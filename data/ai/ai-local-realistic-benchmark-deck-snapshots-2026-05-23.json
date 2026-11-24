@@ -15,7 +15,7 @@
       "deckVersion": "1.3.0-local-web-inspired",
       "name": "Blink Pressure Rig",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -24,28 +24,94 @@
       "classification": "runnable_ai_benchmark",
       "role": "standard_runner_rig_economy_pressure",
       "cards": [
-        { "cardId": "onr_v1_007_blink", "quantity": 3 },
-        { "cardId": "onr_v1_045_newsgroup-filter", "quantity": 1 },
-        { "cardId": "onr_v1_075_zetatech-software-installer", "quantity": 1 },
-        { "cardId": "onr_v1_076_all-nighter", "quantity": 2 },
-        { "cardId": "onr_v1_079_bodyweight-synthetic-blood", "quantity": 3 },
-        { "cardId": "onr_v1_094_inside-job", "quantity": 2 },
-        { "cardId": "onr_v1_095_jack-n-joe", "quantity": 2 },
-        { "cardId": "onr_v1_097_livewires-contacts", "quantity": 3 },
-        { "cardId": "onr_v1_099_mantis-fixer-at-large", "quantity": 3 },
-        { "cardId": "onr_v1_108_score", "quantity": 3 },
-        { "cardId": "onr_v1_111_social-engineering", "quantity": 3 },
-        { "cardId": "onr_v1_114_temple-microcode-outlet", "quantity": 2 },
-        { "cardId": "onr_v1_117_valu-pak-software-bundle", "quantity": 1 },
-        { "cardId": "onr_v1_121_armored-fridge", "quantity": 2 },
-        { "cardId": "onr_v1_144_tycho-mem-chip", "quantity": 3 },
-        { "cardId": "onr_v1_154_broker", "quantity": 2 },
-        { "cardId": "onr_v1_161_fall-guy", "quantity": 2 },
-        { "cardId": "onr_v1_165_junkyard-bbs", "quantity": 1 },
-        { "cardId": "onr_v1_168_loan-from-chiba", "quantity": 2 },
-        { "cardId": "onr_v1_177_the-short-circuit", "quantity": 1 },
-        { "cardId": "onr_v1_184_top-runners-conference", "quantity": 1 },
-        { "cardId": "onr_v1_187_wilson-weeflerunner-apprentice", "quantity": 1 }
+        {
+          "cardId": 219,
+          "quantity": 3
+        },
+        {
+          "cardId": 257,
+          "quantity": 1
+        },
+        {
+          "cardId": 287,
+          "quantity": 1
+        },
+        {
+          "cardId": 288,
+          "quantity": 2
+        },
+        {
+          "cardId": 291,
+          "quantity": 3
+        },
+        {
+          "cardId": 306,
+          "quantity": 2
+        },
+        {
+          "cardId": 307,
+          "quantity": 2
+        },
+        {
+          "cardId": 309,
+          "quantity": 3
+        },
+        {
+          "cardId": 311,
+          "quantity": 3
+        },
+        {
+          "cardId": 320,
+          "quantity": 3
+        },
+        {
+          "cardId": 323,
+          "quantity": 3
+        },
+        {
+          "cardId": 326,
+          "quantity": 2
+        },
+        {
+          "cardId": 329,
+          "quantity": 1
+        },
+        {
+          "cardId": 333,
+          "quantity": 2
+        },
+        {
+          "cardId": 356,
+          "quantity": 3
+        },
+        {
+          "cardId": 366,
+          "quantity": 2
+        },
+        {
+          "cardId": 373,
+          "quantity": 2
+        },
+        {
+          "cardId": 377,
+          "quantity": 1
+        },
+        {
+          "cardId": 380,
+          "quantity": 2
+        },
+        {
+          "cardId": 389,
+          "quantity": 1
+        },
+        {
+          "cardId": 396,
+          "quantity": 1
+        },
+        {
+          "cardId": 399,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -55,7 +121,7 @@
       "deckVersion": "1.3.0-local-themed",
       "name": "Ivory Bastion",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -64,36 +130,126 @@
       "classification": "runnable_ai_benchmark",
       "role": "standard_corp_glacier_remote_scoring",
       "cards": [
-        { "cardId": "onr_v1_193_corporate-coup", "quantity": 1 },
-        { "cardId": "onr_v1_212_priority-requisition", "quantity": 2 },
-        { "cardId": "onr_v1_215_security-net-optimization", "quantity": 1 },
-        { "cardId": "onr_v1_219_superior-net-barriers", "quantity": 1 },
-        { "cardId": "onr_v1_220_tycho-extension", "quantity": 1 },
-        { "cardId": "onr_v1_230_cortical-scanner", "quantity": 1 },
-        { "cardId": "onr_v1_232_crystal-wall", "quantity": 2 },
-        { "cardId": "onr_v1_237_data-wall", "quantity": 2 },
-        { "cardId": "onr_v1_238_data-wall-2-0", "quantity": 2 },
-        { "cardId": "onr_v1_239_endless-corridor", "quantity": 2 },
-        { "cardId": "onr_v1_245_fire-wall", "quantity": 2 },
-        { "cardId": "onr_v1_263_reinforced-wall", "quantity": 2 },
-        { "cardId": "onr_v1_265_rock-is-strong", "quantity": 2 },
-        { "cardId": "onr_v1_278_wall-of-ice", "quantity": 1 },
-        { "cardId": "onr_v1_279_wall-of-static", "quantity": 2 },
-        { "cardId": "onr_v1_281_accounts-receivable", "quantity": 3 },
-        { "cardId": "onr_v1_282_annual-reviews", "quantity": 2 },
-        { "cardId": "onr_v1_290_efficiency-experts", "quantity": 3 },
-        { "cardId": "onr_v1_297_overtime-incentives", "quantity": 2 },
-        { "cardId": "onr_v1_309_bbs-whispering-campaign", "quantity": 2 },
-        { "cardId": "onr_v1_311_braindance-campaign", "quantity": 2 },
-        { "cardId": "onr_v1_317_data-masons", "quantity": 2 },
-        { "cardId": "onr_v1_324_fortress-architects", "quantity": 2 },
-        { "cardId": "onr_v1_329_investment-firm", "quantity": 2 },
-        { "cardId": "onr_v1_343_south-african-mining-corp", "quantity": 1 },
-        { "cardId": "onr_v1_350_antiquated-interface-routines", "quantity": 2 },
-        { "cardId": "onr_v1_355_crystal-palace-station-grid", "quantity": 1 },
-        { "cardId": "onr_v1_360_jerusalem-city-grid", "quantity": 1 },
-        { "cardId": "onr_v1_366_red-herrings", "quantity": 2 },
-        { "cardId": "onr_v1_370_tesseract-fort-construction", "quantity": 1 }
+        {
+          "cardId": 405,
+          "quantity": 1
+        },
+        {
+          "cardId": 424,
+          "quantity": 2
+        },
+        {
+          "cardId": 427,
+          "quantity": 1
+        },
+        {
+          "cardId": 431,
+          "quantity": 1
+        },
+        {
+          "cardId": 432,
+          "quantity": 1
+        },
+        {
+          "cardId": 442,
+          "quantity": 1
+        },
+        {
+          "cardId": 444,
+          "quantity": 2
+        },
+        {
+          "cardId": 449,
+          "quantity": 2
+        },
+        {
+          "cardId": 450,
+          "quantity": 2
+        },
+        {
+          "cardId": 451,
+          "quantity": 2
+        },
+        {
+          "cardId": 457,
+          "quantity": 2
+        },
+        {
+          "cardId": 475,
+          "quantity": 2
+        },
+        {
+          "cardId": 477,
+          "quantity": 2
+        },
+        {
+          "cardId": 490,
+          "quantity": 1
+        },
+        {
+          "cardId": 491,
+          "quantity": 2
+        },
+        {
+          "cardId": 493,
+          "quantity": 3
+        },
+        {
+          "cardId": 494,
+          "quantity": 2
+        },
+        {
+          "cardId": 502,
+          "quantity": 3
+        },
+        {
+          "cardId": 509,
+          "quantity": 2
+        },
+        {
+          "cardId": 521,
+          "quantity": 2
+        },
+        {
+          "cardId": 523,
+          "quantity": 2
+        },
+        {
+          "cardId": 529,
+          "quantity": 2
+        },
+        {
+          "cardId": 536,
+          "quantity": 2
+        },
+        {
+          "cardId": 541,
+          "quantity": 2
+        },
+        {
+          "cardId": 555,
+          "quantity": 1
+        },
+        {
+          "cardId": 562,
+          "quantity": 2
+        },
+        {
+          "cardId": 567,
+          "quantity": 1
+        },
+        {
+          "cardId": 572,
+          "quantity": 1
+        },
+        {
+          "cardId": 578,
+          "quantity": 2
+        },
+        {
+          "cardId": 582,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -103,7 +259,7 @@
       "deckVersion": "1.3.0-local-web-inspired",
       "name": "R&D Interface Dig",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -112,27 +268,90 @@
       "classification": "runnable_ai_benchmark",
       "role": "runner_rnd_interface_pressure",
       "cards": [
-        { "cardId": "onr_v1_005_bartmoss-memorial-icebreaker", "quantity": 2 },
-        { "cardId": "onr_v1_016_cyfermaster", "quantity": 1 },
-        { "cardId": "onr_v1_021_dwarf", "quantity": 1 },
-        { "cardId": "onr_v1_038_joan-of-arc", "quantity": 2 },
-        { "cardId": "onr_v1_039_krash", "quantity": 2 },
-        { "cardId": "onr_v1_050_r-and-d-protocol-files", "quantity": 2 },
-        { "cardId": "onr_v1_059_self-modifying-code", "quantity": 2 },
-        { "cardId": "onr_v1_061_shield", "quantity": 2 },
-        { "cardId": "onr_v1_066_snowball", "quantity": 1 },
-        { "cardId": "onr_v1_079_bodyweight-synthetic-blood", "quantity": 3 },
-        { "cardId": "onr_v1_094_inside-job", "quantity": 2 },
-        { "cardId": "onr_v1_097_livewires-contacts", "quantity": 3 },
-        { "cardId": "onr_v1_106_private-ldl-access", "quantity": 2 },
-        { "cardId": "onr_v1_108_score", "quantity": 3 },
-        { "cardId": "onr_v1_114_temple-microcode-outlet", "quantity": 2 },
-        { "cardId": "onr_v1_139_r-and-d-interface", "quantity": 3 },
-        { "cardId": "onr_v1_145_wutech-mem-chip", "quantity": 2 },
-        { "cardId": "onr_v1_154_broker", "quantity": 2 },
-        { "cardId": "onr_v1_161_fall-guy", "quantity": 2 },
-        { "cardId": "onr_v1_168_loan-from-chiba", "quantity": 3 },
-        { "cardId": "onr_v1_184_top-runners-conference", "quantity": 2 }
+        {
+          "cardId": 217,
+          "quantity": 2
+        },
+        {
+          "cardId": 228,
+          "quantity": 1
+        },
+        {
+          "cardId": 233,
+          "quantity": 1
+        },
+        {
+          "cardId": 250,
+          "quantity": 2
+        },
+        {
+          "cardId": 251,
+          "quantity": 2
+        },
+        {
+          "cardId": 262,
+          "quantity": 2
+        },
+        {
+          "cardId": 271,
+          "quantity": 2
+        },
+        {
+          "cardId": 273,
+          "quantity": 2
+        },
+        {
+          "cardId": 278,
+          "quantity": 1
+        },
+        {
+          "cardId": 291,
+          "quantity": 3
+        },
+        {
+          "cardId": 306,
+          "quantity": 2
+        },
+        {
+          "cardId": 309,
+          "quantity": 3
+        },
+        {
+          "cardId": 318,
+          "quantity": 2
+        },
+        {
+          "cardId": 320,
+          "quantity": 3
+        },
+        {
+          "cardId": 326,
+          "quantity": 2
+        },
+        {
+          "cardId": 351,
+          "quantity": 3
+        },
+        {
+          "cardId": 357,
+          "quantity": 2
+        },
+        {
+          "cardId": 366,
+          "quantity": 2
+        },
+        {
+          "cardId": 373,
+          "quantity": 2
+        },
+        {
+          "cardId": 380,
+          "quantity": 3
+        },
+        {
+          "cardId": 396,
+          "quantity": 2
+        }
       ]
     },
     {
@@ -142,7 +361,7 @@
       "deckVersion": "1.3.0-local-web-inspired-2",
       "name": "Shadoe Tag & Bag",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -151,30 +370,102 @@
       "classification": "runnable_ai_benchmark",
       "role": "corp_tag_punish_pressure",
       "cards": [
-        { "cardId": "onr_v1_192_corporate-boon", "quantity": 1 },
-        { "cardId": "onr_v1_193_corporate-coup", "quantity": 1 },
-        { "cardId": "onr_v1_194_corporate-downsizing", "quantity": 1 },
-        { "cardId": "onr_v1_197_data-fort-reclamation", "quantity": 1 },
-        { "cardId": "onr_v1_203_hostile-takeover", "quantity": 1 },
-        { "cardId": "onr_v1_207_netwatch-operations-office", "quantity": 1 },
-        { "cardId": "onr_v1_209_political-coup", "quantity": 2 },
-        { "cardId": "onr_v1_214_project-babylon", "quantity": 1 },
-        { "cardId": "onr_v1_218_subsidiary-branch", "quantity": 1 },
-        { "cardId": "onr_v1_237_data-wall", "quantity": 2 },
-        { "cardId": "onr_v1_244_filter", "quantity": 2 },
-        { "cardId": "onr_v1_249_hunter", "quantity": 2 },
-        { "cardId": "onr_v1_261_quandary", "quantity": 2 },
-        { "cardId": "onr_v1_268_shock-r", "quantity": 2 },
-        { "cardId": "onr_v1_279_wall-of-static", "quantity": 2 },
-        { "cardId": "onr_v1_281_accounts-receivable", "quantity": 3 },
-        { "cardId": "onr_v1_283_audit-of-call-records", "quantity": 3 },
-        { "cardId": "onr_v1_284_chance-observation", "quantity": 2 },
-        { "cardId": "onr_v1_290_efficiency-experts", "quantity": 3 },
-        { "cardId": "onr_v1_297_overtime-incentives", "quantity": 3 },
-        { "cardId": "onr_v1_301_punitive-counterstrike", "quantity": 3 },
-        { "cardId": "onr_v1_302_scorched-earth", "quantity": 3 },
-        { "cardId": "onr_v1_306_trojan-horse", "quantity": 3 },
-        { "cardId": "onr_v1_307_urban-renewal", "quantity": 3 }
+        {
+          "cardId": 404,
+          "quantity": 1
+        },
+        {
+          "cardId": 405,
+          "quantity": 1
+        },
+        {
+          "cardId": 406,
+          "quantity": 1
+        },
+        {
+          "cardId": 409,
+          "quantity": 1
+        },
+        {
+          "cardId": 415,
+          "quantity": 1
+        },
+        {
+          "cardId": 419,
+          "quantity": 1
+        },
+        {
+          "cardId": 421,
+          "quantity": 2
+        },
+        {
+          "cardId": 426,
+          "quantity": 1
+        },
+        {
+          "cardId": 430,
+          "quantity": 1
+        },
+        {
+          "cardId": 449,
+          "quantity": 2
+        },
+        {
+          "cardId": 456,
+          "quantity": 2
+        },
+        {
+          "cardId": 461,
+          "quantity": 2
+        },
+        {
+          "cardId": 473,
+          "quantity": 2
+        },
+        {
+          "cardId": 480,
+          "quantity": 2
+        },
+        {
+          "cardId": 491,
+          "quantity": 2
+        },
+        {
+          "cardId": 493,
+          "quantity": 3
+        },
+        {
+          "cardId": 495,
+          "quantity": 3
+        },
+        {
+          "cardId": 496,
+          "quantity": 2
+        },
+        {
+          "cardId": 502,
+          "quantity": 3
+        },
+        {
+          "cardId": 509,
+          "quantity": 3
+        },
+        {
+          "cardId": 513,
+          "quantity": 3
+        },
+        {
+          "cardId": 514,
+          "quantity": 3
+        },
+        {
+          "cardId": 518,
+          "quantity": 3
+        },
+        {
+          "cardId": 519,
+          "quantity": 3
+        }
       ]
     },
     {
@@ -184,7 +475,7 @@
       "deckVersion": "1.3.0-local-themed",
       "name": "Chrome Rush Bureau",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -193,35 +484,122 @@
       "classification": "runnable_ai_benchmark",
       "role": "corp_fast_advance_rush_scoreline",
       "cards": [
-        { "cardId": "onr_v1_194_corporate-downsizing", "quantity": 2 },
-        { "cardId": "onr_v1_201_executive-extraction", "quantity": 2 },
-        { "cardId": "onr_v1_203_hostile-takeover", "quantity": 3 },
-        { "cardId": "onr_v1_214_project-babylon", "quantity": 3 },
-        { "cardId": "onr_v1_220_tycho-extension", "quantity": 1 },
-        { "cardId": "onr_v1_232_crystal-wall", "quantity": 2 },
-        { "cardId": "onr_v1_237_data-wall", "quantity": 3 },
-        { "cardId": "onr_v1_238_data-wall-2-0", "quantity": 2 },
-        { "cardId": "onr_v1_244_filter", "quantity": 3 },
-        { "cardId": "onr_v1_252_keeper", "quantity": 2 },
-        { "cardId": "onr_v1_261_quandary", "quantity": 3 },
-        { "cardId": "onr_v1_270_sleeper", "quantity": 3 },
-        { "cardId": "onr_v1_279_wall-of-static", "quantity": 2 },
-        { "cardId": "onr_v1_281_accounts-receivable", "quantity": 2 },
-        { "cardId": "onr_v1_282_annual-reviews", "quantity": 2 },
-        { "cardId": "onr_v1_288_day-shift", "quantity": 2 },
-        { "cardId": "onr_v1_290_efficiency-experts", "quantity": 3 },
-        { "cardId": "onr_v1_291_falsified-transactions-expert", "quantity": 1 },
-        { "cardId": "onr_v1_292_management-shake-up", "quantity": 2 },
-        { "cardId": "onr_v1_295_night-shift", "quantity": 3 },
-        { "cardId": "onr_v1_297_overtime-incentives", "quantity": 3 },
-        { "cardId": "onr_v1_300_project-consultants", "quantity": 2 },
-        { "cardId": "onr_v1_305_team-restructuring", "quantity": 2 },
-        { "cardId": "onr_v1_312_chicago-branch", "quantity": 2 },
-        { "cardId": "onr_v1_328_information-laundering", "quantity": 2 },
-        { "cardId": "onr_v1_334_pacifica-regional-ai", "quantity": 2 },
-        { "cardId": "onr_v1_347_vapor-ops", "quantity": 2 },
-        { "cardId": "onr_v1_352_chester-mix", "quantity": 2 },
-        { "cardId": "onr_v1_374_washington-d-c-city-grid", "quantity": 1 }
+        {
+          "cardId": 406,
+          "quantity": 2
+        },
+        {
+          "cardId": 413,
+          "quantity": 2
+        },
+        {
+          "cardId": 415,
+          "quantity": 3
+        },
+        {
+          "cardId": 426,
+          "quantity": 3
+        },
+        {
+          "cardId": 432,
+          "quantity": 1
+        },
+        {
+          "cardId": 444,
+          "quantity": 2
+        },
+        {
+          "cardId": 449,
+          "quantity": 3
+        },
+        {
+          "cardId": 450,
+          "quantity": 2
+        },
+        {
+          "cardId": 456,
+          "quantity": 3
+        },
+        {
+          "cardId": 464,
+          "quantity": 2
+        },
+        {
+          "cardId": 473,
+          "quantity": 3
+        },
+        {
+          "cardId": 482,
+          "quantity": 3
+        },
+        {
+          "cardId": 491,
+          "quantity": 2
+        },
+        {
+          "cardId": 493,
+          "quantity": 2
+        },
+        {
+          "cardId": 494,
+          "quantity": 2
+        },
+        {
+          "cardId": 500,
+          "quantity": 2
+        },
+        {
+          "cardId": 502,
+          "quantity": 3
+        },
+        {
+          "cardId": 503,
+          "quantity": 1
+        },
+        {
+          "cardId": 504,
+          "quantity": 2
+        },
+        {
+          "cardId": 507,
+          "quantity": 3
+        },
+        {
+          "cardId": 509,
+          "quantity": 3
+        },
+        {
+          "cardId": 512,
+          "quantity": 2
+        },
+        {
+          "cardId": 517,
+          "quantity": 2
+        },
+        {
+          "cardId": 524,
+          "quantity": 2
+        },
+        {
+          "cardId": 540,
+          "quantity": 2
+        },
+        {
+          "cardId": 546,
+          "quantity": 2
+        },
+        {
+          "cardId": 559,
+          "quantity": 2
+        },
+        {
+          "cardId": 564,
+          "quantity": 2
+        },
+        {
+          "cardId": 586,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -231,7 +609,7 @@
       "deckVersion": "1.3.0-local-unused-test",
       "name": "Unused Corp Black ICE Ambush Lab",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -240,35 +618,122 @@
       "classification": "runnable_ai_benchmark",
       "role": "corp_net_damage_ambush",
       "cards": [
-        { "cardId": "onr_v1_189_artificial-security-directors", "quantity": 1 },
-        { "cardId": "onr_v1_191_black-ice-quality-assurance", "quantity": 1 },
-        { "cardId": "onr_v1_192_corporate-boon", "quantity": 1 },
-        { "cardId": "onr_v1_198_detroit-police-contract", "quantity": 1 },
-        { "cardId": "onr_v1_213_private-cybernet-police", "quantity": 1 },
-        { "cardId": "onr_v1_227_cerberus", "quantity": 2 },
-        { "cardId": "onr_v1_231_cortical-scrub", "quantity": 2 },
-        { "cardId": "onr_v1_234_data-darts", "quantity": 1 },
-        { "cardId": "onr_v1_235_data-naga", "quantity": 1 },
-        { "cardId": "onr_v1_242_fatal-attractor", "quantity": 2 },
-        { "cardId": "onr_v1_246_fragmentation-storm", "quantity": 1 },
-        { "cardId": "onr_v1_248_homewrecker", "quantity": 2 },
-        { "cardId": "onr_v1_255_mastiff", "quantity": 2 },
-        { "cardId": "onr_v1_257_nerve-labyrinth", "quantity": 1 },
-        { "cardId": "onr_v1_258_neural-blade", "quantity": 2 },
-        { "cardId": "onr_v1_281_accounts-receivable", "quantity": 3 },
-        { "cardId": "onr_v1_286_corporate-detective-agency", "quantity": 1 },
-        { "cardId": "onr_v1_290_efficiency-experts", "quantity": 2 },
-        { "cardId": "onr_v1_294_new-blood", "quantity": 1 },
-        { "cardId": "onr_v1_295_night-shift", "quantity": 2 },
-        { "cardId": "onr_v1_310_blood-cat", "quantity": 2 },
-        { "cardId": "onr_v1_330_krumz", "quantity": 2 },
-        { "cardId": "onr_v1_331_nevinyrral", "quantity": 1 },
-        { "cardId": "onr_v1_345_trap", "quantity": 2 },
-        { "cardId": "onr_v1_348_virus-test-site", "quantity": 2 },
-        { "cardId": "onr_v1_354_crybaby", "quantity": 2 },
-        { "cardId": "onr_v1_357_dieter-esslin", "quantity": 2 },
-        { "cardId": "onr_v1_365_paris-city-grid", "quantity": 1 },
-        { "cardId": "onr_v1_369_singapore-city-grid", "quantity": 1 }
+        {
+          "cardId": 401,
+          "quantity": 1
+        },
+        {
+          "cardId": 403,
+          "quantity": 1
+        },
+        {
+          "cardId": 404,
+          "quantity": 1
+        },
+        {
+          "cardId": 410,
+          "quantity": 1
+        },
+        {
+          "cardId": 425,
+          "quantity": 1
+        },
+        {
+          "cardId": 439,
+          "quantity": 2
+        },
+        {
+          "cardId": 443,
+          "quantity": 2
+        },
+        {
+          "cardId": 446,
+          "quantity": 1
+        },
+        {
+          "cardId": 447,
+          "quantity": 1
+        },
+        {
+          "cardId": 454,
+          "quantity": 2
+        },
+        {
+          "cardId": 458,
+          "quantity": 1
+        },
+        {
+          "cardId": 460,
+          "quantity": 2
+        },
+        {
+          "cardId": 467,
+          "quantity": 2
+        },
+        {
+          "cardId": 469,
+          "quantity": 1
+        },
+        {
+          "cardId": 470,
+          "quantity": 2
+        },
+        {
+          "cardId": 493,
+          "quantity": 3
+        },
+        {
+          "cardId": 498,
+          "quantity": 1
+        },
+        {
+          "cardId": 502,
+          "quantity": 2
+        },
+        {
+          "cardId": 506,
+          "quantity": 1
+        },
+        {
+          "cardId": 507,
+          "quantity": 2
+        },
+        {
+          "cardId": 522,
+          "quantity": 2
+        },
+        {
+          "cardId": 542,
+          "quantity": 2
+        },
+        {
+          "cardId": 543,
+          "quantity": 1
+        },
+        {
+          "cardId": 557,
+          "quantity": 2
+        },
+        {
+          "cardId": 560,
+          "quantity": 2
+        },
+        {
+          "cardId": 566,
+          "quantity": 2
+        },
+        {
+          "cardId": 569,
+          "quantity": 2
+        },
+        {
+          "cardId": 577,
+          "quantity": 1
+        },
+        {
+          "cardId": 581,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -278,7 +743,7 @@
       "deckVersion": "1.3.0-local-web-inspired-2",
       "name": "Cheap Bag of Tricks",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
@@ -287,52 +752,190 @@
       "classification": "runnable_ai_benchmark",
       "role": "corp_hybrid_score_punish",
       "cards": [
-        { "cardId": "onr_v1_190_bioweapons-engineering", "quantity": 1 },
-        { "cardId": "onr_v1_193_corporate-coup", "quantity": 1 },
-        { "cardId": "onr_v1_195_corporate-retreat", "quantity": 1 },
-        { "cardId": "onr_v1_199_employee-empowerment", "quantity": 1 },
-        { "cardId": "onr_v1_205_main-office-relocation", "quantity": 2 },
-        { "cardId": "onr_v1_207_netwatch-operations-office", "quantity": 1 },
-        { "cardId": "onr_v1_214_project-babylon", "quantity": 1 },
-        { "cardId": "onr_v1_220_tycho-extension", "quantity": 1 },
-        { "cardId": "onr_v1_222_ball-and-chain", "quantity": 1 },
-        { "cardId": "onr_v1_223_banpei", "quantity": 1 },
-        { "cardId": "onr_v1_225_canis-major", "quantity": 1 },
-        { "cardId": "onr_v1_228_cinderella", "quantity": 1 },
-        { "cardId": "onr_v1_233_d-arc-knight", "quantity": 1 },
-        { "cardId": "onr_v1_237_data-wall", "quantity": 1 },
-        { "cardId": "onr_v1_238_data-wall-2-0", "quantity": 2 },
-        { "cardId": "onr_v1_240_fang", "quantity": 2 },
-        { "cardId": "onr_v1_242_fatal-attractor", "quantity": 1 },
-        { "cardId": "onr_v1_244_filter", "quantity": 2 },
-        { "cardId": "onr_v1_245_fire-wall", "quantity": 1 },
-        { "cardId": "onr_v1_249_hunter", "quantity": 1 },
-        { "cardId": "onr_v1_252_keeper", "quantity": 1 },
-        { "cardId": "onr_v1_258_neural-blade", "quantity": 1 },
-        { "cardId": "onr_v1_260_pocket-virtual-reality", "quantity": 1 },
-        { "cardId": "onr_v1_261_quandary", "quantity": 1 },
-        { "cardId": "onr_v1_264_rex", "quantity": 2 },
-        { "cardId": "onr_v1_266_scramble", "quantity": 1 },
-        { "cardId": "onr_v1_270_sleeper", "quantity": 1 },
-        { "cardId": "onr_v1_271_tko-2-0", "quantity": 1 },
-        { "cardId": "onr_v1_279_wall-of-static", "quantity": 1 },
-        { "cardId": "onr_v1_281_accounts-receivable", "quantity": 1 },
-        { "cardId": "onr_v1_284_chance-observation", "quantity": 2 },
-        { "cardId": "onr_v1_290_efficiency-experts", "quantity": 1 },
-        { "cardId": "onr_v1_295_night-shift", "quantity": 2 },
-        { "cardId": "onr_v1_306_trojan-horse", "quantity": 2 },
-        { "cardId": "onr_v1_307_urban-renewal", "quantity": 3 },
-        { "cardId": "onr_v1_309_bbs-whispering-campaign", "quantity": 3 },
-        { "cardId": "onr_v1_312_chicago-branch", "quantity": 1 },
-        { "cardId": "onr_v1_315_corprunners-shattered-remains", "quantity": 1 },
-        { "cardId": "onr_v1_325_hacker-tracker-central", "quantity": 1 },
-        { "cardId": "onr_v1_337_rockerboy-promotion", "quantity": 1 },
-        { "cardId": "onr_v1_340_setup", "quantity": 1 },
-        { "cardId": "onr_v1_346_vacant-soulkiller", "quantity": 1 },
-        { "cardId": "onr_v1_347_vapor-ops", "quantity": 1 },
-        { "cardId": "onr_v1_356_dedicated-response-team", "quantity": 1 },
-        { "cardId": "onr_v1_363_olivia-salazar", "quantity": 1 },
-        { "cardId": "onr_v1_367_rio-de-janeiro-city-grid", "quantity": 1 }
+        {
+          "cardId": 402,
+          "quantity": 1
+        },
+        {
+          "cardId": 405,
+          "quantity": 1
+        },
+        {
+          "cardId": 407,
+          "quantity": 1
+        },
+        {
+          "cardId": 411,
+          "quantity": 1
+        },
+        {
+          "cardId": 417,
+          "quantity": 2
+        },
+        {
+          "cardId": 419,
+          "quantity": 1
+        },
+        {
+          "cardId": 426,
+          "quantity": 1
+        },
+        {
+          "cardId": 432,
+          "quantity": 1
+        },
+        {
+          "cardId": 434,
+          "quantity": 1
+        },
+        {
+          "cardId": 435,
+          "quantity": 1
+        },
+        {
+          "cardId": 437,
+          "quantity": 1
+        },
+        {
+          "cardId": 440,
+          "quantity": 1
+        },
+        {
+          "cardId": 445,
+          "quantity": 1
+        },
+        {
+          "cardId": 449,
+          "quantity": 1
+        },
+        {
+          "cardId": 450,
+          "quantity": 2
+        },
+        {
+          "cardId": 452,
+          "quantity": 2
+        },
+        {
+          "cardId": 454,
+          "quantity": 1
+        },
+        {
+          "cardId": 456,
+          "quantity": 2
+        },
+        {
+          "cardId": 457,
+          "quantity": 1
+        },
+        {
+          "cardId": 461,
+          "quantity": 1
+        },
+        {
+          "cardId": 464,
+          "quantity": 1
+        },
+        {
+          "cardId": 470,
+          "quantity": 1
+        },
+        {
+          "cardId": 472,
+          "quantity": 1
+        },
+        {
+          "cardId": 473,
+          "quantity": 1
+        },
+        {
+          "cardId": 476,
+          "quantity": 2
+        },
+        {
+          "cardId": 478,
+          "quantity": 1
+        },
+        {
+          "cardId": 482,
+          "quantity": 1
+        },
+        {
+          "cardId": 483,
+          "quantity": 1
+        },
+        {
+          "cardId": 491,
+          "quantity": 1
+        },
+        {
+          "cardId": 493,
+          "quantity": 1
+        },
+        {
+          "cardId": 496,
+          "quantity": 2
+        },
+        {
+          "cardId": 502,
+          "quantity": 1
+        },
+        {
+          "cardId": 507,
+          "quantity": 2
+        },
+        {
+          "cardId": 518,
+          "quantity": 2
+        },
+        {
+          "cardId": 519,
+          "quantity": 3
+        },
+        {
+          "cardId": 521,
+          "quantity": 3
+        },
+        {
+          "cardId": 524,
+          "quantity": 1
+        },
+        {
+          "cardId": 527,
+          "quantity": 1
+        },
+        {
+          "cardId": 537,
+          "quantity": 1
+        },
+        {
+          "cardId": 549,
+          "quantity": 1
+        },
+        {
+          "cardId": 552,
+          "quantity": 1
+        },
+        {
+          "cardId": 558,
+          "quantity": 1
+        },
+        {
+          "cardId": 559,
+          "quantity": 1
+        },
+        {
+          "cardId": 568,
+          "quantity": 1
+        },
+        {
+          "cardId": 575,
+          "quantity": 1
+        },
+        {
+          "cardId": 579,
+          "quantity": 1
+        }
       ]
     }
   ]

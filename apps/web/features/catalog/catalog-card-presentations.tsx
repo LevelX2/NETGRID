@@ -1,5 +1,6 @@
 "use client";
 
+import { type CardDefinitionId } from "@netgrid/shared";
 import {
   createContext,
   createElement,
@@ -33,7 +34,7 @@ export function useCatalogCardPresentations(): PublicCardPresentationsById {
 
 export function catalogCardPresentationsFor(
   cards: readonly {
-    catalogCardId: string;
+    catalogCardId: CardDefinitionId;
     title: string;
     type: string;
   }[],

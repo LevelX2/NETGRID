@@ -30,8 +30,8 @@ describe("card image lookup", () => {
     const images = await Promise.all(
       ["thumb", "preview", "thumb"].map((variant) =>
         lookupCardImage(
-          "onr_v1_188_ai-chief-financial-officer",
-          `http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&variant=${variant}`,
+          "400",
+          `http://netgrid.local/api/card-images/400?skin=de&variant=${variant}`,
           { personalStore },
         ),
       ),
@@ -39,20 +39,20 @@ describe("card image lookup", () => {
     expect(images.every((image) => image?.kind === "localized_de")).toBe(true);
     expect(createRuntimeCardsById).toHaveBeenCalledTimes(1);
     await expect(
-      lookupCardImage("toString", "http://netgrid.local", { personalStore }),
+      lookupCardImage("function toString() { [native code] }", "http://netgrid.local", { personalStore }),
     ).resolves.toBeNull();
   });
 
   it("resolves registered German display-only skin assets through printingId", async () => {
     const root = await temporaryRoot();
     const image = await lookupCardImage(
-      "onr_v1_188_ai-chief-financial-officer",
-      "http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&v=test",
+      "400",
+      "http://netgrid.local/api/card-images/400?skin=de&v=test",
       { personalStore: new CardImageStore({ root }) },
     );
 
     expect(image).toMatchObject({
-      cardId: "onr_v1_188_ai-chief-financial-officer",
+      cardId: 400,
       printingId: "onr_v1_188_ai-chief-financial-officer",
       kind: "localized_de",
       relativePath: "rendered/full/onr_v1_188_ai-chief-financial-officer.png",
@@ -66,8 +66,8 @@ describe("card image lookup", () => {
     const root = await temporaryRoot();
     await expect(
       lookupCardImage(
-        "onr_v1_001_afreet",
-        "http://netgrid.local/api/card-images/onr_v1_001_afreet?skin=de&v=test",
+        "213",
+        "http://netgrid.local/api/card-images/213?skin=de&v=test",
         { personalStore: new CardImageStore({ root }) },
       ),
     ).resolves.toBeNull();
@@ -92,8 +92,8 @@ describe("card image lookup", () => {
     ]);
 
     const image = await lookupCardImage(
-      "onr_v1_188_ai-chief-financial-officer",
-      "http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&variant=preview&collectionRevision=1",
+      "400",
+      "http://netgrid.local/api/card-images/400?skin=de&variant=preview&collectionRevision=1",
       { personalStore: new CardImageStore({ root }) },
     );
 
@@ -123,8 +123,8 @@ describe("card image lookup", () => {
 
     await expect(
       lookupCardImage(
-        "onr_v1_188_ai-chief-financial-officer",
-        "http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?variant=thumb&collectionRevision=0",
+        "400",
+        "http://netgrid.local/api/card-images/400?variant=thumb&collectionRevision=0",
         { personalStore: store },
       ),
     ).resolves.toMatchObject({
@@ -147,8 +147,8 @@ describe("card image lookup", () => {
 
     await expect(
       lookupCardImage(
-        "simple_agenda",
-        "http://netgrid.local/api/card-images/simple_agenda",
+        "588",
+        "http://netgrid.local/api/card-images/588",
         {
           personalStore: new CardImageStore({ root }),
         },
@@ -161,8 +161,8 @@ describe("card image lookup", () => {
 
     await expect(
       lookupCardImage(
-        "onr_v1_001_afreet",
-        "http://netgrid.local/api/card-images/onr_v1_001_afreet",
+        "213",
+        "http://netgrid.local/api/card-images/213",
         { personalStore: new CardImageStore({ root }) },
       ),
     ).resolves.toBeNull();

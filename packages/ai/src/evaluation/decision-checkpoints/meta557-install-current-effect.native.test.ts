@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -93,7 +94,7 @@ describe("pairing 557 qualitative install uses actual current Engine effects", (
       const cp = fixture("cp-meta557-empty-install"),
         a = cp.input.legalActions.find(
           (a: any) =>
-            a.source.includes("minotaur") && a.payload?.serverId === "hq",
+            visibleSourceDefinitionsByInstanceId(cp.input.playerView)[a.source] === 89 && a.payload?.serverId === "hq",
         ),
         c = cp.input.playerView.own.gripOrHq.find(
           (c: any) => c.instanceId === a.source,
@@ -113,7 +114,7 @@ describe("pairing 557 qualitative install uses actual current Engine effects", (
     const cp = fixture("cp-meta557-empty-install"),
       a = cp.input.legalActions.find(
         (a: any) =>
-          a.source.includes("minotaur") && a.payload?.serverId === "hq",
+          visibleSourceDefinitionsByInstanceId(cp.input.playerView)[a.source] === 89 && a.payload?.serverId === "hq",
       ),
       c = cp.input.playerView.own.gripOrHq.find(
         (c: any) => c.instanceId === a.source,
@@ -129,7 +130,7 @@ describe("pairing 557 qualitative install uses actual current Engine effects", (
   });
   it("keeps the real Minotaur toll supplied by Tesseract", () => {
     const { cp, pf, action } = decide("cp-meta557-tesseract-install");
-    expect(action.source).toContain("minotaur");
+    expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(89);
     expect(action.payload.serverId).toBe("hq");
     expect(
       JSON.parse(action.payload.postInstallEffectiveRunQuoteJson).subroutines,
@@ -142,8 +143,8 @@ describe("pairing 557 qualitative install uses actual current Engine effects", (
     expect(pf.selectedPlan!.moduleId).toBe("corp.defend_servers");
   });
   it("keeps the real Mastermind stop without an outer layer", () => {
-    const { pf, action } = decide("cp-meta557-hard-stop-install");
-    expect(action.source).toContain("mastermind");
+    const { cp, pf, action } = decide("cp-meta557-hard-stop-install");
+    expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(88);
     expect(
       JSON.parse(action.payload.postInstallEffectiveRunQuoteJson).subroutines,
     ).toContainEqual(expect.objectContaining({ type: "end_the_run" }));

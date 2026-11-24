@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { expect, it } from "vitest";
 import zeroRemote from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-433-g8-d206.json";
 import zeroCentral from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-433-g9-d535.json";
@@ -24,8 +25,8 @@ function fixture(capture: unknown) {
 }
 
 it.each([
-  [zeroRemote, "plan:runner.contest_remote:remote%3Aremote_1", "run_205"],
-  [zeroCentral, "plan:runner.pressure_central:central%3Ard", "run_532"],
+  [zeroRemote, "p1p4xezjcxov79rno40lq3f7rv", "205"],
+  [zeroCentral, "pa90fufw9vc5bkshp96ztlryxl", "532"],
 ] as const)(
   "retains the paid ETR route beside certified zero Core damage",
   (capture, root, run) => {
@@ -39,9 +40,9 @@ it.each([
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId: root,
-          leafExecutorInstanceId: `plan:runner.convert_run_window:run%3A${run}`,
+          leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${run}` }),
           selectedStep: {
-            planInstanceId: `plan:runner.convert_run_window:run%3A${run}`,
+            planInstanceId: planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${run}` }),
           },
           route: {
             actionId: action.actionId,
@@ -81,8 +82,8 @@ it("configures a breaker using its available run credit without changing ownersh
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_170",
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafExecutorInstanceId: "p9nq3th84rzczoifkpb1su8kxw",
         route: {
           actionId: action.actionId,
           stateVersion: input.playerView.stateVersion,
@@ -96,5 +97,5 @@ it("does not promise a paid subtype continuation when the run pool is empty", ()
   const input = fixture(subtype);
   input.playerView.run!.badPublicityCredits = 0;
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.continue_run.subroutine_end_run");
+  expect(decision.actionId).toBe("r5.0");
 });

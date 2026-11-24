@@ -1,6 +1,6 @@
 import type { VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   carryProjectedBreakerStrength,
   effectiveIceForQuote,
@@ -12,13 +12,13 @@ describe("visible run breaker path", () => {
   it("uses encounter modifiers once and carries later strength increases onto that quote", () => {
     const ice = {
       instanceId: "wall",
-      definitionId: "onr_v1_279_wall-of-static",
+      definitionId: 491,
       known: true,
       rezzed: true,
       strength: 2,
       effectiveRunQuote: {
         iceInstanceId: "wall",
-        iceDefinitionId: "onr_v1_279_wall-of-static",
+        iceDefinitionId: 491,
         effectiveStrength: 2,
         encounterStrength: 0,
         subroutines: [],
@@ -39,13 +39,13 @@ describe("visible run breaker path", () => {
     const assessment = structuredBreakerAssessment({
       breakerCard: {
         instanceId: "psychic-friend",
-        definitionId: "onr_classic_030_psychic-friend",
+        definitionId: 34,
       } as VisibleCard,
       breakerDefinition:
-        CARD_DEFINITIONS_BY_ID["onr_classic_030_psychic-friend"],
+        planningCardFactsByDefinitionId(34),
       ice: {
         instanceId: "code-gate",
-        definitionId: "simple_code_gate_ice",
+        definitionId: 590,
         subtypes: ["code_gate"],
         strength: 3,
       },

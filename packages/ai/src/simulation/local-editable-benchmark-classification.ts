@@ -1,4 +1,5 @@
 import { type EditableDeck } from "@netgrid/decks";
+import type { CardDefinitionId } from "@netgrid/shared";
 
 export type LocalEditableBenchmarkDeckClassification =
   | "runnable_ai_benchmark"
@@ -9,9 +10,9 @@ export type LocalEditableBenchmarkDeckClassification =
 
 export function classifyLocalEditableBenchmarkDeck(input: {
   readonly deck: EditableDeck;
-  readonly missingCards: readonly string[];
-  readonly unsupportedCards: readonly string[];
-  readonly nonDeckLegalCards: readonly string[];
+  readonly missingCards: readonly CardDefinitionId[];
+  readonly unsupportedCards: readonly CardDefinitionId[];
+  readonly nonDeckLegalCards: readonly CardDefinitionId[];
   readonly validationErrors: readonly string[];
 }): LocalEditableBenchmarkDeckClassification {
   if (!input.deck.cards || input.deck.cards.length === 0) return "incomplete";

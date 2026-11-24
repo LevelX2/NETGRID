@@ -1,4 +1,10 @@
 import {
+  isCardDefinitionId,
+  type ApiJoinMatchResponse,
+  type ApiSidePayload,
+  type CardDefinitionId,
+} from "@netgrid/shared";
+import {
   mkdtemp,
   readFile,
   readdir,
@@ -8,9 +14,15 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import { DatabaseSync, StatementSync } from "node:sqlite";
+import {
+  aiAttemptStateSnapshotId,
+  INITIAL_STATE_SNAPSHOT_ID,
+  preActionStateSnapshotId,
+  type StateSnapshotId,
+} from "./state-snapshot-id";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
@@ -20,6 +32,7 @@ import {
   buildAiDecisionInput as buildRuntimeAiDecisionInput,
   buildAiDecisionInputDto,
   chooseAiAction as chooseRuntimeAiAction,
+  exportAiRuntimeCheckpoint,
   residentPlanPortfolioSnapshot,
   reconstructBeliefState,
   resetResidentPlanPortfolioMemory,
@@ -35,12 +48,16 @@ import {
 import {
   applyAction,
   applyEffectCommands,
+  applyRandomizedTraceBidSelection,
+  buildMatchPlayerOffer,
   checkWinConditions,
   createGameAfterSetup as createEngineGameAfterSetup,
   CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   getLegalActions,
+  getPlayerView,
   hashState,
+  quoteRandomizedTraceBidSelection,
 } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
 import {
@@ -52,6 +69,7 @@ import {
   startNetgridServer,
 } from "./http-server";
 import { chronicleTurnContextByEventId } from "./chronicle-turn-context";
+import { AiDecisionWorkerPool } from "./ai-decision-worker-pool";
 import {
   InMemoryMaintenanceCredentialStore,
   MaintenanceAuthService,
@@ -86,8 +104,10 @@ import {
   type StoredMatch,
 } from "./multiplayer";
 import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
+import { publicEventHistorySummary } from "./public-event-history";
 import {
   SqliteMatchStorage,
+  SQLITE_STORAGE_SCHEMA_VERSION,
   StorageError,
   inspectSqliteStorage,
   restoreSqliteStorageBackup,
@@ -106,10 +126,12 @@ import {
   type ChoiceRequest,
   type DeckDefinition,
   type GameEvent,
+  type EngineRandomizedIceInstallSelectionReceipt,
   type GameState,
   type LegalAction,
   type PublicGameEvent,
   type Side,
+  type TraceRulesProfile,
 } from "@netgrid/shared";
 
 // Multiplayer mechanics in this file deliberately use test-card snapshots;
@@ -858,7 +880,7 @@ describe("V1.0.9 private internet hardening", () => {
         mode: "ai_vs_ai",
         matchStatus: "active",
         hostSide: "runner",
-        legalActions: [],
+        playerView: { legalActions: [] },
         aiTurnPresentation: { canAdvanceAi: true },
       });
       expect(body.playerView).toBeDefined();
@@ -1079,9 +1101,9 @@ describe("Invite and lobby redaction harness", () => {
       tokenHash:
         "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       sessionId: "session_private_123",
-      decklist: [{ cardId: "onr_v1_001_afreet", quantity: 3 }],
+      decklist: [{ cardId: 213, quantity: 3 }],
       deckHash: "fnv1a:deadbeef",
-      hiddenCard: { definitionId: "simple_agenda" },
+      hiddenCard: { definitionId: 588 },
       AIInput: { side: "runner" },
       DecisionDebug: { explored: true },
       url: "http://127.0.0.1:3100/?matchId=match_1&joinToken=raw-join-token",
@@ -1430,7 +1452,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     finishedRecord.match.winner = "runner";
     finishedRecord.match.updatedAt = "2026-04-01T00:00:00.000Z";
     finishedRecord.stateSnapshots.push({
-      snapshotId: "backend-05-redacted-snapshot",
+      snapshotId: aiAttemptStateSnapshotId(1),
       matchId: finished.matchId,
       stateVersion: finishedRecord.gameState.stateVersion,
       matchVersion: finishedRecord.match.matchVersion,
@@ -1666,7 +1688,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     );
     expect(index?.[0]).toMatchObject({
       matchId: traced.matchId,
-      eventId: expect.any(String),
+      eventId: expect.any(Number),
       side: "corp",
       turn: 1,
       schemaVersion: "ai-decision-trace-v2",
@@ -1678,11 +1700,14 @@ describe("Backend 0.5 private storage maintenance", () => {
         { afterDecisionIndex: index?.[0]?.decisionIndex ?? 0 },
       );
     expect(
-      cursorIndex?.some((entry) => entry.traceId === index?.[0]?.traceId),
+      cursorIndex?.some((entry) => entry.decisionIndex === index?.[0]?.decisionIndex),
     ).toBe(false);
     const details = await Promise.all(
       (index ?? []).map((entry) =>
-        reopenedService.storageMaintenanceAiDecisionTraceDetail(entry.traceId),
+        reopenedService.storageMaintenanceAiDecisionTraceDetail(
+          traced.matchId,
+          entry.decisionIndex,
+        ),
       ),
     );
     const detail = details[0];
@@ -1738,7 +1763,7 @@ describe("Backend 0.5 private storage maintenance", () => {
         `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}`,
       );
       const httpIndex = (await indexResponse.json()) as {
-        traces?: Array<{ traceId: string }>;
+        traces?: Array<{ decisionIndex: number }>;
       };
       expect(indexResponse.status).toBe(200);
       expect(httpIndex.traces?.length).toBeGreaterThan(0);
@@ -1746,18 +1771,21 @@ describe("Backend 0.5 private storage maintenance", () => {
         `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}?afterDecisionIndex=${encodeURIComponent(String(index?.[0]?.decisionIndex ?? 0))}`,
       );
       const cursorBody = (await cursorResponse.json()) as {
-        traces?: Array<{ traceId: string }>;
+        traces?: Array<{ decisionIndex: number }>;
       };
       expect(cursorResponse.status).toBe(200);
       expect(
         cursorBody.traces?.some(
-          (entry) => entry.traceId === httpIndex.traces?.[0]?.traceId,
+          (entry) => entry.decisionIndex === httpIndex.traces?.[0]?.decisionIndex,
         ),
       ).toBe(false);
-      const detailResponse = await maintenance.request(
-        `/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(httpIndex.traces?.[0]?.traceId ?? "")}`,
-      );
+      const decisionIndex = httpIndex.traces?.[0]?.decisionIndex;
+      const decisionTracePath = (matchId: string) =>
+        `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(matchId)}/decisions/${decisionIndex}`;
+      const detailResponse = await maintenance.request(decisionTracePath(traced.matchId));
       expect(detailResponse.status).toBe(200);
+      const missingTraceResponse = await maintenance.request(decisionTracePath(untraced.matchId));
+      expect(missingTraceResponse.status).toBe(404);
       const httpDetail = (await detailResponse.json()) as {
         detail?: {
           actionAlternatives?: Array<{
@@ -1845,7 +1873,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           afterEventIndex?: number;
           eventLimit?: number;
         };
-        events?: Array<{ eventId: string }>;
+        events?: Array<{ eventId: number }>;
         traces?: Array<{ detail: Record<string, unknown> }>;
         schemaVersions?: {
           decisionIndex?: string;
@@ -1884,9 +1912,9 @@ describe("Backend 0.5 private storage maintenance", () => {
           provenance?: string;
           signature?: string;
           deckSnapshotId?: string;
-          identityDefinitionId?: string;
+          identityDefinitionId?: CardDefinitionId;
           definitionCounts?: Array<{
-            definitionId: string;
+            definitionId: CardDefinitionId;
             quantity: number;
           }>;
           totalCards?: number;
@@ -2009,9 +2037,12 @@ describe("Backend 0.5 private storage maintenance", () => {
       )?.cardId;
       if (!opponentOnlyDefinition)
         throw new Error("Missing opponent-only deck definition fixture");
-      expect(JSON.stringify(activeBundle)).not.toContain(
-        opponentOnlyDefinition,
-      );
+      const numericValues = new Set<number>();
+      JSON.stringify(activeBundle, (_key, value: unknown) => {
+        if (typeof value === "number") numericValues.add(value);
+        return value;
+      });
+      expect(numericValues.has(opponentOnlyDefinition)).toBe(false);
       expect(JSON.stringify(activeBundle)).not.toMatch(
         /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|privateDeckSnapshots|decklist|AIInput/i,
       );
@@ -2124,7 +2155,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           runtime?: { schemaVersion?: string };
           validation?: Record<string, boolean>;
         };
-        surroundingEvents?: Array<{ eventId?: string }>;
+        surroundingEvents?: Array<{ eventId?: number }>;
         beliefState?: {
           schemaVersion?: string;
           provenance?: string;
@@ -2154,7 +2185,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           provenance?: string;
           signature?: string;
           definitionCounts?: Array<{
-            definitionId: string;
+            definitionId: CardDefinitionId;
             quantity: number;
           }>;
           zoneBalance?: {
@@ -2162,11 +2193,11 @@ describe("Backend 0.5 private storage maintenance", () => {
             stateVersion?: number;
             hiddenDeckCount?: number;
             knownOutsideDeckDefinitionCounts?: Array<{
-              definitionId: string;
+              definitionId: CardDefinitionId;
               quantity: number;
             }>;
             remainingPossibleDefinitionCounts?: Array<{
-              definitionId: string;
+              definitionId: CardDefinitionId;
               quantity: number;
             }>;
           };
@@ -2825,10 +2856,10 @@ describe("Backend 0.5 private storage maintenance", () => {
 
       traceAuditDb = new DatabaseSync(dbPath);
       traceAuditDb.exec(`
-        CREATE TABLE trace_write_audit (op TEXT NOT NULL, trace_id TEXT NOT NULL);
-        CREATE TRIGGER audit_ai_traces_insert AFTER INSERT ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('insert', NEW.trace_id); END;
-        CREATE TRIGGER audit_ai_traces_update AFTER UPDATE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('update', NEW.trace_id); END;
-        CREATE TRIGGER audit_ai_traces_delete AFTER DELETE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('delete', OLD.trace_id); END;
+        CREATE TABLE trace_write_audit (op TEXT NOT NULL, decision_index INTEGER NOT NULL);
+        CREATE TRIGGER audit_ai_traces_insert AFTER INSERT ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('insert', NEW.decision_index); END;
+        CREATE TRIGGER audit_ai_traces_update AFTER UPDATE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('update', NEW.decision_index); END;
+        CREATE TRIGGER audit_ai_traces_delete AFTER DELETE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('delete', OLD.decision_index); END;
       `);
       const traceAuditCounts = (): Record<string, number> =>
         Object.fromEntries(
@@ -2851,8 +2882,8 @@ describe("Backend 0.5 private storage maintenance", () => {
         knownStateVersion: humanReadyPayload.playerView.stateVersion,
         mode: "single_step",
       });
-      expect(advanced.ok).toBe(true);
-      if (!advanced.ok) throw new Error(advanced.error.message);
+      if (!advanced.ok)
+        throw new Error(`${advanced.error.code}: ${advanced.error.message}`);
       const aiEventId = advanced.publicEvent?.eventId;
       expect(aiEventId).toBeTruthy();
       if (!aiEventId) throw new Error("Missing AI event id");
@@ -2875,6 +2906,7 @@ describe("Backend 0.5 private storage maintenance", () => {
         matchId: created.matchId,
         side: "corp",
         sessionToken: created.hostSessionToken,
+        clientKnownMatchVersion: beforeUndo.match.matchVersion,
         targetEventId: aiEventId,
         reason: "KI-Zug zurücknehmen",
       });
@@ -2944,13 +2976,18 @@ describe("Backend 0.5 private storage maintenance", () => {
         expect(
           replayAuditDb
             .prepare(
-              "SELECT COUNT(*) AS count FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?",
+              "SELECT match_version AS matchVersion, typeof(snapshot_id) AS idType FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?",
             )
             .get(
               created.matchId,
-              `snap_before_${undo.requesterPayload.playerView.stateVersion + 1}`,
+              preActionStateSnapshotId(
+                undo.requesterPayload.playerView.stateVersion + 1,
+              ),
             ),
-        ).toMatchObject({ count: 1 });
+        ).toMatchObject({
+          matchVersion: undo.requesterPayload.matchVersion,
+          idType: "integer",
+        });
       } finally {
         replayAuditDb.close();
       }
@@ -3409,7 +3446,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       });
       const health = await service.storageHealth();
       expect(health.kind).toBe("sqlite");
-      expect(health.schemaVersion).toBe(3);
+      expect(health.schemaVersion).toBe(SQLITE_STORAGE_SCHEMA_VERSION);
       expect(health.storageFormat).toBe("netgrid_multiplayer_sqlite");
       expect(JSON.stringify(health)).not.toMatch(
         /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i,
@@ -3487,7 +3524,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const addedEngineEvents: GameEvent[] = [];
     const traces: NonNullable<StoredMatch["aiDecisionTraces"]> = [];
     for (let index = 1; index <= 120; index += 1) {
-      const eventId = `evt_bounded_${index}`;
+      const eventId = index + 1;
       const actor: Side = index % 2 === 0 ? "corp" : "runner";
       const actionType = index % 10 === 0 ? "end_turn" : "gain_credit";
       const accessIndex =
@@ -3531,7 +3568,6 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         publicPayload: { actor, actionType },
       } as GameEvent);
       traces.push({
-        traceId: `trace_bounded_${index}`,
         matchId: record.match.matchId,
         eventId,
         stateVersion: index,
@@ -3549,7 +3585,10 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     record.eventLog = [firstPublicEvent, ...addedPublicEvents];
     record.gameState.eventLog = [firstEngineEvent, ...addedEngineEvents];
     record.gameState.runnerTurnFlags!.runAttemptsThisGame = 1;
-    record.aiDecisionTraces = traces;
+    record.aiDecisionTraces = [
+      ...traces,
+      { ...traces.at(-1)!, decisionIndex: 121, traceJson: { marker: "latest-at-event" } },
+    ];
     record.actionReceipts = Array.from({ length: 12 }, (_, index) => ({
       idempotencyKey: `receipt-${index}`,
       matchId: record.match.matchId,
@@ -3572,7 +3611,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     if (!full || !legacyPartial || !bounded)
       throw new Error("Missing bounded-load fixture");
 
-    expect(bounded.eventLog).toHaveLength(full.eventLog.length);
+    expect(bounded.eventLog).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
     expect(bounded.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)).toEqual(
       full.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT),
     );
@@ -3581,6 +3620,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     );
     const boundedChronicle = chronicleTurnContextByEventId(
       bounded.eventLog.map((event) => event.publicPayload),
+      bounded.publicHistoryPrefix?.chronicle,
     );
     for (const event of bounded.eventLog.slice(
       -SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
@@ -3593,15 +3633,16 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       JSON.stringify(bounded.eventLog.slice(0, -SIDE_PAYLOAD_EVENT_TAIL_LIMIT)),
     ).not.toContain("EARLY_PUBLIC_PAYLOAD_SENTINEL");
     expect(successfulRunCountForResult(full.eventLog)).toBe(2);
-    expect(successfulRunCountForResult(bounded.eventLog)).toBe(2);
+    expect(publicEventHistorySummary(bounded).successfulRunCount).toBe(2);
     expect(runCountForResult(full.gameState)).toBe(1);
     expect(runCountForResult(bounded.gameState)).toBe(1);
     expect(stolenAgendaCountForResult(full.eventLog)).toBe(1);
-    expect(stolenAgendaCountForResult(bounded.eventLog)).toBe(1);
-    expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog);
+    expect(publicEventHistorySummary(bounded).stolenAgendaCount).toBe(1);
+    expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT));
     expect(bounded.aiDecisionTraces).toHaveLength(
       SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
     );
+    expect(bounded.aiDecisionTraces?.at(-1)?.traceJson.marker).toBe("latest-at-event");
     expect(JSON.stringify(bounded.aiDecisionTraces)).not.toContain(
       "EARLY_TRACE_SENTINEL",
     );
@@ -3609,57 +3650,315 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       bounded.actionReceipts.map((receipt) => receipt.idempotencyKey),
     ).toEqual(["receipt-4"]);
     expect(bounded.stateSnapshots).toEqual([]);
-    const previousActionHistoryBytes = JSON.stringify({
-      events: legacyPartial.eventLog,
-      traces: legacyPartial.aiDecisionTraces,
-      receipts: legacyPartial.actionReceipts,
-      snapshots: legacyPartial.stateSnapshots,
-    }).length;
-    const boundedHistoryBytes = JSON.stringify({
-      events: bounded.eventLog,
-      traces: bounded.aiDecisionTraces,
-      receipts: bounded.actionReceipts,
-      snapshots: bounded.stateSnapshots,
-    }).length;
-    expect(boundedHistoryBytes).toBeLessThan(previousActionHistoryBytes);
+    await expect(storage.save(bounded)).rejects.toMatchObject({ code: "stored_match_invalid" });
+    const tamperedPrefix = structuredClone(bounded);
+    tamperedPrefix.publicHistoryPrefix!.actionCount += 1;
+    await expect(storage.saveActionDelta(tamperedPrefix)).rejects.toMatchObject({ code: "action_persistence_conflict" });
+    expect((await storage.load(record.match.matchId))?.eventLog).toEqual(full.eventLog);
+    const historyDb = new DatabaseSync(dbPath);
+    try {
+      const firstIndex = full.eventLog.length - SIDE_PAYLOAD_EVENT_TAIL_LIMIT;
+      const row = historyDb.prepare("SELECT history_json AS historyJson FROM events WHERE match_id = ? AND event_index = ?")
+        .get(record.match.matchId, firstIndex) as { historyJson: string };
+      const invalidHistory = JSON.parse(row.historyJson);
+      invalidHistory.before.chronicle.turnNumber = 0;
+      historyDb.prepare("UPDATE events SET history_json = ? WHERE match_id = ? AND event_index = ?")
+        .run(JSON.stringify(invalidHistory), record.match.matchId, firstIndex);
+      await expect(storage.loadForAction(record.match.matchId, { side: "runner" }))
+        .rejects.toMatchObject({ code: "stored_match_invalid" });
+      historyDb.prepare("UPDATE events SET history_json = ? WHERE match_id = ? AND event_index = ?")
+        .run(row.historyJson, record.match.matchId, firstIndex);
+    } finally { historyDb.close(); }
     expect(bounded.actionPersistenceBaseline).toMatchObject({
       expectedMatchVersion: record.match.matchVersion,
       expectedStateVersion: record.gameState.stateVersion,
       publicEventCount: 121,
       engineEventCount: 121,
       actionReceiptCount: 12,
-      aiDecisionTraceCount: 120,
+      aiDecisionTraceCount: 121,
       loadedActionReceiptCount: 1,
       loadedAiDecisionTraceCount: SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
     });
+    const connection = (await storage.loadForConnection(record.match.matchId))!;
+    expect(connection.eventLog).toEqual(bounded.eventLog);
+    expect(connection.aiDecisionTraces).toEqual(bounded.aiDecisionTraces);
+    expect(connection.gameState.eventLog).toEqual([]);
+    expect(connection.actionReceipts).toEqual([]);
+    expect(connection.stateSnapshots).toEqual([]);
+    expect(connection.undoSnapshots).toEqual([]);
     const service = new MultiplayerService(storage, {
       tokenSalt: "fixture-v108-bounded-action-load",
       now: () => "2026-07-19T12:00:00.000Z",
     });
+    const watchConnection = new DatabaseSync(dbPath);
+    try {
+      watchConnection.exec(`
+        CREATE TRIGGER reject_connection_state_rewrite BEFORE UPDATE ON game_states
+        BEGIN SELECT RAISE(ABORT, 'connection attempted to rewrite the game state'); END;
+      `);
+      watchConnection.prepare(
+        `UPDATE matches SET record_json = json_set(record_json, '$.aiPlanRuntime', json(?))
+         WHERE match_id = ?`,
+      ).run(JSON.stringify({ residentPlanPortfolioBySide: {} }), record.match.matchId);
+      const sessionId = connection.sessions.find(({ side }) => side === "runner")!.sessionId;
+      await storage.saveConnection(connection, { sessionId, kind: "heartbeat" });
+      expect((await storage.load(record.match.matchId))?.aiPlanRuntime)
+        .toEqual({ residentPlanPortfolioBySide: {} });
+    } finally { watchConnection.close(); }
     const fullPayload = await service.bootstrap(
       record.match.matchId,
       "runner",
       fixture.hostSessionToken,
     );
     if ("error" in fullPayload) throw new Error(fullPayload.error.message);
+    const reconnect = await service.reconnectMatch(record.match.matchId, {
+      side: "runner",
+      sessionToken: fixture.hostSessionToken,
+      reconnectToken: fixture.hostReconnectToken,
+    });
+    if ("error" in reconnect) throw new Error(reconnect.error.message);
+    expect(reconnect.playerView).toEqual(fullPayload.playerView);
+    const afterReconnect = (await storage.load(record.match.matchId))!;
+    expect(afterReconnect.gameState).toEqual(full.gameState);
+    expect(afterReconnect.actionReceipts).toEqual(full.actionReceipts);
+    expect(afterReconnect.stateSnapshots).toEqual(full.stateSnapshots);
+    expect(afterReconnect.aiDecisionTraces).toEqual(full.aiDecisionTraces);
+    expect(afterReconnect.sessions.find(({ side }) => side === "runner")?.lastSeenAt)
+      .toBe("2026-07-19T12:00:00.000Z");
     const duplicate = await service.submitAction({
       matchId: record.match.matchId,
       side: "runner",
       sessionToken: fixture.hostSessionToken,
       actionId:
-        fullPayload.legalActions[0]?.actionId ?? "duplicate-short-circuit",
+        fullPayload.playerView.legalActions[0]?.actionId ??
+        "duplicate-short-circuit",
+      clientKnownMatchVersion: fullPayload.matchVersion,
       clientKnownStateVersion: fullPayload.playerView.stateVersion,
       idempotencyKey: "receipt-4",
     });
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.actorPayload.eventTail).toEqual(fullPayload.eventTail);
+    expect(duplicate.actorPayload.playerView.publicEvents).toEqual(
+      fullPayload.playerView.publicEvents,
+    );
     expect(JSON.stringify(duplicate.actorPayload)).not.toMatch(
       /EARLY_PUBLIC_PAYLOAD_SENTINEL|EARLY_TRACE_SENTINEL/,
     );
-    console.info(
-      `[delta-action-history-probe] ${JSON.stringify({ previousActionHistoryBytes, boundedHistoryBytes })}`,
-    );
     storage.close();
+  });
+
+  it("loads only new SQLite engine rows in KI games and rebuilds after undo and reopen", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const options = { dbPath, backupDir: join(dir, "backups") };
+    const serviceOptions = { tokenSalt: "incremental-engine-journal" };
+    let storage = new SqliteMatchStorage(options);
+    let service = new MultiplayerService(storage, serviceOptions);
+    const nativeAll = StatementSync.prototype.all;
+    const reads: number[][] = [];
+    const audit = vi.spyOn(StatementSync.prototype, "all").mockImplementation(
+      function (this: StatementSync, ...args: Parameters<StatementSync["all"]>) {
+        const rows = Reflect.apply(nativeAll, this, args) as ReturnType<StatementSync["all"]>;
+        if (this.sourceSQL.includes("FROM engine_events") && this.sourceSQL.includes("AS eventJson"))
+          reads.push(rows.map(({ eventIndex }) => Number(eventIndex)));
+        return rows;
+      },
+    );
+    try {
+      const created = await service.createMatch({
+        mode: "human_corp_vs_runner_ai",
+        hostSide: "corp",
+        seed: "incremental-engine-journal",
+        aiPacingMode: "manual",
+      });
+      const corp = {
+        side: "corp" as const,
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      };
+      const load = async () => {
+        const record = await storage.loadForAction(created.matchId, { side: "corp" });
+        if (!record?.actionPersistenceBaseline) throw new Error("Missing action baseline");
+        return record;
+      };
+      const fullRead = (record: StoredMatch) =>
+        [record.gameState.eventLog.map((_, index) => index)];
+      reads.length = 0;
+      const initial = await load();
+      expect(initial.gameState.eventLog.length).toBeGreaterThan(0);
+      expect(reads).toEqual(fullRead(initial));
+
+      reads.length = 0;
+      await submitChoice(service, created.matchId, corp, "keep", "journal-keep");
+      expect(reads).toEqual([]);
+      const afterKeep = await load();
+      expect(reads).toEqual([[initial.gameState.eventLog.length]]);
+      expect(afterKeep.gameState.eventLog.slice(0, -1)).toEqual(initial.gameState.eventLog);
+      expect(afterKeep.gameState.eventLog[0]).toBe(initial.gameState.eventLog[0]);
+      afterKeep.gameState.eventLog.pop();
+      reads.length = 0;
+      expect((await load()).gameState.eventLog).toHaveLength(initial.gameState.eventLog.length + 1);
+      expect(reads).toEqual([]);
+
+      await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", "journal-mandatory");
+      const beforeGain = await load();
+      const gain = await submit(service, created.matchId, corp, (action) => action.type === "gain_credit", "journal-gain");
+      const beforeUndo = await load();
+      const releaseAiRuntime = vi.spyOn(
+        service as unknown as { releaseAiRuntimeFor(matchId: string): void },
+        "releaseAiRuntimeFor",
+      );
+      const undo = await service.requestUndo({
+        matchId: created.matchId,
+        side: corp.side,
+        sessionToken: corp.sessionToken,
+        clientKnownMatchVersion: beforeUndo.match.matchVersion,
+        targetEventId: gain.publicEvent!.eventId,
+      });
+      if (!undo.ok) throw new Error(undo.error.message);
+      expect(releaseAiRuntime).toHaveBeenCalledExactlyOnceWith(created.matchId);
+      releaseAiRuntime.mockRestore();
+      reads.length = 0;
+      const rewound = await load();
+      expect(reads).toEqual(fullRead(beforeGain));
+      expect(rewound.gameState.eventLog).toEqual(beforeGain.gameState.eventLog);
+      expect(hashState(rewound.gameState)).toBe(hashState(beforeGain.gameState));
+      expect(rewound.actionPersistenceBaseline!.engineEventGeneration)
+        .toBeGreaterThan(beforeUndo.actionPersistenceBaseline!.engineEventGeneration);
+
+      const draw = await submit(service, created.matchId, corp, (action) => action.type === "draw_card", "journal-draw");
+      expect(draw.publicEvent!.eventId).toBe(gain.publicEvent!.eventId);
+      reads.length = 0;
+      const beforeReopen = await load();
+      expect(reads).toEqual([[rewound.gameState.eventLog.length]]);
+      expect(beforeReopen.gameState.eventLog.at(-1)?.publicPayload.actionType).toBe("draw_card");
+      expect(await service.replayMatch(created.matchId)).toMatchObject({
+        ok: true,
+        finalStateHash: hashState(beforeReopen.gameState),
+      });
+
+      service.closeStorage();
+      storage = new SqliteMatchStorage(options);
+      service = new MultiplayerService(storage, serviceOptions);
+      reads.length = 0;
+      expect(await service.reconnectMatch(created.matchId, corp)).toHaveProperty("playerView");
+      expect(reads).toEqual([]);
+      const reopened = await load();
+      expect(reads).toEqual(fullRead(beforeReopen));
+      expect(reopened.gameState.eventLog).toEqual(beforeReopen.gameState.eventLog);
+      for (const side of ["corp", "runner"] as const)
+        expect(getPlayerView(reopened.gameState, side)).toEqual(getPlayerView(beforeReopen.gameState, side));
+      expect(await service.replayMatch(created.matchId)).toMatchObject({
+        ok: true,
+        finalStateHash: hashState(beforeReopen.gameState),
+      });
+
+      const writer = new DatabaseSync(dbPath);
+      try {
+        writer.prepare(`UPDATE engine_events SET event_json = event_json
+          WHERE match_id = ? AND event_index = ?`)
+          .run(created.matchId, reopened.gameState.eventLog.length - 1);
+        await expect(storage.saveActionDelta(reopened)).rejects.toMatchObject({
+          code: "action_persistence_conflict",
+        });
+        reads.length = 0;
+        expect((await load()).gameState.eventLog).toEqual(reopened.gameState.eventLog);
+        expect(reads).toEqual(fullRead(reopened));
+      } finally {
+        writer.close();
+      }
+    } finally {
+      audit.mockRestore();
+      service.closeStorage();
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps native history tails accurate through reopen, undo and reapply after 80 events", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    let storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+    let service = new MultiplayerService(storage, { tokenSalt: "history-prefix-native" });
+    try {
+      const created = await service.createMatch({ hostSide: "corp", seed: "history-prefix-native" });
+      const joinToken = new URL(created.joinUrl!).searchParams.get("joinToken")!;
+      const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+      if ("error" in joined) throw new Error(joined.error.message);
+      const sessions = {
+        corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+        runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken },
+      };
+      await forceSetupComplete(service, created.matchId, dbPath);
+      let previousHash = "";
+      let lastSide: Side = "corp";
+      let lastEventId = 0;
+      for (let index = 0; index < 100; index += 1) {
+        const record = (await storage.load(created.matchId, { includeStateSnapshots: false }))!;
+        const side = record.gameState.pendingChoice?.side ?? record.gameState.activeSide;
+        const payload = await bootstrap(service, created.matchId, sessions[side]);
+        const choice = payload.playerView.pendingChoice;
+        const action = choice
+          ? payload.playerView.legalActions.find((candidate) => candidate.type === "resolve_choice")
+          : payload.playerView.legalActions.find((candidate) => candidate.type === "mandatory_draw") ??
+            payload.playerView.legalActions.find((candidate) => candidate.type === "gain_credit") ??
+            payload.playerView.legalActions.find((candidate) => candidate.type === "end_turn");
+        if (!action) throw new Error("Native turn action missing.");
+        previousHash = hashState(record.gameState);
+        const applied = await service.submitAction({
+          matchId: created.matchId, side, sessionToken: sessions[side].sessionToken,
+          actionId: action.actionId, clientKnownMatchVersion: payload.matchVersion,
+          clientKnownStateVersion: payload.playerView.stateVersion, idempotencyKey: `prefix-native-${index}`,
+          ...(choice ? { selectedChoices: { choiceId: choice.choiceId,
+            selectedOptionIds: choice.options.slice(0, choice.minSelections).map((option) => option.id) } } : {}),
+        });
+        if (!applied.ok) throw new Error(applied.error.message);
+        lastSide = side;
+        lastEventId = applied.publicEvent!.eventId;
+        if (index >= 90 && action.type === "gain_credit") break;
+      }
+      const full = (await storage.load(created.matchId))!;
+      const bounded = (await storage.loadForAction(created.matchId, { side: lastSide }))!;
+      expect(full.eventLog.length).toBeGreaterThan(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
+      expect(bounded.eventLog).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
+      expect(bounded.gameState.eventLog).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
+      expect(publicEventHistorySummary(bounded)).toEqual(publicEventHistorySummary(full));
+      const beforeReopen = await bootstrap(service, created.matchId, sessions[lastSide]);
+      storage.close();
+      storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+      service = new MultiplayerService(storage, { tokenSalt: "history-prefix-native" });
+      const reconnected = await service.reconnectMatch(created.matchId, sessions[lastSide]);
+      if ("error" in reconnected) throw new Error(reconnected.error.message);
+      expect(reconnected.playerView).toEqual(beforeReopen.playerView);
+      const undo = await service.requestUndo({
+        matchId: created.matchId, side: lastSide, sessionToken: sessions[lastSide].sessionToken,
+        clientKnownMatchVersion: reconnected.matchVersion, targetEventId: lastEventId,
+      });
+      if (!undo.ok) throw new Error(undo.error.message);
+      if (!undo.undoRequest) throw new Error("Undo request missing.");
+      const opponent = lastSide === "corp" ? "runner" : "corp";
+      const accepted = await service.acceptUndo({
+        matchId: created.matchId, side: opponent, sessionToken: sessions[opponent].sessionToken,
+        undoRequestId: undo.undoRequest.undoRequestId,
+      });
+      if (!accepted.ok) throw new Error(accepted.error.message);
+      const restored = (await storage.load(created.matchId))!;
+      expect(hashState(restored.gameState)).toBe(previousHash);
+      expect(restored.eventLog.some((event) => event.eventId === lastEventId)).toBe(false);
+      const reapplied = await submit(service, created.matchId, sessions[lastSide],
+        (action) => action.type === "gain_credit", "prefix-native-reapply");
+      expect(reapplied.publicEvent!.eventId).toBe(lastEventId);
+      const final = (await storage.load(created.matchId))!;
+      const finalBounded = (await storage.loadForAction(created.matchId, { side: lastSide }))!;
+      expect(publicEventHistorySummary(finalBounded)).toEqual(publicEventHistorySummary(final));
+      expect(finalBounded.actionPersistenceBaseline).toMatchObject({
+        publicEventCount: final.eventLog.length,
+        engineEventCount: final.gameState.eventLog.length,
+        actionReceiptCount: final.actionReceipts.length,
+        aiDecisionTraceCount: final.aiDecisionTraces?.length ?? 0,
+      });
+      expect(finalBounded.actionPersistenceBaseline!.engineEventGeneration)
+        .toBeGreaterThan(bounded.actionPersistenceBaseline!.engineEventGeneration);
+      expect(await service.replayMatch(created.matchId)).toMatchObject({ ok: true, errors: [] });
+    } finally { storage.close(); }
   });
 
   it("appends action deltas without updating or deleting persisted history prefixes", async () => {
@@ -3685,14 +3984,14 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       displayName: "Runner",
     });
     if ("error" in joined) throw new Error(joined.error.message);
-    await forceSetupComplete(service, created.matchId);
+    await forceSetupComplete(service, created.matchId, dbPath);
     const beforePayload = await service.bootstrap(
       created.matchId,
       "corp",
       created.hostSessionToken,
     );
     if ("error" in beforePayload) throw new Error(beforePayload.error.message);
-    const action = beforePayload.legalActions.find(
+    const action = beforePayload.playerView.legalActions.find(
       (candidate) => candidate.type === "mandatory_draw",
     );
     if (!action) throw new Error("Missing mandatory draw");
@@ -3716,6 +4015,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: action.actionId,
+      clientKnownMatchVersion: beforePayload.matchVersion,
       clientKnownStateVersion: beforePayload.playerView.stateVersion,
       idempotencyKey: "delta-append-only",
     });
@@ -3725,6 +4025,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: action.actionId,
+      clientKnownMatchVersion: beforePayload.matchVersion,
       clientKnownStateVersion: beforePayload.playerView.stateVersion,
       idempotencyKey: "delta-append-only",
     });
@@ -3774,14 +4075,14 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       displayName: "Runner",
     });
     if ("error" in joined) throw new Error(joined.error.message);
-    await forceSetupComplete(service, created.matchId);
+    await forceSetupComplete(service, created.matchId, dbPath);
     const payload = await service.bootstrap(
       created.matchId,
       "corp",
       created.hostSessionToken,
     );
     if ("error" in payload) throw new Error(payload.error.message);
-    const action = payload.legalActions.find(
+    const action = payload.playerView.legalActions.find(
       (candidate) => candidate.type === "mandatory_draw",
     );
     if (!action) throw new Error("Missing mandatory draw");
@@ -3808,6 +4109,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         side: "corp",
         sessionToken: created.hostSessionToken,
         actionId: action.actionId,
+        clientKnownMatchVersion: payload.matchVersion,
         clientKnownStateVersion: payload.playerView.stateVersion,
         idempotencyKey: "forced-delta-rollback",
       }),
@@ -3907,7 +4209,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
           displayName: `Runner ${index}`,
         });
         if ("error" in joined) throw new Error(joined.error.message);
-        await forceSetupComplete(service, created.matchId);
+        await forceSetupComplete(service, created.matchId, dbPath);
         matches.push({
           matchId: created.matchId,
           sessionToken: created.hostSessionToken,
@@ -3927,7 +4229,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
               match.sessionToken,
             );
             if ("error" in payload) throw new Error(payload.error.message);
-            const action = payload.legalActions.find(
+            const action = payload.playerView.legalActions.find(
               (candidate) =>
                 candidate.type !== "end_turn" &&
                 candidate.targetRequirements.length === 0 &&
@@ -3939,6 +4241,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
               side: "corp",
               sessionToken: match.sessionToken,
               actionId: action.actionId,
+              clientKnownMatchVersion: payload.matchVersion,
               clientKnownStateVersion: payload.playerView.stateVersion,
               idempotencyKey: `delta-load-probe-${round}-${match.matchId}`,
             });
@@ -3989,7 +4292,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       record.match.matchId,
       gameState,
       record.match.matchVersion,
-      "snap_duplicate",
+      preActionStateSnapshotId(1),
     );
     record.gameState = gameState;
     record.stateSnapshots = [
@@ -4002,14 +4305,14 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const reopened = await storage.load(record.match.matchId);
     expect(
       reopened?.stateSnapshots.map((candidate) => candidate.snapshotId),
-    ).toEqual(["snap_duplicate"]);
+    ).toEqual([preActionStateSnapshotId(1)]);
     const db = new DatabaseSync(dbPath, { readOnly: true });
     expect(
       db
         .prepare(
           "SELECT COUNT(*) AS count FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?",
         )
-        .get(record.match.matchId, "snap_duplicate"),
+        .get(record.match.matchId, preActionStateSnapshotId(1)),
     ).toMatchObject({ count: 1 });
     db.close();
     storage.close();
@@ -4032,14 +4335,14 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         record.match.matchId,
         gameState,
         record.match.matchVersion,
-        "snap_one",
+        INITIAL_STATE_SNAPSHOT_ID,
       ),
       {
         ...stateSnapshotForTest(
           record.match.matchId,
           gameState,
           record.match.matchVersion + 1,
-          "snap_two",
+          preActionStateSnapshotId(2),
         ),
         stateVersion: gameState.stateVersion + 1,
       },
@@ -4056,7 +4359,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         record.match.matchId,
         gameState,
         record.match.matchVersion + 2,
-        "snap_three",
+        preActionStateSnapshotId(3),
       ),
       stateVersion: gameState.stateVersion + 2,
     });
@@ -4065,7 +4368,11 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const reopened = await storage.load(record.match.matchId);
     expect(
       reopened?.stateSnapshots.map((candidate) => candidate.snapshotId),
-    ).toEqual(["snap_one", "snap_two", "snap_three"]);
+    ).toEqual([
+      INITIAL_STATE_SNAPSHOT_ID,
+      preActionStateSnapshotId(2),
+      preActionStateSnapshotId(3),
+    ]);
     const db = new DatabaseSync(dbPath, { readOnly: true });
     const sizes = db
       .prepare(
@@ -4104,7 +4411,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
-    await forceSetupComplete(service, created.matchId);
+    await forceSetupComplete(service, created.matchId, dbPath);
     await submit(
       service,
       created.matchId,
@@ -4140,12 +4447,8 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       privateEngineEventCount: number;
       snapshotsWithEmbeddedEvents: number;
     };
-    expect(
-      (JSON.parse(stored.recordJson) as StoredMatch).gameState.eventLog,
-    ).toEqual([]);
-    expect((JSON.parse(stored.gameStateJson) as GameState).eventLog).toEqual(
-      [],
-    );
+    expect(JSON.parse(stored.recordJson)).not.toHaveProperty("gameState");
+    expect(JSON.parse(stored.gameStateJson)).not.toHaveProperty("eventLog");
     expect(Number(stored.engineEventCount)).toBeGreaterThan(1);
     expect(Number(stored.privateEngineEventCount)).toBeGreaterThan(0);
     expect(Number(stored.snapshotsWithEmbeddedEvents)).toBe(0);
@@ -4194,9 +4497,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
-    await forceSetupComplete(service, created.matchId);
-    const beforeMandatory = await storage.load(created.matchId);
-    if (!beforeMandatory) throw new Error("Missing pre-action SQLite match");
+    await forceSetupComplete(service, created.matchId, dbPath);
     const mandatory = await submit(
       service,
       created.matchId,
@@ -4209,77 +4510,28 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       "v108-sqlite-legacy-compaction-mandatory",
     );
 
-    const current = await storage.load(created.matchId);
-    if (!current) throw new Error("Missing current SQLite match");
-    const legacyRecord = structuredClone(current) as StoredMatch;
-    const replayBaseSnapshot = stateSnapshotForTest(
-      created.matchId,
-      beforeMandatory.gameState,
-      beforeMandatory.match.matchVersion,
-      `snap_before_${mandatory.receipt.stateVersionAfter}`,
-    );
-    const lastSnapshot = stateSnapshotForTest(
-      created.matchId,
-      current.gameState,
-      current.match.matchVersion,
-      "legacy_embedded_eventlog_current",
-    );
-    legacyRecord.stateSnapshots = [replayBaseSnapshot, lastSnapshot];
-    for (let index = 0; index < 3; index += 1) {
-      legacyRecord.stateSnapshots.push({
-        ...structuredClone(lastSnapshot),
-        snapshotId: `legacy_embedded_eventlog_${index}`,
-        createdAt: `2026-05-21T00:00:0${index}.000Z`,
-      });
-    }
     service.closeStorage();
 
     const db = new DatabaseSync(dbPath);
+    let snapshotCount: number;
     try {
-      db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?").run(
-        JSON.stringify(legacyRecord),
-        created.matchId,
-      );
-      db.prepare(
-        "UPDATE game_states SET game_state_json = ? WHERE match_id = ?",
-      ).run(JSON.stringify(legacyRecord.gameState), created.matchId);
-      db.prepare("DELETE FROM state_snapshots WHERE match_id = ?").run(
-        created.matchId,
-      );
-      const insertSnapshot = db.prepare(
-        `INSERT INTO state_snapshots
-          (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      );
-      for (const snapshot of legacyRecord.stateSnapshots) {
-        insertSnapshot.run(
-          created.matchId,
-          snapshot.snapshotId,
-          snapshot.stateVersion,
-          snapshot.matchVersion,
-          snapshot.stateHash,
-          JSON.stringify(snapshot.gameState),
-          snapshot.createdAt,
-          snapshot.hiddenInfoBarrier ? 1 : 0,
-        );
+      for (const [table, column] of [
+        ["matches", "record_json"],
+        ["game_states", "game_state_json"],
+        ["state_snapshots", "game_state_json"],
+      ] as const) {
+        db.prepare(
+          `UPDATE ${table} SET ${column} = json_pretty(${column}) WHERE match_id = ?`,
+        ).run(created.matchId);
       }
-      const legacyStats = db
-        .prepare(
-          `SELECT
-            (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount,
-            (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS embeddedSnapshotCount,
-            (SELECT LENGTH(game_state_json) FROM game_states WHERE match_id = ?) AS gameStateBytes`,
-        )
-        .get(created.matchId, created.matchId, created.matchId) as {
-        engineEventCount: number;
-        embeddedSnapshotCount: number;
-        gameStateBytes: number;
-      };
-      expect(Number(legacyStats.engineEventCount)).toBeGreaterThan(0);
-      expect(Number(legacyStats.embeddedSnapshotCount)).toBe(
-        legacyRecord.stateSnapshots.length,
+      snapshotCount = Number(
+        db
+          .prepare(
+            "SELECT COUNT(*) AS count FROM state_snapshots WHERE match_id = ?",
+          )
+          .get(created.matchId)?.count,
       );
-      expect(Number(legacyStats.gameStateBytes)).toBeGreaterThan(10_000);
+      expect(snapshotCount).toBeGreaterThan(0);
     } finally {
       db.close();
     }
@@ -4312,9 +4564,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       expect(result.matchesScanned).toBe(1);
       expect(result.compactedMatchCount).toBe(1);
       expect(result.gameStateRowsCompacted).toBe(1);
-      expect(result.stateSnapshotRowsCompacted).toBe(
-        legacyRecord.stateSnapshots.length,
-      );
+      expect(result.stateSnapshotRowsCompacted).toBe(snapshotCount);
       expect(result.integrityCheck).toBe("ok");
       expect(result.database?.afterPayloadBytes).toBeLessThan(
         result.database?.beforePayloadBytes ?? 0,
@@ -4350,15 +4600,11 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
           privateEngineEventCount: number;
           snapshotsWithEmbeddedEvents: number;
         };
-        expect(
-          (JSON.parse(stored.recordJson) as StoredMatch).gameState.eventLog,
-        ).toEqual([]);
+        expect(JSON.parse(stored.recordJson)).not.toHaveProperty("gameState");
         expect(
           (JSON.parse(stored.recordJson) as StoredMatch).stateSnapshots,
         ).toEqual([]);
-        expect(
-          (JSON.parse(stored.gameStateJson) as GameState).eventLog,
-        ).toEqual([]);
+        expect(JSON.parse(stored.gameStateJson)).not.toHaveProperty("eventLog");
         expect(Number(stored.engineEventCount)).toBeGreaterThan(0);
         expect(Number(stored.privateEngineEventCount)).toBeGreaterThan(0);
         expect(Number(stored.snapshotsWithEmbeddedEvents)).toBe(0);
@@ -4370,9 +4616,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       expect(
         full?.gameState.eventLog.some((event) => Boolean(event.privatePayload)),
       ).toBe(true);
-      expect(full?.stateSnapshots.length).toBe(
-        legacyRecord.stateSnapshots.length,
-      );
+      expect(full?.stateSnapshots.length).toBe(snapshotCount);
       expect(
         full?.stateSnapshots.some(
           (snapshot) => snapshot.gameState.eventLog.length > 0,
@@ -4390,8 +4634,9 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         matchId: created.matchId,
         side: "corp",
         sessionToken: created.hostSessionToken,
-        targetEventId: `evt_${mandatory.receipt.stateVersionAfter}`,
-        reason: "Legacy compaction undo",
+        clientKnownMatchVersion: mandatory.actorPayload.matchVersion,
+        targetEventId: mandatory.receipt.stateVersionAfter + 1,
+        reason: "Compaction undo",
       });
       if (!undo.ok || !undo.undoRequest)
         throw new Error(`Expected undo request: ${JSON.stringify(undo)}`);
@@ -4405,6 +4650,41 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       expect(accepted.ok).toBe(true);
       if (!accepted.ok) throw new Error(accepted.error.message);
       expect(accepted.requesterPayload.playerView.stateVersion).toBe(0);
+      const afterUndoStorage = new SqliteMatchStorage({ dbPath, backupDir });
+      const afterUndoService = new MultiplayerService(afterUndoStorage, {
+        tokenSalt: "v108-sqlite-legacy-compaction",
+      });
+      try {
+        const transitionId = preActionStateSnapshotId(
+          mandatory.receipt.stateVersionAfter,
+        );
+        const rolledBack = await afterUndoStorage.load(created.matchId);
+        expect(rolledBack?.stateSnapshots.map((state) => state.snapshotId))
+          .toEqual([INITIAL_STATE_SNAPSHOT_ID]);
+        const reissued = await submit(
+          afterUndoService,
+          created.matchId,
+          {
+            side: "corp",
+            sessionToken: created.hostSessionToken,
+            reconnectToken: created.hostReconnectToken,
+          },
+          (action) => action.type === "mandatory_draw",
+          "v108-sqlite-compaction-first-transition-reissued",
+        );
+        expect(reissued.receipt.stateVersionAfter).toBe(
+          mandatory.receipt.stateVersionAfter,
+        );
+        const completed = await afterUndoStorage.load(created.matchId);
+        expect(completed?.stateSnapshots.find((state) => state.snapshotId === transitionId))
+          .toMatchObject({
+            matchVersion: accepted.requesterPayload.matchVersion,
+            stateVersion: 0,
+          });
+        expect((await afterUndoService.replayMatch(created.matchId)).ok).toBe(true);
+      } finally {
+        afterUndoService.closeStorage();
+      }
     } finally {
       await maintenance.handle.close();
     }
@@ -4432,7 +4712,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
-    await forceSetupComplete(service, created.matchId);
+    await forceSetupComplete(service, created.matchId, dbPath);
     await submit(
       service,
       created.matchId,
@@ -4502,7 +4782,8 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         matchId: created.matchId,
         side: "corp",
         sessionToken: created.hostSessionToken,
-        targetEventId: `evt_${credit.receipt.stateVersionAfter}`,
+        clientKnownMatchVersion: credit.actorPayload.matchVersion,
+        targetEventId: credit.receipt.stateVersionAfter + 1,
         reason: "Incremental event write regression",
       });
       expect(undo.ok).toBe(true);
@@ -4587,7 +4868,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       sessionToken: joined.sessionToken,
       reconnectToken: joined.reconnectToken,
     };
-    await forceSetupComplete(service, created.matchId);
+    await forceSetupComplete(service, created.matchId, dbPath);
 
     for (let turn = 0; turn < 2; turn += 1) {
       await submit(
@@ -4771,7 +5052,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const health = inspectSqliteStorage(dbPath);
     expect(health).toMatchObject({
       kind: "sqlite",
-      schemaVersion: 3,
+      schemaVersion: SQLITE_STORAGE_SCHEMA_VERSION,
       matchCount: 1,
     });
     const manifestText = await readFile(
@@ -4881,7 +5162,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     });
     expect(inspectSqliteStorage(restoredPath)).toMatchObject({
       kind: "sqlite",
-      schemaVersion: 3,
+      schemaVersion: SQLITE_STORAGE_SCHEMA_VERSION,
       matchCount: 1,
     });
     const restoredDb = new DatabaseSync(restoredPath, { readOnly: true });
@@ -4955,7 +5236,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       sessionToken,
     );
     if ("error" in payload) throw new Error(payload.error.message);
-    const action = payload.legalActions[0];
+    const action = payload.playerView.legalActions[0];
     if (!action) throw new Error("Missing legal action");
     storage.resetCounters();
     storage.failNextSave = true;
@@ -4965,6 +5246,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         side: activeSide,
         sessionToken,
         actionId: action.actionId,
+        clientKnownMatchVersion: payload.matchVersion,
         clientKnownStateVersion: payload.playerView.stateVersion,
         idempotencyKey: "persist-fails",
       }),
@@ -5004,7 +5286,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       sessionToken,
     );
     if ("error" in payload) throw new Error(payload.error.message);
-    const action = payload.legalActions[0];
+    const action = payload.playerView.legalActions[0];
     if (!action) throw new Error("Missing legal action");
     storage.resetCounters();
     service.addPersistenceObserver(async () => {
@@ -5016,6 +5298,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       side: activeSide,
       sessionToken,
       actionId: action.actionId,
+      clientKnownMatchVersion: payload.matchVersion,
       clientKnownStateVersion: payload.playerView.stateVersion,
       idempotencyKey: "delta-capability",
     });
@@ -5053,10 +5336,10 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(created.playerView.deckMetadata?.own.deckHash).toBe(
-      "fnv1a:d3ad4e1c",
+      "fnv1a:8fcdd81b",
     );
     expect(created.playerView.deckMetadata?.opponent.deckHash).toBe(
-      "fnv1a:54c7851f",
+      "fnv1a:f8ae8139",
     );
     expect(stored?.match.deckSetup.runnerSnapshotId).toBe(
       "demo_runner_004_snapshot_v0_6",
@@ -5064,7 +5347,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(stored?.match.settings.agendaPointsToWin).toBe(7);
     expect(stored?.match.settings.matchFormat).toBe("rules_match");
     expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
-    expect(JSON.stringify(created)).not.toContain("simple_priority_agenda");
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":599\b/);
     expect(JSON.stringify(created)).not.toContain("cardInstances");
 
     const invalidSnapshot = structuredClone(
@@ -5075,7 +5358,7 @@ describe("MVP 0.2 multiplayer service", () => {
     ) as DeckSnapshot | undefined;
     if (!invalidSnapshot) throw new Error("Missing runner snapshot");
     invalidSnapshot.cards.push({
-      cardId: "catalog_preview_resource_001",
+      cardId: 2,
       quantity: 1,
     });
     await expect(
@@ -5096,15 +5379,15 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("starts private local O:NR matches from the shared runtime card pool when the overlay is present", async () => {
     const cardsById = createRuntimeCardsById();
-    if (!cardsById["onr_v1_015_codeslinger"]) return;
+    if (!cardsById[227]) return;
     expect(
-      cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal,
+      cardsById[291]?.statuses.deck_legal,
     ).toBe(true);
-    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(
+    expect(cardsById[218]?.statuses.deck_legal).toBe(
       true,
     );
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(
+    expect(cardsById[230]?.statuses.deck_legal).toBe(true);
+    expect(cardsById[230]?.statuses.ai_supported).toBe(
       true,
     );
 
@@ -5119,29 +5402,29 @@ describe("MVP 0.2 multiplayer service", () => {
       deckVersion: "0.94.0-local-onr",
       name: "O:NR Runner Match Smoke",
       side: "runner",
-      identityCardId: "runner_identity_001",
+      identityCardId: 587,
       cardPoolSnapshotId: "card-snapshot-0.8",
       formatProfileId: "local-demo-v0.8",
       cards: [
-        { cardId: "onr_v1_015_codeslinger", quantity: 2 },
-        { cardId: "onr_v1_052_raffles", quantity: 2 },
-        { cardId: "onr_v1_054_raptor", quantity: 2 },
-        { cardId: "onr_v1_070_tinweasel", quantity: 2 },
-        { cardId: "onr_v1_144_tycho-mem-chip", quantity: 1 },
-        { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
-        { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 1 },
-        { cardId: "onr_v1_095_jack-n-joe", quantity: 1 },
-        { cardId: "onr_v1_097_livewires-contacts", quantity: 1 },
-        { cardId: "onr_v1_108_score", quantity: 1 },
-        { cardId: "onr_v1_072_wild-card", quantity: 1 },
-        { cardId: "onr_v1_145_wutech-mem-chip", quantity: 1 },
-        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
-        { cardId: "onr_v1_014_codecracker", quantity: 1 },
-        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
-        { cardId: "onr_v1_040_loony-goon", quantity: 1 },
-        { cardId: "onr_v1_060_shaka", quantity: 1 },
-        { cardId: "onr_v1_073_wizards-book", quantity: 1 },
-        { cardId: "simple_economy_event", quantity: 2 },
+        { cardId: 227, quantity: 2 },
+        { cardId: 264, quantity: 2 },
+        { cardId: 266, quantity: 2 },
+        { cardId: 282, quantity: 2 },
+        { cardId: 356, quantity: 1 },
+        { cardId: 358, quantity: 1 },
+        { cardId: 291, quantity: 1 },
+        { cardId: 307, quantity: 1 },
+        { cardId: 309, quantity: 1 },
+        { cardId: 320, quantity: 1 },
+        { cardId: 284, quantity: 1 },
+        { cardId: 357, quantity: 1 },
+        { cardId: 218, quantity: 1 },
+        { cardId: 226, quantity: 1 },
+        { cardId: 228, quantity: 1 },
+        { cardId: 252, quantity: 1 },
+        { cardId: 272, quantity: 1 },
+        { cardId: 285, quantity: 1 },
+        { cardId: 595, quantity: 2 },
       ],
       createdAt: now,
       updatedAt: now,
@@ -5151,46 +5434,46 @@ describe("MVP 0.2 multiplayer service", () => {
       deckVersion: "0.94.0-local-onr",
       name: "O:NR Corp Match Smoke",
       side: "corp",
-      identityCardId: "corp_identity_001",
+      identityCardId: 3,
       cardPoolSnapshotId: "card-snapshot-0.8",
       formatProfileId: "local-demo-v0.8",
       cards: [
-        { cardId: "onr_v1_203_hostile-takeover", quantity: 3 },
-        { cardId: "simple_agenda", quantity: 3 },
-        { cardId: "onr_v1_230_cortical-scanner", quantity: 2 },
-        { cardId: "onr_v1_232_crystal-wall", quantity: 2 },
-        { cardId: "onr_v1_237_data-wall", quantity: 2 },
-        { cardId: "onr_v1_238_data-wall-2-0", quantity: 2 },
-        { cardId: "onr_v1_239_endless-corridor", quantity: 2 },
-        { cardId: "onr_v1_220_tycho-extension", quantity: 2 },
-        { cardId: "onr_v1_281_accounts-receivable", quantity: 1 },
-        { cardId: "onr_v1_282_annual-reviews", quantity: 1 },
-        { cardId: "onr_v1_285_closed-accounts", quantity: 1 },
-        { cardId: "onr_v1_287_datapool-by-zetatech", quantity: 1 },
-        { cardId: "onr_v1_288_day-shift", quantity: 1 },
-        { cardId: "onr_v1_290_efficiency-experts", quantity: 1 },
-        { cardId: "onr_v1_301_punitive-counterstrike", quantity: 1 },
-        { cardId: "onr_v1_302_scorched-earth", quantity: 1 },
-        { cardId: "onr_v1_307_urban-renewal", quantity: 1 },
-        { cardId: "onr_v1_244_filter", quantity: 1 },
-        { cardId: "onr_v1_245_fire-wall", quantity: 1 },
-        { cardId: "onr_v1_252_keeper", quantity: 1 },
-        { cardId: "onr_v1_256_mazer", quantity: 1 },
-        { cardId: "onr_v1_253_laser-wire", quantity: 1 },
-        { cardId: "onr_v1_257_nerve-labyrinth", quantity: 1 },
-        { cardId: "onr_v1_259_in-the-face", quantity: 1 },
-        { cardId: "onr_v1_261_quandary", quantity: 1 },
-        { cardId: "onr_v1_262_razor-wire", quantity: 1 },
-        { cardId: "onr_v1_263_reinforced-wall", quantity: 1 },
-        { cardId: "onr_v1_265_rock-is-strong", quantity: 1 },
-        { cardId: "onr_v1_266_scramble", quantity: 1 },
-        { cardId: "onr_v1_269_shotgun-wire", quantity: 1 },
-        { cardId: "onr_v1_270_sleeper", quantity: 1 },
-        { cardId: "onr_v1_278_wall-of-ice", quantity: 1 },
-        { cardId: "onr_v1_279_wall-of-static", quantity: 1 },
-        { cardId: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
-        { cardId: "onr_v1_295_night-shift", quantity: 1 },
-        { cardId: "simple_economy_operation", quantity: 2 },
+        { cardId: 415, quantity: 3 },
+        { cardId: 588, quantity: 3 },
+        { cardId: 442, quantity: 2 },
+        { cardId: 444, quantity: 2 },
+        { cardId: 449, quantity: 2 },
+        { cardId: 450, quantity: 2 },
+        { cardId: 451, quantity: 2 },
+        { cardId: 432, quantity: 2 },
+        { cardId: 493, quantity: 1 },
+        { cardId: 494, quantity: 1 },
+        { cardId: 497, quantity: 1 },
+        { cardId: 499, quantity: 1 },
+        { cardId: 500, quantity: 1 },
+        { cardId: 502, quantity: 1 },
+        { cardId: 513, quantity: 1 },
+        { cardId: 514, quantity: 1 },
+        { cardId: 519, quantity: 1 },
+        { cardId: 456, quantity: 1 },
+        { cardId: 457, quantity: 1 },
+        { cardId: 464, quantity: 1 },
+        { cardId: 468, quantity: 1 },
+        { cardId: 465, quantity: 1 },
+        { cardId: 469, quantity: 1 },
+        { cardId: 471, quantity: 1 },
+        { cardId: 473, quantity: 1 },
+        { cardId: 474, quantity: 1 },
+        { cardId: 475, quantity: 1 },
+        { cardId: 477, quantity: 1 },
+        { cardId: 478, quantity: 1 },
+        { cardId: 481, quantity: 1 },
+        { cardId: 482, quantity: 1 },
+        { cardId: 490, quantity: 1 },
+        { cardId: 491, quantity: 1 },
+        { cardId: 505, quantity: 1 },
+        { cardId: 507, quantity: 1 },
+        { cardId: 596, quantity: 2 },
       ],
       createdAt: now,
       updatedAt: now,
@@ -5239,9 +5522,7 @@ describe("MVP 0.2 multiplayer service", () => {
       "local_onr_corp_match_smoke_snapshot",
     );
     expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
-    expect(JSON.stringify(created)).not.toContain(
-      "onr_v1_203_hostile-takeover",
-    );
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":415\b/);
     expect(JSON.stringify(created)).not.toContain("cardInstances");
 
     expect(created.joinUrl).toBeTruthy();
@@ -5258,7 +5539,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(joined.playerView.deckMetadata?.own.deckName).toBe(
       "O:NR Corp Match Smoke",
     );
-    expect(JSON.stringify(joined)).not.toContain("onr_v1_015_codeslinger");
+    expect(JSON.stringify(joined)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":227\b/);
     expect(JSON.stringify(joined)).not.toContain("cardInstances");
 
     const aiCreated = await service.createMatch({
@@ -5288,155 +5569,155 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("V1.9.9 card release matchstart", async () => {
     const cardsById = createRuntimeCardsById();
-    if (!cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]) return;
+    if (!cardsById[217]) return;
 
     expect(
-      cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses
+      cardsById[217]?.statuses
         .human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_007_blink"]?.statuses.human_playable).toBe(true);
+    expect(cardsById[219]?.statuses.human_playable).toBe(true);
     expect(
-      cardsById["onr_v1_115_terrorist-reprisal"]?.statuses.human_playable,
+      cardsById[327]?.statuses.human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_223_banpei"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_275_vacuum-link"]?.statuses.human_playable).toBe(
+    expect(cardsById[435]?.statuses.human_playable).toBe(true);
+    expect(cardsById[487]?.statuses.human_playable).toBe(
       true,
     );
     expect(
-      cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses
+      cardsById[217]?.statuses
         .ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_013_cockroach"]?.statuses.human_playable).toBe(
+    expect(cardsById[225]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_034_incubator"]?.statuses.human_playable).toBe(
+    expect(cardsById[246]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_030_grubb"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_013_cockroach"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_034_incubator"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_030_grubb"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_076_all-nighter"]?.statuses.human_playable).toBe(
+    expect(cardsById[242]?.statuses.human_playable).toBe(true);
+    expect(cardsById[225]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[246]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[242]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[288]?.statuses.human_playable).toBe(
       true,
     );
     expect(
-      cardsById["onr_v1_096_kilroy-was-here"]?.statuses.human_playable,
+      cardsById[308]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_107_romp-through-hq"]?.statuses.human_playable,
+      cardsById[319]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_184_top-runners-conference"]?.statuses.human_playable,
+      cardsById[396]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses
+      cardsById[400]?.statuses
         .human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.human_playable,
+      cardsById[423]?.statuses.human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_235_data-naga"]?.statuses.human_playable).toBe(
+    expect(cardsById[447]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_076_all-nighter"]?.statuses.ai_supported).toBe(
+    expect(cardsById[288]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_096_kilroy-was-here"]?.statuses.ai_supported).toBe(
+    expect(cardsById[308]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_107_romp-through-hq"]?.statuses.ai_supported).toBe(
+    expect(cardsById[319]?.statuses.ai_supported).toBe(
       true,
     );
     expect(
-      cardsById["onr_v1_184_top-runners-conference"]?.statuses.ai_supported,
+      cardsById[396]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses.ai_supported,
+      cardsById[400]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.ai_supported,
+      cardsById[423]?.statuses.ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_235_data-naga"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[447]?.statuses.ai_supported).toBe(true);
     expect(
-      cardsById["onr_v1_207_netwatch-operations-office"]?.statuses
+      cardsById[419]?.statuses
         .human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_213_private-cybernet-police"]?.statuses.human_playable,
+      cardsById[425]?.statuses.human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.human_playable).toBe(
+    expect(cardsById[463]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_271_tko-2-0"]?.statuses.human_playable).toBe(true);
+    expect(cardsById[483]?.statuses.human_playable).toBe(true);
     expect(
-      cardsById["onr_v1_207_netwatch-operations-office"]?.statuses.ai_supported,
+      cardsById[419]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_213_private-cybernet-police"]?.statuses.ai_supported,
+      cardsById[425]?.statuses.ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.ai_supported).toBe(
+    expect(cardsById[463]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_271_tko-2-0"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[483]?.statuses.ai_supported).toBe(true);
     expect(
-      cardsById["onr_v1_208_on-call-solo-team"]?.statuses.human_playable,
+      cardsById[420]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_217_strike-force-kali"]?.statuses.human_playable,
+      cardsById[429]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_208_on-call-solo-team"]?.statuses.ai_supported,
+      cardsById[420]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_217_strike-force-kali"]?.statuses.ai_supported,
+      cardsById[429]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_219_superior-net-barriers"]?.statuses.human_playable,
+      cardsById[431]?.statuses.human_playable,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.human_playable,
+      cardsById[520]?.statuses.human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_236_data-raven"]?.statuses.human_playable).toBe(
+    expect(cardsById[448]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_001_afreet"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.human_playable).toBe(
+    expect(cardsById[213]?.statuses.human_playable).toBe(true);
+    expect(cardsById[230]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_019_dropp"]?.statuses.human_playable).toBe(true);
+    expect(cardsById[231]?.statuses.human_playable).toBe(true);
     expect(
-      cardsById["onr_v1_219_superior-net-barriers"]?.statuses.ai_supported,
+      cardsById[431]?.statuses.ai_supported,
     ).toBe(true);
     expect(
-      cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.ai_supported,
+      cardsById[520]?.statuses.ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_236_data-raven"]?.statuses.ai_supported).toBe(
+    expect(cardsById[448]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_001_afreet"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(
+    expect(cardsById[213]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[230]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_019_dropp"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_349_aardvark"]?.statuses.human_playable).toBe(
+    expect(cardsById[231]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[561]?.statuses.human_playable).toBe(
       true,
     );
     expect(
-      cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses
+      cardsById[563]?.statuses
         .human_playable,
     ).toBe(true);
-    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.human_playable).toBe(
+    expect(cardsById[564]?.statuses.human_playable).toBe(
       true,
     );
-    expect(cardsById["onr_v1_353_chimera"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_349_aardvark"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[565]?.statuses.human_playable).toBe(true);
+    expect(cardsById[561]?.statuses.ai_supported).toBe(true);
     expect(
-      cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses.ai_supported,
+      cardsById[563]?.statuses.ai_supported,
     ).toBe(true);
-    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.ai_supported).toBe(
+    expect(cardsById[564]?.statuses.ai_supported).toBe(
       true,
     );
-    expect(cardsById["onr_v1_353_chimera"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById[565]?.statuses.ai_supported).toBe(true);
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {
@@ -6385,6 +6666,7 @@ describe("MVP 0.2 multiplayer service", () => {
       mode: "player_clock",
       decisionOwnerSide: "corp",
       remainingMs: { runner: 120_000, corp: 118_000 },
+      consumedMs: { runner: 0, corp: 2_000 },
       graceRemainingMs: 0,
       warningLevel: "charging",
     });
@@ -6398,6 +6680,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: reconnected.sessionToken,
       actionId: mandatoryDraw.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "player-clock-expire",
     });
@@ -6413,12 +6696,19 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect(payload.resultSummary).toMatchObject({
       reason: "time_expired",
+      playerTimeMs: { runner: 0, corp: 120_000 },
       winner: "runner",
       winnerSide: "runner",
       loserSide: "corp",
       finalEngineStateHash: beforeHash,
     });
-    expect(payload.eventTail.at(-1)?.publicPayload.type).toBe("time_expired");
+    expect(payload.playerView.publicEvents.slice(-2).map((event) => event.eventId)).toEqual([
+      before.playerView.stateVersion + 1,
+      before.playerView.stateVersion + 2,
+    ]);
+    expect(payload.playerView.publicEvents.at(-1)?.publicPayload.type).toBe(
+      "time_expired",
+    );
     expectLifecyclePayloadSafe(payload);
     expect(
       (await service.loadForTest(created.matchId))?.gameState.winner,
@@ -6428,12 +6718,56 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
+  it("persists clock expiry on SQLite reconnect without rewriting the Engine journal or snapshots", async () => {
+    const start = Date.parse("2026-05-19T08:00:00.000Z");
+    let elapsed = 0;
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+    const service = new MultiplayerService(storage, { now: () => new Date(start + elapsed).toISOString() });
+    try {
+      const created = await service.createMatch({
+        hostSide: "corp",
+        seed: "bounded-clock-reconnect",
+        settings: { playerClock: { mode: "player_clock", startingTimeMs: 120_000, gracePeriodMs: 5_000 } },
+      });
+      const token = new URL(created.joinUrl!).searchParams.get("joinToken")!;
+      const joined = await service.joinMatch(created.matchId, { token, displayName: "Runner" });
+      if ("error" in joined) throw new Error(joined.error.message);
+      await forceSetupComplete(service, created.matchId, dbPath);
+      const input = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+      const active = await service.reconnectMatch(created.matchId, input);
+      if ("error" in active) throw new Error(active.error.message);
+      const before = (await storage.load(created.matchId))!;
+      elapsed = 125_001;
+      const expired = await service.reconnectMatch(created.matchId, input);
+      if ("error" in expired) throw new Error(expired.error.message);
+      expect(expired).toMatchObject({ matchStatus: "finished", playerClock: { expiredSide: "corp" } });
+      const after = (await storage.load(created.matchId))!;
+      expect(after.lifecycleResult?.reason).toBe("time_expired");
+      expect(after.resultSnapshot?.playerTimeMs).toEqual({ runner: 0, corp: 120_000 });
+      expect(after.match.playerClock?.activity).toBeUndefined();
+      expect(after.eventLog.at(-1)?.publicPayload.type).toBe("time_expired");
+      expect(after.eventLog.length).toBe(before.eventLog.length + 1);
+      expect(after.gameState.eventLog).toEqual(before.gameState.eventLog);
+      expect(after.stateSnapshots).toEqual(before.stateSnapshots);
+      expect(await service.replayMatch(created.matchId)).toMatchObject({ ok: true, finalStateHash: hashState(before.gameState) });
+    } finally { storage.close(); }
+  });
+
   it("moves the displayed player time to the Runner as soon as paced Corp AI finishes", async () => {
     const startMs = Date.parse("2026-07-13T08:00:00.000Z");
     let nowMs = startMs;
+    let msPerAiDecision = 0;
+    let aiThinkingMs = 0;
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "player-clock-paced-corp-ai",
       now: () => new Date(nowMs).toISOString(),
+      chooseAiAction: (input, options) => {
+        aiThinkingMs += msPerAiDecision;
+        nowMs += msPerAiDecision;
+        return chooseRuntimeAiAction(input, options);
+      },
     });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
@@ -6461,6 +6795,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
 
     nowMs = startMs + 2_000;
+    msPerAiDecision = 250;
     const advanced = await service.advanceAi({
       matchId: created.matchId,
       side: "runner",
@@ -6471,19 +6806,41 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
     expect(advanced.requesterPayload.playerView.activeSide).toBe("runner");
+    expect(aiThinkingMs).toBeGreaterThan(0);
+    const corpTimeMs = 2_000 + aiThinkingMs;
     expect(advanced.requesterPayload.playerClock).toMatchObject({
       mode: "none",
       decisionOwnerSide: "runner",
       activityStartedAtMs: nowMs,
-      consumedMs: { runner: 0, corp: 2_000 },
+      consumedMs: { runner: 0, corp: corpTimeMs },
     });
 
-    nowMs = startMs + 5_000;
+    nowMs += 3_000;
     const runnerTurn = await bootstrap(service, created.matchId, runner);
     expect(runnerTurn.playerClock).toMatchObject({
       decisionOwnerSide: "runner",
-      consumedMs: { runner: 3_000, corp: 2_000 },
+      consumedMs: { runner: 3_000, corp: corpTimeMs },
     });
+    nowMs += 4_000;
+    const finished = await service.forfeitMatch({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: runner.sessionToken,
+    });
+    if (!finished.ok) throw new Error(finished.error.message);
+    const playerTimeMs = { runner: 7_000, corp: corpTimeMs };
+    expect(finished.actorPayload).toMatchObject({
+      resultSummary: { playerTimeMs },
+    });
+    expect(finished.actorPayload.playerClock).not.toHaveProperty(
+      "decisionOwnerSide",
+    );
+    const stored = await service.loadForTest(created.matchId);
+    expect(stored?.resultSnapshot?.playerTimeMs).toEqual(playerTimeMs);
+    nowMs += 3_600_000;
+    const reopened = await bootstrap(service, created.matchId, runner);
+    expect(reopened.resultSummary?.playerTimeMs).toEqual(playerTimeMs);
+    expect(reopened.playerClock?.consumedMs).toEqual(playerTimeMs);
   });
 
   it("tracks no-limit consumed player time without time-expiry losses", async () => {
@@ -6555,6 +6912,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: reconnected.sessionToken,
       actionId: mandatoryDraw.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "player-clock-none-action",
     });
@@ -6663,11 +7021,11 @@ describe("MVP 0.2 multiplayer service", () => {
     const runnerView = await bootstrap(service, created.matchId, runner);
     const corpView = await bootstrap(service, created.matchId, corp);
     expect(runnerView.playerView.phase).toBe("setup");
-    expect(runnerView.pendingChoice?.source).toBe("setup.mulligan");
+    expect(runnerView.playerView.pendingChoice?.source).toBe("setup.mulligan");
     expect(
-      runnerView.pendingChoice?.options.map((option) => option.id),
+      runnerView.playerView.pendingChoice?.options.map((option) => option.id),
     ).toEqual(["keep", "mulligan"]);
-    expect(corpView.pendingChoice).toBeUndefined();
+    expect(corpView.playerView.pendingChoice).toBeUndefined();
     expect(JSON.stringify(corpView)).not.toContain("Starthand behalten");
     expect(runnerView.playerView.agendaPointsToWin).toBe(7);
 
@@ -6685,9 +7043,13 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect("error" in corpReconnect).toBe(false);
     if ("error" in corpReconnect) throw new Error(corpReconnect.error.message);
-    expect(corpReconnect.pendingChoice?.source).toBe("setup.mulligan");
+    expect(corpReconnect.playerView.pendingChoice?.source).toBe(
+      "setup.mulligan",
+    );
     expect(
-      corpReconnect.pendingChoice?.options.map((option) => option.id),
+      corpReconnect.playerView.pendingChoice?.options.map(
+        (option) => option.id,
+      ),
     ).toEqual(["keep", "mulligan"]);
 
     const reconnectedCorp = {
@@ -6705,34 +7067,112 @@ describe("MVP 0.2 multiplayer service", () => {
     const after = await bootstrap(service, created.matchId, reconnectedCorp);
     expect(after.playerView.phase).toBe("corp_draw_phase");
     expect(
-      after.legalActions.some((action) => action.type === "mandatory_draw"),
+      after.playerView.legalActions.some(
+        (action) => action.type === "mandatory_draw",
+      ),
     ).toBe(true);
   });
+
+  it("commits a human move in another match while the live AI worker is deciding", async () => {
+    let markWorkerStarted!: () => void;
+    const workerStarted = new Promise<void>((resolve) => {
+      markWorkerStarted = resolve;
+    });
+    let workerFinished = false;
+    class ObservedWorkerPool extends AiDecisionWorkerPool {
+      override choose(...args: Parameters<AiDecisionWorkerPool["choose"]>) {
+        const result = super.choose(...args).finally(() => {
+          workerFinished = true;
+        });
+        markWorkerStarted();
+        return result;
+      }
+    }
+    const workers = new ObservedWorkerPool(1);
+    try {
+      const human = await joinedMatch("parallel-human-action", undefined, {
+        aiDecisionWorkers: workers,
+      });
+      const ai = await human.service.createMatch({
+        mode: "ai_vs_ai",
+        hostSide: "runner",
+        seed: "parallel-live-ai-action",
+        aiPacingMode: "manual",
+      });
+      const before = await human.service.loadForTest(ai.matchId);
+      if (!before?.gameState) throw new Error("Missing AI match state");
+      const advancing = human.service.advanceAi({
+        matchId: ai.matchId,
+        side: ai.hostSide,
+        sessionToken: ai.hostSessionToken,
+        knownMatchVersion: before.match.matchVersion,
+        knownStateVersion: before.gameState.stateVersion,
+        mode: "single_step",
+      });
+      await Promise.race([
+        workerStarted,
+        advancing.then((result) => {
+          throw new Error(
+            result.ok ? "AI skipped the worker" : result.error.code,
+          );
+        }),
+      ]);
+
+      const acted = await submit(
+        human.service,
+        human.matchId,
+        human.corp,
+        (action) => action.type === "mandatory_draw",
+        "parallel-human-mandatory-draw",
+      );
+      expect(acted.receipt.accepted).toBe(true);
+      expect(workerFinished).toBe(false);
+
+      const advanced = await advancing;
+      if (!advanced.ok) {
+        const diagnostic = (await human.service.loadForTest(ai.matchId))
+          ?.aiDecisionTraces?.at(-1)?.traceJson.attempt;
+        throw new Error(
+          `${advanced.error.code}: ${JSON.stringify(diagnostic)}`,
+        );
+      }
+      expect(workerFinished).toBe(true);
+      expect(advanced.requesterPayload.playerView.stateVersion).toBe(
+        before.gameState.stateVersion + 1,
+      );
+      await expectLiveWorkerTraceQuote(workers);
+    } finally {
+      workers.close();
+    }
+  }, 60_000);
 
   it("runs actions only through the server pipeline with idempotency and stale-state rejection", async () => {
     const { service, corp, matchId } = await joinedMatch();
     const before = await bootstrap(service, matchId, corp);
-    const mandatory = mustAction(
-      before,
+    const offer = buildMatchPlayerOffer(before.playerView);
+    const mandatory = offer.legalActions.find(
       (action) => action.type === "mandatory_draw",
     );
+    if (!mandatory) throw new Error("Expected mandatory draw in the offer");
 
-    const first = await service.submitAction({
+    const first = await service.submitActionOffer({
       matchId,
       side: "corp",
       sessionToken: corp.sessionToken,
       actionId: mandatory.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "corp-mandatory-1",
     });
     expect(first.ok).toBe(true);
     if (!first.ok) throw new Error(first.error.message);
 
-    const duplicate = await service.submitAction({
+    const duplicate = await service.submitActionOffer({
       matchId,
       side: "corp",
       sessionToken: corp.sessionToken,
       actionId: mandatory.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "corp-mandatory-1",
     });
@@ -6742,11 +7182,12 @@ describe("MVP 0.2 multiplayer service", () => {
       first.receipt.stateVersionAfter,
     );
 
-    const stale = await service.submitAction({
+    const stale = await service.submitActionOffer({
       matchId,
       side: "corp",
       sessionToken: corp.sessionToken,
       actionId: mandatory.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "corp-mandatory-stale",
     });
@@ -6777,6 +7218,7 @@ describe("MVP 0.2 multiplayer service", () => {
         side: "corp",
         sessionToken: concurrent.corp.sessionToken,
         actionId: concurrentMandatory.actionId,
+        clientKnownMatchVersion: concurrentBoot.matchVersion,
         clientKnownStateVersion: 0,
         idempotencyKey: "concurrent-a",
       }),
@@ -6785,6 +7227,7 @@ describe("MVP 0.2 multiplayer service", () => {
         side: "corp",
         sessionToken: concurrent.corp.sessionToken,
         actionId: concurrentMandatory.actionId,
+        clientKnownMatchVersion: concurrentBoot.matchVersion,
         clientKnownStateVersion: 0,
         idempotencyKey: "concurrent-b",
       }),
@@ -6808,8 +7251,10 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(result.sessionToken).toBe(runner.sessionToken);
     expect(result.reconnectToken).toBe(runner.reconnectToken);
     expect(result.playerView.side).toBe("runner");
-    expect(result.legalActions).toEqual(result.playerView.legalActions);
-    expect(result.eventTail.length).toBeGreaterThan(0);
+    expect(result.playerView.legalActions).toBeInstanceOf(Array);
+    expect(result.playerView.publicEvents.length).toBeGreaterThan(0);
+    expect(result).not.toHaveProperty("legalActions");
+    expect(result).not.toHaveProperty("eventTail");
 
     const repeatedReconnect = await service.reconnectMatch(matchId, {
       side: runner.side,
@@ -6879,7 +7324,7 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) =>
         action.type === "install_card" &&
         action.payload?.serverId === "rd" &&
-        String(action.source).includes("ice"),
+        action.payload?.placement === "ice",
       "install-ice",
     );
     await submit(
@@ -6920,6 +7365,12 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("allows undo before hidden information and blocks undo after access", async () => {
     const first = await joinedMatch("undo-safe");
+    const original = await bootstrap(first.service, first.matchId, first.corp);
+    const originalAction = original.playerView.legalActions.find(
+      (action) => action.type === "mandatory_draw",
+    );
+    if (!originalAction)
+      throw new Error("Expected the original mandatory draw");
     const firstAction = await submit(
       first.service,
       first.matchId,
@@ -6927,11 +7378,24 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) => action.type === "mandatory_draw",
       "mandatory",
     );
+    const targetEventId = firstAction.receipt.stateVersionAfter + 1;
+    const stringUndo = await first.service.requestUndo({
+      matchId: first.matchId,
+      side: "corp",
+      sessionToken: first.corp.sessionToken,
+      clientKnownMatchVersion: firstAction.actorPayload.matchVersion,
+      targetEventId: String(targetEventId) as unknown as number,
+    });
+    expect(stringUndo).toMatchObject({
+      ok: false,
+      error: { code: "undo_not_available" },
+    });
     const undo = await first.service.requestUndo({
       matchId: first.matchId,
       side: "corp",
       sessionToken: first.corp.sessionToken,
-      targetEventId: firstAction.receipt.stateVersionAfter === 1 ? "evt_1" : "",
+      clientKnownMatchVersion: firstAction.actorPayload.matchVersion,
+      targetEventId,
       reason: "Misclick",
     });
     expect(undo.ok).toBe(true);
@@ -6949,6 +7413,30 @@ describe("MVP 0.2 multiplayer service", () => {
     const restored = await bootstrap(first.service, first.matchId, first.corp);
     expect(restored.playerView.stateVersion).toBe(0);
     expect(restored.pendingUndo).toBeUndefined();
+    expect(restored.playerView.stateVersion).toBe(
+      original.playerView.stateVersion,
+    );
+    expect(restored.playerView.legalActions).toContainEqual(
+      expect.objectContaining({ actionId: originalAction.actionId }),
+    );
+    const delayed = await first.service.submitAction({
+      matchId: first.matchId,
+      side: "corp",
+      sessionToken: first.corp.sessionToken,
+      actionId: originalAction.actionId,
+      clientKnownStateVersion: original.playerView.stateVersion,
+      clientKnownMatchVersion: original.matchVersion,
+      idempotencyKey: "delayed-before-undo",
+    });
+    expect(delayed).toMatchObject({
+      ok: false,
+      error: { code: "stale_state" },
+      payload: { matchVersion: restored.matchVersion },
+    });
+    expect(
+      (await bootstrap(first.service, first.matchId, first.corp)).playerView
+        .stateVersion,
+    ).toBe(restored.playerView.stateVersion);
     const acceptedReconnect = await first.service.reconnectMatch(
       first.matchId,
       {
@@ -6974,7 +7462,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: declineMatch.matchId,
       side: "corp",
       sessionToken: declineMatch.corp.sessionToken,
-      targetEventId: `evt_${declineAction.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: declineAction.actorPayload.matchVersion,
+      targetEventId: declineAction.receipt.stateVersionAfter + 1,
     });
     expect(declineRequest.ok).toBe(true);
     if (!declineRequest.ok || !declineRequest.undoRequest)
@@ -7020,7 +7509,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: invalidMatch.matchId,
       side: "corp",
       sessionToken: invalidMatch.corp.sessionToken,
-      targetEventId: `evt_${invalidAction.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: invalidAction.actorPayload.matchVersion,
+      targetEventId: invalidAction.receipt.stateVersionAfter + 1,
     });
     expect(invalidRequest.ok).toBe(true);
     if (!invalidRequest.ok || !invalidRequest.undoRequest)
@@ -7076,7 +7566,7 @@ describe("MVP 0.2 multiplayer service", () => {
         action.type === "start_run" && action.payload?.serverId === "rd",
       "run-rd",
     );
-    await submit(
+    const access = await submit(
       second.service,
       second.matchId,
       second.runner,
@@ -7088,7 +7578,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: second.matchId,
       side: "runner",
       sessionToken: second.runner.sessionToken,
-      targetEventId: `evt_${run.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: access.actorPayload.matchVersion,
+      targetEventId: run.receipt.stateVersionAfter + 1,
       reason: "Undo after access",
     });
     expect(blocked.ok).toBe(false);
@@ -7141,7 +7632,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: match.matchId,
       side: "runner",
       sessionToken: match.runner.sessionToken,
-      targetEventId: `evt_${run.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: access.actorPayload.matchVersion,
+      targetEventId: run.receipt.stateVersionAfter + 1,
       reason: "Lokale Debug-Zurücknahme über Access hinweg",
     });
     expect(requested.ok).toBe(true);
@@ -7170,12 +7662,12 @@ describe("MVP 0.2 multiplayer service", () => {
     const afterUndo = await match.service.loadForTest(match.matchId);
     expect(
       afterUndo?.eventLog.some(
-        (event) => event.eventId === `evt_${run.receipt.stateVersionAfter}`,
+        (event) => event.eventId === run.receipt.stateVersionAfter + 1,
       ),
     ).toBe(false);
     expect(
       afterUndo?.eventLog.some(
-        (event) => event.eventId === `evt_${access.receipt.stateVersionAfter}`,
+        (event) => event.eventId === access.receipt.stateVersionAfter + 1,
       ),
     ).toBe(false);
   });
@@ -7202,7 +7694,7 @@ describe("MVP 0.2 multiplayer service", () => {
       storedBeforeUndo?.stateSnapshots.find(
         (snapshot) =>
           snapshot.snapshotId ===
-          `snap_before_${credit.receipt.stateVersionAfter}`,
+          preActionStateSnapshotId(credit.receipt.stateVersionAfter),
       )?.gameState.eventLog,
     ).toEqual([]);
 
@@ -7210,7 +7702,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: match.matchId,
       side: "corp",
       sessionToken: match.corp.sessionToken,
-      targetEventId: `evt_${credit.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: credit.actorPayload.matchVersion,
+      targetEventId: credit.receipt.stateVersionAfter + 1,
       reason: "Snapshot event history regression",
     });
     expect(undo.ok).toBe(true);
@@ -7230,10 +7723,14 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(
       storedAfterUndo?.gameState.eventLog.map((event) => event.eventId),
-    ).toEqual(["evt_0", `evt_${mandatory.receipt.stateVersionAfter}`]);
+    ).toEqual([1, mandatory.receipt.stateVersionAfter + 1]);
     expect(
       storedAfterUndo?.stateSnapshots
-        .filter((snapshot) => snapshot.snapshotId.startsWith("snap_before_"))
+        .filter(
+          (snapshot) =>
+            snapshot.snapshotId ===
+            preActionStateSnapshotId(snapshot.stateVersion + 1),
+        )
         .every((snapshot) => snapshot.gameState.eventLog.length === 0),
     ).toBe(true);
     expect((await match.service.replayMatch(match.matchId)).ok).toBe(true);
@@ -7270,6 +7767,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: mandatory.actionId,
+      clientKnownMatchVersion: afterSetup.matchVersion,
       clientKnownStateVersion: afterSetup.playerView.stateVersion,
       idempotencyKey: "undo-ai-mandatory",
     });
@@ -7280,7 +7778,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: created.matchId,
       side: "corp",
       sessionToken: created.hostSessionToken,
-      targetEventId: `evt_${mandatoryResult.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: mandatoryResult.actorPayload.matchVersion,
+      targetEventId: mandatoryResult.receipt.stateVersionAfter + 1,
       reason: "Misclick",
     });
     expect(undo.ok).toBe(true);
@@ -7316,13 +7815,14 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: match.corp.sessionToken,
       actionId: operation.actionId,
+      clientKnownMatchVersion: beforeOperation.matchVersion,
       clientKnownStateVersion: beforeOperation.playerView.stateVersion,
       idempotencyKey: "v120-open-window",
     });
     expect(opened.ok).toBe(true);
     if (!opened.ok) throw new Error(opened.error.message);
-    expect(opened.actorPayload.pendingChoice).toBeUndefined();
-    expect(opened.opponentPayload.pendingChoice?.source).toBe(
+    expect(opened.actorPayload.playerView.pendingChoice).toBeUndefined();
+    expect(opened.opponentPayload.playerView.pendingChoice?.source).toBe(
       "v120.event_modification.prevent",
     );
     expect(opened.publicEvent?.publicPayload).toMatchObject({
@@ -7338,6 +7838,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: match.corp.sessionToken,
       actionId: operation.actionId,
+      clientKnownMatchVersion: beforeOperation.matchVersion,
       clientKnownStateVersion: beforeOperation.playerView.stateVersion,
       idempotencyKey: "v120-open-window",
     });
@@ -7358,7 +7859,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect("error" in reconnectedRunner).toBe(false);
     if ("error" in reconnectedRunner)
       throw new Error(reconnectedRunner.error.message);
-    expect(reconnectedRunner.pendingChoice?.source).toBe(
+    expect(reconnectedRunner.playerView.pendingChoice?.source).toBe(
       "v120.event_modification.prevent",
     );
     expect(JSON.stringify(reconnectedRunner)).not.toContain(
@@ -7369,10 +7870,11 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnectedRunner.sessionToken,
-      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      actionId: reconnectedRunner.playerView.legalActions[0]?.actionId ?? "",
+      clientKnownMatchVersion: reconnectedRunner.matchVersion,
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion - 1,
       selectedChoices: {
-        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        choiceId: reconnectedRunner.playerView.pendingChoice?.choiceId,
         selectedOptionIds: ["pass"],
       },
       idempotencyKey: "v120-stale-choice",
@@ -7381,18 +7883,20 @@ describe("MVP 0.2 multiplayer service", () => {
     if (staleChoice.ok) throw new Error("Expected stale choice rejection");
     expect(staleChoice.error.code).toBe("stale_state");
 
-    const preventOption = reconnectedRunner.pendingChoice?.options.find(
-      (option) => option.id !== "pass",
-    )?.id;
+    const preventOption =
+      reconnectedRunner.playerView.pendingChoice?.options.find(
+        (option) => option.id !== "pass",
+      )?.id;
     if (!preventOption) throw new Error("Missing prevent option");
     const prevented = await match.service.submitAction({
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnectedRunner.sessionToken,
-      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      actionId: reconnectedRunner.playerView.legalActions[0]?.actionId ?? "",
+      clientKnownMatchVersion: reconnectedRunner.matchVersion,
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
       selectedChoices: {
-        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        choiceId: reconnectedRunner.playerView.pendingChoice?.choiceId,
         selectedOptionIds: [preventOption],
       },
       idempotencyKey: "v120-prevent",
@@ -7412,10 +7916,11 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnectedRunner.sessionToken,
-      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      actionId: reconnectedRunner.playerView.legalActions[0]?.actionId ?? "",
+      clientKnownMatchVersion: reconnectedRunner.matchVersion,
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
       selectedChoices: {
-        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        choiceId: reconnectedRunner.playerView.pendingChoice?.choiceId,
         selectedOptionIds: [preventOption],
       },
       idempotencyKey: "v120-prevent",
@@ -7430,7 +7935,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnectedRunner.sessionToken,
-      targetEventId: `evt_${prevented.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: prevented.actorPayload.matchVersion,
+      targetEventId: prevented.receipt.stateVersionAfter + 1,
       reason: "Event modification undo",
     });
     expect(blocked.ok).toBe(false);
@@ -7458,13 +7964,14 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: match.corp.sessionToken,
       actionId: operation.actionId,
+      clientKnownMatchVersion: beforeOperation.matchVersion,
       clientKnownStateVersion: beforeOperation.playerView.stateVersion,
       idempotencyKey: "v121-open-window",
     });
     expect(opened.ok).toBe(true);
     if (!opened.ok) throw new Error(opened.error.message);
-    expect(opened.actorPayload.pendingChoice).toBeUndefined();
-    expect(opened.opponentPayload.pendingChoice?.source).toBe(
+    expect(opened.actorPayload.playerView.pendingChoice).toBeUndefined();
+    expect(opened.opponentPayload.playerView.pendingChoice?.source).toBe(
       "v121.replacement.damage",
     );
     expect(opened.publicEvent?.publicPayload).toMatchObject({
@@ -7483,25 +7990,27 @@ describe("MVP 0.2 multiplayer service", () => {
     expect("error" in reconnectedRunner).toBe(false);
     if ("error" in reconnectedRunner)
       throw new Error(reconnectedRunner.error.message);
-    expect(reconnectedRunner.pendingChoice?.source).toBe(
+    expect(reconnectedRunner.playerView.pendingChoice?.source).toBe(
       "v121.replacement.damage",
     );
     expect(JSON.stringify(reconnectedRunner)).not.toContain(
       "Test-only Damage Replacement",
     );
 
-    const replaceOption = reconnectedRunner.pendingChoice?.options.find(
-      (option) => option.id !== "pass",
-    )?.id;
+    const replaceOption =
+      reconnectedRunner.playerView.pendingChoice?.options.find(
+        (option) => option.id !== "pass",
+      )?.id;
     if (!replaceOption) throw new Error("Missing replacement option");
     const replaced = await match.service.submitAction({
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnectedRunner.sessionToken,
-      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      actionId: reconnectedRunner.playerView.legalActions[0]?.actionId ?? "",
+      clientKnownMatchVersion: reconnectedRunner.matchVersion,
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
       selectedChoices: {
-        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        choiceId: reconnectedRunner.playerView.pendingChoice?.choiceId,
         selectedOptionIds: [replaceOption],
       },
       idempotencyKey: "v121-replace",
@@ -7524,10 +8033,11 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnectedRunner.sessionToken,
-      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      actionId: reconnectedRunner.playerView.legalActions[0]?.actionId ?? "",
+      clientKnownMatchVersion: reconnectedRunner.matchVersion,
       clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
       selectedChoices: {
-        choiceId: reconnectedRunner.pendingChoice?.choiceId,
+        choiceId: reconnectedRunner.playerView.pendingChoice?.choiceId,
         selectedOptionIds: [replaceOption],
       },
       idempotencyKey: "v121-replace",
@@ -7552,6 +8062,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: match.runner.sessionToken,
       actionId: special.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "v122-set-aside",
     });
@@ -7569,7 +8080,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(
       moved.actorPayload.playerView.specialZones?.setAside[0],
     ).toMatchObject({
-      definitionId: "simple_economy_event",
+      definitionId: 595,
       controller: "runner",
     });
     expect(
@@ -7584,6 +8095,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: match.runner.sessionToken,
       actionId: special.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "v122-set-aside",
     });
@@ -7598,6 +8110,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: match.runner.sessionToken,
       actionId: special.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "v122-stale-set-aside",
     });
@@ -7624,7 +8137,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: match.matchId,
       side: "runner",
       sessionToken: match.runner.sessionToken,
-      targetEventId: `evt_${moved.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: moved.actorPayload.matchVersion,
+      targetEventId: moved.receipt.stateVersionAfter + 1,
       reason: "Special zone undo",
     });
     expect(blocked.ok).toBe(false);
@@ -7654,7 +8168,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.playerView.deckMetadata?.opponent.deckName).toBe(
       "Runner Demo Deck 1.2.3 - Mechanic Unlock 1",
     );
-    expect(JSON.stringify(created)).not.toContain("onr_v1_101_mit-west-tier");
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":313\b/);
     expect(created.joinUrl).toBeTruthy();
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
       "joinToken",
@@ -7674,7 +8188,7 @@ describe("MVP 0.2 multiplayer service", () => {
       reconnectToken: joined.reconnectToken,
     };
     const before = await bootstrap(service, created.matchId, runner);
-    expect(before.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:349726b4");
+    expect(before.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:6ce0beca");
     const mit = mustAction(
       before,
       (action) =>
@@ -7686,6 +8200,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: runner.sessionToken,
       actionId: mit.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "v123-mit-west-tier",
     });
@@ -7694,7 +8209,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(played.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
     expect(played.publicEvent?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "onr_v1_101_mit-west-tier",
+      cardDefinitionId: 313,
       hiddenZoneBarrier: true,
     });
     expect(JSON.stringify(played.publicEvent?.publicPayload)).not.toContain(
@@ -7703,18 +8218,19 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(
       played.actorPayload.playerView.specialZones?.removedFromGame[0],
     ).toMatchObject({
-      definitionId: "onr_v1_101_mit-west-tier",
+      definitionId: 313,
       controller: "runner",
     });
     expect(
       played.opponentPayload.playerView.specialZones?.removedFromGame[0],
-    ).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+    ).toMatchObject({ definitionId: 313 });
 
     const duplicate = await service.submitAction({
       matchId: created.matchId,
       side: "runner",
       sessionToken: runner.sessionToken,
       actionId: mit.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "v123-mit-west-tier",
     });
@@ -7734,7 +8250,7 @@ describe("MVP 0.2 multiplayer service", () => {
       throw new Error(reconnectedCorp.error.message);
     expect(
       reconnectedCorp.playerView.specialZones?.removedFromGame[0],
-    ).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+    ).toMatchObject({ definitionId: 313 });
     expect(JSON.stringify(reconnectedCorp)).not.toContain("Dwarf");
     expect(JSON.stringify(reconnectedCorp)).not.toContain("Krash");
 
@@ -7742,7 +8258,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: created.matchId,
       side: "runner",
       sessionToken: runner.sessionToken,
-      targetEventId: `evt_${played.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: reconnectedCorp.matchVersion,
+      targetEventId: played.receipt.stateVersionAfter + 1,
       reason: "V1.2.3 hidden-zone shuffle undo",
     });
     expect(blocked.ok).toBe(false);
@@ -7752,7 +8269,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("starts V1.3.0 private local format snapshots and revalidates invalid or AI-unsupported decks server-side", async () => {
     const cardsById = createRuntimeCardsById();
-    if (!cardsById["onr_v1_021_dwarf"]) return;
+    if (!cardsById[233]) return;
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "mp-v130-format-foundation",
     });
@@ -7777,7 +8294,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe(
       "1.3.0",
     );
-    expect(JSON.stringify(created)).not.toContain("onr_v1_021_dwarf");
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":233\b/);
     expect(JSON.stringify(created)).not.toContain("decklist");
 
     const record = await service.loadForTest(created.matchId);
@@ -7793,7 +8310,7 @@ describe("MVP 0.2 multiplayer service", () => {
       ),
     );
     if (!invalidRunner) throw new Error("Missing V1.3.0 runner snapshot");
-    invalidRunner.cards.push({ cardId: "onr_v1_018_dogcatcher", quantity: 1 });
+    invalidRunner.cards.push({ cardId: 230, quantity: 1 });
     await expect(
       service.createMatch({
         hostSide: "runner",
@@ -7839,7 +8356,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     const cardsById = createRuntimeCardsById();
     expect(
-      cardsById["onr_proteus_001_ai-board-member"]?.statuses,
+      cardsById[59]?.statuses,
     ).toMatchObject({
       human_playable: true,
       deck_legal: true,
@@ -7937,7 +8454,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe(
       "1.0.0",
     );
-    expect(JSON.stringify(created)).not.toContain("onr_proteus_084_crumble");
+    expect(JSON.stringify(created)).not.toMatch(/"(?:definitionId|cardDefinitionId|cardId)":142\b/);
     const record = await service.loadForTest(created.matchId);
     expect(record?.match.settings.cardPool).toBe("originalset_proteus");
 
@@ -8051,7 +8568,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(firstAccess.publicEvent?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       serverLabel: "Archives",
     });
     expect(JSON.stringify(firstAccess.actorPayload)).toContain(
@@ -8064,6 +8581,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: match.runner.side,
       sessionToken: reconnected.sessionToken,
       actionId: firstAccess.receipt.idempotencyKey,
+      clientKnownMatchVersion: firstAccess.actorPayload.matchVersion,
       clientKnownStateVersion: firstAccess.receipt.stateVersionBefore,
       idempotencyKey: "v112-access-agenda",
     });
@@ -8077,7 +8595,8 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: match.matchId,
       side: "runner",
       sessionToken: reconnected.sessionToken,
-      targetEventId: `evt_${started.receipt.stateVersionAfter}`,
+      clientKnownMatchVersion: duplicate.actorPayload.matchVersion,
+      targetEventId: started.receipt.stateVersionAfter + 1,
       reason: "Archives reveal undo",
     });
     expect(blocked.ok).toBe(false);
@@ -8101,6 +8620,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: match.corp.side,
       sessionToken: match.corp.sessionToken,
       actionId: operation.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "off-site-backups-start",
     });
@@ -8108,20 +8628,20 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(started.ok).toBe(true);
     if (!started.ok) throw new Error(started.error.message);
     expect(started.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
-    expect(started.actorPayload.pendingChoice?.source).toContain(
+    expect(started.actorPayload.playerView.pendingChoice?.source).toContain(
       "v1922.corp_archives_to_hq",
     );
     expect(
-      started.actorPayload.pendingChoice?.options
+      started.actorPayload.playerView.pendingChoice?.options
         .map((option) => option.label)
         .sort(),
     ).toEqual(["Simple Agenda", "Simple Economy Operation"]);
     expect(
-      started.actorPayload.legalActions.some(
+      started.actorPayload.playerView.legalActions.some(
         (action) => action.type === "resolve_choice",
       ),
     ).toBe(true);
-    expect(started.opponentPayload.pendingChoice).toBeUndefined();
+    expect(started.opponentPayload.playerView.pendingChoice).toBeUndefined();
     expect(JSON.stringify(started.opponentPayload)).not.toContain(
       "Simple Agenda",
     );
@@ -8137,15 +8657,15 @@ describe("MVP 0.2 multiplayer service", () => {
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
     expect(
-      reconnected.pendingChoice?.options.some(
+      reconnected.playerView.pendingChoice?.options.some(
         (option) => option.label === "Simple Agenda",
       ),
     ).toBe(true);
 
-    const choiceAction = reconnected.legalActions.find(
+    const choiceAction = reconnected.playerView.legalActions.find(
       (action) => action.type === "resolve_choice",
     );
-    const agendaOption = reconnected.pendingChoice?.options.find(
+    const agendaOption = reconnected.playerView.pendingChoice?.options.find(
       (option) => option.label === "Simple Agenda",
     );
     expect(choiceAction).toBeDefined();
@@ -8157,9 +8677,10 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: reconnected.sessionToken,
       actionId: choiceAction.actionId,
+      clientKnownMatchVersion: reconnected.matchVersion,
       clientKnownStateVersion: reconnected.playerView.stateVersion,
       selectedChoices: {
-        choiceId: reconnected.pendingChoice?.choiceId,
+        choiceId: reconnected.playerView.pendingChoice?.choiceId,
         selectedOptionIds: [agendaOption.id],
       },
       idempotencyKey: "off-site-backups-resolve",
@@ -8167,10 +8688,10 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(resolved.ok).toBe(true);
     if (!resolved.ok) throw new Error(resolved.error.message);
-    expect(resolved.actorPayload.pendingChoice).toBeUndefined();
+    expect(resolved.actorPayload.playerView.pendingChoice).toBeUndefined();
     expect(
       resolved.actorPayload.playerView.own.gripOrHq.some(
-        (card) => card.definitionId === "simple_agenda",
+        (card) => card.definitionId === 588,
       ),
     ).toBe(true);
     expect(resolved.actorPayload.playerView.own.heapOrArchives).toHaveLength(2);
@@ -8218,14 +8739,15 @@ describe("MVP 0.2 multiplayer service", () => {
       side: exactTwo.corp.side,
       sessionToken: exactTwo.corp.sessionToken,
       actionId: exactTwoAction.actionId,
+      clientKnownMatchVersion: beforeExactTwo.matchVersion,
       clientKnownStateVersion: beforeExactTwo.playerView.stateVersion,
       idempotencyKey: "corporate-shuffle-exact-two",
     });
     expect(exactTwoStarted.ok).toBe(true);
     if (!exactTwoStarted.ok) throw new Error(exactTwoStarted.error.message);
-    expect(exactTwoStarted.actorPayload.pendingChoice?.source).toContain(
-      "classic.corporate_shuffle_hq_to_rd:",
-    );
+    expect(
+      exactTwoStarted.actorPayload.playerView.pendingChoice?.source,
+    ).toContain("classic.corporate_shuffle_hq_to_rd:");
     expect(exactTwoStarted.publicEvent?.publicPayload).toMatchObject({
       actionType: "play_operation",
       actionCostClicks: 2,
@@ -8260,16 +8782,19 @@ describe("MVP 0.2 multiplayer service", () => {
       side: withSpg.corp.side,
       sessionToken: withSpg.corp.sessionToken,
       actionId: withSpgAction.actionId,
+      clientKnownMatchVersion: beforeSpg.matchVersion,
       clientKnownStateVersion: beforeSpg.playerView.stateVersion,
       idempotencyKey: "corporate-shuffle-with-spg",
     });
     expect(spgStarted.ok).toBe(true);
     if (!spgStarted.ok) throw new Error(spgStarted.error.message);
-    expect(spgStarted.actorPayload.pendingChoice?.source).toContain(
+    expect(spgStarted.actorPayload.playerView.pendingChoice?.source).toContain(
       "card_implementation.strategic_planning_group_draw:",
     );
-    expect(spgStarted.actorPayload.pendingChoice?.options).toHaveLength(6);
-    expect(spgStarted.opponentPayload.pendingChoice).toBeUndefined();
+    expect(
+      spgStarted.actorPayload.playerView.pendingChoice?.options,
+    ).toHaveLength(6);
+    expect(spgStarted.opponentPayload.playerView.pendingChoice).toBeUndefined();
 
     const afterSpg = await submitFirstChoice(
       withSpg.service,
@@ -8277,10 +8802,12 @@ describe("MVP 0.2 multiplayer service", () => {
       withSpg.corp,
       "corporate-shuffle-spg-bottom",
     );
-    expect(afterSpg.pendingChoice?.source).toContain(
+    expect(afterSpg.playerView.pendingChoice?.source).toContain(
       "classic.corporate_shuffle_hq_to_rd:",
     );
-    expect(afterSpg.eventTail.at(-1)?.publicPayload).toMatchObject({
+    expect(
+      afterSpg.playerView.publicEvents.at(-1)?.publicPayload,
+    ).toMatchObject({
       strategicPlanningGroupBaseDrawCount: 5,
       strategicPlanningGroupAdditionalDrawCount: 1,
       strategicPlanningGroupDrawnCardCount: 6,
@@ -8299,14 +8826,18 @@ describe("MVP 0.2 multiplayer service", () => {
       withSpg.corp,
       "corporate-shuffle-hq-to-rd",
     );
-    expect(afterHqChoice.pendingChoice).toBeUndefined();
-    expect(afterHqChoice.eventTail.at(-1)?.publicPayload).toMatchObject({
+    expect(afterHqChoice.playerView.pendingChoice).toBeUndefined();
+    expect(
+      afterHqChoice.playerView.publicEvents.at(-1)?.publicPayload,
+    ).toMatchObject({
       hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
-      sourceDefinitionId: "onr_classic_017_corporate-shuffle",
+      sourceDefinitionId: 21,
       movedCount: 1,
     });
     expect(
-      JSON.stringify(afterHqChoice.eventTail.at(-1)?.publicPayload),
+      JSON.stringify(
+        afterHqChoice.playerView.publicEvents.at(-1)?.publicPayload,
+      ),
     ).not.toMatch(/movedCardId|selectedOptionIds|privatePayload/);
 
     const staleMatch = await joinedCorporateShuffleMatch(
@@ -8336,6 +8867,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: staleMatch.corp.side,
       sessionToken: staleMatch.corp.sessionToken,
       actionId: staleOperation.actionId,
+      clientKnownMatchVersion: beforeStale.matchVersion,
       clientKnownStateVersion: beforeStale.playerView.stateVersion,
       idempotencyKey: "corporate-shuffle-stale-submit",
     });
@@ -8530,8 +9062,12 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(runnerReplay.randomDrawRecords.length).toBeGreaterThan(0);
     expect(
-      runnerReplay.randomDrawRecords.every((entry) =>
-        entry.valueHash.startsWith("fnv1a:"),
+      runnerReplay.randomDrawRecords.every(
+        (entry) =>
+          entry.valueHash.startsWith("fnv1a:") &&
+          Number.isSafeInteger(entry.purpose) &&
+          entry.purpose > 0 &&
+          (entry.domain === "engine" || entry.domain === "ai_turn_plan_selection"),
       ),
     ).toBe(true);
     expect(JSON.stringify(runnerReplay)).not.toMatch(
@@ -8742,6 +9278,20 @@ describe("MVP 0.2 multiplayer service", () => {
       accessMatch.service,
       accessMatch.matchId,
       accessMatch.runner,
+      (action) => action.type === "continue_run",
+      "v150-family-access-movement",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.corp,
+      (action) => action.type === "decline_rez",
+      "v150-family-access-rez-pass",
+    );
+    await submit(
+      accessMatch.service,
+      accessMatch.matchId,
+      accessMatch.runner,
       (action) =>
         action.type === "access_card" || action.type === "steal_agenda",
       "v150-family-access-access",
@@ -8774,6 +9324,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: damageMatch.runner.side,
       sessionToken: damageMatch.runner.sessionToken,
       actionId: damageAction.actionId,
+      clientKnownMatchVersion: damageBefore.matchVersion,
       clientKnownStateVersion: damageBefore.playerView.stateVersion,
       idempotencyKey: "v150-family-damage-resolve",
     });
@@ -8805,9 +9356,10 @@ describe("MVP 0.2 multiplayer service", () => {
       side: traceMatch.corp.side,
       sessionToken: traceMatch.corp.sessionToken,
       actionId: corpBidAction.actionId,
+      clientKnownMatchVersion: corpChoice.matchVersion,
       clientKnownStateVersion: corpChoice.playerView.stateVersion,
       selectedChoices: {
-        choiceId: corpChoice.pendingChoice?.choiceId,
+        choiceId: corpChoice.playerView.pendingChoice?.choiceId,
         selectedOptionIds: ["bid_1"],
       },
       idempotencyKey: "v150-family-trace-bid",
@@ -8843,6 +9395,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: replacementMatch.corp.side,
       sessionToken: replacementMatch.corp.sessionToken,
       actionId: replacementOperation.actionId,
+      clientKnownMatchVersion: beforeOperation.matchVersion,
       clientKnownStateVersion: beforeOperation.playerView.stateVersion,
       idempotencyKey: "v150-family-replacement-open",
     });
@@ -8876,6 +9429,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: specialMatch.runner.side,
       sessionToken: specialMatch.runner.sessionToken,
       actionId: specialAction.actionId,
+      clientKnownMatchVersion: specialBefore.matchVersion,
       clientKnownStateVersion: specialBefore.playerView.stateVersion,
       idempotencyKey: "v150-family-special-zone",
     });
@@ -8973,11 +9527,11 @@ describe("MVP 0.2 multiplayer service", () => {
       match.corp,
     );
     expect(corpPayload.resultSummary?.viewerOutcome).toBe("lost");
-    expect(corpPayload.legalActions).toEqual([]);
+    expect(corpPayload.playerView.legalActions).toEqual([]);
   });
 
   it("counts a multiaccess breach as one successful run", () => {
-    const accessEvent = (eventId: string, accessIndex: number): EventRecord =>
+    const accessEvent = (eventId: number, accessIndex: number): EventRecord =>
       ({
         eventId,
         matchId: "multiaccess-result-test",
@@ -8998,17 +9552,17 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(
       successfulRunCountForResult([
-        accessEvent("first-run-0", 0),
-        accessEvent("first-run-1", 1),
-        accessEvent("first-run-2", 2),
-        accessEvent("second-run-0", 0),
+        accessEvent(2, 0),
+        accessEvent(3, 1),
+        accessEvent(4, 2),
+        accessEvent(5, 0),
       ]),
     ).toBe(2);
   });
 
   it("counts only a completed agenda steal after a runner payment-support window", () => {
     const stealEvent = (
-      eventId: string,
+      eventId: number,
       publicPayload: Record<string, unknown>,
     ): EventRecord =>
       ({
@@ -9031,11 +9585,11 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(
       stolenAgendaCountForResult([
-        stealEvent("support-window", {
+        stealEvent(2, {
           runnerCostPenaltySupportWindowOpened: true,
           runnerCostPenaltySupportOriginalActionId: "steal-fetal-ai",
         }),
-        stealEvent("completed-steal", {
+        stealEvent(3, {
           agendaPoints: 3,
           totalAgendaPoints: 5,
         }),
@@ -10157,7 +10711,7 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) => action.type === "mandatory_draw",
       "ws-undo-clear-mandatory",
     );
-    const targetEventId = `evt_${mandatory.receipt.stateVersionAfter}`;
+    const targetEventId = mandatory.receipt.stateVersionAfter + 1;
     const handle = createNetgridHttpServer(match.service);
     await new Promise<void>((resolve) =>
       handle.server.listen(0, "127.0.0.1", resolve),
@@ -10170,6 +10724,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     try {
       await Promise.all([waitForOpen(corpSocket), waitForOpen(runnerSocket)]);
+      const corpJoined = waitForMessage(corpSocket, "match_joined");
       corpSocket.send(
         JSON.stringify({
           type: "join_match",
@@ -10180,6 +10735,9 @@ describe("MVP 0.2 multiplayer service", () => {
           },
         }),
       );
+      await corpJoined;
+      const corpRefreshed = waitForMessage(corpSocket, "state_update");
+      const runnerJoined = waitForMessage(runnerSocket, "match_joined");
       runnerSocket.send(
         JSON.stringify({
           type: "join_match",
@@ -10190,42 +10748,30 @@ describe("MVP 0.2 multiplayer service", () => {
           },
         }),
       );
-      await Promise.all([
-        waitForMessage(corpSocket, "state_update"),
-        waitForMessage(runnerSocket, "state_update"),
-      ]);
+      const [corpCurrent] = await Promise.all([corpRefreshed, runnerJoined]);
+      const { matchVersion } = messagePayload(corpCurrent) as SidePayload;
 
       const corpPendingUpdate = waitForMessage(corpSocket, "state_update");
       const runnerPendingUpdate = waitForMessage(runnerSocket, "state_update");
-      const corpUndoRequest = waitForMessage(corpSocket, "undo_request");
-      const runnerUndoRequest = waitForMessage(runnerSocket, "undo_request");
       corpSocket.send(
         JSON.stringify({
           type: "request_undo",
-          payload: { targetEventId, reason: "Misclick" },
+          payload: {
+            targetEventId,
+            clientKnownMatchVersion: matchVersion,
+            reason: "Misclick",
+          },
         }),
       );
 
-      expect(
-        (
-          messagePayload(await corpPendingUpdate) as {
-            pendingUndo?: { needsResponse?: boolean };
-          }
-        ).pendingUndo?.needsResponse,
-      ).toBe(false);
-      expect(
-        (
-          messagePayload(await runnerPendingUpdate) as {
-            pendingUndo?: { needsResponse?: boolean };
-          }
-        ).pendingUndo?.needsResponse,
-      ).toBe(true);
-      const runnerUndoMessage = (await runnerUndoRequest) as {
-        payload?: { undoRequestId?: string; needsResponse?: boolean };
-      };
-      const runnerUndoPayload = runnerUndoMessage.payload;
+      const corpUpdate = messagePayload(await corpPendingUpdate) as SidePayload;
+      const runnerUpdate = messagePayload(
+        await runnerPendingUpdate,
+      ) as SidePayload;
+      expect(corpUpdate.pendingUndo?.needsResponse).toBe(false);
+      const runnerUndoPayload = runnerUpdate.pendingUndo;
       expect(runnerUndoPayload?.needsResponse).toBe(true);
-      expect(JSON.stringify(await corpUndoRequest)).not.toMatch(
+      expect(JSON.stringify(corpUpdate.pendingUndo)).not.toMatch(
         /Simple Agenda|cardInstances|privatePayload|decklist/i,
       );
       expect(runnerUndoPayload?.undoRequestId).toBeTruthy();
@@ -10242,11 +10788,11 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(
         (messagePayload(await corpClearedUpdate) as { pendingUndo?: unknown })
           .pendingUndo,
-      ).toBeNull();
+      ).toBeUndefined();
       expect(
         (messagePayload(await runnerClearedUpdate) as { pendingUndo?: unknown })
           .pendingUndo,
-      ).toBeNull();
+      ).toBeUndefined();
       const corpBootstrap = await match.service.bootstrap(
         match.matchId,
         "corp",
@@ -10299,35 +10845,6 @@ describe("MVP 0.2 multiplayer service", () => {
     stored.gameState.pendingChoice = choiceRequest(stored.gameState, "runner");
     await storage.save(stored);
 
-    const runnerBootstrap = await service.bootstrap(
-      created.matchId,
-      "runner",
-      created.hostSessionToken,
-    );
-    const corpBootstrap = await service.bootstrap(
-      created.matchId,
-      "corp",
-      joined.sessionToken,
-    );
-    expect("error" in runnerBootstrap).toBe(false);
-    expect("error" in corpBootstrap).toBe(false);
-    if ("error" in runnerBootstrap || "error" in corpBootstrap)
-      throw new Error("Bootstrap failed");
-    expect(runnerBootstrap.pendingChoice?.choiceId).toBe("choice_v093_runner");
-    expect(corpBootstrap.pendingChoice).toBeUndefined();
-    expect(JSON.stringify(corpBootstrap)).not.toContain(
-      "Runner private option",
-    );
-
-    const reconnected = await service.reconnectMatch(created.matchId, {
-      side: "runner",
-      sessionToken: created.hostSessionToken,
-      reconnectToken: created.hostReconnectToken,
-    });
-    expect("error" in reconnected).toBe(false);
-    if ("error" in reconnected) throw new Error(reconnected.error.message);
-    expect(reconnected.pendingChoice?.choiceId).toBe("choice_v093_runner");
-
     const handle = createNetgridHttpServer(service);
     await new Promise<void>((resolve) =>
       handle.server.listen(0, "127.0.0.1", resolve),
@@ -10335,9 +10852,44 @@ describe("MVP 0.2 multiplayer service", () => {
     const address = handle.server.address();
     if (!address || typeof address === "string")
       throw new Error("Missing server address");
-    const socket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+    const matchUrl = `http://127.0.0.1:${address.port}/api/matches/${created.matchId}`;
+    let socket: WebSocket | undefined;
 
     try {
+      const runnerResponse = await fetch(`${matchUrl}/bootstrap?side=runner`, {
+        headers: { authorization: `Bearer ${created.hostSessionToken}` },
+      });
+      const corpResponse = await fetch(`${matchUrl}/bootstrap?side=corp`, {
+        headers: { authorization: `Bearer ${joined.sessionToken}` },
+      });
+      expect(runnerResponse.status).toBe(200);
+      expect(corpResponse.status).toBe(200);
+      const runnerBootstrap = (await runnerResponse.json()) as ApiSidePayload;
+      const corpBootstrap = (await corpResponse.json()) as ApiSidePayload;
+      const offeredChoice = runnerBootstrap.playerView.pendingChoice;
+      expect(offeredChoice?.choiceId).toBe(stored.gameState.stateVersion + 1);
+      expect(offeredChoice?.options[0]).toMatchObject({
+        id: 1,
+        presentation: "keep",
+        label: "Runner private option",
+      });
+      expect(corpBootstrap.playerView.pendingChoice).toBeUndefined();
+      expect(JSON.stringify(corpBootstrap)).not.toContain("Runner private option");
+
+      const reconnectResponse = await fetch(`${matchUrl}/reconnect`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          side: "runner",
+          sessionToken: created.hostSessionToken,
+          reconnectToken: created.hostReconnectToken,
+        }),
+      });
+      expect(reconnectResponse.status).toBe(200);
+      const reconnected = (await reconnectResponse.json()) as ApiJoinMatchResponse;
+      expect(reconnected.playerView?.pendingChoice).toEqual(offeredChoice);
+
+      socket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
       await waitForOpen(socket);
       socket.send(
         JSON.stringify({
@@ -10349,22 +10901,12 @@ describe("MVP 0.2 multiplayer service", () => {
           },
         }),
       );
-      const choiceMessage = await waitForMessage(socket, "choice_request");
-      const choice = (
-        choiceMessage as {
-          payload?: {
-            choice?: {
-              choiceId?: string;
-              options?: Array<{ label?: string }>;
-            } | null;
-          };
-        }
-      ).payload?.choice;
-      expect(choice?.choiceId).toBe("choice_v093_runner");
-      expect(choice?.options?.[0]?.label).toBe("Runner private option");
+      const choiceMessage = await waitForMessage(socket, "state_update");
+      const { playerView } = messagePayload(choiceMessage) as ApiSidePayload;
+      expect(playerView.pendingChoice).toEqual(offeredChoice);
       expect(JSON.stringify(choiceMessage)).not.toContain("hostSessionToken");
     } finally {
-      socket.close();
+      socket?.close();
       await handle.close();
     }
   });
@@ -10470,7 +11012,7 @@ describe("MVP 0.2 multiplayer service", () => {
         waitForMessage(runnerSocket, "state_update"),
       ]);
 
-      const firstTerminal = waitForMessage(runnerSocket, "match_finished");
+      const firstTerminal = waitForMessage(runnerSocket, "state_update");
       const response = await fetch(
         `${baseUrl}/api/matches/${encodeURIComponent(match.matchId)}/forfeit`,
         {
@@ -10502,7 +11044,7 @@ describe("MVP 0.2 multiplayer service", () => {
         },
       });
 
-      const refreshedTerminal = waitForMessage(runnerSocket, "match_finished");
+      const refreshedTerminal = waitForMessage(runnerSocket, "state_update");
       corpSocket.close();
       const refreshedPayload = messagePayload(await refreshedTerminal) as {
         matchStatus?: string;
@@ -10679,14 +11221,16 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.joinUrl).toBeUndefined();
     expect(created.playerView.side).toBe("runner");
     expect(created.playerView.activeSide).toBe("runner");
-    expect(created.pendingChoice?.source).toBe("setup.mulligan");
+    expect(created.playerView.pendingChoice?.source).toBe("setup.mulligan");
     expect(created.matchVersion).toBe(1);
     expect(created.aiTurnPresentation).toEqual({
       canAdvanceAi: false,
       pacingMode: "paced",
     });
     expect(
-      created.legalActions.some((action) => action.type === "resolve_choice"),
+      created.playerView.legalActions.some(
+        (action) => action.type === "resolve_choice",
+      ),
     ).toBe(true);
 
     const stored = await service.loadForTest(created.matchId);
@@ -10770,7 +11314,7 @@ describe("MVP 0.2 multiplayer service", () => {
       mode: "ai_vs_ai",
       matchStatus: "active",
       hostSide: "runner",
-      legalActions: [],
+      playerView: { legalActions: [] },
       aiTurnPresentation: {
         activeAiSide: "runner",
         canAdvanceAi: true,
@@ -10801,6 +11345,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "runner",
       sessionToken: created.hostSessionToken,
       actionId: "observer-must-not-act",
+      clientKnownMatchVersion: created.matchVersion,
       clientKnownStateVersion: initialStateVersion,
       idempotencyKey: "observer-must-not-act",
     });
@@ -10819,7 +11364,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(advanced.requesterPayload.legalActions).toEqual([]);
+    expect(advanced.requesterPayload.playerView.legalActions).toEqual([]);
 
     const afterStep = await service.loadForTest(created.matchId);
     if (!afterStep?.gameState)
@@ -10873,7 +11418,8 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(afterCancel.tokens.every((token) => Boolean(token.revokedAt))).toBe(
       true,
     );
-  });
+    // A batch can run forty real KI decisions; the assertions above define the functional contract.
+  }, 30_000);
 
   it("advances the selected decks past their central-payoff and obligation-removal plan-coverage windows", async () => {
     const storage = new InMemoryMatchStorage();
@@ -10963,7 +11509,7 @@ describe("MVP 0.2 multiplayer service", () => {
       mode: "ai_vs_ai",
       hostSide: "runner",
       matchStatus: "active",
-      legalActions: [],
+      playerView: { legalActions: [] },
       aiTurnPresentation: { canAdvanceAi: true },
     });
     expect(next.joinUrl).toBeUndefined();
@@ -11114,7 +11660,7 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(advanced.requesterPayload.playerView.stateVersion).toBe(
         stateVersion + 1,
       );
-      expect(advanced.requesterPayload.legalActions).toEqual([]);
+      expect(advanced.requesterPayload.playerView.legalActions).toEqual([]);
       stateVersion = advanced.requesterPayload.playerView.stateVersion;
       matchVersion = advanced.requesterPayload.matchVersion;
       lastPayload = advanced.requesterPayload;
@@ -11130,7 +11676,7 @@ describe("MVP 0.2 multiplayer service", () => {
         expect("error" in reconnected).toBe(false);
         if ("error" in reconnected) throw new Error(reconnected.error.message);
         expect(reconnected.playerView?.stateVersion).toBe(stateVersion);
-        expect(reconnected.legalActions).toEqual([]);
+        expect(reconnected.playerView.legalActions).toEqual([]);
         expect(reconnected.aiTurnPresentation).toMatchObject({
           canAdvanceAi: true,
         });
@@ -11316,7 +11862,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect("error" in before).toBe(false);
     if ("error" in before) throw new Error(before.error.message);
-    expect(before.pendingChoice?.source).toBe("setup.mulligan");
+    expect(before.playerView.pendingChoice?.source).toBe("setup.mulligan");
     const afterSetup = await submitChoice(
       service,
       created.matchId,
@@ -11337,6 +11883,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: mandatory.actionId,
+      clientKnownMatchVersion: afterSetup.matchVersion,
       clientKnownStateVersion: afterSetup.playerView.stateVersion,
       idempotencyKey: "corp-ai-mode-mandatory",
     });
@@ -11353,6 +11900,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: endTurn.actionId,
+      clientKnownMatchVersion: afterMandatory.matchVersion,
       clientKnownStateVersion: afterMandatory.playerView.stateVersion,
       idempotencyKey: "corp-ai-mode-end",
     });
@@ -11362,7 +11910,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(endTurnResult.actorPayload.playerView.stateVersion).toBe(
       afterMandatory.playerView.stateVersion + 1,
     );
-    expect(endTurnResult.actorPayload.pendingChoice?.source).toBe(
+    expect(endTurnResult.actorPayload.playerView.pendingChoice?.source).toBe(
       "discard_phase",
     );
     const afterDiscard = await submitFirstChoice(
@@ -11390,8 +11938,8 @@ describe("MVP 0.2 multiplayer service", () => {
       knownStateVersion: afterDiscard.playerView.stateVersion,
       knownMatchVersion: afterDiscard.matchVersion,
     });
-    expect(advanced.ok).toBe(true);
-    if (!advanced.ok) throw new Error(advanced.error.message);
+    if (!advanced.ok)
+      throw new Error(`${advanced.error.code}: ${advanced.error.message}`);
     expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(
       afterDiscard.playerView.stateVersion,
     );
@@ -11433,7 +11981,7 @@ describe("MVP 0.2 multiplayer service", () => {
       gameState = applyEngineChoice(gameState, "corp", [
         String(gameState.pendingChoice.options[0]?.id),
       ]);
-    putCorpIceOnServerForTest(gameState, "rd", "simple_barrier_ice");
+    putCorpIceOnServerForTest(gameState, "rd", 589);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -11453,7 +12001,7 @@ describe("MVP 0.2 multiplayer service", () => {
         created.matchId,
         gameState,
         record.match.matchVersion,
-        "snap_ai_rez_window",
+        aiAttemptStateSnapshotId(1),
       ),
     ];
     record.actionReceipts = [];
@@ -11472,10 +12020,9 @@ describe("MVP 0.2 multiplayer service", () => {
       canAdvanceAi: false,
       pacingMode: "paced",
     });
-    expect(before.legalActions.map((action) => action.type).sort()).toEqual([
-      "decline_rez",
-      "rez_ice",
-    ]);
+    expect(
+      before.playerView.legalActions.map((action) => action.type).sort(),
+    ).toEqual(["decline_rez", "rez_ice"]);
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
@@ -11492,7 +12039,7 @@ describe("MVP 0.2 multiplayer service", () => {
       );
     expect(advanced.error.code).toBe("ai_not_active");
 
-    const declineRez = before.legalActions.find(
+    const declineRez = before.playerView.legalActions.find(
       (action) => action.type === "decline_rez",
     );
     if (!declineRez) throw new Error("Missing decline rez action");
@@ -11501,6 +12048,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: declineRez.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "human-corp-decline-rez",
     });
@@ -11556,7 +12104,7 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_forged_runner",
       name: "Server Runner AI Forged Runner",
       cards: [
-        { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
+        { id: 298, quantity: 1 },
         ...DEMO_DECKS.demo_runner_001.cards,
       ],
     };
@@ -11565,11 +12113,11 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_forged_corp",
       name: "Server Runner AI Forged Corp",
       cards: DEMO_DECKS.demo_corp_004.cards.some(
-        (card) => card.id === "simple_barrier_ice",
+        (card) => card.id === 589,
       )
         ? DEMO_DECKS.demo_corp_004.cards
         : [
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 589, quantity: 1 },
             ...DEMO_DECKS.demo_corp_004.cards,
           ],
     };
@@ -11586,11 +12134,11 @@ describe("MVP 0.2 multiplayer service", () => {
     const targetIceId = putCorpIceOnServerForTest(
       gameState,
       "hq",
-      "simple_barrier_ice",
+      589,
     );
     moveRunnerCardToGripForTest(
       gameState,
-      "onr_v1_086_forged-activation-orders",
+      298,
     );
     gameState = applyEngineAction(
       gameState,
@@ -11598,7 +12146,7 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinitionForServerTest(gameState, action) ===
-          "onr_v1_086_forged-activation-orders",
+          298,
     );
     const targetOptionId = gameState.pendingChoice?.options.find(
       (option) => option.value === targetIceId,
@@ -11628,7 +12176,7 @@ describe("MVP 0.2 multiplayer service", () => {
         created.matchId,
         gameState,
         record.match.matchVersion,
-        "snap_ai_forged_response",
+        aiAttemptStateSnapshotId(1),
       ),
     ];
     record.actionReceipts = [];
@@ -11644,22 +12192,22 @@ describe("MVP 0.2 multiplayer service", () => {
     expect("error" in before).toBe(false);
     if ("error" in before) throw new Error(before.error.message);
     expect(before.playerView.activeSide).toBe("runner");
-    expect(before.pendingChoice).toMatchObject({
+    expect(before.playerView.pendingChoice).toMatchObject({
       side: "corp",
       source: expect.stringContaining(
         "card_implementation.corp_choice_rez_or_trash_ice_decision",
       ),
     });
-    expect(before.pendingChoice?.options.map((option) => option.id)).toEqual([
-      "trash_ice",
-    ]);
+    expect(
+      before.playerView.pendingChoice?.options.map((option) => option.id),
+    ).toEqual(["trash_ice"]);
     expect(before.aiTurnPresentation).toEqual({
       canAdvanceAi: false,
       pacingMode: "paced",
     });
-    expect(before.legalActions.map((action) => action.type)).toEqual([
-      "resolve_choice",
-    ]);
+    expect(before.playerView.legalActions.map((action) => action.type)).toEqual(
+      ["resolve_choice"],
+    );
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
@@ -11685,16 +12233,17 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: action.actionId,
+      clientKnownMatchVersion: before.matchVersion,
       clientKnownStateVersion: before.playerView.stateVersion,
       selectedChoices: {
-        choiceId: before.pendingChoice?.choiceId,
+        choiceId: before.playerView.pendingChoice?.choiceId,
         selectedOptionIds: ["trash_ice"],
       },
       idempotencyKey: "human-corp-forged-trash",
     });
     expect(resolved.ok).toBe(true);
     if (!resolved.ok) throw new Error(resolved.error.message);
-    expect(resolved.actorPayload.pendingChoice).toBeUndefined();
+    expect(resolved.actorPayload.playerView.pendingChoice).toBeUndefined();
     expect(resolved.actorPayload.aiTurnPresentation).toEqual({
       activeAiSide: "runner",
       canAdvanceAi: true,
@@ -11713,7 +12262,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
-  it("does not stall Runner AI when Forged Activation Orders can target rezzed ICE", async () => {
+  it("continues the Runner AI turn when Forged Activation Orders has no unrezzed target", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
       tokenSalt: "ai-runner-forged-no-unrezzed",
@@ -11732,7 +12281,7 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_forged_no_unrezzed_runner",
       name: "Server Runner AI Forged No Unrezzed Runner",
       cards: [
-        { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
+        { id: 298, quantity: 1 },
         ...DEMO_DECKS.demo_runner_001.cards,
       ],
     };
@@ -11741,7 +12290,7 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_forged_no_unrezzed_corp",
       name: "Server Runner AI Forged No Unrezzed Corp",
       cards: [
-        { id: "onr_v1_263_reinforced-wall", quantity: 1 },
+        { id: 475, quantity: 1 },
         ...DEMO_DECKS.demo_corp_004.cards,
       ],
     };
@@ -11758,7 +12307,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const rezzedIceId = putCorpIceOnServerForTest(
       gameState,
       "hq",
-      "onr_v1_263_reinforced-wall",
+      475,
     );
     gameState.cardInstances[rezzedIceId] = {
       ...gameState.cardInstances[rezzedIceId]!,
@@ -11767,16 +12316,17 @@ describe("MVP 0.2 multiplayer service", () => {
     };
     moveRunnerCardToGripForTest(
       gameState,
-      "onr_v1_086_forged-activation-orders",
+      298,
     );
+    moveRunnerCardToGripForTest(gameState, 595);
     expect(
       getLegalActions(gameState, "runner").some(
         (action) =>
           action.type === "play_event" &&
           sourceDefinitionForServerTest(gameState, action) ===
-            "onr_v1_086_forged-activation-orders",
+            298,
       ),
-    ).toBe(true);
+    ).toBe(false);
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;
@@ -11788,7 +12338,7 @@ describe("MVP 0.2 multiplayer service", () => {
         created.matchId,
         gameState,
         record.match.matchVersion,
-        "snap_ai_forged_no_unrezzed",
+        aiAttemptStateSnapshotId(1),
       ),
     ];
     record.actionReceipts = [];
@@ -11817,11 +12367,11 @@ describe("MVP 0.2 multiplayer service", () => {
       knownMatchVersion: before.matchVersion,
       mode: "single_step",
     });
-    expect(advanced.ok).toBe(true);
-    if (!advanced.ok) throw new Error(advanced.error.message);
+    if (!advanced.ok)
+      throw new Error(`${advanced.error.code}: ${advanced.error.message}`);
     expect(advanced.publicEvent?.publicPayload).toMatchObject({
       actionType: "play_event",
-      cardDefinitionId: "simple_economy_event",
+      cardDefinitionId: 595,
     });
     expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(
       before.playerView.stateVersion,
@@ -11846,21 +12396,21 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_mystery_box_runner",
       name: "Server Runner AI Mystery Box Runner",
       side: "runner",
-      identity: "runner_identity_001",
+      identity: 587,
       cards: [
-        { id: "onr_v1_043_mystery-box", quantity: 1 },
-        { id: "simple_decoder", quantity: 1 },
-        { id: "simple_economy_event", quantity: 8 },
+        { id: 255, quantity: 1 },
+        { id: 591, quantity: 1 },
+        { id: 595, quantity: 8 },
       ],
     };
     const corpDeck: DeckDefinition = {
       id: "server_runner_ai_mystery_box_corp",
       name: "Server Runner AI Mystery Box Corp",
       side: "corp",
-      identity: "corp_identity_001",
+      identity: 3,
       cards: [
-        { id: "simple_agenda", quantity: 3 },
-        { id: "simple_economy_operation", quantity: 6 },
+        { id: 588, quantity: 3 },
+        { id: 596, quantity: 6 },
       ],
     };
     let gameState = toRunnerTurnEngine(
@@ -11876,21 +12426,21 @@ describe("MVP 0.2 multiplayer service", () => {
     expectCurrentRulesBaseline(gameState);
     gameState.runner.credits = 20;
     gameState.runner.memoryLimit = 8;
-    moveRunnerCardToGripForTest(gameState, "onr_v1_043_mystery-box");
+    moveRunnerCardToGripForTest(gameState, 255);
     gameState = applyEngineAction(
       gameState,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinitionForServerTest(gameState, action) ===
-          "onr_v1_043_mystery-box",
+          255,
     );
-    putRunnerCardOnTopOfStackForTest(gameState, "simple_economy_event");
+    putRunnerCardOnTopOfStackForTest(gameState, 595);
     const decoderId = putRunnerCardOnTopOfStackForTest(
       gameState,
-      "simple_decoder",
+      591,
     );
-    putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+    putCorpCardOnTopOfRdForTest(gameState, 588);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -11903,7 +12453,7 @@ describe("MVP 0.2 multiplayer service", () => {
       (action) =>
         action.type === "activated_card_ability" &&
         sourceDefinitionForServerTest(gameState, action) ===
-          "onr_v1_043_mystery-box",
+          255,
     );
     expect(gameState.pendingChoice).toMatchObject({
       side: "corp",
@@ -11922,7 +12472,7 @@ describe("MVP 0.2 multiplayer service", () => {
         created.matchId,
         gameState,
         record.match.matchVersion,
-        "snap_ai_mystery_box_review",
+        aiAttemptStateSnapshotId(1),
       ),
     ];
     record.actionReceipts = [];
@@ -11937,11 +12487,11 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect("error" in beforeReview).toBe(false);
     if ("error" in beforeReview) throw new Error(beforeReview.error.message);
-    expect(beforeReview.pendingChoice?.source).toContain(
+    expect(beforeReview.playerView.pendingChoice?.source).toContain(
       "p3_38.revealed_stack_program_install_corp_review",
     );
     expect(
-      beforeReview.pendingChoice?.options.some(
+      beforeReview.playerView.pendingChoice?.options.some(
         (option) => option.value === decoderId,
       ),
     ).toBe(true);
@@ -11974,7 +12524,7 @@ describe("MVP 0.2 multiplayer service", () => {
       "done",
       "human-corp-mystery-box-review",
     );
-    expect(afterReview.pendingChoice).toBeUndefined();
+    expect(afterReview.playerView.pendingChoice).toBeUndefined();
     expect(afterReview.aiTurnPresentation).toEqual({
       activeAiSide: "runner",
       canAdvanceAi: true,
@@ -11995,7 +12545,7 @@ describe("MVP 0.2 multiplayer service", () => {
       actionType: "resolve_choice",
       hiddenZoneAction:
         "p3_38_look_top_stack_show_to_corp_then_install_matching",
-      installedProgramDefinitionId: "simple_decoder",
+      installedProgramDefinitionId: 591,
       selfTrashed: true,
     });
     expect(JSON.stringify(runnerChoice.requesterPayload)).not.toContain(
@@ -12029,22 +12579,22 @@ describe("MVP 0.2 multiplayer service", () => {
       id: "server_runner_ai_krash_filter_runner",
       name: "Server Runner AI Krash Filter Runner",
       side: "runner",
-      identity: "runner_identity_001",
+      identity: 587,
       cards: [
-        { id: "onr_v1_039_krash", quantity: 1 },
-        { id: "simple_economy_event", quantity: 8 },
+        { id: 251, quantity: 1 },
+        { id: 595, quantity: 8 },
       ],
     };
     const corpDeck: DeckDefinition = {
       id: "server_runner_ai_krash_filter_corp",
       name: "Server Runner AI Krash Filter Corp",
       side: "corp",
-      identity: "corp_identity_001",
+      identity: 3,
       cards: [
-        { id: "onr_v1_244_filter", quantity: 1 },
-        { id: "simple_draw_operation", quantity: 1 },
-        { id: "simple_economy_operation", quantity: 3 },
-        { id: "simple_agenda", quantity: 3 },
+        { id: 456, quantity: 1 },
+        { id: 593, quantity: 1 },
+        { id: 596, quantity: 3 },
+        { id: 588, quantity: 3 },
       ],
     };
     let gameState = toRunnerTurnEngine(
@@ -12060,16 +12610,16 @@ describe("MVP 0.2 multiplayer service", () => {
     expectCurrentRulesBaseline(gameState);
     gameState.runner.credits = 5;
     gameState.corp.credits = 5;
-    moveRunnerCardToGripForTest(gameState, "onr_v1_039_krash");
+    moveRunnerCardToGripForTest(gameState, 251);
     gameState = applyEngineAction(gameState, "runner", (action) => {
       const cardId = String(action.payload?.cardId ?? "");
       return (
         action.type === "install_card" &&
-        gameState.cardInstances[cardId]?.definitionId === "onr_v1_039_krash"
+        gameState.cardInstances[cardId]?.definitionId === 251
       );
     });
-    putCorpIceOnServerForTest(gameState, "rd", "onr_v1_244_filter");
-    putCorpCardOnTopOfRdForTest(gameState, "simple_draw_operation");
+    putCorpIceOnServerForTest(gameState, "rd", 456);
+    putCorpCardOnTopOfRdForTest(gameState, 593);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -12089,7 +12639,7 @@ describe("MVP 0.2 multiplayer service", () => {
         created.matchId,
         gameState,
         record.match.matchVersion,
-        "snap_ai_krash_filter_access",
+        aiAttemptStateSnapshotId(1),
       ),
     ];
     record.actionReceipts = [];
@@ -12104,12 +12654,11 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect("error" in beforeRez).toBe(false);
     if ("error" in beforeRez) throw new Error(beforeRez.error.message);
-    expect(beforeRez.legalActions.map((action) => action.type).sort()).toEqual([
-      "decline_rez",
-      "rez_ice",
-    ]);
+    expect(
+      beforeRez.playerView.legalActions.map((action) => action.type).sort(),
+    ).toEqual(["decline_rez", "rez_ice"]);
 
-    const rezAction = beforeRez.legalActions.find(
+    const rezAction = beforeRez.playerView.legalActions.find(
       (action) => action.type === "rez_ice",
     );
     if (!rezAction) throw new Error("Missing rez action");
@@ -12118,6 +12667,7 @@ describe("MVP 0.2 multiplayer service", () => {
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: rezAction.actionId,
+      clientKnownMatchVersion: beforeRez.matchVersion,
       clientKnownStateVersion: beforeRez.playerView.stateVersion,
       idempotencyKey: "human-corp-rez-filter-for-runner-ai",
     });
@@ -12221,7 +12771,7 @@ describe("MVP 0.2 multiplayer service", () => {
         seed: "central-access-redaction-engine",
       }),
     );
-    putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+    putCorpCardOnTopOfRdForTest(gameState, 588);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -12247,13 +12797,15 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect("error" in corpPayload).toBe(false);
     if ("error" in corpPayload) throw new Error(corpPayload.error.message);
-    expect(JSON.stringify(corpPayload.eventTail)).not.toContain(
+    expect(JSON.stringify(corpPayload.playerView.publicEvents)).not.toContain(
       "Simple Agenda",
     );
     expect(JSON.stringify(corpPayload.playerView.publicEvents)).not.toContain(
       "Simple Agenda",
     );
-    expect(corpPayload.eventTail.at(-1)?.publicPayload).toMatchObject({
+    expect(
+      corpPayload.playerView.publicEvents.at(-1)?.publicPayload,
+    ).toMatchObject({
       actionType: "access_card",
       serverLabel: "R&D",
       redactedKind: "accessed_card",
@@ -12295,9 +12847,9 @@ describe("MVP 0.2 multiplayer service", () => {
       }),
     );
     gameState.runner.credits = 10;
-    const accessedId = putCorpCardOnTopOfRdForTest(gameState, "simple_upgrade");
+    const accessedId = putCorpCardOnTopOfRdForTest(gameState, 606);
     for (const [cardId, card] of Object.entries(gameState.cardInstances)) {
-      if (cardId !== accessedId && card.definitionId === "simple_upgrade") {
+      if (cardId !== accessedId && card.definitionId === 606) {
         removeEverywhereForTest(gameState, cardId);
         gameState.corp.rd.push(cardId as CardInstanceId);
         gameState.cardInstances[cardId] = {
@@ -12334,11 +12886,13 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(accessed.actorPayload.playerView.run?.accessedCard).toMatchObject({
       known: true,
-      definitionId: "simple_upgrade",
+      definitionId: 606,
       title: "Simple Upgrade",
     });
     expect(
-      accessed.actorPayload.legalActions.map((action) => action.type),
+      accessed.actorPayload.playerView.legalActions.map(
+        (action) => action.type,
+      ),
     ).toEqual(expect.arrayContaining(["trash_accessed_card", "decline_trash"]));
 
     const corpLivePayload = accessed.opponentPayload;
@@ -12357,12 +12911,14 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty(
       "trashCost",
     );
-    expect(corpLivePayload.pendingChoice).toBeUndefined();
-    expect(corpLivePayload.legalActions).toEqual([]);
+    expect(corpLivePayload.playerView.pendingChoice).toBeUndefined();
+    expect(corpLivePayload.playerView.legalActions).toEqual([]);
     expect(JSON.stringify(corpLivePayload)).not.toMatch(
       /Simple Upgrade|simple_upgrade|trash_accessed_card|decline_trash/i,
     );
-    expect(corpLivePayload.eventTail.at(-1)?.publicPayload).toMatchObject({
+    expect(
+      corpLivePayload.playerView.publicEvents.at(-1)?.publicPayload,
+    ).toMatchObject({
       actionType: "access_card",
       serverLabel: "R&D",
       redactedKind: "accessed_card",
@@ -12386,8 +12942,8 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(payload.playerView.run?.accessedCard).toMatchObject({
         known: false,
       });
-      expect(payload.pendingChoice).toBeUndefined();
-      expect(payload.legalActions).toEqual([]);
+      expect(payload.playerView.pendingChoice).toBeUndefined();
+      expect(payload.playerView.legalActions).toEqual([]);
       expect(JSON.stringify(payload)).not.toMatch(
         /Simple Upgrade|simple_upgrade|trash_accessed_card|decline_trash/i,
       );
@@ -12404,7 +12960,9 @@ describe("MVP 0.2 multiplayer service", () => {
       /Simple Upgrade|simple_upgrade/i,
     );
     expect(
-      JSON.stringify(declined.opponentPayload.eventTail.at(-1)?.publicPayload),
+      JSON.stringify(
+        declined.opponentPayload.playerView.publicEvents.at(-1)?.publicPayload,
+      ),
     ).not.toMatch(/Simple Upgrade|simple_upgrade|upgrade|trashCost/i);
   });
 
@@ -12433,7 +12991,7 @@ describe("MVP 0.2 multiplayer service", () => {
         seed: "hq-access-visible-engine",
       }),
     );
-    moveCorpCardToHqForTest(gameState, "simple_economy_operation");
+    moveCorpCardToHqForTest(gameState, 596);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -12459,7 +13017,8 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect("error" in corpPayload).toBe(false);
     if ("error" in corpPayload) throw new Error(corpPayload.error.message);
-    const eventTailPayload = corpPayload.eventTail.at(-1)?.publicPayload;
+    const eventTailPayload =
+      corpPayload.playerView.publicEvents.at(-1)?.publicPayload;
     const playerViewPayload =
       corpPayload.playerView.publicEvents.at(-1)?.publicPayload;
     expect(eventTailPayload?.actionType).toBe("access_card");
@@ -12499,8 +13058,8 @@ describe("MVP 0.2 multiplayer service", () => {
         seed: "belief-reconnect-rd-engine",
       }),
     );
-    putCorpCardOnTopOfRdForTest(gameState, "simple_economy_operation");
-    putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+    putCorpCardOnTopOfRdForTest(gameState, 596);
+    putCorpCardOnTopOfRdForTest(gameState, 588);
     gameState = applyEngineAction(
       gameState,
       "runner",
@@ -12521,7 +13080,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const storedWithHiddenDecoy = await storage.load(created.matchId);
     expect(JSON.stringify(storedWithHiddenDecoy?.gameState)).toContain(
-      "simple_economy_operation",
+      596,
     );
 
     const livePayload = await service.bootstrap(
@@ -12554,7 +13113,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(reconnectBelief.knownPositionMemory?.[0]).toMatchObject({
       zone: "rd",
       positionKey: "top",
-      definitionId: "simple_agenda",
+      definitionId: 588,
     });
     expect(reconnectSerialized).not.toMatch(
       /privatePayload|cardInstances|privateDeckSnapshots|simple_economy_operation/i,
@@ -12879,7 +13438,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     const receipt = event?.privatePayload?.corp
       ?.randomizedIceInstallSelectionReceipt as
-      | { selectedLegalAction?: LegalAction }
+      | EngineRandomizedIceInstallSelectionReceipt
       | undefined;
     expect(receipt?.selectedLegalAction?.type).toBe("install_card");
     expect(receipt?.selectedLegalAction?.payload?.placement).toBe("ice");
@@ -12904,9 +13463,7 @@ describe("MVP 0.2 multiplayer service", () => {
       after.aiDecisionTraces?.at(-1)?.traceJson.randomizedIceInstallDecision,
     ).toMatchObject({
       selectedTargetServerId: receipt?.selectedLegalAction?.payload?.serverId,
-      rngDrawPurpose: expect.stringContaining(
-        "engine.randomized_ice_install_selection",
-      ),
+      rngDrawPurpose: receipt?.randomDraw.purpose,
     });
 
     const replay = await service.loadReplayDiagnostics(
@@ -12925,7 +13482,7 @@ describe("MVP 0.2 multiplayer service", () => {
       replay.replay.randomDrawRecords.find(
         (entry) => entry.counter === randomCounterBefore,
       )?.purpose,
-    ).toBe("engine_randomized_ice_install_selection");
+    ).toBe(receipt?.randomDraw.purpose[0]);
     expect(JSON.stringify(replay.replay)).not.toMatch(
       /candidateFingerprint|test-near-tie|corp\.install_card\..*\.(?:hq|rd)\./,
     );
@@ -12964,8 +13521,7 @@ describe("MVP 0.2 multiplayer service", () => {
               order: 0,
               kind: "meat_damage",
               sourceCardInstanceId: "missing-server-source",
-              sourceCapabilityId:
-                "missing_server_definition:missing_capability",
+              sourceCapabilityId: Number.MAX_SAFE_INTEGER,
               sourceCapabilityBindingKind: "card_spec_capability_key",
             },
           ],
@@ -13302,12 +13858,13 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(afterFailure?.eventLog).toHaveLength(beforeFailure.eventLog.length);
     expect(afterFailure?.aiDecisionTraces?.at(-1)).toMatchObject({
-      traceId: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
+      decisionIndex: failureDecisionIndex,
       schemaVersion: "ai-decision-failure-attempt-v1",
       traceJson: {
         attempt: {
           phase: "input",
           code: "ai_input_exception",
+          diagnosticCode: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
           error: {
             code: "test.input_exception",
             message: "private input binding detail belongs only in maintenance",
@@ -13532,7 +14089,6 @@ describe("MVP 0.2 multiplayer service", () => {
       );
       expect(bundle?.decisions).toHaveLength(failureDecisionIndex);
       expect(bundle?.decisions.at(-1)).toMatchObject({
-        traceId: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
         eventId: eventAnchorId,
         stateVersion: beforeFailure.gameState.stateVersion,
         decisionIndex: failureDecisionIndex,
@@ -13737,7 +14293,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(after?.gameState?.stateVersion).toBe(before.gameState.stateVersion);
     const failureAttempt = after?.aiDecisionTraces?.at(-1);
     expect(advanced.error).toMatchObject({
-      diagnosticCode: failureAttempt?.traceId,
+      diagnosticCode: `ai_attempt_${created.matchId}_${failureAttempt?.decisionIndex}`,
     });
     expect(JSON.stringify(advanced.error)).not.toContain(
       "Private target detail",
@@ -14058,7 +14614,7 @@ describe("MVP 0.2 multiplayer service", () => {
         side: "corp" | "runner";
         cards: Array<{
           instanceId: string;
-          definitionId: string;
+          definitionId: CardDefinitionId;
           title: string;
         }>;
       };
@@ -14201,7 +14757,7 @@ describe("MVP 0.2 multiplayer service", () => {
       throw new Error("Missing hidden Corp sentinel card");
     const hiddenCorpCard = {
       instanceId: hiddenCorpCardId,
-      definitionId: hiddenCorpSentinelDefinition[0],
+      definitionId: hiddenCorpSentinelDefinition[1].id,
       title: hiddenCorpSentinelDefinition[1].title,
     };
     runnerRecordBefore.gameState.cardInstances[hiddenCorpCardId]!.definitionId =
@@ -14233,11 +14789,15 @@ describe("MVP 0.2 multiplayer service", () => {
       advisorMode: "fresh_human_side_takeover",
     });
     expect(
-      runnerTurn.requesterPayload.legalActions.map((action) => action.actionId),
+      runnerTurn.requesterPayload.playerView.legalActions.map(
+        (action) => action.actionId,
+      ),
     ).toContain(runnerPreview.preview.actionId);
     const runnerPreviewJson = JSON.stringify(runnerPreview);
     expect(runnerPreviewJson).not.toContain(hiddenCorpCard.instanceId);
-    expect(runnerPreviewJson).not.toContain(hiddenCorpCard.definitionId);
+    expect(runnerPreviewJson).not.toMatch(
+      new RegExp(`"(?:[a-z]*definitionId|cardId)":${hiddenCorpCard.definitionId}\\b`, "i"),
+    );
     expect(runnerPreviewJson).not.toContain(hiddenCorpCard.title);
     expect(runnerPreviewJson).not.toMatch(
       /aiPrivateHandPreview|developerPrivateHandsPreview|privateDeckSnapshots|cardInstances/,
@@ -14361,7 +14921,7 @@ describe("MVP 0.2 multiplayer service", () => {
       throw new Error("Missing hidden Runner sentinel cards");
     const hiddenRunnerCards = hiddenRunnerCardIds.map((instanceId, index) => ({
       instanceId: instanceId!,
-      definitionId: hiddenRunnerSentinelDefinitions[index]![0],
+      definitionId: hiddenRunnerSentinelDefinitions[index]![1].id,
       title: hiddenRunnerSentinelDefinitions[index]![1].title,
     }));
     for (const hiddenRunnerCard of hiddenRunnerCards) {
@@ -14398,7 +14958,9 @@ describe("MVP 0.2 multiplayer service", () => {
     const corpPreviewJson = JSON.stringify(corpPreview);
     for (const hiddenRunnerCard of hiddenRunnerCards) {
       expect(corpPreviewJson).not.toContain(hiddenRunnerCard.instanceId);
-      expect(corpPreviewJson).not.toContain(hiddenRunnerCard.definitionId);
+      expect(corpPreviewJson).not.toMatch(
+        new RegExp(`"(?:[a-z]*definitionId|cardId)":${hiddenRunnerCard.definitionId}\\b`, "i"),
+      );
       expect(corpPreviewJson).not.toContain(hiddenRunnerCard.title);
     }
     expect(corpPreviewJson).not.toMatch(
@@ -14601,9 +15163,9 @@ describe("MVP 0.2 multiplayer service", () => {
       choiceId: ownChoice.choiceId,
       selectedOptionIds: ["keep"],
     });
-    expect(corpChoice.legalActions.map((action) => action.actionId)).toContain(
-      preview.preview.actionId,
-    );
+    expect(
+      corpChoice.playerView.legalActions.map((action) => action.actionId),
+    ).toContain(preview.preview.actionId);
     expect(await service.loadForTest(created.matchId)).toEqual(before);
   });
 
@@ -14622,20 +15184,20 @@ describe("MVP 0.2 multiplayer service", () => {
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");
 
-    let gameState = toRunnerTurnEngine(
-      createGameAfterSetup({
-        matchId: created.matchId,
-        seed: "server-corp-ai-root-rez-active-runner-engine",
-      }),
-    );
-    gameState.corp.credits = 5;
-    putCorpRootInRemoteForTest(gameState, "simple_economy_asset");
-    putCorpIceOnServerForTest(gameState, "remote_1", "simple_barrier_ice");
+    const initial = createGameAfterSetup({
+      matchId: created.matchId,
+      seed: "server-corp-ai-root-rez-active-runner-engine",
+    });
+    initial.corp.credits = 5;
+    putCorpRootInRemoteForTest(initial, 594);
+    putCorpIceOnServerForTest(initial, "r1", 589);
+    initial.eventLog[0]!.stateHashAfter = hashState(initial);
+    let gameState = toRunnerTurnEngine(initial);
     gameState = applyEngineAction(
       gameState,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     gameState = applyEngineAction(
       gameState,
@@ -14672,9 +15234,9 @@ describe("MVP 0.2 multiplayer service", () => {
     record.stateSnapshots = [
       stateSnapshotForTest(
         created.matchId,
-        gameState,
+        initial,
         record.match.matchVersion,
-        "snap_ai_root_rez_active_runner",
+        INITIAL_STATE_SNAPSHOT_ID,
       ),
     ];
     record.actionReceipts = [];
@@ -14741,6 +15303,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(replay.ok).toBe(true);
     if (!replay.ok) throw new Error(replay.error.message);
     expect(replay.replay.metadata.replayCheckStatus).toBe("verified");
+    expect(replay.replay.metadata.replayOk).toBe(true);
     expect(
       replay.replay.timeline.find(
         (step) => step.eventId === advanced.publicEvent?.eventId,
@@ -14885,7 +15448,7 @@ describe("MVP 0.2 multiplayer service", () => {
         metadata?: { participantSides?: { player_a?: Side; player_b?: Side } };
         timeline?: Array<{ hiddenInfoBarrier?: boolean }>;
         publicEvents?: Array<{
-          eventId?: string;
+          eventId?: number;
           stateVersionAfter?: number;
         }>;
         frames?: Array<{
@@ -15166,15 +15729,15 @@ const CORPORATE_SHUFFLE_CORP_DECK: DeckDefinition = {
   id: "server_corporate_shuffle_corp",
   name: "Server Corporate Shuffle Integration Harness",
   side: "corp",
-  identity: "corp_identity_001",
+  identity: 3,
   cards: [
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 3 },
-    { id: "simple_economy_asset", quantity: 2 },
-    { id: "simple_tag_ice", quantity: 2 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "onr_classic_017_corporate-shuffle", quantity: 1 },
-    { id: "onr_classic_025_strategic-planning-group", quantity: 1 },
+    { id: 588, quantity: 3 },
+    { id: 596, quantity: 3 },
+    { id: 594, quantity: 2 },
+    { id: 603, quantity: 2 },
+    { id: 589, quantity: 2 },
+    { id: 21, quantity: 1 },
+    { id: 29, quantity: 1 },
   ],
 };
 
@@ -15184,7 +15747,7 @@ const SERVER_DAMAGE_CORP_DECK: DeckDefinition = {
   name: "Server CardSpec Damage Harness",
   cards: [
     ...DEMO_DECKS.demo_corp_008.cards,
-    { id: "onr_v1_302_scorched-earth", quantity: 1 },
+    { id: 514, quantity: 1 },
   ],
 };
 
@@ -15194,7 +15757,7 @@ const SERVER_TRACE_CORP_DECK: DeckDefinition = {
   name: "Server CardSpec Trace Harness",
   cards: [
     ...DEMO_DECKS.demo_corp_008.cards,
-    { id: "onr_v1_236_data-raven", quantity: 1 },
+    { id: 448, quantity: 1 },
   ],
 };
 
@@ -15204,7 +15767,7 @@ const SERVER_DAMAGE_RUNNER_DECK: DeckDefinition = {
   name: "Server CardSpec Damage Runner Harness",
   cards: [
     ...DEMO_DECKS.demo_runner_008.cards,
-    { id: "onr_proteus_108_faked-hit", quantity: 1 },
+    { id: 166, quantity: 1 },
   ],
 };
 
@@ -15264,6 +15827,59 @@ async function joinedMatch(
   };
 }
 
+async function expectLiveWorkerTraceQuote(workers: AiDecisionWorkerPool) {
+  const { service, matchId } = await joinedCanonicalTraceMatch(
+    "worker-blind-trace",
+    "classic_blind",
+  );
+  const state = (await service.loadForTest(matchId))?.gameState;
+  if (!state) throw new Error("Missing Blind Trace GameState");
+  const ownDeckSnapshot = {
+    deckSnapshotId: "worker-blind-trace-deck",
+    side: "corp" as const,
+    cards: SERVER_TRACE_CORP_DECK.cards.map(({ id, quantity }) => ({
+      cardId: id,
+      quantity,
+    })),
+  };
+  const input = buildRuntimeAiDecisionInput(state, "corp", {
+    ownDeckSnapshot,
+    decisionId: "worker-blind-trace-quote",
+    profileId: "worker-blind-trace",
+  });
+  const quote = vi.fn(
+    (request: Parameters<typeof quoteRandomizedTraceBidSelection>[1]) =>
+      quoteRandomizedTraceBidSelection(state, request),
+  );
+  const unexpectedQuote = () => {
+    throw new Error("Unexpected quote from the blind Trace plan");
+  };
+  const { decision } = await workers.choose(
+    input,
+    exportAiRuntimeCheckpoint(input, ownDeckSnapshot.deckSnapshotId),
+    {
+      quoteCorpPunishRoute: unexpectedQuote,
+      quoteRandomizedIceInstallSelection: unexpectedQuote,
+      quoteRandomizedTurnPlanSelection: unexpectedQuote,
+      quoteRandomizedTraceBidSelection: quote,
+    },
+  );
+  expect(quote).toHaveBeenCalledExactlyOnceWith(
+    expect.objectContaining({
+      matchId: state.matchId,
+      stateVersion: state.stateVersion,
+      side: "corp",
+    }),
+  );
+  if (decision.selectionKind !== "engine_randomized_trace_bid_selection")
+    throw new Error("The worker did not return the quoted Trace command");
+  const result = applyRandomizedTraceBidSelection(state, {
+    ...decision.engineCommand,
+    idempotencyKey: "worker-blind-trace-apply",
+  });
+  expect(result.ok).toBe(true);
+}
+
 async function joinedCorporateShuffleMatch(
   seed: string,
   options: { clicks: 2 | 3; strategicPlanningGroup: boolean },
@@ -15303,12 +15919,12 @@ async function joinedCorporateShuffleMatch(
   delete gameState.pendingCorpDraw;
   const operationId = moveCorpCardToHqForTest(
     gameState,
-    "onr_classic_017_corporate-shuffle",
+    21,
   );
   if (options.strategicPlanningGroup) {
     const strategicPlanningGroupId = putCorpRootInRemoteForTest(
       gameState,
-      "onr_classic_025_strategic-planning-group",
+      29,
     );
     gameState.cardInstances[strategicPlanningGroupId] = {
       ...gameState.cardInstances[strategicPlanningGroupId]!,
@@ -15329,7 +15945,7 @@ async function joinedCorporateShuffleMatch(
       created.matchId,
       gameState,
       record.match.matchVersion,
-      "snap_corporate_shuffle_ready",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   record.actionReceipts = [];
@@ -15353,6 +15969,7 @@ async function joinedCorporateShuffleMatch(
 async function forceSetupComplete(
   service: MultiplayerService,
   matchId: string,
+  sqliteDbPath?: string,
 ): Promise<void> {
   const record = await service.loadForTest(matchId);
   if (!record?.gameState) throw new Error("Missing active game state");
@@ -15393,10 +16010,21 @@ async function forceSetupComplete(
       matchId,
       gameState,
       record.match.matchVersion,
-      "snap_initial",
+      INITIAL_STATE_SNAPSHOT_ID,
     ),
   ];
   delete record.pendingUndo;
+  if (sqliteDbPath) {
+    // This fixture substitutes a synthetic game_created state and its snapshot.
+    const database = new DatabaseSync(sqliteDbPath);
+    try {
+      database
+        .prepare("DELETE FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?")
+        .run(matchId, INITIAL_STATE_SNAPSHOT_ID);
+    } finally {
+      database.close();
+    }
+  }
   await (service as unknown as { storage: MultiplayerStorage }).storage.save(
     record,
   );
@@ -15436,7 +16064,7 @@ async function putTopCorpAgendaForMatch(
       matchId,
       gameState,
       record.match.matchVersion,
-      "snap_setup_agenda_top",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   delete record.pendingUndo;
@@ -15587,7 +16215,7 @@ async function joinedV120EventModificationMatch(seed: string) {
   ready.eventModificationHarness = {
     damagePrevention: { side: "runner", preventAmount: 4 },
   };
-  moveCorpCardToHqForTest(ready, "onr_v1_302_scorched-earth");
+  moveCorpCardToHqForTest(ready, 514);
   ready.runner.tags = 1;
   ready.corp.credits = 10;
   record.gameState = ready;
@@ -15601,7 +16229,7 @@ async function joinedV120EventModificationMatch(seed: string) {
       created.matchId,
       ready,
       record.match.matchVersion,
-      "snap_v120_ready",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   record.actionReceipts = [];
@@ -15654,7 +16282,7 @@ async function joinedCanonicalDamageMatch(seed: string) {
       agendaPointsToWin: 7,
     }),
   );
-  moveRunnerCardToGripForTest(ready, "onr_proteus_108_faked-hit");
+  moveRunnerCardToGripForTest(ready, 166);
   ready.runner.credits = 10;
   record.gameState = ready;
   record.match.baseline = ready.baseline;
@@ -15667,7 +16295,7 @@ async function joinedCanonicalDamageMatch(seed: string) {
       created.matchId,
       ready,
       record.match.matchVersion,
-      "snap_damage_ready",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   record.actionReceipts = [];
@@ -15691,14 +16319,21 @@ async function joinedCanonicalDamageMatch(seed: string) {
   };
 }
 
-async function joinedCanonicalTraceMatch(seed: string) {
+async function joinedCanonicalTraceMatch(
+  seed: string,
+  traceRulesProfile?: TraceRulesProfile,
+) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
     publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787",
   });
-  const created = await service.createMatch({ hostSide: "corp", seed });
+  const created = await service.createMatch({
+    hostSide: "corp",
+    seed,
+    ...(traceRulesProfile ? { settings: { traceRulesProfile } } : {}),
+  });
   if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   if (!joinToken) throw new Error("Missing join token");
@@ -15718,9 +16353,10 @@ async function joinedCanonicalTraceMatch(seed: string) {
       runnerDeck: DEMO_DECKS.demo_runner_008,
       corpDeck: SERVER_TRACE_CORP_DECK,
       agendaPointsToWin: 7,
+      ...(traceRulesProfile ? { traceRulesProfile } : {}),
     }),
   );
-  putCorpIceOnServerForTest(ready, "rd", "onr_v1_236_data-raven");
+  putCorpIceOnServerForTest(ready, "rd", 448);
   ready.corp.credits = 20;
   ready.runner.credits = 10;
   ready = applyEngineAction(
@@ -15751,7 +16387,7 @@ async function joinedCanonicalTraceMatch(seed: string) {
       created.matchId,
       ready,
       record.match.matchVersion,
-      "snap_trace_ready",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   record.actionReceipts = [];
@@ -15810,7 +16446,7 @@ async function joinedV121ReplacementMatch(seed: string) {
   ready.eventModificationHarness = {
     damageReplacement: { side: "runner", tagAmount: 1 },
   };
-  moveCorpCardToHqForTest(ready, "onr_v1_302_scorched-earth");
+  moveCorpCardToHqForTest(ready, 514);
   ready.runner.tags = 1;
   ready.corp.credits = 10;
   record.gameState = ready;
@@ -15824,7 +16460,7 @@ async function joinedV121ReplacementMatch(seed: string) {
       created.matchId,
       ready,
       record.match.matchVersion,
-      "snap_v121_ready",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   record.actionReceipts = [];
@@ -15875,7 +16511,7 @@ async function joinedV122SpecialZoneMatch(seed: string) {
       agendaPointsToWin: 7,
     }),
   );
-  const cardId = moveRunnerCardToGripForTest(ready, "simple_economy_event");
+  const cardId = moveRunnerCardToGripForTest(ready, 595);
   ready.specialZoneHarness = {
     actor: "runner",
     cardInstanceId: cardId,
@@ -15896,7 +16532,7 @@ async function joinedV122SpecialZoneMatch(seed: string) {
       created.matchId,
       ready,
       record.match.matchVersion,
-      "snap_v122_ready",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   record.actionReceipts = [];
@@ -15940,7 +16576,7 @@ async function prepareV123MitRunnerTurn(
     mulligansTaken: {},
   };
   delete gameState.pendingChoice;
-  moveRunnerCardToGripForTest(gameState, "onr_v1_101_mit-west-tier");
+  moveRunnerCardToGripForTest(gameState, 313);
   const latestEventIndex = gameState.eventLog.length - 1;
   if (latestEventIndex >= 0)
     gameState.eventLog[latestEventIndex] = {
@@ -15958,7 +16594,7 @@ async function prepareV123MitRunnerTurn(
       matchId,
       gameState,
       record.match.matchVersion,
-      "snap_v123_mit_ready",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   record.actionReceipts = [];
@@ -16001,17 +16637,17 @@ async function joinedV112ArchivesMatch(seed: string) {
   gameState.runner.credits = 10;
   const faceupOperation = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_economy_operation",
+    596,
     true,
   );
   const facedownAsset = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_economy_asset",
+    594,
     false,
   );
   const facedownAgenda = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_agenda",
+    588,
     false,
   );
   keepOnlyCorpArchivesCardsForTest(gameState, [
@@ -16030,7 +16666,7 @@ async function joinedV112ArchivesMatch(seed: string) {
       created.matchId,
       gameState,
       record.match.matchVersion,
-      "snap_v112_archives_ready",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   record.actionReceipts = [];
@@ -16079,7 +16715,7 @@ async function joinedOffSiteBackupsMatch(seed: string) {
     id: "server_off_site_backups_fixture",
     name: "Server Off-Site Backups Fixture",
     cards: [
-      { id: "onr_v1_296_off-site-backups", quantity: 1 },
+      { id: 508, quantity: 1 },
       ...DEMO_DECKS.demo_corp_008.cards,
     ],
   };
@@ -16098,15 +16734,15 @@ async function joinedOffSiteBackupsMatch(seed: string) {
   gameState.corp.credits = 10;
   gameState.corp.clicks = 10;
   gameState.corp.maxHandSize = 100;
-  moveCorpCardToHqForTest(gameState, "onr_v1_296_off-site-backups");
+  moveCorpCardToHqForTest(gameState, 508);
   const faceupOperation = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_economy_operation",
+    596,
     true,
   );
   const facedownAgenda = moveCorpCardToArchivesForTest(
     gameState,
-    "simple_agenda",
+    588,
     false,
   );
   keepOnlyCorpArchivesCardsForTest(gameState, [
@@ -16124,7 +16760,7 @@ async function joinedOffSiteBackupsMatch(seed: string) {
       created.matchId,
       gameState,
       record.match.matchVersion,
-      "snap_off_site_backups_ready",
+      aiAttemptStateSnapshotId(1),
     ),
   ];
   record.actionReceipts = [];
@@ -16164,15 +16800,15 @@ async function bootstrap(
 }
 
 function sidePayloadBeliefInput(
-  payload: Pick<SidePayload, "playerView" | "eventTail" | "legalActions">,
+  payload: Pick<SidePayload, "playerView">,
   side: Side,
   label: string,
 ) {
   return buildAiDecisionInputDto({
     side,
     playerView: payload.playerView,
-    eventTail: payload.eventTail,
-    legalActions: payload.legalActions,
+    eventTail: payload.playerView.publicEvents,
+    legalActions: payload.playerView.legalActions,
     difficulty: "normal",
     seed: `server-belief:${label}`,
     decisionId: `server-belief:${label}:${side}:${payload.playerView.stateVersion}`,
@@ -16222,6 +16858,7 @@ async function submitChoice(
     side: session.side,
     sessionToken: session.sessionToken,
     actionId: action.actionId,
+    clientKnownMatchVersion: before.matchVersion,
     clientKnownStateVersion: before.playerView.stateVersion,
     selectedChoices: {
       choiceId: choice.choiceId,
@@ -16303,15 +16940,15 @@ function applyEngineChoice(
 function sourceDefinitionForServerTest(
   state: GameState,
   action: LegalAction,
-): string | undefined {
+): CardDefinitionId | undefined {
   const cardId = String(action.payload?.cardId ?? action.source ?? "");
   return state.cardInstances[cardId]?.definitionId;
 }
 
 function putCorpIceOnServerForTest(
   state: GameState,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
-  definitionId: string,
+  serverId: "hq" | "rd" | "archives" | `r${number}`,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   const server = state.corp.servers.find(
@@ -16331,15 +16968,15 @@ function putCorpIceOnServerForTest(
 
 function putCorpRootInRemoteForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   let server = state.corp.servers.find(
-    (candidate) => candidate.id === "remote_1",
+    (candidate) => candidate.id === "r1",
   );
   if (!server) {
     server = {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -16351,7 +16988,7 @@ function putCorpRootInRemoteForTest(
   server.root.push(id);
   state.cardInstances[id] = {
     ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: false,
     rezzed: false,
   };
@@ -16360,7 +16997,7 @@ function putCorpRootInRemoteForTest(
 
 function putCorpCardOnTopOfRdForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
@@ -16376,7 +17013,7 @@ function putCorpCardOnTopOfRdForTest(
 
 function moveCorpCardToHqForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
@@ -16392,7 +17029,7 @@ function moveCorpCardToHqForTest(
 
 function moveCorpCardToArchivesForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
   faceup = true,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
@@ -16427,7 +17064,7 @@ function keepOnlyCorpArchivesCardsForTest(
 
 function moveRunnerCardToGripForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
@@ -16443,7 +17080,7 @@ function moveRunnerCardToGripForTest(
 
 function putRunnerCardOnTopOfStackForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const id = findCardForTest(state, definitionId);
   removeEverywhereForTest(state, id);
@@ -16472,7 +17109,7 @@ function emptyRunnerGripForTest(state: GameState): void {
 
 function findCardForTest(
   state: GameState,
-  definitionId: string,
+  definitionId: CardDefinitionId,
 ): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
     ([, card]) => card.definitionId === definitionId,
@@ -16529,7 +17166,7 @@ function stateSnapshotForTest(
   matchId: string,
   state: GameState,
   matchVersion: number,
-  snapshotId: string,
+  snapshotId: StateSnapshotId,
 ): StateSnapshot {
   return {
     snapshotId,
@@ -16586,6 +17223,7 @@ async function submit(
     side: session.side,
     sessionToken: session.sessionToken,
     actionId: action.actionId,
+    clientKnownMatchVersion: payload.matchVersion,
     clientKnownStateVersion: payload.playerView.stateVersion,
     idempotencyKey,
   });
@@ -16598,10 +17236,10 @@ function mustAction(
   payload: SidePayload,
   predicate: (action: LegalAction) => boolean,
 ): LegalAction {
-  const selected = payload.legalActions.find(predicate);
+  const selected = payload.playerView.legalActions.find(predicate);
   expect(
     selected,
-    payload.legalActions
+    payload.playerView.legalActions
       .map((action) => `${action.type}:${action.label}`)
       .join(", "),
   ).toBeDefined();
@@ -16914,8 +17552,11 @@ class ActionDeltaTrackingStorage implements MultiplayerStorage {
       expectedStateVersion: record.gameState.stateVersion,
       publicEventCount: record.eventLog.length,
       engineEventCount: record.gameState.eventLog.length,
+      engineEventGeneration: 0,
       actionReceiptCount: record.actionReceipts.length,
       aiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
+      loadedPublicEventCount: record.eventLog.length,
+      loadedEngineEventCount: record.gameState.eventLog.length,
       loadedActionReceiptCount: record.actionReceipts.length,
       loadedAiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
     };

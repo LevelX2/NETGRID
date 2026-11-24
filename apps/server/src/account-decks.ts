@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import {
   deckFormatProfiles08Data as profilesData,
   deckFormatProfiles130Data as profilesData130,
@@ -7,9 +8,7 @@ import {
   standardDeckGuidesData as standardDeckGuideData,
 } from "@netgrid/runtime-data/standard-decks";
 import { randomBytes } from "node:crypto";
-import { mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import type { DatabaseSync } from "node:sqlite";
 import { DECK_STRATEGY_PROFILE_ANALYSIS_REVISION } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
@@ -28,10 +27,9 @@ import {
   type StandardDeckGuideStatus,
 } from "@netgrid/decks";
 import {
-  configureSqliteConnection,
+  openSqliteAccountDatabase,
   runSqliteStorageOperation,
   runSqliteTransaction,
-  SqliteMatchStorage,
 } from "./storage-sqlite";
 
 export const DEFAULT_ACCOUNT_DECK_LIMIT = 50;
@@ -39,7 +37,7 @@ export const DEFAULT_ACCOUNT_DECK_LIMIT = 50;
 export type AccountDeckDraftInput = {
   name: string;
   side: DeckSide;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
@@ -76,7 +74,7 @@ export type StandardDeckCatalogSourceEntry = {
   status: "active";
   name: string;
   side: DeckSide;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
@@ -212,15 +210,7 @@ export class SqliteAccountDeckStorage implements AccountDeckStorage {
   private readonly db: DatabaseSync;
 
   constructor(options: { dbPath: string; backupDir?: string }) {
-    const dbPath = resolve(options.dbPath);
-    mkdirSync(dirname(dbPath), { recursive: true });
-    const schemaOwner = new SqliteMatchStorage({
-      dbPath,
-      ...(options.backupDir ? { backupDir: resolve(options.backupDir) } : {}),
-    });
-    schemaOwner.close();
-    this.db = new DatabaseSync(dbPath);
-    configureSqliteConnection(this.db);
+    this.db = openSqliteAccountDatabase(options);
   }
 
   async createWithinLimit(
@@ -541,16 +531,16 @@ function editableFromInput(
     throw new AccountDeckError("account_deck_input_invalid");
   const name = validName(input.name);
   const cards = input.cards.map((entry) => ({
-    cardId: String(entry.cardId),
+    cardId: entry.cardId,
     quantity: Number(entry.quantity),
   }));
   if (
-    !input.identityCardId ||
+    !Number.isSafeInteger(input.identityCardId) || input.identityCardId <= 0 ||
     !input.cardPoolSnapshotId ||
     !input.formatProfileId ||
     cards.some(
       (entry) =>
-        !entry.cardId ||
+        !Number.isSafeInteger(entry.cardId) || entry.cardId <= 0 ||
         !Number.isInteger(entry.quantity) ||
         entry.quantity <= 0,
     )
@@ -726,7 +716,7 @@ function sanitizeTableLayout(layout: DeckTableLayout): DeckTableLayout {
         entries: pile.entries.map((entry) => {
           if (
             !entry ||
-            typeof entry.cardId !== "string" ||
+            !Number.isSafeInteger(entry.cardId) || entry.cardId <= 0 ||
             !Number.isInteger(entry.quantity) ||
             entry.quantity <= 0 ||
             !Number.isFinite(entry.order)

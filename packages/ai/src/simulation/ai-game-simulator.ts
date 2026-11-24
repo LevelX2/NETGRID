@@ -14,6 +14,7 @@ import {
   type DeckDefinition,
   type GameState,
   type LegalAction,
+  type PublicGameEvent,
   type Side,
 } from "@netgrid/shared";
 
@@ -26,14 +27,14 @@ import { assessDecisionOpportunity } from "../runtime/decision-opportunity";
 import { releaseAiMatchRuntime } from "../runtime/match-runtime-memory";
 import { fnv1a } from "../runtime/stable-hash";
 import { sortedUniqueProgressionCardTargetTypes } from "../runtime/progression-card-target";
-import { advancementCountersAddedForSimulationAction } from "../runtime/simulation-action-event";
+import { advancementChangesForSimulationAction } from "../runtime/simulation-action-event";
 import {
   advancedAgendaStealSourceForAction,
   cardTargetTypeForInstance,
 } from "../runtime/simulation-card-target";
 import {
   targetCardIdsForSimulationAction,
-  targetServerIdForSimulationAction,
+  simulationActionLocation,
 } from "../runtime/simulation-action-target";
 import type { AiSimulationConfig } from "./ai-simulation-config";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
@@ -43,6 +44,7 @@ import {
   finalAdvanceAssessmentForSimulationAction,
   isProtectBeforeAdvanceSimulationAction,
 } from "./final-advance-assessment";
+import { createAgendaProgressionObserver } from "./agenda-progression-observation";
 import { isHoldoutSeed } from "./holdout-seed";
 import {
   safeEvidenceForSimulationDecision,
@@ -91,6 +93,7 @@ export type AiGameSimulatorDependencies = {
     action: LegalAction,
     targetServerId: string | undefined,
     stateAfterAction: GameState,
+    runStarted: boolean,
   ) => ActionSequenceEntryDiagnostics;
   runnerCentralPressureDiagnosticsForSimulationAction: (
     input: AiDecisionInput,
@@ -101,12 +104,14 @@ export type AiGameSimulatorDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
     targetServerId: string | undefined,
+    runStarted: boolean,
   ) => ActionSequenceEntryDiagnostics;
   runnerEconomySetupDiagnosticsForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
     targetServerId: string | undefined,
     stateAfterAction: GameState,
+    runStarted: boolean,
   ) => ActionSequenceEntryDiagnostics;
   tagPunishWindowDiagnosticsForSimulationAction: (
     input: AiDecisionInput,
@@ -114,6 +119,7 @@ export type AiGameSimulatorDependencies = {
     decision: AiDecision,
     stateBeforeAction: GameState,
     stateAfterAction: GameState,
+    publicResult: PublicGameEvent["publicPayload"],
   ) => ActionSequenceEntryDiagnostics;
   corpFutureRunIceDiagnosticsForSimulationAction: (
     input: AiDecisionInput,
@@ -175,7 +181,7 @@ export function createAiGameSimulator(
         cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
         metrics: metricsFor(
           [],
-          deckSupportErrors,
+          { illegalActions: 0, total: deckSupportErrors.length },
           false,
           isHoldoutSeed(
             config.seed ?? "ai-vs-ai-smoke",
@@ -285,9 +291,12 @@ export function createAiGameSimulator(
       ),
     };
     const actionSequence: AiSimulationSummary["actionSequence"] = [];
+    const agendaProgression = createAgendaProgressionObserver();
     const errors: string[] = [];
     const runtimeFailures: AiSimulationRuntimeFailure[] = [];
+    let illegalActions = 0;
     const maxActions = config.maxActions ?? 120;
+    let completedTurns = 0;
 
     for (let index = 0; index < maxActions && !state.winner; index += 1) {
       const sideSelection = selectAiDecisionSideForState(state);
@@ -374,15 +383,15 @@ export function createAiGameSimulator(
         `ai-sim-${index}`,
       );
       const action =
-        decision.selectionKind === "engine_randomized_ice_install_selection" ||
-        decision.selectionKind === "engine_randomized_trace_bid_selection"
-          ? randomizedResult?.ok
-            ? randomizedResult.receipt.selectedLegalAction
-            : undefined
-          : input.legalActions.find(
+        decision.selectionKind === undefined || decision.selectionKind === "direct"
+          ? input.legalActions.find(
               (candidate) => candidate.actionId === decision.actionId,
-            );
+            )
+          : randomizedResult?.ok
+            ? randomizedResult.receipt.selectedLegalAction
+            : undefined;
       if (!action) {
+        illegalActions += 1;
         const failure = classifiedSimulationRuntimeFailure({
           code:
             randomizedResult && !randomizedResult.ok
@@ -411,6 +420,7 @@ export function createAiGameSimulator(
           idempotencyKey: `ai-sim-${index}`,
         });
       if (!result.ok) {
+        illegalActions += 1;
         const failure = classifiedSimulationRuntimeFailure({
           code: `engine_apply_action_rejected:${result.error.code}`,
           owner: "rules_contract",
@@ -422,11 +432,8 @@ export function createAiGameSimulator(
         errors.push(simulationRuntimeFailureToken(failure));
         break;
       }
-      const targetServerId = targetServerIdForSimulationAction(
-        action,
-        result.event,
-        stateBeforeAction,
-      );
+      const { targetServerId, corpNewRemoteCreated, runnerRunStarted } =
+        simulationActionLocation(action, result.event, stateBeforeAction, result.state);
       const targetCardIds = targetCardIdsForSimulationAction(
         input,
         decision,
@@ -437,16 +444,13 @@ export function createAiGameSimulator(
       const targetCardType = targetCardIds[0]
         ? cardTargetTypeForInstance(stateBeforeAction, targetCardIds[0])
         : undefined;
-      const advancementCountersAdded =
-        advancementCountersAddedForSimulationAction(action, result.event);
-      const advancementTargetTypes =
-        action.type === "advance_card" || advancementCountersAdded > 0
-          ? sortedUniqueProgressionCardTargetTypes(
-              targetCardIds.map((cardId) =>
-                cardTargetTypeForInstance(stateBeforeAction, cardId),
-              ),
-            )
-          : [];
+      const { added: advancementCountersAdded, advancedCardIds } =
+        advancementChangesForSimulationAction(stateBeforeAction, result.state);
+      const advancementTargetTypes = sortedUniqueProgressionCardTargetTypes(
+        advancedCardIds.map((cardId) =>
+          cardTargetTypeForInstance(result.state, cardId),
+        ),
+      );
       const scoreActionsAvailable =
         side === "corp"
           ? input.legalActions.filter(
@@ -460,14 +464,26 @@ export function createAiGameSimulator(
       );
       const finalAdvance = finalAdvanceAssessmentForSimulationAction(
         stateBeforeAction,
+        result.state,
         input,
         action,
         targetServerId,
-        targetCardIds,
+        advancedCardIds,
         advancementCountersAdded,
       );
+      agendaProgression.observe({
+        before: stateBeforeAction,
+        after: result.state,
+        actionIndex: index,
+        turn: completedTurns + 1,
+        targetCardIds,
+        ...(finalAdvance.targetCardId
+          ? { finalAdvanceTargetId: finalAdvance.targetCardId }
+          : {}),
+      });
       const protectBeforeAdvance = isProtectBeforeAdvanceSimulationAction(
         stateBeforeAction,
+        result.state,
         input,
         action,
         targetServerId,
@@ -483,6 +499,7 @@ export function createAiGameSimulator(
         action,
         targetServerId,
         result.state,
+        runnerRunStarted === true,
       );
       const runnerCentralPressure =
         runnerCentralPressureDiagnosticsForSimulationAction(
@@ -495,6 +512,7 @@ export function createAiGameSimulator(
           input,
           action,
           targetServerId,
+          runnerRunStarted === true,
         );
       const runnerEconomySetup =
         runnerEconomySetupDiagnosticsForSimulationAction(
@@ -502,6 +520,7 @@ export function createAiGameSimulator(
           action,
           targetServerId,
           result.state,
+          runnerRunStarted === true,
         );
       const tagPunishDiagnostics =
         tagPunishWindowDiagnosticsForSimulationAction(
@@ -510,6 +529,7 @@ export function createAiGameSimulator(
           decision,
           stateBeforeAction,
           result.state,
+          result.event.publicPayload,
         );
       const corpFutureRunIce = corpFutureRunIceDiagnosticsForSimulationAction(
         input,
@@ -539,9 +559,7 @@ export function createAiGameSimulator(
         eventType: result.event.type,
         timingPoint: action.timingPoint,
         actionsRemainingBefore: input.playerView.own.clicks,
-        turnNumber:
-          state.eventLog.filter((event) => event.type === "end_turn").length +
-          1,
+        turnNumber: completedTurns + 1,
         ...selfplayTraceFactsForSimulationDecision(decision, config),
         ...actionCapacityDiagnostics,
         reasonCode: decision.reasonCode,
@@ -551,6 +569,8 @@ export function createAiGameSimulator(
         fallbackUsed: decision.fallbackUsed,
         timeoutUsed: decision.timeoutUsed ?? false,
         ...(targetServerId ? { targetServerId } : {}),
+        ...(corpNewRemoteCreated ? { corpNewRemoteCreated } : {}),
+        ...(runnerRunStarted ? { runnerRunStarted } : {}),
         ...(advancementCountersAdded > 0 ? { advancementCountersAdded } : {}),
         ...(scoreActionsAvailable > 0 ? { scoreActionsAvailable } : {}),
         ...(targetCardType ? { targetCardType } : {}),
@@ -593,6 +613,7 @@ export function createAiGameSimulator(
         qualityTags: qualityTagsForAction(input, action, decision),
         stateHashAfter: result.stateHash,
       });
+      if (result.event.type === "end_turn") completedTurns += 1;
       state = result.state;
     }
 
@@ -614,7 +635,7 @@ export function createAiGameSimulator(
           : "action_limit_reached"),
       ...(state.gameEndReason ? { gameEndReason: state.gameEndReason } : {}),
       actions: actionSequence.length,
-      turns: state.eventLog.filter((event) => event.type === "end_turn").length,
+      turns: completedTurns,
       finalAgendaPoints: {
         runner: runnerView.own.agendaPoints,
         corp: corpView.own.agendaPoints,
@@ -624,12 +645,13 @@ export function createAiGameSimulator(
       replayOk: replay.ok,
       replayErrors: replay.errors,
       actionSequence,
+      agendaProgressionOutcomes: agendaProgression.outcomes(),
       errors,
       runtimeFailures,
       cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
       metrics: metricsFor(
         actionSequence,
-        errors,
+        { illegalActions, total: errors.length },
         replay.ok,
         isHoldoutSeed(seed, SOAK_SEEDS.holdoutSeeds),
       ),
@@ -637,12 +659,6 @@ export function createAiGameSimulator(
   }
 
   return { simulateAiGame };
-}
-
-function actionPlacement(action: LegalAction): string | undefined {
-  return typeof action.payload?.placement === "string"
-    ? action.payload.placement
-    : undefined;
 }
 
 function runnerArchivesVisibilityDiagnosticsForSimulationAction(
@@ -661,7 +677,7 @@ function runnerArchivesVisibilityDiagnosticsForSimulationAction(
     input.playerView.servers.find((server) => server.id === "archives")?.root ??
     [];
   const knownCards = visibleArchives.filter(
-    (card) => card.known && typeof card.definitionId === "string",
+    (card) => card.known && typeof card.definitionId === "number",
   );
   const unknownCardCount = Math.max(
     0,

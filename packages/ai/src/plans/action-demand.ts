@@ -74,13 +74,34 @@ export type CreateSideActionDemandParams = Omit<
 export function createActionDemand(
   params: CreateActionDemandParams,
 ): ActionDemand {
-  const currentActions = wholeNonNegative(params.currentActions);
-  const targetActions = wholeNonNegative(params.targetActions);
+  const { currentActions, targetActions } = params;
+  for (const count of [currentActions, targetActions]) {
+    if (!Number.isSafeInteger(count) || count < 0) {
+      throw new RangeError(
+        "Invalid action count for demand " + params.demandId + ": " + count,
+      );
+    }
+  }
   const gap = Math.max(0, targetActions - currentActions);
-  const acceptedRestrictions = uniqueRestrictions(
-    params.acceptedRestrictions ?? ["unrestricted"],
-  );
+  const acceptedRestrictions = [
+    ...new Set(params.acceptedRestrictions ?? (["unrestricted"] as const)),
+  ];
   const requiredActionTypes = uniqueStrings(params.requiredActionTypes ?? []);
+  const currentEvidence = [
+    `action_demand_side:${params.side}`,
+    `action_demand_purpose:${params.purpose}`,
+    `action_demand_priority:${params.priority}`,
+    `action_demand_hardness:${params.hardness}`,
+    `action_demand_deadline:${params.deadline}`,
+    `action_demand_current:${currentActions}`,
+    `action_demand_target:${targetActions}`,
+    `action_demand_gap:${gap}`,
+    `action_demand_restrictions:${acceptedRestrictions.join(",")}`,
+    `action_demand_action_types:${requiredActionTypes.join(",") || "any"}`,
+  ];
+  const currentEvidencePrefixes = new Set(
+    currentEvidence.map((fact) => fact.split(":")[0]),
+  );
   return {
     schemaVersion: ACTION_DEMAND_SCHEMA_VERSION,
     demandId: params.demandId,
@@ -97,17 +118,10 @@ export function createActionDemand(
     acceptedRestrictions,
     requiredActionTypes,
     evidence: [
-      ...(params.evidence ?? []),
-      `action_demand_side:${params.side}`,
-      `action_demand_purpose:${params.purpose}`,
-      `action_demand_priority:${params.priority}`,
-      `action_demand_hardness:${params.hardness}`,
-      `action_demand_deadline:${params.deadline}`,
-      `action_demand_current:${currentActions}`,
-      `action_demand_target:${targetActions}`,
-      `action_demand_gap:${gap}`,
-      `action_demand_restrictions:${acceptedRestrictions.join(",")}`,
-      `action_demand_action_types:${requiredActionTypes.join(",") || "any"}`,
+      ...(params.evidence ?? []).filter(
+        (value) => !currentEvidencePrefixes.has(value.split(":")[0] ?? ""),
+      ),
+      ...currentEvidence,
     ],
   };
 }
@@ -154,17 +168,6 @@ function deadlineRank(deadline: ActionDemandDeadline): number {
   }
 }
 
-function uniqueRestrictions(
-  restrictions: readonly ActionDemandRestriction[],
-): ActionDemandRestriction[] {
-  const result = [...new Set(restrictions)];
-  return result.length > 0 ? result : ["unrestricted"];
-}
-
 function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values.filter((value) => value.length > 0))];
-}
-
-function wholeNonNegative(value: number): number {
-  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }

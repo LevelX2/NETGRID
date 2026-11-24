@@ -97,11 +97,11 @@ describe("match 52de cross-server defense reserve", () => {
     expect(decision.reasonCode).toBe("plan_first.corp.defend_servers");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       selectedStep: {
-        stepId: "plan:corp.defend_servers:server-defense-portfolio:allocate",
+        stepId: "penw02zfrkklof54c2nuye5att:allocate",
       },
     });
   });
@@ -155,7 +155,7 @@ describe("match 52de cross-server defense reserve", () => {
     });
     expect(assessment.claims[0]!.expectedPoints).toBeCloseTo(4 / 3);
     expect(assessment.claims[0]!.iceIds).toEqual([
-      "corp_onr_v1_261_quandary_1",
+      "c2x9",
     ]);
   });
 

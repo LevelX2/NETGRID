@@ -5,11 +5,11 @@ import { assessCorpEconomyAssetPayback } from "./economy-asset-payback";
 
 describe("Corp economy asset payback", () => {
   it("prices a costly campaign against protection and actual remaining withdrawal clicks", () => {
-    const input = corpInput(remote("remote_1", []));
+    const input = corpInput(remote("r1", []));
     const quote = (setupActionCost: number) =>
       assessCorpEconomyAssetPayback({
         input,
-        serverId: "remote_1",
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 15,
@@ -31,17 +31,55 @@ describe("Corp economy asset payback", () => {
       projectedPayoutExecutions: 2,
       projectedNetCredits: 0,
     });
-    input.playerView.servers = [remote("remote_1", [knownRezzedWall("wall")])];
+    input.playerView.servers = [remote("r1", [knownRezzedWall("wall")])];
     expect(quote(1)).toMatchObject({
       protectionState: "protected_not_contestable",
-      projectedNetCredits: 1,
+      projectedNetCredits: 5,
     });
   });
+  it("empties a protected campaign in 3+2 payouts after a last-click installation", () => {
+    const input = corpInput(
+      remote("r1", [knownRezzedWall("remote-wall")]),
+    );
+    input.playerView.own.clicks = 1;
+    const quote = (reservedNextTurnClicks = 0) =>
+      assessCorpEconomyAssetPayback({
+        input,
+        serverId: "r1",
+        cadence: "finite_pool",
+        baselineHorizonTurns: 3,
+        finitePoolCredits: 15,
+        payoutCreditsPerExecution: 3,
+        payoutActionCost: 1,
+        setupCreditCost: 4,
+        setupActionCost: 1,
+        reservedNextTurnClicks,
+      });
+    expect(quote()).toMatchObject({
+      projectedCredits: 15,
+      projectedNetCredits: 5,
+      projectedPayoutsByTurn: [0, 3, 2],
+      projectedExhaustion: { turnsFromNow: 2, remainingFlexibleClicks: 1 },
+    });
+    expect(quote(2)).toMatchObject({
+      projectedCredits: 12,
+      projectedPayoutsByTurn: [0, 1, 3],
+    });
+    input.playerView.own.corpFutureFlexibleClicks = [1, 3];
+    expect(quote()).toMatchObject({
+      projectedCredits: 12,
+      projectedPayoutsByTurn: [0, 1, 3],
+    });
+    expect(quote()?.projectedExhaustion).toBeUndefined();
+    delete input.playerView.own.corpFutureFlexibleClicks;
+    expect(quote()?.projectedPayoutsByTurn).toEqual([0]);
+  });
+
   it("counts the last partial withdrawal without inventing credits beyond the finite pool", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 5,
@@ -59,8 +97,8 @@ describe("Corp economy asset payback", () => {
   it("prices an unprotected finite pool only through its immediate payout window", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 16,
@@ -73,7 +111,7 @@ describe("Corp economy asset payback", () => {
       protectionState: "unprotected",
       riskAdjustedHorizonTurns: 1,
       projectedPayoutExecutions: 2,
-      unadjustedProjectedCredits: 8,
+      unadjustedProjectedCredits: 16,
       projectedCredits: 4,
       projectedOpportunityCostCredits: 3,
       projectedNetCredits: 1,
@@ -83,8 +121,8 @@ describe("Corp economy asset payback", () => {
   it("retains the bounded payout horizon behind a known unreachable path", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [knownRezzedWall("remote-wall")])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [knownRezzedWall("remote-wall")])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 16,
@@ -96,18 +134,18 @@ describe("Corp economy asset payback", () => {
     ).toMatchObject({
       protectionState: "protected_not_contestable",
       riskAdjustedHorizonTurns: 3,
-      projectedPayoutExecutions: 4,
-      projectedCredits: 8,
-      projectedOpportunityCostCredits: 5,
-      projectedNetCredits: 3,
+      projectedPayoutExecutions: 8,
+      projectedCredits: 16,
+      projectedOpportunityCostCredits: 9,
+      projectedNetCredits: 7,
     });
   });
 
   it("keeps an already installed finite pool cashable before immediate exposure", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 16,
@@ -129,8 +167,8 @@ describe("Corp economy asset payback", () => {
   it("prices the current payout capacity using the actual action cost", () => {
     expect(
       assessCorpEconomyAssetPayback({
-        input: corpInput(remote("remote_1", [knownRezzedWall("remote-wall")])),
-        serverId: "remote_1",
+        input: corpInput(remote("r1", [knownRezzedWall("remote-wall")])),
+        serverId: "r1",
         cadence: "finite_pool",
         baselineHorizonTurns: 3,
         finitePoolCredits: 16,
@@ -156,7 +194,7 @@ function corpInput(
     side: "corp",
     legalActions: [],
     playerView: {
-      own: { credits: 10, clicks: 3 },
+      own: { credits: 10, clicks: 3, corpFutureFlexibleClicks: [3, 3] },
       opponent: { credits: 10, clicks: 4, rig: [] },
       servers: [remoteServer],
     },
@@ -182,12 +220,12 @@ function knownRezzedWall(instanceId: string): VisibleCard {
     side: "corp",
     type: "ice",
     rezzed: true,
-    definitionId: "onr_v1_237_data-wall",
+    definitionId: 449,
     strength: 2,
     subtypes: ["wall"],
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_237_data-wall",
+      iceDefinitionId: 449,
       effectiveStrength: 2,
       subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
     },

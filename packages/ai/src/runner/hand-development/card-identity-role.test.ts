@@ -9,7 +9,7 @@ import {
   visibleCard,
 } from "../../runner-hand-development.test-support";
 
-function actualCardRole(id: string, title?: string, unknownTarget?: "ice" | "root") {
+function actualCardRole(id: number, title?: string, unknownTarget?: "ice" | "root") {
   const definition = getPublicCardView(id)!;
   const card = visibleCard(`real-${id}`, {
     definitionId: id,
@@ -44,51 +44,51 @@ describe("development roles use card functions rather than identity words (SP-61
   it.each([undefined, "Credit Search Memory Engine"])(
     "keeps the real HQ-triggered expose card in access support: %s",
     (title) => {
-      expect(actualCardRole("onr_classic_032_schematics-search-engine", title).developmentRole)
+      expect(actualCardRole(36, title).developmentRole)
         .toBe("access_payoff");
     },
   );
 
   it("retains actual search and economy functions independently of their title", () => {
-    expect(actualCardRole("onr_classic_034_boostergang-connections", "Unrelated witness").developmentRole)
+    expect(actualCardRole(38, "Unrelated witness").developmentRole)
       .toBe("draw_or_search_engine");
-    expect(actualCardRole("onr_classic_041_networking", "Unrelated witness").developmentRole)
+    expect(actualCardRole(45, "Unrelated witness").developmentRole)
       .toBe("economy_engine");
   });
 
-  it.each(["onr_proteus_133_chiba-bank-account", "onr_proteus_152_swiss-bank-account"])(
+  it.each([191, 210])(
     "classifies %s as finite income rather than manual savings",
     (id) => expect(actualCardRole(id).developmentRole).toBe("economy_engine"),
   );
 
   it("does not treat losing opposing credits as own income", () => {
-    expect(actualCardRole("onr_proteus_136_credit-subversion").developmentRole)
+    expect(actualCardRole(194).developmentRole)
       .toBe("access_payoff");
   });
 
   it("retains the actual manual bank capability", () => {
-    expect(actualCardRole("onr_v1_154_broker").developmentRole).toBe("bank_tool");
+    expect(actualCardRole(366).developmentRole).toBe("bank_tool");
   });
 });
 
 describe("installed-card information development uses actual missing information", () => {
   it("does not invent an expose need when no installed Corp card is unknown", () => {
-    expect(actualCardRole("onr_classic_032_schematics-search-engine").currentNeed)
+    expect(actualCardRole(36).currentNeed)
       .toBe("none");
   });
 
   it.each(["ice", "root"] as const)("recognizes an unknown installed %s target", (target) => {
-    expect(actualCardRole("onr_classic_032_schematics-search-engine", undefined, target).currentNeed)
+    expect(actualCardRole(36, undefined, target).currentNeed)
       .toBe("useful_now");
   });
 });
 
 describe("post-break derez support keeps its known function (SP-617)", () => {
   it("retains a Derez run event in the run-event owner", () => {
-    expect(actualCardRole("onr_proteus_106_disgruntled-ice-technician").developmentRole)
+    expect(actualCardRole(164).developmentRole)
       .toBe("run_event");
   });
-  it.each(["onr_classic_033_superglue", "onr_proteus_085_disintegrator"])(
+  it.each([37, 143])(
     "recognizes %s without inventing an unbound installation need",
     (id) => {
       const evaluation = actualCardRole(id);
@@ -102,8 +102,8 @@ describe("post-break derez support keeps its known function (SP-617)", () => {
 
 describe("tag-removal credit pools keep their restricted function (SP-805)", () => {
   it.each([
-    "onr_v1_120_armadillo-armored-road-home",
-    "onr_v1_126_drifter-mobile-environment",
+    332,
+    338,
   ])("does not classify %s as general income or manual savings", (id) => {
     const evaluation = actualCardRole(id, "Unrelated witness");
     expect(evaluation.developmentRole).toBe("defense_support");

@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 
 import type {
   BreakerCapability,
@@ -21,7 +21,7 @@ import {
   type RunnerRigDemandProviderInput,
   type RunnerRigRoleDemandInput,
 } from "../runner/rig-demand/runner-rig-demand-projection";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 import { strategicSupportDemands } from "../runner/hand-development/strategic-support-development";
 import { minimumCreditFloorForPersistentInstall } from "../runner/hand-development/runner-persistent-install-evaluation";
 
@@ -30,7 +30,7 @@ export type BuildRunnerRigDemandProjectionForCoverageParams = Readonly<{
   strategicIntent: RunnerStrategicIntentProfile;
   deckCapabilities: DeckCapabilityProfile;
   coverageGaps: readonly RunnerCoverageGapSignal[];
-  rolesForDefinitionId: (definitionId: string) => readonly string[];
+  rolesForDefinitionId: (definitionId: number) => readonly string[];
 }>;
 
 /**
@@ -69,7 +69,7 @@ export function buildRunnerRigDemandProjectionForCoverage(
         ...(gap.requesterPlanInstanceId
           ? { sourcePlanInstanceId: gap.requesterPlanInstanceId }
           : {
-              sourcePlanInstanceId: `plan:runner.rig_and_coverage:${gap.gapId}`,
+              sourcePlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.rig_and_coverage", dedupeKey: gap.gapId }),
             }),
         sourceNeedId: gap.requesterNeedId ?? gap.gapId,
         capabilityId: gap.requiredRole,
@@ -378,7 +378,7 @@ function breakerTraitsForProvider(
   visibleInstance: VisibleCard | undefined,
 ): { killer: boolean; noisy: boolean } {
   const canonicalSubtypes =
-    cardSpecPlanningCardByDefinitionId(breaker.cardId)?.planning.engine
+    planningCardByDefinitionId(breaker.cardId)?.engine
       .characteristics.subtypes ?? [];
   const traits = new Set(
     [
@@ -404,7 +404,7 @@ function memoryUnitsForVisibleCard(card: VisibleCard): number | undefined {
     knownNonNegativeInteger(card.memoryCost) ??
     (card.definitionId
       ? knownNonNegativeInteger(
-          cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+          planningCardByDefinitionId(card.definitionId)?.engine
             .characteristics.numeric.memoryCost,
         )
       : undefined)
@@ -422,7 +422,7 @@ function breakerMemoryUnits(
     knownNonNegativeInteger(breaker.memoryCost) ??
     knownNonNegativeInteger(visibleInstance?.memoryCost) ??
     knownNonNegativeInteger(
-      cardSpecPlanningCardByDefinitionId(breaker.cardId)?.planning.engine
+      planningCardByDefinitionId(breaker.cardId)?.engine
         .characteristics.numeric.memoryCost,
     )
   );
@@ -556,7 +556,7 @@ function memorySupportProviders(
     visible
       .map((provider) => provider.definitionId)
       .filter(
-        (definitionId): definitionId is string => definitionId !== undefined,
+        (definitionId) => definitionId !== undefined,
       ),
   );
   const deck = (input.ownDeckSnapshot?.cards ?? []).flatMap((entry) => {
@@ -583,12 +583,12 @@ function memorySupportProviders(
 
 function additionalMemoryCapacity(
   input: AiDecisionInput,
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   capacity: number,
 ): number {
   if (
     !definitionId ||
-    cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine
+    planningCardByDefinitionId(definitionId)?.engine
       .hardwareDeck !== true
   )
     return capacity;
@@ -596,7 +596,7 @@ function additionalMemoryCapacity(
     (sum, card) => {
       if (
         !card.definitionId ||
-        cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+        planningCardByDefinitionId(card.definitionId)?.engine
           .hardwareDeck !== true
       )
         return sum;
@@ -609,7 +609,7 @@ function additionalMemoryCapacity(
 
 function memoryCapacityForCard(
   card: VisibleCard,
-  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  rolesForDefinitionId: (definitionId: number) => readonly string[],
 ): number {
   const visibleCapacity = Math.max(0, card.memoryLimitBonus ?? 0);
   if (visibleCapacity > 0) return visibleCapacity;
@@ -625,9 +625,9 @@ function memoryCapacityForCard(
   return 0;
 }
 
-function memoryCapacityForDefinition(definitionId: string): number {
+function memoryCapacityForDefinition(definitionId: number): number {
   const capacity =
-    cardSpecPlanningCardByDefinitionId(definitionId)?.planning.engine
+    planningCardByDefinitionId(definitionId)?.engine
       .characteristics.memoryLimitBonus;
   return knownNonNegativeInteger(capacity) ?? 0;
 }

@@ -55,7 +55,7 @@ it("does not promise ordinary cash beyond the exact run spending cap for unknown
 });
 it("preserves the unrestricted ordinary run and its cash reserve", () => {
   expect(
-    targets(input()).find((x) => x.actionId === "runner.start_run.rd"),
+    targets(input()).find((x) => x.actionId === "rs.rd"),
   ).toMatchObject({
     recommendation: "run_now",
     prerunReserveQuote: {

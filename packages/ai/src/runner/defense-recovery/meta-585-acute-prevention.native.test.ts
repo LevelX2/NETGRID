@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -44,7 +45,7 @@ function fridgeEvaluation(input: AiDecisionInputWithDeckCapabilities) {
         ]),
       ),
     }),
-  }).find((value) => value.definitionId === "onr_v1_121_armored-fridge");
+  }).find((value) => value.definitionId === 333);
 }
 
 it("removes only the generic cash floor from the recognized acute compatible shield", () => {
@@ -102,7 +103,7 @@ it("preserves the native ordinary Wilson setup reserve and the original run head
     cp.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.start_run.hq");
+  expect(decision.actionId).toBe("rs.hq");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.pressure_central");
@@ -124,6 +125,7 @@ it("does not certify acute demand merely from a fully bound historical checkpoin
     ...cp.input,
     ...buildAiDecisionInputDto(cp.input),
   } as AiDecisionInputWithDeckCapabilities;
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   restoreAiRuntimeCheckpoint(
     input,
     input.ownDeckSnapshot!.deckSnapshotId,
@@ -135,7 +137,9 @@ it("does not certify acute demand merely from a fully bound historical checkpoin
     (a) => a.actionId === decision.actionId,
   );
   expect(action?.type).toBe("install_card");
-  expect(action?.payload?.cardId).toMatch(/broker/);
+  const broker = input.playerView.own.gripOrHq.find((card) => card.definitionId === 366);
+  expect(broker).toBeDefined();
+  expect(action?.payload?.cardId).toBe(broker?.instanceId);
   expect(fridgeEvaluation(input)).toMatchObject({
     currentNeed: "setup", deferReason: "preserve_credit_floor",
   });
@@ -166,9 +170,9 @@ it("chooses the active Meat shield and survives the native three-damage line whe
   expect(unprotectedState.gameEndReason).toBe("flatline");
 });
 
-const FRIDGE = "onr_v1_121_armored-fridge";
-const BROKER = "onr_v1_154_broker";
-const SOLO = "onr_v1_342_solo-squad";
+const FRIDGE = 333;
+const BROKER = 366;
+const SOLO = 554;
 
 function activePreventionFixture() {
   const runnerDeck = { ...ORIGINALSET_DEFAULT_DECKS.runner, cards: [

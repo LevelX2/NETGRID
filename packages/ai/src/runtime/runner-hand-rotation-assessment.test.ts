@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
@@ -105,7 +106,7 @@ function fullHand(): VisibleCard[] {
     side: "runner",
     zone: "grip",
     known: true,
-    definitionId: `test-card-${index + 1}`,
+    definitionId: syntheticCardDefinitionId(`test-card-${index + 1}`),
   })) as VisibleCard[];
 }
 
@@ -129,7 +130,7 @@ function handEvaluation(
   return {
     schemaVersion: "runner-hand-development-evaluation-v4",
     cardInstanceId,
-    definitionId: `test-${cardInstanceId}`,
+    definitionId: syntheticCardDefinitionId(`test-${cardInstanceId}`),
     availability: "legal_now",
     developmentRole: "unknown",
     strategicFit: "weak",

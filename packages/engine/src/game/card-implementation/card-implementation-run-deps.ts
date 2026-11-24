@@ -29,6 +29,11 @@ export function startRunForCardImplementation(
   const sourceDefinitionId = sourceCardId
     ? host.cards.definitionFor(state, sourceCardId).id
     : undefined;
+  const requireSourceDefinitionId = () => {
+    if (!sourceDefinitionId)
+      throw new Error("Der Karteneffekt benötigt eine gebundene Run-Quelle.");
+    return sourceDefinitionId;
+  };
   const ordinarySuccessBonusCredits =
     options.successfulRunAccessReplacement === undefined
       ? options.successfulRunRunnerCreditGain
@@ -94,7 +99,7 @@ export function startRunForCardImplementation(
         ? {
             conditionalAccessBonus: {
               ...options.conditionalAccessBonus,
-              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+              sourceDefinitionId: requireSourceDefinitionId(),
             },
           }
         : {}),
@@ -102,7 +107,7 @@ export function startRunForCardImplementation(
         ? {
             corpRezCostSurcharge: {
               ...options.corpRezCostSurcharge,
-              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+              sourceDefinitionId: requireSourceDefinitionId(),
             },
           }
         : {}),
@@ -146,7 +151,7 @@ export function startRunForCardImplementation(
       ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined
         ? {
             unpreventableCoreDamageAtRunEnd: {
-              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+              sourceDefinitionId: requireSourceDefinitionId(),
               amount: options.afterRunCompletedUnpreventableCoreDamage,
             },
           }
@@ -163,7 +168,7 @@ export function startRunForCardImplementation(
       ...(options.damagePreventionPool !== undefined
         ? {
             damagePreventionPool: {
-              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+              sourceDefinitionId: requireSourceDefinitionId(),
               remaining: options.damagePreventionPool,
             },
           }
@@ -174,7 +179,7 @@ export function startRunForCardImplementation(
               ...options.badPublicityRunAftermath,
               sourceCardId:
                 sourceCardId ?? ("card_implementation" as CardInstanceId),
-              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+              sourceDefinitionId: requireSourceDefinitionId(),
               sourceTitle:
                 sourceCardId && sourceDefinitionId
                   ? host.cards.definitionFor(state, sourceCardId).title

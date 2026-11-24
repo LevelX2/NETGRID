@@ -44,15 +44,15 @@ describe("access presentation outcome ownership", () => {
   });
 
   it("folds a public Setup trash into its access presentation", () => {
-    const access = event("evt_9", "access_card", {
+    const access = event(10, "access_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
-    const trash = event("evt_10", "trash_accessed_card", {
+    const trash = event(11, "trash_accessed_card", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_340_setup",
+      cardDefinitionId: 552,
       title: "Setup!",
       serverLabel: "R&D",
     });
@@ -61,25 +61,25 @@ describe("access presentation outcome ownership", () => {
     expect(
       accessPresentationOutcomeAfter([access, trash], access, "corp"),
     ).toEqual({
-      eventId: "evt_10",
+      eventId: 11,
       kind: "trashed",
       status: "Der Runner hat Setup! getrasht.",
     });
   });
 
   it("folds steal and decline outcomes into the same public access", () => {
-    const access = event("evt_access", "access_card", {
+    const access = event(100, "access_card", {
       actor: "runner",
-      cardDefinitionId: "agenda_1",
+      cardDefinitionId: 11001,
       title: "Public Agenda",
     });
-    const steal = event("evt_steal", "steal_agenda", {
+    const steal = event(101, "steal_agenda", {
       actor: "runner",
-      cardDefinitionId: "agenda_1",
+      cardDefinitionId: 11001,
     });
-    const decline = event("evt_decline", "decline_trash", {
+    const decline = event(102, "decline_trash", {
       actor: "runner",
-      cardDefinitionId: "agenda_1",
+      cardDefinitionId: 11001,
     });
 
     expect(
@@ -91,14 +91,14 @@ describe("access presentation outcome ownership", () => {
   });
 
   it("does not fold outcomes into a redacted access", () => {
-    const hiddenAccess = event("evt_hidden", "access_card", {
+    const hiddenAccess = event(103, "access_card", {
       actor: "runner",
       serverLabel: "R&D",
       redactedKind: "hidden_zone",
     });
-    const trash = event("evt_trash", "trash_accessed_card", {
+    const trash = event(104, "trash_accessed_card", {
       actor: "runner",
-      cardDefinitionId: "secret_asset",
+      cardDefinitionId: 11002,
       title: "Secret Asset",
     });
 
@@ -115,16 +115,16 @@ describe("access presentation outcome ownership", () => {
   });
 
   it("stops ownership at the next access in a multiaccess sequence", () => {
-    const first = event("evt_first", "access_card", {
-      cardDefinitionId: "first",
+    const first = event(105, "access_card", {
+      cardDefinitionId: 11003,
       title: "First",
     });
-    const second = event("evt_second", "access_card", {
-      cardDefinitionId: "second",
+    const second = event(106, "access_card", {
+      cardDefinitionId: 11004,
       title: "Second",
     });
-    const trash = event("evt_trash", "trash_accessed_card", {
-      cardDefinitionId: "second",
+    const trash = event(104, "trash_accessed_card", {
+      cardDefinitionId: 11004,
       title: "Second",
     });
 
@@ -226,7 +226,7 @@ describe("access presentation outcome ownership", () => {
 });
 
 function event(
-  eventId: string,
+  eventId: number,
   actionType: string,
   payload: Record<string, unknown>,
 ): PublicGameEvent {

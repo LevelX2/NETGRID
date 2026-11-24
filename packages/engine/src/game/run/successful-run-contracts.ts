@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -86,7 +87,7 @@ export type SuccessfulRunInterventionHost = {
     ) => void;
   };
   runnerCards: {
-    shuffleGripIntoStack: (purpose: string) => number;
+    shuffleGripIntoStack: (purpose: RandomPurpose) => number;
     drawCards: (amount: number) => {
       drawnCount: number;
       drawTaxSourceCount: number;

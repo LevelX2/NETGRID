@@ -1,9 +1,11 @@
 "use client";
 
-import type {
-  ApiReplayAnalysisFrame,
-  PublicGameEvent,
-  Side,
+import {
+  isCardDefinitionId,
+  type ApiReplayAnalysisFrame,
+  type MatchEventId,
+  type PublicGameEvent,
+  type Side,
 } from "@netgrid/shared";
 import {
   ChevronLeft,
@@ -21,6 +23,9 @@ import {
   CardTooltipSettingsContext,
 } from "../../features/cards/card-display-settings";
 import { usePersistentCardScaleSettings } from "../../features/cards/usePersistentCardScaleSettings";
+import { ActiveMatchResourceStrip } from "../../features/game-board/ResourceStrip";
+import { ActiveMatchChrome } from "../../features/app-shell/ActiveMatchChrome";
+import { useObservedElementHeight } from "../../features/app-shell/useObservedElementHeight";
 import { ReplayBoard } from "../../features/replay/ReplayBoard";
 import {
   DEFAULT_REPLAY_BOARD_SETTINGS,
@@ -46,6 +51,7 @@ import {
 } from "../../features/catalog/catalog-card-presentations";
 
 import { configuredServerHttp } from "../../lib/server-endpoint";
+import { actionSlotCapacityForTurn } from "../action-board-ui";
 
 type ReplayIndexEntry = {
   replayId: string;
@@ -62,7 +68,7 @@ type ReplayIndexEntry = {
 };
 
 type ReplayTimelineStep = {
-  eventId: string;
+  eventId: MatchEventId;
   index: number;
   side?: Side;
   label: string;
@@ -88,6 +94,8 @@ type ReplayView = {
 export default function ReplayPage() {
   const t = useTranslations("Replay");
   const [selectedMatchId, setSelectedMatchId] = useState("");
+  const { elementRef: topbarRef, heightPx: topbarHeightPx } =
+    useObservedElementHeight<HTMLElement>(selectedMatchId);
   const [perspective, setPerspective] = useState<Side>("runner");
   const [replay, setReplay] = useState<ReplayView>();
   const [frameIndex, setFrameIndex] = useState(0);
@@ -192,6 +200,26 @@ export default function ReplayPage() {
       ),
     [currentFrame?.stateVersion, replay?.publicEvents],
   );
+  const replayView = currentFrame?.playerViews[perspective];
+  const replayActionCapacities = useMemo(() => {
+    if (!replayView) return null;
+    return {
+      runner: actionSlotCapacityForTurn(
+        "runner",
+        replayView.side === "runner"
+          ? replayView.own.clicks
+          : replayView.opponent.clicks,
+        currentPublicEvents,
+      ),
+      corp: actionSlotCapacityForTurn(
+        "corp",
+        replayView.side === "corp"
+          ? replayView.own.clicks
+          : replayView.opponent.clicks,
+        currentPublicEvents,
+      ),
+    };
+  }, [replayView, currentPublicEvents]);
 
   useEffect(() => {
     const cardIds = Array.from(
@@ -264,93 +292,103 @@ export default function ReplayPage() {
 
   return (
     <main className={replayClassName} data-theme={boardSettings.colorScheme}>
-      <header className="topbar replayTopbar">
-        <div className="replayTopbarIdentity">
-          <button
-            type="button"
-            className="button replayBackButton"
-            onClick={() => {
-              if (window.history.length > 1) window.history.back();
-              else window.location.assign("/");
-            }}
-          >
-            {t("backToGames")}
-          </button>
-          {replay ? (
-            <strong>
-              {participantLabel(
-                replay.metadata,
-                t("side.runner"),
-                t("side.corp"),
-              )}
-            </strong>
-          ) : null}
-        </div>
-
-        <div className="replayTopbarControls" aria-label={t("controls")}>
-          <div
-            className="replayPerspectiveSwitch"
-            aria-label={t("perspective")}
-          >
+      <ActiveMatchChrome topbarHeight={topbarHeightPx}>
+        <header className="topbar replayTopbar" ref={topbarRef}>
+          <div className="replayTopbarIdentity">
             <button
-              className="button"
               type="button"
-              aria-pressed={perspective === "runner"}
-              onClick={() => setPerspective("runner")}
-              disabled={!currentFrame}
+              className="button replayBackButton"
+              onClick={() => {
+                if (window.history.length > 1) window.history.back();
+                else window.location.assign("/");
+              }}
             >
-              {t("side.runner")}
+              {t("backToGames")}
             </button>
-            <button
-              className="button"
-              type="button"
-              aria-pressed={perspective === "corp"}
-              onClick={() => setPerspective("corp")}
-              disabled={!currentFrame}
-            >
-              {t("side.corp")}
-            </button>
+            {replay ? (
+              <strong>
+                {participantLabel(
+                  replay.metadata,
+                  t("side.runner"),
+                  t("side.corp"),
+                )}
+              </strong>
+            ) : null}
           </div>
-          <button
-            className="button iconOnly"
-            type="button"
-            onClick={() => seek(0)}
-            disabled={frameIndex === 0}
-            aria-label={t("toStart")}
-            title={t("toStart")}
-          >
-            <RotateCcw size={16} />
-          </button>
-          <button
-            className="button"
-            type="button"
-            onClick={() => seek(frameIndex - 1)}
-            disabled={frameIndex === 0}
-          >
-            <ChevronLeft size={16} /> {t("previous")}
-          </button>
-          <button
-            className="button replayPlayButton"
-            type="button"
-            onClick={togglePlayback}
-            disabled={!currentFrame}
-          >
-            {playing ? <Pause size={16} /> : <Play size={16} />}
-            {playing ? t("pause") : t("play")}
-          </button>
-          <button
-            className="button"
-            type="button"
-            onClick={() => seek(frameIndex + 1)}
-            disabled={frameIndex >= frames.length - 1}
-          >
-            {t("next")} <ChevronRight size={16} />
-          </button>
-          <strong className="replayStepCount">
-            {frames.length > 0 ? frameIndex + 1 : 0} / {frames.length}
-          </strong>
-        </div>
-      </header>
+
+          <div className="replayTopbarControls" aria-label={t("controls")}>
+            <div
+              className="replayPerspectiveSwitch"
+              aria-label={t("perspective")}
+            >
+              <button
+                className="button"
+                type="button"
+                aria-pressed={perspective === "runner"}
+                onClick={() => setPerspective("runner")}
+                disabled={!currentFrame}
+              >
+                {t("side.runner")}
+              </button>
+              <button
+                className="button"
+                type="button"
+                aria-pressed={perspective === "corp"}
+                onClick={() => setPerspective("corp")}
+                disabled={!currentFrame}
+              >
+                {t("side.corp")}
+              </button>
+            </div>
+            <button
+              className="button iconOnly"
+              type="button"
+              onClick={() => seek(0)}
+              disabled={frameIndex === 0}
+              aria-label={t("toStart")}
+              title={t("toStart")}
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
+              className="button"
+              type="button"
+              onClick={() => seek(frameIndex - 1)}
+              disabled={frameIndex === 0}
+            >
+              <ChevronLeft size={16} /> {t("previous")}
+            </button>
+            <button
+              className="button replayPlayButton"
+              type="button"
+              onClick={togglePlayback}
+              disabled={!currentFrame}
+            >
+              {playing ? <Pause size={16} /> : <Play size={16} />}
+              {playing ? t("pause") : t("play")}
+            </button>
+            <button
+              className="button"
+              type="button"
+              onClick={() => seek(frameIndex + 1)}
+              disabled={frameIndex >= frames.length - 1}
+            >
+              {t("next")} <ChevronRight size={16} />
+            </button>
+            <strong className="replayStepCount">
+              {frames.length > 0 ? frameIndex + 1 : 0} / {frames.length}
+            </strong>
+          </div>
+        </header>
+        {replayView && replayActionCapacities ? (
+          <ActiveMatchResourceStrip
+            view={replayView}
+            agendaPointsToWin={replayView.agendaPointsToWin}
+            actionCapacities={replayActionCapacities}
+            ariaHidden={!resourceStripVisible}
+          />
+        ) : null}
+      </ActiveMatchChrome>
 
       {currentFrame ? (
         <div className="matchStrip replayTimelineStrip">
@@ -395,7 +433,7 @@ export default function ReplayPage() {
         <div className="activeMatchWorkspace">{t("loading")}</div>
       ) : null}
 
-      {currentFrame ? (
+      {currentFrame && replayActionCapacities ? (
         <CardScaleSettingsContext.Provider
           value={{
             tooltipPercent: cardScaleSettings.cardTooltipScalePercent,
@@ -427,6 +465,8 @@ export default function ReplayPage() {
                   perspective={perspective}
                   displayNames={replay?.metadata.participantNames ?? {}}
                   publicEvents={currentPublicEvents}
+                  actionCapacities={replayActionCapacities}
+                  showResourceStats={!resourceStripVisible}
                   cardPresentationsById={cardPresentationsById}
                   cardDetailsById={cardDetailsById}
                   cardDisplayMode={boardSettings.cardDisplayMode}

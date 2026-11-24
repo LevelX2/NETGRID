@@ -1,3 +1,4 @@
+import { parseRunIdToken } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -43,6 +44,7 @@ import {
 } from "../../ability-engine/card-implementation-runtime";
 import { startCorpHqCardToRdChoice } from "../hidden-zone/nonsearch-choice-handlers";
 import { resumeSuccessfulRunAccessReplacementAfterTagPrevention } from "../run/run-access-transition";
+import { enterRunStartApproach } from "../run/run-core-execution";
 import { resumePreventableTrashCostContinuation } from "../abilities/trigger-ability-execution";
 import { resumeRunEndCleanupAfterTagPrevention } from "../run/run-end-cleanup";
 import {
@@ -160,33 +162,10 @@ export function createPendingChoiceRuntimeHosts(
     state: GameState,
     legalAction?: LegalAction,
   ): void {
-    const run = state.run;
-    if (run) delete run.runStartInterventions;
-    state.activeSide = "runner";
-    let advancedFromStart = false;
-    const runPhase = run?.phase as
-      | NonNullable<GameState["run"]>["phase"]
-      | "start"
-      | undefined;
-    if (run && runPhase === "start") {
-      const server = deps.mustServer(state, run.attackedServerId);
-      if (server.ice.length > 0) {
-        const iceIndex = server.ice.length - 1;
-        const approachedIceId = server.ice[iceIndex];
-        if (!approachedIceId)
-          throw new Error(
-            "Das angegriffene Fort hat keine ICE an dieser Position.",
-          );
-        run.phase = "approach_ice";
-        run.position = { kind: "ice", serverId: server.id, iceIndex };
-        run.approachedIceId = approachedIceId;
-      } else {
-        run.phase = "approach_ice";
-        run.position = { kind: "server", serverId: server.id };
-      }
-      advancedFromStart = true;
-    }
-    return;
+    enterRunStartApproach(
+      deps.runFlow.runCoreExecutionHost(state),
+      legalAction,
+    );
   }
 
   function originalRunStartServerId(
@@ -283,7 +262,7 @@ export function createPendingChoiceRuntimeHosts(
         throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
       const [, runId = "", sourceCardId = "", serverId = ""] =
         choice.source.split(":");
-      if (run.runId !== runId || run.attackedServerId !== serverId)
+      if (run.runId !== parseRunIdToken(runId) || run.attackedServerId !== serverId)
         throw new Error("Die Spend-Cap-Choice passt nicht mehr zum Run.");
       const selected =
         deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
@@ -492,7 +471,7 @@ export function createPendingChoiceRuntimeHosts(
       if (!run) throw new Error("Es laeuft kein Run fuer Fort-Reorder.");
       const [, runId = "", sourceCardId = "", serverId = ""] =
         choice.source.split(":");
-      if (run.runId !== runId || run.attackedServerId !== serverId)
+      if (run.runId !== parseRunIdToken(runId) || run.attackedServerId !== serverId)
         throw new Error("Die Reorder-Choice passt nicht mehr zum Run.");
       const selectedIds = selectedChoiceCardIds(choice, playerAction);
       const server = deps.mustServer(state, serverId);
@@ -1079,7 +1058,7 @@ export function createPendingChoiceRuntimeHosts(
       selectedCards = deps.discardRandomCorpHqCards(
         state,
         expectedCount,
-        "v191.random.runner_virus_hq_discard_phase",
+        [53],
       );
     } else {
       const selectedIds = deps.selectedChoiceIds(playerAction.selectedChoices);
@@ -1218,7 +1197,7 @@ export function createPendingChoiceRuntimeHosts(
       const shuffled = deps.shuffleStateIds(
         state,
         allIds,
-        "setup.shuffle.runner.mulligan",
+        [5],
       );
       const grip = shuffled.splice(0, handSize);
       state.runner.grip = grip;
@@ -1230,7 +1209,7 @@ export function createPendingChoiceRuntimeHosts(
         };
       deps.recordStateRandomMarkers(
         state,
-        "setup.draw.runner.mulligan_hand",
+        [7],
         grip.length,
       );
       return;
@@ -1245,7 +1224,7 @@ export function createPendingChoiceRuntimeHosts(
     const shuffled = deps.shuffleStateIds(
       state,
       allIds,
-      "setup.shuffle.corp.mulligan",
+      [6],
     );
     const hq = shuffled.splice(0, handSize);
     state.corp.hq = hq;
@@ -1257,7 +1236,7 @@ export function createPendingChoiceRuntimeHosts(
       };
     deps.recordStateRandomMarkers(
       state,
-      "setup.draw.corp.mulligan_hand",
+      [8],
       hq.length,
     );
   }
@@ -1313,7 +1292,7 @@ export function createPendingChoiceRuntimeHosts(
     for (let index = 0; index < continuation.runAttemptsLastTurn; index += 1) {
       const roll = rollDeterministicDie(
         state,
-        `classic.satellite_monitors.corp_start.${state.stateVersion}.${continuation.sourceCardId}.${index}`,
+        [26, state.stateVersion, continuation.sourceCardId, index],
       );
       rolls.push(roll);
       if (roll === 1) tagsAdded += 1;

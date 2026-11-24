@@ -93,6 +93,13 @@ describe("Department rest-turn funding with a new Remote protection need", () =>
       expect(
         corpOrderedRemoteInstallPathAssessment(input, [], source, missing),
       ).toMatchObject({ knowledge: "unknown" });
+      const stale = structuredClone(action);
+      stale.expiresAtStateVersion -= 1;
+      stale.payload!.postInstallRezQuoteExpiresAtStateVersion =
+        stale.expiresAtStateVersion;
+      expect(
+        corpOrderedRemoteInstallPathAssessment(input, [], source, stale),
+      ).toMatchObject({ knowledge: "unknown" });
     }
   });
   it("binds the whole Engine-quoted cycle and rejects a mismatched admitted milestone", () => {
@@ -114,7 +121,7 @@ describe("Department rest-turn funding with a new Remote protection need", () =>
       stateIdentity,
       signal,
       actionId: signal.actionIds[0]!,
-      planInstanceId: "plan:corp.economy:native-bank-cycle",
+      planInstanceId: "pbvzi7n89vb00w56yjo6nh4puo",
     };
     const quote = corpHostedBankTurnPlanningQuote(params)!;
     expect(quote.campaignQuote).toMatchObject({
@@ -134,42 +141,80 @@ describe("Department rest-turn funding with a new Remote protection need", () =>
       corpHostedBankTurnPlanningQuote({ ...params, signal: invalid }),
     ).toThrow("missing_plan_module_coverage");
   });
-  it("admits the profitable native load when neither offered new layer improves the current path", () => {
-    const f = fixture(),
-      input = f.input;
-    expect(Object.keys(f.validation)).toHaveLength(9);
-    expect(Object.values(f.validation).every(Boolean)).toBe(true);
-    expect(input.playerView.own).toMatchObject({ credits: 3, clicks: 2 });
-    input.planningStateIdentity = buildPlanningStateIdentity(input);
-    restoreAiRuntimeCheckpoint(
-      input,
-      input.ownDeckSnapshot!.deckSnapshotId,
-      f.runtime,
-    );
-    restoreResidentPlanPortfolioMemorySnapshot(
-      input,
-      f.runtime.residentPlanPortfolio!,
-    );
-    const before = JSON.stringify(input),
-      decision = chooseAiAction(input);
-    expect(JSON.stringify(input)).toBe(before);
-    expect(decision.fallbackUsed).toBe(false);
-    expect(decision.timeoutUsed).toBe(false);
-    const action = input.legalActions.find(
-      (a) => a.actionId === decision.actionId,
-    )!;
-    expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
-    expect(action.payload?.hostedCreditAddAmount).toBe(3);
-    const p = decision.decisionDebug?.planFirstDecision;
-    expect(p?.selectedPlan?.moduleId).toBe("corp.economy");
-    expect(p?.rootPlanInstanceId).toContain("economy-hosted-bank-cycle");
-    expect(p?.route?.actionId).toBe(action.actionId);
-    expect(p?.route?.stateVersion).toBe(input.playerView.stateVersion);
-    expect(
-      p?.turnPlanning?.consideredLines?.some((line) =>
-        line.evidenceCodes.includes("corp_engine_quoted_bank_milestone"),
-      ),
-    ).toBe(true);
-    expect(p?.selectedStep?.planInstanceId).toBe(p?.leafExecutorInstanceId);
-  });
+  it.each([false, true])(
+    "values the bank with the current installation offers (new Remote only: %s)",
+    (newRemoteOnly) => {
+      const f = fixture(),
+        input = f.input;
+      expect(Object.keys(f.validation)).toHaveLength(9);
+      expect(Object.values(f.validation).every(Boolean)).toBe(true);
+      expect(input.playerView.own).toMatchObject({ credits: 3, clicks: 2 });
+      if (newRemoteOnly) {
+        // Isolate the two fully quoted new-Remote installs from older forts
+        // whose remaining path cannot be assessed in the captured public rig.
+        input.legalActions = input.legalActions.filter(
+          (action) =>
+            action.type !== "install_card" ||
+            action.payload?.placement !== "ice" ||
+            action.payload.serverId === "new_remote",
+        );
+      }
+      input.planningStateIdentity = buildPlanningStateIdentity(input);
+      restoreAiRuntimeCheckpoint(
+        input,
+        input.ownDeckSnapshot!.deckSnapshotId,
+        f.runtime,
+      );
+      restoreResidentPlanPortfolioMemorySnapshot(
+        input,
+        f.runtime.residentPlanPortfolio!,
+      );
+      const before = JSON.stringify(input),
+        decision = chooseAiAction(input);
+      expect(JSON.stringify(input)).toBe(before);
+      expect(decision.fallbackUsed).toBe(false);
+      expect(decision.timeoutUsed).toBe(false);
+      const action = input.legalActions.find(
+        (a) => a.actionId === decision.actionId,
+      )!;
+      expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
+      const p = decision.decisionDebug?.planFirstDecision;
+      expect(p?.selectedPlan?.moduleId).toBe("corp.economy");
+      if (newRemoteOnly) {
+        expect(action.payload?.hostedCreditAddAmount).toBe(3);
+        expect(
+          p?.portfolio.find(
+            (instance) => instance.instanceId === p?.rootPlanInstanceId,
+          ),
+        ).toMatchObject({
+          moduleId: "corp.economy",
+          dedupeKey: expect.stringContaining("economy-hosted-bank-cycle"),
+        });
+      } else {
+        expect(action.payload?.hostedCreditTakeAmount).toBe(3);
+        const load = input.legalActions.find(
+          (a) =>
+            a.source === action.source &&
+            a.payload?.cardImplementationAddsHostedCredits === true,
+        );
+        expect(load).toBeDefined();
+        expect(p?.dispositions).toContainEqual(
+          expect.objectContaining({
+            actionId: load!.actionId,
+            ownerModuleId: "corp.economy",
+            evidenceCode:
+              "corp_hosted_bank_load_deferred_no_admitted_investment_or_funding_route",
+          }),
+        );
+      }
+      expect(p?.route?.actionId).toBe(action.actionId);
+      expect(p?.route?.stateVersion).toBe(input.playerView.stateVersion);
+      expect(
+        p?.turnPlanning?.consideredLines?.some((line) =>
+          line.evidenceCodes.includes("corp_engine_quoted_bank_milestone"),
+        ),
+      ).toBe(true);
+      expect(p?.selectedStep?.planInstanceId).toBe(p?.leafExecutorInstanceId);
+    },
+  );
 });

@@ -53,7 +53,7 @@ export function removesPersistentRunnerHazardCounter(
     typeof payload.counterType === "string" &&
     isRemovableRunnerHazardCounterType(payload.counterType) &&
     typeof payload.removeCounterAmount === "number" &&
-    Number.isFinite(payload.removeCounterAmount) &&
+    Number.isSafeInteger(payload.removeCounterAmount) &&
     payload.removeCounterAmount > 0
   );
 }

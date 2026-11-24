@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
@@ -5,6 +6,7 @@ import {
   type LegalAction,
   type PlayerView,
   type PublicGameEvent,
+  type MatchEventId,
   type VisibleCard,
 } from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "./input-dto";
@@ -47,10 +49,10 @@ describe("AI input DTO score-conversion contract", () => {
     const action = conversionAction();
     action.side = "runner";
     action.type = "continue_run";
+    action.encounterSubroutineIds = ["damage", "next-lock"];
     action.payload = {
       encounterContinue: true,
       unbrokenSubroutineCount: 2,
-      encounterSubroutineIds: "damage,next-lock",
       encounterFullBreakDamage: 3,
       privateProbe: "discard",
     };
@@ -69,11 +71,7 @@ describe("AI input DTO score-conversion contract", () => {
       input.legalActions[0],
       input.playerView.legalActions[0],
     ]) {
-      expect(projected?.payload).toMatchObject({
-        encounterSubroutineIds: "damage,next-lock",
-        encounterFullBreakDamage: 3,
-        unbrokenSubroutineCount: 2,
-      });
+      expect(projected).toMatchObject({encounterSubroutineIds: ["damage","next-lock"], payload: { encounterFullBreakDamage: 3, unbrokenSubroutineCount: 2 }});
       expect(projected?.payload).not.toHaveProperty("privateProbe");
     }
   });
@@ -117,7 +115,7 @@ describe("AI input DTO score-conversion contract", () => {
 
   it("preserves the actor-private Runner draw projection without changing its action binding", () => {
     const action = conversionAction();
-    action.actionId = "runner.draw_card";
+    action.actionId = "r8";
     action.side = "runner";
     action.type = "draw_card";
     action.source = "basic_action";
@@ -154,7 +152,7 @@ describe("AI input DTO score-conversion contract", () => {
 
   it("preserves the engine-certified Runner agenda-transfer quote", () => {
     const action = conversionAction();
-    action.actionId = "runner.play_event.corruption";
+    action.actionId = "rh.corruption";
     action.side = "runner";
     action.type = "play_event";
     action.source = "corruption";
@@ -333,7 +331,7 @@ describe("AI input DTO score-conversion contract", () => {
     view.own.gripOrHq = [
       {
         instanceId: "vapor",
-        definitionId: "onr_v1_347_vapor-ops",
+        definitionId: 559,
         title: "Vapor Ops",
         owner: "corp",
         controller: "corp",
@@ -407,7 +405,7 @@ describe("AI input DTO score-conversion contract", () => {
     view.own.gripOrHq = [
       {
         instanceId: "power-grid",
-        definitionId: "onr_v1_299_power-grid-overload",
+        definitionId: 511,
         title: "Power Grid Overload",
         owner: "corp",
         controller: "corp",
@@ -423,7 +421,7 @@ describe("AI input DTO score-conversion contract", () => {
     ];
     view.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [],
         root: [
@@ -473,7 +471,7 @@ describe("AI input DTO score-conversion contract", () => {
       visibility: "public",
       continuation: {
         family: "corp_advancement_counter",
-        originActionId: "corp.play_operation.test",
+        originActionId: "ci.test",
         createdAtStateVersion: 1,
       },
     };
@@ -530,7 +528,7 @@ describe("AI input DTO score-conversion contract", () => {
       visibility: "hidden_info_barrier",
       continuation: {
         family: "runner_post_break_stealth_loss",
-        originActionId: "runner.break_subroutine.pile-driver",
+        originActionId: "r3.pile-driver",
         breakerInstanceId: "pile-driver",
         requiredLoss: 3,
         sourceMode: "any_stealth_cards",
@@ -657,7 +655,7 @@ describe("AI input DTO score-conversion contract", () => {
     ];
     view.servers = [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: [
           {
@@ -764,7 +762,7 @@ describe("AI input DTO score-conversion contract", () => {
     const view = playerView(action, "runner");
     view.publicEvents = [
       {
-        eventId: "turn-start-effects",
+        eventId: 3,
         type: "automatic_effects_resolved",
         stateVersionBefore: 1,
         stateVersionAfter: 2,
@@ -773,23 +771,23 @@ describe("AI input DTO score-conversion contract", () => {
         publicPayload: {
           resolvedEffects: [
             {
-              effectId: "conference-credit",
+              effectId: 0,
+              kind: "draw_cards",
+              visibility: "private_to_side",
+              side: "corp",
+              amount: 1,
+              cardDefinitionId: syntheticCardDefinitionId("must-not-cross-dto"),
+              cardTitle: "Must not cross DTO",
+            },
+            {
+              effectId: 1,
               kind: "gain_credits",
               visibility: "public",
               side: "runner",
               amount: 2,
               reason: "start_of_turn",
-              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceDefinitionId: 396,
               sourceTitle: "Top Runners' Conference",
-            },
-            {
-              effectId: "private-probe",
-              kind: "draw_cards",
-              visibility: "private_to_side",
-              side: "corp",
-              amount: 1,
-              cardDefinitionId: "must-not-cross-dto",
-              cardTitle: "Must not cross DTO",
             },
           ],
         },
@@ -811,16 +809,23 @@ describe("AI input DTO score-conversion contract", () => {
       input.playerView.publicEvents[0]?.publicPayload.resolvedEffects,
     ).toEqual([
       expect.objectContaining({
-        effectId: "conference-credit",
+        effectId: 1,
         kind: "gain_credits",
         visibility: "public",
-        sourceDefinitionId: "onr_v1_184_top-runners-conference",
+        sourceDefinitionId: 396,
       }),
     ]);
     expect(input.eventTail[0]?.publicPayload.resolvedEffects).toEqual(
       input.playerView.publicEvents[0]?.publicPayload.resolvedEffects,
     );
     expect(JSON.stringify(input)).not.toContain("must-not-cross-dto");
+    const staleEvent = structuredClone(view.publicEvents[0]!);
+    Object.assign(staleEvent.publicPayload.resolvedEffects![1]!, {
+      effectId: "old-source-effect-id",
+    });
+    expect(() =>
+      buildAiDecisionInputDto({ ...input, eventTail: [staleEvent] }),
+    ).toThrow("invalid_public_resolved_game_effect_id");
   });
 
   it("preserves exact public score-conversion capabilities and drops unknown payload data", () => {
@@ -1168,7 +1173,7 @@ describe("AI input DTO score-conversion contract", () => {
     view.own.rig = [
       {
         instanceId: "runner-morphing-tool",
-        definitionId: "onr_proteus_092_morphing-tool",
+        definitionId: 150,
         title: "Morphing Tool",
         owner: "runner",
         controller: "runner",
@@ -1203,12 +1208,12 @@ describe("AI input DTO score-conversion contract", () => {
   it("preserves actor-visible encounter subroutine targets", () => {
     const action = runnerSemanticAction();
     action.type = "break_subroutine";
+    action.subroutineIndexes = [1];
     action.payload = {
       ...action.payload,
       breakerId: "runner-breaker",
       iceId: "corp-ice",
       subroutineIndex: 1,
-      subroutineIndexes: "1",
       privateEncounterProbe: "must-not-cross-dto",
     };
     const input = buildAiDecisionInputDto({
@@ -1223,18 +1228,8 @@ describe("AI input DTO score-conversion contract", () => {
       profileId: "runner-encounter-target-dto-test",
     });
 
-    expect(input.legalActions[0]?.payload).toMatchObject({
-      breakerId: "runner-breaker",
-      iceId: "corp-ice",
-      subroutineIndex: 1,
-      subroutineIndexes: "1",
-    });
-    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
-      breakerId: "runner-breaker",
-      iceId: "corp-ice",
-      subroutineIndex: 1,
-      subroutineIndexes: "1",
-    });
+    expect(input.legalActions[0]).toMatchObject({subroutineIndexes: [1], payload: { breakerId: "runner-breaker", iceId: "corp-ice", subroutineIndex: 1 }});
+    expect(input.playerView.legalActions[0]).toMatchObject({subroutineIndexes: [1], payload: { breakerId: "runner-breaker", iceId: "corp-ice", subroutineIndex: 1 }});
     expect(input.legalActions[0]?.payload).not.toHaveProperty(
       "privateEncounterProbe",
     );
@@ -1278,7 +1273,7 @@ describe("AI input DTO score-conversion contract", () => {
   it("preserves public remote-root structure without exposing card identities", () => {
     const action = runnerSemanticAction();
     const events: PublicGameEvent[] = [
-      publicEvent("install", {
+      publicEvent(2, {
         actor: "corp",
         actionType: "install_card",
         serverLabel: "Remote 1",
@@ -1287,11 +1282,11 @@ describe("AI input DTO score-conversion contract", () => {
         replacedRootCardType: "asset",
         replacedRootCardId: "must-not-cross-dto",
       }),
-      publicEvent("score", {
+      publicEvent(3, {
         actor: "corp",
         actionType: "score_agenda",
         targets: {
-          scoredFromServerId: "remote-1",
+          scoredFromServerId: "r1",
           scoredCardId: "must-not-cross-dto",
         },
       }),
@@ -1316,13 +1311,13 @@ describe("AI input DTO score-conversion contract", () => {
       "replacedRootCardId",
     );
     expect(input.eventTail[1]?.publicPayload.targets).toEqual({
-      scoredFromServerId: "remote-1",
+      scoredFromServerId: "r1",
     });
   });
 
   it("sanitizes aliased public history only once", () => {
     const action = conversionAction();
-    const events = [publicEvent("shared", { actionType: "gain_credit" })];
+    const events = [publicEvent(2, { actionType: "gain_credit" })];
     events[0]!.turnSerial = 7;
     const view = playerView(action);
     view.publicEvents = events;
@@ -1348,9 +1343,9 @@ describe("AI input DTO score-conversion contract", () => {
   it("reuses sanitized event objects for a public-history suffix", () => {
     const action = conversionAction();
     const events = [
-      publicEvent("one", { actionType: "gain_credit" }),
-      publicEvent("two", { actionType: "click_credit" }),
-      publicEvent("three", { actionType: "end_turn" }),
+      publicEvent(2, { actionType: "gain_credit" }),
+      publicEvent(3, { actionType: "click_credit" }),
+      publicEvent(4, { actionType: "end_turn" }),
     ];
     const view = playerView(action);
     view.publicEvents = events;
@@ -1378,10 +1373,10 @@ describe("AI input DTO score-conversion contract", () => {
       ...action.payload,
       cardImplementationAdvancementCounterCost: 1,
     };
-    const payoutEvent = publicEvent("counter-payout", {
+    const payoutEvent = publicEvent(2, {
       actor: "corp",
       actionType: "activated_card_ability",
-      sourceDefinitionId: "corp-counter-economy",
+      sourceDefinitionId: syntheticCardDefinitionId("corp-counter-economy"),
       cardImplementationAdvancementCounterCost: 1,
       gainedCredits: 1,
       privateProbe: "must-not-cross-dto",
@@ -1405,7 +1400,7 @@ describe("AI input DTO score-conversion contract", () => {
       cardImplementationAdvancementCounterCost: 1,
     });
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
-      sourceDefinitionId: "corp-counter-economy",
+      sourceDefinitionId: syntheticCardDefinitionId("corp-counter-economy"),
       cardImplementationAdvancementCounterCost: 1,
       gainedCredits: 1,
     });
@@ -1419,7 +1414,7 @@ describe("AI input DTO score-conversion contract", () => {
     const view = playerView(action, "runner");
     const effectiveRunQuote = {
       iceInstanceId: "homing-missile",
-      iceDefinitionId: "onr_proteus_025_homing-missile",
+      iceDefinitionId: 83,
       effectiveStrength: 5,
       encounterTemporaryTraceCredits: 2,
       conditionalEncounterEffects: [
@@ -1450,7 +1445,7 @@ describe("AI input DTO score-conversion contract", () => {
         ice: [
           {
             instanceId: "homing-missile",
-            definitionId: "onr_proteus_025_homing-missile",
+            definitionId: 83,
             title: "Homing Missile",
             type: "ice",
             known: true,
@@ -1493,13 +1488,13 @@ describe("AI input DTO score-conversion contract", () => {
         ice: [
           {
             instanceId: "malformed-ice",
-            definitionId: "onr_proteus_025_homing-missile",
+            definitionId: 83,
             type: "ice",
             known: true,
             rezzed: true,
             effectiveRunQuote: {
               iceInstanceId: "malformed-ice",
-              iceDefinitionId: "onr_proteus_025_homing-missile",
+              iceDefinitionId: 83,
               effectiveStrength: 5,
               subroutines: [
                 {
@@ -1555,7 +1550,7 @@ describe("AI input DTO score-conversion contract", () => {
             rezzed: true,
             effectiveRunQuote: {
               iceInstanceId: "hidden-ice",
-              iceDefinitionId: "must-not-cross-dto",
+              iceDefinitionId: syntheticCardDefinitionId("must-not-cross-dto"),
               effectiveStrength: 5,
               subroutines: [],
               privateQuoteProbe: "must-not-cross-dto",
@@ -1590,14 +1585,14 @@ describe("AI input DTO score-conversion contract", () => {
     const postRezQuote = {
       context: "installed_post_rez" as const,
       cardId: "corp-fixed-ice",
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       targetServerId: "rd" as const,
       projectedServerId: "rd" as const,
       expiresAtStateVersion: view.stateVersion,
       complete: true as const,
       effectiveRunQuote: {
         iceInstanceId: "corp-fixed-ice",
-        iceDefinitionId: "simple_barrier_ice",
+        iceDefinitionId: 589,
         effectiveStrength: 3,
         subroutines: [{ id: "fixed-etr", type: "end_the_run" as const }],
       },
@@ -1609,7 +1604,7 @@ describe("AI input DTO score-conversion contract", () => {
         ice: [
           {
             instanceId: "corp-fixed-ice",
-            definitionId: "simple_barrier_ice",
+            definitionId: 589,
             type: "ice",
             owner: "corp",
             controller: "corp",
@@ -1643,7 +1638,7 @@ describe("AI input DTO score-conversion contract", () => {
     view.servers[0]!.ice[0]!.effectivePostRezRunQuote = {
       context: "installed_post_rez",
       cardId: "corp-fixed-ice",
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       targetServerId: "rd",
       projectedServerId: "rd",
       expiresAtStateVersion: view.stateVersion,
@@ -1666,7 +1661,7 @@ describe("AI input DTO score-conversion contract", () => {
     ).toEqual({
       context: "installed_post_rez",
       cardId: "corp-fixed-ice",
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       targetServerId: "rd",
       projectedServerId: "rd",
       expiresAtStateVersion: view.stateVersion,
@@ -1716,14 +1711,14 @@ describe("AI input DTO score-conversion contract", () => {
 });
 
 function publicEvent(
-  eventId: string,
+  eventId: MatchEventId,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
     eventId,
     type: String(publicPayload.actionType ?? "game_event"),
-    stateVersionBefore: 0,
-    stateVersionAfter: 1,
+    stateVersionBefore: eventId - 2,
+    stateVersionAfter: eventId - 1,
     stateHashAfter: `hash-${eventId}`,
     publicPayload,
   };
@@ -1834,7 +1829,7 @@ function playerView(
 function identity(side: "corp" | "runner"): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(`${side}-identity`),
     title: `${side} identity`,
     owner: side,
     controller: side,

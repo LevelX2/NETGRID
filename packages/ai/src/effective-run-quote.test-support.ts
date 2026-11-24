@@ -65,7 +65,7 @@ export function withPostRezRunQuote(
   };
 }
 
-function requireDefinitionId(ice: VisibleCard): string {
+function requireDefinitionId(ice: VisibleCard): number {
   if (!ice.definitionId) {
     throw new Error(
       `Post-rez run quote fixture ${ice.instanceId} needs a definitionId.`,

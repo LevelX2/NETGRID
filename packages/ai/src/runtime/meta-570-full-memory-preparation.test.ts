@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -49,7 +50,7 @@ it("replaces the acceptable redundant program, funds and wins the original remot
   let state: GameState = saved.state;
   const initial = state;
   const heads: string[] = [];
-  const root = "plan:runner.contest_remote:remote%3Aremote_1";
+  const root = "p1p4xezjcxov79rno40lq3f7rv";
   for (let n = 0; n < 80 && !state.winner; n++) {
     const side = state.activeSide;
     const input =
@@ -83,11 +84,11 @@ it("replaces the acceptable redundant program, funds and wins the original remot
     }
     if (n === 1) {
       expect(action.payload.runnerProgramTrashBeforeInstall).toBe(true);
-      expect(action.source).toContain("codecracker");
+      expect(referencesDefaultDeckCard(action.source, 226)).toBe(true);
     }
     if (n === 2)
       expect(decision.selectedChoices?.selectedOptionIds).toEqual([
-        expect.stringContaining("vienna-22"),
+        "card_cyp",
       ]);
     const result = applyAction(state, {
       matchId: state.matchId,
@@ -118,9 +119,9 @@ it("replaces the acceptable redundant program, funds and wins the original remot
     getPlayerView(state, "runner").own.rig?.map((c) => c.definitionId),
   ).toEqual(
     expect.arrayContaining([
-      "onr_v1_039_krash",
-      "onr_v1_021_dwarf",
-      "onr_v1_014_codecracker",
+      251,
+      233,
+      226,
     ]),
   );
   const replay = replayEvents(
@@ -140,7 +141,7 @@ it.each([
   const { checkpoint } = original(),
     input = checkpoint.input;
   const card = input.playerView.own.gripOrHq.find(
-    (c: any) => c.definitionId === "onr_v1_014_codecracker",
+    (c: any) => c.definitionId === 226,
   );
   if (boundary === "missing_native_route")
     input.legalActions = input.legalActions.filter(
@@ -148,7 +149,7 @@ it.each([
     );
   if (boundary === "lost_memory_provider")
     input.playerView.own.rig.find(
-      (c: any) => c.definitionId === "onr_proteus_098_vienna-22",
+      (c: any) => c.definitionId === 156,
     ).memoryLimitBonus = 1;
   const assessProgramInstallTarget = (
     current: typeof input,

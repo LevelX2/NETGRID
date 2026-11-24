@@ -123,19 +123,19 @@ function encounter(credits: number) {
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_v1_280_zombie", quantity: 3 },
-        { id: "onr_proteus_029_marionette", quantity: 1 },
+        { id: 492, quantity: 3 },
+        { id: 87, quantity: 1 },
         ...ORIGINALSET_DEFAULT_DECKS.corp.cards.filter(
           (c) =>
-            !["onr_v1_280_zombie", "onr_proteus_029_marionette"].includes(c.id),
+            ![492, 87].includes(c.id),
         ),
       ],
     },
   });
-  installRunnerProgramForTest(state, "onr_v1_039_krash");
-  const inner = putCorpIceOnServer(state, "rd", "onr_v1_280_zombie");
-  const middle = putCorpIceOnServer(state, "rd", "onr_proteus_029_marionette");
-  const outer = putCorpIceCopyOnServer(state, "rd", "onr_v1_280_zombie");
+  installRunnerProgramForTest(state, 251);
+  const inner = putCorpIceOnServer(state, "rd", 492);
+  const middle = putCorpIceOnServer(state, "rd", 87);
+  const outer = putCorpIceCopyOnServer(state, "rd", 492);
   for (const id of [inner, middle, outer]) {
     state.cardInstances[id]!.rezzed = true;
     state.cardInstances[id]!.faceup = true;

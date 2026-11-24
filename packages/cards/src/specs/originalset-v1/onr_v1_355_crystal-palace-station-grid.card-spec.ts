@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_355_crystal-palace-station-grid",
+      567,
     ),
     title: "Crystal Palace Station Grid",
     side: "corp",

@@ -32,7 +32,7 @@ it.each([
   (strength, cost) => {
     const { input } = capture();
     const breaker = input.playerView.own.rig.find(
-      (c: { definitionId: string }) => c.definitionId === "onr_v1_039_krash",
+      (c: { definitionId: number }) => c.definitionId === 251,
     );
     const ice = input.playerView.servers.find(
       (s: { id: string }) => s.id === "rd",
@@ -79,7 +79,7 @@ it("funds the native negative-strength route before starting another known faile
   );
   expect(action).toMatchObject({
     type: "play_event",
-    source: "runner_onr_proteus_124_stakeout_2",
+    source: "c14i",
     expiresAtStateVersion: 328,
   });
   expect(decision.fallbackUsed).toBe(false);

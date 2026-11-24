@@ -107,6 +107,12 @@ function visibleChoiceOptionValue(
 ): ChoiceRequest["options"][number]["value"] | undefined {
   if (option.value === undefined) return undefined;
   if (
+    choice.source.startsWith(
+      "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target:",
+    )
+  )
+    return undefined;
+  if (
     choice.visibility === "public" &&
     option.publicLabel &&
     typeof option.value === "string" &&

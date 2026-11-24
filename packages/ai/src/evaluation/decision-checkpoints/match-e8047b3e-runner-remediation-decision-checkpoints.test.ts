@@ -31,7 +31,7 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
     const { input, decision } = replayDecision(shellDuplicateJson);
     const duplicatePreparation = input.legalActions.find((action) =>
       action.actionId.includes(
-        "runner_onr_v1_059_self-modifying-code_1.set_aside_from_grip",
+        "c1o9.set_aside_from_grip",
       ),
     );
     expect(duplicatePreparation).toBeDefined();
@@ -113,14 +113,19 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
         action.type === "pump_breaker" && action.label.startsWith("Snowball:"),
     );
     expect(snowballPump).toBeDefined();
+    const currentPlan = decision.decisionDebug?.planFirstDecision;
+    const boundContest = currentPlan?.portfolio.find(
+      (instance) => instance.instanceId === currentPlan.rootPlanInstanceId,
+    );
+    expect(boundContest?.moduleId).toBe("runner.contest_remote");
 
     expect(decision).toMatchObject({
-      actionId: "runner.continue_run.printed_subroutines_trace",
+      actionId: "r5.0",
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining("runner.contest_remote"),
+          rootPlanInstanceId: boundContest?.instanceId,
           route: {
             actionType: "continue_run",
           },
@@ -132,26 +137,25 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
     );
   });
 
-  it("spends the full visible safe bid against Neon Guillotine's credible tag-kill turn", () => {
-    const capture = structuredClone(
+  it("rejects the old Neon Guillotine capture without Classic Link deltas", () => {
+    const capture = structuredClone<unknown>(
       lethalTraceJson,
     ) as ReconstructedRunnerDecisionCapture;
     const choice = capture.input.playerView.pendingChoice;
     if (!choice) throw new Error("Expected the persisted Trace choice.");
 
-    const result = assessTraceBidCandidates(
-      capture.input as AiDecisionInput,
-      choice,
-      latestTraceContext(capture.input),
+    expect(() =>
+      assessTraceBidCandidates(
+        capture.input as AiDecisionInput,
+        choice,
+        latestTraceContext(capture.input),
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "missing_action_semantics",
+        context: expect.objectContaining({ owner: "rules_contract" }),
+      }),
     );
-
-    expect(result?.assessment).toMatchObject({
-      stakes: "terminal",
-      rationalTarget: 5,
-      rationalRange: [5, 5],
-      reserveTarget: 0,
-    });
-    expect(result?.candidates.map((candidate) => candidate.bid)).toEqual([5]);
   });
 });
 

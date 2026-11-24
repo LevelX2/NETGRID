@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_144_tycho-mem-chip"),
+    cardDefinitionId: cardDefinitionId(356),
     title: "Tycho Mem Chip",
     side: "runner",
     cardType: "hardware",

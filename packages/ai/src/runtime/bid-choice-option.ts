@@ -1,20 +1,15 @@
-import { traceSuccessEffectCardImplementationQuotesForDefinition } from "@netgrid/engine";
-import { type AiDecisionInput, type CardDefinitionId } from "@netgrid/shared";
+import type { RunnerRunPlan } from "./runner-run-plan-snapshot";
+import type { AiDecisionInput } from "@netgrid/shared";
 
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
+import { ACCESS_PRESERVING_SECRET_COMPARE_BID } from "../run-analysis/visible-subroutine-semantics";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 import { assessCorpTraceBid } from "./corp-trace-bid-assessment";
-import {
-  currentEncounteredIceCard,
-  currentRunRemainingIce,
-} from "./current-encounter";
+import { currentRunRemainingIce } from "./current-encounter";
 import { getRunnerRunPlanMemorySnapshot } from "./runner-run-plan-memory";
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
-import type {
-  RunnerRunIceEncounterQuote,
-  RunnerRunPlan,
-} from "./runner-run-plan-types";
+import type { RunnerRunIceEncounterQuote } from "./runner-run-plan-types";
 import { type LatestTraceContext } from "./trace-context";
 import { visibleTraceSuccessEffect } from "./trace-bid-assessment";
 
@@ -33,7 +28,17 @@ export function selectedBidChoiceOptionId(
   choice: PendingChoice,
   traceContext: LatestTraceContext,
 ): string | undefined {
+  if (choice.source.startsWith("card_implementation.secret_spend_compare:")) {
+    // The Run ends only if the Runner spends more than the Corp. Zero
+    // preserves access for the Runner and maximizes the Corp's chance to stop it.
+    return choice.options.find(
+      (option) =>
+        option.selectable !== false &&
+        option.value === ACCESS_PRESERVING_SECRET_COMPARE_BID,
+    )?.id;
+  }
   const bidOptions: RunnerTraceBidOption[] = choice.options
+    .filter((option) => option.selectable !== false)
     .map((option) => {
       const amount =
         typeof option.value === "number" ? option.value : Number.NaN;
@@ -45,9 +50,9 @@ export function selectedBidChoiceOptionId(
     })
     .filter(
       (option) =>
-        Number.isInteger(option.amount) &&
+        Number.isSafeInteger(option.amount) &&
         option.amount >= 0 &&
-        Number.isInteger(option.linkDelta) &&
+        Number.isSafeInteger(option.linkDelta) &&
         option.linkDelta >= 0,
     )
     .sort((left, right) => left.amount - right.amount);
@@ -65,10 +70,6 @@ export function selectedBidChoiceOptionId(
   let desired = 0;
   if (input.side === "corp") {
     desired = corpDesiredBidAmount(input, choice, traceContext, maxBid);
-  } else if (
-    choice.source.startsWith("card_implementation.secret_spend_compare:")
-  ) {
-    desired = maxBid;
   } else {
     const runnerNeedsStrictlyMore =
       traceContext.traceRulesProfile === "classic_blind_corp_ties" ||
@@ -153,7 +154,8 @@ function runnerRunBudgetPreservingBidOption(
   ) {
     return undefined;
   }
-  const tagAmount = currentTraceTagAmount(input, traceContext);
+  const effect = visibleTraceSuccessEffect(input, traceContext);
+  const tagAmount = effect?.type === "add_tag" ? effect.amount : 0;
   if (
     tagAmount <= 0 ||
     input.playerView.own.tags > 0 ||
@@ -194,37 +196,6 @@ function runnerRunBudgetPreservingBidOption(
     return undefined;
   }
   return minimumLosingBid;
-}
-
-function currentTraceTagAmount(
-  input: AiDecisionInput,
-  traceContext: LatestTraceContext,
-): number {
-  const tagAmounts =
-    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines.flatMap(
-      (subroutine) =>
-        subroutine.traceSuccessEffect?.type === "add_tag"
-          ? [Math.max(0, subroutine.traceSuccessEffect.amount)]
-          : [],
-    ) ?? [];
-  if (tagAmounts.length === 1) return tagAmounts[0] ?? 0;
-  const sourceDefinitionId = traceContext.sourceDefinitionId;
-  if (!sourceDefinitionId) return 0;
-  const implementationQuotes =
-    traceSuccessEffectCardImplementationQuotesForDefinition(
-      sourceDefinitionId as CardDefinitionId,
-    ).filter(
-      (quote) =>
-        traceContext.traceLimit === undefined ||
-        quote.traceLimit === traceContext.traceLimit,
-    );
-  const implementationTagAmounts = implementationQuotes.flatMap((quote) =>
-    quote.traceSuccessEffect.type === "add_tag"
-      ? [Math.max(0, quote.traceSuccessEffect.amount)]
-      : [],
-  );
-  const uniqueTagAmounts = new Set(implementationTagAmounts);
-  return uniqueTagAmounts.size === 1 ? (implementationTagAmounts[0] ?? 0) : 0;
 }
 
 function runnerFacesVisibleTagPunish(input: AiDecisionInput): boolean {
@@ -271,11 +242,9 @@ function knownRemainingRunCashCost(
   if (remainingIce.some((ice) => !ice.known || ice.rezzed === false)) {
     return undefined;
   }
+  const afterEncounter = quoteRunnerRunPath(input, plan, "after_current_encounter");
   const quotesByIceId = new Map(
-    quoteRunnerRunPath(input, plan).iceQuotes.map((quote) => [
-      quote.iceRef.instanceId,
-      quote,
-    ]),
+    afterEncounter.iceQuotes.map((quote) => [quote.iceRef.instanceId, quote]),
   );
   let totalCashCost = 0;
   for (const ice of remainingIce) {

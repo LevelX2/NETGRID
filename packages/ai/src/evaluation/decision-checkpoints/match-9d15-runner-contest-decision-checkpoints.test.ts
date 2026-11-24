@@ -25,7 +25,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
       const state = checkpoint.engine.testOnlyGameState;
       const rd = state.corp.servers.find((server) => server.id === "rd");
       const remote = state.corp.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       );
       const outerIceId = rd?.ice[0];
       if (!rd || !remote || !outerIceId) {
@@ -35,7 +35,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
       remote.ice.push(outerIceId);
       state.cardInstances[outerIceId] = {
         ...state.cardInstances[outerIceId]!,
-        zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverIce", serverId: "r1" },
       };
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "9D15-C01-BYPASS-LEAVES-BLOCKER";
@@ -43,14 +43,14 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         forbiddenActions: [
           {
             actionId:
-              "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2.onr_v1_094_inside-job:abilities_on_play_make_run",
+              "rh.c1w2.r1.c1w2.390",
           },
         ],
         runTargets: [
           {
             actionId:
-              "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2.onr_v1_094_inside-job:abilities_on_play_make_run",
-            targetServerId: "remote_1",
+              "rh.c1w2.r1.c1w2.390",
+            targetServerId: "r1",
             pathPassability: "blocked_missing_coverage",
             recommendation: "find_breaker_first",
             requiredEvidence: ["run_action_projection_bypass_first_ice:true"],
@@ -70,7 +70,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "9D15-C02-NO-FOLLOW-UP-CLICK";
         checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+          forbiddenActions: [{ actionId: "rx" }],
         };
       },
     );
@@ -84,7 +84,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
       (checkpoint) => {
         const state = checkpoint.engine.testOnlyGameState;
         const remote = state.corp.servers.find(
-          (server) => server.id === "remote_1",
+          (server) => server.id === "r1",
         );
         const rootId = remote?.root[0];
         if (!rootId) throw new Error("Expected Remote 1 root card");
@@ -95,7 +95,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         const matchpointAgendaId = state.corp.scoreArea.find(
           (cardId) =>
             state.cardInstances[cardId]?.definitionId ===
-            "onr_v1_205_main-office-relocation",
+            417,
         );
         if (!matchpointAgendaId) throw new Error("Expected matchpoint agenda");
         state.corp.scoreArea = state.corp.scoreArea.filter(
@@ -111,7 +111,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "9D15-C03-NO-REMOTE-THREAT";
         checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+          forbiddenActions: [{ actionId: "rx" }],
           selectedScoreBreakdown: {
             forbiddenComponentKeys: ["runner_matchpoint_run_lock_release"],
           },
@@ -128,7 +128,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "9D15-C04-RUN-LOCK-UNAFFORDABLE";
       checkpoint.expectation = {
-        forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+        forbiddenActions: [{ actionId: "rx" }],
       };
     });
 

@@ -61,13 +61,14 @@ export function buildSemanticRuntimeWhyCoverageReport(
   ).length;
   const decisionsWithRuntimeWhyNotSection = decisions.filter((decision) =>
     (decision.detailSections ?? []).some(
-      (section) => section.id === "runtime_why_not",
+      (section) => section.id === "runtime_why_not" && section.items.length > 0,
     ),
   ).length;
   const decisionsMissingRuntimeWhyNotSection = decisionsRequiringWhyNot.filter(
     (decision) =>
       !(decision.detailSections ?? []).some(
-        (section) => section.id === "runtime_why_not",
+        (section) =>
+          section.id === "runtime_why_not" && section.items.length > 0,
       ),
   ).length;
   const selectedActionAlternativesWithWhyChosen =
@@ -108,15 +109,16 @@ export function buildSemanticRuntimeWhyCoverageReport(
         ]
       : []),
   ];
+  const auditStatus: SemanticRuntimeWhyCoverageReport["auditStatus"] =
+    decisions.length === 0
+      ? "empty_sample"
+      : missingCoverageSignals.length === 0
+        ? "complete"
+        : "incomplete";
   const report: SemanticRuntimeWhyCoverageReport = {
     schemaVersion: SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION,
     scope: "semantic_runtime_why_coverage_report_only",
-    auditStatus:
-      decisions.length === 0
-        ? "empty_sample"
-        : missingCoverageSignals.length === 0
-          ? "complete"
-          : "incomplete",
+    auditStatus,
     sampleCount: decisions.length,
     decisionsRequiringWhyNot: decisionsRequiringWhyNot.length,
     decisionsNotRequiringWhyNot:
@@ -157,13 +159,7 @@ export function buildSemanticRuntimeWhyCoverageReport(
     missingCoverageSignals,
     evidence: [
       "semantic_runtime_why_coverage:report_only",
-      `audit_status:${
-        decisions.length === 0
-          ? "empty_sample"
-          : missingCoverageSignals.length === 0
-            ? "complete"
-            : "incomplete"
-      }`,
+      `audit_status:${auditStatus}`,
       `sample_count:${decisions.length}`,
       `decision_top_level_why_not_count:${decisionsWithTopLevelWhyNot}`,
       `action_alternative_count:${actionAlternatives.length}`,

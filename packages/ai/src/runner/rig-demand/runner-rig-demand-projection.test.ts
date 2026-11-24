@@ -1,3 +1,5 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -17,13 +19,13 @@ import {
 describe("RunnerRigDemandProjection", () => {
   it("binds simultaneous concrete coverage demand to current side-safe state", () => {
     const decoder = visibleCard("decoder-hand", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       title: "Decoder",
       type: "program",
       memoryCost: 2,
     });
     const killer = visibleCard("killer-hand", {
-      definitionId: "test-killer",
+      definitionId: syntheticCardDefinitionId("test-killer"),
       title: "Killer",
       type: "program",
       memoryCost: 1,
@@ -44,7 +46,7 @@ describe("RunnerRigDemandProjection", () => {
         requirement: "required_simultaneously",
         provider: {
           providerId: "decoder-provider",
-          definitionId: "test-decoder",
+          definitionId: syntheticCardDefinitionId("test-decoder"),
           memoryUnits: 2,
         },
       }),
@@ -54,7 +56,7 @@ describe("RunnerRigDemandProjection", () => {
         requirement: "required_simultaneously",
         provider: {
           providerId: "killer-provider",
-          definitionId: "test-killer",
+          definitionId: syntheticCardDefinitionId("test-killer"),
           memoryUnits: 1,
         },
       }),
@@ -104,7 +106,7 @@ describe("RunnerRigDemandProjection", () => {
       demandId: "wall:basic",
       capabilityId: "breaker_wall",
       requirement: "required_simultaneously",
-      provider: { providerId: "wall", definitionId: "wall", memoryUnits: 1 },
+      provider: { providerId: "wall", definitionId: syntheticCardDefinitionId("wall"), memoryUnits: 1 },
     });
     const second = {
       ...first,
@@ -140,7 +142,7 @@ describe("RunnerRigDemandProjection", () => {
       demandId: "pool:a",
       capabilityId: "recurring_credits",
       requirement: "required_simultaneously",
-      provider: { providerId: "pool:a", definitionId: "pool", memoryUnits: 1 },
+      provider: { providerId: "pool:a", definitionId: syntheticCardDefinitionId("pool"), memoryUnits: 1 },
     });
     const second = {
       ...first,
@@ -178,7 +180,7 @@ describe("RunnerRigDemandProjection", () => {
           requirement: "preferred_simultaneously",
           provider: {
             providerId: "wall",
-            definitionId: "wall",
+            definitionId: syntheticCardDefinitionId("wall"),
             memoryUnits: 1,
           },
         }),
@@ -207,7 +209,7 @@ describe("RunnerRigDemandProjection", () => {
 
   it("keeps doctrine and a full hand informational without inventing rig demand", () => {
     const memoryChip = visibleCard("memory-chip-hand", {
-      definitionId: "test-memory-chip",
+      definitionId: syntheticCardDefinitionId("test-memory-chip"),
       title: "Memory Chip",
       type: "hardware",
       memoryLimitBonus: 2,
@@ -217,7 +219,7 @@ describe("RunnerRigDemandProjection", () => {
         memoryChip,
         ...[1, 2, 3, 4].map((index) =>
           visibleCard(`filler-${index}`, {
-            definitionId: `filler-definition-${index}`,
+            definitionId: syntheticCardDefinitionId(`filler-definition-${index}`),
             type: "event",
           }),
         ),
@@ -247,7 +249,7 @@ describe("RunnerRigDemandProjection", () => {
 
   it("separates hosted demand from general MU demand", () => {
     const hostedBreaker = visibleCard("hosted-breaker", {
-      definitionId: "test-hosted-breaker",
+      definitionId: syntheticCardDefinitionId("test-hosted-breaker"),
       type: "program",
       memoryCost: 2,
     });
@@ -263,7 +265,7 @@ describe("RunnerRigDemandProjection", () => {
       requirement: "required_simultaneously",
       provider: {
         providerId: "hosted-wall-provider",
-        definitionId: "test-hosted-breaker",
+        definitionId: syntheticCardDefinitionId("test-hosted-breaker"),
         memoryMode: "hosted",
         memoryUnits: 2,
       },
@@ -311,7 +313,7 @@ describe("RunnerRigDemandProjection", () => {
       requirement: "required_simultaneously",
       provider: {
         providerId: "stale-provider",
-        definitionId: "test-stale",
+        definitionId: syntheticCardDefinitionId("test-stale"),
         memoryUnits: 1,
       },
     });
@@ -340,7 +342,7 @@ describe("RunnerRigDemandProjection", () => {
 
   it("is invariant under opponent hidden-zone differences outside the side-safe input", () => {
     const program = visibleCard("decoder-hand", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       type: "program",
       memoryCost: 2,
     });
@@ -376,7 +378,7 @@ describe("RunnerRigDemandProjection", () => {
           requirement: "required_simultaneously",
           provider: {
             providerId: "decoder",
-            definitionId: "test-decoder",
+            definitionId: syntheticCardDefinitionId("test-decoder"),
             memoryUnits: 2,
           },
         }),
@@ -391,7 +393,7 @@ describe("RunnerRigDemandProjection", () => {
           requirement: "required_simultaneously",
           provider: {
             providerId: "decoder",
-            definitionId: "test-decoder",
+            definitionId: syntheticCardDefinitionId("test-decoder"),
             memoryUnits: 2,
           },
         }),
@@ -406,7 +408,7 @@ describe("RunnerRigDemandProjection", () => {
 
   it("is deterministic and exposes only aggregate redacted facts", () => {
     const program = visibleCard("program-hand", {
-      definitionId: "test-program",
+      definitionId: syntheticCardDefinitionId("test-program"),
       type: "program",
       memoryCost: 1,
     });
@@ -422,7 +424,7 @@ describe("RunnerRigDemandProjection", () => {
       requirement: "preferred_simultaneously",
       provider: {
         providerId: "z-provider",
-        definitionId: "test-program",
+        definitionId: syntheticCardDefinitionId("test-program"),
         memoryUnits: 1,
       },
     });
@@ -432,7 +434,7 @@ describe("RunnerRigDemandProjection", () => {
       requirement: "alternative_provider",
       provider: {
         providerId: "a-provider",
-        definitionId: "test-program",
+        definitionId: syntheticCardDefinitionId("test-program"),
         memoryUnits: 1,
       },
     });
@@ -502,7 +504,7 @@ function demand(
     requirement: RunnerRigRoleDemandInput["requirement"];
     provider: {
       providerId: string;
-      definitionId: string;
+      definitionId: number;
       memoryMode?: "general" | "hosted";
       memoryUnits: number;
     };
@@ -512,7 +514,7 @@ function demand(
     demandId: params.demandId,
     ownerModuleId: "runner.rig_and_coverage",
     sourceKind: "resident_plan_need",
-    sourcePlanInstanceId: `plan:runner.rig_and_coverage:${params.demandId}`,
+    sourcePlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.rig_and_coverage", dedupeKey: params.demandId }),
     sourceNeedId: params.demandId,
     capabilityId: params.capabilityId,
     horizon: "next_rig_milestone",

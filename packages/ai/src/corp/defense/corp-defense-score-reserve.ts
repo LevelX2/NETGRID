@@ -1,4 +1,5 @@
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { visibleRunnerRunOnlyCredits } from "../../run-analysis/visible-run-credit-budget";
 import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
 import type {
   AiDecisionInput,
@@ -188,7 +189,10 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
       .sort((a, b) => b - a)
       .slice(0, remainingRunnerRuns)
       .reduce((sum, cost) => sum + cost, 0) +
-    Math.max(currentRunFollowup?.credits ?? 0, route.continuationRezCredits ?? 0);
+    Math.max(
+      currentRunFollowup?.credits ?? 0,
+      route.continuationRezCredits ?? 0,
+    );
   const consumesNoReservedResources =
     route.totalRezCredits === 0 &&
     (route.currentEncounterDefense?.activationCredits ?? 0) === 0 &&
@@ -274,8 +278,10 @@ function exactStoppingRezForServer(
     if (!quote) return [];
     const after = assessProtectionAfterRezzing(
       input,
+      server,
       server.ice,
       ice.instanceId,
+      input.playerView.runnerNextRunBadPublicityCredits ?? 0,
     );
     return after && after.runnerAccessSuccessProbability.numerator === 0
       ? [{ iceId: ice.instanceId, credits: quote.totalRezCredits }]
@@ -313,8 +319,10 @@ function exactCurrentRunFollowupStoppingRez(
         return [];
       const after = assessProtectionAfterRezzing(
         input,
+        server,
         futureIce,
         ice.instanceId,
+        visibleRunnerRunOnlyCredits(input.playerView.run),
       );
       return after && after.runnerAccessSuccessProbability.numerator === 0
         ? [{ iceId: ice.instanceId, credits: quote.totalRezCredits }]
@@ -328,8 +336,10 @@ function exactCurrentRunFollowupStoppingRez(
 
 function assessProtectionAfterRezzing(
   input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
   ice: readonly VisibleCard[],
   rezzedIceId: string,
+  runnerRunOnlyCredits: number,
 ): KnownCorpScoreProtectionAssessment | undefined {
   const result = assessCorpScoreProtection({
     serverIce: ice.map((card) => ({
@@ -344,6 +354,8 @@ function assessProtectionAfterRezzing(
         : {}),
       ...(card.instanceId === rezzedIceId ? { rezzed: true } : {}),
     })),
+    serverRoot: server.root,
+    runnerRunOnlyCredits,
     runnerRig: input.playerView.opponent.rig ?? [],
     runnerCredits: input.playerView.opponent.credits,
     maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },

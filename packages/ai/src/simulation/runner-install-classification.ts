@@ -1,17 +1,20 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   isRunnerEconomyRole,
   isRunnerNonAdditiveUtilityRole,
   isRunnerPressureRole,
 } from "../runtime/runner-role-classification";
-import { rolesMatch } from "../runtime/role-match";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
+import { isRemoteServerTarget } from "../runtime/server-target";
+import { rolesMatch } from "../role-match";
 
 type RunnerInstallClassificationDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
-  rolesForCardId: (cardId: string | undefined) => string[];
+  ) => number | undefined | undefined;
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
 };
 
 type RunnerActionRoleDependencies = {
@@ -54,7 +57,7 @@ export function isRunnerEconomyActionForSimulation(
   dependencies: RunnerActionRoleDependencies,
 ): boolean {
   if (action.side !== "runner") return false;
-  if (action.type === "gain_credit") return true;
+  if (action.type === "gain_credit") return actionProvidesCredits(action);
   if (
     action.type !== "play_event" &&
     action.type !== "install_card" &&
@@ -142,8 +145,8 @@ export function hasRunnerRunnablePressureActionForSimulation(
   return input.legalActions.some((action) => {
     if (action.actionId === excludeActionId || action.side !== "runner")
       return false;
-    if (isRunnerPressureAction(input, action)) return true;
-    if (action.type !== "start_run") return false;
+    if (action.type !== "start_run")
+      return isRunnerPressureAction(input, action);
     const serverId =
       typeof action.payload?.serverId === "string"
         ? action.payload.serverId
@@ -152,9 +155,9 @@ export function hasRunnerRunnablePressureActionForSimulation(
     const server = input.playerView.servers.find(
       (candidate) => candidate.id === serverId,
     );
-    if (serverId.startsWith("remote_") && (server?.root.length ?? 0) === 0)
+    if (!server || (isRemoteServerTarget(serverId) && server.root.length === 0))
       return false;
-    return input.playerView.own.credits >= 3 || (server?.ice.length ?? 0) === 0;
+    return input.playerView.own.credits >= 3 || server.ice.length === 0;
   });
 }
 
@@ -164,7 +167,7 @@ export function isRunnerDuplicateInstallForSimulation(
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined,
+  ) => number | undefined | undefined,
 ): boolean {
   const definitionId = sourceDefinitionIdForAction(input, action);
   if (!definitionId || action.type !== "install_card") return false;
@@ -183,7 +186,7 @@ export function isRunnerLowValueDuplicateInstallForSimulation(
   const definitionId = dependencies.sourceDefinitionIdForAction(input, action);
   if (!definitionId) return false;
   const roles = dependencies.rolesForCardId(definitionId);
-  if (definitionId === "onr_v1_165_junkyard-bbs") return true;
+  if (definitionId === 377) return true;
   if (roles.some((role) => role === "memory" || role === "memory_support"))
     return false;
   if (roles.some((role) => isRunnerPressureRole(role))) return false;
@@ -202,7 +205,7 @@ export function isRunnerLowValueDuplicateInstallForSimulation(
 export function runnerDiscardChoiceRolesForSimulation(
   input: AiDecisionInput,
   decision: { selectedChoices?: unknown },
-  discardRolesForCardId: (cardId: string | undefined) => string[],
+  discardRolesForCardId: (cardId: CardDefinitionId | undefined) => string[],
 ): string[] {
   if (
     input.playerView.pendingChoice?.source !== "discard_phase" ||
@@ -230,11 +233,11 @@ export function runnerDiscardChoiceRolesForSimulation(
 
 export function createRunnerInstallClassificationContext(dependencies: {
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  rolesForCardId: (cardId: string | undefined) => string[];
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined | undefined;
   isSearchChoice: (
     choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
   ) => boolean;
@@ -279,6 +282,18 @@ export function createRunnerInstallClassificationContext(dependencies: {
       hasRunnerInstallableBreakerActionForSimulation(input, excludeActionId, {
         rolesForAction: dependencies.rolesForAction,
       }),
+    hasRunnerPlayablePressureCard: (
+      input: AiDecisionInput,
+      excludeActionId?: string,
+    ): boolean =>
+      input.legalActions.some(
+        (action) =>
+          action.actionId !== excludeActionId &&
+          action.type !== "start_run" &&
+          action.source !== "basic_action" &&
+          action.source !== "game_rule" &&
+          isRunnerPressureAction(input, action),
+      ),
     hasRunnerRunnablePressureAction: (
       input: AiDecisionInput,
       excludeActionId?: string,

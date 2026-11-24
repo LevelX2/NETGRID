@@ -39,19 +39,19 @@ it("finishes the cheaper installed agenda before the prospective equal-point sib
       p.clicksGenerated,
     ]),
   ).toEqual([
-    ["corp_onr_v1_203_hostile-takeover_1", 3, 3, 0],
+    ["c2kd", 3, 3, 0],
     // The visible rezzed support is discarded in Archives, so this sibling
     // still requires the real extra-action operation and its full costs.
-    ["corp_onr_v1_203_hostile-takeover_2", 7, 5, 2],
+    ["c2ke", 7, 5, 2],
   ]);
   const decision = chooseAiAction(input);
   const action = input.legalActions.find(
     (a) => a.actionId === decision.actionId,
   )!;
   expect(action.type).toBe("advance_card");
-  expect(action.source).toBe("corp_onr_v1_203_hostile-takeover_1");
+  expect(action.source).toBe("c2kd");
   const parent =
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_203_hostile-takeover_1%3Aremote_1";
+    "p9zaxr028shneph2natwhsp7ql";
   const plan = decision.decisionDebug?.planFirstDecision;
   expect(plan?.rootPlanInstanceId).toBe(parent);
   expect(plan?.leafExecutorInstanceId).toBe(parent);
@@ -63,7 +63,7 @@ it("finishes the cheaper installed agenda before the prospective equal-point sib
   expect(decision.fallbackUsed).toBe(false);
   const other = residentPlanPortfolioSnapshot(input)!.instances.find(
     (p) =>
-      p.dedupeKey === "agenda:corp_onr_v1_203_hostile-takeover_2:new_remote",
+      p.dedupeKey === "agenda:c2ke:new_remote",
   )!;
   expect(other.moduleState).toMatchObject({
     signal: {

@@ -1,3 +1,4 @@
+import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
@@ -128,7 +129,7 @@ describe("pairing557 mixed pay and hard-ETR scope (SP-664)", () => {
         a.payload?.payOrEndRunSubroutinePayment === 1,
     );
     const pump = f.input.legalActions.find(
-      (a: any) => a.type === "pump_breaker" && a.source.includes("raptor"),
+      (a: any) => a.type === "pump_breaker" && visibleSourceDefinitionsByInstanceId(f.input.playerView)[a.source] === 266,
     );
     expect(pureEndRunEncounterPayment(f.input, pay)).toMatchObject({
       cost: 6,
@@ -147,7 +148,7 @@ describe("pairing557 mixed pay and hard-ETR scope (SP-664)", () => {
       cashCost: 6,
     });
     expect(
-      p.rig.find((c: any) => c.definitionId.includes("raptor"))?.strength,
+      p.rig.find((c: any) => c.definitionId === 266)?.strength,
     ).toBe(1);
   });
   it("does not certify a full mixed response when only the first payment is funded", () => {

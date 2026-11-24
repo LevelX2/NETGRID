@@ -107,11 +107,11 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
       expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
       const plan = decision.decisionDebug!.planFirstDecision!;
       expect(plan.rootPlanInstanceId).toBe(
-        "plan:runner.contest_remote:remote%3Aremote_1",
+        "p1p4xezjcxov79rno40lq3f7rv",
       );
       expect(plan.selectedPlan?.moduleId).toBe("runner.convert_run_window");
       expect(plan.leafExecutorInstanceId).toBe(
-        "plan:runner.convert_run_window:run%3Arun_348",
+        "p89fxqr6ohtx681gt369mg21g5",
       );
       expect(plan.route?.actionId).toBe(action.actionId);
       expect(plan.route?.stateVersion).toBe(input.playerView.stateVersion);
@@ -180,6 +180,40 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
     expect(hashGameState(replay.state)).toBe(hashGameState(state));
   });
 
+  it("does not budget a damage break beyond a hard end-the-run effect", () => {
+    const { input } = capture(354);
+    const ice = currentEncounteredIceCard(input)!;
+    const quote = ice.effectiveRunQuote!;
+    const damage = quote.subroutines.find(({ type }) => type === "do_damage")!;
+    const hardStop = {
+      ...damage,
+      id: "hard-stop-before-damage",
+      type: "end_the_run_and_trash_source_at_end_of_turn" as const,
+    };
+    ice.effectiveRunQuote = { ...quote, subroutines: [hardStop, damage] };
+    const continueAction = input.legalActions.find(
+      (action) =>
+        action.type === "continue_run" && action.payload?.encounterContinue,
+    )!;
+    continueAction.encounterSubroutineIds = [hardStop.id, damage.id];
+    continueAction.payload = {
+      ...continueAction.payload,
+      unbrokenSubroutineCount: 2,
+    };
+    const breaker = input.playerView.own.rig!.find(
+      (card) => card.definitionId === 251,
+    )!;
+    expect(
+      currentEncounterMitigationForBreaker(
+        input,
+        breaker,
+        quote.effectiveStrength,
+        () => true,
+        3,
+      ),
+    ).toBeUndefined();
+  });
+
   it.each([10, 9])(
     "requires the complete mitigation payment after four real pumps from %s credits",
     (credits) => {
@@ -193,7 +227,7 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
       });
       const ice = currentEncounteredIceCard(input)!;
       const breaker = input.playerView.own.rig!.find(
-        (c) => c.definitionId === "onr_v1_039_krash",
+        (c) => c.definitionId === 251,
       )!;
       const mitigation = currentEncounterMitigationForBreaker(
         input,
@@ -208,7 +242,7 @@ describe("SP-135: the paid mitigation pump keeps its exact break purpose", () =>
           }).affordable,
         3,
       );
-      expect(ice.definitionId).toBe("onr_classic_005_baskerville");
+      expect(ice.definitionId).toBe(9);
       expect(state.runner.credits).toBe(credits - 8);
       if (credits === 10) {
         expect(mitigation?.subroutineIndexes).toEqual([0]);
@@ -261,16 +295,16 @@ function encounter(credits = 19): GameState {
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_classic_008_deadeye", quantity: 1 },
-        { id: "onr_classic_005_baskerville", quantity: 1 },
+        { id: 12, quantity: 1 },
+        { id: 9, quantity: 1 },
         ...ORIGINALSET_DEFAULT_DECKS.corp.cards,
       ],
     },
   });
-  installRunnerProgramForTest(state, "onr_v1_039_krash");
+  installRunnerProgramForTest(state, 251);
   for (const definitionId of [
-    "onr_classic_008_deadeye",
-    "onr_classic_005_baskerville",
+    12,
+    9,
   ]) {
     const id = putCorpIceOnServer(state, "rd", definitionId);
     state.cardInstances[id]!.rezzed = true;

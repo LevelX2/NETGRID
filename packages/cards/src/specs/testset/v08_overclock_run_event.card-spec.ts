@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("v08_overclock_run_event"),
+    cardDefinitionId: cardDefinitionId(615),
     title: "Overclock Run Event",
     side: "runner",
     cardType: "event",

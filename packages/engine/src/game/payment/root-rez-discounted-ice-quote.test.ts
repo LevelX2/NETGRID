@@ -45,7 +45,7 @@ describe("current pure root-rez discounted ICE quote boundaries", () => {
     if (kind === "no_run") delete state.run;
     if (kind === "unfunded") state.corp.credits = 2;
     if (kind === "bypass") state.run!.bypassFirstIceRemaining = true;
-    if (kind === "variable") ice.definitionId = "onr_proteus_023_galatea";
+    if (kind === "variable") ice.definitionId = 81;
     if (kind === "stale") root.expiresAtStateVersion--;
     const before = hashGameState(state);
     expect(quoteCorpRootRezDiscountedIce(state, root)).toBeUndefined();

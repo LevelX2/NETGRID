@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type { Side } from "@netgrid/shared";
 import {
   PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
@@ -28,9 +29,9 @@ export const CLASSIC_PROTEUS_DECK_CARD_POOL_VERSION =
 export const CLASSIC_PROTEUS_DECK_FORMAT_PROFILE_ID =
   "netgrid_private_local_classic_proteus_playtest_v1";
 export const CLASSIC_PROTEUS_DECK_FORMAT_PROFILE_VERSION = "1.0.0";
-export const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
-  runner: "runner_identity_001",
-  corp: "corp_identity_001",
+export const DEFAULT_IDENTITY_BY_SIDE: Record<Side, CardDefinitionId> = {
+  runner: 587,
+  corp: 3,
 };
 
 const ADDITIVE_FORMAT_PROFILE_IDS = new Set([
@@ -89,6 +90,8 @@ export function deckProfileForMatchCardPool(
   };
 }
 
+type CardSetsById = Readonly<Record<CardDefinitionId, { setId: string }>>;
+
 type DeckSnapshotForMatchPool = {
   formatProfileId: string;
   cards: DeckCardEntry[];
@@ -107,22 +110,24 @@ type CatalogCardForDeckEditor = {
 export function snapshotAllowedForMatchCardPool(
   snapshot: DeckSnapshotForMatchPool,
   matchCardPool: MatchCardPoolSelection,
+  cardSetsById: CardSetsById,
 ): boolean {
   if (!profileAllowedForMatchCardPool(snapshot.formatProfileId, matchCardPool))
     return false;
   return snapshot.cards.every((entry) =>
-    cardIdAllowedForMatchCardPool(entry.cardId, matchCardPool),
+    cardIdAllowedForMatchCardPool(entry.cardId, matchCardPool, cardSetsById),
   );
 }
 
 export function editableDeckAllowedForMatchCardPool(
   deck: EditableDeck,
   matchCardPool: MatchCardPoolSelection,
+  cardSetsById: CardSetsById,
 ): boolean {
   if (!profileAllowedForMatchCardPool(deck.formatProfileId, matchCardPool))
     return false;
   return deck.cards.every((entry) =>
-    cardIdAllowedForMatchCardPool(entry.cardId, matchCardPool),
+    cardIdAllowedForMatchCardPool(entry.cardId, matchCardPool, cardSetsById),
   );
 }
 
@@ -154,16 +159,19 @@ function profileAllowedForMatchCardPool(
 }
 
 function cardIdAllowedForMatchCardPool(
-  cardId: string,
+  cardId: CardDefinitionId,
   matchCardPool: MatchCardPoolSelection,
+  cardSetsById: CardSetsById,
 ): boolean {
+  const cardSet = cardSetsById[cardId];
+  if (!cardSet) return false;
   if (
-    cardId.startsWith("onr_classic_") &&
+    cardSet.setId === "classic" &&
     !matchCardPoolIncludesClassic(matchCardPool)
   )
     return false;
   if (
-    cardId.startsWith("onr_proteus_") &&
+    cardSet.setId === "proteus" &&
     !matchCardPoolIncludesProteus(matchCardPool)
   )
     return false;

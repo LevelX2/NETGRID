@@ -1,15 +1,12 @@
-import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { isRunnerPaymentWindowId, isTraceId, type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
-import {
-  type EngineWindowResolution,
-  type PlanSchedulerContext,
-  type PlanSchedulerResult,
-} from "../../plans/plan-scheduler";
+import type { PlanSchedulerResult } from "../../plans/plan-scheduler";
 import {
   selectResidentPlanPortfolioExecutor,
   type ResidentPlanPortfolio,
 } from "../../plans/resident-plan-portfolio";
 import { type RunnerTargetedBypassChoiceContinuation } from "./runner-targeted-bypass-plan";
+import type { RunnerTargetedIceTrashChoiceContinuation } from "../../runtime/runner-targeted-ice-trash-plan";
 import { reconcileSelectedRunnerSuccessfulReplacementChoice } from "./run-window-successful-replacement-continuation";
 import {
   bindRunnerDevelopmentSearchEngineContinuation,
@@ -18,97 +15,10 @@ import {
 import { preserveSelectedRunnerDevelopmentSearchAcrossPaymentStep } from "../hand-development/development-payment-continuation";
 import { preserveSelectedRunnerCoverageBindingAcrossPaymentStep } from "../rig-coverage/coverage-bindings";
 
-/** A selected movement may cross witnessed Corp rez windows or the exact
- * public temporary-encounter intervention before its entry payment. */
-function originalPaymentSelectionReachesWindow(
-  input: AiDecisionInput,
-  previous: ResidentPlanPortfolio | undefined,
-  windowId: string | undefined,
-): boolean {
-  const origin = previous?.pendingRunnerCostPenaltySupportOrigin;
-  if (
-    !previous ||
-    !origin ||
-    origin.windowId !== undefined ||
-    previous.stateVersion !== origin.selectedAtStateVersion
-  )
-    return false;
-  if (input.playerView.stateVersion === previous.stateVersion + 1) return true;
-  const run = input.playerView.run;
-  const executor = previous.instances.find(
-    (p) => p.instanceId === origin.executorInstanceId,
-  );
-  const state = executor?.moduleState as
-    | { kind?: string; signal?: { windowId?: string; serverId?: string } }
-    | undefined;
-  if (
-    !run ||
-    origin.originalActionId !== "runner.continue_run" ||
-    executor?.moduleId !== "runner.convert_run_window" ||
-    executor.parentInstanceId !== origin.rootPlanInstanceId ||
-    previous.rootForegroundInstanceId !== origin.rootPlanInstanceId ||
-    previous.executorInstanceId !== origin.executorInstanceId ||
-    state?.kind !== "run_window" ||
-    state.signal?.windowId !== `run:${run.runId}` ||
-    state.signal.serverId !== run.attackedServerId
-  )
-    return false;
-  const events = (input.eventTail ?? []).filter(
-    (e) =>
-      e.stateVersionBefore >= previous.stateVersion &&
-      e.stateVersionAfter <= input.playerView.stateVersion,
-  );
-  const first = events[0],
-    last = events.at(-1);
-  const temporaryEncounterIntervention =
-    events.length === 2 &&
-    first?.publicPayload.hiddenZoneAction ===
-      "p3_54_delayed_success_intervention_choice" &&
-    first.publicPayload.abilityId ===
-      "p3_54_delayed_success_intervention_choice" &&
-    first.publicPayload.hiddenZoneBarrier === true &&
-    typeof first.publicPayload.sourceDefinitionId === "string" &&
-    last?.publicPayload.actionType === "resolve_choice" &&
-    last.publicPayload.hiddenZoneAction ===
-      "successful_run_temporary_encounter" &&
-    last.publicPayload.abilityId === "successful_run_temporary_encounter" &&
-    last.publicPayload.sourceDefinitionId ===
-      first.publicPayload.sourceDefinitionId &&
-    last.publicPayload.serverId === run.attackedServerId &&
-    last.publicPayload.revealKind === "reveal" &&
-    typeof last.publicPayload.cardDefinitionId === "string" &&
-    last.publicPayload.cardDefinitionId ===
-      last.publicPayload.targetIceDefinitionId;
-  return (
-    events.length >= 2 &&
-    first?.stateVersionBefore === previous.stateVersion &&
-    last?.stateVersionAfter === input.playerView.stateVersion &&
-    events.every(
-      (e, index) =>
-        e.stateVersionAfter === e.stateVersionBefore + 1 &&
-        (index === 0 ||
-          e.stateVersionBefore === events[index - 1]!.stateVersionAfter),
-    ) &&
-    first.publicPayload.actor === "runner" &&
-    first.publicPayload.actionType === "continue_run" &&
-    first.publicPayload.serverId === run.attackedServerId &&
-    events
-      .slice(1)
-      .every(
-        (e) =>
-          e.publicPayload.actor === "corp" &&
-          (["rez_ice", "rez_card", "decline_rez"].includes(
-            String(e.publicPayload.actionType),
-          ) ||
-            (e === last && temporaryEncounterIntervention)),
-      ) &&
-    last.publicPayload.runnerCostPenaltySupportWindowOpened === true &&
-    last.publicPayload.runnerCostPenaltySupportWindowId === windowId &&
-    last.publicPayload.runnerCostPenaltySupportOriginalActionId ===
-      origin.originalActionId &&
-    typeof last.publicPayload.targetIceDefinitionId === "string"
-  );
-}
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { originalPaymentSelectionReachesWindow } from "./run-window-cost-offers";
+
+export { resolvePlanBoundRunnerCostPenaltyContinuation } from "./run-window-cost-offers";
 
 export function reconcileSelectedRunnerCostPenaltySupportOrigin(
   input: AiDecisionInput,
@@ -128,7 +38,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
   const continuation =
     continuationActions.length === 1 ? continuationActions[0] : undefined;
   const supportWindowId =
-    typeof selectedAction?.payload?.costPenaltySupportWindowId === "string"
+    isRunnerPaymentWindowId(selectedAction?.payload?.costPenaltySupportWindowId)
       ? selectedAction.payload.costPenaltySupportWindowId
       : undefined;
   const supportOriginalActionId =
@@ -137,14 +47,17 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       ? selectedAction.payload.costPenaltySupportOriginalActionId
       : undefined;
   const continuationWindowId =
-    typeof continuation?.payload?.runnerCostPenaltySupportWindowId === "string"
+    isRunnerPaymentWindowId(continuation?.payload?.runnerCostPenaltySupportWindowId)
       ? continuation.payload.runnerCostPenaltySupportWindowId
       : undefined;
   const selectedPaymentSupport =
-    supportWindowId !== undefined && supportOriginalActionId !== undefined;
+    selectedAction !== undefined &&
+    supportWindowId !== undefined &&
+    supportOriginalActionId !== undefined;
   const continuationMatchesWindow =
     continuationActions.length === 0 ||
     (continuation !== undefined &&
+      actionMatchesCurrentDecision(input, continuation) &&
       continuationWindowId === supportWindowId &&
       continuation.actionId === pending?.originalActionId);
 
@@ -173,10 +86,8 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         supportOriginalActionId !== pending.originalActionId ||
         (pending.windowId !== supportWindowId &&
           !directSupportFromOriginalSelection) ||
-        selectedAction.side !== "runner" ||
+        !actionMatchesCurrentDecision(input, selectedAction) ||
         selectedAction.type !== "activated_card_ability" ||
-        selectedAction.expiresAtStateVersion !==
-          input.playerView.stateVersion ||
         result.origin.rootPlanInstanceId !== pending.rootPlanInstanceId ||
         result.origin.leafPlanInstanceId !== pending.executorInstanceId
       ) {
@@ -240,7 +151,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       bindRunnerEventInstallChoiceEngineContinuation(input, result, pending);
       bindRunnerDevelopmentSearchEngineContinuation(input, result, pending);
       result.portfolio.stateVersion = input.playerView.stateVersion;
-      restorePaidRunnerRunStartExecutor(input, result, pending, selectedAction);
+      restorePaidRunnerServerExecutor(input, result, pending, selectedAction);
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
       return;
     }
@@ -382,7 +293,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       pending.executorInstanceId === executorInstanceId &&
       pending.selectedAtStateVersion === previous?.stateVersion &&
       pending.sourceStepId === `run.encounter_ice:${previous?.stateVersion}` &&
-      pending.originalActionId.startsWith("runner.continue_run.") &&
+      pending.originalActionId.startsWith("r5.") &&
       executorState?.signal?.serverId === run?.attackedServerId &&
       root?.target !== undefined &&
       root.target.kind === "server" &&
@@ -400,7 +311,10 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         directRunRootTraceContinuationIsBound) &&
       choice?.side === "runner" &&
       choice.kind === "bid_amount" &&
-      choice.source.startsWith(`trace:${run?.runId}.`) &&
+      run !== undefined &&
+      trace !== undefined &&
+      trace.sourceRunId === run.runId &&
+      choice.source === `trace:${trace.traceId}` &&
       choice.stateVersion === input.playerView.stateVersion &&
       selectedAction?.side === "runner" &&
       selectedAction.type === "resolve_choice" &&
@@ -417,7 +331,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       traceWindowIsContinuous;
     const completedSelectedTrace =
       interveningEvents.length === 1 &&
-      pending?.originalActionId === "runner.resolve_choice" &&
+      pending?.originalActionId === "rn" &&
       pending.selectedAtStateVersion === previous?.stateVersion &&
       pending.sourceStepId === `run.encounter_ice:${previous?.stateVersion}` &&
       interveningEvents[0]?.publicPayload.actor === "runner" &&
@@ -426,8 +340,9 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       interveningEvents[0]?.publicPayload.traceStep === "runner_bid" &&
       typeof interveningEvents[0]?.publicPayload.traceSuccessful ===
         "boolean" &&
-      typeof interveningEvents[0]?.publicPayload.traceId === "string" &&
-      interveningEvents[0].publicPayload.traceId.startsWith(`${run?.runId}.`) &&
+      isTraceId(interveningEvents[0]?.publicPayload.traceId) &&
+      run !== undefined &&
+      interveningEvents[0].publicPayload.traceSourceRunId === run.runId &&
       interveningEvents[0].publicPayload.choiceId ===
         `${interveningEvents[0].publicPayload.traceId}.runner.bid.${previous?.stateVersion}`;
     const exactForcedRunContinuationOrigin =
@@ -456,7 +371,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       selectedAction.type === "continue_run" &&
       ((run?.phase === "movement" &&
         input.playerView.timingPoint === "run.jack_out_window" &&
-        selectedAction.actionId === "runner.continue_run") ||
+        selectedAction.actionId === "r5") ||
         (run?.phase === "encounter_ice" &&
           input.playerView.timingPoint === "run.encounter_ice" &&
           selectedAction.payload?.encounterContinue === true)) &&
@@ -522,6 +437,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
   if (selectedPaymentSupport) {
     if (
       !pending ||
+      !actionMatchesCurrentDecision(input, selectedAction) ||
       continuationActions.length > 1 ||
       !continuationMatchesWindow ||
       supportWindowId === undefined ||
@@ -553,7 +469,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       previous,
       pending,
     );
-    preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
+    preserveSelectedRunnerTargetedPreparationAcrossPaymentStep(
       input,
       result,
       previous,
@@ -571,8 +487,8 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
     0,
   );
   if (
-    selectedAction?.side === "runner" &&
-    selectedAction.expiresAtStateVersion === input.playerView.stateVersion &&
+    selectedAction !== undefined &&
+    actionMatchesCurrentDecision(input, selectedAction) &&
     Number.isFinite(creditCost) &&
     (Number(creditCost) > 0 ||
       (selectedAction.type === "continue_run" &&
@@ -590,7 +506,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
   delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
 }
 
-function preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
+function preserveSelectedRunnerTargetedPreparationAcrossPaymentStep(
   input: AiDecisionInput,
   result: Extract<PlanSchedulerResult, { lane: "plan" }>,
   previous: ResidentPlanPortfolio | undefined,
@@ -610,14 +526,22 @@ function preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
   const previousState = previousExecutor.moduleState as
     | {
         kind?: unknown;
-        choiceContinuation?: RunnerTargetedBypassChoiceContinuation;
+        choiceContinuation?:
+          | RunnerTargetedBypassChoiceContinuation
+          | RunnerTargetedIceTrashChoiceContinuation;
       }
     | undefined;
   const continuation = previousState?.choiceContinuation;
-  if (continuation?.family !== "runner_targeted_bypass") return;
+  if (
+    continuation?.family !== "runner_targeted_bypass" &&
+    continuation?.family !== "runner_targeted_ice_trash"
+  )
+    return;
   const exactOrigin =
     previous?.side === "runner" &&
-    previousExecutor.executionState === "executor" &&
+    (previousExecutor.executionState === "executor" ||
+      (previousExecutor.executionState === "preempted" &&
+        pending.windowId !== undefined)) &&
     (previousState?.kind === "central_pressure" ||
       previousState?.kind === "remote_contest") &&
     continuation.ownerModuleId === previousExecutor.moduleId &&
@@ -636,7 +560,7 @@ function preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
       planInstanceId: pending.executorInstanceId,
       stepId: pending.sourceStepId,
       removalCondition:
-        "Carry the exact selected targeted-bypass plan and its bound Social Engineering continuation through payment support.",
+        "Carry the selected server plan and its exact ICE preparation target through payment support.",
     });
   }
   const existing = result.portfolio.instances.find(
@@ -702,10 +626,10 @@ function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
         };
 }
 
-/** The payment plan completed its job. The Engine resumes the previously
- * selected Run, so subsequent encounter windows belong to that same plan.
+/** Payment support hands the action back to the server plan that selected
+ * the run or its ICE preparation and owns the next Engine window.
  */
-function restorePaidRunnerRunStartExecutor(
+function restorePaidRunnerServerExecutor(
   input: AiDecisionInput,
   result: Extract<PlanSchedulerResult, { lane: "engine_window" }>,
   pending: NonNullable<
@@ -717,25 +641,40 @@ function restorePaidRunnerRunStartExecutor(
   const original = portfolio.instances.find(
     (plan) => plan.instanceId === pending.executorInstanceId,
   );
+  const state = original?.moduleState as
+    | {
+        kind?: string;
+        signal?: { serverId?: string };
+        choiceContinuation?: RunnerTargetedIceTrashChoiceContinuation;
+      }
+    | undefined;
+  const preparation =
+    state?.choiceContinuation?.family === "runner_targeted_ice_trash"
+      ? state.choiceContinuation
+      : undefined;
   if (
     !action ||
     (action.type !== "start_run" &&
       (action.type !== "play_event" ||
-        action.payload?.runnerEventRun !== true)) ||
+        (action.payload?.runnerEventRun !== true && !preparation))) ||
     input.playerView.run ||
     pending.rootPlanInstanceId !== pending.executorInstanceId ||
     (original?.moduleId !== "runner.pressure_central" &&
       original?.moduleId !== "runner.contest_remote") ||
-    portfolio.executorInstanceId === original.instanceId
+    (portfolio.executorInstanceId === original.instanceId && !preparation)
   )
     return;
-  const state = original.moduleState as
-    | { kind?: string; signal?: { serverId?: string } }
-    | undefined;
-  const serverId = action.payload?.serverId;
+  const serverId = preparation
+    ? preparation.serverId
+    : action.payload?.serverId;
+  const windowId = action.payload?.runnerCostPenaltySupportWindowId;
   if (
     original.side !== "runner" ||
-    original.executionState !== "preempted" ||
+    (original.executionState !== "preempted" &&
+      !(
+        original.executionState === "executor" &&
+        portfolio.executorInstanceId === original.instanceId
+      )) ||
     original.viability !== "ready" ||
     original.parentInstanceId !== undefined ||
     original.target?.kind !== "server" ||
@@ -743,14 +682,27 @@ function restorePaidRunnerRunStartExecutor(
     (state?.kind !== "central_pressure" && state?.kind !== "remote_contest") ||
     state.signal?.serverId !== serverId ||
     typeof serverId !== "string" ||
-    action.side !== "runner" ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.actionId !== pending.originalActionId ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.payload?.runnerCostPenaltySupportContinuation !== true ||
-    action.payload.runnerCostPenaltySupportWindowId !== pending.windowId ||
-    result.origin.windowId !== pending.windowId ||
+    !isRunnerPaymentWindowId(windowId) ||
+    (windowId !== pending.windowId &&
+      !(
+        pending.windowId === undefined &&
+        windowId === pending.selectedAtStateVersion + 1
+      )) ||
+    result.origin.windowId !== String(windowId) ||
     result.origin.rootPlanInstanceId !== pending.rootPlanInstanceId ||
-    result.origin.leafPlanInstanceId !== pending.executorInstanceId
+    result.origin.leafPlanInstanceId !== pending.executorInstanceId ||
+    (preparation &&
+      (action.type !== "play_event" ||
+        action.source !== preparation.sourceCardInstanceId ||
+        preparation.ownerModuleId !== original.moduleId ||
+        preparation.ownerDedupeKey !== original.dedupeKey ||
+        preparation.sourceActionId !== pending.originalActionId ||
+        preparation.selectedActionId !== pending.originalActionId ||
+        preparation.plannedAtStateVersion !== pending.selectedAtStateVersion ||
+        preparation.selectedAtStateVersion !== pending.selectedAtStateVersion))
   ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
@@ -762,9 +714,13 @@ function restorePaidRunnerRunStartExecutor(
       planInstanceId: pending.executorInstanceId,
       stepId: pending.sourceStepId,
       removalCondition:
-        "Resume the exact paid Run with its preempted server plan, Engine window and unchanged action.",
+        "Resume the exact paid action with its server plan, Engine payment window and bound target.",
     });
   }
+  if (preparation)
+    preparation.engineContinuationAtStateVersion =
+      input.playerView.stateVersion;
+  if (portfolio.executorInstanceId === original.instanceId) return;
   delete portfolio.turnPlanExecutionLease;
   delete portfolio.turnPlanCommitment;
   const resumed = selectResidentPlanPortfolioExecutor({
@@ -773,149 +729,16 @@ function restorePaidRunnerRunStartExecutor(
     timingPoint: input.playerView.timingPoint,
     reason: "executor_selected",
   });
-  resumed.selectedActionOrigin = {
-    rootPlanInstanceId: pending.rootPlanInstanceId,
-    executorInstanceId: pending.executorInstanceId,
-    selectedActionId: action.actionId,
-    selectedAtStateVersion: input.playerView.stateVersion,
-    immediateChoicePolicy: "resolve_runner_run_start_order",
-    sourceStepId: pending.sourceStepId,
-    sourceActionType: action.type,
-    continuedThroughStateVersion: input.playerView.stateVersion,
-  };
-  result.portfolio = resumed;
-}
-
-export function resolvePlanBoundRunnerCostPenaltyContinuation(
-  context: PlanSchedulerContext,
-  previous: ResidentPlanPortfolio | undefined,
-): EngineWindowResolution | undefined {
-  if (context.input.side !== "runner") return undefined;
-  const origin = previous?.pendingRunnerCostPenaltySupportOrigin;
-  const continuationActions = context.input.legalActions.filter(
-    (action) => action.payload?.runnerCostPenaltySupportContinuation === true,
-  );
-  const boundSupportActions = context.input.legalActions.filter(
-    (action) =>
-      action.side === "runner" &&
-      action.type === "activated_card_ability" &&
-      typeof action.payload?.costPenaltySupportWindowId === "string" &&
-      action.payload?.costPenaltySupportOriginalActionId ===
-        origin?.originalActionId,
-  );
-  if (continuationActions.length === 0) {
-    if (boundSupportActions.length !== 1) return undefined;
-    const action = boundSupportActions[0]!;
-    const windowId = action.payload!.costPenaltySupportWindowId as string;
-    const directSupportFromOriginalSelection =
-      originalPaymentSelectionReachesWindow(context.input, previous, windowId);
-    if (
-      !origin ||
-      previous?.side !== "runner" ||
-      previous.stateVersion > context.input.playerView.stateVersion ||
-      (origin.windowId !== windowId && !directSupportFromOriginalSelection) ||
-      action.expiresAtStateVersion !== context.input.playerView.stateVersion
-    ) {
-      throw new PlanResolutionFailure("window_origin_missing", {
-        side: context.input.side,
-        stateVersion: context.input.playerView.stateVersion,
-        timingPoint: context.input.playerView.timingPoint,
-        legalActionTypes: context.input.legalActions.map(
-          (legalAction) => legalAction.type,
-        ),
-        unresolvedActionIds: boundSupportActions.map(
-          (legalAction) => legalAction.actionId,
-        ),
-        owner: "continuation",
-        ...(origin ? { planInstanceId: origin.executorInstanceId } : {}),
-        ...(origin ? { stepId: origin.sourceStepId } : {}),
-        removalCondition:
-          "Use the sole current Runner payment-support action only while preserving the exact original plan action and Engine support-window id.",
-      });
-    }
-    return {
-      actionId: action.actionId,
-      reasonCode: "plan_bound_runner_cost_penalty_support_action",
-      origin: {
-        rootPlanInstanceId: origin.rootPlanInstanceId,
-        leafPlanInstanceId: origin.executorInstanceId,
-        side: "runner",
-        windowKind: "optional_ability",
-        windowId,
-        stateVersion: context.input.playerView.stateVersion,
-        timingPoint: context.input.playerView.timingPoint,
-      },
+  if (!preparation)
+    resumed.selectedActionOrigin = {
+      rootPlanInstanceId: pending.rootPlanInstanceId,
+      executorInstanceId: pending.executorInstanceId,
+      selectedActionId: action.actionId,
+      selectedAtStateVersion: input.playerView.stateVersion,
+      immediateChoicePolicy: "resolve_runner_run_start_order",
+      sourceStepId: pending.sourceStepId,
+      sourceActionType: action.type,
+      continuedThroughStateVersion: input.playerView.stateVersion,
     };
-  }
-  const action =
-    continuationActions.length === 1 ? continuationActions[0] : undefined;
-  const windowId =
-    typeof action?.payload?.runnerCostPenaltySupportWindowId === "string"
-      ? action.payload.runnerCostPenaltySupportWindowId
-      : undefined;
-  const supportActions = context.input.legalActions.filter(
-    (legalAction) => legalAction.actionId !== action?.actionId,
-  );
-  const supportActionsMatchWindow = supportActions.every(
-    (supportAction) =>
-      supportAction.payload?.costPenaltySupportWindowId === windowId &&
-      supportAction.payload?.costPenaltySupportOriginalActionId ===
-        origin?.originalActionId,
-  );
-  const supportActionsExplicitlyRejected = supportActions.every(
-    (supportAction) =>
-      context.actionDispositions?.some(
-        (disposition) =>
-          disposition.actionId === supportAction.actionId &&
-          disposition.disposition === "explicitly_nonproductive",
-      ) === true,
-  );
-  const directContinuationFromOriginalSelection =
-    originalPaymentSelectionReachesWindow(context.input, previous, windowId);
-  if (
-    !action ||
-    !origin ||
-    previous?.side !== "runner" ||
-    previous.stateVersion > context.input.playerView.stateVersion ||
-    origin.originalActionId !== action.actionId ||
-    (origin.windowId !== windowId &&
-      !directContinuationFromOriginalSelection) ||
-    action.side !== "runner" ||
-    action.expiresAtStateVersion !== context.input.playerView.stateVersion ||
-    windowId === undefined ||
-    !supportActionsMatchWindow
-  ) {
-    throw new PlanResolutionFailure("window_origin_missing", {
-      side: context.input.side,
-      stateVersion: context.input.playerView.stateVersion,
-      timingPoint: context.input.playerView.timingPoint,
-      legalActionTypes: context.input.legalActions.map(
-        (legalAction) => legalAction.type,
-      ),
-      unresolvedActionIds: continuationActions.map(
-        (legalAction) => legalAction.actionId,
-      ),
-      owner: "continuation",
-      ...(origin ? { planInstanceId: origin.executorInstanceId } : {}),
-      ...(origin ? { stepId: origin.sourceStepId } : {}),
-      removalCondition:
-        "Resume only the exact original Runner plan action from the same current Engine cost/penalty support window.",
-    });
-  }
-  if (supportActions.length > 0 && !supportActionsExplicitlyRejected) {
-    return undefined;
-  }
-  return {
-    actionId: action.actionId,
-    reasonCode: "plan_bound_runner_cost_penalty_support_continuation",
-    origin: {
-      rootPlanInstanceId: origin.rootPlanInstanceId,
-      leafPlanInstanceId: origin.executorInstanceId,
-      side: "runner",
-      windowKind: "optional_ability",
-      windowId,
-      stateVersion: context.input.playerView.stateVersion,
-      timingPoint: context.input.playerView.timingPoint,
-    },
-  };
+  result.portfolio = resumed;
 }

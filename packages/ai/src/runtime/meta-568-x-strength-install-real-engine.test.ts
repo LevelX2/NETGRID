@@ -6,7 +6,12 @@ import {
   getPlayerView,
   hashState,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState, LegalAction } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  DeckDefinition,
+  GameState,
+  LegalAction,
+} from "@netgrid/shared";
 import { afterEach, expect, it } from "vitest";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -37,7 +42,7 @@ function apply(state: GameState, action: LegalAction): GameState {
   if (!r.ok) throw Error(JSON.stringify(r.error));
   return r.state;
 }
-function fixture(card: string, credits: number) {
+function fixture(card: CardDefinitionId, credits: number) {
   let s = createGameAfterSetup({
     seed: "meta568-x-strength",
     corpDeck,
@@ -56,7 +61,7 @@ function fixture(card: string, credits: number) {
     .withCorpHqSize(0)
     .withCorpCredits(credits)
     .withRunnerCredits(3)
-    .withCorpCardInHq("onr_proteus_005_marked-accounts")
+    .withCorpCardInHq(63)
     .withCorpCardInHq(card);
   return s;
 }
@@ -75,7 +80,7 @@ function input(s: GameState) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 
-it.each([["onr_proteus_020_digiconda", 6]] as const)(
+it.each([[78, 6]] as const)(
   "binds the minimum x-strength installation, Defense plan and actual rez of %s",
   (card, cost) => {
     let s = fixture(card, cost);
@@ -88,7 +93,7 @@ it.each([["onr_proteus_020_digiconda", 6]] as const)(
       (a) => a.actionId === decision.actionId,
     )!;
     expect(install.type).toBe("install_card");
-    expect(install.source).toContain(card);
+    expect(s.cardInstances[install.source]?.definitionId).toBe(card);
     expect(["hq", "rd"]).toContain(install.payload?.serverId);
     const predicted = JSON.parse(
       install.payload!.postInstallEffectiveRunQuoteJson as string,
@@ -102,7 +107,7 @@ it.each([["onr_proteus_020_digiconda", 6]] as const)(
       postInstallRezQuoteVariableMinValueFinalCredits: cost,
     });
     expect(pf).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       selectedPlan: { moduleId: "corp.defend_servers" },
       route: {
         actionId: install.actionId,
@@ -144,14 +149,16 @@ it.each([["onr_proteus_020_digiconda", 6]] as const)(
   },
 );
 
-it.each(["onr_proteus_025_homing-missile"])(
+it.each([83])(
   "does not invent an unbound variable projection for %s",
   (card) => {
     const s = fixture(card, 20),
       before = hashState(s),
       i = input(s);
     const installs = i.legalActions.filter(
-      (a) => a.type === "install_card" && a.source.includes(card),
+      (action) =>
+        action.type === "install_card" &&
+        s.cardInstances[action.source]?.definitionId === card,
     );
     expect(installs.length).toBeGreaterThan(0);
     for (const a of installs)
@@ -161,8 +168,8 @@ it.each(["onr_proteus_025_homing-missile"])(
 );
 
 it.each([
-  ["onr_proteus_024_gatekeeper", 5],
-  ["onr_proteus_036_sandstorm", 6],
+  [82, 5],
+  [94, 6],
 ] as const)(
   "binds the first paid stopping routine, Defense owner and actual rez of %s",
   (card, credits) => {
@@ -173,7 +180,7 @@ it.each([
     const r = chooseAiAction(i);
     const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
     expect(selected.type).toBe("install_card");
-    expect(selected.source).toContain(card);
+    expect(s.cardInstances[selected.source]?.definitionId).toBe(card);
     expect(["hq", "rd"]).toContain(selected.payload?.serverId);
     expect(r.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
       "corp.defend_servers",
@@ -225,11 +232,11 @@ it.each([
 );
 
 it("keeps the minimum-X effect quote separate from current installed rez choices", () => {
-  let s = fixture("onr_proteus_020_digiconda", 6);
+  let s = fixture(78, 6);
   const install = getLegalActions(s, "corp").find(
     (a) =>
       a.type === "install_card" &&
-      a.source.includes("digiconda") &&
+      s.cardInstances[a.source]?.definitionId === 78 &&
       a.payload?.serverId === "rd",
   )!;
   expect(
@@ -242,14 +249,14 @@ it("keeps the minimum-X effect quote separate from current installed rez choices
   ).toMatchObject({ complete: false, reason: "variable_rez_choice_required" });
 });
 
-it.each(["onr_proteus_024_gatekeeper", "onr_proteus_036_sandstorm"])(
+it.each([82, 94])(
   "does not bind a current installed paid-routine rez choice from the installation quote for %s",
   (card) => {
     let s = fixture(card, 20);
     const install = getLegalActions(s, "corp").find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes(card) &&
+        s.cardInstances[a.source]?.definitionId === card &&
         a.payload?.serverId === "rd",
     )!;
     expect(
@@ -268,31 +275,35 @@ it.each(["onr_proteus_024_gatekeeper", "onr_proteus_036_sandstorm"])(
 );
 
 it.each([
-  ["onr_proteus_024_gatekeeper", 5],
-  ["onr_proteus_036_sandstorm", 6],
+  [82, 5],
+  [94, 6],
 ] as const)(
   "keeps the first-stop qualitative installation fail-closed without the Engine effect quote for %s",
   (card, credits) => {
-    const i = input(fixture(card, credits));
-    for (const a of i.legalActions.filter(
-      (a) => a.type === "install_card" && a.source.includes(card),
-    ))
+    const s = fixture(card, credits);
+    const i = input(s);
+    const installs = i.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        s.cardInstances[action.source]?.definitionId === card,
+    );
+    expect(installs.length).toBeGreaterThan(0);
+    for (const a of installs)
       delete a.payload!.postInstallEffectiveRunQuoteJson;
     const r = chooseAiAction(i);
-    expect(
-      i.legalActions.find((a) => a.actionId === r.actionId)?.source,
-    ).not.toContain(card);
+    const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
+    expect(s.cardInstances[selected.source]?.definitionId).not.toBe(card);
     expect(r.fallbackUsed).toBe(false);
   },
 );
 
 it("keeps an unfunded minimum-X installation at the existing staging milestone", () => {
-  const s = fixture("onr_proteus_020_digiconda", 5),
+  const s = fixture(78, 5),
     i = input(s),
     r = chooseAiAction(i);
   const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
   expect(selected.type).toBe("install_card");
-  expect(selected.source).toContain("digiconda");
+  expect(s.cardInstances[selected.source]?.definitionId).toBe(78);
   expect(r.decisionDebug?.planFirstDecision?.selectedPlan).toMatchObject({
     moduleId: "corp.defend_servers",
     evidenceCodes: [
@@ -327,9 +338,11 @@ it.each([
 ] as const)(
   "rejects %s rather than substituting a minimum price",
   (_name, patch) => {
-    const s = fixture("onr_proteus_020_digiconda", 6);
+    const s = fixture(78, 6);
     const install = getLegalActions(s, "corp").find(
-      (a) => a.type === "install_card" && a.source.includes("digiconda"),
+      (action) =>
+        action.type === "install_card" &&
+        s.cardInstances[action.source]?.definitionId === 78,
     )!;
     expect(
       selectedPostInstallRezCreditsFromCurrentQuote(install.payload!),
@@ -347,14 +360,18 @@ it.each([
   "postInstallEffectiveRunQuoteJson",
   "postInstallRezQuoteExpiresAtStateVersion",
 ])("keeps the native owner fail-closed without %s", (key) => {
-  const i = input(fixture("onr_proteus_020_digiconda", 6));
-  for (const a of i.legalActions.filter(
-    (a) => a.source.includes("digiconda") && a.type === "install_card",
-  ))
+  const s = fixture(78, 6);
+  const i = input(s);
+  const installs = i.legalActions.filter(
+    (action) =>
+      action.type === "install_card" &&
+      s.cardInstances[action.source]?.definitionId === 78,
+  );
+  expect(installs.length).toBeGreaterThan(0);
+  for (const a of installs)
     delete a.payload![key];
   const r = chooseAiAction(i);
-  expect(
-    i.legalActions.find((a) => a.actionId === r.actionId)?.source,
-  ).not.toContain("digiconda");
+  const selected = i.legalActions.find((a) => a.actionId === r.actionId)!;
+  expect(s.cardInstances[selected.source]?.definitionId).not.toBe(78);
   expect(r.fallbackUsed).toBe(false);
 });

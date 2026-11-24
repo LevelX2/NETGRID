@@ -1,3 +1,6 @@
+import { capabilityKey } from "@netgrid/cards";
+import { canonicalCapabilityId } from "@netgrid/cards/planning";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -10,14 +13,14 @@ import {
 describe("AI input DTO public event source binding", () => {
   it("preserves public trace completion bindings while dropping unapproved fields", () => {
     const action = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "trace-complete",
+      eventId: 186,
       stateHashAfter: "fnv1a:trace-complete",
       type: "resolve_choice",
       stateVersionBefore: 184,
@@ -25,8 +28,9 @@ describe("AI input DTO public event source binding", () => {
       publicPayload: {
         actor: "runner",
         actionType: "resolve_choice",
-        traceId: "run_173.ice.0.trace",
-        choiceId: "run_173.ice.0.trace.runner.bid.184",
+        traceId: 174,
+        traceSourceRunId: 173,
+        choiceId: "174.runner.bid.184",
         traceStep: "runner_bid",
         traceSuccessful: false,
         unapprovedTraceAlias: "discard",
@@ -46,8 +50,9 @@ describe("AI input DTO public event source binding", () => {
       profileId: "public-trace",
     });
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
-      traceId: "run_173.ice.0.trace",
-      choiceId: "run_173.ice.0.trace.runner.bid.184",
+      traceId: 174,
+      traceSourceRunId: 173,
+      choiceId: "174.runner.bid.184",
       traceSuccessful: false,
     });
     expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
@@ -105,7 +110,7 @@ describe("AI input DTO public event source binding", () => {
         actionNumber: 1,
         profileId: "action-side-mismatch-test",
       }),
-    ).toThrow(/LegalAction side mismatch/);
+    ).toThrow(new Error("AI input LegalAction side mismatch."));
   });
 
   it("preserves the Engine-owned post-pass ICE lifecycle quote", () => {
@@ -119,7 +124,7 @@ describe("AI input DTO public event source binding", () => {
     action.source = "datacomb-ice";
     action.payload = {
       corpPostPassIceAbility: "return_passed_ice_to_hq",
-      sourceDefinitionId: "onr_proteus_018_datacomb",
+      sourceDefinitionId: 76,
       decision: "pay",
       paymentAmount: 1,
       serverId: "rd",
@@ -142,7 +147,7 @@ describe("AI input DTO public event source binding", () => {
 
     expect(input.legalActions[0]?.payload).toEqual({
       corpPostPassIceAbility: "return_passed_ice_to_hq",
-      sourceDefinitionId: "onr_proteus_018_datacomb",
+      sourceDefinitionId: 76,
       decision: "pay",
       paymentAmount: 1,
       serverId: "rd",
@@ -150,6 +155,8 @@ describe("AI input DTO public event source binding", () => {
   });
 
   it("preserves exact actor-side canonical capability binding and rejects hybrid AbilityRef", () => {
+    const key = capabilityKey("store_credits");
+    const sourceAbilityId = canonicalCapabilityId(366, key);
     const action = legalAction(
       "canonical-action",
       "runner",
@@ -161,12 +168,12 @@ describe("AI input DTO public event source binding", () => {
     action.payload = {
       cardId: "source",
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-      cardImplementationAbilityId: "test_card:gain",
-      cardImplementationAbilityKey: "gain",
+      cardImplementationAbilityId: sourceAbilityId,
+      cardImplementationAbilityKey: key,
     };
     action.abilityRef = {
       sourceCardInstanceId: "source",
-      sourceAbilityId: "test_card:gain",
+      sourceAbilityId,
     };
     const view = playerView("runner", [action]);
     const build = () =>
@@ -184,12 +191,12 @@ describe("AI input DTO public event source binding", () => {
     expect(build().legalActions[0]).toMatchObject({
       abilityRef: {
         sourceCardInstanceId: "source",
-        sourceAbilityId: "test_card:gain",
+        sourceAbilityId,
       },
       payload: {
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityId: "test_card:gain",
-        cardImplementationAbilityKey: "gain",
+        cardImplementationAbilityId: sourceAbilityId,
+        cardImplementationAbilityKey: key,
       },
     });
     action.payload.cardImplementationAbilityIndex = 0;
@@ -202,7 +209,7 @@ describe("AI input DTO public event source binding", () => {
     action.abilityRef = {
       sourceCardInstanceId: "source",
       abilityId: "legacy",
-      sourceAbilityId: "test_card:gain",
+      sourceAbilityId,
     } as never;
     expect(build).toThrow(/AbilityRef/);
   });
@@ -237,14 +244,14 @@ describe("AI input DTO public event source binding", () => {
 
   it("preserves the structured actor-side source binding and drops unknown fields", () => {
     const action = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "actor-side-bank-load",
+      eventId: 3,
       type: "activated_card_ability",
       stateVersionBefore: 1,
       stateVersionAfter: 2,
@@ -254,7 +261,7 @@ describe("AI input DTO public event source binding", () => {
         actor: "runner",
         actionType: "activated_card_ability",
         sourceCardInstanceId: "broker-1",
-        sourceDefinitionId: "onr_v1_154_broker",
+        sourceDefinitionId: 366,
         unapprovedSourceAlias: "must-not-cross-dto",
       },
     };
@@ -277,7 +284,7 @@ describe("AI input DTO public event source binding", () => {
     expect(input.eventTail).toBe(input.playerView.publicEvents);
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
       sourceCardInstanceId: "broker-1",
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
     });
     expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
       "unapprovedSourceAlias",
@@ -286,14 +293,14 @@ describe("AI input DTO public event source binding", () => {
 
   it("preserves the exact Engine-owned payment-support origin in the event tail", () => {
     const action = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "runner-payment-support-window",
+      eventId: 12,
       type: "play_event",
       stateVersionBefore: 10,
       stateVersionAfter: 11,
@@ -303,7 +310,7 @@ describe("AI input DTO public event source binding", () => {
         actor: "runner",
         actionType: "play_event",
         runnerCostPenaltySupportWindowOpened: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.11",
+        runnerCostPenaltySupportWindowId: 11,
         runnerCostPenaltySupportOriginalActionId: "runner.play.social-1",
         unapprovedPaymentSupportAlias: "must-not-cross-dto",
       },
@@ -325,7 +332,7 @@ describe("AI input DTO public event source binding", () => {
 
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
       runnerCostPenaltySupportWindowOpened: true,
-      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.11",
+      runnerCostPenaltySupportWindowId: 11,
       runnerCostPenaltySupportOriginalActionId: "runner.play.social-1",
     });
     expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
@@ -335,14 +342,14 @@ describe("AI input DTO public event source binding", () => {
 
   it("preserves Engine-owned agenda access cost facts and drops unknown aliases", () => {
     const action = legalAction(
-      "runner.gain_credit",
+      "rb",
       "runner",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "agenda-access-cost",
+      eventId: 9,
       type: "decline_trash",
       stateVersionBefore: 7,
       stateVersionAfter: 8,
@@ -351,10 +358,10 @@ describe("AI input DTO public event source binding", () => {
       publicPayload: {
         actor: "runner",
         actionType: "decline_trash",
-        serverId: "remote_1",
+        serverId: "r1",
         stealCost: 2,
         stealAdditionalCost: 2,
-        stealCostSourceDefinitionIds: "agenda-with-access-cost",
+        stealCostSourceDefinitionIds: String(syntheticCardDefinitionId("agenda-with-access-cost")),
         stealCostSourceTitles: "Agenda with access cost",
         stealCostPersistedForCurrentAccess: true,
         stealBlockedByCost: true,
@@ -379,7 +386,7 @@ describe("AI input DTO public event source binding", () => {
     expect(input.eventTail[0]?.publicPayload).toMatchObject({
       stealCost: 2,
       stealAdditionalCost: 2,
-      stealCostSourceDefinitionIds: "agenda-with-access-cost",
+      stealCostSourceDefinitionIds: String(syntheticCardDefinitionId("agenda-with-access-cost")),
       stealCostSourceTitles: "Agenda with access cost",
       stealCostPersistedForCurrentAccess: true,
       stealBlockedByCost: true,
@@ -391,14 +398,14 @@ describe("AI input DTO public event source binding", () => {
 
   it("preserves the Engine-owned Corp mandatory draw rate for deckout planning", () => {
     const action = legalAction(
-      "corp.gain_credit",
+      "cb",
       "corp",
       "gain_credit",
       "Gain 1 Credit",
       { credits: 0, clicks: 1 },
     );
     const event: PublicGameEvent = {
-      eventId: "corp-extra-mandatory-draw",
+      eventId: 10,
       type: "mandatory_draw",
       stateVersionBefore: 8,
       stateVersionAfter: 9,
@@ -412,11 +419,14 @@ describe("AI input DTO public event source binding", () => {
         corpMandatoryCardCount: 1,
         corpMandatoryAdditionalCardCount: 1,
         corpMandatoryTotalBaseDrawCount: 2,
+        corpHqCountBefore: 3,
+        corpHqCountAfter: 5,
+        corpRdDrawnToHqCount: 2,
         corpMandatoryAgendaCardCount: 0,
         corpMandatoryOptionalAgendaCardCount: 0,
         corpMandatorySkivvissCardCount: 1,
         corpMandatoryAdditionalSourceCount: 1,
-        corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
+        corpMandatoryAdditionalSourceDefinitionIds: 276,
         unapprovedDrawRateAlias: 2,
       },
     };
@@ -441,8 +451,11 @@ describe("AI input DTO public event source binding", () => {
       corpMandatoryCardCount: 1,
       corpMandatoryAdditionalCardCount: 1,
       corpMandatoryTotalBaseDrawCount: 2,
+      corpHqCountBefore: 3,
+      corpHqCountAfter: 5,
+      corpRdDrawnToHqCount: 2,
       corpMandatorySkivvissCardCount: 1,
-      corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
+      corpMandatoryAdditionalSourceDefinitionIds: 276,
     });
     expect(input.playerView.publicEvents[0]?.publicPayload).not.toHaveProperty(
       "unapprovedDrawRateAlias",

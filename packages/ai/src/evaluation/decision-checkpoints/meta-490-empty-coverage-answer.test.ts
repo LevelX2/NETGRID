@@ -14,9 +14,13 @@ import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
-it.each(["g25-d46", "g38-d208"])(
-  "keeps the native %s draw route when no improving hand answer is bound",
-  (name) => {
+it.each([
+  { name: "g25-d46", onlyHq: false },
+  { name: "g25-d46", onlyHq: true },
+  { name: "g38-d208", onlyHq: false },
+])(
+  "binds coverage or HQ funding in $name with only HQ offered=$onlyHq",
+  ({ name, onlyHq }) => {
     const fixture = JSON.parse(
       readFileSync(
         new URL(`fixtures/meta490-${name}.json`, import.meta.url),
@@ -32,9 +36,17 @@ it.each(["g25-d46", "g38-d208"])(
       ...buildAiDecisionInputDto(fixture.input),
     } as AiDecisionInput;
     bindPublicBoardStealQuoteCompanion(input);
+    if (onlyHq) {
+      // Isolate the certified HQ need from the other current run offers.
+      input.legalActions = input.legalActions.filter(
+        (action) => action.payload?.serverId !== "rd" &&
+          action.payload?.serverId !== "archives",
+      );
+      input.playerView.legalActions = input.legalActions;
+    }
     if (name === "g38-d208") {
       const target = evaluateRunnerRunTargets({ input }).find(
-        (entry) => entry.actionId === "runner.start_run.remote_1",
+        (entry) => entry.actionId === "rs.r1",
       )!;
       expect(target).toMatchObject({
         pathPassability: "blocked_unpayable",
@@ -43,7 +55,7 @@ it.each(["g25-d46", "g38-d208"])(
       });
       const unquoted = structuredClone(input);
       delete unquoted.playerView.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )!.runnerAgendaStealCostQuote;
       expect(
         evaluateRunnerRunTargets({ input: unquoted }).find(
@@ -63,15 +75,27 @@ it.each(["g25-d46", "g38-d208"])(
     );
 
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.draw_card");
     expect(decision.fallbackUsed).toBe(false);
+    if (onlyHq) {
+      expect(decision.actionId).toBe("rb");
+      expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+        rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+        leafExecutorInstanceId: "p3bckraiba865d5xfnzk3r03v0",
+        route: {
+          actionId: decision.actionId,
+          stateVersion: input.playerView.stateVersion,
+        },
+      });
+      return;
+    }
+    expect(decision.actionId).toBe("r8");
     expect(
       input.legalActions.some(
         (action) => action.actionId === decision.actionId,
       ),
     ).toBe(true);
     expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       capabilityId: "draw_for_answer_breaker_wall",
       stateVersion: input.playerView.stateVersion,
     });
@@ -88,12 +112,12 @@ it.each(["g25-d46", "g38-d208"])(
         answerInHand: false,
         installActionIds: [],
         recoveryMode: "draw_for_known_role",
-        drawForAnswerActionIds: expect.arrayContaining(["runner.draw_card"]),
+        drawForAnswerActionIds: expect.arrayContaining(["r8"]),
       },
     });
     expect(
       decision.decisionDebug?.actionAlternatives?.find(
-        (action) => action.actionId === "runner.draw_card",
+        (action) => action.actionId === "r8",
       )?.excluded,
     ).not.toBe(true);
   },

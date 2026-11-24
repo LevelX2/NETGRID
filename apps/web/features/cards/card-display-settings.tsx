@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import { createContext, useContext } from "react";
 
 import { localCardImageUrl } from "./card-image-service";
@@ -50,7 +51,7 @@ export function useCardImagePreference(): CardImagePreferenceSettings {
 }
 
 export function usePreferredCardImageSource(
-  cardId: string | undefined | null,
+  cardId: CardDefinitionId | undefined | null,
 ): { src: string | undefined; fallbackSrc: string | undefined } {
   const { preferGermanCardImages } = useCardImagePreference();
   const src = localCardImageUrl(cardId, {

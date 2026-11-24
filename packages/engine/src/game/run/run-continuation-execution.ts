@@ -1,3 +1,5 @@
+import type { RandomPurpose } from "@netgrid/shared";
+import type { CardDefinitionId } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardInstanceId,
@@ -80,8 +82,8 @@ export type RunContinuationExecutionHost = {
     icebreakerSpecialSourceDefinitionId: (
       breakerId: CardInstanceId,
       special: "bartmoss_post_encounter_self_trash_check",
-    ) => string | undefined;
-    rollDeterministicDie: (purpose: string) => number;
+    ) => CardDefinitionId | undefined;
+    rollDeterministicDie: (purpose: RandomPurpose) => number;
     trashRunnerInstalledProgram: (breakerId: CardInstanceId) => void;
   };
 };
@@ -359,7 +361,7 @@ function applyBartmossPostEncounterTrigger(
       );
     if (!sourceDefinitionId) continue;
     const die = host.callbacks.rollDeterministicDie(
-      `${sourceDefinitionId}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`,
+      [19, sourceDefinitionId, run.runId, encounteredIceId, breakerId],
     );
     const trashed = die === 1;
     if (trashed) host.callbacks.trashRunnerInstalledProgram(breakerId);

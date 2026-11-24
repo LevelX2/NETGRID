@@ -13,7 +13,7 @@ describe("SelfplayDecisionSnapshotMining", () => {
     const summary = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {
         selectedActionId: "run-remote-1",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         reasonCode: "runner.plan.remote_contest",
         evidence: ["known_no_current_payoff"],
         actionAlternatives: [
@@ -23,7 +23,7 @@ describe("SelfplayDecisionSnapshotMining", () => {
       }),
       selfplayAction("runner", 2, "start_run", {
         selectedActionId: "run-remote-2",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         reasonCode: "runner.plan.remote_contest",
         evidence: ["known_no_current_payoff"],
         runnerRunPenalizedAsKnownNoAccess: true,
@@ -172,6 +172,14 @@ describe("SelfplayDecisionSnapshotMining", () => {
       ]),
     );
     expect(containsForbiddenSemanticMarker(activityCandidates)).toBe(false);
+
+    const paired = buildSelfplayDecisionSnapshotMiningReport(
+      [summary, structuredClone(summary)],
+      { detectorIds: ["repeated_no_progress_run", "repeated_known_no_payoff_remote"] },
+    );
+    expect(paired.candidates).toHaveLength(4);
+    expect(new Set(paired.candidates.map(({ snapshotId }) => snapshotId)).size).toBe(4);
+    expect(new Set(paired.promotionQueue.map(({ snapshotId }) => snapshotId)).size).toBe(4);
   });
 
   it("keeps findings without redacted action alternatives as blocked candidates", () => {
@@ -290,3 +298,23 @@ function actionAlternative(
     ...overrides,
   };
 }
+
+it("keeps distinct snapshot file names when a long scenario prefix is truncated", () => {
+  const base = {
+    category: "promote_to_real_engine_corpus" as const,
+    scenarioHint: "runner-run-same-".repeat(12),
+    evidence: [],
+  };
+  const entries = [
+    { ...base, snapshotId: "snapshot:a" },
+    { ...base, snapshotId: "snapshot_a" },
+  ];
+  const forward = formatSelfplayPromotionActivityCandidates(entries);
+  const reversed = formatSelfplayPromotionActivityCandidates(
+    [...entries].reverse(),
+  );
+  expect(new Set(forward.map(({ fileName }) => fileName)).size).toBe(2);
+  expect(reversed.map(({ fileName }) => fileName)).toEqual(
+    forward.map(({ fileName }) => fileName).reverse(),
+  );
+});

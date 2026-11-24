@@ -32,12 +32,11 @@ describe("Runner TurnPlanner cutover behavior-baseline regressions", () => {
       summary.actionSequence.some(
         (entry) =>
           entry.side === "corp" &&
-          entry.selectedActionId === "corp.play_operation" &&
           entry.actionType === "play_operation" &&
           entry.planKind === "corp.economy" &&
           entry.reasonCode === "plan_first.corp.economy" &&
           entry.evidence.includes(
-            "plan_assessment_evidence:corp_engine_certified_immediate_operation_conversion:onr_v1_295_night-shift",
+            "plan_assessment_evidence:corp_engine_certified_immediate_operation_conversion:507",
           ),
       ),
     ).toBe(true);

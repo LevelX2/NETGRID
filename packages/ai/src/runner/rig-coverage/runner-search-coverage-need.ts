@@ -1,3 +1,5 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
 import { cardProvidesBreakerCoverage } from "../../plans/tactical-plan-breaker-cards";
 import { missingBreakerCoverageKind } from "../../plans/tactical-plan-breaker-coverage";
@@ -7,7 +9,7 @@ import {
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../../visible-run-analysis";
-import { rolesMatch } from "../../runtime/role-match";
+import { rolesMatch } from "../../role-match";
 
 export type RunnerVisibleSearchCoverageNeed = {
   readonly requiredCoverage: RequiredCapabilityKind;
@@ -18,11 +20,11 @@ export type RunnerVisibleSearchCoverageNeed = {
 export type RunnerCoverageSearchSaturation = {
   readonly requiredCoverage: RequiredCapabilityKind;
   readonly serverId: string;
-  readonly handAnswerDefinitionId?: string;
+  readonly handAnswerDefinitionId?: number;
   readonly handAnswerTitle?: string;
 };
 
-type RolesForCardId = (cardId: string | undefined) => readonly string[];
+type RolesForCardId = (cardId: number | undefined) => readonly string[];
 
 export function runnerVisibleSearchCoverageNeed(
   input: AiDecisionInput,
@@ -40,14 +42,26 @@ export function runnerVisibleSearchCoverageNeed(
       (ice) => ice.known && ice.rezzed === true,
     );
     if (!hasKnownRezzedIce) continue;
+    const excludeStealthCredits =
+      server.statuses?.some(
+        (status) =>
+          status.kind === "run_payment_restriction" &&
+          status.restriction === "runner_stealth_bit_payment_sources",
+      ) === true;
     const assessment = assessKnownRezzedIcePath(
       server.ice ?? [],
       playerView.own.rig ?? [],
       runnerRunPathCreditBudgetWithVisiblePools(
         playerView.own.credits,
         playerView.own.rig ?? [],
+        { excludeStealthCredits },
       ),
       server.root ?? [],
+      input.playerView.opponent.credits,
+      {
+        ...visibleRunnerPathTraceContext(input),
+        excludeStealthTraceCredits: excludeStealthCredits,
+      },
     );
     if (!runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)) continue;
     const requiredCoverage = missingBreakerCoverageKind(
@@ -132,7 +146,7 @@ function searchCoverageServerPriority(
 ): number {
   const root = server.root ?? [];
   const ice = server.ice ?? [];
-  let priority = server.id.startsWith("remote_") ? 90 : 40;
+  let priority = isRemoteServerId(server.id) ? 90 : 40;
   if (server.id === "rd") priority += 20;
   if (server.id === "hq") priority += 12;
   if (server.id === "archives") priority -= 10;

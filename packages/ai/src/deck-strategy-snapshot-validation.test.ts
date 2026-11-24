@@ -1,7 +1,17 @@
-import { createGameAfterSetup } from "@netgrid/engine";
-import { describe, expect, it } from "vitest";
-import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import {
+  applyAction,
+  createGame,
+  createGameAfterSetup,
+  getPlayerView,
+} from "@netgrid/engine";
+import {
+  ORIGINALSET_DEFAULT_DECKS,
+  type GameState,
+  type Side,
+} from "@netgrid/shared";
+import { describe, expect, it } from "vitest";
+import {
+  AiDecisionChronicle,
   assertValidAiDeckSnapshotForRuntime,
   buildAiDecisionInput,
   isAiDeckSnapshotRuntimeError,
@@ -9,6 +19,7 @@ import {
   type AiDeckStrategyDeckSnapshot,
   type AiDeckSnapshotRuntimeErrorCode,
 } from "./index";
+import { deckSnapshotForSimulation } from "./simulation/simulation-config-helpers";
 
 describe("AI deck snapshot runtime validation", () => {
   it("builds a normal AI decision input with a valid ownDeckSnapshot", () => {
@@ -16,7 +27,7 @@ describe("AI deck snapshot runtime validation", () => {
       matchId: "ai-deck-snapshot-valid",
       seed: "ai-deck-snapshot-valid",
     });
-    const snapshot = snapshotById("demo_corp_008_snapshot_v0_8");
+    const snapshot = snapshotForSide("corp");
 
     const input = buildAiDecisionInput(state, "corp", {
       difficulty: "normal",
@@ -25,6 +36,37 @@ describe("AI deck snapshot runtime validation", () => {
 
     expect(input.ownDeckStrategyProfile?.deckId).toBe(snapshot.deckSnapshotId);
     expect(input.ownDeckCapabilities?.side).toBe("corp");
+  });
+
+  it("appends side-filtered observations and rebuilds the exact input after a rewind", () => {
+    const initial = createGame({
+      matchId: "ai-chronicle",
+      seed: "ai-chronicle",
+    });
+    const keep = openingChoice(initial, "keep");
+    const mulligan = openingChoice(initial, "mulligan");
+    const chronicle = new AiDecisionChronicle();
+    for (const side of ["runner", "corp"] as const) {
+      const options = { ownDeckSnapshot: snapshotForSide(side) };
+      const read = (state: GameState) => {
+        const current = buildAiDecisionInput(state, side, {
+          ...options,
+          chronicle,
+        });
+        expect(current).toEqual(buildAiDecisionInput(state, side, options));
+        return current.playerView.publicEvents;
+      };
+      const before = read(initial);
+      const after = read(keep);
+      expect(after.length).toBeGreaterThan(before.length);
+      expect(before.length).toBeGreaterThan(0);
+      expect(after[0]).toBe(before[0]);
+      expect(read(mulligan).at(-1)?.stateHashAfter).not.toBe(
+        after.at(-1)?.stateHashAfter,
+      );
+      chronicle.release(initial.matchId);
+      expect(read(keep)[0]).not.toBe(before[0]);
+    }
   });
 
   it("rejects a normal AI decision input without ownDeckSnapshot", () => {
@@ -49,7 +91,7 @@ describe("AI deck snapshot runtime validation", () => {
       () =>
         buildAiDecisionInput(state, "corp", {
           difficulty: "normal",
-          ownDeckSnapshot: snapshotById("demo_runner_008_snapshot_v0_8"),
+          ownDeckSnapshot: snapshotForSide("runner"),
         }),
       "ai_deck_snapshot_side_mismatch",
     );
@@ -60,12 +102,8 @@ describe("AI deck snapshot runtime validation", () => {
       matchId: "ai-deck-snapshot-unknown-card",
       seed: "ai-deck-snapshot-unknown-card",
     });
-    const snapshot = structuredClone(
-      snapshotById("demo_corp_008_snapshot_v0_8"),
-    );
-    snapshot.cards = [
-      { cardId: "unknown_runtime_card_for_snapshot_test", quantity: 1 },
-    ];
+    const snapshot = snapshotForSide("corp");
+    snapshot.cards = [{ cardId: Number.MAX_SAFE_INTEGER, quantity: 1 }];
 
     expectSnapshotError(
       () =>
@@ -77,8 +115,30 @@ describe("AI deck snapshot runtime validation", () => {
     );
   });
 
+  it.each(["duplicate", "malformed", "string card identifier"])(
+    "rejects %s card rows",
+    (invalidity) => {
+      const snapshot = snapshotForSide("corp");
+      if (invalidity === "duplicate") {
+        snapshot.cards.push({ ...snapshot.cards[0]! });
+      } else if (invalidity === "string card identifier") {
+        snapshot.cards[0] = {
+          ...snapshot.cards[0]!,
+          cardId: String(snapshot.cards[0]!.cardId) as never,
+        };
+      } else {
+        snapshot.cards.push(null as never);
+      }
+
+      expectSnapshotError(
+        () => assertValidAiDeckSnapshotForRuntime(snapshot, { side: "corp" }),
+        "ai_deck_snapshot_invalid",
+      );
+    },
+  );
+
   it("rejects stale ownDeckSnapshot metadata for normal runtime", () => {
-    const snapshot = snapshotById("demo_corp_008_snapshot_v0_8");
+    const snapshot = snapshotForSide("corp");
 
     expectSnapshotError(
       () =>
@@ -91,12 +151,29 @@ describe("AI deck snapshot runtime validation", () => {
   });
 });
 
-function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
-  const snapshot = (
-    snapshotsData08.snapshots as AiDeckStrategyDeckSnapshot[]
-  ).find((candidate) => candidate.deckSnapshotId === snapshotId);
-  if (!snapshot) throw new Error(`Missing test deck snapshot ${snapshotId}`);
-  return structuredClone(snapshot);
+function openingChoice(state: GameState, selectedOptionId: string): GameState {
+  const view = getPlayerView(state, "runner");
+  const choice = view.pendingChoice!;
+  const action = view.legalActions.find(
+    (offer) => offer.type === "resolve_choice",
+  )!;
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side: "runner",
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: selectedOptionId,
+    selectedChoices: {
+      choiceId: choice.choiceId,
+      selectedOptionIds: [selectedOptionId],
+    },
+  });
+  if (!result.ok) throw new Error(result.error.code);
+  return result.state;
+}
+
+function snapshotForSide(side: Side): AiDeckStrategyDeckSnapshot {
+  return deckSnapshotForSimulation(ORIGINALSET_DEFAULT_DECKS[side]);
 }
 
 function expectSnapshotError(

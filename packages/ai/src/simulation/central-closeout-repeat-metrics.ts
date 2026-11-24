@@ -148,11 +148,12 @@ export function summarizeCentralCloseoutRepeatMetrics(
         entry.runnerCentralRunInsteadOfContestableAdvancedRemote &&
         !entry.runnerCentralRunInsteadWasJustified
       ) {
-        for (const serverId of entry.runnerContestableAdvancedRemoteThreatServerIds ??
-          []) {
-          centralInsteadUnjustifiedKeys.add(
-            `${summary.seed}|${turn}|${serverId}`,
-          );
+        for (const threat of entry.runnerAdvancedRemoteThreats ?? []) {
+          if (threat.contestable) {
+            centralInsteadUnjustifiedKeys.add(
+              `${summary.seed}|${turn}|${threat.serverId}`,
+            );
+          }
         }
       }
 

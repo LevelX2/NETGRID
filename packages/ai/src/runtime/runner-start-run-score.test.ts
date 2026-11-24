@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -5,45 +6,15 @@ import type {
   PlayerView,
   VisibleCard,
 } from "@netgrid/shared";
-import { runnerStartRunScoreComponents } from "./runner-start-run-score";
+import { runnerHqSuccessWindowSetupAssessment } from "./runner-start-run-score";
 
-describe("runnerStartRunScoreComponents", () => {
-  it("surfaces empty HQ as a no-access payoff in start-run scoring", () => {
-    const components = runnerStartRunScoreComponents(
-      aiInput({ opponentHandCount: 0 }),
-      startRun("hq"),
-      dependencies(),
-    );
-
-    expect(components).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_hq_empty_no_access_payoff",
-          value: -3200,
-          reason: "opponent_hand_count:0",
-        }),
-      ]),
-    );
-  });
-
-  it("does not penalize HQ pressure while HQ still has visible cards", () => {
-    const components = runnerStartRunScoreComponents(
-      aiInput({ opponentHandCount: 1 }),
-      startRun("hq"),
-      dependencies(),
-    );
-
-    expect(components.map((component) => component.key)).not.toContain(
-      "runner_hq_empty_no_access_payoff",
-    );
-  });
-
+describe("runnerHqSuccessWindowSetupAssessment", () => {
   it("values an HQ run that opens an affordable conditional ICE-trash window", () => {
     const input = aiInput({ opponentHandCount: 4 });
     input.playerView.own.gripOrHq = [
       {
         instanceId: "jettison",
-        definitionId: "onr_v1_080_core-command-jettison-ice",
+        definitionId: 292,
         title: "Jettison Ice",
         owner: "runner",
         controller: "runner",
@@ -57,7 +28,7 @@ describe("runnerStartRunScoreComponents", () => {
       ice: [
         {
           instanceId: "rezzed-ice",
-          definitionId: "rezzed-ice",
+          definitionId: syntheticCardDefinitionId("rezzed-ice"),
           title: "Rezzed ICE",
           owner: "corp",
           controller: "corp",
@@ -71,36 +42,17 @@ describe("runnerStartRunScoreComponents", () => {
     });
 
     expect(
-      runnerStartRunScoreComponents(input, startRun("hq"), dependencies()),
-    ).toContainEqual(
-      expect.objectContaining({
-        key: "runner_hq_success_window_setup",
-        value: 1700,
-      }),
-    );
+      runnerHqSuccessWindowSetupAssessment(input, startRun("hq"), "hq"),
+    ).toMatchObject({
+      sourceDefinitionId: 292,
+      minimumIceTrashCost: 2,
+    });
   });
 });
 
-function dependencies(): Parameters<typeof runnerStartRunScoreComponents>[2] {
-  return {
-    serverId: (action) =>
-      typeof action.payload?.serverId === "string"
-        ? action.payload.serverId
-        : undefined,
-    hqMemoryComponents: () => [],
-    rndMemoryComponents: () => [],
-    archivesComponents: () => [],
-    isRemoteServerTarget: (serverId) =>
-      serverId?.startsWith("remote_") ?? false,
-    remoteComponents: () => [],
-    knownIcePathComponents: () => [],
-    repeatedRunTargetComponents: () => [],
-  };
-}
-
 function startRun(serverId: string): LegalAction {
   return {
-    actionId: `runner.start_run.${serverId}`,
+    actionId: `rs.${serverId}`,
     side: "runner",
     type: "start_run",
     label: `Run auf ${serverId}`,
@@ -168,7 +120,7 @@ function aiInput(params: { opponentHandCount: number }): AiDecisionInput {
 function visibleIdentity(side: "runner" | "corp"): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(side + "-identity"),
     title: `${side} identity`,
     owner: side,
     controller: side,

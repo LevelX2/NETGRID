@@ -48,6 +48,18 @@ function debtEntry(
 }
 
 describe("groupChronicleEntriesForRender", () => {
+  it("keeps the group anchor when a newer action is prepended", () => {
+    const label = "Zug 2 - Runner";
+    const older = [entry("score", label, "runner")];
+    const updated = [entry("gain-credit", label, "runner"), ...older];
+    expect(groupChronicleEntriesForRender(older)[0]?.oldestItemId).toBe(
+      "score",
+    );
+    expect(groupChronicleEntriesForRender(updated)[0]?.oldestItemId).toBe(
+      "score",
+    );
+  });
+
   it("keeps a multi-access run open until its final access", () => {
     expect(
       chronicleAccessCompletesRun({
@@ -74,7 +86,7 @@ describe("groupChronicleEntriesForRender", () => {
       chronicleResolveChoiceBelongsToRunPayload({
         runnerMemoryCheckpointResolved: true,
         trashedProgramCount: 1,
-        trashedCardDefinitionIds: "simple_decoder",
+        trashedCardDefinitionIds: 591,
       }),
     ).toBe(true);
   });
@@ -97,7 +109,7 @@ describe("groupChronicleEntriesForRender", () => {
         eventModificationDecision: "apply",
         eventModificationOutcome: "avoided",
         imminentEventType: "add_tag",
-        sourceDefinitionId: "onr_v1_161_fall-guy",
+        sourceDefinitionId: 373,
       }),
     ).toBe(true);
   });

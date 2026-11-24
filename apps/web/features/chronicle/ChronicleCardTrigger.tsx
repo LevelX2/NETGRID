@@ -1,5 +1,6 @@
 "use client";
 
+import { type CardDefinitionId } from "@netgrid/shared";
 import { useEffect, useId, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useTranslations } from "use-intl/react";
@@ -19,7 +20,6 @@ import {
   shouldAddFallbackSubroutineMarker,
 } from "../cards/CardTextRendering";
 import {
-  CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS,
   CARD_TOOLTIP_PIN_EVENT,
   type CardDisplayMode,
 } from "../settings/settings-model";
@@ -28,10 +28,11 @@ import {
   useCardTooltipSettings,
   usePreferredCardImageSource,
 } from "../cards/card-display-settings";
+import { useCardTooltipHover } from "../cards/useCardTooltipHover";
 import { chronicleCardTooltipContentMode } from "./chronicle-card-tooltip-model";
 
 type ChronicleTriggerCard = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   type: string;
   text: string;
@@ -75,10 +76,9 @@ export function ChronicleCardTrigger({
   const { tooltipPercent } = useCardScaleSettings();
   const tooltipViewId = useId();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipRef = useRef<HTMLSpanElement | null>(null);
   const lastTouchTapRef = useRef(0);
-  const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
+  const hover = useCardTooltipHover(triggerRef, tooltipRef, hoverOpenDelayMs);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">(
     "below",
@@ -102,8 +102,7 @@ export function ChronicleCardTrigger({
   const tooltipEnabled =
     Boolean(card) && !disabled && tooltipContentMode !== null;
   const nativeTitle = tooltipEnabled ? undefined : title;
-  const showTooltip =
-    tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible);
+  const showTooltip = tooltipEnabled && (hover.visible || tooltipFocusVisible);
   const cardType = card?.type ?? "";
   const tooltipId =
     tooltipEnabled && card
@@ -173,20 +172,6 @@ export function ChronicleCardTrigger({
     : [];
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
 
-  const clearOpenTimer = () => {
-    if (openTimerRef.current !== null) {
-      clearTimeout(openTimerRef.current);
-      openTimerRef.current = null;
-    }
-  };
-
-  const clearCloseTimer = () => {
-    if (closeTimerRef.current !== null) {
-      clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = null;
-    }
-  };
-
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
     const base = tooltipMode === "enhanced" ? 132 : 78;
@@ -238,37 +223,13 @@ export function ChronicleCardTrigger({
     }
   };
 
-  const scheduleOpen = () => {
-    if (!tooltipEnabled) return;
-    clearCloseTimer();
-    if (tooltipHoverVisible) return;
-    clearOpenTimer();
-    openTimerRef.current = setTimeout(() => {
-      openTimerRef.current = null;
-      setTooltipHoverVisible(true);
-    }, hoverOpenDelayMs);
-  };
-
-  const scheduleClose = () => {
-    clearOpenTimer();
-    clearCloseTimer();
-    closeTimerRef.current = setTimeout(() => {
-      closeTimerRef.current = null;
-      setTooltipHoverVisible(false);
-    }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
-  };
-
   const closeTooltip = () => {
-    clearOpenTimer();
-    clearCloseTimer();
-    setTooltipHoverVisible(false);
+    hover.close();
     setTooltipFocusVisible(false);
   };
 
   const openTouchTooltip = () => {
-    clearOpenTimer();
-    clearCloseTimer();
-    setTooltipHoverVisible(false);
+    hover.close();
     setTooltipFocusVisible(true);
     window.dispatchEvent(
       new CustomEvent(CARD_TOOLTIP_PIN_EVENT, {
@@ -284,10 +245,7 @@ export function ChronicleCardTrigger({
 
   useEffect(() => {
     if (tooltipEnabled) return;
-    clearOpenTimer();
-    clearCloseTimer();
-    setTooltipHoverVisible(false);
-    setTooltipFocusVisible(false);
+    closeTooltip();
     setTooltipPositionStyle({});
   }, [tooltipEnabled]);
 
@@ -295,14 +253,6 @@ export function ChronicleCardTrigger({
     if (!showTooltip) return;
     updateTooltipPlacement();
   }, [showTooltip, tooltipMode]);
-
-  useEffect(
-    () => () => {
-      clearOpenTimer();
-      clearCloseTimer();
-    },
-    [],
-  );
 
   useEffect(() => {
     const closeWhenOtherTooltipOpens = (event: Event) => {
@@ -364,9 +314,10 @@ export function ChronicleCardTrigger({
         activateCardPreview();
       }}
       onPointerEnter={(event) => {
-        if (event.pointerType === "touch") return;
-        updateTooltipPlacement();
-        scheduleOpen();
+        if (tooltipEnabled) hover.open(event);
+      }}
+      onPointerMove={(event) => {
+        if (tooltipEnabled) hover.open(event);
       }}
       onPointerUp={(event) => {
         if (event.pointerType !== "touch" || disabled) return;
@@ -380,28 +331,17 @@ export function ChronicleCardTrigger({
           activateCardPreview();
         }
       }}
-      onPointerLeave={(event) => {
-        if (event.pointerType === "touch") return;
-        scheduleClose();
-      }}
+      onPointerLeave={hover.leave}
     >
       {children}
       {showTooltip && tooltipId && card ? (
         <span
+          ref={tooltipRef}
           className={`chronicleCardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
           id={tooltipId}
           role="tooltip"
           style={tooltipPositionStyle}
-          onPointerEnter={(event) => {
-            if (event.pointerType === "touch") return;
-            clearCloseTimer();
-            clearOpenTimer();
-            if (!tooltipHoverVisible) setTooltipHoverVisible(true);
-          }}
-          onPointerLeave={(event) => {
-            if (event.pointerType === "touch") return;
-            scheduleClose();
-          }}
+          onPointerEnter={(event) => hover.open(event, true)}
         >
           {showImageTooltip ? (
             <span

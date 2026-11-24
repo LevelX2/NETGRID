@@ -1,6 +1,7 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
+  isRunnerPaymentWindowId,
   type CardDefinition,
   type CardInstanceId,
   type EventVisibilityClass,
@@ -9,7 +10,8 @@ import {
   type LegalAction,
   type AbilityPayloadDiscriminatorField,
   type PlayerAction,
-  type ResolvedGameEffect,
+  type PublicEventPayload,
+  type PublicResolvedGameEffect,
   type Side,
   type StateHash,
 } from "@netgrid/shared";
@@ -91,6 +93,11 @@ export function buildEventWithHost(
     legalAction,
     host.publicContext.deps,
   );
+  let resolvedEffects: PublicResolvedGameEffect[] | undefined =
+    legalAction.resolvedEffects?.map((effect, effectId) => ({
+      ...effect,
+      effectId,
+    }));
   const startedRun =
     state.run && state.run.runId !== previousState.run?.runId
       ? state.run
@@ -100,8 +107,9 @@ export function buildEventWithHost(
     actionContext.abilityFamily = "run-access";
     actionContext.effectKind = "run";
     if (legalAction.type !== "start_run") {
-      const runStartEffect: ResolvedGameEffect = {
-        effectId: `${startedRun.runId}.start`,
+      resolvedEffects ??= [];
+      resolvedEffects.push({
+        effectId: resolvedEffects.length,
         kind: "start_run",
         visibility: "public",
         side: "runner",
@@ -109,11 +117,7 @@ export function buildEventWithHost(
         serverId: startedRun.attackedServerId,
         accessServerId:
           startedRun.accessServerOverride ?? startedRun.attackedServerId,
-      };
-      actionContext.resolvedEffects = [
-        ...(legalAction.resolvedEffects ?? []),
-        runStartEffect,
-      ];
+      });
     }
   }
   if (
@@ -137,7 +141,12 @@ export function buildEventWithHost(
     state,
     legalAction,
   );
-  const publicPayload: Record<string, unknown> = {
+  const creditChanges = (["corp", "runner"] as const).flatMap((side) => {
+    const before = previousState[side].credits;
+    const after = state[side].credits;
+    return before === after ? [] : [{ side, before, after }];
+  });
+  const publicPayload: PublicEventPayload = {
     actor,
     actionType: publicEventType,
     label: publicLabel(legalAction),
@@ -145,6 +154,13 @@ export function buildEventWithHost(
     ...runnerCostPenaltySupportEventContext(state, legalAction),
     ...actionContext,
     ...installedPositionContext,
+    ...publicCorpZoneObservations(
+      previousState,
+      state,
+      legalAction,
+      actionContext.serverId === "hq" &&
+        installedPositionContext.installPlacement !== "root",
+    ),
     ...buildPublicAbilitySchemaContext(
       legalAction.type,
       legalAction.payload,
@@ -152,6 +168,8 @@ export function buildEventWithHost(
       visibilityClass,
     ),
     ...(counterMutations.length > 0 ? { counterMutations } : {}),
+    ...(creditChanges.length > 0 ? { creditChanges } : {}),
+    ...(resolvedEffects ? { resolvedEffects } : {}),
     ...(legalAction.publicVisibilityTransitions?.length
       ? {
           publicVisibilityTransitions: legalAction.publicVisibilityTransitions,
@@ -183,7 +201,7 @@ export function buildEventWithHost(
     }
   }
   return {
-    eventId: `evt_${after}`,
+    eventId: after + 1,
     type: publicEventType,
     stateVersionBefore: before,
     stateVersionAfter: after,
@@ -200,6 +218,45 @@ export function buildEventWithHost(
   };
 }
 
+function publicCorpZoneObservations(
+  previous: GameState,
+  current: GameState,
+  action: LegalAction,
+  accessesHqHand: boolean,
+): Pick<
+  PublicEventPayload,
+  | "corpHqCountBefore"
+  | "corpHqCountAfter"
+  | "corpRdDrawnToHqCount"
+  | "corpRdDrawOrderUnresolved"
+> {
+  const before = previous.corp.hq.length;
+  const after = current.corp.hq.length;
+  const hqObservation =
+    before !== after || (action.type === "access_card" && accessesHqHand)
+      ? { corpHqCountBefore: before, corpHqCountAfter: after }
+      : {};
+  if (
+    action.side !== "corp" ||
+    (action.type !== "draw_card" && action.type !== "mandatory_draw")
+  ) {
+    return hqObservation;
+  }
+  const priorRd = previous.corp.rd;
+  const currentRd = current.corp.rd;
+  const removed = priorRd.length - currentRd.length;
+  const currentHq = new Set(current.corp.hq);
+  const prefixReachedHq =
+    !previous.pendingCorpDraw &&
+    !current.pendingCorpDraw &&
+    removed >= 0 &&
+    currentRd.every((cardId, index) => cardId === priorRd[removed + index]) &&
+    priorRd.slice(0, removed).every((cardId) => currentHq.has(cardId));
+  return prefixReachedHq
+    ? { ...hqObservation, corpRdDrawnToHqCount: removed }
+    : { ...hqObservation, corpRdDrawOrderUnresolved: true };
+}
+
 function runnerCostPenaltySupportEventContext(
   state: GameState,
   legalAction: LegalAction,
@@ -208,7 +265,7 @@ function runnerCostPenaltySupportEventContext(
     return {};
   }
   const windowId = legalAction.payload.runnerCostPenaltySupportWindowId;
-  if (typeof windowId !== "string" || windowId.length === 0) {
+  if (!isRunnerPaymentWindowId(windowId)) {
     throw new Error(
       "Runner-Kostenfenster benötigt eine öffentliche Window-ID.",
     );
@@ -415,7 +472,7 @@ function revealForPublicEvent(
     legalAction.payload?.hiddenRunnerResourceInstall === true
   )
     return {};
-  if (typeof legalAction.payload?.publicRevealDefinitionId === "string") {
+  if (typeof legalAction.payload?.publicRevealDefinitionId === "number") {
     const definition =
       CARD_DEFINITIONS_BY_ID[legalAction.payload.publicRevealDefinitionId];
     if (definition)
@@ -485,7 +542,7 @@ function revealForPublicEvent(
       const definition = definitionForEvent(state, cardId);
       return { cardDefinitionId: definition.id, title: definition.title };
     }
-    if (typeof cardId === "string" && CARD_DEFINITIONS_BY_ID[cardId])
+    if (typeof cardId === "number" && CARD_DEFINITIONS_BY_ID[cardId])
       return {
         cardDefinitionId: cardId,
         title: CARD_DEFINITIONS_BY_ID[cardId]?.title,

@@ -17,7 +17,7 @@ import {
 } from "./hidden-resource-payment-preselection";
 
 const ability: VisibleRunnerPaymentSupportAbility = {
-  sourceAbilityId: "test_hidden_resource:withdraw-1",
+  sourceAbilityId: 440,
   capabilityKey: "withdraw-1",
   timing: "runner_cost_penalty_support",
   label: "Swiss Bank Account: 6 Credits nehmen",
@@ -40,10 +40,10 @@ describe("hidden resource payment preselection", () => {
       matchId: "match-1",
       side: "runner",
       sourceCardId: "swiss-a",
-      sourceAbilityId: "test_hidden_resource:withdraw-1",
+      sourceAbilityId: 440,
       capabilityKey: "withdraw-1",
       selectedTurnSerial: 7,
-      selectedRunId: "run-1",
+      selectedRunId: 1,
     });
     expect(
       hiddenResourcePaymentPreselectionIsAvailable(
@@ -72,42 +72,42 @@ describe("hidden resource payment preselection", () => {
       "support-0",
       "swiss-a",
       "withdraw-0",
-      "window-1",
+      1,
     );
     const exactAbility = supportAction(
       "support-1",
       "swiss-a",
       "withdraw-1",
-      "window-1",
+      1,
     );
 
     expect(
       resolveHiddenResourcePaymentPreselection(selection, [
         lowerAbility,
         exactAbility,
-        continuation("continue", "window-1"),
+        continuation("continue", 1),
       ]),
-    ).toEqual({ kind: "match", windowId: "window-1", action: exactAbility });
-    expect(paymentSupportSubmitKey("match-1", "window-1", exactAbility)).toBe(
-      "match-1:window-1:support-1",
+    ).toEqual({ kind: "match", windowId: 1, action: exactAbility });
+    expect(paymentSupportSubmitKey("match-1", 1, exactAbility)).toBe(
+      "match-1:1:support-1",
     );
     expect(
       shouldSubmitPaymentSupportAction(
-        "match-1:window-1:support-1",
-        "match-1:window-1:support-1",
+        "match-1:1:support-1",
+        "match-1:1:support-1",
       ),
     ).toBe(false);
     expect(
       shouldSubmitPaymentSupportAction(
-        "match-1:window-1:support-1",
-        "match-1:window-2:support-1",
+        "match-1:1:support-1",
+        "match-1:2:support-1",
       ),
     ).toBe(true);
   });
 
   it("matches canonical payment support by exact capability identity", () => {
     const canonical: VisibleRunnerPaymentSupportAbility = {
-      sourceAbilityId: "test_hidden_resource:withdraw",
+      sourceAbilityId: 441,
       capabilityKey: "withdraw",
       timing: "runner_cost_penalty_support",
       label: "Withdraw",
@@ -129,20 +129,20 @@ describe("hidden resource payment preselection", () => {
       {
         cardId: "canonical-a",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityId: "test_hidden_resource:withdraw",
+        cardImplementationAbilityId: 441,
         cardImplementationAbilityKey: "withdraw",
         cardImplementationAbilityTiming: "runner_cost_penalty_support",
-        costPenaltySupportWindowId: "window-1",
+        costPenaltySupportWindowId: 1,
       },
       12,
     );
     exact.abilityRef = {
       sourceCardInstanceId: "canonical-a",
-      sourceAbilityId: "test_hidden_resource:withdraw",
+      sourceAbilityId: 441,
     };
     expect(
       resolveHiddenResourcePaymentPreselection(selection, [exact]),
-    ).toEqual({ kind: "match", windowId: "window-1", action: exact });
+    ).toEqual({ kind: "match", windowId: 1, action: exact });
   });
 
   it("waits outside a support window and falls back for stale or ambiguous actions", () => {
@@ -157,16 +157,16 @@ describe("hidden resource payment preselection", () => {
     });
     expect(
       resolveHiddenResourcePaymentPreselection(selection, [
-        supportAction("wrong-source", "swiss-b", "withdraw-1", "window-1"),
-        continuation("continue", "window-1"),
+        supportAction("wrong-source", "swiss-b", "withdraw-1", 1),
+        continuation("continue", 1),
       ]),
-    ).toEqual({ kind: "invalid", windowId: "window-1" });
+    ).toEqual({ kind: "invalid", windowId: 1 });
     expect(
       resolveHiddenResourcePaymentPreselection(selection, [
-        supportAction("duplicate-a", "swiss-a", "withdraw-1", "window-1"),
-        supportAction("duplicate-b", "swiss-a", "withdraw-1", "window-1"),
+        supportAction("duplicate-a", "swiss-a", "withdraw-1", 1),
+        supportAction("duplicate-b", "swiss-a", "withdraw-1", 1),
       ]),
-    ).toEqual({ kind: "invalid", windowId: "window-1" });
+    ).toEqual({ kind: "invalid", windowId: 1 });
   });
 
   it("continues the original action only after bank support reached a fresh state", () => {
@@ -174,28 +174,23 @@ describe("hidden resource payment preselection", () => {
       "support-1",
       "swiss-a",
       "withdraw-1",
-      "window-1",
+      1,
     );
-    support.payload = {
-      ...support.payload,
-      costPenaltySupportOriginalActionId: "running-interference",
-    };
     const pending = pendingPaymentSupportContinuation("match-1", support, 12);
     expect(pending).toEqual({
       matchId: "match-1",
-      windowId: "window-1",
-      originalActionId: "running-interference",
+      windowId: 1,
       supportSubmittedAtStateVersion: 12,
     });
 
     const staleContinuation = continuation(
       "running-interference",
-      "window-1",
+      1,
       12,
     );
     const freshContinuation = continuation(
       "running-interference",
-      "window-1",
+      1,
       13,
     );
     expect(
@@ -213,7 +208,7 @@ describe("hidden resource payment preselection", () => {
           "more-support-needed",
           "chiba-a",
           "withdraw-0",
-          "window-1",
+          1,
           13,
         ),
       ]),
@@ -328,7 +323,7 @@ function view(
     },
     servers: [],
     run: {
-      runId: "run-1",
+      runId: 1,
       attackedServerId: "hq",
       phase: "encounter_ice",
       successful: false,
@@ -351,10 +346,10 @@ function supportAction(
   actionId: string,
   source: string,
   capabilityKey: string,
-  windowId: string,
+  windowId: number,
   stateVersion = 12,
 ): LegalAction {
-  const sourceAbilityId = `test_hidden_resource:${capabilityKey}`;
+  const sourceAbilityId = capabilityKey === "withdraw-1" ? 440 : 441;
   const result = action(
     actionId,
     "activated_card_ability",
@@ -375,7 +370,7 @@ function supportAction(
 
 function continuation(
   actionId: string,
-  windowId: string,
+  windowId: number,
   stateVersion = 12,
 ): LegalAction {
   return action(

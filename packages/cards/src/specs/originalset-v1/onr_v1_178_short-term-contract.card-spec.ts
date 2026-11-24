@@ -7,7 +7,7 @@ const takeHostedCredits = capabilityKey(
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_178_short-term-contract"),
+    cardDefinitionId: cardDefinitionId(390),
     title: "Short-Term Contract",
     side: "runner",
     cardType: "resource",

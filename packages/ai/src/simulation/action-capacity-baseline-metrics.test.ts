@@ -38,6 +38,28 @@ describe("action-capacity baseline metrics", () => {
     });
   });
 
+  it("counts later own actions across an opponent response in the same turn", () => {
+    const metrics = summarizeActionCapacityBaselineMetrics([
+      summary([
+        entry({
+          actionType: "play_operation",
+          actionCapacitySourceUsed: true,
+        }),
+        entry({ side: "runner", actionType: "resolve_choice" }),
+        entry({ actionType: "score_agenda" }),
+        entry({ actionType: "end_turn", actionsRemainingBefore: 1 }),
+        entry({ turnNumber: 2, actionType: "gain_credit" }),
+      ]),
+    ]);
+
+    expect(metrics).toMatchObject({
+      actionCapacityUses: 1,
+      actionCapacityFollowupConversions: 1,
+      actionCapacityExpiredUses: 1,
+      actionCapacityMisconversions: 0,
+    });
+  });
+
   it("counts an inline self-financing action as a converted use", () => {
     const metrics = summarizeActionCapacityBaselineMetrics([
       summary([

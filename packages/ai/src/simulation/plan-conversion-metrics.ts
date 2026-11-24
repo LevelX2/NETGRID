@@ -3,7 +3,7 @@ import type { Side } from "@netgrid/shared";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { isMeaningfulBoardProgress } from "./meaningful-board-progress";
-import { summarizeOutcomeFollowupMetrics } from "./outcome-followup-metrics";
+import { summarizeEncounterEffectMetrics } from "./encounter-effect-metrics";
 import {
   actionsUntil,
   advanceConvertsToScore,
@@ -48,7 +48,7 @@ type BasicPlanConversionMetrics = Pick<
 
 type PlanConversionMetrics = BasicPlanConversionMetrics &
   ReturnType<typeof summarizeStrategicPlanConversionMetrics> &
-  ReturnType<typeof summarizeOutcomeFollowupMetrics>;
+  ReturnType<typeof summarizeEncounterEffectMetrics>;
 
 export function summarizePlanConversionMetrics(
   summaries: AiSimulationSummary[],
@@ -71,21 +71,23 @@ export function summarizePlanConversionMetrics(
   const noProgressChains: number[] = [];
   const scoreOrStealDistances: number[] = [];
   const boardProgressDistances: number[] = [];
-  const turnsWithActions = new Set<string>();
-  const turnsWithProgress = new Set<string>();
+  let turnsWithNoProgress = 0;
 
   for (const summary of summaries) {
     const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    const turnsWithActions = new Set<number>();
+    const turnsWithProgress = new Set<number>();
     const lastPlanBySide: Partial<
       Record<Side, { planKind: string; progressSince: boolean }>
     > = {};
     let noProgressChain = 0;
 
     sequence.forEach((entry, index) => {
-      const turnKey = `${summary.seed}|${entry.turnNumber ?? 0}`;
-      turnsWithActions.add(turnKey);
       const hasProgress = isMeaningfulBoardProgress(entry);
-      if (hasProgress) turnsWithProgress.add(turnKey);
+      if (entry.turnNumber !== undefined) {
+        turnsWithActions.add(entry.turnNumber);
+        if (hasProgress) turnsWithProgress.add(entry.turnNumber);
+      }
 
       if (hasProgress) {
         if (noProgressChain > 0) noProgressChains.push(noProgressChain);
@@ -203,6 +205,9 @@ export function summarizePlanConversionMetrics(
       }
     });
 
+    turnsWithNoProgress += [...turnsWithActions].filter(
+      (turnNumber) => !turnsWithProgress.has(turnNumber),
+    ).length;
     if (noProgressChain > 0) {
       noProgressChains.push(noProgressChain);
       longestNoProgressChain = Math.max(
@@ -228,9 +233,7 @@ export function summarizePlanConversionMetrics(
     centralPressureConvertedToSteal,
     noProgressActionChainLength: averageNumber(noProgressChains),
     longestNoProgressChain,
-    turnsWithNoProgress: [...turnsWithActions].filter(
-      (turnKey) => !turnsWithProgress.has(turnKey),
-    ).length,
+    turnsWithNoProgress,
     actionsUntilNextScoreOrSteal: averageNumber(scoreOrStealDistances),
     actionsUntilNextMeaningfulBoardProgress: averageNumber(
       boardProgressDistances,
@@ -240,6 +243,6 @@ export function summarizePlanConversionMetrics(
       isMeaningfulBoardProgress,
       isCorpRemoteAdvancementProgress,
     ),
-    ...summarizeOutcomeFollowupMetrics(summaries, isMeaningfulBoardProgress),
+    ...summarizeEncounterEffectMetrics(summaries),
   };
 }

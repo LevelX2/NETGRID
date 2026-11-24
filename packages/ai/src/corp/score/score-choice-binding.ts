@@ -9,8 +9,9 @@ import {
   corpScoredAgendaIceMarkProfile,
 } from "../../runtime/corp-canonical-card-facts";
 import {
-  PendingChoice,
-  PendingChoiceOptions,
+  exactCurrentChoiceAction,
+  type PendingChoice,
+  type PendingChoiceOptions,
   unresolvedChoiceFailure,
 } from "../../runtime/plan-bound-choice-contract";
 export function selectedCorpScoredAgendaStartDrawChoiceOptionId(
@@ -40,20 +41,7 @@ export function selectedCorpScoredAgendaStartDrawChoiceOptionId(
   );
   const exactOptions =
     selectableOptions.length === 2 && draw !== undefined && skip !== undefined;
-  const requirement = action.choiceRequirements?.[0];
-  const exactActionBinding =
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === 2 &&
-    requirement.optionIds.includes("draw") &&
-    requirement.optionIds.includes("skip");
+  const exactActionBinding = exactCurrentChoiceAction(input, choice) === action;
   const rdCount = input.playerView.own.stackOrRdCount;
   if (
     input.playerView.timingPoint !== "corp_draw.mandatory_draw" ||
@@ -111,12 +99,13 @@ export function selectedCorpSatelliteMonitorsStartOptionId(
   const sourceStateVersion = Number(sourceMatch?.[2]);
   const sourceCard = sourceCardId
     ? input.playerView.servers
+        .filter((server) => server.id !== "archives")
         .flatMap((server) => server.root)
         .find(
           (card) =>
             card.instanceId === sourceCardId &&
             card.known &&
-            card.definitionId === "onr_classic_021_satellite-monitors" &&
+            card.definitionId === 25 &&
             card.type === "asset" &&
             card.rezzed === true,
         )
@@ -127,20 +116,7 @@ export function selectedCorpSatelliteMonitorsStartOptionId(
   const decline = selectableOptions.find(
     (option) => option.id === "decline" && option.value === "decline",
   );
-  const requirement = action.choiceRequirements?.[0];
-  const exactActionBinding =
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === 2 &&
-    requirement.optionIds.includes("use") &&
-    requirement.optionIds.includes("decline");
+  const exactActionBinding = exactCurrentChoiceAction(input, choice) === action;
   const exactWindow =
     sourceCard !== undefined &&
     sourceStateVersion === input.playerView.stateVersion &&
@@ -162,124 +138,13 @@ export function selectedCorpSatelliteMonitorsStartOptionId(
   return use.id;
 }
 
-export function selectedCorpDelayedSuccessOptionId(
+export function selectedCorpScoreAdvancementOptionId(
   input: AiDecisionInput,
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
-): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
-  const sourceMatch =
-    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:([^:]+):([0-9]+)$/.exec(
-      choice.source,
-    );
-  const sourceServerId = sourceMatch?.[2];
-  const boundDefensePlans = (portfolio?.instances ?? []).filter((instance) => {
-    if (instance.moduleId !== "corp.defend_servers") return false;
-    const state = instance.moduleState as
-      | {
-          kind?: unknown;
-          delayedSuccessChoiceBinding?: {
-            choiceId?: unknown;
-            actionId?: unknown;
-            sourceCardInstanceId?: unknown;
-            serverId?: unknown;
-            observedAtStateVersion?: unknown;
-          };
-        }
-      | undefined;
-    const candidateBinding = state?.delayedSuccessChoiceBinding;
-    return (
-      state?.kind === "defense" &&
-      candidateBinding?.choiceId === choice.choiceId &&
-      candidateBinding.actionId === action.actionId &&
-      candidateBinding.sourceCardInstanceId === sourceMatch?.[1] &&
-      candidateBinding.serverId === sourceServerId &&
-      candidateBinding.observedAtStateVersion === input.playerView.stateVersion
-    );
-  });
-  const executor =
-    boundDefensePlans.length === 1 ? boundDefensePlans[0] : undefined;
-  const moduleState = executor?.moduleState as
-    | {
-        kind?: unknown;
-        delayedSuccessChoiceBinding?: {
-          choiceId?: unknown;
-          actionId?: unknown;
-          selectedOptionId?: unknown;
-          sourceCardInstanceId?: unknown;
-          serverId?: unknown;
-          observedAtStateVersion?: unknown;
-        };
-      }
-    | undefined;
-  const binding = moduleState?.delayedSuccessChoiceBinding;
-  const selectedOption = selectableOptions.find(
-    (option) => option.id === binding?.selectedOptionId,
-  );
-  const [requirement] = action.choiceRequirements ?? [];
-  const optionIds = selectableOptions.map((option) => option.id);
-  const exactBinding =
-    portfolio?.side === "corp" &&
-    executor !== undefined &&
-    moduleState?.kind === "defense" &&
-    binding?.choiceId === choice.choiceId &&
-    binding.actionId === action.actionId &&
-    binding.selectedOptionId === selectedOption?.id &&
-    binding.sourceCardInstanceId === sourceMatch?.[1] &&
-    binding.serverId === sourceServerId &&
-    binding.observedAtStateVersion === input.playerView.stateVersion &&
-    sourceMatch?.[3] === String(input.playerView.stateVersion) &&
-    choice.side === "corp" &&
-    choice.stateVersion === input.playerView.stateVersion &&
-    choice.visibility === "hidden_info_barrier" &&
-    choice.minSelections === 1 &&
-    choice.maxSelections === 1 &&
-    selectedOption !== undefined &&
-    typeof selectedOption.value === "string" &&
-    ((selectedOption.id === "decline" && selectedOption.value === "decline") ||
-      (selectedOption.id === `ice_${selectedOption.value}` &&
-        input.playerView.own.gripOrHq.some(
-          (card) =>
-            card.instanceId === selectedOption.value &&
-            card.known &&
-            card.type === "ice",
-        ))) &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
-  if (!exactBinding || !selectedOption) {
-    throw unresolvedChoiceFailure(
-      input,
-      action,
-      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding on the attacked fort and its legal decline or visible HQ-ICE payload.",
-    );
-  }
-  return [selectedOption.id];
-}
-
-export function residentCorpScoreChoiceBinding(
-  input: AiDecisionInput,
-  choice: PendingChoice,
-  selectableOptions: PendingChoiceOptions,
-): {
-  planInstanceId: string;
-  targetCardId: string;
-  move?: { sourceCardId: string; targetCardId: string; amount: number };
-  placement?: {
-    placements: Array<{ targetCardId: string; amount: number }>;
-  };
-} {
-  const portfolio = residentPlanPortfolioSnapshot(input);
+  portfolio = residentPlanPortfolioSnapshot(input),
+): string {
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -308,36 +173,40 @@ export function residentCorpScoreChoiceBinding(
       ? continuation.targetCardId
       : undefined;
   const isMoveChoice = choice.source.startsWith("p3_34.move_advancement:");
-  const move =
+  const isPlacementChoice = choice.source.startsWith(
+    "p3_34.distribute_advancement:",
+  );
+  const sourceCardId = continuation?.sourceCardId;
+  const amount = continuation?.amount;
+  const moveValue =
     isMoveChoice &&
-    typeof continuation?.sourceCardId === "string" &&
-    typeof continuation.amount === "number" &&
-    Number.isInteger(continuation.amount) &&
-    continuation.amount > 0 &&
-    targetCardId !== undefined
-      ? {
-          sourceCardId: continuation.sourceCardId,
-          targetCardId,
-          amount: continuation.amount,
-        }
+    typeof sourceCardId === "string" &&
+    sourceCardId.length > 0 &&
+    !sourceCardId.includes("|") &&
+    targetCardId !== undefined &&
+    targetCardId.length > 0 &&
+    !targetCardId.includes("|") &&
+    sourceCardId !== targetCardId &&
+    typeof amount === "number" &&
+    Number.isSafeInteger(amount) &&
+    amount > 0
+      ? `${sourceCardId}|${targetCardId}|${amount}`
       : undefined;
-  const placement =
-    !isMoveChoice &&
-    Array.isArray(continuation?.placements) &&
-    continuation.placements.every(
-      (entry): entry is { targetCardId: string; amount: number } =>
-        entry !== null &&
-        typeof entry === "object" &&
-        typeof (entry as { targetCardId?: unknown }).targetCardId ===
-          "string" &&
-        typeof (entry as { amount?: unknown }).amount === "number" &&
-        Number.isInteger((entry as { amount: number }).amount) &&
-        (entry as { amount: number }).amount > 0,
-    )
-      ? { placements: continuation.placements }
-      : undefined;
+  const placementSignature = isPlacementChoice
+    ? advancementPlacementSignature(continuation?.placements)
+    : undefined;
+  const matches = selectableOptions.filter(({ value }) =>
+    moveValue !== undefined
+      ? value === moveValue
+      : placementSignature !== undefined &&
+        typeof value === "string" &&
+        value.split("|").sort().join("|") === placementSignature,
+  );
+  const optionId = matches.length === 1 ? matches[0]!.id : undefined;
+  const requirement = action.choiceRequirements?.[0];
   const exactContinuation =
-    portfolio !== undefined &&
+    input.side === "corp" &&
+    portfolio?.side === "corp" &&
     executor !== undefined &&
     moduleState?.kind === "score" &&
     typeof moduleState.signal?.agendaInstanceId === "string" &&
@@ -351,39 +220,40 @@ export function residentCorpScoreChoiceBinding(
       input.playerView.stateVersion &&
     continuation.selectedAtStateVersion === portfolio.stateVersion &&
     portfolio.stateVersion + 1 === input.playerView.stateVersion &&
+    choice.side === "corp" &&
+    choice.kind === "select_option" &&
     choice.stateVersion === input.playerView.stateVersion &&
-    targetCardId !== undefined &&
-    (move
-      ? selectableOptions.some(
-          (option) =>
-            option.value ===
-            `${move.sourceCardId}|${move.targetCardId}|${move.amount}`,
-        )
-      : placement !== undefined &&
-        selectableOptions.some((option) =>
-            advancementChoiceOptionMatchesPlacements(
-              option.value,
-              placement.placements,
-            ),
-          ));
-  if (!exactContinuation || !executor || !targetCardId) {
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    Array.isArray(requirement.optionIds);
+  if (
+    !exactContinuation ||
+    typeof optionId !== "string" ||
+    optionId.length === 0 ||
+    !requirement.optionIds.includes(optionId)
+  ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [action.actionId],
       owner: "continuation",
       removalCondition:
-        "Bind the advancement choice to the immediately preceding resident Corp score executor, selected score-conversion action and exact agenda target.",
+        "Bind the advancement choice to the preceding Corp score executor, current LegalAction and one exact selectable move or placement.",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
     });
   }
-  return {
-    planInstanceId: executor.instanceId,
-    targetCardId,
-    ...(move ? { move } : {}),
-    ...(placement ? { placement } : {}),
-  };
+  return optionId;
 }
 
 export function selectedCorpScoredAgendaSubtypeRevealOptionIds(
@@ -586,10 +456,7 @@ export function selectedCorpScoredAgendaIceMarkOptionId(
     targetCard.rezzed === true &&
     targetCard.definitionId === binding.targetDefinitionId &&
     matchingTargetOptions.length === 1 &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    exactCurrentChoiceAction(input, choice) === action &&
     action.choiceRequirements?.length === 1 &&
     requirement?.choiceId === choice.choiceId &&
     requirement.minSelections === 1 &&
@@ -712,10 +579,7 @@ export function selectedCorpScoredAgendaFreeRezOptionId(
     binding.selectedOptionId ===
       `rez_${binding.targetCardId}_${binding.selectedVariantId}` &&
     matchingTargetOptions.length === 1 &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    exactCurrentChoiceAction(input, choice) === action &&
     action.choiceRequirements?.length === 1 &&
     requirement?.choiceId === choice.choiceId &&
     requirement.minSelections === 1 &&
@@ -747,8 +611,8 @@ export function residentCorpScoredAgendaHqShuffleBinding(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
+  portfolio = residentPlanPortfolioSnapshot(input),
 ): { planInstanceId: string; selectedOptionIds: string[] } {
-  const portfolio = residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -804,10 +668,7 @@ export function residentCorpScoredAgendaHqShuffleBinding(
     choiceContinuation?.family === "corp_scored_agenda_hq_shuffle" &&
     choiceContinuation.createdAtStateVersion ===
       input.playerView.stateVersion &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    exactCurrentChoiceAction(input, choice) === action &&
     action.choiceRequirements?.length === 1 &&
     choiceRequirement?.choiceId === choice.choiceId &&
     choiceRequirement.minSelections === choice.minSelections &&
@@ -880,22 +741,28 @@ export function residentCorpScoredAgendaHqShuffleBinding(
   return { planInstanceId: executor.instanceId, selectedOptionIds };
 }
 
-function advancementChoiceOptionMatchesPlacements(
-  value: PendingChoiceOptions[number]["value"],
-  placements: Array<{ targetCardId: string; amount: number }>,
-): boolean {
-  if (typeof value !== "string" || !value.includes(":")) return false;
-  const valueSignature = value
-    .split("|")
-    .map((placement) => {
-      const [cardId, amount] = placement.split(":");
-      return `${cardId}:${Number(amount)}`;
-    })
-    .sort()
-    .join("|");
-  const plannedSignature = placements
-    .map((placement) => `${placement.targetCardId}:${placement.amount}`)
-    .sort()
-    .join("|");
-  return valueSignature === plannedSignature;
+function advancementPlacementSignature(
+  placements: unknown,
+): string | undefined {
+  if (!Array.isArray(placements) || placements.length === 0) return undefined;
+  const targets = new Set<string>();
+  const parts: string[] = [];
+  for (const placement of placements) {
+    const targetId = placement?.targetCardId;
+    const amount = placement?.amount;
+    if (
+      typeof targetId !== "string" ||
+      targetId.length === 0 ||
+      /[|:]/.test(targetId) ||
+      targets.has(targetId) ||
+      typeof amount !== "number" ||
+      !Number.isSafeInteger(amount) ||
+      amount <= 0
+    ) {
+      return undefined;
+    }
+    targets.add(targetId);
+    parts.push(`${targetId}:${amount}`);
+  }
+  return parts.sort().join("|");
 }

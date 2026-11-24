@@ -3,7 +3,7 @@
   "catalogId": "netgrid-standard-decks-1.0.0",
   "version": "1.0.0",
   "status": "active",
-  "curatedAt": "2026-08-20",
+  "curatedAt": "2026-11-20",
   "decks": [
     {
       "standardDeckId": "standard_corp_express_shutdown",
@@ -11,74 +11,74 @@
       "status": "active",
       "name": "Express Shutdown",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_004_fetal-ai",
+          "cardId": 62,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_196_corporate-war",
+          "cardId": 408,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_212_priority-requisition",
+          "cardId": 424,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_302_scorched-earth",
+          "cardId": 514,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_301_punitive-counterstrike",
+          "cardId": 513,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_284_chance-observation",
+          "cardId": 496,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_306_trojan-horse",
+          "cardId": 518,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_340_setup",
+          "cardId": 552,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_345_trap",
+          "cardId": 557,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_032_misleading-access-menus",
+          "cardId": 90,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_038_snowbank",
+          "cardId": 96,
           "quantity": 3
         }
       ],
@@ -94,190 +94,190 @@
       "status": "active",
       "name": "Cheap Bag of Tricks",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_190_bioweapons-engineering",
+          "cardId": 402,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_193_corporate-coup",
+          "cardId": 405,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_195_corporate-retreat",
+          "cardId": 407,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_199_employee-empowerment",
+          "cardId": 411,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_205_main-office-relocation",
+          "cardId": 417,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_207_netwatch-operations-office",
+          "cardId": 419,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_222_ball-and-chain",
+          "cardId": 434,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_223_banpei",
+          "cardId": 435,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_225_canis-major",
+          "cardId": 437,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_228_cinderella",
+          "cardId": 440,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_233_d-arc-knight",
+          "cardId": 445,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_240_fang",
+          "cardId": 452,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_242_fatal-attractor",
+          "cardId": 454,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_249_hunter",
+          "cardId": 461,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_252_keeper",
+          "cardId": 464,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_258_neural-blade",
+          "cardId": 470,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_260_pocket-virtual-reality",
+          "cardId": 472,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_264_rex",
+          "cardId": 476,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_266_scramble",
+          "cardId": 478,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_270_sleeper",
+          "cardId": 482,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_271_tko-2-0",
+          "cardId": 483,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_284_chance-observation",
+          "cardId": 496,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_306_trojan-horse",
+          "cardId": 518,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_307_urban-renewal",
+          "cardId": 519,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_312_chicago-branch",
+          "cardId": 524,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_325_hacker-tracker-central",
+          "cardId": 537,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_337_rockerboy-promotion",
+          "cardId": 549,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_340_setup",
+          "cardId": 552,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_346_vacant-soulkiller",
+          "cardId": 558,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_347_vapor-ops",
+          "cardId": 559,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_356_dedicated-response-team",
+          "cardId": 568,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_363_olivia-salazar",
+          "cardId": 575,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+          "cardId": 579,
           "quantity": 1
         }
       ],
@@ -293,130 +293,130 @@
       "status": "active",
       "name": "Chrome Rush Bureau",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_206_marine-arcology",
+          "cardId": 418,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_194_corporate-downsizing",
+          "cardId": 406,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_201_executive-extraction",
+          "cardId": 413,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_232_crystal-wall",
+          "cardId": 444,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_252_keeper",
+          "cardId": 464,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_270_sleeper",
+          "cardId": 482,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_288_day-shift",
+          "cardId": 500,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_291_falsified-transactions-expert",
+          "cardId": 503,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_292_management-shake-up",
+          "cardId": 504,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_300_project-consultants",
+          "cardId": 512,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_305_team-restructuring",
+          "cardId": 517,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_312_chicago-branch",
+          "cardId": 524,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_328_information-laundering",
+          "cardId": 540,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_334_pacifica-regional-ai",
+          "cardId": 546,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_347_vapor-ops",
+          "cardId": 559,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_352_chester-mix",
+          "cardId": 564,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_374_washington-d-c-city-grid",
+          "cardId": 586,
           "quantity": 1
         }
       ],
@@ -432,110 +432,110 @@
       "status": "active",
       "name": "Classic Corp - Remote Lab Deflection",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
       "formatProfileId": "netgrid_private_local_classic_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_classic_001_data-fort-remapping",
+          "cardId": 5,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_002_superserum",
+          "cardId": 6,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_003_unlisted-research-lab",
+          "cardId": 7,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_004_theorem-proof",
+          "cardId": 8,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_005_baskerville",
+          "cardId": 9,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_006_bolter-swarm",
+          "cardId": 10,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_008_deadeye",
+          "cardId": 12,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_009_dumpster",
+          "cardId": 13,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_010_entrapment",
+          "cardId": 14,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_011_glacier",
+          "cardId": 15,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_012_imperial-guard",
+          "cardId": 16,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_013_puzzle",
+          "cardId": 17,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_014_trapdoor",
+          "cardId": 18,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_015_vortex",
+          "cardId": 19,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_016_badtimes",
+          "cardId": 20,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_017_corporate-shuffle",
+          "cardId": 21,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_018_reclamation-project",
+          "cardId": 22,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_020_london-city-grid",
+          "cardId": 24,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_021_satellite-monitors",
+          "cardId": 25,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_022_self-destruct",
+          "cardId": 26,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_025_strategic-planning-group",
+          "cardId": 29,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_026_street-enforcer",
+          "cardId": 30,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_337_rockerboy-promotion",
+          "cardId": 549,
           "quantity": 2
         }
       ],
@@ -551,110 +551,110 @@
       "status": "active",
       "name": "Classic Corp - Superserum Control Grid",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
       "formatProfileId": "netgrid_private_local_classic_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_classic_001_data-fort-remapping",
+          "cardId": 5,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_002_superserum",
+          "cardId": 6,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_003_unlisted-research-lab",
+          "cardId": 7,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_004_theorem-proof",
+          "cardId": 8,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_005_baskerville",
+          "cardId": 9,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_006_bolter-swarm",
+          "cardId": 10,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_007_brain-drain",
+          "cardId": 11,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_008_deadeye",
+          "cardId": 12,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_009_dumpster",
+          "cardId": 13,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_010_entrapment",
+          "cardId": 14,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_011_glacier",
+          "cardId": 15,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_012_imperial-guard",
+          "cardId": 16,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_013_puzzle",
+          "cardId": 17,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_014_trapdoor",
+          "cardId": 18,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_015_vortex",
+          "cardId": 19,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_016_badtimes",
+          "cardId": 20,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_017_corporate-shuffle",
+          "cardId": 21,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_018_reclamation-project",
+          "cardId": 22,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_019_indiscriminate-response-team",
+          "cardId": 23,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_020_london-city-grid",
+          "cardId": 24,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_021_satellite-monitors",
+          "cardId": 25,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_022_self-destruct",
+          "cardId": 26,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_023_shock-treatment",
+          "cardId": 27,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_024_sterdroid",
+          "cardId": 28,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_025_strategic-planning-group",
+          "cardId": 29,
           "quantity": 2
         }
       ],
@@ -670,110 +670,110 @@
       "status": "active",
       "name": "CODE ROT: Bitte eintreten v2",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_005_marked-accounts",
+          "cardId": 63,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_026_hunting-pack",
+          "cardId": 84,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_055_cybertech-think-tank",
+          "cardId": 113,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_193_corporate-coup",
+          "cardId": 405,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_197_data-fort-reclamation",
+          "cardId": 409,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_207_netwatch-operations-office",
+          "cardId": 419,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_221_asp",
+          "cardId": 433,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_223_banpei",
+          "cardId": 435,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_232_crystal-wall",
+          "cardId": 444,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_236_data-raven",
+          "cardId": 448,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_243_fetch-4-0-1",
+          "cardId": 455,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_251_jack-attack",
+          "cardId": 463,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_252_keeper",
+          "cardId": 464,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_285_closed-accounts",
+          "cardId": 497,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_302_scorched-earth",
+          "cardId": 514,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_342_solo-squad",
+          "cardId": 554,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_356_dedicated-response-team",
+          "cardId": 568,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_358_dr-dreff",
+          "cardId": 570,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_365_paris-city-grid",
+          "cardId": 577,
           "quantity": 1
         }
       ],
@@ -789,114 +789,114 @@
       "status": "active",
       "name": "Fast Advance, Baby",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_007_project-venice",
+          "cardId": 65,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_008_project-zurich",
+          "cardId": 66,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_013_caryatid",
+          "cardId": 71,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_021_dog-pile",
+          "cardId": 79,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_195_corporate-retreat",
+          "cardId": 407,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_206_marine-arcology",
+          "cardId": 418,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_216_security-purge",
+          "cardId": 428,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_231_cortical-scrub",
+          "cardId": 443,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_252_keeper",
+          "cardId": 464,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_262_razor-wire",
+          "cardId": 474,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_269_shotgun-wire",
+          "cardId": 481,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_292_management-shake-up",
+          "cardId": 504,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_304_systematic-layoffs",
+          "cardId": 516,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_340_setup",
+          "cardId": 552,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_347_vapor-ops",
+          "cardId": 559,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_366_red-herrings",
+          "cardId": 578,
           "quantity": 1
         }
       ],
@@ -912,126 +912,126 @@
       "status": "active",
       "name": "Ivory Bastion",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_193_corporate-coup",
+          "cardId": 405,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_212_priority-requisition",
+          "cardId": 424,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_215_security-net-optimization",
+          "cardId": 427,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_219_superior-net-barriers",
+          "cardId": 431,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_230_cortical-scanner",
+          "cardId": 442,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_232_crystal-wall",
+          "cardId": 444,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_239_endless-corridor",
+          "cardId": 451,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_263_reinforced-wall",
+          "cardId": 475,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_265_rock-is-strong",
+          "cardId": 477,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_278_wall-of-ice",
+          "cardId": 490,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_311_braindance-campaign",
+          "cardId": 523,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_317_data-masons",
+          "cardId": 529,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_324_fortress-architects",
+          "cardId": 536,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_329_investment-firm",
+          "cardId": 541,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "cardId": 562,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "cardId": 567,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_360_jerusalem-city-grid",
+          "cardId": 572,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_366_red-herrings",
+          "cardId": 578,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "cardId": 582,
           "quantity": 1
         }
       ],
@@ -1047,90 +1047,90 @@
       "status": "active",
       "name": "Manhunt Pressure Bureau",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_207_netwatch-operations-office",
+          "cardId": 419,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_190_bioweapons-engineering",
+          "cardId": 402,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_196_corporate-war",
+          "cardId": 408,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_223_banpei",
+          "cardId": 435,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_252_keeper",
+          "cardId": 464,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_275_vacuum-link",
+          "cardId": 487,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_283_audit-of-call-records",
+          "cardId": 495,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_284_chance-observation",
+          "cardId": 496,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_285_closed-accounts",
+          "cardId": 497,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_299_power-grid-overload",
+          "cardId": 511,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_302_scorched-earth",
+          "cardId": 514,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_304_systematic-layoffs",
+          "cardId": 516,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_307_urban-renewal",
+          "cardId": 519,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_313_city-surveillance",
+          "cardId": 525,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_327_i-got-a-rock",
+          "cardId": 539,
           "quantity": 1
         }
       ],
@@ -1146,142 +1146,142 @@
       "status": "active",
       "name": "Mumie",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_193_corporate-coup",
+          "cardId": 405,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_200_encryption-breakthrough",
+          "cardId": 412,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_202_genetics-visionary-acquisition",
+          "cardId": 414,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_209_political-coup",
+          "cardId": 421,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_211_polymer-breakthrough",
+          "cardId": 423,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_219_superior-net-barriers",
+          "cardId": 431,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_222_ball-and-chain",
+          "cardId": 434,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_223_banpei",
+          "cardId": 435,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_224_bolter-cluster",
+          "cardId": 436,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_229_code-corpse",
+          "cardId": 441,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_233_d-arc-knight",
+          "cardId": 445,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_247_haunting-inquisition",
+          "cardId": 459,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_253_laser-wire",
+          "cardId": 465,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_266_scramble",
+          "cardId": 478,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_288_day-shift",
+          "cardId": 500,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_291_falsified-transactions-expert",
+          "cardId": 503,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_292_management-shake-up",
+          "cardId": 504,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_305_team-restructuring",
+          "cardId": 517,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_312_chicago-branch",
+          "cardId": 524,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_318_department-of-truth-enhancement",
+          "cardId": 530,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_320_encoder-inc",
+          "cardId": 532,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_326_holovid-campaign",
+          "cardId": 538,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_353_chimera",
+          "cardId": 565,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_358_dr-dreff",
+          "cardId": 570,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_364_omni-kismet-ph-d",
+          "cardId": 576,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_373_twenty-four-hour-surveillance",
+          "cardId": 585,
           "quantity": 1
         }
       ],
@@ -1297,114 +1297,114 @@
       "status": "active",
       "name": "Neon Guillotine",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_190_bioweapons-engineering",
+          "cardId": 402,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_207_netwatch-operations-office",
+          "cardId": 419,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_208_on-call-solo-team",
+          "cardId": 420,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_217_strike-force-kali",
+          "cardId": 429,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_221_asp",
+          "cardId": 433,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_236_data-raven",
+          "cardId": 448,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_243_fetch-4-0-1",
+          "cardId": 455,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_249_hunter",
+          "cardId": 461,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_251_jack-attack",
+          "cardId": 463,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_260_pocket-virtual-reality",
+          "cardId": 472,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_284_chance-observation",
+          "cardId": 496,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_285_closed-accounts",
+          "cardId": 497,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_287_datapool-by-zetatech",
+          "cardId": 499,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_293_netwatch-credit-voucher",
+          "cardId": 505,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_301_punitive-counterstrike",
+          "cardId": 513,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_302_scorched-earth",
+          "cardId": 514,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_306_trojan-horse",
+          "cardId": 518,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_307_urban-renewal",
+          "cardId": 519,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_313_city-surveillance",
+          "cardId": 525,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_333_omniscience-foundation",
+          "cardId": 545,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_339_schlaghund",
+          "cardId": 551,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_342_solo-squad",
+          "cardId": 554,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_356_dedicated-response-team",
+          "cardId": 568,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_372_turbeau-delacroix",
+          "cardId": 584,
           "quantity": 1
         }
       ],
@@ -1420,102 +1420,102 @@
       "status": "active",
       "name": "Neon Escrow",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_007_project-venice",
+          "cardId": 65,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_008_project-zurich",
+          "cardId": 66,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_194_corporate-downsizing",
+          "cardId": 406,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_252_keeper",
+          "cardId": 464,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_258_neural-blade",
+          "cardId": 470,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_305_team-restructuring",
+          "cardId": 517,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_304_systematic-layoffs",
+          "cardId": 516,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_291_falsified-transactions-expert",
+          "cardId": 503,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_347_vapor-ops",
+          "cardId": 559,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_312_chicago-branch",
+          "cardId": 524,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_323_experimental-ai",
+          "cardId": 535,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_351_bizarre-encryption-scheme",
+          "cardId": 563,
           "quantity": 1
         }
       ],
@@ -1531,114 +1531,114 @@
       "status": "active",
       "name": "Original Speed v1.0",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_196_corporate-war",
+          "cardId": 408,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_199_employee-empowerment",
+          "cardId": 411,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_205_main-office-relocation",
+          "cardId": 417,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_225_canis-major",
+          "cardId": 437,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_226_canis-minor",
+          "cardId": 438,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_232_crystal-wall",
+          "cardId": 444,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_250_ice-pick-willie",
+          "cardId": 462,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_252_keeper",
+          "cardId": 464,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_258_neural-blade",
+          "cardId": 470,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_275_vacuum-link",
+          "cardId": 487,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_277_virizz",
+          "cardId": 489,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_288_day-shift",
+          "cardId": 500,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_298_planning-consultants",
+          "cardId": 510,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_304_systematic-layoffs",
+          "cardId": 516,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_305_team-restructuring",
+          "cardId": 517,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_316_cowboy-sysop",
+          "cardId": 528,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_320_encoder-inc",
+          "cardId": 532,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_323_experimental-ai",
+          "cardId": 535,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_347_vapor-ops",
+          "cardId": 559,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_351_bizarre-encryption-scheme",
+          "cardId": 563,
           "quantity": 3
         }
       ],
@@ -1654,130 +1654,130 @@
       "status": "active",
       "name": "Proteus Korp - Hidden Node & Region Trap",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_002_charity-takeover",
+          "cardId": 60,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_003_corporate-headhunters",
+          "cardId": 61,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_004_fetal-ai",
+          "cardId": 62,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_005_marked-accounts",
+          "cardId": 63,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_006_please-dont-choke-anyone",
+          "cardId": 64,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_009_viral-breeding-ground",
+          "cardId": 67,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_012_bug-zapper",
+          "cardId": 70,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_017_credit-blocks",
+          "cardId": 75,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_021_dog-pile",
+          "cardId": 79,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_025_homing-missile",
+          "cardId": 83,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_026_hunting-pack",
+          "cardId": 84,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_030_mastermind",
+          "cardId": 88,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_033_mobile-barricade",
+          "cardId": 91,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_034_riddler",
+          "cardId": 92,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_036_sandstorm",
+          "cardId": 94,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_040_sumo-2008",
+          "cardId": 98,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_050_manhunt",
+          "cardId": 108,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_054_bel-digmo-antibody",
+          "cardId": 112,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_055_cybertech-think-tank",
+          "cardId": 113,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_056_department-of-misinformation",
+          "cardId": 114,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_057_doppelganger-antibody",
+          "cardId": 115,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_059_government-contract",
+          "cardId": 117,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_065_networked-center",
+          "cardId": 123,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_068_pattel-antibody",
+          "cardId": 126,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_070_rasmin-bridger",
+          "cardId": 128,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_072_research-bunker",
+          "cardId": 130,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_075_stereogram-antibody",
+          "cardId": 133,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_077_weapons-depot",
+          "cardId": 135,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 1
         }
       ],
@@ -1793,126 +1793,126 @@
       "status": "active",
       "name": "Proteus Korp - Variable ICE Gauntlet",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_002_charity-takeover",
+          "cardId": 60,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_005_marked-accounts",
+          "cardId": 63,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_006_please-dont-choke-anyone",
+          "cardId": 64,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_007_project-venice",
+          "cardId": 65,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_008_project-zurich",
+          "cardId": 66,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_011_brain-wash",
+          "cardId": 69,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_012_bug-zapper",
+          "cardId": 70,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_013_caryatid",
+          "cardId": 71,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_014_chihuahua",
+          "cardId": 72,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_017_credit-blocks",
+          "cardId": 75,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_018_datacomb",
+          "cardId": 76,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_020_digiconda",
+          "cardId": 78,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_021_dog-pile",
+          "cardId": 79,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_023_galatea",
+          "cardId": 81,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_024_gatekeeper",
+          "cardId": 82,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_025_homing-missile",
+          "cardId": 83,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_026_hunting-pack",
+          "cardId": 84,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_028_lesser-arcana",
+          "cardId": 86,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_031_minotaur",
+          "cardId": 89,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_034_riddler",
+          "cardId": 92,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_036_sandstorm",
+          "cardId": 94,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_041_toughoniumtm-wall",
+          "cardId": 99,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_044_walking-wall",
+          "cardId": 102,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_047_credit-consolidation",
+          "cardId": 105,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_049_emergency-rig",
+          "cardId": 107,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_051_rent-to-own-contract",
+          "cardId": 109,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_062_lesley-major",
+          "cardId": 120,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 1
         }
       ],
@@ -1928,102 +1928,102 @@
       "status": "active",
       "name": "Rent to Own War Engine",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_208_on-call-solo-team",
+          "cardId": 420,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_194_corporate-downsizing",
+          "cardId": 406,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_196_corporate-war",
+          "cardId": 408,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_222_ball-and-chain",
+          "cardId": 434,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_243_fetch-4-0-1",
+          "cardId": 455,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_247_haunting-inquisition",
+          "cardId": 459,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_254_liche",
+          "cardId": 466,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_268_shock-r",
+          "cardId": 480,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_278_wall-of-ice",
+          "cardId": 490,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_296_off-site-backups",
+          "cardId": 508,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_298_planning-consultants",
+          "cardId": 510,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_300_project-consultants",
+          "cardId": 512,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_313_city-surveillance",
+          "cardId": 525,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_318_department-of-truth-enhancement",
+          "cardId": 530,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_324_fortress-architects",
+          "cardId": 536,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_352_chester-mix",
+          "cardId": 564,
           "quantity": 2
         }
       ],
@@ -2039,110 +2039,110 @@
       "status": "active",
       "name": "Shadoe Tag & Bag",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_208_on-call-solo-team",
+          "cardId": 420,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_192_corporate-boon",
+          "cardId": 404,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_193_corporate-coup",
+          "cardId": 405,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_194_corporate-downsizing",
+          "cardId": 406,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_197_data-fort-reclamation",
+          "cardId": 409,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_207_netwatch-operations-office",
+          "cardId": 419,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_209_political-coup",
+          "cardId": 421,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_218_subsidiary-branch",
+          "cardId": 430,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_249_hunter",
+          "cardId": 461,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_268_shock-r",
+          "cardId": 480,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_283_audit-of-call-records",
+          "cardId": 495,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_284_chance-observation",
+          "cardId": 496,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_301_punitive-counterstrike",
+          "cardId": 513,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_302_scorched-earth",
+          "cardId": 514,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_306_trojan-horse",
+          "cardId": 518,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_307_urban-renewal",
+          "cardId": 519,
           "quantity": 3
         }
       ],
@@ -2158,86 +2158,86 @@
       "status": "active",
       "name": "Salazar Toll Road",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_v1_197_data-fort-reclamation",
+          "cardId": 409,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_194_corporate-downsizing",
+          "cardId": 406,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_196_corporate-war",
+          "cardId": 408,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_016_coyote",
+          "cardId": 74,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_021_dog-pile",
+          "cardId": 79,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_030_mastermind",
+          "cardId": 88,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_031_minotaur",
+          "cardId": 89,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_032_misleading-access-menus",
+          "cardId": 90,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_038_snowbank",
+          "cardId": 96,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_045_washed-up-solo-construct",
+          "cardId": 103,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_288_day-shift",
+          "cardId": 500,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_289_edgerunner-inc-temps",
+          "cardId": 501,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_296_off-site-backups",
+          "cardId": 508,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_363_olivia-salazar",
+          "cardId": 575,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_366_red-herrings",
+          "cardId": 578,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "cardId": 582,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_371_tokyo-chiba-infighting",
+          "cardId": 583,
           "quantity": 2
         }
       ],
@@ -2249,109 +2249,105 @@
     },
     {
       "standardDeckId": "standard_corp_siren_fortress",
-      "version": "1.1.0",
+      "version": "1.4.0",
       "status": "active",
       "name": "Siren Fortress",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_188_ai-chief-financial-officer",
+          "cardId": 400,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_191_black-ice-quality-assurance",
+          "cardId": 403,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_204_ice-transmutation",
+          "cardId": 416,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_222_ball-and-chain",
+          "cardId": 434,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_228_cinderella",
+          "cardId": 440,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_247_haunting-inquisition",
+          "cardId": 459,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_258_neural-blade",
+          "cardId": 470,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_268_shock-r",
+          "cardId": 480,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_278_wall-of-ice",
+          "cardId": 490,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_296_off-site-backups",
+          "cardId": 502,
+          "quantity": 3
+        },
+        {
+          "cardId": 507,
+          "quantity": 3
+        },
+        {
+          "cardId": 521,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 526,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_314_corporate-negotiating-center",
+          "cardId": 564,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_352_chester-mix",
+          "cardId": 575,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_363_olivia-salazar",
-          "quantity": 2
-        },
-        {
-          "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
-          "quantity": 2
-        },
-        {
-          "cardId": "onr_v1_368_roving-submarine",
-          "quantity": 2
-        },
-        {
-          "cardId": "onr_v1_374_washington-d-c-city-grid",
+          "cardId": 579,
           "quantity": 2
         }
       ],
       "source": {
         "kind": "curated_local_deck",
-        "sourceDeckId": "local_corp_siren_fortress",
-        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
+        "sourceDeckId": "local_corp_siren_fortress_wirtschaft",
+        "sourceDeckVersion": "1.4.0-wirtschaft-2026-11-22"
       }
     },
     {
@@ -2360,78 +2356,78 @@
       "status": "active",
       "name": "Syds ICE-Pfandhaus",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_008_project-zurich",
+          "cardId": 66,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_007_project-venice",
+          "cardId": 65,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_013_puzzle",
+          "cardId": 17,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_017_corporate-shuffle",
+          "cardId": 21,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_018_reclamation-project",
+          "cardId": 22,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_012_bug-zapper",
+          "cardId": 70,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_014_chihuahua",
+          "cardId": 72,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_015_colonel-failure",
+          "cardId": 73,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_016_coyote",
+          "cardId": 74,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_038_snowbank",
+          "cardId": 96,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_049_emergency-rig",
+          "cardId": 107,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_058_executive-boot-camp",
+          "cardId": 116,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_076_syd-meyer-superstores",
+          "cardId": 134,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_197_data-fort-reclamation",
+          "cardId": 409,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_216_security-purge",
+          "cardId": 428,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_358_dr-dreff",
+          "cardId": 570,
           "quantity": 3
         }
       ],
@@ -2447,142 +2443,142 @@
       "status": "active",
       "name": "The Korp Master",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_313_city-surveillance",
+          "cardId": 525,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_302_scorched-earth",
+          "cardId": 514,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_193_corporate-coup",
+          "cardId": 405,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_201_executive-extraction",
+          "cardId": 413,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_207_netwatch-operations-office",
+          "cardId": 419,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_208_on-call-solo-team",
+          "cardId": 420,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_212_priority-requisition",
+          "cardId": 424,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_213_private-cybernet-police",
+          "cardId": 425,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_215_security-net-optimization",
+          "cardId": 427,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_217_strike-force-kali",
+          "cardId": 429,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_259_in-the-face",
+          "cardId": 471,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_263_reinforced-wall",
+          "cardId": 475,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_265_rock-is-strong",
+          "cardId": 477,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_268_shock-r",
+          "cardId": 480,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_270_sleeper",
+          "cardId": 482,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_273_triggerman",
+          "cardId": 485,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_275_vacuum-link",
+          "cardId": 487,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_278_wall-of-ice",
+          "cardId": 490,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_288_day-shift",
+          "cardId": 500,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_314_corporate-negotiating-center",
+          "cardId": 526,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_322_euromarket-consortium",
+          "cardId": 534,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_323_experimental-ai",
+          "cardId": 535,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_347_vapor-ops",
+          "cardId": 559,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "cardId": 562,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_371_tokyo-chiba-infighting",
+          "cardId": 583,
           "quantity": 2
         }
       ],
@@ -2598,82 +2594,82 @@
       "status": "active",
       "name": "Tycho Ice Stack",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_215_security-net-optimization",
+          "cardId": 427,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_193_corporate-coup",
+          "cardId": 405,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_232_crystal-wall",
+          "cardId": 444,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_252_keeper",
+          "cardId": 464,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_268_shock-r",
+          "cardId": 480,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_275_vacuum-link",
+          "cardId": 487,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_300_project-consultants",
+          "cardId": 512,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_308_acme-savings-and-loan",
+          "cardId": 520,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_318_department-of-truth-enhancement",
+          "cardId": 530,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_368_roving-submarine",
+          "cardId": 580,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_374_washington-d-c-city-grid",
+          "cardId": 586,
           "quantity": 2
         }
       ],
@@ -2689,86 +2685,86 @@
       "status": "active",
       "name": "Vom Tablet",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_208_on-call-solo-team",
+          "cardId": 420,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_188_ai-chief-financial-officer",
+          "cardId": 400,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_190_bioweapons-engineering",
+          "cardId": 402,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_203_hostile-takeover",
+          "cardId": 415,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_236_data-raven",
+          "cardId": 448,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_244_filter",
+          "cardId": 456,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_249_hunter",
+          "cardId": 461,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_252_keeper",
+          "cardId": 464,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 1
         }
       ],
@@ -2784,82 +2780,82 @@
       "status": "active",
       "name": "Bit-Denial Lock",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_068_startup-immolator",
+          "cardId": 280,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_080_core-command-jettison-ice",
+          "cardId": 292,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "cardId": 296,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_086_forged-activation-orders",
+          "cardId": 298,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_105_priority-wreck",
+          "cardId": 317,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_109_security-code-worm-chip",
+          "cardId": 321,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_118_weather-to-finance-pipe",
+          "cardId": 330,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_135_nasuko-cycle",
+          "cardId": 347,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
+          "cardId": 373,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_165_junkyard-bbs",
+          "cardId": 377,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_168_loan-from-chiba",
+          "cardId": 380,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_173_restrictive-net-zoning",
+          "cardId": 385,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 1
         }
       ],
@@ -2875,98 +2871,98 @@
       "status": "active",
       "name": "Blink Pressure Rig",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_007_blink",
+          "cardId": 219,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_045_newsgroup-filter",
+          "cardId": 257,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_075_zetatech-software-installer",
+          "cardId": 287,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_076_all-nighter",
+          "cardId": 288,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "cardId": 311,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_111_social-engineering",
+          "cardId": 323,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_117_valu-pak-software-bundle",
+          "cardId": 329,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_121_armored-fridge",
+          "cardId": 333,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
+          "cardId": 373,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_165_junkyard-bbs",
+          "cardId": 377,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_168_loan-from-chiba",
+          "cardId": 380,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_177_the-short-circuit",
+          "cardId": 389,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_184_top-runners-conference",
+          "cardId": 396,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+          "cardId": 399,
           "quantity": 1
         }
       ],
@@ -2982,102 +2978,102 @@
       "status": "active",
       "name": "Classic Runner - Cybernetics Risk Rig",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
       "formatProfileId": "netgrid_private_local_classic_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_classic_027_early-worm",
+          "cardId": 31,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_028_matador",
+          "cardId": 32,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_029_ms-todon",
+          "cardId": 33,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_030_psychic-friend",
+          "cardId": 34,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_031_rent-i-con",
+          "cardId": 35,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_032_schematics-search-engine",
+          "cardId": 36,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_033_superglue",
+          "cardId": 37,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_034_boostergang-connections",
+          "cardId": 38,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_035_corruption",
+          "cardId": 39,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_036_do-the-drine",
+          "cardId": 40,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_037_finders-keepers",
+          "cardId": 41,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+          "cardId": 42,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_039_library-search",
+          "cardId": 43,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_040_meat-upgrade",
+          "cardId": 44,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_041_networking",
+          "cardId": 45,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_042_panzer-run",
+          "cardId": 46,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_043_running-interference",
+          "cardId": 47,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_044_crash-space",
+          "cardId": 48,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_046_executive-file-clerk",
+          "cardId": 50,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_049_omnitech-wet-drive",
+          "cardId": 53,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_050_sandbox-dig",
+          "cardId": 54,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_052_zetatech-portastation",
+          "cardId": 56,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_047_little-black-box",
+          "cardId": 51,
           "quantity": 1
         }
       ],
@@ -3093,90 +3089,90 @@
       "status": "active",
       "name": "Classic Runner - Prep Economy Pressure",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
       "formatProfileId": "netgrid_private_local_classic_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_classic_027_early-worm",
+          "cardId": 31,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_028_matador",
+          "cardId": 32,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_029_ms-todon",
+          "cardId": 33,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_030_psychic-friend",
+          "cardId": 34,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_031_rent-i-con",
+          "cardId": 35,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_032_schematics-search-engine",
+          "cardId": 36,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_033_superglue",
+          "cardId": 37,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_037_finders-keepers",
+          "cardId": 41,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+          "cardId": 42,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_039_library-search",
+          "cardId": 43,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_040_meat-upgrade",
+          "cardId": 44,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_041_networking",
+          "cardId": 45,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_042_panzer-run",
+          "cardId": 46,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_043_running-interference",
+          "cardId": 47,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_045_elena-laskova",
+          "cardId": 49,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_046_executive-file-clerk",
+          "cardId": 50,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_047_little-black-box",
+          "cardId": 51,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_050_sandbox-dig",
+          "cardId": 54,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_051_vintage-camaro",
+          "cardId": 55,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_052_zetatech-portastation",
+          "cardId": 56,
           "quantity": 2
         }
       ],
@@ -3192,118 +3188,118 @@
       "status": "active",
       "name": "Deep Market Engine",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_001_afreet",
+          "cardId": 213,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_033_imp",
+          "cardId": 245,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_059_self-modifying-code",
+          "cardId": 271,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_066_snowball",
+          "cardId": 278,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_074_worm",
+          "cardId": 286,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_087_forgotten-backup-chip",
+          "cardId": 299,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_089_gideons-pawnshop",
+          "cardId": 301,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_104_playful-ai",
+          "cardId": 316,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_110_sneak-preview",
+          "cardId": 322,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_120_armadillo-armored-road-home",
+          "cardId": 332,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_133_militech-mram-chip",
+          "cardId": 345,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_134_mram-chip",
+          "cardId": 346,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "cardId": 358,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_176_the-shell-traders",
+          "cardId": 388,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_178_short-term-contract",
+          "cardId": 390,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_180_smiths-pawnshop",
+          "cardId": 392,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_184_top-runners-conference",
+          "cardId": 396,
           "quantity": 1
         }
       ],
@@ -3319,118 +3315,118 @@
       "status": "active",
       "name": "Ghost Circuit",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_011_cloak",
+          "cardId": 223,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_030_grubb",
+          "cardId": 242,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_035_invisibility",
+          "cardId": 247,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_054_raptor",
+          "cardId": 266,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_059_self-modifying-code",
+          "cardId": 271,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_063_signpost",
+          "cardId": 275,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_065_smarteye",
+          "cardId": 277,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "cardId": 283,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_091_hunt-club-bbs",
+          "cardId": 303,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_092_ice-and-datas-guide-to-the-net",
+          "cardId": 304,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_112_stumble-through-wilderspace",
+          "cardId": 324,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": 341,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_149_access-to-arasaka",
+          "cardId": 361,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
+          "cardId": 373,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_178_short-term-contract",
+          "cardId": 390,
           "quantity": 2
         }
       ],
@@ -3446,86 +3442,86 @@
       "status": "active",
       "name": "Ice Destruction Runner",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_062_shredder-uplink-protocol",
+          "cardId": 274,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_080_core-command-jettison-ice",
+          "cardId": 292,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_086_forged-activation-orders",
+          "cardId": 298,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "cardId": 311,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_109_security-code-worm-chip",
+          "cardId": 321,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_111_social-engineering",
+          "cardId": 323,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
+          "cardId": 373,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_165_junkyard-bbs",
+          "cardId": 377,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_173_restrictive-net-zoning",
+          "cardId": 385,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_178_short-term-contract",
+          "cardId": 390,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+          "cardId": 399,
           "quantity": 1
         }
       ],
@@ -3541,82 +3537,82 @@
       "status": "active",
       "name": "Inside Forgery Loop",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_028_force-shield",
+          "cardId": 240,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_058_seeya",
+          "cardId": 270,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_080_core-command-jettison-ice",
+          "cardId": 292,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_086_forged-activation-orders",
+          "cardId": 298,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "cardId": 311,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_133_militech-mram-chip",
+          "cardId": 345,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_135_nasuko-cycle",
+          "cardId": 347,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
+          "cardId": 373,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_165_junkyard-bbs",
+          "cardId": 377,
           "quantity": 3
         }
       ],
@@ -3632,124 +3628,124 @@
       "status": "active",
       "name": "King of the Road",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "formatProfileId": "local-demo-v0.8",
       "cards": [
         {
-          "cardId": "onr_v1_006_black-dahlia",
+          "cardId": 218,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_052_raffles",
+          "cardId": 264,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_054_raptor",
+          "cardId": 266,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_060_shaka",
+          "cardId": 272,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_031_hammer",
+          "cardId": 243,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_047_pile-driver",
+          "cardId": 259,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_070_tinweasel",
+          "cardId": 282,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_072_wild-card",
+          "cardId": 284,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_073_wizards-book",
+          "cardId": 285,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_076_all-nighter",
+          "cardId": 288,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
+          "cardId": 293,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_083_desperate-competitor",
+          "cardId": 295,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "cardId": 296,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
+          "cardId": 297,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_096_kilroy-was-here",
+          "cardId": 308,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_106_private-ldl-access",
+          "cardId": 318,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_107_romp-through-hq",
+          "cardId": 319,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_118_weather-to-finance-pipe",
+          "cardId": 330,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 2
         }
       ],
@@ -3765,90 +3761,90 @@
       "status": "active",
       "name": "Krashkurs: Clown-Kreditmaschine",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_classic_041_networking",
+          "cardId": 45,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_042_panzer-run",
+          "cardId": 46,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_091_lockjaw",
+          "cardId": 149,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "cardId": 161,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_106_disgruntled-ice-technician",
+          "cardId": 164,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_124_stakeout",
+          "cardId": 182,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_134_cortical-cybermodem",
+          "cardId": 192,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+          "cardId": 197,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_150_streetware-distributor",
+          "cardId": 208,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_011_cloak",
+          "cardId": 223,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_012_clown",
+          "cardId": 224,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_046_pattels-virus",
+          "cardId": 258,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "cardId": 283,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "cardId": 358,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_177_the-short-circuit",
+          "cardId": 389,
           "quantity": 2
         }
       ],
@@ -3864,102 +3860,102 @@
       "status": "active",
       "name": "Last Call at R&D",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_017_deep-thought",
+          "cardId": 229,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_045_newsgroup-filter",
+          "cardId": 257,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_054_raptor",
+          "cardId": 266,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_074_worm",
+          "cardId": 286,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_075_zetatech-software-installer",
+          "cardId": 287,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_076_all-nighter",
+          "cardId": 288,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_086_forged-activation-orders",
+          "cardId": 298,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_123_bodyweight-data-creche",
+          "cardId": 335,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "cardId": 369,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_165_junkyard-bbs",
+          "cardId": 377,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_174_rigged-investments",
+          "cardId": 386,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_177_the-short-circuit",
+          "cardId": 389,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_178_short-term-contract",
+          "cardId": 390,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_179_silicon-saloon-franchise",
+          "cardId": 391,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_184_top-runners-conference",
+          "cardId": 396,
           "quantity": 3
         }
       ],
@@ -3975,90 +3971,90 @@
       "status": "active",
       "name": "Lucidrine Shell Traders",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_002_ai-boon",
+          "cardId": 214,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_045_newsgroup-filter",
+          "cardId": 257,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_047_pile-driver",
+          "cardId": 259,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_061_shield",
+          "cardId": 273,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_078_arasaka-owns-you",
+          "cardId": 290,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_098_lucidrine-booster-drug",
+          "cardId": 310,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_133_militech-mram-chip",
+          "cardId": 345,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
+          "cardId": 373,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_165_junkyard-bbs",
+          "cardId": 377,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_171_preying-mantis",
+          "cardId": 383,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_176_the-shell-traders",
+          "cardId": 388,
           "quantity": 3
         }
       ],
@@ -4074,70 +4070,70 @@
       "status": "active",
       "name": "Mit Ansage: Der perfekte Coup",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_classic_028_matador",
+          "cardId": 32,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_030_psychic-friend",
+          "cardId": 34,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+          "cardId": 42,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_041_networking",
+          "cardId": 45,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_042_panzer-run",
+          "cardId": 46,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_081_boring-bit",
+          "cardId": 139,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_101_all-hands",
+          "cardId": 159,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_118_prearranged-drop",
+          "cardId": 176,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_119_promises-promises",
+          "cardId": 177,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_122_rush-hour",
+          "cardId": 180,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_142_hq-mole",
+          "cardId": 200,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_147_r-and-d-mole",
+          "cardId": 205,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "cardId": 262,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_123_bodyweight-data-creche",
+          "cardId": 335,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 3
         }
       ],
@@ -4153,130 +4149,130 @@
       "status": "active",
       "name": "Proteus Runner - Breaker Lab & Virus Pressure",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_079_big-frackin-gun",
+          "cardId": 137,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_080_black-widow",
+          "cardId": 138,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_081_boring-bit",
+          "cardId": 139,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_082_bulldozer",
+          "cardId": 140,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_083_corrosion",
+          "cardId": 141,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_084_crumble",
+          "cardId": 142,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_085_disintegrator",
+          "cardId": 143,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_087_forwards-legacy",
+          "cardId": 145,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_088_fubar",
+          "cardId": 146,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_089_garbage-in",
+          "cardId": 147,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_090_highlighter",
+          "cardId": 148,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_092_morphing-tool",
+          "cardId": 150,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_093_redecorator",
+          "cardId": 151,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_095_skeleton-passkeys",
+          "cardId": 153,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_097_taxman",
+          "cardId": 155,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_098_vienna-22",
+          "cardId": 156,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_099_viral-pipeline",
+          "cardId": 157,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_100_wrecking-ball",
+          "cardId": 158,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_101_all-hands",
+          "cardId": 159,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_106_disgruntled-ice-technician",
+          "cardId": 164,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_134_cortical-cybermodem",
+          "cardId": 192,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_135_cortical-stimulators",
+          "cardId": 193,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_138_deck-the",
+          "cardId": 196,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_151_sunburst-cranial-interface",
+          "cardId": 209,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_124_stakeout",
+          "cardId": 182,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "cardId": 161,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_177_the-short-circuit",
+          "cardId": 389,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "cardId": 378,
           "quantity": 1
         }
       ],
@@ -4292,142 +4288,142 @@
       "status": "active",
       "name": "Proteus Runner - Hidden Backdoor Sabotage",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_084_crumble",
+          "cardId": 142,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_089_garbage-in",
+          "cardId": 147,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_090_highlighter",
+          "cardId": 148,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_094_scaldan",
+          "cardId": 152,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_097_taxman",
+          "cardId": 155,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_098_vienna-22",
+          "cardId": 156,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_099_viral-pipeline",
+          "cardId": 157,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_102_blackmail",
+          "cardId": 160,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "cardId": 161,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_104_decoy-signal",
+          "cardId": 162,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_105_demolition-run",
+          "cardId": 163,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_106_disgruntled-ice-technician",
+          "cardId": 164,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_108_faked-hit",
+          "cardId": 166,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_109_frame-up",
+          "cardId": 167,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_112_identity-donor",
+          "cardId": 170,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_113_live-news-feed",
+          "cardId": 171,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_121_remote-detonator",
+          "cardId": 179,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_123_senatorial-field-trip",
+          "cardId": 181,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_125_subliminal-corruption",
+          "cardId": 183,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_128_airport-locker",
+          "cardId": 186,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_129_back-door-to-netwatch",
+          "cardId": 187,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_130_back-door-to-rivals",
+          "cardId": 188,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_132_bolt-hole",
+          "cardId": 190,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_133_chiba-bank-account",
+          "cardId": 191,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_136_credit-subversion",
+          "cardId": 194,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_137_death-from-above",
+          "cardId": 195,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_142_hq-mole",
+          "cardId": 200,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_147_r-and-d-mole",
+          "cardId": 205,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_150_streetware-distributor",
+          "cardId": 208,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         }
       ],
@@ -4443,90 +4439,90 @@
       "status": "active",
       "name": "R&D Express",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "cardId": 283,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_089_gideons-pawnshop",
+          "cardId": 301,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_102_open-ended-mileage-program",
+          "cardId": 314,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_124_corolla-speed-chip",
+          "cardId": 336,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": 341,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "cardId": 358,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "cardId": 378,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_178_short-term-contract",
+          "cardId": 390,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_083_corrosion",
+          "cardId": 141,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "cardId": 161,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_122_rush-hour",
+          "cardId": 180,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_124_stakeout",
+          "cardId": 182,
           "quantity": 3
         }
       ],
@@ -4542,106 +4538,106 @@
       "status": "active",
       "name": "R&D Express – Switchyard",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "cardId": 283,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_089_gideons-pawnshop",
+          "cardId": 301,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_102_open-ended-mileage-program",
+          "cardId": 314,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_120_armadillo-armored-road-home",
+          "cardId": 332,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_124_corolla-speed-chip",
+          "cardId": 336,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": 341,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "cardId": 358,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "cardId": 378,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_178_short-term-contract",
+          "cardId": 390,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_079_big-frackin-gun",
+          "cardId": 137,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_081_boring-bit",
+          "cardId": 139,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_083_corrosion",
+          "cardId": 141,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_095_skeleton-passkeys",
+          "cardId": 153,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "cardId": 161,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_122_rush-hour",
+          "cardId": 180,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_124_stakeout",
+          "cardId": 182,
           "quantity": 3
         }
       ],
@@ -4657,94 +4653,94 @@
       "status": "active",
       "name": "R&D Interface Dig",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+          "cardId": 217,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_038_joan-of-arc",
+          "cardId": 250,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "cardId": 262,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_059_self-modifying-code",
+          "cardId": 271,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_061_shield",
+          "cardId": 273,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_066_snowball",
+          "cardId": 278,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_106_private-ldl-access",
+          "cardId": 318,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
+          "cardId": 373,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_168_loan-from-chiba",
+          "cardId": 380,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_184_top-runners-conference",
+          "cardId": 396,
           "quantity": 2
         }
       ],
@@ -4760,98 +4756,98 @@
       "status": "active",
       "name": "Redline Riot",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_066_snowball",
+          "cardId": 278,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_074_worm",
+          "cardId": 286,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_076_all-nighter",
+          "cardId": 288,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
+          "cardId": 293,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
+          "cardId": 297,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_106_private-ldl-access",
+          "cardId": 318,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_107_romp-through-hq",
+          "cardId": 319,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": 341,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_145_wutech-mem-chip",
+          "cardId": 357,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 2
         }
       ],
@@ -4867,114 +4863,114 @@
       "status": "active",
       "name": "Rent-I-Con: Das Shellspiel",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_classic_031_rent-i-con",
+          "cardId": 35,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_037_finders-keepers",
+          "cardId": 41,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_042_panzer-run",
+          "cardId": 46,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_043_running-interference",
+          "cardId": 47,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_045_elena-laskova",
+          "cardId": 49,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_106_disgruntled-ice-technician",
+          "cardId": 164,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_128_airport-locker",
+          "cardId": 186,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_133_chiba-bank-account",
+          "cardId": 191,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_134_cortical-cybermodem",
+          "cardId": 192,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_152_swiss-bank-account",
+          "cardId": 210,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_011_cloak",
+          "cardId": 223,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_035_invisibility",
+          "cardId": 247,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "cardId": 283,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_087_forgotten-backup-chip",
+          "cardId": 299,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_089_gideons-pawnshop",
+          "cardId": 301,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_110_sneak-preview",
+          "cardId": 322,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_111_social-engineering",
+          "cardId": 323,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_113_synchronized-attack-on-hq",
+          "cardId": 325,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_165_junkyard-bbs",
+          "cardId": 377,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_176_the-shell-traders",
+          "cardId": 388,
           "quantity": 3
         }
       ],
@@ -4990,106 +4986,106 @@
       "status": "active",
       "name": "Run til End",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_011_cloak",
+          "cardId": 223,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_012_clown",
+          "cardId": 224,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_024_expert-schedule-analyzer",
+          "cardId": 236,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_056_replicator",
+          "cardId": 268,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_066_snowball",
+          "cardId": 278,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_073_wizards-book",
+          "cardId": 285,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_074_worm",
+          "cardId": 286,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_091_hunt-club-bbs",
+          "cardId": 303,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "cardId": 311,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_101_mit-west-tier",
+          "cardId": 313,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_104_playful-ai",
+          "cardId": 316,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": 326,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_121_armored-fridge",
+          "cardId": 333,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": 341,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "cardId": 358,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_151_aujourdoui",
+          "cardId": 363,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
+          "cardId": 373,
           "quantity": 3
         }
       ],
@@ -5105,138 +5101,138 @@
       "status": "active",
       "name": "Skivviss Mill Pressure",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_001_afreet",
+          "cardId": 213,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_003_baedekers-net-map",
+          "cardId": 215,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_023_evil-twin",
+          "cardId": 235,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_036_jackhammer",
+          "cardId": 248,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_045_newsgroup-filter",
+          "cardId": 257,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_046_pattels-virus",
+          "cardId": 258,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_047_pile-driver",
+          "cardId": 259,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_061_shield",
+          "cardId": 273,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_064_skivviss",
+          "cardId": 276,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_069_succubus",
+          "cardId": 281,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_075_zetatech-software-installer",
+          "cardId": 287,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_077_anonymous-tip",
+          "cardId": 289,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_089_gideons-pawnshop",
+          "cardId": 301,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_093_if-you-want-it-done-right",
+          "cardId": 305,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_098_lucidrine-booster-drug",
+          "cardId": 310,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "cardId": 311,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_105_priority-wreck",
+          "cardId": 317,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_118_weather-to-finance-pipe",
+          "cardId": 330,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_121_armored-fridge",
+          "cardId": 333,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_126_drifter-mobile-environment",
+          "cardId": 338,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": 341,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_133_militech-mram-chip",
+          "cardId": 345,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_155_code-viral-cache",
+          "cardId": 367,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_165_junkyard-bbs",
+          "cardId": 377,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_176_the-shell-traders",
+          "cardId": 388,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_177_the-short-circuit",
+          "cardId": 389,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_178_short-term-contract",
+          "cardId": 390,
           "quantity": 3
         }
       ],
@@ -5252,138 +5248,138 @@
       "status": "active",
       "name": "Stealth Interface Starter",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_006_black-dahlia",
+          "cardId": 218,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_011_cloak",
+          "cardId": 223,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_012_clown",
+          "cardId": 224,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_016_cyfermaster",
+          "cardId": 228,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_028_force-shield",
+          "cardId": 240,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_040_loony-goon",
+          "cardId": 252,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_042_mouse",
+          "cardId": 254,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_045_newsgroup-filter",
+          "cardId": 257,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_047_pile-driver",
+          "cardId": 259,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_054_raptor",
+          "cardId": 266,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_058_seeya",
+          "cardId": 270,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "cardId": 283,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
+          "cardId": 297,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_093_if-you-want-it-done-right",
+          "cardId": 305,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_128_green-knight-surge-buffers",
+          "cardId": 340,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": 341,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_131_microtech-backup-drive",
+          "cardId": 343,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
+          "cardId": 351,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_140_raven-microcyb-eagle",
+          "cardId": 352,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_141_raven-microcyb-owl",
+          "cardId": 353,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_149_access-to-arasaka",
+          "cardId": 361,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_152_back-door-to-hilliard",
+          "cardId": 364,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
+          "cardId": 373,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_174_rigged-investments",
+          "cardId": 386,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_177_the-short-circuit",
+          "cardId": 389,
           "quantity": 2
         }
       ],
@@ -5399,78 +5395,78 @@
       "status": "active",
       "name": "Purge Window",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_083_corrosion",
+          "cardId": 141,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_089_garbage-in",
+          "cardId": 147,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_090_highlighter",
+          "cardId": 148,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_078_armageddon",
+          "cardId": 136,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_099_viral-pipeline",
+          "cardId": 157,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_086_forged-activation-orders",
+          "cardId": 298,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": 306,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_109_security-code-worm-chip",
+          "cardId": 321,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_111_social-engineering",
+          "cardId": 323,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": 291,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "cardId": 311,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_147_r-and-d-mole",
+          "cardId": 205,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_177_the-short-circuit",
+          "cardId": 389,
           "quantity": 1
         }
       ],
@@ -5486,82 +5482,82 @@
       "status": "active",
       "name": "Universal Fast Advance",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_v1_201_executive-extraction",
+          "cardId": 413,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_007_project-venice",
+          "cardId": 65,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_196_corporate-war",
+          "cardId": 408,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_194_corporate-downsizing",
+          "cardId": 406,
           "quantity": 3
         },
         {
-          "cardId": "onr_classic_002_superserum",
+          "cardId": 6,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_282_annual-reviews",
+          "cardId": 494,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_288_day-shift",
+          "cardId": 500,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_292_management-shake-up",
+          "cardId": 504,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_304_systematic-layoffs",
+          "cardId": 516,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_312_chicago-branch",
+          "cardId": 524,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_347_vapor-ops",
+          "cardId": 559,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_032_misleading-access-menus",
+          "cardId": 90,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_038_snowbank",
+          "cardId": 96,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 3
         }
       ],
@@ -5577,78 +5573,78 @@
       "status": "active",
       "name": "Dead Channel",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_004_fetal-ai",
+          "cardId": 62,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_005_marked-accounts",
+          "cardId": 63,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_190_bioweapons-engineering",
+          "cardId": 402,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_345_trap",
+          "cardId": 557,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_348_virus-test-site",
+          "cardId": 560,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_340_setup",
+          "cardId": 552,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_313_city-surveillance",
+          "cardId": 525,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_050_manhunt",
+          "cardId": 108,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_302_scorched-earth",
+          "cardId": 514,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_011_brain-wash",
+          "cardId": 69,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_242_fatal-attractor",
+          "cardId": 454,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_234_data-darts",
+          "cardId": 446,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_026_hunting-pack",
+          "cardId": 84,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_253_laser-wire",
+          "cardId": 465,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_257_nerve-labyrinth",
+          "cardId": 469,
           "quantity": 3
         }
       ],
@@ -5664,102 +5660,102 @@
       "status": "active",
       "name": "Counter Shell",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_008_project-zurich",
+          "cardId": 66,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_007_project-venice",
+          "cardId": 65,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_199_employee-empowerment",
+          "cardId": 411,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_205_main-office-relocation",
+          "cardId": 417,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_291_falsified-transactions-expert",
+          "cardId": 503,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_305_team-restructuring",
+          "cardId": 517,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_347_vapor-ops",
+          "cardId": 559,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_348_virus-test-site",
+          "cardId": 560,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_346_vacant-soulkiller",
+          "cardId": 558,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_328_information-laundering",
+          "cardId": 540,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_312_chicago-branch",
+          "cardId": 524,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_062_lesley-major",
+          "cardId": 120,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_038_snowbank",
+          "cardId": 96,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_032_misleading-access-menus",
+          "cardId": 90,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_017_credit-blocks",
+          "cardId": 75,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_263_reinforced-wall",
+          "cardId": 475,
           "quantity": 1
         }
       ],
@@ -5775,78 +5771,78 @@
       "status": "active",
       "name": "Lucidrine Lockdown",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_004_fetal-ai",
+          "cardId": 62,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_212_priority-requisition",
+          "cardId": 424,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_196_corporate-war",
+          "cardId": 408,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_347_vapor-ops",
+          "cardId": 559,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_297_overtime-incentives",
+          "cardId": 509,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_292_management-shake-up",
+          "cardId": 504,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_304_systematic-layoffs",
+          "cardId": 516,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_366_red-herrings",
+          "cardId": 578,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_039_sphinx-2006",
+          "cardId": 97,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_032_misleading-access-menus",
+          "cardId": 90,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_038_snowbank",
+          "cardId": 96,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_017_credit-blocks",
+          "cardId": 75,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_245_fire-wall",
+          "cardId": 457,
           "quantity": 3
         }
       ],
@@ -5862,110 +5858,110 @@
       "status": "active",
       "name": "Dr. Dreffs letzte Visite",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_008_project-zurich",
+          "cardId": 66,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_199_employee-empowerment",
+          "cardId": 411,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_205_main-office-relocation",
+          "cardId": 417,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_001_data-fort-remapping",
+          "cardId": 5,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_238_data-wall-2-0",
+          "cardId": 450,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_018_datacomb",
+          "cardId": 76,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_029_marionette",
+          "cardId": 87,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_268_shock-r",
+          "cardId": 480,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_011_glacier",
+          "cardId": 15,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_247_haunting-inquisition",
+          "cardId": 459,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_280_zombie",
+          "cardId": 492,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_015_colonel-failure",
+          "cardId": 73,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_041_toughoniumtm-wall",
+          "cardId": 99,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_358_dr-dreff",
+          "cardId": 570,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_357_dieter-esslin",
+          "cardId": 569,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_366_red-herrings",
+          "cardId": 578,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "cardId": 567,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_317_data-masons",
+          "cardId": 529,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_018_reclamation-project",
+          "cardId": 22,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_017_corporate-shuffle",
+          "cardId": 21,
           "quantity": 1
         }
       ],
@@ -5981,102 +5977,102 @@
       "status": "active",
       "name": "Connection Pressure – Publicity Network",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
       "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_094_scaldan",
+          "cardId": 152,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_098_vienna-22",
+          "cardId": 156,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_090_highlighter",
+          "cardId": 148,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_084_crumble",
+          "cardId": 142,
           "quantity": 1
         },
         {
-          "cardId": "onr_classic_047_little-black-box",
+          "cardId": 51,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": 356,
           "quantity": 2
         },
         {
-          "cardId": "onr_classic_054_phone-freak",
+          "cardId": 58,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_170_nomad-allies",
+          "cardId": 382,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": 366,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "cardId": 378,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_130_back-door-to-rivals",
+          "cardId": 188,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_165_junkyard-bbs",
+          "cardId": 377,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "cardId": 161,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
+          "cardId": 309,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
+          "cardId": 307,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_109_frame-up",
+          "cardId": 167,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_117_poisoned-water-supply",
+          "cardId": 175,
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_113_live-news-feed",
+          "cardId": 171,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_123_senatorial-field-trip",
+          "cardId": 181,
           "quantity": 1
         }
       ],
@@ -6092,100 +6088,397 @@
       "status": "active",
       "name": "Black Ops – Security Foundry",
       "side": "corp",
-      "identityCardId": "corp_identity_001",
+      "identityCardId": 3,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1",
       "formatProfileId": "netgrid_private_local_v1",
       "formatProfileVersion": "1.3.0",
       "cards": [
         {
-          "cardId": "onr_v1_189_artificial-security-directors",
+          "cardId": 401,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_196_corporate-war",
+          "cardId": 408,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_191_black-ice-quality-assurance",
+          "cardId": 403,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_220_tycho-extension",
+          "cardId": 432,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_214_project-babylon",
+          "cardId": 426,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_261_quandary",
+          "cardId": 473,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_279_wall-of-static",
+          "cardId": 491,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_228_cinderella",
+          "cardId": 440,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_231_cortical-scrub",
+          "cardId": 443,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_280_zombie",
+          "cardId": 492,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_242_fatal-attractor",
+          "cardId": 454,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_237_data-wall",
+          "cardId": 449,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_295_night-shift",
+          "cardId": 507,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_290_efficiency-experts",
+          "cardId": 502,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_281_accounts-receivable",
+          "cardId": 493,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_288_day-shift",
+          "cardId": 500,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+          "cardId": 553,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "cardId": 521,
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_366_red-herrings",
+          "cardId": 578,
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_374_washington-d-c-city-grid",
+          "cardId": 586,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_337_rockerboy-promotion",
+          "cardId": 549,
           "quantity": 1
         }
       ],
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_black_ops_security_foundry",
+        "sourceDeckVersion": "0.1.0"
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_amt_fuer_umleitungen",
+      "version": "0.3.0",
+      "status": "active",
+      "name": "Amt für Umleitungen",
+      "side": "corp",
+      "identityCardId": 3,
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": 66,
+          "quantity": 3
+        },
+        {
+          "cardId": 5,
+          "quantity": 1
+        },
+        {
+          "cardId": 409,
+          "quantity": 2
+        },
+        {
+          "cardId": 62,
+          "quantity": 2
+        },
+        {
+          "cardId": 18,
+          "quantity": 2
+        },
+        {
+          "cardId": 95,
+          "quantity": 3
+        },
+        {
+          "cardId": 491,
+          "quantity": 2
+        },
+        {
+          "cardId": 90,
+          "quantity": 2
+        },
+        {
+          "cardId": 96,
+          "quantity": 2
+        },
+        {
+          "cardId": 87,
+          "quantity": 2
+        },
+        {
+          "cardId": 473,
+          "quantity": 3
+        },
+        {
+          "cardId": 132,
+          "quantity": 3
+        },
+        {
+          "cardId": 131,
+          "quantity": 2
+        },
+        {
+          "cardId": 560,
+          "quantity": 3
+        },
+        {
+          "cardId": 574,
+          "quantity": 1
+        },
+        {
+          "cardId": 507,
+          "quantity": 3
+        },
+        {
+          "cardId": 493,
+          "quantity": 3
+        },
+        {
+          "cardId": 521,
+          "quantity": 2
+        },
+        {
+          "cardId": 128,
+          "quantity": 1
+        },
+        {
+          "cardId": 578,
+          "quantity": 2
+        },
+        {
+          "cardId": 406,
+          "quantity": 1
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_amt_fuer_umleitungen",
+        "sourceDeckVersion": "0.3.0"
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_redaktionsschluss",
+      "version": "0.2.0",
+      "status": "active",
+      "name": "Redaktionsschluss",
+      "side": "runner",
+      "identityCardId": 587,
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": 374,
+          "quantity": 3
+        },
+        {
+          "cardId": 178,
+          "quantity": 2
+        },
+        {
+          "cardId": 238,
+          "quantity": 1
+        },
+        {
+          "cardId": 304,
+          "quantity": 2
+        },
+        {
+          "cardId": 185,
+          "quantity": 2
+        },
+        {
+          "cardId": 297,
+          "quantity": 3
+        },
+        {
+          "cardId": 293,
+          "quantity": 3
+        },
+        {
+          "cardId": 306,
+          "quantity": 2
+        },
+        {
+          "cardId": 298,
+          "quantity": 2
+        },
+        {
+          "cardId": 248,
+          "quantity": 2
+        },
+        {
+          "cardId": 226,
+          "quantity": 2
+        },
+        {
+          "cardId": 266,
+          "quantity": 2
+        },
+        {
+          "cardId": 252,
+          "quantity": 1
+        },
+        {
+          "cardId": 326,
+          "quantity": 2
+        },
+        {
+          "cardId": 335,
+          "quantity": 2
+        },
+        {
+          "cardId": 320,
+          "quantity": 3
+        },
+        {
+          "cardId": 309,
+          "quantity": 3
+        },
+        {
+          "cardId": 191,
+          "quantity": 2
+        },
+        {
+          "cardId": 307,
+          "quantity": 3
+        },
+        {
+          "cardId": 351,
+          "quantity": 1
+        },
+        {
+          "cardId": 170,
+          "quantity": 2
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_redaktionsschluss",
+        "sourceDeckVersion": "0.2.0"
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_doppelte_buchfuehrung",
+      "version": "0.1.0",
+      "status": "active",
+      "name": "Doppelte Buchführung",
+      "side": "corp",
+      "identityCardId": 3,
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": 66,
+          "quantity": 3
+        },
+        {
+          "cardId": 406,
+          "quantity": 3
+        },
+        {
+          "cardId": 426,
+          "quantity": 2
+        },
+        {
+          "cardId": 411,
+          "quantity": 2
+        },
+        {
+          "cardId": 560,
+          "quantity": 3
+        },
+        {
+          "cardId": 546,
+          "quantity": 3
+        },
+        {
+          "cardId": 540,
+          "quantity": 2
+        },
+        {
+          "cardId": 524,
+          "quantity": 2
+        },
+        {
+          "cardId": 503,
+          "quantity": 3
+        },
+        {
+          "cardId": 517,
+          "quantity": 3
+        },
+        {
+          "cardId": 507,
+          "quantity": 3
+        },
+        {
+          "cardId": 493,
+          "quantity": 3
+        },
+        {
+          "cardId": 482,
+          "quantity": 3
+        },
+        {
+          "cardId": 491,
+          "quantity": 3
+        },
+        {
+          "cardId": 473,
+          "quantity": 2
+        },
+        {
+          "cardId": 96,
+          "quantity": 2
+        },
+        {
+          "cardId": 87,
+          "quantity": 2
+        },
+        {
+          "cardId": 90,
+          "quantity": 1
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_doppelte_buchfuehrung",
         "sourceDeckVersion": "0.1.0"
       }
     }

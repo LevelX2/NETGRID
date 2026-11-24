@@ -1,15 +1,15 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 
 type RunnerPlanningCard = NonNullable<
-  ReturnType<typeof cardSpecPlanningCardByDefinitionId>
+  ReturnType<typeof planningCardByDefinitionId>
 >;
 
 /** This temporary bit belongs to the install sequence, never general income. */
 export function runnerHasOnlyProgramInstallActionBundle(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
-  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  const planning = planningCardByDefinitionId(definitionId);
   if (planning?.side !== "runner") return false;
   const abilities = planning.engine.abilities ?? [];
   return (
@@ -22,10 +22,10 @@ export function runnerHasOnlyProgramInstallActionBundle(
 }
 
 export function runnerEventStartsRunAfterProgramSearch(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
-  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  const planning = planningCardByDefinitionId(definitionId);
   return (
     planning?.side === "runner" &&
     planning.engine.runnerEventLongtail?.kind ===
@@ -34,10 +34,10 @@ export function runnerEventStartsRunAfterProgramSearch(
 }
 
 export function runnerSoleFortIceTrashTagAmount(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number | undefined {
   if (!definitionId) return undefined;
-  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  const planning = planningCardByDefinitionId(definitionId);
   if (planning?.side !== "runner") return undefined;
   const abilities = (planning.engine.abilities ?? []).filter(
     (entry) => entry.kind === "on_play",
@@ -79,10 +79,10 @@ export type RunnerVoluntarySelfTrashLifecycleProfile = Readonly<{
 }>;
 
 export function runnerVoluntarySelfTrashLifecycleProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerVoluntarySelfTrashLifecycleProfile | undefined {
   if (!definitionId) return undefined;
-  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  const planning = planningCardByDefinitionId(definitionId);
   if (planning?.side !== "runner") return undefined;
   const abilities = planning.engine.abilities ?? [];
   const pureVoluntarySelfTrashAbilities = abilities.filter(
@@ -148,18 +148,18 @@ export function runnerVoluntarySelfTrashLifecycleProfile(
 }
 
 export function runnerRestrictedRunCreditProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerRestrictedRunCreditProfile | undefined {
   if (!definitionId) return undefined;
   return runnerRestrictedRunCreditProfileFromPlanningCard(
-    cardSpecPlanningCardByDefinitionId(definitionId),
+    planningCardByDefinitionId(definitionId),
   );
 }
 
 export function runnerRestrictedRunCreditProfileFromPlanningCard(
   card: RunnerPlanningCard | undefined,
 ): RunnerRestrictedRunCreditProfile | undefined {
-  const planning = card?.planning;
+  const planning = card;
   if (planning?.side !== "runner") return undefined;
   const source = planning.engine.restrictedHostedCreditSource;
   if (
@@ -234,7 +234,7 @@ export type RunnerRunStartRandomStrengthSourceProfile = Readonly<{
 }>;
 
 export function runnerInstalledDebtFinancingLiability(
-  definitionIds: readonly (string | undefined)[],
+  definitionIds: readonly (number | undefined)[],
 ): RunnerDebtFinancingLiability {
   const profiles = definitionIds.flatMap((definitionId) => {
     const profile = runnerDebtFinancingProfile(definitionId);
@@ -254,18 +254,18 @@ export function runnerInstalledDebtFinancingLiability(
 }
 
 export function runnerDebtFinancingProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerDebtFinancingProfile | undefined {
   if (!definitionId) return undefined;
   return runnerDebtFinancingProfileFromPlanningCard(
-    cardSpecPlanningCardByDefinitionId(definitionId),
+    planningCardByDefinitionId(definitionId),
   );
 }
 
 export function runnerDebtFinancingProfileFromPlanningCard(
   card: RunnerPlanningCard | undefined,
 ): RunnerDebtFinancingProfile | undefined {
-  const planning = card?.planning;
+  const planning = card;
   if (planning?.side !== "runner") return undefined;
   const debtFinancing = planning.planningAnnotations?.card?.some(
     (annotation) =>
@@ -325,11 +325,11 @@ export function runnerDebtFinancingProfileFromPlanningCard(
 }
 
 export function runnerNoRunRecurringEconomyProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerNoRunRecurringEconomyProfile | undefined {
   if (!definitionId) return undefined;
   return runnerNoRunRecurringEconomyProfileFromPlanningCard(
-    cardSpecPlanningCardByDefinitionId(definitionId),
+    planningCardByDefinitionId(definitionId),
   );
 }
 
@@ -337,15 +337,15 @@ export function runnerNoRunRecurringEconomyProfileFromPlanningCard(
   card: RunnerPlanningCard | undefined,
 ): RunnerNoRunRecurringEconomyProfile | undefined {
   const planning = card;
-  if (planning?.planning.side !== "runner") return undefined;
+  if (planning?.side !== "runner") return undefined;
 
-  const recoveryInvestment = planning.planning.planningAnnotations?.card?.some(
+  const recoveryInvestment = planning.planningAnnotations?.card?.some(
     (annotation) =>
       annotation.kind === "plan_role" && annotation.role === "recover_economy",
   );
   if (!recoveryInvestment) return undefined;
 
-  const lifecycle = planning.planning.engine.lifecycle;
+  const lifecycle = planning.engine.lifecycle;
   const turnStartCredits = (lifecycle?.start_of_runner_turn ?? []).reduce(
     (sum, ability) =>
       sum +
@@ -366,7 +366,7 @@ export function runnerNoRunRecurringEconomyProfileFromPlanningCard(
       ability.effects.some((effect) => effect.kind === "trash_source"),
   );
   const installCost =
-    planning.planning.engine.characteristics.numeric.installCost;
+    planning.engine.characteristics.numeric.installCost;
   return turnStartCredits > 0 &&
     trashesOnRunStart &&
     nonNegativeSafeInteger(installCost)
@@ -388,18 +388,18 @@ export function runnerNoRunRecurringEconomyProfileFromPlanningCard(
  * consequence.  This deliberately does not identify cards by title or ID.
  */
 export function runnerStartOfTurnCreditProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerStartOfTurnCreditProfile | undefined {
   if (!definitionId) return undefined;
   return runnerStartOfTurnCreditProfileFromPlanningCard(
-    cardSpecPlanningCardByDefinitionId(definitionId),
+    planningCardByDefinitionId(definitionId),
   );
 }
 
 export function runnerStartOfTurnCreditProfileFromPlanningCard(
   card: RunnerPlanningCard | undefined,
 ): RunnerStartOfTurnCreditProfile | undefined {
-  const planning = card?.planning;
+  const planning = card;
   if (planning?.side !== "runner") return undefined;
   const effects = (
     planning.engine.lifecycle?.start_of_runner_turn ?? []
@@ -443,22 +443,11 @@ export function runnerStartOfTurnCreditProfileFromPlanningCard(
         amount: effect.amount,
         sourceEffect: "take_hosted_credits",
       });
+      continue;
     }
+    if (effect.kind !== "trash_source_when_empty") return undefined;
   }
-  const allEffectsAreProfiled = effects.every(
-    (effect) =>
-      effect.kind === "lose_credits" ||
-      effect.kind === "gain_credits" ||
-      effect.kind === "take_hosted_credits" ||
-      effect.kind === "trash_source_when_empty",
-  );
-  if (
-    !allEffectsAreProfiled ||
-    creditEffects.length !== 1 ||
-    !positiveSafeInteger(creditEffects[0]?.amount)
-  ) {
-    return undefined;
-  }
+  if (creditEffects.length !== 1) return undefined;
   return creditEffects[0]!;
 }
 
@@ -467,18 +456,18 @@ export function runnerStartOfTurnCreditProfileFromPlanningCard(
  * The AI orders sources deterministically without simulating or consuming RNG.
  */
 export function runnerStartOfTurnRandomEffectProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerStartOfTurnRandomEffectProfile | undefined {
   if (!definitionId) return undefined;
   return runnerStartOfTurnRandomEffectProfileFromPlanningCard(
-    cardSpecPlanningCardByDefinitionId(definitionId),
+    planningCardByDefinitionId(definitionId),
   );
 }
 
 export function runnerStartOfTurnRandomEffectProfileFromPlanningCard(
   card: RunnerPlanningCard | undefined,
 ): RunnerStartOfTurnRandomEffectProfile | undefined {
-  const planning = card?.planning;
+  const planning = card;
   const table = planning?.engine.runnerUtilityLongtail;
   if (
     planning?.side !== "runner" ||
@@ -530,18 +519,18 @@ export function runnerStartOfTurnRandomEffectProfileFromPlanningCard(
  * place already-due automatic effects before the optional conversion.
  */
 export function runnerStartOfTurnOptionalInstalledCardConversionProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerStartOfTurnOptionalInstalledCardConversionProfile | undefined {
   if (!definitionId) return undefined;
   return runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard(
-    cardSpecPlanningCardByDefinitionId(definitionId),
+    planningCardByDefinitionId(definitionId),
   );
 }
 
 export function runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard(
   card: RunnerPlanningCard | undefined,
 ): RunnerStartOfTurnOptionalInstalledCardConversionProfile | undefined {
-  const planning = card?.planning;
+  const planning = card;
   const conversion = planning?.engine.uniqueDirectLongtail;
   return planning?.side === "runner" &&
     conversion?.kind === "start_turn_trash_for_credits" &&
@@ -562,18 +551,18 @@ export function runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlann
  * not select the staged card or duplicate the delayed-install plan.
  */
 export function runnerStartOfTurnDelayedInstallCountdownProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerStartOfTurnDelayedInstallCountdownProfile | undefined {
   if (!definitionId) return undefined;
   return runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard(
-    cardSpecPlanningCardByDefinitionId(definitionId),
+    planningCardByDefinitionId(definitionId),
   );
 }
 
 export function runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard(
   card: RunnerPlanningCard | undefined,
 ): RunnerStartOfTurnDelayedInstallCountdownProfile | undefined {
-  const planning = card?.planning;
+  const planning = card;
   const countdown = planning?.engine.hiddenReplacementLongtail;
   return planning?.side === "runner" &&
     countdown?.kind === "delayed_install_with_counter_countdown" &&
@@ -591,18 +580,18 @@ export function runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard(
  * it among other equally profiled sources cannot make a strategic choice.
  */
 export function runnerRunStartTrashSourceProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerRunStartTrashSourceProfile | undefined {
   if (!definitionId) return undefined;
   return runnerRunStartTrashSourceProfileFromPlanningCard(
-    cardSpecPlanningCardByDefinitionId(definitionId),
+    planningCardByDefinitionId(definitionId),
   );
 }
 
 export function runnerRunStartTrashSourceProfileFromPlanningCard(
   card: RunnerPlanningCard | undefined,
 ): RunnerRunStartTrashSourceProfile | undefined {
-  const planning = card?.planning;
+  const planning = card;
   if (planning?.side !== "runner") return undefined;
   const effects = (
     planning.engine.lifecycle?.on_runner_run_start ?? []
@@ -618,18 +607,18 @@ export function runnerRunStartTrashSourceProfileFromPlanningCard(
  * order-equivalent; the Engine still requires one exact source payload.
  */
 export function runnerRunStartRandomStrengthSourceProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): RunnerRunStartRandomStrengthSourceProfile | undefined {
   if (!definitionId) return undefined;
   return runnerRunStartRandomStrengthSourceProfileFromPlanningCard(
-    cardSpecPlanningCardByDefinitionId(definitionId),
+    planningCardByDefinitionId(definitionId),
   );
 }
 
 export function runnerRunStartRandomStrengthSourceProfileFromPlanningCard(
   card: RunnerPlanningCard | undefined,
 ): RunnerRunStartRandomStrengthSourceProfile | undefined {
-  const planning = card?.planning;
+  const planning = card;
   const strength = planning?.engine.characteristics?.strength;
   const hasRunStartRandomStrengthAbility =
     planning?.engine.icebreakerAbilities?.some(

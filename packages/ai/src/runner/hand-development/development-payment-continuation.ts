@@ -23,9 +23,10 @@ export function preserveSelectedRunnerDevelopmentSearchAcrossPaymentStep(
   if (oldExecutor?.moduleId !== "runner.develop_board_and_hand") return;
   const oldState = oldExecutor.moduleState as DevelopmentState | undefined;
   const keys = ["programSearchCommitment", "recoverySearchCommitment"] as const;
-  const activeKeys = keys.filter(
-    (key) => oldState?.signal?.[key] !== undefined,
-  );
+  const activeKeys =
+    oldState?.kind === "development"
+      ? keys.filter((key) => oldState.signal[key] !== undefined)
+      : [];
   if (activeKeys.length === 0) return;
   const key = activeKeys[0]!;
   const selected = oldState?.signal?.[key];
@@ -33,7 +34,8 @@ export function preserveSelectedRunnerDevelopmentSearchAcrossPaymentStep(
     (i) => i.instanceId === pending.executorInstanceId,
   );
   const nextState = nextExecutor?.moduleState as DevelopmentState | undefined;
-  const rediscovered = nextState?.signal?.[key];
+  const rediscovered =
+    nextState?.kind === "development" ? nextState.signal[key] : undefined;
   const sameTarget =
     selected &&
     rediscovered &&

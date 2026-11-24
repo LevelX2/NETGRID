@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CURRENT_RULES_BASELINE,
   type AiDecisionInput,
@@ -5,6 +6,17 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import {
+  applyAction,
+  createGameAfterSetup,
+  DEMO_DECKS,
+  getLegalActions,
+  getPlayerView,
+} from "@netgrid/engine";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { corpEconomyCandidateHasExecutablePayload } from "../corp/economy/economy-routes";
+import { corpHqOverflowCandidateIsExactCurrentConversion } from "../corp/hand-management/hand-overflow";
+import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { costProfileForAction } from "../actions/action-cost-timing";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -20,9 +32,107 @@ import {
   certifiedTurnProjectionDeltaFromCandidate,
   PROJECTED_DECISION_FRAME_SCHEMA_VERSION,
   TurnProjectionError,
+  type TurnProjectionDelta,
 } from "./turn-projection";
 
 describe("turn projection", () => {
+  it("matches the native Accounts Receivable payment and payout", () => {
+    const cardId = 493;
+    const corpDeck = DEMO_DECKS.demo_corp_001;
+    const setup = createGameAfterSetup({
+      seed: "projection-accounts-receivable",
+      runnerDeck: DEMO_DECKS.demo_runner_001,
+      corpDeck: {
+        ...corpDeck,
+        cards: [...corpDeck.cards, { id: cardId, quantity: 1 }],
+      },
+      traceRulesProfile: "modern_open",
+    });
+    const draw = getLegalActions(setup, "corp").find(
+      (action) => action.type === "mandatory_draw",
+    )!;
+    const opening = applyAction(setup, {
+      matchId: setup.matchId,
+      side: "corp",
+      actionId: draw.actionId,
+      clientKnownStateVersion: setup.stateVersion,
+    });
+    if (!opening.ok) throw new Error(opening.error.message);
+    const state = opening.state;
+    RealEngineFixtureBuilder.forState(state).withCorpCardInHq(cardId);
+    const playerView = getPlayerView(state, "corp");
+    const legalActions = getLegalActions(state, "corp");
+    const card = playerView.own.gripOrHq.find(
+      (entry) => entry.definitionId === cardId,
+    )!;
+    const offer = buildActionSemanticCandidates({
+      legalActions,
+      observerSide: "corp",
+      stateVersion: state.stateVersion,
+    }).find(
+      (entry) =>
+        entry.sourceCardInstanceId === card.instanceId &&
+        entry.actionType === "play_operation",
+    )!;
+    const input = {
+      ...decisionInput(),
+      matchId: state.matchId,
+      playerView,
+      legalActions,
+    };
+    expect(corpEconomyCandidateHasExecutablePayload(input, offer)).toBe(true);
+    const staleOffer = {
+      ...input,
+      legalActions: legalActions.map((action) =>
+        action.actionId === offer.actionId
+          ? { ...action, timingPoint: "game.checkpoint" as const }
+          : action,
+      ),
+    };
+    expect(corpEconomyCandidateHasExecutablePayload(staleOffer, offer)).toBe(
+      false,
+    );
+    expect(corpHqOverflowCandidateIsExactCurrentConversion(input, offer)).toBe(
+      true,
+    );
+    for (const netHandDelta of [-Infinity, -1.5, -2]) {
+      expect(
+        corpHqOverflowCandidateIsExactCurrentConversion(input, {
+          ...offer,
+          economyProjection: { ...offer.economyProjection!, netHandDelta },
+        }),
+      ).toBe(false);
+    }
+    expect(
+      corpHqOverflowCandidateIsExactCurrentConversion(input, {
+        ...offer,
+        economyProjection: {
+          ...offer.economyProjection!,
+          reliability: "unknown",
+        },
+      }),
+    ).toBe(false);
+
+    const frame = projectedFrame(input);
+    const delta = certifiedTurnProjectionDeltaFromCandidate({
+      frame,
+      candidate: offer,
+    });
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: offer.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    if (!result.ok) throw new Error(result.error.message);
+    expect(delta.creditDelta).toEqual({ minimum: 4, maximum: 4 });
+    expect(result.state.corp.credits).toBe(9);
+    expect(applyCertifiedTurnProjectionDelta(frame, delta).ownCredits).toEqual({
+      minimum: result.state.corp.credits,
+      maximum: result.state.corp.credits,
+    });
+  });
+
   it.each(["pump_breaker", "break_subroutine"] as const)(
     "prices only the exact current %s payment-window opening",
     (type) => {
@@ -33,7 +143,7 @@ describe("turn projection", () => {
       input.playerView.own.credits = 1;
       const ice = input.playerView.servers[1]!.ice[0]!;
       input.playerView.run = {
-        runId: "run-current",
+        runId: 1,
         attackedServerId: "rd",
         phase: "encounter_ice",
         position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -89,7 +199,7 @@ describe("turn projection", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.clicks = 1;
     const action: LegalAction = {
-      actionId: "runner.install_card.runner-wall-breaker",
+      actionId: "rc.runner-wall-breaker",
       type: "install_card",
       side: "runner",
       label: "Wall-Breaker installieren",
@@ -224,20 +334,19 @@ describe("turn projection", () => {
   it("tracks restricted action tokens exactly and rejects overconsumption", () => {
     const frame = projectedFrame(decisionInput());
     const tokenId = "restricted-install-actions";
-    const withToken = applyCertifiedTurnProjectionDelta(frame, {
+    const grant = {
+      tokenId,
+      remaining: 3,
+      allowedActionTypes: ["install_card"],
+      expiresAt: "side_turn_end",
+    };
+    const addition: TurnProjectionDelta = {
       schemaVersion: "turn-projection-delta-v1",
       deltaId: "add-restricted-capacity",
       expectedBaseFrameKey: frame.projectedFrameKey,
       certification: "legal_action_semantics",
       actionCapacityDelta: { minimum: -1, maximum: -1 },
-      restrictedActionCapacityAdds: [
-        {
-          tokenId,
-          remaining: 3,
-          allowedActionTypes: ["install_card"],
-          expiresAt: "side_turn_end",
-        },
-      ],
+      restrictedActionCapacityAdds: [grant],
       creditDelta: { minimum: 0, maximum: 0 },
       handCountDelta: { minimum: 0, maximum: 0 },
       knownZoneMoves: [],
@@ -247,7 +356,24 @@ describe("turn projection", () => {
       reservations: [],
       portfolioProgress: [],
       uncertainty: [],
-    });
+    };
+    const withToken = applyCertifiedTurnProjectionDelta(frame, addition);
+    const addAgain = (overrides: Partial<typeof grant>) =>
+      applyCertifiedTurnProjectionDelta(withToken, {
+        ...addition,
+        expectedBaseFrameKey: withToken.projectedFrameKey,
+        actionCapacityDelta: { minimum: 0, maximum: 0 },
+        restrictedActionCapacityAdds: [{ ...grant, ...overrides }],
+      });
+    expect(addAgain({}).actionCapacityLedger.restrictedTokens).toEqual([
+      { ...grant, remaining: 6 },
+    ]);
+    expect(() => addAgain({ allowedActionTypes: ["draw_card"] })).toThrow(
+      /conflicting_restricted_capacity_add/,
+    );
+    expect(() => addAgain({ expiresAt: "window_end" })).toThrow(
+      /conflicting_restricted_capacity_add/,
+    );
     const consumed = applyCertifiedTurnProjectionDelta(withToken, {
       schemaVersion: "turn-projection-delta-v1",
       deltaId: "consume-restricted-capacity",
@@ -305,14 +431,14 @@ describe("turn projection", () => {
         {
           instanceId: "agenda-1",
           fromZoneId: "own_hand",
-          toZoneId: "server:remote_1:root",
+          toZoneId: "server:r1:root",
         },
       ],
       boardUpdates: [
         {
           instanceId: "agenda-1",
-          zoneId: "server:remote_1:root",
-          serverId: "remote_1",
+          zoneId: "server:r1:root",
+          serverId: "r1",
           advancementDelta: 1,
         },
       ],
@@ -325,12 +451,12 @@ describe("turn projection", () => {
 
     expect(
       projected.ownKnownZones.find(
-        (zone) => zone.zoneId === "server:remote_1:root",
+        (zone) => zone.zoneId === "server:r1:root",
       )?.instanceIds,
     ).toContain("agenda-1");
     expect(
       projected.ownKnownBoard.find((card) => card.instanceId === "agenda-1"),
-    ).toMatchObject({ serverId: "remote_1", advancement: 1 });
+    ).toMatchObject({ serverId: "r1", advancement: 1 });
     expect(projected.usageLedger).toContain("installed_this_turn:agenda-1");
 
     expect(() =>
@@ -472,7 +598,7 @@ function candidate(params: {
     },
     sourceKind: "card",
     sourceCardInstanceId: "operation-1",
-    sourceDefinitionId: "operation",
+    sourceDefinitionId: syntheticCardDefinitionId("operation"),
     abilityBindingMethod: "unresolved",
     semanticActionType: "economy.gain_credit",
     cardContextSignals: [],
@@ -588,7 +714,7 @@ function decisionInput(): AiDecisionInput {
         { id: "hq", label: "HQ", ice: [], root: [] },
         { id: "rd", label: "R&D", ice: [ice], root: [] },
         { id: "archives", label: "Archives", ice: [], root: [] },
-        { id: "remote_1", label: "Remote 1", ice: [], root: [] },
+        { id: "r1", label: "Remote 1", ice: [], root: [] },
       ],
       publicEvents: [],
       legalActions: [],
@@ -601,13 +727,13 @@ function decisionInput(): AiDecisionInput {
 
 function card(
   instanceId: string,
-  definitionId: string,
+  fixtureName: string,
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
   return {
     instanceId,
-    definitionId,
-    title: definitionId,
+    definitionId: syntheticCardDefinitionId(fixtureName),
+    title: fixtureName,
     type,
     known: true,
     owner: "corp",

@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -203,7 +204,7 @@ export function createHiddenZoneSearchRuntime(
           ),
       },
       runnerMemoryLimit: () => deps.runnerMemoryLimit(state),
-      shuffleRunnerStack: (purpose: string) =>
+      shuffleRunnerStack: (purpose: RandomPurpose) =>
         shuffleRunnerStack(state, purpose),
     };
   }
@@ -443,7 +444,7 @@ export function createHiddenZoneSearchRuntime(
     return cardId;
   }
 
-  function shuffleRunnerStack(state: GameState, purpose: string): void {
+  function shuffleRunnerStack(state: GameState, purpose: RandomPurpose): void {
     const result = deps.shuffleRunnerStackAndRefreshZones({
       stack: state.runner.stack,
       cardInstances: state.cardInstances,

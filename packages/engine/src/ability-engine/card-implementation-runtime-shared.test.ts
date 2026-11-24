@@ -8,7 +8,7 @@ describe("deterministic on-play action-capacity payload", () => {
   it.each([0, 1, 3, 8])(
     "quotes only drawable Runner cards with stack size %s",
     (stackSize) => {
-      const definition = CARD_DEFINITIONS_BY_ID["onr_v1_095_jack-n-joe"]!;
+      const definition = CARD_DEFINITIONS_BY_ID[307]!;
       const state = createGameAfterSetup({
         seed: `bounded-on-play:${stackSize}`,
       });
@@ -23,8 +23,8 @@ describe("deterministic on-play action-capacity payload", () => {
   );
 
   it.each([
-    ["onr_v1_089_gideons-pawnshop", "any_card"],
-    ["onr_v1_087_forgotten-backup-chip", "program"],
+    [301, "any_card"],
+    [299, "program"],
   ])("publishes the canonical heap recovery filter for %s", (id, filter) => {
     expect(
       deterministicOnPlayResourcePayload(
@@ -39,7 +39,7 @@ describe("deterministic on-play action-capacity payload", () => {
 
   it("publishes Valu-Pak's exact restricted program-install bundle", () => {
     const definition =
-      CARD_DEFINITIONS_BY_ID["onr_v1_117_valu-pak-software-bundle"];
+      CARD_DEFINITIONS_BY_ID[329];
 
     expect(
       deterministicOnPlayResourcePayload(definition!, "runner"),
@@ -55,7 +55,7 @@ describe("deterministic on-play action-capacity payload", () => {
 
   it("publishes Edgerunner's exact restricted Corp-install bundle", () => {
     const definition =
-      CARD_DEFINITIONS_BY_ID["onr_v1_289_edgerunner-inc-temps"];
+      CARD_DEFINITIONS_BY_ID[501];
 
     expect(
       deterministicOnPlayResourcePayload(definition!, "corp"),
@@ -71,7 +71,7 @@ describe("deterministic on-play action-capacity payload", () => {
 
   it("publishes exact on-play tag removal without a card-id contract", () => {
     const definition =
-      CARD_DEFINITIONS_BY_ID["onr_v1_116_total-genetic-retrofit"];
+      CARD_DEFINITIONS_BY_ID[328];
 
     expect(
       deterministicOnPlayResourcePayload(definition!, "runner"),
@@ -83,7 +83,7 @@ describe("deterministic on-play action-capacity payload", () => {
   });
 
   it("publishes exact on-play advancement distribution", () => {
-    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_305_team-restructuring"];
+    const definition = CARD_DEFINITIONS_BY_ID[517];
 
     expect(
       deterministicOnPlayResourcePayload(definition!, "corp"),
@@ -98,7 +98,7 @@ describe("deterministic on-play action-capacity payload", () => {
   });
 
   it("publishes exact deterministic bad-publicity and self-damage effects", () => {
-    const definition = CARD_DEFINITIONS_BY_ID["onr_proteus_108_faked-hit"];
+    const definition = CARD_DEFINITIONS_BY_ID[166];
 
     expect(
       deterministicOnPlayResourcePayload(definition!, "runner"),
@@ -114,7 +114,7 @@ describe("deterministic on-play action-capacity payload", () => {
   it("projects every deterministic make-run context field before run start", () => {
     expect(
       deterministicOnPlayResourcePayload(
-        CARD_DEFINITIONS_BY_ID["onr_classic_043_running-interference"]!,
+        CARD_DEFINITIONS_BY_ID[47]!,
         "runner",
       ),
     ).toMatchObject({
@@ -122,26 +122,26 @@ describe("deterministic on-play action-capacity payload", () => {
     });
     expect(
       deterministicOnPlayResourcePayload(
-        CARD_DEFINITIONS_BY_ID["onr_proteus_120_reconnaissance"]!,
+        CARD_DEFINITIONS_BY_ID[178]!,
         "runner",
       ),
     ).toMatchObject({ runnerCreditGainOnCorpRez: 1 });
     expect(
       deterministicOnPlayResourcePayload(
-        CARD_DEFINITIONS_BY_ID["onr_proteus_127_weefle-initiation"]!,
+        CARD_DEFINITIONS_BY_ID[185]!,
         "runner",
       ),
     ).toMatchObject({ damagePreventionPool: 7 });
     expect(
       deterministicOnPlayResourcePayload(
-        CARD_DEFINITIONS_BY_ID["onr_proteus_104_decoy-signal"]!,
+        CARD_DEFINITIONS_BY_ID[162]!,
         "runner",
       ),
     ).toMatchObject({ eventApproachIceExposeBeforeRez: true });
   });
 
   it("publishes an optional follow-up run as an action-bound fact", () => {
-    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_076_all-nighter"];
+    const definition = CARD_DEFINITIONS_BY_ID[288];
 
     expect(
       deterministicOnPlayResourcePayload(definition!, "runner"),
@@ -152,7 +152,7 @@ describe("deterministic on-play action-capacity payload", () => {
 
   it("publishes declarative run-duration effects for an on-play run", () => {
     const definition =
-      CARD_DEFINITIONS_BY_ID["onr_v1_098_lucidrine-booster-drug"];
+      CARD_DEFINITIONS_BY_ID[310];
 
     expect(
       deterministicOnPlayResourcePayload(definition!, "runner"),

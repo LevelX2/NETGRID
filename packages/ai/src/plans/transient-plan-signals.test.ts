@@ -48,7 +48,7 @@ describe("transient plan goal/threat signals", () => {
   it("binds only the exact plan and target while targetless or foreign signals cannot authorize", () => {
     const exact = signal({
       signalId: "exact",
-      target: { kind: "server", id: "remote_1" },
+      target: { kind: "server", id: "r1" },
     });
     const signals = requireCurrentTransientPlanSignals(
       [
@@ -56,16 +56,16 @@ describe("transient plan goal/threat signals", () => {
         signal({
           signalId: "foreign-plan",
           planModuleId: "runner.pressure_central",
-          target: { kind: "server", id: "remote_1" },
+          target: { kind: "server", id: "r1" },
         }),
         signal({
           signalId: "foreign-instance",
           planDedupeKey: "remote-2",
-          target: { kind: "server", id: "remote_1" },
+          target: { kind: "server", id: "r1" },
         }),
         signal({
           signalId: "foreign-target",
-          target: { kind: "server", id: "remote_2" },
+          target: { kind: "server", id: "r2" },
         }),
         signal({ signalId: "targetless" }),
       ],
@@ -77,7 +77,7 @@ describe("transient plan goal/threat signals", () => {
         signals,
         "runner.contest_remote",
         "remote-1",
-        { kind: "server", id: "remote_1" },
+        { kind: "server", id: "r1" },
       ),
     ).toEqual([exact]);
     expect(
@@ -102,10 +102,26 @@ describe("transient plan goal/threat signals", () => {
     ).toThrow(PlanResolutionFailure);
   });
 
+  it.each([{ planModuleId: "runner." }, { target: null }])(
+    "rejects a malformed owner or target",
+    (overrides) => {
+      const malformed = {
+        ...signal(),
+        ...overrides,
+      } as unknown as TransientPlanSignal;
+      expect(() =>
+        requireCurrentTransientPlanSignals([malformed], {
+          side: "runner",
+          stateVersion: 17,
+        }),
+      ).toThrow(PlanResolutionFailure);
+    },
+  );
+
   it("rejects an undeclared action-authority field instead of ignoring it", () => {
     const authorityBearingSignal = {
       ...signal(),
-      actionIds: ["runner.start_run.rd"],
+      actionIds: ["rs.rd"],
     } as unknown as TransientPlanSignal;
 
     let failure: unknown;

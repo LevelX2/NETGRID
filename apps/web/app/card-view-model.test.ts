@@ -6,7 +6,7 @@ import {
   aiBoonRunStrengthBadgeValue,
   enrichVisibleCard,
   iceStrengthBadgeValue,
-  strengthModifierBadgeLabel,
+  signedStrengthModifier,
   strengthModifierBadgeValue,
 } from "../features/cards/card-view-model";
 
@@ -24,10 +24,10 @@ const emptyNumeric = {
   agendaPoints: null,
 };
 
-function detail(cardId: string, strength: number | null): CardDetail {
+function detail(cardId: number, strength: number | null): CardDetail {
   return {
     catalogCardId: cardId,
-    title: cardId,
+    title: String(cardId),
     side: "corp",
     type: "ice",
     subtypes: ["wall"],
@@ -47,14 +47,14 @@ describe("card view model ICE strength badge", () => {
     const card: VisibleCard = {
       instanceId: "ice-1",
       known: true,
-      definitionId: "numeric-ice",
+      definitionId: 9124,
       title: "Numeric ICE",
       type: "ice",
       strength: 5,
     };
 
     const enriched = enrichVisibleCard(card, {
-      "numeric-ice": detail("numeric-ice", 3),
+      9124: detail(9124, 3),
     });
 
     expect(enriched.printedStrength).toBe(3);
@@ -66,14 +66,14 @@ describe("card view model ICE strength badge", () => {
     const card: VisibleCard = {
       instanceId: "ice-2",
       known: true,
-      definitionId: "variable-ice",
+      definitionId: 9121,
       title: "Variable ICE",
       type: "ice",
       strength: 4,
     };
 
     const enriched = enrichVisibleCard(card, {
-      "variable-ice": detail("variable-ice", null),
+      9121: detail(9121, null),
     });
 
     expect(enriched.printedStrength).toBeNull();
@@ -86,19 +86,19 @@ describe("card view model ICE strength badge", () => {
     const encounteredIce: VisibleCard = {
       instanceId: "encountered-ice",
       known: true,
-      definitionId: "numeric-ice",
+      definitionId: 9124,
       title: "Numeric ICE",
       type: "ice",
       strength: 2,
     };
 
     const enriched = enrichVisibleCard(encounteredIce, {
-      "numeric-ice": detail("numeric-ice", 3),
+      9124: detail(9124, 3),
     });
 
     expect(enriched.strengthModifier).toBe(-1);
     expect(strengthModifierBadgeValue(enriched)).toBe(-1);
-    expect(strengthModifierBadgeLabel(-1)).toBe("−1 Stärke");
+    expect(signedStrengthModifier(-1)).toBe("−1");
   });
 
   it("keeps positive modifiers and omits a net modifier of zero", () => {
@@ -106,27 +106,27 @@ describe("card view model ICE strength badge", () => {
       {
         instanceId: "boosted-ice",
         known: true,
-        definitionId: "numeric-ice",
+        definitionId: 9124,
         title: "Numeric ICE",
         type: "ice",
         strength: 4,
       },
-      { "numeric-ice": detail("numeric-ice", 3) },
+      { 9124: detail(9124, 3) },
     );
     const unchangedIce = enrichVisibleCard(
       {
         instanceId: "unchanged-ice",
         known: true,
-        definitionId: "numeric-ice",
+        definitionId: 9124,
         title: "Numeric ICE",
         type: "ice",
         strength: 3,
       },
-      { "numeric-ice": detail("numeric-ice", 3) },
+      { 9124: detail(9124, 3) },
     );
 
     expect(strengthModifierBadgeValue(boostedIce)).toBe(1);
-    expect(strengthModifierBadgeLabel(1)).toBe("+1 Stärke");
+    expect(signedStrengthModifier(1)).toBe("+1");
     expect(unchangedIce.strengthModifier).toBeUndefined();
     expect(
       strengthModifierBadgeValue({ ...unchangedIce, strengthModifier: 0 }),
@@ -164,7 +164,10 @@ describe("card view model ICE strength badge", () => {
     );
 
     expect(badgeSource).toContain('data-testid="strength-modifier-badge"');
-    expect(badgeSource).toContain("strengthModifierBadgeLabel(amount)");
+    expect(badgeSource).toContain("signedStrengthModifier(amount)");
+    expect(cardSource).toMatch(
+      /counterDisplaysForRendering\(card\)\.filter\(\s*\(display\) => display\.id !== "ice_mark_modifier"/u,
+    );
     expect(cardSource).toMatch(
       /strengthModifier !== null\s*\?\s*\(?\s*<StrengthModifierBadge amount=\{strengthModifier\} \/>\s*\)?\s*:\s*null/u,
     );
@@ -217,14 +220,14 @@ describe("card view model AI Boon run strength badge", () => {
     const card: VisibleCard = {
       instanceId: "ai-boon-1",
       known: true,
-      definitionId: "onr_v1_002_ai-boon",
+      definitionId: 214,
       title: "AI Boon",
       type: "program",
       strength: 5,
     };
     const enriched = enrichVisibleCard(card, {
-      "onr_v1_002_ai-boon": {
-        ...detail("onr_v1_002_ai-boon", null),
+      214: {
+        ...detail(214, null),
         side: "runner",
         type: "program",
         subtypes: ["icebreaker", "random"],
@@ -241,7 +244,7 @@ describe("card view model AI Boon run strength badge", () => {
       aiBoonRunStrengthBadgeValue({
         instanceId: "ai-boon-2",
         known: true,
-        definitionId: "onr_v1_002_ai-boon",
+        definitionId: 214,
         title: "AI Boon",
         type: "program",
         printedStrength: null,

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { corpFundedScoreProtectionNeed } from "../../corp/score/score-protection-needs";
 import { readFileSync } from "node:fs";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -42,10 +43,10 @@ it("does not project next-turn Heap recovery during a Corp rez window in a live 
   input.playerView.phase = "run";
   input.playerView.timingPoint = "run.approach_ice";
   input.playerView.run = {
-    runId: "current-run",
-    attackedServerId: "remote_1",
+    runId: input.playerView.stateVersion,
+    attackedServerId: "r1",
     phase: "approach_ice",
-    position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+    position: { kind: "ice", serverId: "r1", iceIndex: 0 },
     successful: false,
   };
   expect(input.playerView.activeSide).toBe("corp");
@@ -65,30 +66,30 @@ it.each(["g4-d595", "g17-d455"])(
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     });
-    const definition =
-      name === "g4-d595" ? "project-babylon" : "tycho-extension";
+    const definition = name === "g4-d595" ? 426 : 432;
+    const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);
     const action = input.legalActions.find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes(definition) &&
-        a.payload?.serverId === "remote_1",
+        definitions[a.source] === definition &&
+        a.payload?.serverId === "r1",
     )!;
     const candidate = candidates.find((c) => c.actionId === action.actionId)!;
     expect(candidate).toBeDefined();
     const before = JSON.stringify([input.playerView, input.legalActions]);
     expect(input.playerView.opponent.discardCards!.at(-1)?.definitionId).toBe(
-      "onr_classic_031_rent-i-con",
+      35,
     );
     expect(
       input.playerView.opponent.rig?.some(
-        (c) => c.definitionId === "onr_classic_031_rent-i-con",
+        (c) => c.definitionId === 35,
       ),
     ).toBe(false);
     expect(
       corpMatureRemoteAffordableDefenseLayerCertification(
         input,
         candidate,
-        "remote_1",
+        "r1",
       ),
     ).toBeUndefined();
     expect(JSON.stringify([input.playerView, input.legalActions])).toBe(before);
@@ -100,7 +101,7 @@ it.each(["g4-d595", "g17-d455"])(
   "uses the public recovery in the underlying native %s scoring-window path",
   (name) => {
     const input = fixture(name);
-    const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
+    const server = input.playerView.servers.find((s) => s.id === "r1")!;
     const assessment = scoringWindowPostRezProtectionAssessment(
       input,
       server,
@@ -178,7 +179,7 @@ it.each(["absent", "inactive", "hidden"])(
     const input = fixture("g17-d455");
     const runner = input.playerView.opponent;
     const bbs = runner.rig!.find(
-      (c) => c.definitionId === "onr_v1_165_junkyard-bbs",
+      (c) => c.definitionId === 377,
     )!;
     if (mode === "absent") runner.rig = runner.rig!.filter((c) => c !== bbs);
     else if (mode === "inactive") bbs.rezzed = false;
@@ -189,7 +190,7 @@ it.each(["absent", "inactive", "hidden"])(
 it("keeps a genuine current two-layer certificate when no public recovery is installed", () => {
   const input = fixture("g17-d455");
   input.playerView.opponent.rig = input.playerView.opponent.rig!.filter(
-    (c) => c.definitionId !== "onr_v1_165_junkyard-bbs",
+    (c) => c.definitionId !== 377,
   );
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -204,14 +205,14 @@ it("keeps a genuine current two-layer certificate when no public recovery is ins
   const action = input.legalActions.find(
     (a) =>
       a.type === "install_card" &&
-      a.source.includes("tycho-extension") &&
-      a.payload?.serverId === "remote_1",
+      visibleSourceDefinitionsByInstanceId(input.playerView)[a.source] === 432 &&
+      a.payload?.serverId === "r1",
   )!;
   expect(
     corpMatureRemoteAffordableDefenseLayerCertification(
       input,
       candidates.find((c) => c.actionId === action.actionId)!,
-      "remote_1",
+      "r1",
     ),
   ).toBeDefined();
 });
@@ -291,7 +292,7 @@ it("does not admit the Corporation discard zone into a Runner input", () => {
   cp.input.playerView.opponent.discardCards = [
     {
       instanceId: "injected-private-corp-discard",
-      definitionId: "private-corp-card",
+      definitionId: syntheticCardDefinitionId("private-corp-card"),
       owner: "corp",
       known: false,
     },
@@ -319,13 +320,13 @@ it.each(["g4-d595", "g17-d455"])(
   "does not let the funded Score consumer recreate the false native %s certificate",
   (name) => {
     const input = fixture(name);
-    const definition =
-      name === "g4-d595" ? "project-babylon" : "tycho-extension";
+    const definition = name === "g4-d595" ? 426 : 432;
+    const definitions = visibleSourceDefinitionsByInstanceId(input.playerView);
     const action = input.legalActions.find(
       (a) =>
         a.type === "install_card" &&
-        a.source.includes(definition) &&
-        a.payload?.serverId === "remote_1",
+        definitions[a.source] === definition &&
+        a.payload?.serverId === "r1",
     )!;
     const candidates = buildActionSemanticCandidates({
       legalActions: input.legalActions,
@@ -345,7 +346,7 @@ it.each(["g4-d595", "g17-d455"])(
       candidate,
       agenda,
       "native-public-heap-" + name,
-      "remote_1",
+      "r1",
       input.playerView.own.agendaPoints + (agenda.agendaPoints ?? 0) >= 7,
       false,
     );
@@ -355,3 +356,55 @@ it.each(["g4-d595", "g17-d455"])(
     ).toBe(false);
   },
 );
+
+it("keeps the rezzed fort pass modifier in the score protection evidence", () => {
+  const input = fixture("g17-d455");
+  const server = input.playerView.servers.find(({ id }) => id === "r1")!;
+  const action = input.legalActions.find(
+    (entry) =>
+      entry.type === "install_card" &&
+      visibleSourceDefinitionsByInstanceId(input.playerView)[entry.source] === 432 &&
+      entry.payload?.serverId === server.id,
+  )!;
+  const candidate = buildActionSemanticCandidates({
+    legalActions: [action],
+    observerSide: "corp",
+    stateVersion: input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
+      input.playerView,
+    ),
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
+  })[0]!;
+  const agenda = input.playerView.own.gripOrHq.find(
+    (card) => card.instanceId === action.source,
+  )!;
+  const assess = () =>
+    corpFundedScoreProtectionNeed(
+      input,
+      candidate,
+      agenda,
+      "score-pass-modifier",
+      server.id,
+      false,
+      false,
+    ).baseline;
+  const before = assess();
+  server.root.push({
+    instanceId: "pass-protection",
+    definitionId: 579,
+    type: "upgrade",
+    known: true,
+    owner: "corp",
+    controller: "corp",
+    rezzed: true,
+  });
+  const after = assess();
+  if (before.knowledge !== "known" || after.knowledge !== "known")
+    throw new Error("Expected a known comparison for the same funded fort");
+  const prior = before.protection.runnerAccessSuccessProbability;
+  const current = after.protection.runnerAccessSuccessProbability;
+  expect(current.numerator * prior.denominator).toBeLessThan(
+    prior.numerator * current.denominator,
+  );
+});

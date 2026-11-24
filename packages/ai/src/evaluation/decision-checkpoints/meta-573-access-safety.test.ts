@@ -53,16 +53,16 @@ it("jacks out of the native remote after Data Darts leaves one card before unkno
   const cp = checkpoint();
   const result = decide(cp);
   expect(result).toMatchObject({
-    actionId: "runner.jack_out",
+    actionId: "rd",
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_40",
+        rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+        leafExecutorInstanceId: "p8lpoje30almity9nfv832h7cu",
         selectedStep: {
-          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
         },
         route: {
-          actionId: "runner.jack_out",
+          actionId: "rd",
           actionType: "jack_out",
           stateVersion: 43,
         },
@@ -115,7 +115,7 @@ it("does not impose the unknown-access barrier on a larger hand", () => {
 });
 it("does not invent unknown access when the root is fully known", () => {
   const { input } = checkpoint();
-  input.playerView.servers.find((s) => s.id === "remote_1")!.root = [];
+  input.playerView.servers.find((s) => s.id === "r1")!.root = [];
   expect(
     currentRunAbortAssessment(input, undefined)?.evidenceCode,
   ).not.toContain("runner_critical_low_grip_unknown_remote_access");
@@ -127,7 +127,7 @@ it("does not infer damage pressure from a hidden root alone", () => {
   input.playerView.opponent.discardCards = [];
   input.playerView.servers.forEach((s) => {
     s.ice = [];
-    if (s.id !== "remote_1") s.root = [];
+    if (s.id !== "r1") s.root = [];
   });
   expect(currentRunAbortAssessment(input, undefined)).toBeUndefined();
 });
@@ -140,9 +140,9 @@ it("never claims an abort without its current legal exit", () => {
 it("does not overwrite the native unfunded Archives route with a second agenda signal", () => {
   const cp = checkpoint("g40d34");
   const result = decide(cp);
-  expect(result.actionId).toBe("runner.draw_card");
+  expect(result.actionId).toBe("r8");
   expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.defense_and_recovery:runner",
+    "p1gzjb6yfcv4zbzow512kexs33",
   );
 });
 it("retains a currently quoted payable known Archives steal", () => {
@@ -161,7 +161,7 @@ it("retains a currently quoted payable known Archives steal", () => {
     complete: true,
   };
   expect(runnerAgendaStealCreditRequirement(input, "archives")).toBe(2);
-  expect(decide(cp).actionId).toBe("runner.start_run.archives");
+  expect(decide(cp).actionId).toBe("rs.archives");
 });
 
 it.each(["unfunded", "stale", "wrong_server", "wrong_instance"] as const)(
@@ -188,6 +188,6 @@ it.each(["unfunded", "stale", "wrong_server", "wrong_instance"] as const)(
         (t) => t.targetServerId === "archives",
       )?.stealOrTrashAffordable,
     ).toBe(false);
-    expect(decide(cp).actionId).not.toBe("runner.start_run.archives");
+    expect(decide(cp).actionId).not.toBe("rs.archives");
   },
 );

@@ -1,3 +1,5 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type {
   CardDefinitionId,
   CardInstanceId,
@@ -920,9 +922,10 @@ function reserveRequirementForFamily(
   params: BuildStrategicRuntimeContextParams,
   family: StrategicIntentFamily,
 ): StrategicReserveRequirement {
+  const minimumActionCost = cheapestRelevantActionCost(params, family);
   const required = Math.max(
     defaultReserveCreditsForFamily(family),
-    cheapestRelevantActionCost(params, family) ?? 0,
+    minimumActionCost ?? 0,
   );
   if (required <= 0) {
     return {
@@ -943,7 +946,7 @@ function reserveRequirementForFamily(
       `reserve_family:${family}`,
       `reserve_required:${required}`,
       `reserve_available:${available}`,
-      `relevant_action_min_cost:${cheapestRelevantActionCost(params, family) ?? "none"}`,
+      `relevant_action_min_cost:${minimumActionCost ?? "none"}`,
     ],
   };
 }
@@ -1082,8 +1085,8 @@ function sourceDefinitionIdForAction(
   visibleDefinitions: Readonly<Record<CardInstanceId, CardDefinitionId>>,
 ): CardDefinitionId | undefined {
   const payloadSourceDefinitionId =
-    stringPayload(action, "sourceDefinitionId") ??
-    stringPayload(action, "sourceCardDefinitionId");
+    cardDefinitionIdValue(action.payload?.sourceDefinitionId) ??
+    cardDefinitionIdValue(action.payload?.sourceCardDefinitionId);
   if (payloadSourceDefinitionId !== undefined) return payloadSourceDefinitionId;
   const sourceCardInstanceId =
     action.abilityRef?.sourceCardInstanceId ??
@@ -1151,7 +1154,7 @@ function isCentralServer(serverId: string): boolean {
 }
 
 function isRemoteServer(serverId: string): boolean {
-  return serverId.startsWith("remote_");
+  return isRemoteServerId(serverId);
 }
 
 function remoteWithVisibleAgenda(playerView: PlayerView): boolean {

@@ -883,7 +883,9 @@ export function createCorpRuntimeResolvers(
         isConcealedRunnerResource(state, cardId);
       return {
         cardInstanceId: cardId,
-        choiceValue: concealed ? hiddenRunnerResourceSlotId(cardId) : cardId,
+        choiceValue: concealed
+          ? hiddenRunnerResourceSlotId(state, cardId)
+          : cardId,
       };
     });
     state.pendingRunnerInstalledMultiTrash = {
@@ -1379,7 +1381,7 @@ export function createCorpRuntimeResolvers(
 
   function abilityMetadata(
     sourceCardInstanceId: CardInstanceId,
-    sourceAbilityId: string,
+    sourceAbilityId: number,
     encounteredIceId?: CardInstanceId,
   ): Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements"> {
     parseCanonicalCapabilityId(sourceAbilityId);

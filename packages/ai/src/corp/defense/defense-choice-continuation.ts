@@ -1,3 +1,4 @@
+import { isRunId } from "@netgrid/shared";
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
@@ -7,7 +8,10 @@ import {
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { corpIceEffectsOnlyReachFutureEncounters } from "../../runtime/semantic-runtime-corp-effective-defense";
 import { turnKey } from "../../runtime/runtime-identifiers";
-import { preferUnbreakableEquivalentTemporaryIce } from "./temporary-ice-choice";
+import {
+  currentDelayedSuccessChoice,
+  preferUnbreakableEquivalentTemporaryIce,
+} from "./temporary-ice-choice";
 
 export function resolvePlanBoundCorpDelayedSuccessChoice(
   context: PlanSchedulerContext,
@@ -20,19 +24,20 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
   ) {
     return undefined;
   }
-  const sourceMatch =
-    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:([^:]+):([0-9]+)$/.exec(
-      choice.source,
-    );
-  const sourceCardId = sourceMatch?.[1];
-  const serverId = sourceMatch?.[2];
-  const sourceStateVersion = Number(sourceMatch?.[3]);
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const binding = action
+    ? currentDelayedSuccessChoice(context.input, action, choice)
+    : undefined;
+  const { sourceCardId, serverId, options = [] } = binding ?? {};
   const executor = previous?.instances.find(
     (instance) =>
       instance.moduleId === "corp.defend_servers" &&
       instance.side === "corp" &&
       instance.instanceId ===
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
   );
   const moduleState = executor?.moduleState as
     | {
@@ -56,7 +61,7 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
           (card) =>
             card.instanceId === sourceCardId &&
             card.known &&
-            card.definitionId === "onr_v1_358_dr-dreff" &&
+            card.definitionId === 570 &&
             card.rezzed === true,
         )
     : undefined;
@@ -67,10 +72,10 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
             server.id === serverId && server.root.includes(sourceCard),
         )
       : undefined;
-  const decline = choice.options.find(
+  const decline = options.find(
     (option) => option.id === "decline" && option.value === "decline",
   );
-  const iceOptions = choice.options.filter(
+  const iceOptions = options.filter(
     (option) =>
       option.id.startsWith("ice_") &&
       typeof option.value === "string" &&
@@ -113,12 +118,6 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
         )
       : null;
   const selectedOption = preference === null ? decline : preference;
-  const choiceActions = context.input.legalActions.filter(
-    (action) => action.type === "resolve_choice",
-  );
-  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
-  const [requirement] = action?.choiceRequirements ?? [];
-  const optionIds = choice.options.map((option) => option.id);
   const currentEventTail = (context.input.eventTail ?? []).filter(
     (event) => event.stateVersionAfter <= context.input.playerView.stateVersion,
   );
@@ -126,8 +125,8 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
   const reactiveRunStartEvent = currentEventTail.find((event) => {
     if (event.publicPayload?.actor !== "runner") return false;
     if (
-      typeof activeRunId !== "string" ||
-      activeRunId !== `run_${event.stateVersionAfter}`
+      !isRunId(activeRunId) ||
+      activeRunId !== event.stateVersionAfter
     ) {
       return false;
     }
@@ -217,62 +216,16 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
     moduleState.hqHoldCadence?.turnKey === turnKey(context.input) &&
     moduleState.signals?.some((signal) => signal.serverId === serverId) ===
       true;
-  const exactBinding =
-    sourceCard !== undefined &&
-    sourceServer !== undefined &&
-    sourceStateVersion === context.input.playerView.stateVersion &&
-    context.input.playerView.run?.attackedServerId === serverId &&
-    choice.side === "corp" &&
-    choice.kind === "select_option" &&
-    choice.visibility === "hidden_info_barrier" &&
-    choice.stateVersion === context.input.playerView.stateVersion &&
-    choice.minSelections === 1 &&
-    choice.maxSelections === 1 &&
-    decline !== undefined &&
-    selectedOption !== undefined &&
-    exactEffectFacts &&
-    pricedIceOptions.length === iceOptions.length &&
-    iceOptions.length > 0 &&
-    iceOptions.length === choice.options.length - 1 &&
-    previous !== undefined &&
-    previous.side === "corp" &&
-    previous.stateVersion < context.input.playerView.stateVersion &&
-    (exactExplicitRunChain ||
-      exactReactiveRunChain ||
-      exactActiveDefenseOrigin) &&
-    executor !== undefined &&
-    moduleState?.kind === "defense" &&
-    action !== undefined &&
-    action.side === "corp" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
   const delayedSuccessFailedChecks = [
+    ["choice_contract", binding !== undefined],
     ["source_card", sourceCard !== undefined],
     ["source_server", sourceServer !== undefined],
-    [
-      "source_state",
-      sourceStateVersion === context.input.playerView.stateVersion,
-    ],
-    ["active_run", context.input.playerView.run?.attackedServerId === serverId],
-    ["choice_side", choice.side === "corp"],
-    ["choice_kind", choice.kind === "select_option"],
-    ["choice_visibility", choice.visibility === "hidden_info_barrier"],
-    [
-      "choice_state",
-      choice.stateVersion === context.input.playerView.stateVersion,
-    ],
     ["decline", decline !== undefined],
     ["selected_option", selectedOption !== undefined],
     ["exact_effect_facts", exactEffectFacts],
     ["priced_options", pricedIceOptions.length === iceOptions.length],
     ["ice_options", iceOptions.length > 0],
-    ["option_set", iceOptions.length === choice.options.length - 1],
+    ["option_set", iceOptions.length === options.length - 1],
     ["previous", previous !== undefined && previous.side === "corp"],
     [
       "previous_state",
@@ -287,19 +240,12 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
     ],
     ["defense_owner", executor !== undefined],
     ["defense_state", moduleState?.kind === "defense"],
-    ["action", action !== undefined && action.side === "corp"],
-    ["action_source", action?.source === "game_rule"],
-    [
-      "action_state",
-      action?.expiresAtStateVersion === context.input.playerView.stateVersion,
-    ],
-    ["requirement", requirement?.choiceId === choice.choiceId],
   ]
     .filter(([, valid]) => !valid)
     .map(([name]) => name)
     .join(",");
   if (
-    !exactBinding ||
+    delayedSuccessFailedChecks.length > 0 ||
     !action ||
     !executor ||
     !moduleState ||
@@ -319,7 +265,7 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
       ),
       owner: "continuation",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
-      removalCondition: `Resolve Dr. Dreff only from the resident corp.defend_servers owner, exact rezzed source on the attacked fort, continuous matching run event chain and complete Engine-priced effect facts. Choose a current defense option or the bound legal decline when no option provides current defense value, including a complete free full break. Failed=${delayedSuccessFailedChecks || "unknown"}.`,
+      removalCondition: `Failed=${delayedSuccessFailedChecks || "unknown"}. Require the current Dr. Dreff choice, rezzed source on the attacked server, Defense plan origin and exact effect facts for all offered options.`,
     });
   }
   moduleState.delayedSuccessChoiceBinding = {

@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   applyAction,
   createGameAfterSetup,
@@ -10,8 +11,8 @@ import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-buil
 import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
-const NETWATCH = "onr_v1_207_netwatch-operations-office",
-  URBAN = "onr_v1_307_urban-renewal";
+const NETWATCH = 419,
+  URBAN = 519;
 const deck = {
   ...DEMO_DECKS.demo_corp_001,
   id: "scored-trace-corp",
@@ -86,13 +87,15 @@ it("selects the actual scored trace head for an affordable lethal payoff", () =>
     type: "activated_card_ability",
     payload: {
       cardImplementationAbilityId:
-        NETWATCH + ":abilities_activated_corp_main_trace",
+        canonicalCapabilityId(NETWATCH, capabilityKey("abilities_activated_corp_main_trace")),
     },
   });
   expect(decision.fallbackUsed).toBe(false);
   expect(
-    decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-  ).toContain("corp.punish_campaign");
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.punish_campaign");
 });
 it("does not claim a forced trace through a richer Runner's full response", () => {
   const state = fixture();

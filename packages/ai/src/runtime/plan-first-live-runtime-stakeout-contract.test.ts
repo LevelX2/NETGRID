@@ -1,8 +1,10 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
+  completeRunnerEconomyFixturePolicy,
   aiInput,
   legalAction,
   visibleCard,
@@ -19,7 +21,7 @@ describe("plan-first Runner composite economy-card ownership", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("stakeout-card", "runner", "event", {
-        definitionId: "test_stakeout",
+        definitionId: syntheticCardDefinitionId("test_stakeout"),
         title: "Stakeout",
       }),
     ];
@@ -29,7 +31,7 @@ describe("plan-first Runner composite economy-card ownership", () => {
         {
           schemaVersion: "runner-hand-development-evaluation-v4",
           cardInstanceId: "stakeout-card",
-          definitionId: "test_stakeout",
+          definitionId: syntheticCardDefinitionId("test_stakeout"),
           title: "Stakeout",
           cardType: "event",
           availability: "legal_now",
@@ -61,7 +63,7 @@ describe("plan-first Runner composite economy-card ownership", () => {
     const unownedCredit = stakeoutLikeAction();
     unownedCredit.costs = [{ credits: 0, clicks: 0 }];
     const endTurn = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -72,7 +74,7 @@ describe("plan-first Runner composite economy-card ownership", () => {
     input.playerView.own.clicks = 0;
     input.playerView.own.gripOrHq = [
       visibleCard("stakeout-card", "runner", "event", {
-        definitionId: "test_stakeout",
+        definitionId: syntheticCardDefinitionId("test_stakeout"),
         title: "Stakeout",
       }),
     ];
@@ -101,7 +103,7 @@ function stakeoutLikeAction() {
       source: "stakeout-card",
       payload: {
         cardId: "stakeout-card",
-        sourceDefinitionId: "test_stakeout",
+        sourceDefinitionId: syntheticCardDefinitionId("test_stakeout"),
         gainCreditsAmount: 2,
         drawCardsAmount: 1,
       },
@@ -131,5 +133,12 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     practicalMicroRuntimeCandidates: () => [],
     ...overrides,
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  return createSemanticRuntimeDecisionContext(dependencies);
+  return createSemanticRuntimeDecisionContext({
+    ...dependencies,
+    buildRunnerEconomyPosture: (params) =>
+      completeRunnerEconomyFixturePolicy(
+        dependencies.buildRunnerEconomyPosture(params),
+        params.input.playerView.own.credits,
+      ),
+  });
 }

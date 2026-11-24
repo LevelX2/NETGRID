@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import {
   applyAction,
   createGameAfterSetup,
@@ -15,9 +16,9 @@ import { buildAiDecisionInput } from "./runtime/ai-decision-input";
 import { chooseAiAction } from "./ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 import { runnerStrategicExchangeKinds } from "./runtime/runner-strategic-exchange";
-const id = "onr_proteus_108_faked-hit";
-const poisonedWaterSupply = "onr_proteus_117_poisoned-water-supply";
-const entry = cardSpecPlanningCards().find((c) => c.definition.id === id)!;
+const id = 166;
+const poisonedWaterSupply = 175;
+const entry = listPlanningCardsWithFacts().find((c) => c.facts.id === id)!;
 const payoff = {
   kind: "run_tax",
   scope: "corp",
@@ -26,20 +27,20 @@ const payoff = {
   amount: 1,
   finite: true,
 };
-function nativeInput(eventId = id, additionalCards: readonly string[] = []) {
+function nativeInput(eventId = id, additionalCards: readonly CardDefinitionId[] = []) {
   let state = createGameAfterSetup({
     seed: "fixed-bad-publicity-profile",
     runnerDeck: {
       id: "bp-runner",
       name: "BP",
       side: "runner",
-      identity: "runner_identity_001",
+      identity: 587,
       cards: [
         eventId,
-        "onr_v1_108_score",
-        "onr_v1_097_livewires-contacts",
-        "onr_v1_039_krash",
-        "onr_v1_014_codecracker",
+        320,
+        309,
+        251,
+        226,
         ...additionalCards,
       ].map((id) => ({ id, quantity: 3 })),
     },
@@ -47,10 +48,10 @@ function nativeInput(eventId = id, additionalCards: readonly string[] = []) {
       id: "bp-corp",
       name: "Corp",
       side: "corp",
-      identity: "corp_identity_001",
+      identity: 3,
       cards: [
-        { id: "simple_agenda", quantity: 8 },
-        { id: "simple_barrier_ice", quantity: 8 },
+        { id: 588, quantity: 8 },
+        { id: 589, quantity: 8 },
       ],
     },
   });
@@ -73,10 +74,10 @@ function nativeInput(eventId = id, additionalCards: readonly string[] = []) {
     .withRunnerCredits(5);
   for (const def of [
     eventId,
-    "onr_v1_108_score",
-    "onr_v1_097_livewires-contacts",
-    "onr_v1_039_krash",
-    "onr_v1_014_codecracker",
+    320,
+    309,
+    251,
+    226,
   ])
     f.withRunnerCardInGrip(def);
   return {
@@ -88,10 +89,10 @@ function nativeInput(eventId = id, additionalCards: readonly string[] = []) {
         side: "runner",
         cards: [
           eventId,
-          "onr_v1_108_score",
-          "onr_v1_097_livewires-contacts",
-          "onr_v1_039_krash",
-          "onr_v1_014_codecracker",
+          320,
+          309,
+          251,
+          226,
           ...additionalCards,
         ].map((cardId) => ({ cardId, quantity: 3 })),
       },
@@ -116,9 +117,9 @@ describe("fixed public bad-publicity effect translation", () => {
   it("translates the typed effect independently of card identity", () => {
     const renamed = {
       ...structuredClone(entry),
-      definition: {
-        ...entry.definition,
-        id: "onr_v1_108_score",
+      facts: {
+        ...entry.facts,
+        id: 320,
         title: "Synthetic Pressure",
       },
     };
@@ -203,7 +204,7 @@ describe("fixed public bad-publicity effect translation", () => {
     ).toBeTruthy();
   });
   it("carries the Connection sacrifice and its distinct public benefit to the legal play", () => {
-    const connectionIds = ["onr_v1_154_broker", "onr_v1_170_nomad-allies"];
+    const connectionIds = [366, 382];
     const { state } = nativeInput(poisonedWaterSupply, connectionIds);
     const fixture = RealEngineFixtureBuilder.forState(state);
     fixture.withRunnerResourceInstalled(connectionIds[0]!);

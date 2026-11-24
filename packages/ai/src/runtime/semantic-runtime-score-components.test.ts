@@ -15,6 +15,7 @@ import type { AiDecisionDebug, LegalAction } from "@netgrid/shared";
 describe("semantic runtime score components", () => {
   it("rounds scores and derives confidence without selecting actions", () => {
     expect(roundSemanticRuntimeScore(12.345)).toBe(12.35);
+    expect(roundSemanticRuntimeScore(Number.MAX_VALUE)).toBe(Number.MAX_VALUE);
     expect(semanticRuntimeConfidence("mandatory_draw", 10)).toBe(0.95);
     expect(
       semanticRuntimeConfidence("runner.semantic.basic_economy_draw", 9000),
@@ -87,7 +88,7 @@ describe("semantic runtime score components", () => {
     expect(
       scrubEvidence([
         "safe:entry",
-        "remote_1:known_payoff",
+        "r1:known_payoff",
         "server_1:central",
         "scenario_1:fixture",
         "cardInstances:hidden",
@@ -97,7 +98,7 @@ describe("semantic runtime score components", () => {
       ]),
     ).toEqual([
       "safe:entry",
-      "remote_1:known_payoff",
+      "r1:known_payoff",
       "server_1:central",
       "scenario_1:fixture",
     ]);

@@ -43,7 +43,7 @@ it.each(["insufficient_exit_reserve", "no_installed_coverage"] as const)(
       cp.input.playerView.own.gripOrHq.find(
         (card) => card.instanceId === action.source,
       )?.definitionId,
-    ).not.toBe("onr_v1_168_loan-from-chiba");
+    ).not.toBe(380);
     expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
   },
 );
@@ -64,7 +64,7 @@ it.each([
         cp.input.playerView.own.gripOrHq.some(
           (card) =>
             card.instanceId === action.source &&
-            card.definitionId === "onr_v1_168_loan-from-chiba",
+            card.definitionId === 380,
         ),
     )!;
     expect(loan).toBeDefined();
@@ -79,11 +79,11 @@ it.each([
     expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
     expect(decision.actionId).toBe(loan.actionId);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       selectedPlan: {
         moduleId: "runner.economy",
-        parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-        parentNeedId: "run-support:remote:remote_1",
+        parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+        parentNeedId: "run-support:remote:r1",
       },
       route: {
         actionId: loan.actionId,

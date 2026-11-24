@@ -1,3 +1,8 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
+import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { corpCurrentRunAccessServerId } from "../defense/corp-central-defense-facts-adapter";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { accessInstalledTrashChoiceSignal } from "./corp-access-installed-trash-choice";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
@@ -93,7 +98,7 @@ export function buildCorpAmbushPlanSignals(params: {
       if (
         params.input.playerView.servers.some(
           (server) =>
-            server.id.startsWith("remote_") &&
+            isRemoteServerId(server.id) &&
             server.root.some(
               (card) => card.definitionId === source.definitionId,
             ),
@@ -176,31 +181,10 @@ function accessProgramBounceChoiceSignal(
       candidate.actionType === "resolve_choice",
   );
   if (resolveCandidates.length !== 1) return undefined;
-  const resolveCandidate = resolveCandidates[0]!;
-  const resolveAction = input.legalActions.find(
-    (action) => action.actionId === resolveCandidate.actionId,
-  );
-  const requirement = resolveAction?.choiceRequirements?.[0];
-  const selectableOptions = choice.options.filter(
-    (option) => option.selectable !== false,
-  );
-  const optionIds = selectableOptions.map((option) => option.id);
-  if (
-    !resolveAction ||
-    resolveAction.side !== "corp" ||
-    resolveAction.type !== "resolve_choice" ||
-    resolveAction.source !== "game_rule" ||
-    resolveAction.timingPoint !== input.playerView.timingPoint ||
-    resolveAction.expiresAtStateVersion !== input.playerView.stateVersion ||
-    resolveAction.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== choice.minSelections ||
-    requirement.maxSelections !== choice.maxSelections ||
-    requirement.optionIds.length !== optionIds.length ||
-    !optionIds.every((optionId) => requirement.optionIds.includes(optionId))
-  ) {
+  const resolveAction = exactCurrentChoiceAction(input, choice);
+  if (resolveAction?.actionId !== resolveCandidates[0]!.actionId)
     return undefined;
-  }
+  const selectableOptions = selectableChoiceOptions(choice.options);
   const visiblePrograms = new Map(
     (input.playerView.opponent.rig ?? [])
       .filter(
@@ -274,7 +258,7 @@ function accessProgramBounceChoiceSignal(
   };
 }
 
-function definitionSupportsProgramBounceAmbush(definitionId: string): boolean {
+function definitionSupportsProgramBounceAmbush(definitionId: number): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   return (
     (hint?.strategyAnchors?.includes("corp.ambush_bluff") === true ||
@@ -343,7 +327,7 @@ function scoreDecoySignals(params: {
         )
         .flatMap((candidate) => {
           const serverId = candidateTargetIds(candidate).find((target) =>
-            target.startsWith("remote_"),
+            isRemoteServerId(target),
           );
           const server = params.input.playerView.servers.find(
             (entry) => entry.id === serverId,
@@ -627,7 +611,7 @@ function currentInstalledAccessRezSignals(
   },
   continuedSourceIds: ReadonlySet<string>,
 ): CorpAmbushSignal[] {
-  const serverId = params.input.playerView.run?.attackedServerId;
+  const serverId = corpCurrentRunAccessServerId(params.input);
   const server = params.input.playerView.servers.find((s) => s.id === serverId);
   if (!server || server.id === "archives") return [];
   return server.root.flatMap((source): CorpAmbushSignal[] => {
@@ -688,8 +672,8 @@ function accessWindowRezRoutes(
     input.playerView.timingPoint !== "run.movement_rez_window" ||
     run?.phase !== "movement" ||
     run.position?.kind !== "server" ||
-    run.position.serverId !== location.serverId ||
-    run.attackedServerId !== location.serverId
+    run.position.serverId !== run.attackedServerId ||
+    corpCurrentRunAccessServerId(input) !== location.serverId
   )
     return [];
   return params.candidates.flatMap((candidate) => {
@@ -703,13 +687,10 @@ function accessWindowRezRoutes(
       (a) => a.actionId === candidate.actionId,
     );
     if (
-      !action ||
-      action.side !== "corp" ||
+      !actionMatchesCurrentDecision(input, action) ||
       action.type !== "rez_card" ||
       action.source !== location.card.instanceId ||
-      action.payload?.serverId !== location.serverId ||
-      action.timingPoint !== input.playerView.timingPoint ||
-      action.expiresAtStateVersion !== input.playerView.stateVersion
+      action.payload?.serverId !== location.serverId
     )
       return [];
     const rezCredits = exactLegalActionCreditCost(action);
@@ -765,12 +746,7 @@ function continuedAmbushSignals(params: {
       signal?: Partial<CorpAmbushSignal>;
     };
     if (moduleState.kind !== "ambush") return [];
-    const signal = (
-      instance.moduleState as {
-        kind?: string;
-        signal?: Partial<CorpAmbushSignal>;
-      }
-    ).signal;
+    const signal = moduleState.signal;
     if (!signal || signal.commitmentVersion !== CORP_AMBUSH_COMMITMENT_VERSION)
       return [];
     if (
@@ -1157,7 +1133,7 @@ function corpIntentSupportsAmbush(intent: CorpStrategicIntentProfile): boolean {
   );
 }
 
-function definitionSupportsAmbushPlan(definitionId: string): boolean {
+function definitionSupportsAmbushPlan(definitionId: number): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   const strategyBound =
     hint?.strategyAnchors?.includes("corp.ambush_bluff") === true ||
@@ -1182,7 +1158,7 @@ function definitionSupportsAmbushPlan(definitionId: string): boolean {
 
 function ambushVisibleConditionsSatisfied(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   if (!hint) return false;
@@ -1230,7 +1206,7 @@ function agendaAmbushInstallHasDecisivePayoff(
 
 function ambushAdvancementTarget(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): number {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   const requiresCounters = hint?.conditions?.some(
@@ -1272,7 +1248,7 @@ function ambushAdvancementSupportRoute(params: {
       phase: "install" | "rez" | "trigger";
       candidate: ActionSemanticCandidate;
       supportSourceInstanceId: string;
-      supportSourceDefinitionId: string;
+      supportSourceDefinitionId: number;
       creditCost: number;
     }
   | undefined {
@@ -1433,7 +1409,7 @@ function installedCardLocation(
 }
 
 function isAmbushRemoteInstallServer(value: string): boolean {
-  return value === "new_remote" || value.startsWith("remote_");
+  return value === "new_remote" || isRemoteServerId(value);
 }
 
 function ambushContractFailure(

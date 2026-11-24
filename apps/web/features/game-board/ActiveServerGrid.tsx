@@ -1,13 +1,10 @@
 "use client";
 
+import { type SelectionId } from "../../lib/presented-player-view";
 import { Route } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
-import type {
-  LegalAction,
-  PlayerView,
-  Side,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import type { BoardHighlight } from "../../app/action-cues";
@@ -53,7 +50,7 @@ const CORP_HQ_HAND_PANEL_INLINE_CHROME_PX = 14;
 const RunIcon = Route;
 
 type DiscardOption = {
-  id: string;
+  id: SelectionId;
 };
 
 export function ActiveServerGrid({
@@ -64,6 +61,7 @@ export function ActiveServerGrid({
   activeRunIceId,
   viewedApproachIceId,
   viewedInstalledExposeCardId,
+  exposedBoardIce,
   exposedCardHighlightIds,
   selectedActionContext,
   selectedDiscardOptionIdSet,
@@ -92,9 +90,10 @@ export function ActiveServerGrid({
   activeRunIceId: string | null;
   viewedApproachIceId: string | null;
   viewedInstalledExposeCardId: string | null;
+  exposedBoardIce?: ReadonlyMap<string, DisplayVisibleCard>;
   exposedCardHighlightIds: ReadonlySet<string>;
   selectedActionContext: ActionContext | null;
-  selectedDiscardOptionIdSet: ReadonlySet<string>;
+  selectedDiscardOptionIdSet: ReadonlySet<SelectionId>;
   boardLaneStyle: CSSProperties;
   handCardsStyle: CSSProperties;
   zoneCardsStyle: CSSProperties;
@@ -106,7 +105,7 @@ export function ActiveServerGrid({
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   scoreAreaCardsBySide(side: Side): VisibleCard[];
   discardOptionForCard(card: VisibleCard): DiscardOption | null;
-  toggleDiscardOption(optionId: string): void;
+  toggleDiscardOption(optionId: SelectionId): void;
   fieldChoiceCardProps(card: VisibleCard): FieldChoiceCardProps;
   onAction(action: LegalAction): void;
   onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
@@ -240,8 +239,11 @@ export function ActiveServerGrid({
                   );
                 }
                 return lane.cards.map((card, index) => {
-                  const displayCard = enrichCard(card);
-                  return (
+                  const isCurrentIce =
+                    lane.kind === "ice" && activeRunIceId === card.instanceId;
+                  const exposedIce = exposedBoardIce?.get(card.instanceId);
+                  const displayCard = exposedIce ?? enrichCard(card);
+                  const cardView = (
                     <CardView
                       key={card.instanceId}
                       card={displayCard}
@@ -266,16 +268,11 @@ export function ActiveServerGrid({
                         )
                       }
                       actionDisabled={actionDisabled}
-                      slotClassName={[
-                        ...(lane.kind === "ice"
-                          ? [iceStackSlotClass(card)]
-                          : []),
-                        ...(exposedCardHighlightIds.has(card.instanceId)
-                          ? ["exposedCardHighlightSlot"]
-                          : []),
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
+                      slotClassName={
+                        exposedCardHighlightIds.has(card.instanceId)
+                          ? "exposedCardHighlightSlot"
+                          : ""
+                      }
                       {...(lane.kind === "ice"
                         ? { positionBadge: String(index + 1) }
                         : {})}
@@ -291,12 +288,8 @@ export function ActiveServerGrid({
                         displayCard,
                         scoreAreaCardsBySide("corp"),
                       )}
-                      runPositionActive={
-                        lane.kind === "ice" &&
-                        activeRunIceId === card.instanceId
-                      }
-                      {...(lane.kind === "ice" &&
-                      activeRunIceId === card.instanceId
+                      runPositionActive={isCurrentIce}
+                      {...(isCurrentIce
                         ? {
                             runPositionLabel:
                               runPositionStatusLabel(view, locale) ??
@@ -306,13 +299,22 @@ export function ActiveServerGrid({
                       viewMarkerActive={
                         (lane.kind === "ice" &&
                           viewedApproachIceId === card.instanceId) ||
-                        viewedInstalledExposeCardId === card.instanceId
+                        viewedInstalledExposeCardId === card.instanceId ||
+                        Boolean(exposedIce)
                       }
                       {...fieldChoiceCardProps(card)}
                       onAction={onAction}
-                      onFocus={onFocus}
-                      onActionContextSelect={onActionContextSelect}
+                      {...(!exposedIce ? { onFocus, onActionContextSelect } : {})}
                     />
+                  );
+                  if (lane.kind !== "ice") return cardView;
+                  return (
+                    <div key={card.instanceId} className={iceStackSlotClass(card)}>
+                      {cardView}
+                      {isCurrentIce && (
+                        <span className="runPositionFrame" aria-hidden="true" />
+                      )}
+                    </div>
                   );
                 });
               };

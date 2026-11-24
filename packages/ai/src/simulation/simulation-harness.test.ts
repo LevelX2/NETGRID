@@ -112,8 +112,9 @@ describe("AI simulation harness", () => {
       seed: "ai-sim-invalid-deck-support",
       runnerDeck: {
         id: "invalid-runtime-deck",
+        name: "Invalid runtime deck",
         side: "runner",
-        identityCardId: "missing-identity",
+        identity: 587,
         cards: [{ id: "missing-card", quantity: 1 }],
       } as never,
     });
@@ -121,6 +122,7 @@ describe("AI simulation harness", () => {
     expect(result.terminationKind).toBe("runtime_failure");
     expect(result.winner).toBe("runtime_failure");
     expect(result.actions).toBe(0);
+    expect(result.metrics.illegalActions).toBe(0);
     expect(result.runtimeFailures).toEqual([
       expect.objectContaining({
         code: "simulation_deck_support_invalid",
@@ -188,6 +190,7 @@ describe("AI simulation harness", () => {
         side: "runner",
         stateVersionBefore: 2,
         actionType: "start_run",
+        runnerRunStarted: true,
         reasonCode: "runner.plan.pressure_rnd",
         explanation: "metric fixture",
         confidence: 0.7,
@@ -201,7 +204,8 @@ describe("AI simulation harness", () => {
       {
         side: "runner",
         stateVersionBefore: 3,
-        actionType: "start_run",
+        actionType: "play_event",
+        runnerRunStarted: true,
         reasonCode: "runner.plan.pressure_rnd",
         explanation: "metric fixture",
         confidence: 0.7,

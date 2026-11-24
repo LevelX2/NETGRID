@@ -25,17 +25,17 @@ function fixture(credits = 3, runnerCredits = 22) {
     runnerDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.runner,
       cards: [
-        { id: "onr_v1_039_krash", quantity: 3 },
-        { id: "onr_v1_108_score", quantity: 8 },
+        { id: 251, quantity: 3 },
+        { id: 320, quantity: 8 },
       ],
     },
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_classic_011_glacier", quantity: 3 },
-        { id: "onr_classic_008_deadeye", quantity: 3 },
-        { id: "onr_classic_004_theorem-proof", quantity: 6 },
-        { id: "onr_classic_001_data-fort-remapping", quantity: 3 },
+        { id: 15, quantity: 3 },
+        { id: 12, quantity: 3 },
+        { id: 8, quantity: 6 },
+        { id: 5, quantity: 3 },
       ],
     },
   });
@@ -46,10 +46,10 @@ function fixture(credits = 3, runnerCredits = 22) {
   state.runner.clicks = 3;
   state.corp.credits = credits;
   const scoredTheorem = Object.values(state.cardInstances).filter(
-    (c) => c.definitionId === "onr_classic_004_theorem-proof",
+    (c) => c.definitionId === 8,
   )[1]!;
   const scoredRemaps = Object.values(state.cardInstances).filter(
-    (c) => c.definitionId === "onr_classic_001_data-fort-remapping",
+    (c) => c.definitionId === 5,
   );
   for (const [card, side] of [
     [scoredTheorem, "runner"],
@@ -63,43 +63,43 @@ function fixture(credits = 3, runnerCredits = 22) {
     state[side].scoreArea.push(card.instanceId);
   }
   const glacs = Object.values(state.cardInstances).filter(
-    (c) => c.definitionId === "onr_classic_011_glacier",
+    (c) => c.definitionId === 15,
   );
   const dead = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_classic_008_deadeye",
+    (c) => c.definitionId === 12,
   )!;
   const agenda = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_classic_004_theorem-proof",
+    (c) => c.definitionId === 8,
   )!;
   const krash = Object.values(state.cardInstances).find(
-    (c) => c.definitionId === "onr_v1_039_krash",
+    (c) => c.definitionId === 251,
   )!;
   for (const c of [glacs[0]!, glacs[1]!, dead, agenda, krash])
     removeEverywhere(state, c.instanceId);
   for (const [c, server] of [
-    [glacs[0]!, "remote_1"],
-    [glacs[1]!, "remote_2"],
-    [dead, "remote_2"],
+    [glacs[0]!, "r1"],
+    [glacs[1]!, "r2"],
+    [dead, "r2"],
   ] as const) {
     c.zone = { side: "corp", zone: "serverIce", serverId: server };
     c.rezzed = true;
     c.faceup = true;
   }
-  agenda.zone = { side: "corp", zone: "serverRoot", serverId: "remote_2" };
+  agenda.zone = { side: "corp", zone: "serverRoot", serverId: "r2" };
   agenda.advancementCounters = 1;
   krash.zone = { side: "runner", zone: "rig" };
   krash.faceup = true;
   state.runner.rig.programs.push(krash.instanceId);
   state.corp.servers.push(
     {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       root: [],
       ice: [glacs[0]!.instanceId],
     },
     {
-      id: "remote_2",
+      id: "r2",
       kind: "remote",
       label: "Remote 2",
       root: [agenda.instanceId],
@@ -107,7 +107,7 @@ function fixture(credits = 3, runnerCredits = 22) {
     },
   );
   const start = getLegalActions(state, "runner").find(
-    (a) => a.type === "start_run" && a.payload?.serverId === "remote_2",
+    (a) => a.type === "start_run" && a.payload?.serverId === "r2",
   )!;
   const result = applyAction(state, {
     matchId: state.matchId,
@@ -128,10 +128,10 @@ function inputFor(state: GameState) {
       deckSnapshotId: "sp431-current-terminal-corp",
       side: "corp",
       cards: [
-        { cardId: "onr_classic_011_glacier", quantity: 3 },
-        { cardId: "onr_classic_008_deadeye", quantity: 3 },
-        { cardId: "onr_classic_004_theorem-proof", quantity: 6 },
-        { cardId: "onr_classic_001_data-fort-remapping", quantity: 3 },
+        { cardId: 15, quantity: 3 },
+        { cardId: 12, quantity: 3 },
+        { cardId: 8, quantity: 6 },
+        { cardId: 5, quantity: 3 },
       ],
     },
   });
@@ -142,8 +142,8 @@ function move(input: ReturnType<typeof inputFor>) {
     (a) =>
       a.payload?.fortRunWindowAbility ===
         "move_self_to_outermost_position_on_other_fort" &&
-      a.payload?.serverId === "remote_1" &&
-      a.payload?.targetServerId === "remote_2",
+      a.payload?.serverId === "r1" &&
+      a.payload?.targetServerId === "r2",
   )!;
 }
 function apply(state: GameState, action: LegalAction) {
@@ -166,7 +166,7 @@ function terminalHqFixture(corpCredits = 3, runnerCredits = 4) {
   state.activeSide = "runner";
   state.phase = "runner_action_phase";
   state.timingPoint = "runner_action.main";
-  const remote = state.corp.servers.find((s) => s.id === "remote_2")!;
+  const remote = state.corp.servers.find((s) => s.id === "r2")!;
   const agenda = state.cardInstances[remote.root[0]!]!;
   removeEverywhere(state, agenda.instanceId);
   agenda.zone = { side: "corp", zone: "hq" };
@@ -174,14 +174,14 @@ function terminalHqFixture(corpCredits = 3, runnerCredits = 4) {
   const runnerRemap = state.runner.scoreArea.find(
     (id) =>
       state.cardInstances[id]!.definitionId ===
-      "onr_classic_001_data-fort-remapping",
+      5,
   )!;
   removeEverywhere(state, runnerRemap);
   state.cardInstances[runnerRemap]!.zone = { side: "corp", zone: "archives" };
   state.corp.archives.push(runnerRemap);
   const extraScore = Object.values(state.cardInstances).find(
     (c) =>
-      c.definitionId === "onr_classic_004_theorem-proof" &&
+      c.definitionId === 8 &&
       c.zone.zone !== "scoreArea" &&
       c.instanceId !== agenda.instanceId,
   )!;
@@ -205,7 +205,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
     expect(state.corp.credits).toBe(3);
     expect(input.playerView.own.agendaPoints).toBe(4);
     expect(
-      getPlayerView(state, "runner").servers.find((s) => s.id === "remote_1")!
+      getPlayerView(state, "runner").servers.find((s) => s.id === "r1")!
         .ice[0]!.known,
     ).toBe(false);
     expect(input.playerView.opponent.agendaPoints).toBe(6);
@@ -242,16 +242,22 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
     const decision = chooseAiAction(input);
     expect(decision.actionId).toBe(action.actionId);
     expect(
-      decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
-    ).toContain("corp.defend_servers");
+      decision.decisionDebug!.planFirstDecision!.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.defend_servers");
     expect(
-      rezDecision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
-    ).toContain("corp.defend_servers");
+      rezDecision.decisionDebug!.planFirstDecision!.portfolio.find(
+        (instance) => instance.instanceId === rezDecision.decisionDebug!.planFirstDecision!.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.defend_servers");
     for (const d of [decision, rezDecision]) {
       expect(d.fallbackUsed).toBe(false);
       expect(
-        d.decisionDebug!.planFirstDecision!.leafExecutorInstanceId,
-      ).toContain("corp.defend_servers");
+        d.decisionDebug!.planFirstDecision!.portfolio.find(
+          (instance) => instance.instanceId === d.decisionDebug!.planFirstDecision!.leafExecutorInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
       expect(d.decisionDebug!.planFirstDecision!.selectedStep).toBeDefined();
       expect(d.decisionDebug!.planFirstDecision!.route).toBeDefined();
     }
@@ -271,7 +277,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
   it("does not infer terminal HQ material from hidden R&D or the deck list", () => {
     const { state, source } = terminalHqFixture();
     for (const id of state.corp.hq.filter((id) =>
-      state.cardInstances[id]!.definitionId.includes("theorem-proof"),
+      state.cardInstances[id]!.definitionId === 8,
     )) {
       removeEverywhere(state, id);
       state.cardInstances[id]!.zone = { side: "corp", zone: "rd" };
@@ -296,14 +302,22 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       expect(action.payload?.corpMobileIceMoveQuoteJson).toBeTypeOf("string");
       expect(assessMobileIceRunDefense(input, action)).toMatchObject({
         productive: true,
-        serverId: "remote_2",
+        serverId: "r2",
       });
       const decision = chooseAiAction(input);
       expect(decision.actionId).toBe(action.actionId);
       expect(decision.fallbackUsed).toBe(false);
       const pf = decision.decisionDebug!.planFirstDecision!;
-      expect(pf.rootPlanInstanceId).toContain("corp.defend_servers");
-      expect(pf.leafExecutorInstanceId).toContain("corp.defend_servers");
+      expect(
+        pf.portfolio.find(
+          (instance) => instance.instanceId === pf.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
+      expect(
+        pf.portfolio.find(
+          (instance) => instance.instanceId === pf.leafExecutorInstanceId,
+        )?.moduleId,
+      ).toBe("corp.defend_servers");
       expect(pf.selectedStep).toBeDefined();
       expect(pf.route).toBeDefined();
       const quote = JSON.parse(
@@ -311,7 +325,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
         ),
         after = apply(state, action);
       const actual = getPlayerView(after, "corp").servers.find(
-        (s) => s.id === "remote_2",
+        (s) => s.id === "r2",
       )!.ice;
       expect(actual.map((c) => c.effectiveRunQuote)).toEqual(
         quote.afterIce.map((c: any) => c.effectiveRunQuote),
@@ -333,13 +347,13 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
     const { state } = fixture(),
       spare = Object.values(state.cardInstances).find(
         (c) =>
-          c.definitionId === "onr_classic_004_theorem-proof" &&
+          c.definitionId === 8 &&
           c.zone.zone !== "serverRoot",
       )!;
     removeEverywhere(state, spare.instanceId);
-    spare.zone = { side: "corp", zone: "serverRoot", serverId: "remote_1" };
+    spare.zone = { side: "corp", zone: "serverRoot", serverId: "r1" };
     state.corp.servers
-      .find((s) => s.id === "remote_1")!
+      .find((s) => s.id === "r1")!
       .root.push(spare.instanceId);
     const input = inputFor(state);
     expect(assessMobileIceRunDefense(input, move(input))).toMatchObject({
@@ -370,7 +384,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       scored = state.runner.scoreArea.find(
         (id) =>
           state.cardInstances[id]?.definitionId ===
-          "onr_classic_001_data-fort-remapping",
+          5,
       )!;
     removeEverywhere(state, scored);
     state.cardInstances[scored]!.zone = { side: "corp", zone: "archives" };
@@ -382,7 +396,7 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       evidenceCode: "corp_mobile_ice_has_no_bound_current_terminal_agenda",
     });
   });
-  it.each(["state", "action", "target", "json", "payment"])(
+  it.each(["state", "action", "target", "json", "payment", "ice"])(
     "fails closed on a broken quote binding: %s",
     (broken) => {
       const { state } = fixture(),
@@ -393,6 +407,8 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
       if (broken === "action") q.actionId = "another-action";
       if (broken === "target") q.targetServerId = "hq";
       if (broken === "payment") q.continuation.corpAgendaPointsAfterDefense--;
+      if (broken === "ice")
+        q.afterIce[0] = { known: true, rezzed: true, type: "ice" };
       action.payload!.corpMobileIceMoveQuoteJson =
         broken === "json" ? "{" : JSON.stringify(q);
       expect(() => assessMobileIceRunDefense(input, action)).toThrow(

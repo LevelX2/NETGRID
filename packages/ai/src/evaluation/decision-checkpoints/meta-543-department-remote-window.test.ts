@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it, vi } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildCorpIceDensityProfile } from "../../runtime/corp-economy/corp-ice-density";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {
   restoreAiRuntimeCheckpoint,
@@ -47,12 +48,12 @@ it("executes the real defense draw before releasing its consumed receipt to Econ
       expect(plan?.selectedPlan?.moduleId).toBe("corp.economy");
     }
   }
-  expect(observed.some(p => p.defenseNeeds.some(s => s.kind === "generic" && s.drawAttemptState?.remainingAttempts === 1 && s.actionIds?.includes("corp.draw_card")))).toBe(true);
+  expect(observed.some(p => p.defenseNeeds.some(s => s.kind === "generic" && s.drawAttemptState?.remainingAttempts === 1 && s.actionIds?.includes("c8")))).toBe(true);
   expect(observed.some(p => p.defenseNeeds.some(s => s.kind === "generic" && s.drawAttemptState?.remainingAttempts === 0 && s.actionIds?.length === 0))).toBe(true);
 });
 
 it.each(["g5-d333", "g18-d237", "g19-d258", "g19-d259", "g19-d269", "completed-defense-draw"])(
-  "admits the profitable bank cycle without an executable Remote protection window: %s",
+  "uses a quoted bank action without an executable Remote protection window: %s",
   (name) => {
     const f = JSON.parse(
       readFileSync(
@@ -109,11 +110,40 @@ it.each(["g5-d333", "g18-d237", "g19-d258", "g19-d259", "g19-d269", "completed-d
       (a) => a.actionId === decision.actionId,
     );
     if (!selected) throw Error("Current native action missing");
-    expect(selected.payload?.hostedCreditAddAmount).toBe(3);
     expect(selected.expiresAtStateVersion).toBe(f.input.playerView.stateVersion);
     const plan = decision.decisionDebug?.planFirstDecision;
     expect(plan?.selectedPlan?.moduleId).toBe("corp.economy");
-    expect(plan?.rootPlanInstanceId).toContain("economy-hosted-bank-cycle");
+    if (name === "g18-d237") {
+      // The Runner's removed event cannot make Corp's defensive follow-up unknown.
+      expect(buildCorpIceDensityProfile(f.input)).toMatchObject({
+        confidence: "deck_snapshot",
+        remainingIceCount: 6,
+        remainingDeckCount: 21,
+      });
+      expect(selected.payload).toMatchObject({
+        cardImplementationTakesHostedCredits: true,
+        hostedCreditTakeAmount: 3,
+        gainCreditsAmount: 3,
+      });
+      expect(
+        plan?.portfolio.find(
+          (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+        ),
+      ).toMatchObject({
+        moduleId: "corp.economy",
+        dedupeKey: expect.stringContaining("economy-visible-card-payout"),
+      });
+    } else {
+      expect(selected.payload?.hostedCreditAddAmount).toBe(3);
+      expect(
+        plan?.portfolio.find(
+          (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+        ),
+      ).toMatchObject({
+        moduleId: "corp.economy",
+        dedupeKey: expect.stringContaining("economy-hosted-bank-cycle"),
+      });
+    }
     expect(plan?.route?.actionId).toBe(selected.actionId);
     expect(plan?.route?.stateVersion).toBe(f.input.playerView.stateVersion);
     expect(plan?.selectedStep?.planInstanceId).toBe(plan?.selectedPlan?.instanceId);
@@ -122,7 +152,7 @@ it.each(["g5-d333", "g18-d237", "g19-d258", "g19-d259", "g19-d269", "completed-d
 
 it.each([
   ["cp-daed3ad-latest-02-start-score-remote-d19.json", "new_remote"],
-  ["cp-daed3ad-latest-03-harden-bound-remote-d88.json", "remote_1"],
+  ["cp-daed3ad-latest-03-harden-bound-remote-d88.json", "r1"],
 ])("preserves a native bound Remote protection window: %s", (name, target) => {
   const checkpoint = JSON.parse(
     readFileSync(

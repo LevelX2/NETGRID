@@ -1,7 +1,8 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { cardImplementationForDefinitionId } from "@netgrid/engine";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
@@ -47,7 +48,7 @@ export function runnerCoverageHeapPreparation(
       (c) =>
         c.known &&
         visibleCardCoversRequiredCoverage(c, requiredRole, (id) =>
-          rolesForDeckDoctrineCard(id ?? ""),
+          rolesForDeckDoctrineCard(id),
         ),
     );
   const targetIndex = fromTop < 0 ? -1 : heap.length - 1 - fromTop;
@@ -60,7 +61,7 @@ export function runnerCoverageHeapPreparation(
     return undefined;
   const answer = heap[targetIndex]!;
   const definition = answer.definitionId
-    ? CARD_DEFINITIONS_BY_ID[answer.definitionId]
+    ? planningCardFactsByDefinitionId(answer.definitionId)
     : undefined;
   const memoryUsed = input.playerView.own.memoryUsed,
     memoryLimit = input.playerView.own.memoryLimit;
@@ -131,6 +132,7 @@ export function runnerCoverageHeapPreparation(
       ),
       server.root,
       input.playerView.opponent.credits,
+      visibleRunnerPathTraceContext(input),
     );
     if (
       !path.canReachAccess ||

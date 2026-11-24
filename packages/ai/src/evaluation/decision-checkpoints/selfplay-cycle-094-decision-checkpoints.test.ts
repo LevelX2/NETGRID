@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("selfplay cycle 094 decision checkpoints", () => {
   it("pumps Krash repeatedly before the bound score-threat ETR", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(pumpScoreThreatJson) as AiDecisionCheckpointV1,
+      structuredClone(pumpScoreThreatJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, result.message).toBe(true);

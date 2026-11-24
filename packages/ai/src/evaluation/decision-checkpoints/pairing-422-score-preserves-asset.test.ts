@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-422-score-preserves-asset-d50.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -29,7 +30,7 @@ it("preserves the installed economy asset when the same agenda closes this turn 
   const paths = corpSameTurnScoreConversionPaths(input);
   const newRemote = paths.find((path) => path.targetServerId === "new_remote")!;
   const occupiedRemote = paths.find(
-    (path) => path.targetServerId === "remote_1",
+    (path) => path.targetServerId === "r1",
   )!;
   expect(newRemote).toMatchObject({
     agendaCardId: occupiedRemote.agendaCardId,
@@ -85,7 +86,7 @@ it.each([
       checkpointJson.input,
     ) as unknown as AiDecisionInputWithDeckCapabilities;
     const source = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.root[0]!;
     if (scenario === "no payout action")
       input.legalActions = input.legalActions.filter(
@@ -96,7 +97,7 @@ it.each([
       const install = input.legalActions.find(
         (action) =>
           action.type === "install_card" &&
-          action.source?.includes("corporate-downsizing") &&
+          referencesDefaultDeckCard(action.source, 406) &&
           action.payload?.serverId === "new_remote",
       )!;
       install.costs = [{ clicks: 1, credits: 1 }];
@@ -151,7 +152,7 @@ it.each([
     checkpointJson.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
   const paths = corpSameTurnScoreConversionPaths(input);
-  const left = paths.find((path) => path.targetServerId === "remote_1")!;
+  const left = paths.find((path) => path.targetServerId === "r1")!;
   const right = paths.find((path) => path.targetServerId === "new_remote")!;
   expect(equivalentSameTurnScoreResources(left, right)).toBe(true);
   if (difference === "conversion source")

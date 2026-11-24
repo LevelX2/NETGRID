@@ -1,8 +1,5 @@
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
-import {
-  assessKnownRezzedIcePath,
-  runnerRunPathCreditBudgetWithVisiblePools,
-} from "../visible-run-analysis";
+import { assessVisibleRunnerServerPath } from "../run-analysis/visible-run-server-path";
 import { cardProvidesBreakerCoverage } from "./tactical-plan-breaker-cards";
 import { coverageKindForAssessment } from "./tactical-plan-coverage-kinds";
 import type { RequiredCapabilityKind } from "./tactical-plan-types";
@@ -16,14 +13,9 @@ export function missingBreakerCoverageKind(
     (candidate) => candidate.id === serverId,
   );
   if (!server) return "breaker_coverage";
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      playerView.own.credits,
-      playerView.own.rig ?? [],
-    ),
-    server.root,
+  const assessment = assessVisibleRunnerServerPath(
+    { side: playerView.side, playerView, legalActions: playerView.legalActions },
+    server,
   );
   const preciseMissingCoverage = coverageKindForAssessment(assessment);
   if (
@@ -58,7 +50,6 @@ export function missingBreakerCoverageKind(
 function visibleCardCoverageTokens(card: VisibleCard): string[] {
   return [
     card.title,
-    card.definitionId,
     ...(card.subtypes ?? []),
     card.rulesText,
   ]

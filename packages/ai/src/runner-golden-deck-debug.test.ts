@@ -1,7 +1,9 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   LegalAction,
   PlayerView,
   PublicGameEvent,
@@ -27,12 +29,6 @@ import {
 import { buildRunnerTacticalGoals } from "./runner-tactical-goals";
 import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
-
-const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as Array<{
-  deckSnapshotId: string;
-  side: "runner" | "corp";
-  cards: Array<{ cardId: string; quantity: number }>;
-}>;
 
 type AiDecisionInputWithRunnerProjection = AiDecisionInput & {
   ownDeckCapabilities: DeckCapabilityProfile;
@@ -144,7 +140,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       credits: 6,
       servers: [
         server("rd"),
-        server("remote_2", {
+        server("r2", {
           ice: [wallOfStatic("remote-ice-rd-choice")],
           root: [
             visibleCard("remote-root-2", {
@@ -156,7 +152,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       ],
       legalActions: [
         runAction("run-rd", "rd"),
-        runAction("run-remote-2", "remote_2"),
+        runAction("run-remote-2", "r2"),
       ],
       grip: [
         visibleCard("safe-grip-1", { type: "event" }),
@@ -197,7 +193,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       servers: [server("hq")],
       grip: [
         visibleCard("access-card", {
-          definitionId: "onr_v1_129_hq-interface",
+          definitionId: 341,
           title: "HQ Interface",
           type: "hardware",
           rulesText:
@@ -230,7 +226,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     );
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:develop_onr_v1_129_hq-interface",
+        "plan_step_capability:develop_341",
         "plan_priority_class:P5",
       ]),
     );
@@ -253,7 +249,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       ],
       eventTail: [
         {
-          eventId: "golden-rd-low-value-run",
+          eventId: 2,
           type: "start_run",
           stateVersionBefore: 0,
           stateVersionAfter: 1,
@@ -270,7 +266,7 @@ describe("Runner Golden Deck strategy and debug", () => {
           ...rdAccessEvent(
             "golden-rd-low-value-access",
             1,
-            "onr_v1_281_accounts-receivable",
+            493,
           ),
           turnSerial: 0,
         },
@@ -301,7 +297,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     const input = goldenInput({
       credits: 6,
       servers: [
-        server("remote_2", {
+        server("r2", {
           ice: [wallOfStatic("remote-ice-coverage")],
           root: [
             visibleCard("remote-root-2", {
@@ -311,7 +307,7 @@ describe("Runner Golden Deck strategy and debug", () => {
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-2", "remote_2")],
+      legalActions: [runAction("run-remote-2", "r2")],
     });
 
     const evaluations = evaluateRunnerRunTargets({
@@ -332,7 +328,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     });
 
     expect(evaluations[0]).toMatchObject({
-      targetServerId: "remote_2",
+      targetServerId: "r2",
       scoreThreat: true,
       pathPassability: "blocked_missing_coverage",
       recommendation: "find_breaker_first",
@@ -341,7 +337,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       expect.arrayContaining([
         expect.objectContaining({
           goalId: "runner.contest_remote_if_score_threat",
-          targetServerId: "remote_2",
+          targetServerId: "r2",
         }),
       ]),
     );
@@ -351,17 +347,17 @@ describe("Runner Golden Deck strategy and debug", () => {
     const input = goldenInput({
       credits: 6,
       servers: [
-        server("remote_1", {
+        server("r1", {
           root: [
             visibleCard("remote-root-1", {
-              definitionId: "onr_v1_281_accounts-receivable",
+              definitionId: 493,
               type: "operation",
               known: true,
             }),
           ],
         }),
       ],
-      legalActions: [runAction("run-remote-1", "remote_1")],
+      legalActions: [runAction("run-remote-1", "r1")],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({
@@ -371,7 +367,7 @@ describe("Runner Golden Deck strategy and debug", () => {
     });
 
     expect(evaluation).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       knownAccessState: "known_no_current_payoff",
       recommendation: "known_no_current_payoff",
     });
@@ -455,20 +451,25 @@ function goldenInput(params: {
   snapshot?: AiDeckStrategyDeckSnapshot;
 }): AiDecisionInputWithRunnerProjection {
   const snapshot = params.snapshot ?? goldenBlinkSnapshot();
+  const stateVersion = params.stateVersion ?? 1;
+  const legalActions = params.legalActions.map((action) => ({
+    ...action,
+    expiresAtStateVersion: stateVersion,
+  }));
   const view = playerView({
     credits: params.credits,
     servers: params.servers,
-    legalActions: params.legalActions,
+    legalActions,
     ...(params.rig ? { rig: params.rig } : {}),
     ...(params.grip ? { grip: params.grip } : {}),
-    ...(params.stateVersion ? { stateVersion: params.stateVersion } : {}),
+    stateVersion,
     ...(params.eventTail ? { eventTail: params.eventTail } : {}),
   });
   const input: AiDecisionInput = {
     side: "runner",
     playerView: view,
     eventTail: params.eventTail ?? [],
-    legalActions: params.legalActions,
+    legalActions,
     difficulty: "normal",
     seed: "runner-golden-deck-debug-test",
     decisionId: `runner-golden-deck-debug-test:${view.stateVersion}:runner`,
@@ -478,7 +479,7 @@ function goldenInput(params: {
   const ownDeckCapabilities = buildDeckCapabilityProfile({
     side: "runner",
     playerView: view,
-    legalActions: params.legalActions,
+    legalActions,
     deckSnapshot: snapshot,
   });
   const ownRunnerStrategicIntent = buildRunnerStrategicIntentProfile({
@@ -493,13 +494,13 @@ function goldenInput(params: {
 }
 
 function goldenBlinkSnapshot(): AiDeckStrategyDeckSnapshot {
-  const snapshot = benchmarkSnapshots.find(
+  const snapshot = benchmarkSnapshotsData.snapshots.find(
     (candidate) =>
       candidate.deckSnapshotId ===
       "local_realistic_runner_blink_pressure_rig_snapshot_v1",
   );
-  if (!snapshot)
-    throw new Error("Missing Blink Pressure Rig benchmark snapshot");
+  if (snapshot?.side !== "runner")
+    throw new Error("Missing Runner Blink Pressure Rig benchmark snapshot");
   return {
     deckSnapshotId: snapshot.deckSnapshotId,
     side: snapshot.side,
@@ -605,7 +606,7 @@ function legalAction(
 function visibleIdentity(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: syntheticCardDefinitionId(`${side}-identity`),
     title: `${side} identity`,
     owner: side,
     controller: side,
@@ -627,7 +628,7 @@ function visibleCard(
 
 function wallOfStatic(instanceId: string): VisibleCard {
   const ice = visibleCard(instanceId, {
-    definitionId: "onr_v1_279_wall-of-static",
+    definitionId: 491,
     title: "Wall of Static",
     type: "ice",
     subtypes: ["wall"],
@@ -641,7 +642,7 @@ function wallOfStatic(instanceId: string): VisibleCard {
       {
         id: `${instanceId}-end-the-run`,
         type: "end_the_run",
-        sourceDefinitionId: "onr_v1_279_wall-of-static",
+        sourceDefinitionId: 491,
         sourceTitle: "Wall of Static",
       },
     ],
@@ -649,16 +650,16 @@ function wallOfStatic(instanceId: string): VisibleCard {
 }
 
 function rdAccessEvent(
-  eventId: string,
+  label: string,
   stateVersionBefore: number,
-  cardDefinitionId: string,
+  cardDefinitionId: CardDefinitionId,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type: "access_card",
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${label}`,
     visibilityClass: "public",
     publicPayload: {
       actor: "runner",

@@ -17,9 +17,7 @@ it("develops a fully dead hand before extending an already large credit reserve"
 
 it("retains the native profitable first bank load before optional P5 hand rotation", () => {
   const { action, plan } = decide(load(171));
-  expect(action.actionId).toContain(
-    "broker_1.activated.onr_v1_154_broker:store_credits",
-  );
+  expect(action.payload?.cardImplementationAbilityId).toBe(440);
   expect(plan.priority?.effectiveClass).toBe("P4");
 });
 

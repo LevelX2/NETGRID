@@ -11,12 +11,12 @@ import type { CardInstanceId, GameState } from "@netgrid/shared";
 
 function installRunnerHardware(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
 ): CardInstanceId {
   // The compact demo fixture does not carry every enabled card; its instance
   // remains a normal Engine card instance after we select the implemented
   // definition under test.
-  const cardId = moveRunnerCardToGrip(state, "simple_decoder");
+  const cardId = moveRunnerCardToGrip(state, 591);
   removeEverywhere(state, cardId);
   state.runner.rig.hardware.push(cardId);
   state.cardInstances[cardId] = {
@@ -66,13 +66,13 @@ describe("Corp central access quotes", () => {
         seed: "central-access-hq-interface",
       }),
     );
-    installRunnerHardware(state, "onr_v1_129_hq-interface");
+    installRunnerHardware(state, 341);
     expect(
       corpQuotes(state)?.find((quote) => quote.serverId === "hq"),
     ).toMatchObject({
       effectiveAccessCount: 2,
       isMultiaccess: true,
-      sourceDefinitionIds: ["onr_v1_129_hq-interface"],
+      sourceDefinitionIds: [341],
     });
   });
 
@@ -108,15 +108,15 @@ describe("Corp central access quotes", () => {
     const state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "central-access-combined" }),
     );
-    installRunnerHardware(state, "onr_v1_139_r-and-d-interface");
+    installRunnerHardware(state, 351);
     state.purgeableRunnerVirusCounters = { corp: { highlighter: 3 } };
     expect(
       corpQuotes(state)?.find((quote) => quote.serverId === "rd"),
     ).toMatchObject({
       effectiveAccessCount: 4,
       sourceDefinitionIds: [
-        "onr_proteus_090_highlighter",
-        "onr_v1_139_r-and-d-interface",
+        148,
+        351,
       ],
       serverBoundEffects: [
         {
@@ -125,7 +125,7 @@ describe("Corp central access quotes", () => {
           serverId: "rd",
           counterKind: "highlighter",
           formula: "per_counter_after_first",
-          sourceDefinitionId: "onr_proteus_090_highlighter",
+          sourceDefinitionId: 148,
           counterCount: 3,
           additionalAccessCount: 2,
         },
@@ -137,7 +137,7 @@ describe("Corp central access quotes", () => {
     const state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "central-access-vienna" }),
     );
-    installRunnerHardware(state, "onr_v1_129_hq-interface");
+    installRunnerHardware(state, 341);
     state.purgeableRunnerVirusCounters = { corp: { vienna: 2 } };
     expect(corpQuotes(state)?.find((quote) => quote.serverId === "hq")).toEqual(
       {
@@ -147,8 +147,8 @@ describe("Corp central access quotes", () => {
         effectiveAccessCount: 4,
         isMultiaccess: true,
         sourceDefinitionIds: [
-          "onr_proteus_098_vienna-22",
-          "onr_v1_129_hq-interface",
+          156,
+          341,
         ],
         serverBoundEffects: [
           {
@@ -157,7 +157,7 @@ describe("Corp central access quotes", () => {
             serverId: "hq",
             counterKind: "vienna",
             formula: "per_counter",
-            sourceDefinitionId: "onr_proteus_098_vienna-22",
+            sourceDefinitionId: 156,
             counterCount: 2,
             additionalAccessCount: 2,
           },
@@ -170,7 +170,7 @@ describe("Corp central access quotes", () => {
     const state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "central-access-private" }),
     );
-    installRunnerHardware(state, "onr_v1_129_hq-interface");
+    installRunnerHardware(state, 341);
     const runnerView = getPlayerView(state, "runner");
     expect(runnerView).not.toHaveProperty("corpCentralAccessQuotes");
     expect(JSON.stringify(runnerView)).not.toContain("corpCentralAccessQuotes");

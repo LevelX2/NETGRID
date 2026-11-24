@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION,
   RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
@@ -236,6 +237,25 @@ describe("action economy projection", () => {
     });
   });
 
+  it("does not certify a basic draw when the supplied Engine projection contradicts itself", () => {
+    const projection = project(legalAction("invalid-draw", "draw_card", {
+      side: "runner",
+      source: "basic_action",
+      payload: {
+        runnerDrawProjectionSchemaVersion: RUNNER_DRAW_PROJECTION_SCHEMA_VERSION,
+        projectedGrossDrawCount: 2,
+        projectedPostDrawDispositionCount: 1,
+        projectedNetHandDelta: 2,
+        visibleDrawTaxSourceCount: 0,
+      },
+    }));
+    expect(projection).toMatchObject({
+      reliability: "unknown",
+      confidence: "none",
+      source: "unknown",
+    });
+  });
+
   it("projects a guaranteed draw event as immediate payload-backed hand progress", () => {
     const projection = project(
       legalAction("draw-three", "play_event", {
@@ -303,7 +323,7 @@ describe("action economy projection", () => {
       zoneTransitionAction({
         actionId: "ai-cfo-refresh",
         sourceCardInstanceId: "ai-cfo",
-        sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+        sourceDefinitionId: 400,
         kind: "shuffle_hq_archives_into_rd_then_draw",
         grossDrawCount: 5,
         hqCardsRecycledBeforeDrawCount: 2,
@@ -330,7 +350,7 @@ describe("action economy projection", () => {
       zoneTransitionAction({
         actionId: "rescheduler-refresh",
         sourceCardInstanceId: "rescheduler",
-        sourceDefinitionId: "onr_v1_336_rescheduler",
+        sourceDefinitionId: 548,
         kind: "shuffle_hq_into_rd_then_draw_same_count",
         grossDrawCount: 3,
         hqCardsRecycledBeforeDrawCount: 3,
@@ -429,7 +449,7 @@ describe("action economy projection", () => {
         action.payload = {
           cardId: "root-1",
           rootRez: true,
-          serverId: "remote_1",
+          serverId: "r1",
         };
       },
     ],
@@ -518,17 +538,19 @@ function project(action: LegalAction) {
 }
 
 function restrictedCreditAction(): LegalAction {
+  const key = "corp_paid_spend_advancement_for_install_rez_credits";
+  const abilityId = canonicalCapabilityId(117, capabilityKey(key));
   return legalAction("restricted-payout", "activated_card_ability", {
     source: "payout-source",
     costs: [],
     abilityRef: {
       sourceCardInstanceId: "payout-source",
-      sourceAbilityId: "test-card:payout",
+      sourceAbilityId: abilityId,
     },
     payload: {
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-      cardImplementationAbilityId: "test-card:payout",
-      cardImplementationAbilityKey: "payout",
+      cardImplementationAbilityId: abilityId,
+      cardImplementationAbilityKey: key,
       cardId: "payout-source",
       cardImplementationEffectKind: "gain_temporary_corp_credits",
       restrictedCreditGainAmount: 3,
@@ -568,12 +590,12 @@ function rootRezCreditAction(): LegalAction {
     payload: {
       cardId: "root-1",
       rootRez: true,
-      serverId: "remote_1",
+      serverId: "r1",
       rootRezCreditOutcomeQuoteSchemaVersion:
         "corp-root-rez-credit-outcome-quote-v1",
       rootRezCreditOutcomeQuoteComplete: true,
       rootRezCreditOutcomeQuoteSourceCardInstanceId: "root-1",
-      rootRezCreditOutcomeQuoteTargetServerId: "remote_1",
+      rootRezCreditOutcomeQuoteTargetServerId: "r1",
       rootRezCreditOutcomeQuoteStateVersion: 1,
       rootRezCreditOutcomeQuoteTimingPoint: "run.movement_rez_window",
       rootRezCreditOutcomeQuoteActionId: "rez-root-1",
@@ -596,7 +618,7 @@ function corporateShuffleAction(complete: boolean): LegalAction {
       corpZoneTransitionProjectionComplete: complete,
       corpZoneTransitionProjectionSourceCardInstanceId: "shuffle-card",
       corpZoneTransitionProjectionSourceDefinitionId:
-        "onr_classic_017_corporate-shuffle",
+        21,
       corpZoneTransitionProjectionStateVersion: 1,
       corpZoneTransitionProjectionTimingPoint: "corp_action.main",
       corpZoneTransitionProjectionActionId: "corp-shuffle",
@@ -621,7 +643,7 @@ function corporateShuffleAction(complete: boolean): LegalAction {
 function zoneTransitionAction(params: {
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   kind:
     | "shuffle_hq_archives_into_rd_then_draw"
     | "shuffle_hq_into_rd_then_draw_same_count";

@@ -1,4 +1,5 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 export function currentEncounteredIceCard(
@@ -17,10 +18,14 @@ export function currentEncounteredIceCard(
 export function encounterHasImmediateUnbrokenThreat(
   input: AiDecisionInput,
 ): boolean {
+  if (input.playerView.run?.phase !== "encounter_ice") return false;
   const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+  if (!quote) return false;
   if (currentEncounterRequiresFullBreak(input)) return true;
+  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
   return Boolean(
-    quote?.subroutines.some((subroutine) => {
+    quote.subroutines.some((subroutine, index) => {
+      if (!unbroken.has(index)) return false;
       if (currentEncounterNextOnlySubroutineHasNoTarget(input, subroutine.type))
         return false;
       // This obligation belongs to the following encounter and is assessed
@@ -37,8 +42,6 @@ export function encounterHasImmediateUnbrokenThreat(
       return (
         type === "end_the_run" ||
         type === "end_the_run_unless_runner_pays" ||
-        type ===
-          "secret_spend_compare_end_run_unless_corp_spent_at_least_runner" ||
         type === "do_damage" ||
         type === "random_damage" ||
         type === "brain_damage" ||
@@ -95,6 +98,7 @@ export function currentEncounterRequiresFullBreak(
     input.playerView.run?.phase === "encounter_ice" &&
     input.legalActions.some(
       (action) =>
+        actionMatchesCurrentDecision(input, action) &&
         action.type === "continue_run" &&
         action.payload?.encounterContinue === true &&
         typeof action.payload.encounterFullBreakDamage === "number" &&
@@ -111,16 +115,13 @@ export function currentEncounterUnbrokenSubroutineIndexes(
       candidate.type === "continue_run" &&
       candidate.payload?.encounterContinue === true,
   );
-  const quotedIds = action?.payload?.encounterSubroutineIds;
-  const ids =
-    typeof quotedIds === "string" && quotedIds.length > 0
-      ? quotedIds.split(",")
-      : [];
+  const ids = action?.encounterSubroutineIds;
   const subroutines =
     currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
   if (
+    !actionMatchesCurrentDecision(input, action) ||
     !subroutines ||
-    typeof quotedIds !== "string" ||
+    !Array.isArray(ids) ||
     new Set(ids).size !== ids.length ||
     ids.length !== action?.payload?.unbrokenSubroutineCount ||
     ids.some((id) => !subroutines.some((subroutine) => subroutine.id === id))
@@ -157,13 +158,12 @@ export function currentEncounterCompleteSubroutineIndexes(
   );
   const subroutines =
     currentEncounteredIceCard(input)!.effectiveRunQuote!.subroutines;
-  const raw = action?.payload?.encounterRemainingSubroutineIds;
+  const ids = action?.encounterRemainingSubroutineIds;
   const count = action?.payload?.encounterRemainingSubroutineCount;
-  if (raw === undefined && count === undefined)
+  if (ids === undefined && count === undefined)
     return next.size === subroutines.length ? next : undefined;
-  const ids = typeof raw === "string" && raw.length ? raw.split(",") : [];
   if (
-    typeof raw !== "string" ||
+    !Array.isArray(ids) ||
     !Number.isSafeInteger(count) ||
     count !== ids.length ||
     new Set(ids).size !== ids.length ||

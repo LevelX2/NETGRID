@@ -19,8 +19,7 @@ export type RunnerBreakerArchitecture =
 export type RunnerBreakerDevelopmentAssessment = {
   minimumCoverageComplete: boolean;
   architecture: RunnerBreakerArchitecture;
-  optionalBreakerIds: string[];
-  searchableOptionalBreakerIds: string[];
+  optionalBreakerIds: number[];
   primaryBreakerNeed: boolean;
   evidence: string[];
 };
@@ -34,7 +33,6 @@ export function assessRunnerBreakerDevelopment(
       minimumCoverageComplete: false,
       architecture: "unknown",
       optionalBreakerIds: [],
-      searchableOptionalBreakerIds: [],
       primaryBreakerNeed: true,
       evidence: ["breaker_architecture:unknown", "breaker_profile:missing"],
     };
@@ -88,9 +86,6 @@ export function assessRunnerBreakerDevelopment(
     minimumCoverageComplete,
     architecture,
     optionalBreakerIds: optionalBreakers.map((breaker) => breaker.cardId),
-    searchableOptionalBreakerIds: searchableOptionalBreakers.map(
-      (breaker) => breaker.cardId,
-    ),
     primaryBreakerNeed: !minimumCoverageComplete,
     evidence: [
       `breaker_architecture:${architecture}`,
@@ -105,7 +100,7 @@ export function assessRunnerBreakerDevelopment(
 function distinctHighConfidenceBaseBreakers(
   inventory: readonly BreakerCapability[],
 ): BreakerCapability[] {
-  const byDefinition = new Map<string, BreakerCapability>();
+  const byDefinition = new Map<number, BreakerCapability>();
   for (const breaker of inventory) {
     if (breaker.confidence !== "high") continue;
     if (
@@ -119,6 +114,6 @@ function distinctHighConfidenceBaseBreakers(
     }
   }
   return [...byDefinition.values()].sort((left, right) =>
-    left.cardId.localeCompare(right.cardId),
+    (left.cardId - right.cardId),
   );
 }

@@ -61,7 +61,7 @@ export function quoteRunnerTagClearBankFunding(
   if (bank.length === 0) return undefined;
   const demand = createRunnerCreditDemand({
     demandId: "runner-defense-tag-clear-funding",
-    sourcePlanId: "plan:runner.defense_and_recovery:runner",
+    sourcePlanId: "p1gzjb6yfcv4zbzow512kexs33",
     purpose: "foreground_plan",
     priority: "acute_hard_plan_blocker",
     hardness: "hard",

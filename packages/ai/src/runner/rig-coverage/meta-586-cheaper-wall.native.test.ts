@@ -49,7 +49,7 @@ function installAssessment(input: AiDecisionInputWithDeckCapabilities) {
     isRunnerEconomyRole: () => false,
   });
   const incoming = input.playerView.own.gripOrHq.find(
-    (card) => card.definitionId === "onr_v1_036_jackhammer",
+    (card) => card.definitionId === 248,
   )!;
   return context.runnerProgramInstallTrashAssessmentForCard(input, incoming);
 }
@@ -66,7 +66,7 @@ describe("native same-turn cheaper breaker replacement", () => {
       memoryLimit: 4,
     });
     const held = input.playerView.own.gripOrHq.find(
-      (card) => card.definitionId === "onr_v1_036_jackhammer",
+      (card) => card.definitionId === 248,
     );
     const install = input.legalActions.find(
       (action) =>
@@ -86,10 +86,16 @@ describe("native same-turn cheaper breaker replacement", () => {
     expect(decision.timeoutUsed).toBe(false);
     expect(decision.actionId).toBe(install!.actionId);
     const plan = decision.decisionDebug?.planFirstDecision;
-    expect(plan?.rootPlanInstanceId).toMatch(/^plan:runner\.contest_remote:/);
-    expect(plan?.leafExecutorInstanceId).toMatch(
-      /^plan:runner\.rig_and_coverage:/,
-    );
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("runner.contest_remote");
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.rig_and_coverage");
     expect(plan?.route).toMatchObject({
       actionId: install!.actionId,
       stateVersion: input.playerView.stateVersion,
@@ -101,8 +107,8 @@ describe("native same-turn cheaper breaker replacement", () => {
     expect(assessment.canFreeRequiredMemory).toBe(true);
     expect(
       assessment.selectedCandidates.map((c) => c.card?.definitionId),
-    ).toEqual(["onr_v1_047_pile-driver"]);
-    for (const id of ["onr_v1_014_codecracker", "onr_v1_023_evil-twin"])
+    ).toEqual([259]);
+    for (const id of [226, 235])
       expect(
         assessment.candidates.find((c) => c.card?.definitionId === id)
           ?.protectedRole,
@@ -114,7 +120,7 @@ describe("native same-turn cheaper breaker replacement", () => {
     (kind) => {
       const input = nativeInput();
       const breaker = input.ownDeckCapabilities!.runner!.breakerInventory.find(
-        (b) => b.cardId === "onr_v1_036_jackhammer",
+        (b) => b.cardId === 248,
       )!;
       if (kind === "low-confidence") breaker.confidence = "low";
       if (kind === "restriction") breaker.restrictions.push("once_per_run");
@@ -124,7 +130,7 @@ describe("native same-turn cheaper breaker replacement", () => {
           (c) => c.definitionId === breaker.cardId,
         )!.known = false;
       const candidate = installAssessment(input).candidates.find(
-        (c) => c.card?.definitionId === "onr_v1_047_pile-driver",
+        (c) => c.card?.definitionId === 259,
       )!;
       expect(candidate.protectedRole).toBe(true);
       expect(candidate.acceptable).toBe(false);
@@ -134,7 +140,7 @@ describe("native same-turn cheaper breaker replacement", () => {
   it("retains the Stealth liability when actual Stealth credits would be lost", () => {
     const input = nativeInput();
     const breaker = input.ownDeckCapabilities!.runner!.breakerInventory.find(
-      (b) => b.cardId === "onr_v1_036_jackhammer",
+      (b) => b.cardId === 248,
     )!;
     expect(breakerPreparationHasCurrentLiability(input, breaker)).toBe(false);
     input.playerView.own.rig!.push({
@@ -162,7 +168,7 @@ describe("native same-turn cheaper breaker replacement", () => {
   it("keeps other risk and generic side-effect penalties blocking preparation", () => {
     const input = nativeInput();
     const breaker = input.ownDeckCapabilities!.runner!.breakerInventory.find(
-      (b) => b.cardId === "onr_v1_036_jackhammer",
+      (b) => b.cardId === 248,
     )!;
     expect(
       breakerPreparationHasCurrentLiability(input, {

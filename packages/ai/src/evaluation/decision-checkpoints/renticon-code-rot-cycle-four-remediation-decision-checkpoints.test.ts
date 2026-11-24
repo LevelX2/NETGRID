@@ -7,7 +7,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("Rent-I-Con versus CODE ROT cycle-four remediation checkpoint", () => {
   it("holds an already funded score parent instead of forcing an unsafe advance", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(unsafeWindowAdvanceJson) as AiDecisionCheckpointV1,
+      structuredClone(unsafeWindowAdvanceJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

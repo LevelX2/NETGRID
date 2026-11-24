@@ -50,11 +50,11 @@ it("allocates the fully funded HQ stop before ordinary empty-remote prebuild in 
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(hq.actionIds![0]);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:corp.defend_servers:server-defense-portfolio",
+    "penw02zfrkklof54c2nuye5att",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toBe("plan:corp.defend_servers:server-defense-portfolio");
+  ).toBe("penw02zfrkklof54c2nuye5att");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).toBe(false);
 });

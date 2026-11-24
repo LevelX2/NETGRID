@@ -10,18 +10,20 @@ const globalStyles = readFileSync(
 
 describe("active match details strip", () => {
   it("renders the complete match ID instead of a shortened diagnostic value", () => {
-    expect(pageSource).toContain('className="matchStripMatchId"');
-    expect(pageSource).toContain(
-      '<strong>{gameT("match")}</strong> {payload.matchId}',
-    );
-    expect(pageSource).not.toContain(
-      '<strong>{gameT("match")}</strong> {shortDiagnosticsHash(payload.matchId)}',
+    expect(pageSource).toMatch(
+      /<dt>\{gameT\("match"\)\}<\/dt>\s*<dd>\{payload\.matchId\}<\/dd>/,
     );
   });
 
-  it("allows the complete match ID to wrap instead of ellipsizing it", () => {
+  it("wraps status fields as groups and lets long values break within a field", () => {
     expect(globalStyles).toMatch(
-      /\.matchStrip \.matchStripMatchId\s*\{[^}]*overflow:\s*visible;[^}]*text-overflow:\s*clip;[^}]*white-space:\s*normal;[^}]*overflow-wrap:\s*anywhere;/s,
+      /\.matchDetailsFields\s*\{[^}]*flex-wrap:\s*wrap;/s,
+    );
+    expect(globalStyles).toMatch(
+      /\.matchDetailsFields > div\s*\{[^}]*flex:\s*0 0 auto;[^}]*max-width:\s*100%;[^}]*flex-wrap:\s*wrap;/s,
+    );
+    expect(globalStyles).toMatch(
+      /\.matchDetailsFields dd\s*\{[^}]*overflow-wrap:\s*anywhere;/s,
     );
   });
 });

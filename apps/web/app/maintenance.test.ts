@@ -17,7 +17,7 @@ import {
   findForbiddenMaintenanceMarkers,
   formatAge,
   formatBytes,
-  latestMaintenanceAiTraceId,
+  latestMaintenanceAiDecisionIndex,
   mergeMaintenanceAiTraceIndex,
   mergeMaintenanceAiTraceMatches,
   participantsLabel,
@@ -149,9 +149,8 @@ describe("Backend 0.5 maintenance UI helpers", () => {
 
   it("formats AI decision trace navigation labels and meta rows", () => {
     const trace = {
-      traceId: "ai_trace_1",
       matchId: "match_1",
-      eventId: "evt_1",
+      eventId: 2,
       stateVersion: 4,
       matchVersion: 5,
       side: "corp" as const,
@@ -202,7 +201,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
       actionAlternatives: [
         {
           rank: 1,
-          actionId: "runner.gain_credit",
+          actionId: "rb",
           actionType: "gain_credit",
           label: "1 Credit nehmen",
           source: "basic_action",
@@ -245,7 +244,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
 
     expect(rows).toHaveLength(2);
     expect(rows[0]).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "rb",
       actionType: "gain_credit",
       label: "Credit nehmen",
       selected: true,
@@ -286,15 +285,14 @@ describe("Backend 0.5 maintenance UI helpers", () => {
 
   it("keeps applied and diagnostic AI trace selections separate", () => {
     const trace = {
-      traceId: "trace_1",
       matchId: "match_1",
-      eventId: "evt_1",
+      eventId: 2,
       stateVersion: 9,
       matchVersion: 10,
       side: "runner" as const,
       turn: 3,
       decisionIndex: 3,
-      selectedActionId: "runner.start_run.hq",
+      selectedActionId: "rs.hq",
       selectedActionType: "start_run",
       planKind: "build_rig",
       score: 877.75,
@@ -302,7 +300,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
       schemaVersion: "ai-decision-trace-v1",
       meta: {},
       detail: {
-        selectedActionId: "runner.start_run.hq",
+        selectedActionId: "rs.hq",
         selectedActionType: "start_run",
         debugSelectedActionType: "install_card",
         debugSelectionMatchesApplied: false,
@@ -319,7 +317,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
           },
           {
             rank: 2,
-            actionId: "runner.start_run.hq",
+            actionId: "rs.hq",
             actionType: "start_run",
             label: "Run auf HQ",
             source: "basic_action",
@@ -401,9 +399,8 @@ describe("Backend 0.5 maintenance UI helpers", () => {
 
   it("builds cursor paths and merges AI decision trace live-follow updates", () => {
     const first = {
-      traceId: "trace_1",
       matchId: "match_1",
-      eventId: "evt_1",
+      eventId: 2,
       stateVersion: 4,
       matchVersion: 4,
       side: "corp" as const,
@@ -415,8 +412,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     };
     const second = {
       ...first,
-      traceId: "trace_2",
-      eventId: "evt_2",
+      eventId: 3,
       decisionIndex: 2,
       createdAt: "2026-05-22T10:00:02.000Z",
     };
@@ -429,10 +425,10 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     );
     expect(
       mergeMaintenanceAiTraceIndex([second], [first, second]).map(
-        (trace) => trace.traceId,
+        (trace) => trace.decisionIndex,
       ),
-    ).toEqual(["trace_1", "trace_2"]);
-    expect(latestMaintenanceAiTraceId([first, second])).toBe("trace_2");
+    ).toEqual([1, 2]);
+    expect(latestMaintenanceAiDecisionIndex([first, second])).toBe(2);
   });
 
   it("keeps just-enabled AI trace matches visible while the match index refreshes", () => {
@@ -477,9 +473,8 @@ describe("Backend 0.5 maintenance UI helpers", () => {
 
   it("exports only redacted AI trace index projections", () => {
     const trace = {
-      traceId: "trace_1",
       matchId: "match_1",
-      eventId: "evt_1",
+      eventId: 2,
       stateVersion: 4,
       matchVersion: 5,
       side: "runner" as const,
@@ -496,8 +491,8 @@ describe("Backend 0.5 maintenance UI helpers", () => {
       traces: [trace],
     });
 
-    expect(output).toContain("netgrid-ai-decision-trace-index-export-v1");
-    expect(output).toContain('"traceId":"trace_1"');
+    expect(output).toContain("netgrid-ai-decision-trace-index-export-v2");
+    expect(output).toContain('"decisionIndex":3');
     expect(output).not.toMatch(
       /AIInput|DecisionDebug|cardInstances|privatePayload|decklist|C:\\Users/i,
     );

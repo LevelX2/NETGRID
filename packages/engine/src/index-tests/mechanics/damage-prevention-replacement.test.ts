@@ -1,4 +1,6 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
+import { cardSpecSourceRefByDefinitionId } from "@netgrid/cards/engine";
 import {
   applyAction,
   applyEffectCommands,
@@ -188,15 +190,15 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.damagePrevention).toHaveLength(17);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.damagePrevention) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      if (definitionId === "onr_v1_139_r-and-d-interface") {
+      if (definitionId === 351) {
         expect(definition?.mechanics).toEqual(
           expect.arrayContaining(["access_count", "modifiers"]),
         );
         expect(definition?.mechanics).not.toContain("damage_prevention");
-      } else if (definitionId === "onr_v1_155_code-viral-cache") {
+      } else if (definitionId === 367) {
         expect(definition?.mechanics).toEqual(
           expect.arrayContaining([
             "runner_made_successful_run_on_server_this_turn",
@@ -208,9 +210,9 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       }
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID[488]?.implementationStatus,
     ).toBe("playable_mvp");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_234_data-darts"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[446]).toMatchObject({
       rezCost: 5,
       strength: 3,
     });
@@ -226,10 +228,10 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.damagePrevention.filter(
       (id) =>
         ![
-          "onr_v1_224_bolter-cluster",
-          "onr_v1_234_data-darts",
-          "onr_v1_258_neural-blade",
-          "onr_v1_155_code-viral-cache",
+          436,
+          446,
+          470,
+          367,
         ].includes(id),
     )) {
       moveRunnerCardToGrip(state, definitionId);
@@ -251,7 +253,8 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       expect.arrayContaining(
         MECHANIC_SMOKE_CARD_IDS.damagePrevention.filter(
           (id) =>
-            !id.startsWith("onr_v1_2") && id !== "onr_v1_155_code-viral-cache",
+            !cardSpecSourceRefByDefinitionId(id)?.sourcePath.includes("/onr_v1_2") &&
+            id !== 367,
         ),
       ),
     );
@@ -266,7 +269,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     state.runner.clicks = 4;
     const cacheGripId = moveRunnerCardToGrip(
       state,
-      "onr_v1_155_code-viral-cache",
+      367,
     );
     expect(
       getLegalActions(state, "runner").some(
@@ -288,11 +291,11 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_155_code-viral-cache",
+        sourceDefinition(state, action) === 367,
     );
     const cacheId = state.runner.rig.resources.find(
       (id) =>
-        state.cardInstances[id]?.definitionId === "onr_v1_155_code-viral-cache",
+        state.cardInstances[id]?.definitionId === 367,
     );
     expect(cacheId).toBeDefined();
     if (!cacheId) throw new Error("Missing installed Code Viral Cache");
@@ -317,7 +320,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     state = applyChoices(state, "runner", preserveOptions);
     expect(cardCounterAmount(state, cacheId, "virus")).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_155_code-viral-cache",
+      sourceDefinitionId: 367,
       preservedCounterAmount: 2,
       remainingVirusCounters: 2,
     });
@@ -339,16 +342,16 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       state.runner.rig.resources.some(
         (id) =>
           state.cardInstances[id]?.definitionId ===
-          "onr_v1_155_code-viral-cache",
+          367,
       ),
     ).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_155_code-viral-cache",
+      sourceDefinitionId: 367,
       amounts: {
         trashCostPaid: 5,
       },
       targets: {
-        trashedCardDefinitionId: "onr_v1_155_code-viral-cache",
+        trashedCardDefinitionId: 367,
       },
     });
   });
@@ -364,7 +367,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
           name: "Originalset Code Viral Cache Stacking Runner",
           cards: MECHANIC_SMOKE_DECKS.damagePrevention.runner.cards.map(
             (card) =>
-              card.id === "onr_v1_155_code-viral-cache"
+              card.id === 367
                 ? { ...card, quantity: 2 }
                 : card,
           ),
@@ -374,7 +377,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       }),
     );
     const cacheIds = Object.entries(state.cardInstances)
-      .filter(([, card]) => card.definitionId === "onr_v1_155_code-viral-cache")
+      .filter(([, card]) => card.definitionId === 367)
       .map(([id]) => id as CardInstanceId)
       .sort();
     expect(cacheIds).toHaveLength(2);
@@ -418,7 +421,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       ),
     ).toBe(4);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_155_code-viral-cache",
+      sourceDefinitionId: 367,
       sourceCount: 2,
       preservedCounterAmount: 4,
       remainingVirusCounters: 4,
@@ -468,18 +471,18 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     );
     state.runner.credits = 20;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_121_armored-fridge");
+    moveRunnerCardToGrip(state, 333);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_121_armored-fridge",
+        sourceDefinition(state, action) === 333,
     );
     const armoredFridgeId = state.runner.rig.hardware.find(
       (cardId) =>
         state.cardInstances[cardId]?.definitionId ===
-        "onr_v1_121_armored-fridge",
+        333,
     );
     expect(armoredFridgeId).toBeDefined();
     if (!armoredFridgeId) throw new Error("Missing Armored Fridge install");
@@ -493,7 +496,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.runner.tags = 1;
-    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    moveCorpCardToHq(state, 513);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const gripBefore = state.runner.grip.length;
@@ -502,7 +505,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+        sourceDefinition(state, action) === 513,
     );
     expect(state.pendingChoice?.source).toBe("v120.event_modification.prevent");
     state = applyChoice(
@@ -536,13 +539,13 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
 
     setCardCounterForTest(state, armoredFridgeId, "ablative", 1);
-    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    moveCorpCardToHq(state, 513);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+        sourceDefinition(state, action) === 513,
     );
     state = applyChoice(
       state,
@@ -565,17 +568,17 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     );
     state.runner.credits = 20;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_128_green-knight-surge-buffers");
+    moveRunnerCardToGrip(state, 340);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_128_green-knight-surge-buffers",
+          340,
     );
-    putCorpIceOnServer(state, "rd", "onr_v1_258_neural-blade");
-    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpIceOnServer(state, "rd", 470);
+    putCorpCardOnTopOfRd(state, 588);
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -590,7 +593,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_258_neural-blade",
+        sourceDefinition(state, action) === 470,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
@@ -621,17 +624,17 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     );
     state.runner.credits = 20;
     state.corp.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_161_fall-guy");
+    moveRunnerCardToGrip(state, 373);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_161_fall-guy",
+        sourceDefinition(state, action) === 373,
     );
     drawRunnerCardsForTest(state, 4);
-    addCorpCardToHqForTest(state, "onr_v1_345_trap", "ordinary-damage-tag");
-    putCorpCardOnTopOfRd(state, "onr_v1_345_trap");
+    addCorpCardToHqForTest(state, 557, "ordinary-damage-tag");
+    putCorpCardOnTopOfRd(state, 557);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const gripBefore = state.runner.grip.length;
@@ -676,14 +679,14 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       state.corp.credits = 20;
       const forceShieldId = moveRunnerCardToGrip(
         state,
-        "onr_v1_038_joan-of-arc",
+        250,
       );
       state.cardInstances[forceShieldId]!.definitionId =
-        "onr_v1_028_force-shield";
+        240;
       for (const definitionId of [
-        "onr_v1_028_force-shield",
-        "onr_v1_128_green-knight-surge-buffers",
-        "onr_v1_161_fall-guy",
+        240,
+        340,
+        373,
       ]) {
         moveRunnerCardToGrip(state, definitionId);
         state = apply(
@@ -694,14 +697,14 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
             sourceDefinition(state, action) === definitionId,
         );
       }
-      addCorpCardToHqForTest(state, "onr_v1_345_trap", "damage-tag");
-      putCorpCardOnTopOfRd(state, "onr_v1_345_trap");
+      addCorpCardToHqForTest(state, 557, "damage-tag");
+      putCorpCardOnTopOfRd(state, 557);
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
       const gripBefore = state.runner.grip.length;
       const tagsBefore = state.runner.tags;
-      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-        "onr_v1_345_trap",
+      expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(state, "runner")))).not.toContain(
+        557,
       );
       state = apply(
         state,
@@ -713,6 +716,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       state = applyChoice(state, "corp", "pay");
       const damageId = state.imminentEvent?.eventId;
       let damageWindowId = state.eventModificationWindow?.windowId;
+      expect(damageWindowId).toBe(state.stateVersion);
       expect(state.imminentEvent?.eventType).toBe("damage");
       for (const label of [
         "Force Shield: 1 Schaden verhindern",
@@ -724,6 +728,8 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
         );
         expect(option, label).toBeDefined();
         damageWindowId = state.eventModificationWindow?.windowId;
+        expect(damageWindowId).toBe(state.eventModificationWindow?.createdAtStateVersion);
+        expect(state.imminentEvent?.modificationWindowId).toBe(damageWindowId);
         state = applyChoice(state, "runner", String(option?.id));
       }
       const damageEvent = state.eventLog.at(-1)!;
@@ -734,7 +740,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
         eventModificationKind: "prevent",
         eventModificationDecision: "apply",
         eventModificationOutcome: "prevented",
-        sourceDefinitionId: "onr_v1_128_green-knight-surge-buffers",
+        sourceDefinitionId: 340,
         damageResolved: true,
         damageAmount: 0,
         finalAmount: 0,
@@ -744,7 +750,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
           expect.objectContaining({
             kind: "damage",
             amount: 0,
-            sourceDefinitionId: "onr_v1_345_trap",
+            sourceDefinitionId: 557,
           }),
         ]),
       );
@@ -783,27 +789,27 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     );
     state.runner.credits = 20;
     state.corp.credits = 20;
-    const forceShieldId = moveRunnerCardToGrip(state, "onr_v1_038_joan-of-arc");
+    const forceShieldId = moveRunnerCardToGrip(state, 250);
     state.cardInstances[forceShieldId]!.definitionId =
-      "onr_v1_028_force-shield";
+      240;
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_028_force-shield",
+        sourceDefinition(state, action) === 240,
     );
-    moveRunnerCardToGrip(state, "onr_v1_128_green-knight-surge-buffers");
+    moveRunnerCardToGrip(state, 340);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) ===
-          "onr_v1_128_green-knight-surge-buffers",
+          340,
     );
-    putCorpIceOnServer(state, "rd", "onr_v1_234_data-darts");
-    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpIceOnServer(state, "rd", 446);
+    putCorpCardOnTopOfRd(state, 588);
 
     state = apply(
       state,
@@ -816,7 +822,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_234_data-darts",
+        sourceDefinition(state, action) === 446,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 

@@ -11,7 +11,7 @@ function capture(
     engine: {
       eventPrefix: events.map((event, index) => ({
         ...event,
-        eventId: `evt_${index}`,
+        eventId: index + 2,
         stateVersionBefore: index,
         stateVersionAfter: index + 1,
         stateHashAfter: "fnv1a:00000000",
@@ -28,7 +28,7 @@ it("binds the canonical fixed-central event run after a completed different run"
       type: "play_event",
       publicPayload: {
         actor: "runner",
-        cardDefinitionId: "onr_proteus_101_all-hands",
+        cardDefinitionId: 159,
         serverLabel: "HQ",
       },
     },
@@ -70,7 +70,7 @@ it("rejects a fixed-central event recorded for a different server", () => {
           type: "play_event",
           publicPayload: {
             actor: "runner",
-            cardDefinitionId: "onr_proteus_101_all-hands",
+            cardDefinitionId: 159,
             serverLabel: "R&D",
           },
         },
@@ -91,7 +91,7 @@ it("does not infer an origin from a chosen-target event without its resolved run
           type: "play_event",
           publicPayload: {
             actor: "runner",
-            cardDefinitionId: "onr_v1_094_inside-job",
+            cardDefinitionId: 306,
             serverLabel: "HQ",
           },
         },

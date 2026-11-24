@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_299_power-grid-overload"),
+    cardDefinitionId: cardDefinitionId(511),
     title: "Power Grid Overload",
     side: "corp",
     cardType: "operation",

@@ -1,8 +1,10 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { CorpEconomyNeedSignal } from "./economy-types";
 import { currentCorpHostedBankCycleQuotes } from "./hosted-credit-bank-cycle";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
+  canonicalTurnPlanningSerialize,
   turnPlanningFingerprint,
   type CampaignMilestoneQuote,
   type CampaignValueClaim,
@@ -27,9 +29,11 @@ export function corpHostedBankTurnPlanningQuote(params: {
   | undefined {
   const { signal, input } = params;
   const cycle =
-    signal.kind === "develop_campaign" || signal.kind === "parent_funding"
-      ? signal.hostedCreditBankCycle
-      : undefined;
+    signal.kind === "parent_funding"
+      ? signal.fundingRouteAssessment?.hostedCreditBankCycle
+      : signal.kind === "develop_campaign"
+        ? signal.hostedCreditBankCycle
+        : undefined;
   const payout =
     signal.kind === "convert_visible_card_payout" &&
     signal.conversion.hostedCreditTakeMode === "all"
@@ -61,14 +65,15 @@ export function corpHostedBankTurnPlanningQuote(params: {
     return fail();
   const action = input.legalActions.find((a) => a.actionId === params.actionId);
   if (
-    !action ||
-    action.source !== source ||
-    action.expiresAtStateVersion !== params.stateIdentity.stateVersion
+    input.side !== "corp" ||
+    !actionMatchesCurrentDecision(input, action) ||
+    action.source !== source
   )
     return fail();
   if (
     cycle &&
-    (JSON.stringify(cycle) !== JSON.stringify(quote) ||
+    (canonicalTurnPlanningSerialize(cycle) !==
+      canonicalTurnPlanningSerialize(quote) ||
       quote.actionId !== action.actionId)
   )
     return fail();

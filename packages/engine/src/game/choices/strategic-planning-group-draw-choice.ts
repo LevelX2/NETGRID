@@ -105,12 +105,12 @@ export function resolveStrategicPlanningGroupDrawChoice(
     throw new Error("Nur die Corporation darf diese Karte auswählen.");
   const transaction = state.pendingCorpDraw;
   if (!transaction) throw new Error("Der Strategic-Planning-Group-Draw fehlt.");
-  const [, sourceId = "", transactionId = ""] = choice.source.split(":");
+  const sourceId = choice.sourceCardInstanceId;
   if (
-    transaction.transactionId !== transactionId ||
-    choice.sourceCardInstanceId !== sourceId ||
+    sourceId === undefined ||
     transaction.replacementSourceCardInstanceId !== sourceId ||
-    !strategicPlanningGroupSourceIds(state).includes(sourceId as CardInstanceId)
+    choice.source !== `card_implementation.strategic_planning_group_draw:${sourceId}:${transaction.transactionId}` ||
+    !strategicPlanningGroupSourceIds(state).includes(sourceId)
   )
     throw new Error("Strategic Planning Group ist nicht mehr aktiv.");
   const selectedOptionId = selectedChoiceOptionIds(

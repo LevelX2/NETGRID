@@ -1,11 +1,13 @@
+import { runnerGeneralCreditsAfterCompletedPath } from "../run-analysis/visible-run-credit-budget";
+import { quoteVisibleRunnerPathForMetrics } from "./visible-run-path-for-metrics";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
 import {
   centralServerId,
   type CentralServerId,
 } from "../runtime/server-target";
-import { rolesMatch } from "../runtime/role-match";
-import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
+import { rolesMatch } from "../role-match";
+import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import type {
   BestTrueCentralCloseoutProfile,
   NoFreshCentralSubstitutionType,
@@ -21,17 +23,16 @@ import {
 import {
   centralRepeatHasFreshValueForMetrics,
   centralRunStreakWithoutValueForMetrics,
-  isRepeatedLowValueCentralRunForMetrics,
 } from "./central-run-history";
 import { runnerHqMemoryDiagnosticsForMetrics } from "./runner-hq-memory-diagnostics";
 import { runnerKnownCardPositionDiagnosticsForMetrics } from "./runner-known-card-position-diagnostics";
 
 export type RunnerCentralPressureDiagnosticsDependencies = {
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined;
   bestTrueCentralCloseoutProfileForMetrics: (
     input: AiDecisionInput,
   ) => BestTrueCentralCloseoutProfile;
@@ -47,12 +48,7 @@ export type RunnerCentralPressureDiagnosticsDependencies = {
     action: LegalAction,
   ) => NoFreshCentralSubstitutionType | undefined;
   runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
-  assessKnownRezzedIcePath: (
-    iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-    rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number,
-    rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
-  ) => KnownRezzedIcePathAssessment;
+  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
 };
 
 export function createRunnerCentralPressureDiagnosticsForSimulationAction(
@@ -116,30 +112,20 @@ export function createRunnerCentralPressureDiagnosticsForSimulationAction(
           "multiaccess",
         ]),
     );
-    const repeatedLowValue =
-      centralTarget !== undefined &&
-      centralRun &&
-      isRepeatedLowValueCentralRunForMetrics(input, centralTarget) &&
-      !centralRepeatHasFreshValueForMetrics(input, centralTarget, {
-        matchingInterface,
-        anyMultiaccessInstalled,
-        eventGoodTarget,
-        trueCloseout: trueCloseout.opportunity,
-      });
-    const repeatWindow =
-      centralTarget !== undefined &&
-      centralRun &&
-      centralRunStreakWithoutValueForMetrics(input, centralTarget) > 0;
+    const streakWithoutValue = centralRun
+      ? centralRunStreakWithoutValueForMetrics(input, centralTarget)
+      : 0;
+    const repeatWindow = streakWithoutValue > 0;
     const repeatWithFreshValue =
-      centralTarget !== undefined &&
-      centralRun &&
       repeatWindow &&
+      centralRun &&
       centralRepeatHasFreshValueForMetrics(input, centralTarget, {
         matchingInterface,
         anyMultiaccessInstalled,
         eventGoodTarget,
         trueCloseout: trueCloseout.opportunity,
       });
+    const repeatedLowValue = repeatWindow && !repeatWithFreshValue;
     const noFresh = dependencies.runnerNoFreshCentralContextForMetrics(input);
     const noFreshRunTaken =
       centralRun &&
@@ -149,28 +135,26 @@ export function createRunnerCentralPressureDiagnosticsForSimulationAction(
       noFresh.targets.length > 0 && !noFreshRunTaken
         ? dependencies.noFreshCentralSubstitutionTypeForAction(input, action)
         : undefined;
-    const streakWithoutValue =
-      centralTarget !== undefined && centralRun
-        ? centralRunStreakWithoutValueForMetrics(input, centralTarget)
-        : 0;
-    const reserveTarget = dependencies.runnerCreditReserveTargetForInput(input);
-    const server = centralTarget
-      ? input.playerView.servers.find(
-          (candidate) => candidate.id === centralTarget,
+    const reserveTarget = centralRun
+      ? dependencies.runnerCreditReserveTargetForInput(input)
+      : 0;
+    const server =
+      centralRun && reserveTarget > 0
+        ? input.playerView.servers.find(
+            (candidate) => candidate.id === centralTarget,
+          )
+        : undefined;
+    const path = server
+      ? quoteVisibleRunnerPathForMetrics(
+          input,
+          server,
+          dependencies.assessKnownRezzedIcePath,
         )
       : undefined;
-    const visibleBreakCost =
-      centralTarget && server
-        ? (dependencies.assessKnownRezzedIcePath(
-            server.ice,
-            input.playerView.own.rig ?? [],
-            input.playerView.own.credits,
-            server.root,
-          ).visibleBreakCost ?? 0)
-        : 0;
     const insufficientReserve =
-      centralRun &&
-      input.playerView.own.credits - visibleBreakCost < reserveTarget;
+      path?.canReachAccess === true &&
+      runnerGeneralCreditsAfterCompletedPath(path.creditBudgetAfterPath) <
+        reserveTarget;
     const hqMemoryDiagnostics = runnerHqMemoryDiagnosticsForMetrics(
       input,
       centralRun,

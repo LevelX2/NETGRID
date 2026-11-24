@@ -10,7 +10,7 @@ import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 export function scoreQuotedResourceCost(
   signal: CorpScoreProjectSignal,
   input: AiDecisionInput,
-): { credits: number; clicks: number } | undefined {
+): { stateVersion: number; credits: number; clicks: number } | undefined {
   const generated = signal.sameTurnConversionGeneratedActionCost;
   const cost = generated
     ? {
@@ -23,6 +23,8 @@ export function scoreQuotedResourceCost(
   if (cost === undefined) return undefined;
   if (
     signal.sameTurnConversionProof !== "engine_quoted_path" ||
+    (generated !== undefined &&
+      signal.sameTurnConversionResourceCost !== undefined) ||
     (generated !== undefined &&
       (!Number.isSafeInteger(generated.clicksSpent) ||
         generated.clicksSpent < 0 ||
@@ -45,5 +47,9 @@ export function scoreQuotedResourceCost(
         "Publish the complete score valuation resource cost from the exact current Engine-quoted score path.",
     });
   }
-  return cost;
+  return {
+    stateVersion: cost.stateVersion,
+    credits: cost.credits,
+    clicks: cost.clicks,
+  };
 }

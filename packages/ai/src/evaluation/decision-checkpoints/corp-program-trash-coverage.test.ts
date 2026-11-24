@@ -1,9 +1,12 @@
+import { deckSnapshotCardCountsForTest } from "../../deck-snapshot.test-support";
+import { corpProgramTrashDefenseSignals } from "../../corp/defense/program-trash-signal";
 import { programTrashCoverageLosses } from "../../corp/defense/program-trash-coverage";
 import { afterEach, expect, it } from "vitest";
 import {
   ORIGINALSET_DEFAULT_DECKS,
   type GameState,
   type LegalAction,
+  type TraceRulesProfile,
 } from "@netgrid/shared";
 import {
   createGameAfterSetup,
@@ -20,22 +23,88 @@ import { buildAiDecisionInput, chooseCorpAction } from "../../index";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { selectedCorpProgramTrashChoiceOptionIds } from "../../runtime/corp-program-trash-choice";
 
+const REX = 476;
+const RAPTOR = 266;
+const CYFERMASTER = 228;
+const KRASH = 251;
+const WORM = 286;
+
 afterEach(resetResidentPlanPortfolioMemory);
+
+// Marionette accounts for one lost response in both profiles. Rex adds one in Classic.
+it.each([
+  ["classic_blind", 2],
+  ["modern_open", 1],
+] as const)(
+  "prices Raptor's native Rex coverage in %s",
+  (traceRulesProfile, lostAffordableIce) => {
+    const state = choiceState({ rexTraceProfile: traceRulesProfile });
+    const input = corpInput(state);
+    const rig = input.playerView.opponent.rig!;
+    const raptor = rig.find((card) => card.definitionId === RAPTOR)!;
+    const action = input.legalActions[0]!;
+    const choice = input.playerView.pendingChoice!;
+    expect(input.playerView.traceRulesProfile).toBe(traceRulesProfile);
+    expect(input.playerView.own.credits).toBe(1);
+    expect(input.playerView.opponent.credits).toBe(5);
+    expect(choice.options).toHaveLength(2);
+    expect(
+      programTrashCoverageLosses(input, rig).get(raptor.instanceId),
+    ).toEqual({
+      lostAffordableIce,
+      additionalCredits: 0,
+    });
+
+    const decision = chooseCorpAction(input);
+    expect(decision).toMatchObject({
+      actionId: action.actionId,
+      fallbackUsed: false,
+      selectedChoices: { choiceId: choice.choiceId },
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "penw02zfrkklof54c2nuye5att",
+          leafExecutorInstanceId:
+            "penw02zfrkklof54c2nuye5att",
+          route: { actionId: action.actionId },
+        },
+      },
+    });
+    if (traceRulesProfile === "classic_blind") {
+      expect(selectedTarget(input, decision)).toBe(raptor.instanceId);
+      const applied = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: action.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        selectedChoices: decision.selectedChoices!,
+      });
+      if (!applied.ok) throw new Error(applied.error.message);
+      expect(applied.state.runner.rig.programs).not.toContain(
+        raptor.instanceId,
+      );
+      const replay = replayEvents(state, [applied.event]);
+      expect(replay.ok).toBe(true);
+      expect(hashGameState(replay.state)).toBe(hashGameState(applied.state));
+    }
+  },
+);
 
 it("destroys the sole affordable Wall response and applies the exact Defense choice deterministically", () => {
   const initial = choiceState();
   const input = corpInput(initial);
   const decision = chooseCorpAction(input);
-  expect(selectedTarget(input, decision)).toContain("worm");
+  const worm = input.playerView.opponent.rig!.find((card) => card.definitionId === WORM)!;
+  expect(selectedTarget(input, decision)).toBe(worm.instanceId);
   expect(decision.actionId).toBe(input.legalActions[0]!.actionId);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     lane: "plan",
     route: { actionId: decision.actionId },
     selectedStep: {
-      planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      planInstanceId: "penw02zfrkklof54c2nuye5att",
     },
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
   });
   if (!decision.actionId || !decision.selectedChoices)
     throw new Error("Expected a bound legal action");
@@ -49,9 +118,7 @@ it("destroys the sole affordable Wall response and applies the exact Defense cho
   });
   expect(result.ok).toBe(true);
   if (!result.ok) throw new Error(result.error.message);
-  expect(
-    result.state.runner.rig.programs.some((id) => id.includes("worm")),
-  ).toBe(false);
+  expect(result.state.runner.rig.programs).not.toContain(worm.instanceId);
   const replay = replayEvents(
     initial,
     result.state.eventLog.slice(initial.eventLog.length),
@@ -62,35 +129,31 @@ it("destroys the sole affordable Wall response and applies the exact Defense cho
 
 it("preserves redundant Wall coverage and instead removes the unique affordable decoder", () => {
   const input = corpInput(choiceState({ dwarf: true, gate: true }));
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain(
-    "cyfermaster",
-  );
+  expect(selectedTargetDefinition(input, chooseCorpAction(input))).toBe(CYFERMASTER);
 });
 
 it("recognizes universal replacement cost but prioritizes its unique Sentry coverage", () => {
   const input = corpInput(choiceState({ krash: true }));
   const programs = input.playerView.opponent.rig!;
   const losses = programTrashCoverageLosses(input, programs);
-  const worm = programs.find((p) => p.definitionId === "onr_v1_074_worm")!;
-  const krash = programs.find((p) => p.definitionId === "onr_v1_039_krash")!;
+  const worm = programs.find((p) => p.definitionId === WORM)!;
+  const krash = programs.find((p) => p.definitionId === KRASH)!;
   expect(losses.get(worm.instanceId)).toEqual({
     lostAffordableIce: 0,
     additionalCredits: 4,
   });
   expect(losses.get(krash.instanceId)?.lostAffordableIce).toBe(1);
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain("krash");
+  expect(selectedTarget(input, chooseCorpAction(input))).toBe(krash.instanceId);
 });
 
 it("does not award coverage loss for unrezzed ICE", () => {
   const input = corpInput(choiceState({ unrezzedWall: true }));
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain(
-    "cyfermaster",
-  );
+  expect(selectedTargetDefinition(input, chooseCorpAction(input))).toBe(CYFERMASTER);
 });
 
 it("does not award coverage loss for a path already unaffordable before the trash", () => {
   const input = corpInput(choiceState({ gate: true, credits: 1 }));
-  expect(selectedTarget(input, chooseCorpAction(input))).toContain("worm");
+  expect(selectedTargetDefinition(input, chooseCorpAction(input))).toBe(WORM);
 });
 
 it("keeps the target unchanged when the public Runner hand count changes", () => {
@@ -106,6 +169,18 @@ it("requires current Engine quotes for known rezzed ICE", () => {
   delete input.playerView.servers.find((s) => s.id === "rd")!.ice[0]!
     .effectiveRunQuote;
   expect(() => chooseCorpAction(input)).toThrow("missing_action_semantics");
+});
+
+it("diagnoses a pending Defense program-trash choice without its LegalAction", () => {
+  const input = corpInput(choiceState());
+  expect(() =>
+    corpProgramTrashDefenseSignals({ ...input, legalActions: [] }, []),
+  ).toThrow(
+    expect.objectContaining({
+      code: "missing_action_semantics",
+      context: expect.objectContaining({ owner: "rules_contract" }),
+    }),
+  );
 });
 
 it("requires the selected Defense executor instead of ranking targets again in the resolver", () => {
@@ -153,6 +228,14 @@ function selectedTarget(
   );
 }
 
+function selectedTargetDefinition(
+  input: ReturnType<typeof corpInput>,
+  decision: ReturnType<typeof chooseCorpAction>,
+) {
+  const targetId = selectedTarget(input, decision);
+  return input.playerView.opponent.rig!.find((card) => card.instanceId === targetId)?.definitionId;
+}
+
 function corpInput(state: GameState) {
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",
@@ -160,9 +243,7 @@ function corpInput(state: GameState) {
     ownDeckSnapshot: {
       deckSnapshotId: "program-trash-coverage-test",
       side: "corp",
-      cards: Object.values(state.cardInstances)
-        .filter((c) => c.owner === "corp")
-        .map((c) => ({ cardId: c.definitionId, quantity: 1 })),
+      cards: deckSnapshotCardCountsForTest(state, "corp"),
     },
     decisionId: `${state.matchId}:${state.stateVersion}:corp`,
     actionNumber: state.stateVersion,
@@ -176,21 +257,25 @@ function choiceState(
     krash?: boolean;
     unrezzedWall?: boolean;
     credits?: number;
+    rexTraceProfile?: TraceRulesProfile;
   } = {},
 ): GameState {
   const corp = [
-    "onr_proteus_029_marionette",
-    "onr_v1_238_data-wall-2-0",
-    "onr_v1_247_haunting-inquisition",
+    87,
+    options.rexTraceProfile ? REX : 450,
+    459,
   ];
   const runner = [
-    "onr_v1_074_worm",
-    "onr_v1_016_cyfermaster",
-    "onr_v1_021_dwarf",
-    "onr_v1_039_krash",
+    286,
+    options.rexTraceProfile ? RAPTOR : 228,
+    233,
+    251,
   ];
   let state = createGameAfterSetup({
     seed: "program-trash-coverage",
+    ...(options.rexTraceProfile
+      ? { traceRulesProfile: options.rexTraceProfile }
+      : {}),
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
@@ -212,9 +297,9 @@ function choiceState(
   });
   state = applyMatching(state, (a) => a.type === "mandatory_draw");
   const marionette = putCorpIceOnServer(state, "hq", corp[0]!);
-  const wall = putCorpIceOnServer(state, "rd", corp[1]!);
-  state.cardInstances[wall]!.rezzed = !options.unrezzedWall;
-  state.cardInstances[wall]!.faceup = !options.unrezzedWall;
+  const coverageIce = putCorpIceOnServer(state, "rd", corp[1]!);
+  state.cardInstances[coverageIce]!.rezzed = !options.unrezzedWall;
+  state.cardInstances[coverageIce]!.faceup = !options.unrezzedWall;
   if (options.gate) {
     const gate = putCorpIceOnServer(state, "archives", corp[2]!);
     state.cardInstances[gate]!.rezzed = true;
@@ -224,8 +309,8 @@ function choiceState(
   installRunnerProgramForTest(state, runner[1]!);
   if (options.dwarf) installRunnerProgramForTest(state, runner[2]!);
   if (options.krash) installRunnerProgramForTest(state, runner[3]!);
-  state.runner.credits = options.credits ?? 6;
-  state.corp.credits = 20;
+  state.runner.credits = options.rexTraceProfile ? 5 : (options.credits ?? 6);
+  state.corp.credits = options.rexTraceProfile ? 4 : 20;
   state.corp.clicks = 0;
   state = applyMatching(state, (a) => a.type === "end_turn");
   state = applyMatching(

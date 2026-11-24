@@ -1,14 +1,60 @@
-import type { ActionType, GameState, LegalAction, Side } from "@netgrid/shared";
+import type {
+  ActionType,
+  EncounterActionTargets,
+  GameState,
+  LegalAction,
+  Side,
+} from "@netgrid/shared";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS } from "../../compatibility/payload-compatibility";
 import { abilityPayloadDiscriminatorEntries } from "../../mechanics/public-payload-schema";
 
-export type LegalActionMetadata = Partial<
-  Pick<
-    LegalAction,
-    "abilityRef" | "effectRef" | "choiceRequirements" | "targetRequirements"
-  >
->;
+export type LegalActionMetadata = EncounterActionTargets &
+  Partial<
+    Pick<
+      LegalAction,
+      "abilityRef" | "effectRef" | "choiceRequirements" | "targetRequirements"
+    >
+  >;
+
+// Fixed codes, ordered by the existing action-family ordering. Append new
+// codes explicitly so future declarations cannot reassign an action family's identity.
+const actionTypeCode = {
+  access_card: "0",
+  activated_card_ability: "1",
+  advance_card: "2",
+  break_subroutine: "3",
+  change_card_control: "4",
+  continue_run: "5",
+  decline_rez: "6",
+  decline_trash: "7",
+  draw_card: "8",
+  end_turn: "9",
+  forgo_action: "a",
+  gain_credit: "b",
+  install_card: "c",
+  jack_out: "d",
+  mandatory_draw: "e",
+  move_to_removed_from_game: "f",
+  move_to_set_aside: "g",
+  play_event: "h",
+  play_operation: "i",
+  pump_breaker: "j",
+  purge_runner_virus_counters: "k",
+  purge_virus_counters: "l",
+  remove_tag: "m",
+  resolve_choice: "n",
+  return_from_set_aside: "o",
+  rez_card: "p",
+  rez_ice: "q",
+  score_agenda: "r",
+  start_run: "s",
+  steal_agenda: "t",
+  stop_restricted_action_sequence: "u",
+  trash_accessed_card: "v",
+  trash_resource: "w",
+  trigger_ability: "x",
+} as const satisfies Record<ActionType, string>;
 
 export function buildLegalAction(
   state: GameState,
@@ -39,7 +85,7 @@ export function buildLegalAction(
       ? { payload: stableLegalActionPayload(type, payload, visibility) }
       : {};
   return {
-    actionId: makeActionId(type, side, payload, source),
+    actionId: makeActionId(type, side, payload, source, metadata),
     side,
     type,
     label,
@@ -49,6 +95,27 @@ export function buildLegalAction(
     targetRequirements: metadata.targetRequirements ?? [],
     visibility,
     expiresAtStateVersion: state.stateVersion,
+    ...(metadata.encounterSubroutineIds
+      ? { encounterSubroutineIds: metadata.encounterSubroutineIds }
+      : {}),
+    ...(metadata.encounterRemainingSubroutineIds
+      ? {
+          encounterRemainingSubroutineIds:
+            metadata.encounterRemainingSubroutineIds,
+        }
+      : {}),
+    ...(metadata.subroutineIndexes
+      ? { subroutineIndexes: metadata.subroutineIndexes }
+      : {}),
+    ...(metadata.payOrEndRunSubroutineIndexes
+      ? { payOrEndRunSubroutineIndexes: metadata.payOrEndRunSubroutineIndexes }
+      : {}),
+    ...(metadata.payOrTrashProgramSubroutineIndexes
+      ? {
+          payOrTrashProgramSubroutineIndexes:
+            metadata.payOrTrashProgramSubroutineIndexes,
+        }
+      : {}),
     ...(metadata.choiceRequirements
       ? { choiceRequirements: metadata.choiceRequirements }
       : {}),
@@ -83,10 +150,10 @@ export function makeActionId(
   side: Side,
   payload: LegalAction["payload"] | undefined,
   source: LegalAction["source"],
+  targets: EncounterActionTargets = {},
 ): string {
   const parts = [
-    side,
-    type,
+    `${side === "corp" ? "c" : "r"}${actionTypeCode[type]}`,
     source === "basic_action" || source === "game_rule" ? "" : source,
   ];
   if (payload?.serverId) parts.push(String(payload.serverId));
@@ -114,8 +181,8 @@ export function makeActionId(
     parts.push(String(payload.subroutineIndex));
   if (payload?.subroutineId !== undefined)
     parts.push(String(payload.subroutineId));
-  if (payload?.subroutineIndexes !== undefined)
-    parts.push(String(payload.subroutineIndexes));
+  if (targets.subroutineIndexes !== undefined)
+    parts.push(targets.subroutineIndexes.join(","));
   if (payload?.sourceIceIndex !== undefined)
     parts.push(String(payload.sourceIceIndex));
   if (payload?.targetIceIndex !== undefined)
@@ -150,10 +217,10 @@ export function makeActionId(
     parts.push(String(payload.accessTrashTotalCost));
   if (payload?.accessTrashCostSourceDefinitionIds)
     parts.push(String(payload.accessTrashCostSourceDefinitionIds));
-  if (payload?.encounterSubroutineIds !== undefined)
-    parts.push(String(payload.encounterSubroutineIds));
-  if (payload?.payOrEndRunSubroutineIndexes !== undefined)
-    parts.push(String(payload.payOrEndRunSubroutineIndexes));
+  if (targets.encounterSubroutineIds !== undefined)
+    parts.push(targets.encounterSubroutineIds.join(","));
+  if (targets.payOrEndRunSubroutineIndexes !== undefined)
+    parts.push(targets.payOrEndRunSubroutineIndexes.join(","));
   if (payload?.payOrEndRunSubroutinePayment !== undefined)
     parts.push(String(payload.payOrEndRunSubroutinePayment));
   if (payload?.decision) parts.push(String(payload.decision));

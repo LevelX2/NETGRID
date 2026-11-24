@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { runnerEconomySetupActionClass } from "./runner-economy-setup-types";
+import {
+  runnerEconomySetupActionClass,
+  runnerEconomySkipReasonForDiagnostics,
+  runnerEconomySubcounts,
+} from "./runner-economy-setup-types";
 
 describe("runnerEconomySetupActionClass", () => {
   it("matches economy setup roles by bounded role terms", () => {
@@ -29,6 +33,63 @@ describe("runnerEconomySetupActionClass", () => {
       loanDebtEconomy: false,
       downsideEconomy: false,
       handSizeSupport: false,
+    });
+  });
+});
+
+describe("Runner economy diagnostic counts", () => {
+  it("attributes an economy skip to the selected action", () => {
+    const context = {
+      draw: false,
+      setupAction: false,
+      installsBreaker: false,
+      advancedRemoteContestTaken: false,
+      pressureAction: false,
+      runStarted: false,
+    };
+    const pass = {
+      ...action(),
+      type: "decline_trash" as const,
+    };
+    expect(
+      runnerEconomySkipReasonForDiagnostics({
+        ...context,
+        action: pass,
+      }),
+    ).toBe("unknown_higher_priority");
+    expect(
+      runnerEconomySkipReasonForDiagnostics({
+        ...context,
+        setupAction: true,
+        installsBreaker: true,
+        action: action(),
+      }),
+    ).toBe("install_breaker");
+    expect(
+      runnerEconomySkipReasonForDiagnostics({
+        ...context,
+        advancedRemoteContestTaken: true,
+        runStarted: true,
+        action: { ...action(), type: "start_run" },
+      }),
+    ).toBe("remote_contest");
+    expect(
+      runnerEconomySkipReasonForDiagnostics({
+        ...context,
+        runStarted: true,
+        action: { ...action(), type: "play_event" },
+      }),
+    ).toBe("run");
+  });
+
+  it("counts overlapping economy categories and omits empty categories", () => {
+    const one = classify(["finite_economy_pool", "loan_debt"]);
+    const two = classify(["recurring_income"]);
+    expect(runnerEconomySubcounts([one, two])).toEqual({
+      runnerLegalFinitePoolEconomyActions: 1,
+      runnerLegalLoanDebtEconomyActions: 1,
+      runnerLegalRecurringEconomyActions: 1,
+      runnerLegalResourceEconomyActions: 2,
     });
   });
 });

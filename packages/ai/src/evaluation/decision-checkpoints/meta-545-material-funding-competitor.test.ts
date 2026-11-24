@@ -32,15 +32,15 @@ describe("material funding competitor admission", () => {
     );
     const start = runtime.chooseAiAction(first.input);
     expect(start.decisionDebug!.planFirstDecision!.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ard",
+      "pa90fufw9vc5bkshp96ztlryxl",
     );
     const result = runtime.chooseAiAction(second.input),
       pf = result.decisionDebug!.planFirstDecision!;
     expect(pf.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ard",
+      "pa90fufw9vc5bkshp96ztlryxl",
     );
     expect(pf.selectedStep!.needId).toBe("run-support:central:rd");
-    expect(result.actionId).toBe("runner.gain_credit");
+    expect(result.actionId).toBe("rb");
     expect(result.fallbackUsed).toBe(false);
     expect(result.timeoutUsed).toBe(false);
     expect(pf.route).toMatchObject({

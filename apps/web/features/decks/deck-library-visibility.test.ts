@@ -38,7 +38,7 @@ function deck(deckId: string): EditableDeck {
     deckVersion: "test",
     name: deckId,
     side: "corp",
-    identityCardId: "corp_identity_001",
+    identityCardId: 3,
     cardPoolSnapshotId: "card-snapshot-0.8",
     formatProfileId: "netgrid_private_local_v1",
     cards: [],

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import {
@@ -20,7 +21,7 @@ function reserveForRoles(roles: string[], activeRun = false): number {
 }
 
 function postRunReserveForRoles(roles: string[]): number {
-  return runnerPostRunReserveTargetForRemoteInput(input(), "remote_1", {
+  return runnerPostRunReserveTargetForRemoteInput(input(), "r1", {
     remoteServerHasScoreThreat: () => false,
     rolesForCardId: () => roles,
   });
@@ -34,14 +35,16 @@ function input(activeRun = false): AiDecisionInput {
         credits: 6,
         rig: [],
       },
+      opponent: { credits: 4 },
+      traceRulesProfile: "modern_open",
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           ice: [],
           root: [
             {
               instanceId: "root",
-              definitionId: "root_definition",
+              definitionId: syntheticCardDefinitionId("root_definition"),
               known: true,
               type: "agenda",
               advancementCounters: 1,
@@ -52,7 +55,7 @@ function input(activeRun = false): AiDecisionInput {
       ...(activeRun
         ? {
             run: {
-              attackedServerId: "remote_1",
+              attackedServerId: "r1",
               phase: "encounter",
               successful: false,
             },

@@ -20,13 +20,13 @@ import {
 } from "./access-flow";
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   trashCost = 0,
 ): CardDefinition {
   return {
     id: id as CardDefinitionId,
-    title: id,
+    title: String(id),
     type,
     ...(trashCost > 0 ? { trashCost } : {}),
   } as CardDefinition;
@@ -34,7 +34,7 @@ function definition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
 ): CardInstance {
   return {
@@ -71,14 +71,14 @@ function makeHost(
   trashedCards: CardInstanceId[];
 } {
   const definitions = options.definitions ?? {
-    agenda: definition("agenda_def", "agenda"),
-    asset: definition("asset_def", "asset", 3),
-    ice: definition("ice_def", "ice"),
+    agenda: definition(2855245605, "agenda"),
+    asset: definition(1151438755, "asset", 3),
+    ice: definition(1663273972, "ice"),
   };
   const servers =
     options.servers ??
     ([
-      { id: "remote_1", ice: [], root: ["asset"] },
+      { id: "r1", ice: [], root: ["asset"] },
       { id: "rd", ice: [], root: [] },
       { id: "hq", ice: [], root: [] },
       { id: "archives", ice: [], root: [] },
@@ -86,20 +86,20 @@ function makeHost(
   const instances =
     options.instances ??
     ({
-      asset: instance("asset", "asset_def", {
+      asset: instance("asset", 1151438755, {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"]),
-      agenda: instance("agenda", "agenda_def", {
+      agenda: instance("agenda", 2855245605, {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"]),
-      ice: instance("ice", "ice_def", {
+      ice: instance("ice", 1663273972, {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"]),
     } satisfies Record<string, CardInstance>);
   const state = {
@@ -123,8 +123,8 @@ function makeHost(
   } as unknown as GameState;
   if (options.run === undefined) {
     state.run = {
-      runId: "run_1",
-      attackedServerId: "remote_1",
+      runId: 1,
+      attackedServerId: "r1",
     } as unknown as NonNullable<GameState["run"]>;
   } else if (options.run) {
     state.run = options.run;
@@ -311,7 +311,7 @@ describe("access flow execution", () => {
       handleAccessExecution(host, {
         side: "runner",
         type: "access_card",
-        actionId: "runner.access_card",
+        actionId: "r0",
         label: "Access",
         source: "run",
       } as LegalAction),
@@ -323,7 +323,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "access_card",
-      actionId: "runner.access_card",
+      actionId: "r0",
       label: "Access",
       source: "run",
     } as unknown as LegalAction;
@@ -333,7 +333,7 @@ describe("access flow execution", () => {
     expect(result).toMatchObject({
       handled: true,
       accessedCardId: "asset",
-      serverId: "remote_1",
+      serverId: "r1",
       stateChanged: true,
     });
     expect(state.run?.accessedCardId).toBe("asset");
@@ -341,23 +341,23 @@ describe("access flow execution", () => {
     expect(effects).toEqual(["asset"]);
     expect(legalAction.payload).toMatchObject({
       accessedCardId: "asset",
-      serverId: "remote_1",
+      serverId: "r1",
       accessOrigin: "remote_root",
     });
   });
 
   it("publishes central root and HQ card access origins without card identity guesses", () => {
-    const hqRoot = instance("hq_root", "asset_def", {
+    const hqRoot = instance("hq_root", 1151438755, {
       side: "corp",
       zone: "serverRoot",
       serverId: "hq",
     } as CardInstance["zone"]);
-    const hqCard = instance("hq_card", "ice_def", {
+    const hqCard = instance("hq_card", 1663273972, {
       side: "corp",
       zone: "hq",
     });
     const breach = {
-      breachId: "run_hq.breach",
+      breachId: "709564.breach",
       serverId: "hq" as Exclude<ServerId, "new_remote">,
       accessMode: "multi" as const,
       queue: [
@@ -384,7 +384,7 @@ describe("access flow execution", () => {
     };
     const { host, state } = makeHost({
       run: {
-        runId: "run_hq",
+        runId: 709564,
         attackedServerId: "hq",
         breach,
       } as unknown as NonNullable<GameState["run"]>,
@@ -443,38 +443,34 @@ describe("access flow execution", () => {
   it("exposes installed corp cards when Schematics Search Engine accesses HQ", () => {
     const { host, state, effects } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "hq",
       } as unknown as NonNullable<GameState["run"]>,
       definitions: {
-        hqCard: definition("hq_card_def", "operation"),
-        asset: definition("asset_def", "asset", 3),
-        ice: definition("ice_def", "ice"),
-        schematics: definition(
-          "onr_classic_032_schematics-search-engine",
-          "program",
-        ),
+        hqCard: definition(2268447633, "operation"),
+        asset: definition(1151438755, "asset", 3),
+        ice: definition(1663273972, "ice"),
+        schematics: definition(36, "program"),
       },
       instances: {
-        hq_card: instance("hq_card", "hq_card_def", {
+        hq_card: instance("hq_card", 2268447633, {
           side: "corp",
           zone: "hq",
         }),
-        asset: instance("asset", "asset_def", {
+        asset: instance("asset", 1151438755, {
           side: "corp",
           zone: "serverRoot",
-          serverId: "remote_1",
+          serverId: "r1",
         } as CardInstance["zone"]),
-        ice: instance("ice", "ice_def", {
+        ice: instance("ice", 1663273972, {
           side: "corp",
           zone: "serverIce",
-          serverId: "remote_1",
+          serverId: "r1",
         } as CardInstance["zone"]),
         schematics: {
           id: "schematics" as CardInstanceId,
           instanceId: "schematics" as CardInstanceId,
-          definitionId:
-            "onr_classic_032_schematics-search-engine" as CardDefinitionId,
+          definitionId: 36 as CardDefinitionId,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -485,7 +481,7 @@ describe("access flow execution", () => {
       },
       corpHq: ["hq_card"],
       servers: [
-        { id: "remote_1", ice: ["ice"], root: ["asset"] },
+        { id: "r1", ice: ["ice"], root: ["asset"] },
         { id: "rd", ice: [], root: [] },
         { id: "hq", ice: [], root: [] },
         { id: "archives", ice: [], root: [] },
@@ -495,7 +491,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "access_card",
-      actionId: "runner.access_card",
+      actionId: "r0",
       label: "Access",
       source: "run",
     } as unknown as LegalAction;
@@ -516,11 +512,11 @@ describe("access flow execution", () => {
       hiddenZoneAction:
         "schematics_search_engine_expose_installed_cards_review",
       publicRevealKind: "expose",
-      sourceDefinitionId: "onr_classic_032_schematics-search-engine",
+      sourceDefinitionId: 36,
       revealedCount: 2,
-      publicRevealDefinitionIds: "asset_def,ice_def",
-      publicRevealTitles: "asset_def||ice_def",
-      exposedServerLabels: "remote_1 root,remote_1 ICE 1",
+      publicRevealDefinitionIds: "1151438755,1663273972",
+      publicRevealTitles: "1151438755||1663273972",
+      exposedServerLabels: "r1 root,r1 ICE 1",
       exposedCardInstanceIds: "asset,ice",
     });
     expect(state.pendingChoice).toMatchObject({
@@ -533,7 +529,7 @@ describe("access flow execution", () => {
       visibility: "hidden_info_barrier",
     });
     expect(state.pendingChoice?.source).toContain(
-      "p3_36.expose_installed_cards_review:asset|ice:schematics:onr_classic_032_schematics-search-engine:",
+      "p3_36.expose_installed_cards_review:asset|ice:schematics:36:",
     );
     expect(JSON.stringify(legalAction.payload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"hq"\s*:/,
@@ -543,12 +539,12 @@ describe("access flow execution", () => {
   it("steals an accessed agenda after revalidating the current steal cost", () => {
     const { host, state, spentRunnerCredits, finishedRuns } = makeHost({
       run: {
-        runId: "run_1",
-        attackedServerId: "remote_1",
+        runId: 1,
+        attackedServerId: "r1",
         accessedCardId: "agenda",
       } as unknown as NonNullable<GameState["run"]>,
       servers: [
-        { id: "remote_1", ice: [], root: ["agenda"] },
+        { id: "r1", ice: [], root: ["agenda"] },
         { id: "rd", ice: [], root: [] },
         { id: "hq", ice: [], root: [] },
         { id: "archives", ice: [], root: [] },
@@ -558,7 +554,7 @@ describe("access flow execution", () => {
     const result = handleAccessExecution(host, {
       side: "runner",
       type: "steal_agenda",
-      actionId: "runner.steal_agenda.agenda",
+      actionId: "rt.agenda",
       label: "Steal",
       source: "agenda",
       costs: [] as LegalAction["costs"],
@@ -580,15 +576,12 @@ describe("access flow execution", () => {
   });
 
   it("opens cost support before paying a self-costed accessed agenda", () => {
-    const fetalDefinition = definition("onr_proteus_004_fetal-ai", "agenda");
-    const swissDefinition = definition(
-      "onr_proteus_152_swiss-bank-account",
-      "resource",
-    );
+    const fetalDefinition = definition(62, "agenda");
+    const swissDefinition = definition(210, "resource");
     const swissId = "steal_support_swiss" as CardInstanceId;
     const { host, state, spentRunnerCredits } = makeHost({
       run: {
-        runId: "run_support",
+        runId: 724938,
         attackedServerId: "rd",
         accessedCardId: "fetal",
       } as unknown as NonNullable<GameState["run"]>,
@@ -619,7 +612,7 @@ describe("access flow execution", () => {
     const action = {
       side: "runner",
       type: "steal_agenda",
-      actionId: "runner.steal_agenda.fetal.2",
+      actionId: "rt.fetal.2",
       label: "Steal Fetal AI",
       source: "fetal",
       costs: [{ credits: 2 }],
@@ -643,8 +636,8 @@ describe("access flow execution", () => {
     const { host, state, trashPayments, trashedCards, finishedRuns } = makeHost(
       {
         run: {
-          runId: "run_1",
-          attackedServerId: "remote_1",
+          runId: 1,
+          attackedServerId: "r1",
           accessedCardId: "asset",
         } as unknown as NonNullable<GameState["run"]>,
       },
@@ -652,7 +645,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "trash_accessed_card",
-      actionId: "runner.trash_accessed_card.asset.3",
+      actionId: "rv.asset.3",
       label: "Trash",
       source: "asset",
     } as unknown as LegalAction;
@@ -677,31 +670,28 @@ describe("access flow execution", () => {
 
   it("revalidates Mercenary-style hidden resource current-access trash and pays its source cost", () => {
     const definitions = {
-      operation: definition("operation_def", "operation"),
-      mercenary: definition(
-        "onr_proteus_145_mercenary-subcontract",
-        "resource",
-      ),
-      boltHole: definition("onr_proteus_132_bolt-hole", "resource"),
-      agenda: definition("agenda_def", "agenda"),
+      operation: definition(3983278954, "operation"),
+      mercenary: definition(203, "resource"),
+      boltHole: definition(190, "resource"),
+      agenda: definition(2855245605, "agenda"),
     };
     const { host, state, spentRunnerCredits, trashPayments, trashedCards } =
       makeHost({
         run: {
-          runId: "run_1",
+          runId: 1,
           attackedServerId: "rd",
           accessedCardId: "operation",
         } as unknown as NonNullable<GameState["run"]>,
         definitions,
         instances: {
-          operation: instance("operation", "operation_def", {
+          operation: instance("operation", 3983278954, {
             side: "corp",
             zone: "rd",
           }),
           mercenary: {
             id: "mercenary" as CardInstanceId,
             instanceId: "mercenary" as CardInstanceId,
-            definitionId: "onr_proteus_145_mercenary-subcontract",
+            definitionId: 203,
             owner: "runner",
             controller: "runner",
             zone: { side: "runner", zone: "rig" },
@@ -713,7 +703,7 @@ describe("access flow execution", () => {
           bolt: {
             id: "bolt" as CardInstanceId,
             instanceId: "bolt" as CardInstanceId,
-            definitionId: "onr_proteus_132_bolt-hole",
+            definitionId: 190,
             owner: "runner",
             controller: "runner",
             zone: { side: "runner", zone: "rig" },
@@ -722,7 +712,7 @@ describe("access flow execution", () => {
             tapped: false,
             advancementCounters: 0,
           } as unknown as CardInstance,
-          agenda: instance("agenda", "agenda_def", {
+          agenda: instance("agenda", 2855245605, {
             side: "corp",
             zone: "rd",
           }),
@@ -734,7 +724,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "trash_accessed_card",
-      actionId: "runner.trash_accessed_card.operation.mercenary",
+      actionId: "rv.operation.mercenary",
       label: "Mercenary",
       source: "operation",
       costs: [{ credits: 4 }],
@@ -744,8 +734,7 @@ describe("access flow execution", () => {
         freeAccessTrash: true,
         hiddenResourceCurrentAccessTrash: true,
         hiddenResourceSourceCardId: "mercenary",
-        hiddenResourceSourceDefinitionId:
-          "onr_proteus_145_mercenary-subcontract",
+        hiddenResourceSourceDefinitionId: 203,
       },
     } as unknown as LegalAction;
 
@@ -771,7 +760,7 @@ describe("access flow execution", () => {
     });
     expect(legalAction.payload).toMatchObject({
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_proteus_145_mercenary-subcontract",
+      trashedCardDefinitionId: 203,
       hiddenZoneAction: "proteus_hidden_current_access_free_trash_choice",
     });
     resolveMercenaryCurrentAccessTrashChoice(
@@ -779,7 +768,7 @@ describe("access flow execution", () => {
       {
         side: "runner",
         type: "resolve_choice",
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         label: "Trash",
         source: "choice",
         payload: { choiceId: state.pendingChoice?.choiceId },
@@ -787,7 +776,7 @@ describe("access flow execution", () => {
       {
         matchId: "match",
         side: "runner",
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         clientKnownStateVersion: state.pendingChoice!.stateVersion,
         selectedChoices: {
           choiceId: state.pendingChoice!.choiceId,
@@ -806,20 +795,20 @@ describe("access flow execution", () => {
     };
     const wrongKind = makeHost({
       run: {
-        runId: "run_2",
+        runId: 2,
         attackedServerId: "rd",
         accessedCardId: "operation",
       } as unknown as NonNullable<GameState["run"]>,
       definitions,
       instances: {
-        operation: instance("operation", "operation_def", {
+        operation: instance("operation", 3983278954, {
           side: "corp",
           zone: "rd",
         }),
         bolt: {
           id: "bolt" as CardInstanceId,
           instanceId: "bolt" as CardInstanceId,
-          definitionId: "onr_proteus_132_bolt-hole",
+          definitionId: 190,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -838,20 +827,20 @@ describe("access flow execution", () => {
 
     const agendaState = makeHost({
       run: {
-        runId: "run_3",
+        runId: 3,
         attackedServerId: "rd",
         accessedCardId: "agenda",
       } as unknown as NonNullable<GameState["run"]>,
       definitions,
       instances: {
-        agenda: instance("agenda", "agenda_def", {
+        agenda: instance("agenda", 2855245605, {
           side: "corp",
           zone: "rd",
         }),
         mercenary: {
           id: "mercenary" as CardInstanceId,
           instanceId: "mercenary" as CardInstanceId,
-          definitionId: "onr_proteus_145_mercenary-subcontract",
+          definitionId: 203,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -872,7 +861,7 @@ describe("access flow execution", () => {
       {
         side: "runner",
         type: "resolve_choice",
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         label: "Trash agenda",
         source: "choice",
         payload: { choiceId: agendaState.state.pendingChoice?.choiceId },
@@ -880,7 +869,7 @@ describe("access flow execution", () => {
       {
         matchId: "match",
         side: "runner",
-        actionId: "runner.resolve_choice",
+        actionId: "rn",
         clientKnownStateVersion: agendaState.state.pendingChoice!.stateVersion,
         selectedChoices: {
           choiceId: agendaState.state.pendingChoice!.choiceId,
@@ -892,20 +881,20 @@ describe("access flow execution", () => {
 
     const poorState = makeHost({
       run: {
-        runId: "run_4",
+        runId: 4,
         attackedServerId: "rd",
         accessedCardId: "operation",
       } as unknown as NonNullable<GameState["run"]>,
       definitions,
       instances: {
-        operation: instance("operation", "operation_def", {
+        operation: instance("operation", 3983278954, {
           side: "corp",
           zone: "rd",
         }),
         mercenary: {
           id: "mercenary" as CardInstanceId,
           instanceId: "mercenary" as CardInstanceId,
-          definitionId: "onr_proteus_145_mercenary-subcontract",
+          definitionId: 203,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -926,24 +915,21 @@ describe("access flow execution", () => {
 
   it("lets Mercenary trash a paid subset of already revealed current-breach cards including agendas", () => {
     const definitions = {
-      asset: definition("asset_def", "asset"),
-      agenda: definition("agenda_def", "agenda"),
-      mercenary: definition(
-        "onr_proteus_145_mercenary-subcontract",
-        "resource",
-      ),
+      asset: definition(1151438755, "asset"),
+      agenda: definition(2855245605, "agenda"),
+      mercenary: definition(203, "resource"),
     };
     const run = {
-      runId: "run_multi",
+      runId: 151144,
       attackedServerId: "rd",
       accessedCardId: "agenda",
       breach: {
-        breachId: "run_multi.breach",
+        breachId: "151144.breach",
         serverId: "rd",
         accessMode: "multi",
         queue: [
           {
-            entryId: "run_multi.breach.0",
+            entryId: "151144.breach.0",
             cardInstanceId: "asset",
             serverId: "rd",
             zone: "rd",
@@ -951,7 +937,7 @@ describe("access flow execution", () => {
             hiddenInfo: true,
           },
           {
-            entryId: "run_multi.breach.1",
+            entryId: "151144.breach.1",
             cardInstanceId: "agenda",
             serverId: "rd",
             zone: "rd",
@@ -963,9 +949,9 @@ describe("access flow execution", () => {
         completed: false,
         accessedSummaries: [
           {
-            entryId: "run_multi.breach.0",
+            entryId: "151144.breach.0",
             status: "declined",
-            cardDefinitionId: "asset_def",
+            cardDefinitionId: 1151438755,
           },
         ],
       },
@@ -974,15 +960,15 @@ describe("access flow execution", () => {
       run,
       definitions,
       instances: {
-        asset: instance("asset", "asset_def", { side: "corp", zone: "rd" }),
-        agenda: instance("agenda", "agenda_def", {
+        asset: instance("asset", 1151438755, { side: "corp", zone: "rd" }),
+        agenda: instance("agenda", 2855245605, {
           side: "corp",
           zone: "rd",
         }),
         mercenary: {
           id: "mercenary" as CardInstanceId,
           instanceId: "mercenary" as CardInstanceId,
-          definitionId: "onr_proteus_145_mercenary-subcontract",
+          definitionId: 203,
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
@@ -1002,7 +988,7 @@ describe("access flow execution", () => {
     const activation = {
       side: "runner",
       type: "trash_accessed_card",
-      actionId: "runner.trash_accessed_card.agenda.mercenary",
+      actionId: "rv.agenda.mercenary",
       label: "Mercenary",
       source: "agenda",
       costs: [{ credits: 4 }],
@@ -1012,8 +998,7 @@ describe("access flow execution", () => {
         freeAccessTrash: true,
         hiddenResourceCurrentAccessTrash: true,
         hiddenResourceSourceCardId: "mercenary",
-        hiddenResourceSourceDefinitionId:
-          "onr_proteus_145_mercenary-subcontract",
+        hiddenResourceSourceDefinitionId: 203,
       },
     } as unknown as LegalAction;
 
@@ -1032,7 +1017,7 @@ describe("access flow execution", () => {
     const resolution = {
       side: "runner",
       type: "resolve_choice",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       label: "Trash both",
       source: "choice",
       payload: { choiceId: choice.choiceId },
@@ -1055,13 +1040,13 @@ describe("access flow execution", () => {
     expect(state.run).toBeUndefined();
     expect(resolution.payload).toMatchObject({
       currentAccessTrashCount: 2,
-      currentAccessTrashDefinitionIds: "asset_def,agenda_def",
+      currentAccessTrashDefinitionIds: "1151438755,2855245605",
     });
   });
 
   it("adds Highlighter access context to each breached R&D access", () => {
     const breach = {
-      breachId: "run_1.breach",
+      breachId: "1.breach",
       serverId: "rd" as Exclude<ServerId, "new_remote">,
       accessMode: "multi" as const,
       queue: [
@@ -1096,14 +1081,14 @@ describe("access flow execution", () => {
     };
     const { host, state } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "rd",
         breach,
       } as unknown as NonNullable<GameState["run"]>,
       instances: {
-        asset: instance("asset", "asset_def", { side: "corp", zone: "rd" }),
-        asset_2: instance("asset_2", "asset_def", { side: "corp", zone: "rd" }),
-        asset_3: instance("asset_3", "asset_def", { side: "corp", zone: "rd" }),
+        asset: instance("asset", 1151438755, { side: "corp", zone: "rd" }),
+        asset_2: instance("asset_2", 1151438755, { side: "corp", zone: "rd" }),
+        asset_3: instance("asset_3", 1151438755, { side: "corp", zone: "rd" }),
       },
       corpRd: ["asset", "asset_2", "asset_3"],
     });
@@ -1111,7 +1096,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "access_card",
-      actionId: "runner.access_card",
+      actionId: "r0",
       label: "Access",
       source: "run",
     } as unknown as LegalAction;
@@ -1131,7 +1116,7 @@ describe("access flow execution", () => {
 
   it("defers Garbage counter spending until the run ends", () => {
     const breach = {
-      breachId: "run_1.breach",
+      breachId: "1.breach",
       serverId: "rd" as Exclude<ServerId, "new_remote">,
       accessMode: "single" as const,
       queue: [
@@ -1150,16 +1135,16 @@ describe("access flow execution", () => {
     };
     const { host, state, trashPayments, trashedCards } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "rd",
         accessedCardId: "operation",
         breach,
       } as unknown as NonNullable<GameState["run"]>,
       definitions: {
-        operation: definition("operation_def", "operation"),
+        operation: definition(3983278954, "operation"),
       },
       instances: {
-        operation: instance("operation", "operation_def", {
+        operation: instance("operation", 3983278954, {
           side: "corp",
           zone: "rd",
         }),
@@ -1170,7 +1155,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "trash_accessed_card",
-      actionId: "runner.trash_accessed_card.operation.0",
+      actionId: "rv.operation.0",
       label: "Trash",
       source: "operation",
       payload: {
@@ -1200,14 +1185,14 @@ describe("access flow execution", () => {
 
   it("advances breach queue on decline without finishing the run", () => {
     const breach = {
-      breachId: "run_1.breach",
-      serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+      breachId: "1.breach",
+      serverId: "r1" as Exclude<ServerId, "new_remote">,
       accessMode: "multi" as const,
       queue: [
         {
           entryId: "entry_0",
           cardInstanceId: "asset" as CardInstanceId,
-          serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+          serverId: "r1" as Exclude<ServerId, "new_remote">,
           zone: "remote_root" as const,
           status: "accessed" as const,
           hiddenInfo: false,
@@ -1215,7 +1200,7 @@ describe("access flow execution", () => {
         {
           entryId: "entry_1",
           cardInstanceId: "agenda" as CardInstanceId,
-          serverId: "remote_1" as Exclude<ServerId, "new_remote">,
+          serverId: "r1" as Exclude<ServerId, "new_remote">,
           zone: "remote_root" as const,
           status: "pending" as const,
           hiddenInfo: false,
@@ -1227,8 +1212,8 @@ describe("access flow execution", () => {
     };
     const { host, state, finishedRuns } = makeHost({
       run: {
-        runId: "run_1",
-        attackedServerId: "remote_1",
+        runId: 1,
+        attackedServerId: "r1",
         accessedCardId: "asset",
         breach,
       } as unknown as NonNullable<GameState["run"]>,
@@ -1237,7 +1222,7 @@ describe("access flow execution", () => {
     const result = handleAccessExecution(host, {
       side: "runner",
       type: "decline_trash",
-      actionId: "runner.decline_trash.asset",
+      actionId: "r7.asset",
       label: "Decline",
       source: "asset",
     } as LegalAction);
@@ -1256,7 +1241,7 @@ describe("access flow execution", () => {
 
   it("auto-advances archives breach cards that need no decision", () => {
     const breach = {
-      breachId: "run_1.breach",
+      breachId: "1.breach",
       serverId: "archives" as Exclude<ServerId, "new_remote">,
       accessMode: "multi" as const,
       queue: [
@@ -1283,7 +1268,7 @@ describe("access flow execution", () => {
     };
     const { host, state, finishedRuns } = makeHost({
       run: {
-        runId: "run_1",
+        runId: 1,
         attackedServerId: "archives",
         breach,
       } as unknown as NonNullable<GameState["run"]>,
@@ -1292,7 +1277,7 @@ describe("access flow execution", () => {
     const legalAction = {
       side: "runner",
       type: "access_card",
-      actionId: "runner.access_card",
+      actionId: "r0",
       label: "Access",
       source: "run",
     } as LegalAction;
@@ -1305,7 +1290,7 @@ describe("access flow execution", () => {
       {
         entryId: "entry_0",
         status: "accessed",
-        cardDefinitionId: "ice_def",
+        cardDefinitionId: 1663273972,
       },
     ]);
     expect(legalAction.payload).toEqual({ archivesAutoAccessedCount: 1 });

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/action-card-semantic-profiles";
@@ -22,17 +23,17 @@ function fixture() {
       source: "resource-1",
       payload: {
         cardId: "resource-1",
-        sourceDefinitionId: "onr_classic_044_crash-space",
+        sourceDefinitionId: 48,
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
         cardImplementationAbilityKey: "trash_source_action",
         cardImplementationAbilityId:
-          "onr_classic_044_crash-space:trash_source_action",
+          63,
         cardImplementationTrashesSource: true,
       },
     },
   );
   const run = legalAction(
-    "runner.start_run.rd",
+    "rs.rd",
     "runner",
     "start_run",
     "Run R&D",
@@ -43,13 +44,13 @@ function fixture() {
   Object.assign(input.playerView.own, { credits: 31, clicks: 2 });
   input.playerView.own.rig = [
     visibleCard("resource-1", "runner", "resource", {
-      definitionId: "onr_classic_044_crash-space",
+      definitionId: 48,
     }),
   ];
   input.playerView.servers = [
     server("rd", [
       visibleCard("trace-1", "corp", "ice", {
-        definitionId: "onr_v1_228_cinderella",
+        definitionId: 440,
         rezzed: true,
       }),
     ]),
@@ -59,7 +60,7 @@ function fixture() {
     observerSide: "runner",
     stateVersion: 1,
     visibleSourceDefinitionsByInstanceId: {
-      "resource-1": "onr_classic_044_crash-space",
+      "resource-1": 48,
     },
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),
@@ -169,7 +170,7 @@ describe("Resource lifecycle visible trace liability", () => {
         f.trash.payload!.cardImplementationAbilityKey = "another-capability";
       if (kind === "cost") f.trash.costs = [{ clicks: 2 }];
       if (kind === "definition")
-        f.input.playerView.own.rig![0]!.definitionId = "unknown-resource";
+        f.input.playerView.own.rig![0]!.definitionId = syntheticCardDefinitionId("unknown-resource");
       expect(f.signals()).toEqual([]);
     },
   );

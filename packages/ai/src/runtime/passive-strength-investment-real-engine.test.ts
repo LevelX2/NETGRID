@@ -8,7 +8,11 @@ import {
   projectVisibleIceAfterPassiveRunnerInstall,
   replayEvents,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState } from "@netgrid/shared";
+import {
+  DEMO_DECKS,
+  type DeckDefinition,
+  type GameState,
+} from "@netgrid/shared";
 import catalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
@@ -17,6 +21,7 @@ import { buildDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { evaluateRunnerHandDevelopment } from "../runner/hand-development/hand-development-evaluation";
 import { assessPassiveStrengthInvestment } from "../runner/hand-development/passive-strength-investment";
+import { assessPassiveStrengthDevelopment } from "../runner/hand-development/passive-strength-development";
 import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
@@ -36,8 +41,8 @@ const runner = catalog.decks.find(
     "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
 )!;
 const corp = catalog.decks.find((d) => d.name === "Dr. Dreffs letzte Visite")!;
-const clownId = "onr_v1_012_clown";
-const krashId = "onr_v1_039_krash";
+const clownId = 224;
+const krashId = 251;
 const snapshot = {
   deckSnapshotId: runner.standardDeckId,
   side: "runner" as const,
@@ -90,13 +95,13 @@ function fixture() {
     .withRunnerGripSize(0)
     .withRunnerProgramInstalled(krashId)
     .withRunnerCardInGrip(clownId)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_279_wall-of-static")
-    .withRezzedCorpIceOnServer("rd", "onr_proteus_018_datacomb");
+    .withRezzedCorpIceOnServer("rd", 491)
+    .withRezzedCorpIceOnServer("rd", 76);
   for (const id of [
-    "onr_v1_146_zetatech-mem-chip",
-    "onr_proteus_091_lockjaw",
-    "onr_v1_046_pattels-virus",
-    "onr_proteus_150_streetware-distributor",
+    358,
+    149,
+    258,
+    208,
   ])
     f.withRunnerCardInGrip(id);
   state.runner.memoryUsed = 1;
@@ -124,6 +129,98 @@ function assess(state: GameState) {
 }
 
 describe("canonical passive strength investment", () => {
+  it.each([
+    ["classic_blind", false],
+    ["modern_open", true],
+  ] as const)(
+    "quotes Clown against the actual %s Rex rules",
+    (traceRulesProfile, admitted) => {
+      const rex = 476;
+      const datacomb = 76;
+      const runnerDeck: DeckDefinition = {
+        ...DEMO_DECKS.demo_runner_001,
+        cards: [
+          { id: clownId, quantity: 2 },
+          { id: krashId, quantity: 12 },
+        ],
+      };
+      const corpDeck: DeckDefinition = {
+        ...DEMO_DECKS.demo_corp_001,
+        cards: [
+          ...DEMO_DECKS.demo_corp_001.cards,
+          { id: rex, quantity: 1 },
+          { id: datacomb, quantity: 1 },
+        ],
+      };
+      let state = createGameAfterSetup({
+        seed: "review-seven-passive",
+        runnerDeck,
+        corpDeck,
+        traceRulesProfile,
+      });
+      state = apply(
+        state,
+        "corp",
+        getLegalActions(state, "corp").find(
+          (action) => action.type === "mandatory_draw",
+        )!.actionId,
+      );
+      RealEngineFixtureBuilder.forState(state).withCorpHqSize(5);
+      state = apply(
+        state,
+        "corp",
+        getLegalActions(state, "corp").find(
+          (action) => action.type === "end_turn",
+        )!.actionId,
+      );
+      RealEngineFixtureBuilder.forState(state)
+        .withRunnerGripSize(0)
+        .withRunnerCardInGrip(clownId)
+        .withRunnerProgramInstalled(krashId)
+        .withRunnerCredits(20)
+        .withRunnerClicks(4)
+        .withCorpCredits(3)
+        .withRezzedCorpIceOnServer("rd", datacomb)
+        .withRezzedCorpIceOnServer("rd", rex);
+      state.runner.memoryUsed = 1;
+      const input = buildAiDecisionInput(state, "runner", {
+        ownDeckSnapshot: {
+          deckSnapshotId: runnerDeck.id,
+          side: "runner",
+          cards: runnerDeck.cards.map(({ id, quantity }) => ({
+            cardId: id,
+            quantity,
+          })),
+        },
+      });
+      const clown = input.playerView.own.gripOrHq.find(
+        (card) => card.definitionId === clownId,
+      )!;
+      const offer = input.legalActions.find(
+        (action) =>
+          action.type === "install_card" && action.source === clown.instanceId,
+      )!;
+      const development = (position: typeof input) =>
+        assessPassiveStrengthDevelopment(
+          position,
+          clownId,
+          clown.memoryCost!,
+          offer.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+          offer.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0),
+          0,
+          input.playerView.own.rig!,
+        );
+      expect(offer.expiresAtStateVersion).toBe(state.stateVersion);
+      expect(input.playerView.traceRulesProfile).toBe(traceRulesProfile);
+      expect(development(input)?.admitted === true).toBe(admitted);
+      const missing = structuredClone(input);
+      delete missing.playerView.traceRulesProfile;
+      expect(() => development(missing)).toThrow(
+        "invalid_player_view_card_projection",
+      );
+    },
+  );
+
   it("releases residual liquidity for Clown one decision earlier through strategic development", () => {
     const { checkpoints } = structuredClone(
       capturedContinuation,
@@ -141,7 +238,7 @@ describe("canonical passive strength investment", () => {
     );
     // Restore once, then preserve actual in-process commitments. Restoring the
     // final checkpoint alone simulates a restart and falsely passes this case.
-    expect(chooseAiAction(first.input).actionId).toBe("runner.draw_card");
+    expect(chooseAiAction(first.input).actionId).toBe("r8");
     // The new horizon admits the investment before the old extra credit click.
     // Stop at that divergence instead of feeding an obsolete successor state.
     const input = checkpoints[1]!.input;
@@ -150,7 +247,7 @@ describe("canonical passive strength investment", () => {
       (a) => a.actionId === decision.actionId,
     )!;
     expect(action.type).toBe("install_card");
-    expect(action.source).toBe("runner_onr_v1_012_clown_3");
+    expect(action.source).toBe("c1dv");
     expect(decision.fallbackUsed).toBe(false);
     const pf = decision.decisionDebug!.planFirstDecision!;
     expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
@@ -175,7 +272,7 @@ describe("canonical passive strength investment", () => {
       (a) => a.actionId === decision.actionId,
     )!;
     expect(action.type).toBe("install_card");
-    expect(action.source).toBe("runner_onr_v1_012_clown_3");
+    expect(action.source).toBe("c1dv");
     expect(decision.fallbackUsed).toBe(false);
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
@@ -191,10 +288,10 @@ describe("canonical passive strength investment", () => {
       const state = fixture();
       RealEngineFixtureBuilder.forState(state)
         .withRunnerCredits(credits)
-        .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet");
+        .withRunnerProgramInstalled(283);
       const source = Object.values(state.cardInstances).find(
         (c) =>
-          c.definitionId === "onr_v1_071_vewy-vewy-quiet" &&
+          c.definitionId === 283 &&
           c.zone.zone === "rig",
       )!;
       source.counters = { bit: 2 };
@@ -216,7 +313,7 @@ describe("canonical passive strength investment", () => {
     state.runner.credits = 5;
     const input = assess(state).input;
     const source = input.playerView.own.gripOrHq.find(
-      (c) => c.definitionId === "onr_proteus_150_streetware-distributor",
+      (c) => c.definitionId === 208,
     )!;
     const decision = chooseAiAction(input);
     expect(decision.decisionDebug?.planFirstDecision?.portfolio).toEqual(
@@ -262,18 +359,18 @@ describe("canonical passive strength investment", () => {
   it("prices compatible recurring credits and rejects a saving already absorbed by the pool", () => {
     const state = fixture();
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerProgramInstalled("onr_v1_011_cloak")
-      .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet");
+      .withRunnerProgramInstalled(223)
+      .withRunnerProgramInstalled(283);
     state.runner.memoryUsed = 3;
     for (const id of state.runner.rig.programs) {
       const card = state.cardInstances[id]!;
-      if (card.definitionId === "onr_v1_011_cloak") card.counters = { bit: 3 };
-      if (card.definitionId === "onr_v1_071_vewy-vewy-quiet")
+      if (card.definitionId === 223) card.counters = { bit: 3 };
+      if (card.definitionId === 283)
         card.counters = { bit: 2 };
     }
     expect(assess(state).investment?.admitted).toBe(true);
     RealEngineFixtureBuilder.forState(state).withCorpCardInHq(
-      "onr_proteus_018_datacomb",
+      76,
     );
     expect(assess(state).investment?.admitted).toBe(false);
     // Spent pools do not disappear from the next-turn economic comparison.
@@ -283,7 +380,7 @@ describe("canonical passive strength investment", () => {
     expect(exhausted.investment?.admitted).toBe(false);
     expect(
       exhausted.input.playerView.own.rig!.find(
-        (c) => c.definitionId === "onr_v1_011_cloak",
+        (c) => c.definitionId === 223,
       )!.counterDisplays,
     ).toContainEqual(
       expect.objectContaining({
@@ -313,7 +410,7 @@ describe("canonical passive strength investment", () => {
     changed.runner.stack.reverse();
     changed.corp.rd.reverse();
     for (const id of changed.corp.servers.find((s) => s.id === "rd")!.ice)
-      changed.cardInstances[id]!.definitionId = "onr_v1_279_wall-of-static";
+      changed.cardInstances[id]!.definitionId = 491;
     expect(assess(changed).investment).toEqual(investment);
   });
   it("connects real hints, coverage and the Clown engine without mocked roles", () => {
@@ -329,11 +426,11 @@ describe("canonical passive strength investment", () => {
     ).toContain("runner.coverage.breaker");
     const dropp = buildDeckStrategyProfile({
       ...snapshot,
-      cards: [{ cardId: "onr_v1_019_dropp", quantity: 3 }],
+      cards: [{ cardId: 231, quantity: 3 }],
     });
     expect(dropp.runnerProfile?.coverageProfile.universal.count).toBe(0);
     expect(
-      AI_HINTS_BY_CARD.get("onr_v1_019_dropp")?.breakerProfile?.sideEffects,
+      AI_HINTS_BY_CARD.get(231)?.breakerProfile?.sideEffects,
     ).toContain("ends_run_after_use");
   });
 
@@ -406,11 +503,11 @@ describe("canonical passive strength investment", () => {
   });
 
   it("derives other strength support and Corp hand capacity from their real mechanics", () => {
-    for (const id of ["onr_proteus_091_lockjaw", "onr_v1_046_pattels-virus"])
+    for (const id of [149, 258])
       expect(AI_HINTS_BY_CARD.get(id)?.roles).toContain("icebreaker_support");
     for (const id of [
-      "onr_v1_322_euromarket-consortium",
-      "onr_v1_205_main-office-relocation",
+      534,
+      417,
     ])
       expect(
         AI_HINTS_BY_CARD.get(id)?.effects?.find(
@@ -432,10 +529,10 @@ describe("canonical passive strength investment", () => {
     expect(
       decision.evidence?.some((e) => e.startsWith("plan_scheduler:route:")),
     ).toBe(true);
-    expect(
-      decision.decisionDebug?.planFirstDecision?.executionOrigin
-        ?.leafPlanInstanceId,
-    ).toContain("runner.develop_board_and_hand");
+    const plan = decision.decisionDebug?.planFirstDecision;
+    expect(plan?.portfolio.find((instance) =>
+      instance.instanceId === plan.executionOrigin?.leafPlanInstanceId,
+    )?.moduleId).toBe("runner.develop_board_and_hand");
   });
 
   it.each(["poor", "no_mu", "matchpoint", "zero_strength"])(
@@ -492,9 +589,7 @@ describe("canonical passive strength investment", () => {
     const pf = decision.decisionDebug!.planFirstDecision!;
     expect(pf.selectedPlan?.moduleId).toBe("runner.develop_board_and_hand");
     expect(pf.route?.actionId).toBe(decision.actionId);
-    expect(pf.executionOrigin?.leafPlanInstanceId).toContain(
-      "runner.develop_board_and_hand",
-    );
+    expect(pf.executionOrigin?.leafPlanInstanceId).toBe(pf.leafExecutorInstanceId);
     const next = apply(state, "runner", decision.actionId!);
     expect(next.runner.rig.programs).toContain(evaluation.cardInstanceId);
     expect(next.runner.credits).toBe(36);
@@ -540,7 +635,7 @@ describe("canonical passive strength investment", () => {
       if (extraMemory) {
         state.runner.clicks = 4;
         const memoryCard = getPlayerView(state, "runner").own.gripOrHq.find(
-          (c) => c.definitionId === "onr_v1_146_zetatech-mem-chip",
+          (c) => c.definitionId === 358,
         )!;
         const install = getLegalActions(state, "runner").find(
           (a) =>
@@ -588,7 +683,7 @@ describe("canonical passive strength investment", () => {
           expect.arrayContaining([
             expect.objectContaining({
               moduleId: "runner.develop_board_and_hand",
-              target: { kind: "card", id: clownId },
+              target: { kind: "card", id: String(clownId) },
               viability: "ready",
             }),
           ]),
@@ -605,25 +700,25 @@ describe("canonical passive strength investment", () => {
   );
 
   it.each([
-    ["onr_v1_039_krash", "runner.rig_and_coverage"],
+    [251, "runner.rig_and_coverage"],
     [
-      "onr_proteus_139_eurocorpse-tm-spin-chip",
+      197,
       "runner.develop_board_and_hand",
     ],
-    ["onr_v1_011_cloak", "runner.recurring_economy"],
-    ["onr_v1_071_vewy-vewy-quiet", "runner.recurring_economy"],
-    ["onr_proteus_134_cortical-cybermodem", "runner.recurring_economy"],
-    ["onr_proteus_150_streetware-distributor", "runner.credit_bank"],
-  ])("binds canonical core card %s to its existing owner", (cardId, owner) => {
+    [223, "runner.recurring_economy"],
+    [283, "runner.recurring_economy"],
+    [192, "runner.recurring_economy"],
+    [208, "runner.credit_bank"],
+  ] as const)("binds canonical core card %s to its existing owner", (cardId, owner) => {
     const state = fixture();
     const f = RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(0)
       .withRunnerCardInGrip(cardId!);
-    if (cardId!.includes("spin-chip") || cardId === krashId) {
+    if (cardId === 197 || cardId === krashId) {
       f.withRunnerCardInGrip(krashId);
       state.runner.memoryUsed = 0;
     }
-    if (cardId === "onr_proteus_150_streetware-distributor")
+    if (cardId === 208)
       state.runner.credits = 5;
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",
@@ -653,7 +748,7 @@ describe("canonical passive strength investment", () => {
           ? input.playerView.own.gripOrHq.find(
               (c) => c.definitionId === cardId,
             )!.instanceId
-          : cardId;
+          : String(cardId);
       expect(ownPlans).toEqual(
         expect.arrayContaining([
           expect.objectContaining({

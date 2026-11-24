@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -23,21 +24,25 @@ import {
   type HiddenZoneNonSearchChoiceHandlerHost,
 } from "./nonsearch-choice-handlers";
 
-const offSiteId = "off_site_backups" as CardDefinitionId;
-const socialId = "social_engineering" as CardDefinitionId;
+const offSiteId = 3499602688 as CardDefinitionId;
+const socialId = 2227175182 as CardDefinitionId;
 const sourceId = "source" as CardInstanceId;
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"] = "resource",
-  title = id,
+  title = String(id),
 ): CardDefinition {
-  return { id: id as CardDefinitionId, type, title } as CardDefinition;
+  return {
+    id: id as CardDefinitionId,
+    type,
+    title: String(title),
+  } as CardDefinition;
 }
 
 function instance(
   cardId: CardInstanceId,
-  definitionId = cardId as string,
+  definitionId = syntheticCardDefinitionId(cardId),
   side: "corp" | "runner" = "runner",
 ): CardInstance {
   return {
@@ -121,7 +126,7 @@ function makeHost(
       input.instances?.[cardId] ??
         instance(
           cardId,
-          definitions[cardId]?.id ?? cardId,
+          definitions[cardId]?.id ?? syntheticCardDefinitionId(cardId),
           (input.corpHq ?? []).includes(cardId) ||
             (input.corpArchives ?? []).includes(cardId) ||
             (input.servers ?? []).some((server) => server.ice.includes(cardId))
@@ -161,7 +166,8 @@ function makeHost(
     legalAction,
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     cards: {
-      definitionFor: (cardId) => definitions[cardId] ?? definition(cardId),
+      definitionFor: (cardId) =>
+        definitions[cardId] ?? definition(syntheticCardDefinitionId(cardId)),
       corpUtilityForCard: (cardId) => input.corpUtilities?.[cardId],
       hasCorpUtilityKind: (cardId, kind) =>
         input.corpUtilities?.[cardId]?.kind === kind,
@@ -281,14 +287,10 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const host = makeHost({
       corpArchives: [sourceId, ice1, asset, ice2],
       definitions: {
-        [sourceId]: definition(
-          "onr_classic_018_reclamation-project",
-          "operation",
-          "Reclamation Project",
-        ),
-        [ice1]: definition("classic_ice_1", "ice", "Classic ICE 1"),
-        [ice2]: definition("classic_ice_2", "ice", "Classic ICE 2"),
-        [asset]: definition("classic_asset_1", "asset", "Classic Asset"),
+        [sourceId]: definition(22, "operation", "Reclamation Project"),
+        [ice1]: definition(1151099479, "ice", "Classic ICE 1"),
+        [ice2]: definition(1167877098, "ice", "Classic ICE 2"),
+        [asset]: definition(2704077880, "asset", "Classic Asset"),
       },
       corpUtilities: {
         [sourceId]: {
@@ -317,10 +319,10 @@ describe("hidden-zone nonsearch choice handlers", () => {
     expect(host.state.corp.hq).toEqual([ice1, ice2]);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "v1922_corp_archives_to_hq",
-      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      sourceDefinitionId: 22,
       movedCount: 2,
       archivesRevealCount: 2,
-      archivesRevealDefinitionIds: "classic_ice_1,classic_ice_2",
+      archivesRevealDefinitionIds: "1151099479,1167877098",
     });
   });
 
@@ -329,12 +331,8 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const host = makeHost({
       corpArchives: [sourceId, ice],
       definitions: {
-        [sourceId]: definition(
-          "onr_classic_018_reclamation-project",
-          "operation",
-          "Reclamation Project",
-        ),
-        [ice]: definition("classic_ice_1", "ice", "Classic ICE 1"),
+        [sourceId]: definition(22, "operation", "Reclamation Project"),
+        [ice]: definition(1151099479, "ice", "Classic ICE 1"),
       },
       corpUtilities: {
         [sourceId]: {
@@ -357,7 +355,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     });
     expect(host.state.corp.archives).toEqual([sourceId, ice]);
     expect(host.legalAction.payload).toMatchObject({
-      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      sourceDefinitionId: 22,
       movedCount: 0,
       archivesRevealCount: 0,
     });
@@ -365,11 +363,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const emptyHost = makeHost({
       corpArchives: [sourceId],
       definitions: {
-        [sourceId]: definition(
-          "onr_classic_018_reclamation-project",
-          "operation",
-          "Reclamation Project",
-        ),
+        [sourceId]: definition(22, "operation", "Reclamation Project"),
       },
       corpUtilities: {
         [sourceId]: {
@@ -385,7 +379,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     startCorpArchivesToHqChoice(emptyHost, sourceId);
     expect(emptyHost.state.pendingChoice).toBeUndefined();
     expect(emptyHost.legalAction.payload).toMatchObject({
-      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      sourceDefinitionId: 22,
       eligibleCount: 0,
       movedCount: 0,
       archivesRevealCount: 0,
@@ -397,12 +391,8 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const host = makeHost({
       corpHq: [hqCard],
       definitions: {
-        [sourceId]: definition(
-          "onr_classic_017_corporate-shuffle",
-          "operation",
-          "Corporate Shuffle",
-        ),
-        [hqCard]: definition("classic_hq_card", "operation", "HQ Card"),
+        [sourceId]: definition(21, "operation", "Corporate Shuffle"),
+        [hqCard]: definition(2795342430, "operation", "HQ Card"),
       },
       corpUtilities: {
         [sourceId]: {
@@ -424,7 +414,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
-      sourceDefinitionId: "onr_classic_017_corporate-shuffle",
+      sourceDefinitionId: 21,
       movedCount: 1,
     });
     expect(host.legalAction.payload).not.toHaveProperty("movedCardId");
@@ -669,7 +659,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     const ice = "ice_1" as CardInstanceId;
     const calls: Array<{ serverId: string; iceId: CardInstanceId }> = [];
     const server = {
-      id: "remote_1" as Exclude<ServerId, "new_remote">,
+      id: "r1" as Exclude<ServerId, "new_remote">,
       kind: "remote",
       label: "Remote 1",
       ice: [ice],
@@ -695,13 +685,13 @@ describe("hidden-zone nonsearch choice handlers", () => {
       "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target",
     );
 
-    host.playerAction = playerAction([`ice_${ice}`]);
+    host.playerAction = playerAction(["ice_r1.0"]);
     const result = handleHiddenZoneNonSearchChoice(host);
     expect(result.handled).toBe(true);
-    expect(calls).toEqual([{ serverId: "remote_1", iceId: ice }]);
+    expect(calls).toEqual([{ serverId: "r1", iceId: ice }]);
     expect(host.legalAction.payload).toMatchObject({
       autoPassChosenIce: true,
-      serverId: "remote_1",
+      serverId: "r1",
       chosenIcePosition: 0,
     });
   });
@@ -735,22 +725,25 @@ describe("hidden-zone nonsearch choice handlers", () => {
 
     expect(host.state.pendingChoice?.options).toEqual([
       {
-        id: `ice_${hiddenIce}`,
+        id: "ice_hq.0",
         label: "HQ ICE 1",
         publicLabel: "HQ ICE 1",
         value: `hq|${hiddenIce}`,
+        metadata: { targetServerId: "hq", targetIcePosition: 0 },
       },
       {
-        id: `ice_${firstQuandary}`,
+        id: "ice_hq.1",
         label: "Quandary (HQ ICE 2)",
         publicLabel: "HQ ICE 2",
         value: `hq|${firstQuandary}`,
+        metadata: { targetServerId: "hq", targetIcePosition: 1 },
       },
       {
-        id: `ice_${secondQuandary}`,
+        id: "ice_hq.2",
         label: "Quandary (HQ ICE 3)",
         publicLabel: "HQ ICE 3",
         value: `hq|${secondQuandary}`,
+        metadata: { targetServerId: "hq", targetIcePosition: 2 },
       },
     ]);
   });

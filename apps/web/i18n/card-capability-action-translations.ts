@@ -1,187 +1,193 @@
-import type { LegalAction } from "@netgrid/shared";
+import { isCanonicalCapabilityId, type CanonicalCapabilityId } from "@netgrid/shared";
+import type { LegalAction } from "../lib/presented-player-view";
 
+import {
+  actionPresentationNoun,
+  actionPresentationText,
+} from "./action-presentation";
 import type { AppLocale } from "./locale";
 
 type TranslatedCapabilityActionLocale = Exclude<AppLocale, "de">;
+const BBS_PAYOUT_CAPABILITY_ID: CanonicalCapabilityId = 635;
 
 export type CardCapabilityActionTranslationCatalog = Readonly<
-  Record<string, string>
+  Partial<Record<CanonicalCapabilityId, string>>
 >;
 
 const EN_CARD_CAPABILITY_ACTION_TRANSLATIONS = {
-  "onr_classic_001_data-fort-remapping:spend_remap_counter_end_run":
+  4:
     "Data Fort Remapping: End the run",
-  "onr_classic_024_sterdroid:corp_main_double_chosen_ice_strength":
+  36:
     "Sterdroid: double ICE strength",
-  "onr_classic_024_sterdroid:during_run_double_chosen_ice_strength":
+  37:
     "Sterdroid: double ICE strength",
-  "onr_classic_053_protected-resources:deposit_hosted_credits":
+  71:
     "Protected Resources: deposit credits",
-  "onr_classic_053_protected-resources:withdraw_hosted_credits":
+  72:
     "Protected Resources: withdraw credits",
-  "onr_proteus_020_digiconda:variable_rez_x": "Choose X for rez",
-  "onr_proteus_020_digiconda:net_damage_subroutine": "Deal 2 net damage",
-  "onr_proteus_020_digiconda:end_the_run_subroutine": "End the run",
-  "onr_proteus_061_ldl-traffic-analyzers:self_rez_during_trace_attempt":
+  104: "Choose X for rez",
+  103: "Deal 2 net damage",
+  102: "End the run",
+  167:
     "Rez LDL Traffic Analyzers during the trace",
-  "onr_proteus_061_ldl-traffic-analyzers:trace_window_spend_advancement_for_trace_credits":
+  168:
     "LDL Traffic Analyzers: spend 1 advancement counter for 5 temporary credits",
-  "onr_proteus_080_black-widow:select_ice_target": "Select ICE",
-  "onr_proteus_080_black-widow:break_sentry_subroutine":
+  187: "Select ICE",
+  185:
     "Break sentry subroutine",
-  "onr_proteus_080_black-widow:increase_strength": "+1 strength",
-  "onr_proteus_092_morphing-tool:select_breaker_subtype":
+  186: "+1 strength",
+  208:
     "Choose breaker subtype",
-  "onr_proteus_092_morphing-tool:change_breaker_subtype":
+  206:
     "Change breaker subtype",
-  "onr_proteus_092_morphing-tool:break_selected_subtype":
+  205:
     "Break a subroutine of the selected subtype",
-  "onr_proteus_092_morphing-tool:increase_strength": "+1 strength",
-  "onr_proteus_130_back-door-to-rivals:trace_base_link_two":
+  207: "+1 strength",
+  251:
     "Back Door to Rivals: use base link 2",
-  "onr_proteus_130_back-door-to-rivals:trace_post_bid_link_plus_one":
+  252:
     "Back Door to Rivals: +1 link",
-  "onr_proteus_138_deck-the:trace_base_link_five": "Deck, The: use base link 5",
-  "onr_proteus_138_deck-the:trace_post_bid_link_plus_one": "Deck, The: +1 link",
-  "onr_proteus_148_runner-sensei:trace_base_link_four":
+  259: "Deck, The: use base link 5",
+  260: "Deck, The: +1 link",
+  268:
     "Runner Sensei: use base link 4",
-  "onr_proteus_148_runner-sensei:trace_post_bid_link_plus_one":
+  269:
     "Runner Sensei: +1 link",
-  "onr_proteus_152_swiss-bank-account:trash_source_gain_two_credits":
+  273:
     "Swiss Bank Account: take 2 credits",
-  "onr_proteus_152_swiss-bank-account:pay_three_trash_source_gain_six":
+  272:
     "Swiss Bank Account: take 6 credits",
-  "onr_v1_003_baedekers-net-map:abilities_activated_trace_base_link_window_use_base_link":
+  278:
     "Baedeker’s Net Map: use base link 1",
-  "onr_v1_003_baedekers-net-map:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  279:
     "Baedeker’s Net Map: +1 link",
-  "onr_v1_004_bakdoor:abilities_activated_trace_base_link_window_use_base_link":
+  280:
     "Bakdoor™: use base link 3",
-  "onr_v1_004_bakdoor:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  281:
     "Bakdoor™: +1 link",
-  "onr_v1_149_access-to-arasaka:abilities_activated_trace_base_link_window_use_base_link":
+  431:
     "Access to Arasaka: use base link 4",
-  "onr_v1_149_access-to-arasaka:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  432:
     "Access to Arasaka: +1 link",
-  "onr_v1_150_access-to-kiribati:abilities_activated_trace_base_link_window_use_base_link":
+  433:
     "Access to Kiribati: use base link 1",
-  "onr_v1_150_access-to-kiribati:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  434:
     "Access to Kiribati: +1 link",
-  "onr_v1_152_back-door-to-hilliard:abilities_activated_trace_base_link_window_use_base_link":
+  436:
     "Back Door to Hilliard: use base link 2",
-  "onr_v1_152_back-door-to-hilliard:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  437:
     "Back Door to Hilliard: +1 link",
-  "onr_v1_153_back-door-to-orbital-air:abilities_activated_trace_base_link_window_use_base_link":
+  438:
     "Back Door to Orbital Air: use base link 2",
-  "onr_v1_153_back-door-to-orbital-air:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  439:
     "Back Door to Orbital Air: +1 link",
-  "onr_v1_154_broker:store_credits": "Broker: place 3 credits on Broker",
-  "onr_v1_154_broker:withdraw_credits": "Broker: take all credits from Broker",
-  "onr_v1_175_ronin-around:abilities_activated_runner_main_look_top_stack_take_matching":
+  440: "Broker: place 3 credits on Broker",
+  441: "Broker: take all credits from Broker",
+  462:
     "Ronin Around: search the top of the Stack for hardware",
-  "onr_v1_175_ronin-around:abilities_activated_runner_main_expose_installed_card":
+  461:
     "Ronin Around: expose an installed Corp card",
-  "onr_v1_182_submarine-uplink:abilities_activated_trace_base_link_window_use_base_link":
+  469:
     "Submarine Uplink: use base link 4",
-  "onr_v1_182_submarine-uplink:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  470:
     "Submarine Uplink: +1 link",
-  "onr_v1_318_department-of-truth-enhancement:abilities_activated_corp_main_add_hosted_credits":
+  641:
     "Department of Truth Enhancement: place 3 credits on this card",
-  "onr_v1_318_department-of-truth-enhancement:abilities_activated_corp_main_take_hosted_credits":
+  642:
     "Department of Truth Enhancement: take all hosted credits",
-  "onr_v1_347_vapor-ops:abilities_activated_corp_main_gain_credits":
+  665:
     "Vapor Ops: spend 1 advancement counter for 1 credit",
-  "onr_v1_347_vapor-ops:abilities_activated_corp_main_move_advancement_counters":
+  666:
     "Vapor Ops: move an advancement counter",
 } as const satisfies CardCapabilityActionTranslationCatalog;
 
 const FR_CARD_CAPABILITY_ACTION_TRANSLATIONS = {
-  "onr_classic_001_data-fort-remapping:spend_remap_counter_end_run":
+  4:
     "Data Fort Remapping : Mettre fin au piratage",
-  "onr_classic_024_sterdroid:corp_main_double_chosen_ice_strength":
+  36:
     "Sterdroid : doubler la force de la glace",
-  "onr_classic_024_sterdroid:during_run_double_chosen_ice_strength":
+  37:
     "Sterdroid : doubler la force de la glace",
-  "onr_classic_053_protected-resources:deposit_hosted_credits":
+  71:
     "Protected Resources : déposer des crédits",
-  "onr_classic_053_protected-resources:withdraw_hosted_credits":
+  72:
     "Protected Resources : retirer des crédits",
-  "onr_proteus_020_digiconda:variable_rez_x": "Choisir X pour le rezzage",
-  "onr_proteus_020_digiconda:net_damage_subroutine": "Infliger 2 dégâts réseau",
-  "onr_proteus_020_digiconda:end_the_run_subroutine": "Mettre fin au piratage",
-  "onr_proteus_061_ldl-traffic-analyzers:self_rez_during_trace_attempt":
+  104: "Choisir X pour le rezzage",
+  103: "Infliger 2 dégâts réseau",
+  102: "Mettre fin au piratage",
+  167:
     "Rezzer LDL Traffic Analyzers pendant la Trace",
-  "onr_proteus_061_ldl-traffic-analyzers:trace_window_spend_advancement_for_trace_credits":
+  168:
     "LDL Traffic Analyzers : dépenser 1 pion Avancement pour 5 crédits temporaires",
-  "onr_proteus_080_black-widow:select_ice_target": "Choisir une glace",
-  "onr_proteus_080_black-widow:break_sentry_subroutine":
+  187: "Choisir une glace",
+  185:
     "Neutraliser une routine de sentinelle",
-  "onr_proteus_080_black-widow:increase_strength": "+1 force",
-  "onr_proteus_092_morphing-tool:select_breaker_subtype":
+  186: "+1 force",
+  208:
     "Choisir un sous-type de brise-glace",
-  "onr_proteus_092_morphing-tool:change_breaker_subtype":
+  206:
     "Changer le sous-type de brise-glace",
-  "onr_proteus_092_morphing-tool:break_selected_subtype":
+  205:
     "Neutraliser une routine du sous-type choisi",
-  "onr_proteus_092_morphing-tool:increase_strength": "+1 force",
-  "onr_proteus_130_back-door-to-rivals:trace_base_link_two":
+  207: "+1 force",
+  251:
     "Back Door to Rivals : utiliser le Link de base 2",
-  "onr_proteus_130_back-door-to-rivals:trace_post_bid_link_plus_one":
+  252:
     "Back Door to Rivals : +1 Link",
-  "onr_proteus_138_deck-the:trace_base_link_five":
+  259:
     "Deck, The : utiliser le Link de base 5",
-  "onr_proteus_138_deck-the:trace_post_bid_link_plus_one":
+  260:
     "Deck, The : +1 Link",
-  "onr_proteus_148_runner-sensei:trace_base_link_four":
+  268:
     "Runner Sensei : utiliser le Link de base 4",
-  "onr_proteus_148_runner-sensei:trace_post_bid_link_plus_one":
+  269:
     "Runner Sensei : +1 Link",
-  "onr_proteus_152_swiss-bank-account:trash_source_gain_two_credits":
+  273:
     "Swiss Bank Account : prendre 2 crédits",
-  "onr_proteus_152_swiss-bank-account:pay_three_trash_source_gain_six":
+  272:
     "Swiss Bank Account : prendre 6 crédits",
-  "onr_v1_003_baedekers-net-map:abilities_activated_trace_base_link_window_use_base_link":
+  278:
     "Baedeker’s Net Map : utiliser le Link de base 1",
-  "onr_v1_003_baedekers-net-map:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  279:
     "Baedeker’s Net Map : +1 Link",
-  "onr_v1_004_bakdoor:abilities_activated_trace_base_link_window_use_base_link":
+  280:
     "Bakdoor™ : utiliser le Link de base 3",
-  "onr_v1_004_bakdoor:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  281:
     "Bakdoor™ : +1 Link",
-  "onr_v1_149_access-to-arasaka:abilities_activated_trace_base_link_window_use_base_link":
+  431:
     "Access to Arasaka : utiliser le Link de base 4",
-  "onr_v1_149_access-to-arasaka:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  432:
     "Access to Arasaka : +1 Link",
-  "onr_v1_150_access-to-kiribati:abilities_activated_trace_base_link_window_use_base_link":
+  433:
     "Access to Kiribati : utiliser le Link de base 1",
-  "onr_v1_150_access-to-kiribati:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  434:
     "Access to Kiribati : +1 Link",
-  "onr_v1_152_back-door-to-hilliard:abilities_activated_trace_base_link_window_use_base_link":
+  436:
     "Back Door to Hilliard : utiliser le Link de base 2",
-  "onr_v1_152_back-door-to-hilliard:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  437:
     "Back Door to Hilliard : +1 Link",
-  "onr_v1_153_back-door-to-orbital-air:abilities_activated_trace_base_link_window_use_base_link":
+  438:
     "Back Door to Orbital Air : utiliser le Link de base 2",
-  "onr_v1_153_back-door-to-orbital-air:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  439:
     "Back Door to Orbital Air : +1 Link",
-  "onr_v1_154_broker:store_credits": "Broker : placer 3 crédits sur Broker",
-  "onr_v1_154_broker:withdraw_credits":
+  440: "Broker : placer 3 crédits sur Broker",
+  441:
     "Broker : prendre tous les crédits de Broker",
-  "onr_v1_175_ronin-around:abilities_activated_runner_main_look_top_stack_take_matching":
+  462:
     "Ronin Around : chercher un matériel au sommet de la pile",
-  "onr_v1_175_ronin-around:abilities_activated_runner_main_expose_installed_card":
+  461:
     "Ronin Around : exposer une carte Corpo installée",
-  "onr_v1_182_submarine-uplink:abilities_activated_trace_base_link_window_use_base_link":
+  469:
     "Submarine Uplink : utiliser le Link de base 4",
-  "onr_v1_182_submarine-uplink:abilities_activated_trace_post_bid_link_window_increase_trace_link":
+  470:
     "Submarine Uplink : +1 Link",
-  "onr_v1_318_department-of-truth-enhancement:abilities_activated_corp_main_add_hosted_credits":
+  641:
     "Department of Truth Enhancement : placer 3 crédits sur cette carte",
-  "onr_v1_318_department-of-truth-enhancement:abilities_activated_corp_main_take_hosted_credits":
+  642:
     "Department of Truth Enhancement : prendre tous les crédits hébergés",
-  "onr_v1_347_vapor-ops:abilities_activated_corp_main_gain_credits":
+  665:
     "Vapor Ops : dépenser 1 pion Avancement pour 1 crédit",
-  "onr_v1_347_vapor-ops:abilities_activated_corp_main_move_advancement_counters":
+  666:
     "Vapor Ops : déplacer un pion Avancement",
 } as const satisfies CardCapabilityActionTranslationCatalog;
 
@@ -197,29 +203,46 @@ export const CARD_CAPABILITY_ACTION_TRANSLATION_CATALOGS: Readonly<
 
 export function cardCapabilityIdForAction(
   action: Pick<LegalAction, "abilityRef" | "payload">,
-): string | null {
+): CanonicalCapabilityId | null {
   const abilityRefId = action.abilityRef?.sourceAbilityId;
   const payloadId = action.payload?.cardImplementationAbilityId;
   if (
-    typeof abilityRefId === "string" &&
-    typeof payloadId === "string" &&
+    (abilityRefId !== undefined && !isCanonicalCapabilityId(abilityRefId)) ||
+    (payloadId !== undefined && !isCanonicalCapabilityId(payloadId))
+  ) {
+    return null;
+  }
+  if (
+    isCanonicalCapabilityId(abilityRefId) &&
+    isCanonicalCapabilityId(payloadId) &&
     abilityRefId !== payloadId
   ) {
     return null;
   }
-  if (typeof abilityRefId === "string" && abilityRefId.length > 0)
-    return abilityRefId;
-  return typeof payloadId === "string" && payloadId.length > 0
-    ? payloadId
-    : null;
+  return abilityRefId ?? payloadId ?? null;
 }
 
 export function localizedCardCapabilityActionLabel(
-  action: Pick<LegalAction, "abilityRef" | "payload">,
-  locale: TranslatedCapabilityActionLocale,
+  action: Pick<LegalAction, "type" | "abilityRef" | "payload">,
+  locale: AppLocale,
 ): string | null {
   const capabilityId = cardCapabilityIdForAction(action);
-  return capabilityId
+  if (
+    action.type === "activated_card_ability" &&
+    capabilityId === BBS_PAYOUT_CAPABILITY_ID
+  ) {
+    const count = action.payload?.hostedCreditTakeAmount;
+    if (typeof count !== "number" || !Number.isSafeInteger(count) || count < 1)
+      throw new Error(
+        `card_action_invalid_hosted_credit_take_amount:${capabilityId}`,
+      );
+    return actionPresentationText(locale, "actionTakeCreditsFromThisCard", {
+      card: "BBS Whispering Campaign",
+      count,
+      credits: actionPresentationNoun(locale, "credit", count),
+    });
+  }
+  return capabilityId && locale !== "de"
     ? (CARD_CAPABILITY_ACTION_TRANSLATION_CATALOGS[locale][capabilityId] ??
         null)
     : null;

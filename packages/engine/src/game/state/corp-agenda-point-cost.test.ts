@@ -14,14 +14,14 @@ function fixture() {
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_classic_004_theorem-proof", quantity: 3 },
-        { id: "onr_classic_001_data-fort-remapping", quantity: 3 },
+        { id: 8, quantity: 3 },
+        { id: 5, quantity: 3 },
       ],
     },
   });
   const scored = [
-    "onr_classic_004_theorem-proof",
-    "onr_classic_001_data-fort-remapping",
+    8,
+    5,
   ].map(
     (def) =>
       Object.values(state.cardInstances).find((c) => c.definitionId === def)!,

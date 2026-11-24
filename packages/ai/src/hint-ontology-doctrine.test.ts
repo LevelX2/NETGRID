@@ -7,11 +7,11 @@ describe("AI hint ontology doctrine diagnostics", () => {
       deckSnapshotId: "ontology-corp-pilot",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_210_political-overthrow", quantity: 2 },
-        { cardId: "onr_v1_192_corporate-boon", quantity: 1 },
-        { cardId: "onr_v1_249_hunter", quantity: 2 },
-        { cardId: "onr_v1_302_scorched-earth", quantity: 2 },
-        { cardId: "onr_v1_366_red-herrings", quantity: 1 },
+        { cardId: 422, quantity: 2 },
+        { cardId: 404, quantity: 1 },
+        { cardId: 461, quantity: 2 },
+        { cardId: 514, quantity: 2 },
+        { cardId: 578, quantity: 1 },
       ],
     });
 
@@ -22,12 +22,31 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(summary.effectCounts.byKind.tag_source).toBe(2);
     expect(summary.effectCounts.byKind.tag_punish_payoff).toBe(2);
     expect(summary.scoredAgendaActions.cardIds).toEqual([
-      "onr_v1_192_corporate-boon",
-      "onr_v1_210_political-overthrow",
+      404,
+      422,
     ]);
     expect(summary.tagPunish.hasTagSourceAndPayoff).toBe(true);
     expect(summary.lineSupportCounts.byKind["corp.tag_trace_punish"]).toBe(2);
     expect(summary.remoteRoles.roleCounts.agenda_steal_tax).toBe(1);
+  });
+
+  it("counts repeated deck rows once and ignores entries with no copies", () => {
+    const summary = buildAiDeckOntologySummary({
+      deckSnapshotId: "split-deck",
+      side: "corp",
+      cards: [
+        { cardId: 514, quantity: 1 },
+        { cardId: 514, quantity: 2 },
+        { cardId: 461, quantity: 0 },
+      ],
+    });
+    expect(summary).toMatchObject({
+      totalCardQuantity: 3,
+      uniqueCardCount: 1,
+      structuredCardCount: 1,
+      tagPunish: { hasTagSourceAndPayoff: false, tagSourceCardIds: [] },
+    });
+    expect(summary.effectCounts.byKind.tag_punish_payoff).toBe(3);
   });
 
   it("aggregates runner breaker coverage and search ontology fields", () => {
@@ -35,11 +54,11 @@ describe("AI hint ontology doctrine diagnostics", () => {
       deckSnapshotId: "ontology-runner-pilot",
       side: "runner",
       cards: [
-        { cardId: "onr_v1_037_japanese-water-torture", quantity: 2 },
-        { cardId: "onr_v1_059_self-modifying-code", quantity: 1 },
-        { cardId: "onr_v1_043_mystery-box", quantity: 1 },
-        { cardId: "onr_v1_057_scatter-shot", quantity: 2 },
-        { cardId: "onr_v1_050_r-and-d-protocol-files", quantity: 1 },
+        { cardId: 249, quantity: 2 },
+        { cardId: 271, quantity: 1 },
+        { cardId: 255, quantity: 1 },
+        { cardId: 269, quantity: 2 },
+        { cardId: 262, quantity: 1 },
       ],
     });
 
@@ -47,7 +66,7 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(summary.breakerCoverage.coverageCounts.wall).toBe(2);
     expect(summary.breakerCoverage.breakerCards).toContainEqual(
       expect.objectContaining({
-        cardId: "onr_v1_037_japanese-water-torture",
+        cardId: 249,
         coverage: ["wall"],
         breakCost: 0,
       }),
@@ -70,16 +89,16 @@ describe("AI hint ontology doctrine diagnostics", () => {
       deckSnapshotId: "ontology-quality-pilot",
       side: "runner",
       cards: [
-        { cardId: "runner_identity_001", quantity: 1 },
-        { cardId: "onr_v1_037_japanese-water-torture", quantity: 1 },
+        { cardId: 587, quantity: 1 },
+        { cardId: 249, quantity: 1 },
       ],
     });
 
     expect(summary.quality.needsHumanReviewCardIds).not.toContain(
-      "runner_identity_001",
+      587,
     );
     expect(summary.quality.lowConfidenceCardIds).not.toContain(
-      "runner_identity_001",
+      587,
     );
     expect(summary.structuredCardCount).toBe(1);
     expect(JSON.stringify(summary)).not.toContain("planWeights");
@@ -91,7 +110,7 @@ describe("AI hint ontology doctrine diagnostics", () => {
       buildAiDeckOntologySummary({
         deckSnapshotId: "ontology-invalid-quantity",
         side: "runner",
-        cards: [{ cardId: "runner_identity_001", quantity: Number.NaN }],
+        cards: [{ cardId: 587, quantity: Number.NaN }],
       }),
     ).toThrow(/deck ontology quantity must be a non-negative safe integer/);
   });

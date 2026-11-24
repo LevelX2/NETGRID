@@ -29,7 +29,7 @@ it("preserves current terminal R&D defense instead of emptying its bank for a no
   )!;
   expect(score.costs).toEqual([]);
   expect(
-    input.legalActions.find((action) => action.actionId === "corp.gain_credit"),
+    input.legalActions.find((action) => action.actionId === "cb"),
   ).toMatchObject({
     costs: [{ clicks: 1 }],
     payload: { gainCreditsAmount: 1 },
@@ -41,7 +41,7 @@ it("preserves current terminal R&D defense instead of emptying its bank for a no
     runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.gain_credit");
+  expect(decision.actionId).toBe("cb");
   expect(decision.fallbackUsed).toBe(false);
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   const root = portfolio.instances.find(
@@ -51,10 +51,12 @@ it("preserves current terminal R&D defense instead of emptying its bank for a no
   const scoreOwner = portfolio.instances.find(
     (p) =>
       p.moduleId === "corp.score_agenda" &&
-      p.instanceId.includes("corporate-war"),
+      (p.moduleState as { signal: CorpScoreProjectSignal }).signal
+        .agendaInstanceId === score.source,
   )!;
   expect(scoreOwner.moduleState).toMatchObject({
     signal: {
+      agendaDefinitionId: 408,
       feasible: false,
       evidenceCode: expect.stringContaining(
         "corp_same_turn_score_consumes_funded_defense_reserve",
@@ -86,7 +88,7 @@ it.each([
   const score = input.legalActions.find((a) => a.type === "score_agenda")!;
   const project: CorpScoreProjectSignal = {
     projectId: "current-score",
-    agendaDefinitionId: "onr_v1_196_corporate-war",
+    agendaDefinitionId: 408,
     agendaInstanceId: score.source,
     agendaPoints: 3,
     phase: "score_agenda",
@@ -100,8 +102,7 @@ it.each([
   if (variant === "more_clicks") input.playerView.own.clicks = 2;
   if (variant === "terminal_score") project.terminalScore = true;
   if (variant === "expired_score") score.expiresAtStateVersion--;
-  if (variant === "ordinary_agenda")
-    project.agendaDefinitionId = "onr_v1_203_hostile-takeover";
+  if (variant === "ordinary_agenda") project.agendaDefinitionId = 415;
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: "corp",
@@ -122,5 +123,5 @@ it.each([
   }
   expect([
     ...corpBasicCreditsDominatedByCurrentScore(input, candidates, [project]),
-  ]).toEqual(variant === "last_credit" ? ["corp.gain_credit"] : []);
+  ]).toEqual(variant === "last_credit" ? ["cb"] : []);
 });

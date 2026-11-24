@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-  createObservedAccessOutcome,
   createProjectedAccessOutcome,
+  observedAccessOutcomeEvidence,
 } from "./access-outcome-projection";
 
 describe("access outcome projection", () => {
   it("keeps projected access outcomes distinct from observed outcomes", () => {
     const projected = createProjectedAccessOutcome({
-      serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_326_holovid-campaign",
+      serverId: "r1",
+      knownRootDefinitionId: 538,
       projectedIntent: "decline",
       reason: "reserve_would_break",
       stateVersion: 12,
@@ -24,16 +24,15 @@ describe("access outcome projection", () => {
   });
 
   it("models observed access outcomes separately", () => {
-    const observed = createObservedAccessOutcome({
-      serverId: "remote_1",
-      knownRootDefinitionId: "onr_v1_326_holovid-campaign",
+    const observed = observedAccessOutcomeEvidence({
+      serverId: "r1",
+      knownRootDefinitionId: 538,
       observedIntent: "trash",
       reason: "trash_affordable",
       stateVersion: 13,
     });
 
-    expect(observed.kind).toBe("observed_access_outcome");
-    expect(observed.evidence).toEqual(
+    expect(observed).toEqual(
       expect.arrayContaining([
         "observed_access_outcome_intent:trash",
         "observed_access_outcome_reason:trash_affordable",

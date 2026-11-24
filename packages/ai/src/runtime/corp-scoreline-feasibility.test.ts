@@ -4,13 +4,50 @@ import { aiInput } from "../semantic-ai-runtime-cutover.test-support";
 import { corpScorelineFeasibilityForDecisionInput } from "./corp-scoreline-feasibility";
 
 describe("corpScorelineFeasibilityForDecisionInput", () => {
-  it("counts mandatory draw windows instead of raw deck cards when a public extra draw is active", () => {
+  it("subtracts printed agendas that are scored or removed while using actual Corp score", () => {
+    const input = aiInput("corp", []);
+    const definitionId = 403;
+    const card = {
+      definitionId,
+      known: true as const,
+      type: "agenda" as const,
+    };
+    input.playerView.own.agendaPoints = 1;
+    input.playerView.own.scoreArea = [
+      { ...card, instanceId: "scored", agendaPoints: 1 },
+    ];
+    input.playerView.specialZones = {
+      setAside: [],
+      setAsideCount: 0,
+      removedFromGameCount: 1,
+      removedFromGame: [{ ...card, instanceId: "removed", agendaPoints: 2 }],
+    };
+    Object.assign(input, {
+      ownDeckSnapshot: {
+        deckSnapshotId: "scoreline-physical-inventory",
+        side: "corp",
+        cards: [{ cardId: definitionId, quantity: 4 }],
+      },
+    });
+
+    expect(corpScorelineFeasibilityForDecisionInput(input)).toMatchObject({
+      remainingAgendaPoints: 4,
+      maxReachablePoints: 5,
+      feasible: false,
+    });
+  });
+
+  it("uses current mandatory draws when the previous draw included optional cards", () => {
     const input = aiInput("corp", []);
     input.playerView.own.agendaPoints = 6;
     input.playerView.opponent.agendaPoints = 0;
     input.playerView.own.stackOrRdCount = 2;
+    input.playerView.corpMandatoryBaseDrawQuote = {
+      baseCount: 2,
+      virusDrawCount: 1,
+    };
     input.playerView.publicEvents.push({
-      eventId: "evt-extra-mandatory-draw",
+      eventId: 2,
       type: "mandatory_draw",
       stateVersionBefore: 0,
       stateVersionAfter: 1,
@@ -21,13 +58,13 @@ describe("corpScorelineFeasibilityForDecisionInput", () => {
         label: "Korp Pflichtkarten ziehen",
         corpMandatoryDraw: true,
         corpMandatoryCardCount: 1,
-        corpMandatoryAdditionalCardCount: 1,
-        corpMandatoryTotalBaseDrawCount: 2,
+        corpMandatoryAdditionalCardCount: 3,
+        corpMandatoryTotalBaseDrawCount: 4,
         corpMandatoryAgendaCardCount: 0,
-        corpMandatoryOptionalAgendaCardCount: 0,
+        corpMandatoryOptionalAgendaCardCount: 2,
         corpMandatorySkivvissCardCount: 1,
         corpMandatoryAdditionalSourceCount: 1,
-        corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
+        corpMandatoryAdditionalSourceDefinitionIds: 276,
       },
     });
     Object.assign(input, {
@@ -36,7 +73,7 @@ describe("corpScorelineFeasibilityForDecisionInput", () => {
         side: "corp",
         cards: [
           {
-            cardId: "onr_v1_191_black-ice-quality-assurance",
+            cardId: 403,
             quantity: 4,
           },
         ],

@@ -1,10 +1,11 @@
 import type { PlayerView, PublicGameEvent } from "@netgrid/shared";
 import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
+import { parseCardDefinitionIdCsv } from "./card-definition-id-input";
 
 export type PublicInstalledExposure = Readonly<{
   serverId: string;
   positionKey: string;
-  definitionId: string;
+  definitionId: number;
 }>;
 
 /** Projects only the Engine's aligned public multi-expose observation facts. */
@@ -54,10 +55,11 @@ export function publicInstalledExposures(
   ) {
     return fail();
   }
-  const definitionIds = definitions === "" ? [] : definitions.split(",");
+  const definitionIds = parseCardDefinitionIdCsv(definitions);
   const serverIds = servers === "" ? [] : servers.split(",");
   const positionKeys = positions === "" ? [] : positions.split(",");
   if (
+    !definitionIds ||
     definitionIds.length !== serverIds.length ||
     definitionIds.length !== positionKeys.length ||
     (payload.revealedCount !== undefined &&
@@ -72,8 +74,7 @@ export function publicInstalledExposures(
     const key = `${serverId}:${positionKey}`;
     if (
       !definitionId ||
-      definitionId.trim() !== definitionId ||
-      !/^(hq|rd|archives|remote_\d+)$/.test(serverId) ||
+      !/^(hq|rd|archives|r\d+)$/.test(serverId) ||
       !/^(ice|root):\d+$/.test(positionKey) ||
       seen.has(key)
     ) {

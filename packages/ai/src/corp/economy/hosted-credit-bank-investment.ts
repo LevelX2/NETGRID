@@ -9,7 +9,7 @@ import {
   clickCreditBankProfile,
 } from "../../plans/credit-bank-investment";
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
-import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
+import { corpRemoteContestabilityAssessment } from "../defense/corp-remote-contestability";
 import { corpVisibleLiquidityDemandTarget } from "./economy-domain-signals";
 import { currentCorpHostedBankCycleQuotes } from "./hosted-credit-bank-cycle";
 import { corpFundedDefenseContinuationWindow } from "../defense/corp-funded-continuation-window";

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { beforeEach, expect, it } from "vitest";
 import { createGameAfterSetup } from "@netgrid/engine";
@@ -39,9 +40,9 @@ it("carries the real global other-fort quote through both DTO action lists", () 
   RealEngineFixtureBuilder.forState(state)
     .withCorpHqSize(0)
     .withCorpCredits(12)
-    .withCorpCardInHq("onr_v1_232_crystal-wall")
-    .withCorpIceOnServer("hq", "onr_v1_237_data-wall")
-    .withCorpRemoteRoot("rd", "onr_v1_324_fortress-architects");
+    .withCorpCardInHq(444)
+    .withCorpIceOnServer("hq", 449)
+    .withCorpRemoteRoot("rd", 536);
   const input = buildAiDecisionInputDto(
     buildAiDecisionInput(state, "corp", {
       difficulty: "hard",
@@ -57,7 +58,7 @@ it("carries the real global other-fort quote through both DTO action lists", () 
       (a) =>
         a.type === "rez_card" &&
         state.cardInstances[a.source!]?.definitionId ===
-          "onr_v1_324_fortress-architects",
+          536,
     )!;
     const quote = JSON.parse(
       rez.payload!.rootRezIceInstallCostQuoteJson as string,
@@ -104,7 +105,7 @@ function addGlobalQuotes(input: AiDecisionInput) {
       s.root.some(
         (c) =>
           c.instanceId === action.source &&
-          c.definitionId === "onr_v1_324_fortress-architects",
+          c.definitionId === 536,
       ),
     );
     if (!server) continue;
@@ -151,7 +152,7 @@ for (const decision of [80, 126])
       (a) => a.actionId === after.actionId,
     )!;
     expect(rez.type).toBe("rez_card");
-    expect(rez.source).toContain("fortress-architects");
+    expect(referencesDefaultDeckCard(rez.source, 536)).toBe(true);
     expect(after.reasonCode).toBe("plan_first.corp.defend_servers");
     expect(after.decisionDebug?.planFirstDecision?.selectedStep).toEqual(
       before.decisionDebug?.planFirstDecision?.selectedStep,
@@ -167,14 +168,14 @@ it("funds the actual D80 install/rez gap from the current counter payout first",
     result = choose(cp);
   expect(cp.input.playerView.own.credits).toBe(2);
   expect(result.actionId).toBe(
-    "corp.activated_card_ability.corp_onr_v1_193_corporate-coup_1.corp_onr_v1_193_corporate-coup_1.activated.onr_v1_193_corporate-coup:abilities_activated_corp_main_take_hosted_credits",
+    "c1.c2i5.c2i5.activated.483",
   );
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
     selectedStep: {
-      parentInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      parentInstanceId: "penw02zfrkklof54c2nuye5att",
       needId:
-        "install:rd:corp.install_card.corp_onr_v1_232_crystal-wall_2.rd.corp_onr_v1_232_crystal-wall_2.1",
+        "install:rd:cc.c2qu.rd.c2qu.1",
     },
   });
 });

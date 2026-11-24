@@ -6,7 +6,7 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
-import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-discovery-support";
+import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-install-discovery";
 import {
   v162CardReleaseGame,
   moveCorpCardToHq,
@@ -26,7 +26,7 @@ function checkpoint() {
     native.input,
   ) as AiDecisionInputWithDeckCapabilities;
   const source = input.playerView.own.gripOrHq.find(
-    (c) => c.definitionId === "onr_v1_320_encoder-inc",
+    (c) => c.definitionId === 532,
   )!;
   const action = input.legalActions.find(
     (a) => a.source === source.instanceId && a.type === "install_card",
@@ -96,8 +96,10 @@ describe("global ICE support installation admission (SP-207)", () => {
     const selected = chooseAiAction(input);
     expect(selected.actionId).toBe(actionId);
     expect(
-      selected.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-    ).toContain("plan:corp.defend_servers:");
+      selected.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === selected.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("corp.defend_servers");
   });
   it.each([
     "targets",
@@ -119,7 +121,7 @@ describe("global ICE support installation admission (SP-207)", () => {
       p.postInstallRezQuoteCardId = "wrong_source";
     if (condition === "existing_target")
       input.playerView.servers.push({
-        id: p.postInstallRezQuoteProjectedServerId as `remote_${number}`,
+        id: p.postInstallRezQuoteProjectedServerId as `r${number}`,
         label: "Already existing target",
         ice: [],
         root: [],

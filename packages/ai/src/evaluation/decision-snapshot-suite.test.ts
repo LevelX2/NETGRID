@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -56,6 +57,18 @@ describe("DecisionSnapshotSuite", () => {
 
     expect(evaluation.passed).toBe(true);
     expect(evaluation.preferredGoalFamilyMatched).toBe(true);
+  });
+
+  it("rejects a trace with a valid action id from a different state", () => {
+    const snapshot = playStrengthSnapshotCorpus()[0]!;
+    const frame = buildDecisionSnapshotFrame(snapshot);
+    const trace = buildSemanticShadowDecision(frame);
+    trace.frameSummary.stateVersion -= 1;
+    const evaluation = evaluateDecisionSnapshot({ snapshot, frame, trace });
+    expect(evaluation.passed).toBe(false);
+    expect(evaluation.evidence).toContain(
+      "snapshot_trace_identity_matched:false",
+    );
   });
 
   it("evaluates the play-strength snapshot corpus without forbidden mistakes", () => {
@@ -268,7 +281,7 @@ function playStrengthSnapshotCorpus(): DecisionSnapshot[] {
       "runner",
       [
         legalAction("run-remote", "start_run", "runner", {
-          payload: { serverId: "remote_1" },
+          payload: { serverId: "r1" },
         }),
         legalAction("draw-1", "draw_card", "runner"),
       ],
@@ -285,7 +298,7 @@ function playStrengthSnapshotCorpus(): DecisionSnapshot[] {
         runner: {
           runTargets: [
             runTarget({
-              targetServerId: "remote_1",
+              targetServerId: "r1",
               targetKind: "remote",
               accessPayoff: "agenda",
               recommendation: "run_now",
@@ -347,7 +360,7 @@ function playStrengthSnapshotCorpus(): DecisionSnapshot[] {
         legalAction("gain-1", "gain_credit", "corp"),
         legalAction("rez-ice", "rez_ice", "corp", {
           credits: 4,
-          payload: { serverId: "remote_1" },
+          payload: { serverId: "r1" },
         }),
       ],
       {
@@ -570,7 +583,7 @@ function legalAction(
 function visibleCard(cardId: string) {
   return {
     instanceId: `${cardId}-instance`,
-    definitionId: cardId,
+    definitionId: syntheticCardDefinitionId(cardId),
     title: cardId,
     side: "runner",
     type: "identity",

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -5,6 +6,7 @@ import {
   getLegalActions,
   getPlayerView,
   hashGameState,
+  replayEvents,
 } from "@netgrid/engine";
 import type { GameState, LegalAction } from "@netgrid/shared";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -16,7 +18,10 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
-import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import {
+  buildAiDecisionInput,
+  type AiDecisionInputWithDeckCapabilities,
+} from "./ai-decision-input";
 import { createRunnerRandomBreakOrDamageEncounterContext } from "./runner-blink-encounter-break-context";
 import {
   buildRandomBreakOrDamageRiskAssessment,
@@ -93,14 +98,14 @@ function take(
 }
 function risk(input: AiDecisionInputWithDeckCapabilities, action: LegalAction) {
   return createRunnerRandomBreakOrDamageEncounterContext({
-    sourceDefinitionIdForAction: () => "onr_v1_007_blink",
+    sourceDefinitionIdForAction: () => 219,
     randomBreakOrDamageRiskProfileForDefinitionId,
     breakSubroutineIndexesForAction,
     encounteredSubroutines: (i) =>
       currentEncounteredIceCard(i)?.effectiveRunQuote?.subroutines ?? [],
     buildRandomBreakOrDamageRiskAssessment,
     isImmediateSafetyThreatSubroutine,
-    isRemoteServerTarget: (s) => s?.startsWith("remote_") ?? false,
+    isRemoteServerTarget: isRemoteServerId,
     visibleRootIsKnownAgenda: (c) => c.known && c.type === "agenda",
   }).randomBreakOrDamageRiskAssessmentForEncounterBreak(input, action);
 }
@@ -136,7 +141,7 @@ it("normal native run executor tries the ETR instead of risking damage on zero C
   expect(a.type).toBe("break_subroutine");
   expect(a.payload?.subroutineIndex).toBe(1);
   expect(d.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.convert_run_window",
@@ -172,7 +177,7 @@ it("native three-Core rescue is admitted before guaranteed negative hand limit a
     "runner.convert_run_window",
   );
   expect(d.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ahq",
+    "pa7nez1ioecg7mf06q1uwqq57o",
   );
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
   const forced = take(
@@ -240,7 +245,7 @@ it("does not use an encounter survival fact to waive pre-run risk", () => {
     context: "run_path",
     certainLossRescue: true,
     riskProfile:
-      randomBreakOrDamageRiskProfileForDefinitionId("onr_v1_007_blink")!,
+      randomBreakOrDamageRiskProfileForDefinitionId(219)!,
   });
   expect(r.certainLossRescue).toBeUndefined();
   expect(randomBreakOrDamageRiskShouldAvoidRun(r)).toBe(true);
@@ -252,29 +257,38 @@ it("binds the native Downsizing rescue at scoring and consumes exactly that cont
   expect(input.playerView.own.stackOrRdCount).toBe(0);
   expect(input.playerView.own.clicks).toBe(0);
   const score = chooseAiAction(input);
-  expect(score.actionId).toBe(
-    "corp.score_agenda.corp_onr_v1_194_corporate-downsizing_2.corp_onr_v1_194_corporate-downsizing_2",
-  );
+  expect(score.actionId).toBe("cr.c2ie.c2ie");
   expect(score.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "corp.score_agenda",
   );
   const scored = take(f.state, score.actionId);
-  expect(hashGameState(scored)).toBe(f.nextCheckpoint.stateHash);
-  const next = f.nextCheckpoint.input as AiDecisionInputWithDeckCapabilities;
-  next.planningStateIdentity = buildPlanningStateIdentity(next);
+  expect(scored.corp.scoreArea).toContain("c2ie");
+  expect(scored.pendingChoice).toMatchObject({
+    side: "corp",
+    stateVersion: scored.stateVersion,
+    source: `scored_agenda.hq_agenda_shuffle_credits:c2ie:2:${scored.stateVersion}`,
+  });
+  const next = buildAiDecisionInput(scored, "corp", {
+    difficulty: input.difficulty,
+    profileId: input.profileId,
+    ownDeckSnapshot: input.ownDeckSnapshot!,
+  });
   const choice = chooseAiAction(next);
-  expect(choice.actionId).toBe("corp.resolve_choice");
+  expect(choice.actionId).toBe("cn");
   expect(choice.selectedChoices).toEqual({
     choiceId: "scored_agenda_hq_agenda_shuffle_credits_314",
-    selectedOptionIds: ["card_corp_onr_v1_196_corporate-war_2"],
+    selectedOptionIds: ["card_c2iu"],
   });
   expect(choice.fallbackUsed || choice.timeoutUsed).toBe(false);
   const replenished = take(scored, choice.actionId, choice.selectedChoices);
   expect(getPlayerView(replenished, "corp").own.stackOrRdCount).toBe(1);
   expect(replenished.corp.credits).toBe(11);
-  expect(hashGameState(replenished)).toBe(
-    hashGameState(take(scored, choice.actionId, choice.selectedChoices)),
+  const replay = replayEvents(
+    f.state,
+    replenished.eventLog.slice(f.state.eventLog.length),
   );
+  expect(replay.ok).toBe(true);
+  expect(hashGameState(replay.state)).toBe(hashGameState(replenished));
 });
 
 it("retains the ordinary empty selection when a real R&D card prevents the next-draw loss", () => {
@@ -287,7 +301,7 @@ it("retains the ordinary empty selection when a real R&D card prevents the next-
   restore(f, input);
   const score = chooseAiAction(input);
   expect(score.actionId).toBe(
-    "corp.score_agenda.corp_onr_v1_194_corporate-downsizing_2.corp_onr_v1_194_corporate-downsizing_2",
+    "cr.c2ie.c2ie",
   );
   const portfolio = residentPlanPortfolioSnapshot(input)!;
   const binding = portfolio.instances.find(

@@ -29,7 +29,7 @@ describe("runner draw main actions", () => {
 
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       side: "runner",
       type: "draw_card",
       label: "Karte ziehen",
@@ -64,7 +64,7 @@ describe("runner draw main actions", () => {
 
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       type: "draw_card",
       label: "Karte ziehen",
       costs: [{ clicks: 1 }],
@@ -91,7 +91,7 @@ describe("runner draw main actions", () => {
 
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       label: "Karte ziehen",
       costs: [{ clicks: 1 }],
       payload: {

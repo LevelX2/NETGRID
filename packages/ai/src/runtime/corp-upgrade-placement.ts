@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -5,11 +6,13 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { createAiHintsByCard } from "../ai-hints";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { corpSameFortAgendaDiscountProfiles } from "./corp-canonical-card-facts";
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
+import { isRemoteServerTarget } from "./server-target";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
@@ -57,9 +60,9 @@ export function corpUpgradePlacementAssessment(
   const signals = semanticSignals(params.actionSemanticCandidate);
   const server = visibleServer(params.input, params.serverId);
   if (
-    (hasSignal(signals, "remote.agenda_difficulty_discount") ||
-      hasSignal(signals, "score.agenda_difficulty_discount")) &&
-    !isRemoteServerId(params.serverId)
+    (signals.has("remote.agenda_difficulty_discount") ||
+      signals.has("score.agenda_difficulty_discount")) &&
+    !isRemoteServerTarget(params.serverId)
   ) {
     return placementAssessment({
       recommendation: "defer",
@@ -151,8 +154,8 @@ export function corpUpgradeInstallPlacementComponent(
   const evidence = baseEvidence(params, meaningfulSignals);
 
   if (
-    hasSignal(signals, "remote.agenda_difficulty_discount") ||
-    hasSignal(signals, "score.agenda_difficulty_discount")
+    signals.has("remote.agenda_difficulty_discount") ||
+    signals.has("score.agenda_difficulty_discount")
   ) {
     return agendaDifficultyPlacementComponent(
       params.serverId,
@@ -163,14 +166,14 @@ export function corpUpgradeInstallPlacementComponent(
   }
 
   if (
-    hasSignal(signals, "remote.agenda_steal_tax") ||
-    hasSignal(signals, "remote_role:agenda_steal_tax") ||
-    hasSignal(signals, "access.agenda_steal_tax")
+    signals.has("remote.agenda_steal_tax") ||
+    signals.has("remote_role:agenda_steal_tax") ||
+    signals.has("access.agenda_steal_tax")
   ) {
     return agendaStealTaxPlacementComponent(
       params.serverId,
       server,
-      hasSignal(signals, "access.agenda_steal_tax"),
+      signals.has("access.agenda_steal_tax"),
       evidence,
     );
   }
@@ -195,15 +198,15 @@ export function corpUpgradeInstallPlacementComponent(
     };
   }
 
-  if (hasSignal(signals, "condition.during_hq_run")) {
+  if (signals.has("condition.during_hq_run")) {
     return hqOnlyPlacementComponent(params.serverId, evidence);
   }
 
-  if (hasSignal(signals, "access.corp_central_access_reduction")) {
+  if (signals.has("access.corp_central_access_reduction")) {
     return centralAccessPlacementComponent(params.serverId, evidence);
   }
 
-  if (hasSignal(signals, "remote.capacity_support")) {
+  if (signals.has("remote.capacity_support")) {
     return remoteCapacityPlacementComponent(params.serverId, server, evidence);
   }
 
@@ -245,7 +248,7 @@ function agendaStealTaxPlacementComponent(
       reason: [...evidence, "fit:central_agenda_steal_tax"].join("|"),
     };
   }
-  if (!isRemoteServerId(serverId) || serverId === "new_remote") {
+  if (!isRemoteServerTarget(serverId) || serverId === "new_remote") {
     return {
       key: "corp_upgrade_install_placement_mismatch",
       label: "Upgrade-Zielserver unpassend",
@@ -306,7 +309,7 @@ function agendaDifficultyPlacementComponent(
   evidence: string[],
   hasEligibleAgenda: boolean,
 ): AiDecisionScoreComponent {
-  if (!isRemoteServerId(serverId)) {
+  if (!isRemoteServerTarget(serverId)) {
     return {
       key: "corp_upgrade_install_placement_mismatch",
       label: "Upgrade-Zielserver unpassend",
@@ -412,7 +415,7 @@ function remoteCapacityPlacementComponent(
   server: VisibleCorpServer | undefined,
   evidence: string[],
 ): AiDecisionScoreComponent {
-  if (!isRemoteServerId(serverId)) {
+  if (!isRemoteServerTarget(serverId)) {
     return {
       key: "corp_upgrade_install_placement_mismatch",
       label: "Upgrade-Zielserver unpassend",
@@ -642,7 +645,7 @@ function activeUpgradeUtility(
   }
   if (
     agendas.length === 0 &&
-    serverId.startsWith("remote_") &&
+    isRemoteServerId(serverId) &&
     server.ice.length > 0 &&
     hasEligibleRestrictedAgenda(input, sourceCard, server) &&
     (signals.has("score.agenda_difficulty_discount") ||
@@ -677,7 +680,7 @@ function activeUpgradeUtility(
     utility.add("central_agenda_steal_tax");
   }
   if (
-    serverId.startsWith("remote_") &&
+    isRemoteServerId(serverId) &&
     (server.root.length > 0 || server.ice.length > 0) &&
     signals.has("remote.capacity_support")
   ) {
@@ -704,11 +707,10 @@ function hasEligibleRestrictedAgenda(
     return profiles.some((profile) => subtypes.has(normalizedToken(profile.requiredSubtype!)));
   };
   if (server.root.some(compatible)) return true;
-  if (!server.id.startsWith("remote_") || server.ice.length === 0) return false;
+  if (!isRemoteServerId(server.id) || server.ice.length === 0) return false;
   return (input.playerView.own.gripOrHq ?? []).some((card) =>
     compatible(card) && input.legalActions.some((action) =>
-      action.side === "corp" && action.type === "install_card" &&
-      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      actionMatchesCurrentDecision(input, action) && action.type === "install_card" &&
       action.source === card.instanceId && action.payload?.cardId === card.instanceId &&
       action.payload?.serverId === server.id && action.payload?.placement === "root",
     ),
@@ -765,10 +767,6 @@ function semanticSignals(
   ]);
 }
 
-function hasSignal(signals: ReadonlySet<string>, signal: string): boolean {
-  return signals.has(signal);
-}
-
 function hasIceSupportSignal(signals: ReadonlySet<string>): boolean {
   return [...signals].some(
     (signal) =>
@@ -796,25 +794,16 @@ function visibleServer(
   return input.playerView.servers.find((server) => server.id === serverId);
 }
 
-function isRemoteServerId(serverId: string | undefined): boolean {
-  return serverId === "new_remote" || serverId?.startsWith("remote_") === true;
-}
-
 function serverHasScorelineRoot(
   server: VisibleCorpServer | undefined,
 ): boolean {
   return (
-    server?.root.some((card) => {
-      if (card.known === false) return false;
-      const definition = visibleCardDefinition(card);
-      return (
-        card.type === "agenda" ||
-        definition?.type === "agenda" ||
-        typeof card.advancementRequirement === "number" ||
-        typeof definition?.advancementRequirement === "number" ||
-        (card.advancementCounters ?? 0) > 0
-      );
-    }) === true
+    server?.root.some(
+      (card) =>
+        card.known === true &&
+        (card.type === "agenda" ||
+          visibleCardDefinition(card)?.type === "agenda"),
+    ) === true
   );
 }
 

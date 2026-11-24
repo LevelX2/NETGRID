@@ -9,16 +9,16 @@ import newsgroupD75Json from "../../../../../data/scenarios/ai-decision-checkpoi
 import newsgroupD83Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f6d-06-newsgroup-dominance-d83.json";
 import newsgroupD84Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f6d-07-newsgroup-dominance-d84.json";
 import stackSearchFirstPickJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-5f6d-08-stack-search-first-pick.json";
-import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
+import { bindHistoricalRunEventCadence, publishOpenTraceBid } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const NEWSGROUP_INSTANCE_ID = "runner_onr_v1_045_newsgroup-filter_1";
+const NEWSGROUP_INSTANCE_ID = "c1l5";
 const SHATTERED_REMAINS_INSTANCE_ID =
-  "corp_onr_v1_315_corprunners-shattered-remains_1";
+  "c399";
 const VISIBLE_TAG_PUNISH_INSTANCE_ID =
-  "corp_onr_classic_026_street-enforcer_fixture_1";
-const VISIBLE_TAG_PUNISH_DEFINITION_ID = "onr_classic_026_street-enforcer";
+  "corp_30_fixture_1";
+const VISIBLE_TAG_PUNISH_DEFINITION_ID = 30;
 
 describe("match 5F6D runner decision checkpoints", () => {
   it.each([
@@ -49,7 +49,11 @@ describe("match 5F6D runner decision checkpoints", () => {
   });
 
   it("keeps the minimal winning bid under the Trace-Limit model", () => {
-    expectCheckpointToPass(fixture(unwinnableTraceControlJson));
+    expectCheckpointToPass(
+      mutateFixture(unwinnableTraceControlJson, (checkpoint) => {
+        publishOpenTraceBid(checkpoint);
+      }),
+    );
   });
 
   it("does not take the tag when a visible active punish payoff remains", () => {
@@ -59,7 +63,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         (instanceId) => instanceId !== SHATTERED_REMAINS_INSTANCE_ID,
       );
       const remote = state.corp.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       );
       if (!remote) throw new Error("Expected Remote 1");
       remote.root.push(VISIBLE_TAG_PUNISH_INSTANCE_ID);
@@ -67,7 +71,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         ...state.cardInstances[SHATTERED_REMAINS_INSTANCE_ID]!,
         instanceId: VISIBLE_TAG_PUNISH_INSTANCE_ID,
         definitionId: VISIBLE_TAG_PUNISH_DEFINITION_ID,
-        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
         faceup: true,
         rezzed: true,
       };
@@ -112,6 +116,7 @@ describe("match 5F6D runner decision checkpoints", () => {
       corpBidResolved.publicPayload.corpCreditBid = 2;
       delete corpBidResolved.publicPayload.baseTraceStrength;
       delete corpBidResolved.publicPayload.traceStrength;
+      publishOpenTraceBid(checkpoint);
       const choice = state.pendingChoice;
       if (!choice || choice.kind !== "bid_amount")
         throw new Error("Expected Runner trace-bid choice");
@@ -143,7 +148,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         forbiddenActions: [
           {
             actionId:
-              "runner.activated_card_ability.runner_onr_v1_045_newsgroup-filter_1.runner_onr_v1_045_newsgroup-filter_1.activated.0",
+              "r1.c1l5.c1l5.activated.0",
           },
         ],
       };
@@ -163,7 +168,7 @@ describe("match 5F6D runner decision checkpoints", () => {
         checkpoint.source.findingId = "5F6D-C03-FUNDED-CLOAK-FIRST";
         checkpoint.expectation = {
           choice: {
-            selectedOptionIdsPrefix: ["card_runner_onr_v1_011_cloak_2"],
+            selectedOptionIdsPrefix: ["card_c1dm"],
           },
         };
       },

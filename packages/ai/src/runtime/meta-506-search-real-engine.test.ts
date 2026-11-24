@@ -5,7 +5,7 @@ import {
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState } from "@netgrid/shared";
+import type { CardDefinitionId, DeckDefinition, GameState } from "@netgrid/shared";
 import { metaTenStandardDecks as catalog } from "../evaluation/meta-ten-standard-decks.test-support";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
@@ -26,12 +26,12 @@ const checkpoint = JSON.parse(
     "utf8",
   ),
 );
-const locker = "onr_proteus_128_airport-locker";
-const sneak = "onr_v1_110_sneak-preview";
-const temple = "onr_v1_114_temple-microcode-outlet";
-const cloak = "onr_v1_011_cloak";
-const vewy = "onr_v1_071_vewy-vewy-quiet";
-const smc = "onr_v1_059_self-modifying-code";
+const locker = 186;
+const sneak = 322;
+const temple = 326;
+const cloak = 223;
+const vewy = 283;
+const smc = 271;
 function fixture(credits: number, fullMemory = false, prepareSmc = false) {
   const runner = catalog.decks.find(
     (d) =>
@@ -63,8 +63,8 @@ function fixture(credits: number, fullMemory = false, prepareSmc = false) {
     .withRunnerCredits(30)
     .withRunnerClicks(4)
     .withRunnerGripSize(0)
-    .withRunnerCardInGrip("onr_classic_031_rent-i-con")
-    .withRunnerCardInGrip("onr_v1_035_invisibility")
+    .withRunnerCardInGrip(35)
+    .withRunnerCardInGrip(247)
     .withRunnerResourceInstalled(locker)
     .withRunnerCardInGrip(sneak)
     .withRunnerCardInGrip(temple);
@@ -72,8 +72,8 @@ function fixture(credits: number, fullMemory = false, prepareSmc = false) {
   if (prepareSmc) builder.withRunnerCardInGrip(smc);
   // Real installations maintain the Engine's MU accounting, including payment.
   for (const definition of [
-    "onr_classic_031_rent-i-con",
-    "onr_v1_035_invisibility",
+    35,
+    247,
     ...(fullMemory ? [vewy] : []),
   ]) {
     const cardId = state.runner.grip.find(
@@ -165,7 +165,7 @@ function apply(
   if (!result.ok) throw Error(result.error.message);
   return result.state;
 }
-function complete(state: GameState, target: string) {
+function complete(state: GameState, target: CardDefinitionId) {
   for (let step = 0; step < 6 && state.pendingChoice; step++) {
     const choice = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",

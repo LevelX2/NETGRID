@@ -1,3 +1,5 @@
+import type { RandomPurpose } from "@netgrid/shared";
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -43,7 +45,7 @@ export type CorpZoneChoiceHandlerHost = {
     rezzedCorpRootCardIds: () => CardInstanceId[];
     shuffleCorpRnd: (
       cardIds: CardInstanceId[],
-      randomPurpose: string,
+      randomPurpose: RandomPurpose,
     ) => CardInstanceId[];
   };
   credits: {
@@ -234,7 +236,7 @@ export function resolveReschedulerHqShuffleDraw(
 ): CorpZoneChoiceHandlerResult {
   const hqCards = host.state.corp.hq.slice();
   const hqCardCount = hqCards.length;
-  const randomPurpose = `v1917.rescheduler.hq_into_rd.${sourceCardId}.${host.state.stateVersion + 1}`;
+  const randomPurpose: RandomPurpose = [31, sourceCardId, host.state.stateVersion + 1];
   host.state.corp.hq = [];
   host.state.corp.rd = host.zones.shuffleCorpRnd(
     [...host.state.corp.rd, ...hqCards],
@@ -254,7 +256,7 @@ export function resolveReschedulerHqShuffleDraw(
     hiddenZoneChangesRd: hqCardCount > 0,
     hqCardCount,
     drawnCount: hqCardCount,
-    randomDrawRecordPurpose: randomPurpose,
+    randomDrawRecordPurpose: randomPurpose[0],
     randomCounterAfter: host.state.randomCounter,
   };
   return {
@@ -278,7 +280,7 @@ export function resolveHqArchivesShuffleDraw(
   host.state.corp.archives = [];
   host.state.corp.rd = host.zones.shuffleCorpRnd(
     merge,
-    `scored_agenda.shuffle.hq_archives_into_rd.${host.state.stateVersion + 1}`,
+    [32, host.state.stateVersion + 1],
   );
   refreshCorpRndZones(host, { faceup: false, rezzed: false });
   const drawAmount = host.cards.scoredAgendaDrawCount(agendaId);
@@ -377,9 +379,12 @@ function resolveShowHqAgendasForCreditsChoice(
   const [
     ,
     sourceCardId = "",
-    sourceDefinitionId = "",
+    sourceDefinitionIdToken = "",
     creditPerAgendaRaw = "",
   ] = choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   const creditPerAgenda = Number(creditPerAgendaRaw);
   const continuation = choice.continuation;
   const expectedCreditPerAgenda = sourceCardId
@@ -496,7 +501,7 @@ function resolveScoredAgendaHqShuffleCreditsChoice(
   host.state.corp.hq = host.state.corp.hq.filter(
     (cardId) => !selectedSet.has(cardId),
   );
-  const randomPurpose = `scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.${sourceCardId}.${host.state.stateVersion + 1}`;
+  const randomPurpose: RandomPurpose = [33, sourceCardId, host.state.stateVersion + 1];
   host.state.corp.rd = host.zones.shuffleCorpRnd(
     [...host.state.corp.rd, ...selectedIds],
     randomPurpose,
@@ -525,7 +530,7 @@ function resolveScoredAgendaHqShuffleCreditsChoice(
     combinedAgendaPoints,
     gainedCredits,
     corpCreditsAfter: host.state.corp.credits,
-    randomDrawRecordPurpose: randomPurpose,
+    randomDrawRecordPurpose: randomPurpose[0],
     randomCounterAfter: host.state.randomCounter,
   };
   return {

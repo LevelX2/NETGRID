@@ -12,15 +12,16 @@ export function applyTagPunishOntologyDiagnostics(
     diagnostics.corpTagSourceOntologyProfilesSeen = true;
   if (assessment.profile.payoff)
     diagnostics.corpTagPunishPayoffOntologyProfilesSeen = true;
-  if (assessment.isTagSource) diagnostics.corpTagSourceOntologyUsed = true;
-  if (assessment.isPunishPayoff)
+  if (assessment.isTagSource) {
+    diagnostics.corpTagSourceOntologyUsed = true;
+    diagnostics.corpTagSourceLegalActionClassifiedByOntology = true;
+  }
+  if (assessment.isPunishPayoff) {
     diagnostics.corpTagPunishPayoffOntologyUsed = true;
+    diagnostics.corpPunishLegalActionClassifiedByOntology = true;
+  }
   if (assessment.conflictWithLegacy)
     diagnostics.corpTagPunishOntologyConflict = true;
-  if (assessment.isTagSource)
-    diagnostics.corpTagSourceLegalActionClassifiedByOntology = true;
-  if (assessment.isPunishPayoff)
-    diagnostics.corpPunishLegalActionClassifiedByOntology = true;
   diagnostics.corpTagPunishOntologyKinds = sortedUnique([
     ...(diagnostics.corpTagPunishOntologyKinds ?? []),
     ...assessment.profile.effectKinds,

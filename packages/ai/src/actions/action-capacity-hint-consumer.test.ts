@@ -5,7 +5,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { ActionCardSemanticProfile } from "../action-semantic-candidate-types";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./action-card-semantic-profiles";
 
-const OVERTIME_ID = "onr_v1_297_overtime-incentives" as const;
+const OVERTIME_ID = 509 as const;
 
 describe("action-capacity hint consumer", () => {
   it("confirms Overtime Incentives against LegalAction facts and consumes its durability contract", () => {

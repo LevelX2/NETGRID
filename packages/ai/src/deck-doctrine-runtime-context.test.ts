@@ -17,12 +17,31 @@ describe("buildDeckDoctrineRuntimeContext", () => {
       deckSnapshot: {
         deckSnapshotId: "runner-fixture",
         side: "runner",
-        cards: [{ cardId: "simple_fracter", quantity: 1 }],
+        cards: [{ cardId: 597, quantity: 1 }],
       },
     });
 
     expect(context.strategyProfile.deckId).toBe("runner-fixture");
     expect(context).not.toHaveProperty("v1Profile");
     expect(context.v2Diagnostic.source.mode).toBe("report_only");
+  });
+
+  it("validates against the caller's side even when metadata carries a side", () => {
+    const deckSnapshot = {
+      deckSnapshotId: "corp-fixture",
+      side: "corp" as const,
+      cards: [],
+    };
+    const expectedDeckSnapshot = {
+      deckSnapshotId: deckSnapshot.deckSnapshotId,
+      side: "corp" as const,
+    };
+    expect(() =>
+      buildDeckDoctrineRuntimeContext({
+        side: "runner",
+        deckSnapshot,
+        expectedDeckSnapshot,
+      }),
+    ).toThrow(/ai_deck_snapshot_side_mismatch/);
   });
 });

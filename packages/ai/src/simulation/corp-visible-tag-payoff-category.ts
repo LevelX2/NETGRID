@@ -5,7 +5,7 @@ import type {
   CorpPunishKind,
   CorpVisibleTagPayoffCategory,
 } from "../runtime/corp-tag-punish-types";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { corpVisibleTagPayoffCategoryFromOntology } from "../runtime/tag-punish-payoff-mapping";
 
 export type CorpVisibleTagPayoffCategoryContextDependencies = {

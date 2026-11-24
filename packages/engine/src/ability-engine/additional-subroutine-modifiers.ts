@@ -11,6 +11,7 @@ import type {
   CardInstanceId,
   GameState,
   SubroutineDefinition,
+  SubroutineProvenance,
 } from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForCorpInstalled,
@@ -27,10 +28,9 @@ import type {
   CardAdditionalSubroutineModifierImplementation,
   CardSubroutineImplementation,
 } from "./definition-types";
+import { sameSubroutineProvenance } from "./subroutine-provenance";
 
 export type DynamicSubroutineAttribution = {
-  internalId: string;
-  publicId: string;
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
   sourceTitle: string;
@@ -95,12 +95,10 @@ function subroutineDefinitionForImplementation(
 ): DynamicSubroutineDefinition {
   if (subroutine.visibility !== "public")
     throw new Error("Unsupported additional subroutine visibility.");
-  const repeatPart =
-    repeatIndex === undefined ? "" : `.repeat.${repeatIndex + 1}`;
-  const publicId = `card_implementation.${match.sourceDefinitionId}.additional_subroutine.${index + 1}${repeatPart}.${subroutine.kind}`;
+  const provenance: SubroutineProvenance = repeatIndex === undefined
+    ? ["a", match.sourceDefinitionId, match.sourceCardInstanceId, index]
+    : ["a", match.sourceDefinitionId, match.sourceCardInstanceId, index, repeatIndex];
   const dynamicSubroutine: DynamicSubroutineAttribution = {
-    internalId: `${publicId}.${match.sourceCardInstanceId}`,
-    publicId,
     sourceCardInstanceId: match.sourceCardInstanceId,
     sourceDefinitionId: match.sourceDefinitionId,
     sourceTitle: match.sourceDefinition.title,
@@ -109,14 +107,16 @@ function subroutineDefinitionForImplementation(
   };
   if (subroutine.kind === "end_the_run") {
     return {
-      id: publicId,
+      id: `a${index.toString(36)}`,
+      provenance,
       type: "end_the_run",
       dynamicSubroutine,
     };
   }
   if (subroutine.kind === "end_the_run_unless_runner_pays") {
     return {
-      id: publicId,
+      id: `a${index.toString(36)}`,
+      provenance,
       type: "end_the_run_unless_runner_pays",
       amount: subroutine.amount,
       dynamicSubroutine,
@@ -247,12 +247,9 @@ export function currentEncounterAdditionalSubroutinesForIce(
   const records = run.encounterAdditionalSubroutines ?? [];
   const subroutines: SubroutineDefinition[] = [];
   records.forEach((record, index) => {
-    if (record.originalSubroutineId) return;
+    if (record.originalSubroutineProvenance) return;
     if (record.sourceCardInstanceId !== iceId) return;
-    const publicId = `card_implementation.${record.sourceDefinitionId}.current_encounter_additional_subroutine.${index + 1}.${record.subroutineKind}`;
     const dynamicSubroutine: DynamicSubroutineAttribution = {
-      internalId: `${publicId}.${record.sourceCardInstanceId}`,
-      publicId,
       sourceCardInstanceId: record.sourceCardInstanceId,
       sourceDefinitionId: record.sourceDefinitionId,
       sourceTitle: record.sourceTitle,
@@ -261,7 +258,8 @@ export function currentEncounterAdditionalSubroutinesForIce(
     };
     if (record.subroutineKind === "end_the_run") {
       const subroutine: DynamicSubroutineDefinition = {
-        id: publicId,
+        id: `e${index.toString(36)}`,
+        provenance: ["e", record.sourceDefinitionId, record.sourceCardInstanceId, index],
         type: "end_the_run",
         dynamicSubroutine,
       };
@@ -272,7 +270,8 @@ export function currentEncounterAdditionalSubroutinesForIce(
       const amount = Math.max(0, Math.floor(record.amount ?? 0));
       if (amount <= 0) return;
       const subroutine: DynamicSubroutineDefinition = {
-        id: publicId,
+        id: `e${index.toString(36)}`,
+        provenance: ["e", record.sourceDefinitionId, record.sourceCardInstanceId, index],
         type: "end_the_run_unless_runner_pays",
         amount,
         dynamicSubroutine,
@@ -286,24 +285,21 @@ export function currentEncounterAdditionalSubroutinesForIce(
 export function copiedRunSubroutinesForIceAfterOriginal(
   state: GameState,
   iceId: CardInstanceId,
-  originalSubroutineId: string,
+  originalSubroutineProvenance: SubroutineProvenance,
 ): SubroutineDefinition[] {
   const run = state.run;
   if (!run) return [];
   const records = run.encounterAdditionalSubroutines ?? [];
-  return records
+  return records.map((record, index) => ({ record, index }))
     .filter(
-      (record) =>
+      ({ record }) =>
         record.targetIceId === iceId &&
-        record.originalSubroutineId === originalSubroutineId,
+        sameSubroutineProvenance(record.originalSubroutineProvenance, originalSubroutineProvenance),
     )
-    .map((record, index) => {
+    .map(({ record, index }) => {
       if (!record.copiedSubroutine)
         throw new Error("runtime_copied_subroutine_snapshot_missing");
-      const publicId = `card_implementation.${record.sourceDefinitionId}.copied_subroutine.${index + 1}.${record.subroutineKind}`;
       const dynamicSubroutine: DynamicSubroutineAttribution = {
-        internalId: `${publicId}.${record.sourceCardInstanceId}.${record.targetIceId}.${record.originalSubroutineId}`,
-        publicId,
         sourceCardInstanceId: record.sourceCardInstanceId,
         sourceDefinitionId: record.sourceDefinitionId,
         sourceTitle: record.sourceTitle,
@@ -312,7 +308,8 @@ export function copiedRunSubroutinesForIceAfterOriginal(
       };
       return {
         ...structuredClone(record.copiedSubroutine),
-        id: publicId,
+        id: `c${index.toString(36)}`,
+        provenance: ["c", record.sourceDefinitionId, record.sourceCardInstanceId, index],
         dynamicSubroutine,
       };
     });

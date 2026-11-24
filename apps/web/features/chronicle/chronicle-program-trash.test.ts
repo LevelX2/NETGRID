@@ -13,12 +13,12 @@ import {
 
 const messages = { de, en, fr };
 const source = {
-  effectId: "subroutine_1",
+  effectId: 0,
   kind: "resolve_subroutine",
   visibility: "public",
   side: "runner",
   reason: "ice_subroutine",
-  sourceDefinitionId: "onr_proteus_006_colonel-failure",
+  sourceDefinitionId: 11037,
   sourceTitle: "Colonel Failure",
   subroutineIndex: 0,
   subroutineType: "trash_installed_program",
@@ -30,7 +30,7 @@ function event(
   payload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId: `event_${id}`,
+    eventId: id + 2,
     type: actionType,
     stateVersionBefore: id,
     stateVersionAfter: id + 1,
@@ -67,14 +67,14 @@ describe("program-trash chronicle", () => {
       expect(
         items(locale, {
           cardsTrashed: 1,
-          cardDefinitionId: "krash",
+          cardDefinitionId: 11038,
           cardTitle: "Krash",
         })[0],
       ).toMatchObject({
         title,
         category: "run",
         visibility: "public",
-        cardDefinitionId: "krash",
+        cardDefinitionId: 11038,
         cardTitle: "Krash",
       });
     },
@@ -115,7 +115,7 @@ describe("program-trash chronicle", () => {
     const [item] = items("en", {
       visibility: "private_to_side",
       cardsTrashed: 1,
-      cardDefinitionId: "private_program",
+      cardDefinitionId: 11039,
       cardTitle: "Private Program",
     });
     expect(item?.visibility).toBe("redacted");
@@ -127,7 +127,7 @@ describe("program-trash chronicle", () => {
     (locale) => {
       const events = [
         event(0, "start_run", {
-          serverId: "remote_1",
+          serverId: "r1",
           serverLabel: "Remote 1",
         }),
       ];
@@ -138,7 +138,6 @@ describe("program-trash chronicle", () => {
       ].entries()) {
         const effect = {
           ...source,
-          effectId: `subroutine_${index + 1}`,
           subroutineIndex: index,
         };
         events.push(
@@ -170,7 +169,6 @@ describe("program-trash chronicle", () => {
           resolvedEffects: [
             {
               ...source,
-              effectId: "subroutine_4",
               subroutineIndex: 3,
               subroutineType: "end_the_run",
               endedRun: true,

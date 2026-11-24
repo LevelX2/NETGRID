@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_128_green-knight-surge-buffers"),
+    cardDefinitionId: cardDefinitionId(340),
     title: "“Green Knight” Surge Buffers",
     side: "runner",
     cardType: "hardware",

@@ -71,16 +71,16 @@ describe("canonical CardSpec authority", () => {
       }) as (typeof CARD_IMPLEMENTATIONS)[number];
     expect(
       resolveUniqueCardImplementationCounterOwner(
-        [owner("counter_owner", "reviewed")],
+        [owner(1476146659, "reviewed")],
         "reviewed",
       ),
-    ).toBe("counter_owner");
+    ).toBe(1476146659);
     expect(() =>
       resolveUniqueCardImplementationCounterOwner([], "missing"),
     ).toThrow("card_implementation_counter_owner_not_unique:missing:0");
     expect(() =>
       resolveUniqueCardImplementationCounterOwner(
-        [owner("first", "duplicate"), owner("second", "duplicate")],
+        [owner(1216479057, "duplicate"), owner(2885221357, "duplicate")],
         "duplicate",
       ),
     ).toThrow("card_implementation_counter_owner_not_unique:duplicate:2");

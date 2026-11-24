@@ -44,7 +44,11 @@ export function getStrategicIntentMemorySnapshot(
     return undefined;
   }
   const snapshot = strategicIntentMemoryByKey.get(key);
-  if (!snapshot) return undefined;
+  if (
+    !snapshot ||
+    snapshot.updatedAtStateVersion > input.playerView.stateVersion
+  )
+    return undefined;
   if (
     snapshot.side !== input.side ||
     snapshot.deckSnapshotId !== deckId(input, deckSnapshotId)
@@ -71,6 +75,11 @@ export function rememberStrategicIntentState(
   }
   if (state.side !== input.side) return undefined;
   const previous = strategicIntentMemoryByKey.get(key);
+  if (
+    previous &&
+    previous.updatedAtStateVersion > input.playerView.stateVersion
+  )
+    return undefined;
   const snapshot = createStrategicIntentMemorySnapshot({
     input,
     state,
@@ -173,6 +182,8 @@ function nextTtl(
   if (state.transition.status === "abandoned") return 0;
   if (state.blockers.some((blocker) => blocker.severity === "hard")) return 1;
   if (state.transition.status === "continued") {
+    if (previous?.updatedAtStateVersion === state.stateVersion)
+      return previous.ttlDecisionsRemaining;
     return Math.min(4, (previous?.ttlDecisionsRemaining ?? 2) + 1);
   }
   if (state.transition.status === "paused") return 1;

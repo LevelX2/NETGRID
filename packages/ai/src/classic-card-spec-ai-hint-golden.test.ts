@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
@@ -36,13 +36,13 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("pins all 54 complete compiler outputs including explicit absences", () => {
-    const compiled = cardSpecPlanningCards()
-      .filter((entry) => reviewedIds.has(entry.definition.id))
+    const compiled = listPlanningCardsWithFacts()
+      .filter((entry) => reviewedIds.has(entry.facts.id))
       .map((entry) => ({
-        cardId: entry.definition.id,
+        cardId: entry.facts.id,
         hint: deriveCardSpecAiHint(entry),
       }))
-      .sort((left, right) => left.cardId.localeCompare(right.cardId));
+      .sort((left, right) => (left.cardId - right.cardId));
 
     expect(reviewedGolden.cards).toHaveLength(54);
     expect(reviewedIds.size).toBe(54);
@@ -63,7 +63,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
 
   it("pins all 46 pre-Classic artifact records including Broker action costs", () => {
     const entriesById = new Map(
-      cardSpecPlanningCards().map((entry) => [entry.definition.id, entry]),
+      listPlanningCardsWithFacts().map((entry) => [entry.facts.id, entry]),
     );
     const priorGeneratedCards = generatedArtifact.cards.filter(
       (record) =>
@@ -77,7 +77,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     );
     const compiled = priorGeneratedCards.map((record) => {
       const entry = entriesById.get(record.cardId);
-      expect(entry, record.cardId).toBeDefined();
+      expect(entry, String(record.cardId)).toBeDefined();
       return {
         cardId: record.cardId,
         cardRulesFingerprint: entry!.planning.cardRulesFingerprint,
@@ -91,7 +91,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     expect(compiled).toEqual(priorGeneratedCards);
     expect(
       priorGeneratedCards.find(
-        (record) => record.cardId === "onr_v1_154_broker",
+        (record) => record.cardId === 366,
       ),
     ).toMatchObject({
       hint: {
@@ -112,7 +112,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:a250e731223ba1887bbfa7e423d922e989a0ae1c551b186d11954aabb70df81e",
+      "sha256:36697974efb10df777691a591d64f9546876cb3138726793d498aff01568c753",
     );
   });
 
@@ -120,7 +120,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     const hints = new Map(
       reviewedGolden.cards.map((record) => [record.cardId, record.hint]),
     );
-    expect(hints.get("onr_classic_029_ms-todon")?.breakerProfile).toMatchObject(
+    expect(hints.get(33)?.breakerProfile).toMatchObject(
       {
         baseStrength: 2,
         restrictions: ["first_sentry_break_each_run_gives_runner_tag"],
@@ -128,13 +128,13 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
       },
     );
     expect(
-      hints.get("onr_classic_030_psychic-friend")?.breakerProfile,
+      hints.get(34)?.breakerProfile,
     ).toMatchObject({
       baseStrength: 1,
       sideEffects: ["temporary_strength"],
     });
     expect(
-      hints.get("onr_classic_051_vintage-camaro")?.actionCapacityProfiles,
+      hints.get(55)?.actionCapacityProfiles,
     ).toEqual([
       {
         class: "action_debt",
@@ -170,7 +170,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
       actionPairs
         .filter(
           ({ cardId, pair }) =>
-            cardId === "onr_classic_039_library-search" &&
+            cardId === 43 &&
             pair.strategyId === "runner.interface_closeout",
         )
         .map(({ pair }) => pair.evidence),
@@ -181,9 +181,9 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("rejects unknown families, unsupported target owners and malformed action debt", () => {
-    const entries = cardSpecPlanningCards();
+    const entries = listPlanningCardsWithFacts();
     const vintage = entries.find(
-      (entry) => entry.definition.id === "onr_classic_051_vintage-camaro",
+      (entry) => entry.facts.id === 55,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
@@ -213,7 +213,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     ).toThrow("card_spec_unknown_action_debt_tag_prevention_shape");
 
     const targetOwner = entries.find(
-      (entry) => entry.definition.id === "onr_classic_046_executive-file-clerk",
+      (entry) => entry.facts.id === 50,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
@@ -231,10 +231,10 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("rejects invented strategy bindings and forged capability evidence", () => {
-    const entries = cardSpecPlanningCards();
+    const entries = listPlanningCardsWithFacts();
     const baskerville = structuredClone(
       entries.find(
-        (entry) => entry.definition.id === "onr_classic_005_baskerville",
+        (entry) => entry.facts.id === 9,
       )!,
     );
     const baskervillePair =
@@ -249,7 +249,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
 
     const library = structuredClone(
       entries.find(
-        (entry) => entry.definition.id === "onr_classic_039_library-search",
+        (entry) => entry.facts.id === 43,
       )!,
     );
     const libraryPair =
@@ -269,7 +269,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
 
     const forgedAnchor = structuredClone(
       entries.find(
-        (entry) => entry.definition.id === "onr_classic_039_library-search",
+        (entry) => entry.facts.id === 43,
       )!,
     );
     const forgedPair =
@@ -286,14 +286,14 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("rejects missing scenario evidence and compatibility-container mechanics", () => {
-    const entry = cardSpecPlanningCards().find(
-      (candidate) => candidate.definition.id === "onr_classic_041_networking",
+    const entry = listPlanningCardsWithFacts().find(
+      (candidate) => candidate.facts.id === 45,
     )!;
     expect(() =>
       deriveCardSpecAiHint({
         ...entry,
-        definition: {
-          ...entry.definition,
+        facts: {
+          ...entry.facts,
           id: "onr_classic_missing_scenario_evidence",
         },
       } as never),
@@ -310,7 +310,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     for (const { cardId, hint } of reviewedGolden.cards)
       expect(
         (hint.requiredMechanics ?? []).filter((token) => forbidden.has(token)),
-        cardId,
+        String(cardId),
       ).toEqual([]);
   });
 });

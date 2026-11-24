@@ -28,7 +28,7 @@ describe("series participant identity", () => {
       first.match.status = "finished";
       first.gameState.winner = "corp";
       first.gameState.gameEndReason = "agenda_points";
-      first.gameState.corp.agendaPoints = 7;
+      first.gameState.corpBonusAgendaPoints = 7;
       await storage.save(first);
 
       const next = await service.startNextSeriesGame(created.matchId, {
@@ -44,7 +44,6 @@ describe("series participant identity", () => {
       second.match.status = "finished";
       second.gameState.winner = next.hostSide;
       second.gameState.gameEndReason = "agenda_points";
-      second.gameState[next.hostSide].agendaPoints = 7;
       await storage.save(second);
       const entries = await service.listRecentGameResults(20);
       const result = (await service.loadForTest(next.matchId))?.resultSnapshot;

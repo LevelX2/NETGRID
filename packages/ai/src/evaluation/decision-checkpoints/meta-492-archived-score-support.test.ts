@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -32,7 +33,7 @@ it("executes the native Babylon advance at original R4 G1 D171 without projectin
   );
   const archivedSupport = input.playerView.servers
     .find((s) => s.id === "archives")!
-    .root.find((c) => c.definitionId === "onr_v1_312_chicago-branch")!;
+    .root.find((c) => c.definitionId === 524)!;
   expect(archivedSupport.rezzed).toBe(true);
   expect(corpInstalledAdvancementPreparations(input)).not.toContainEqual(
     expect.objectContaining({ sourceCardId: archivedSupport.instanceId }),
@@ -46,7 +47,7 @@ it("executes the native Babylon advance at original R4 G1 D171 without projectin
     decision = chooseAiAction(input),
     action = input.legalActions.find((a) => a.actionId === decision.actionId)!;
   expect(action.type).toBe("advance_card");
-  expect(action.source).toContain("project-babylon");
+  expect(action.source).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 426));
   expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
   expect(decision.fallbackUsed).toBe(false);
   expect(JSON.stringify(input)).toBe(before);

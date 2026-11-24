@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   runnerGeneralCreditsAfterCompletedPath,
   runnerRunPathCreditBudgetAfterEncounter,
@@ -86,7 +87,7 @@ export function currentEncounterMitigationForAction(
   let strength = breaker.strength;
   let pumpCost = 0;
   if (action.type === "pump_breaker") {
-    const gain = pumpStrengthAmountForAction(action, breaker.definitionId);
+    const gain = pumpStrengthAmountForAction(action);
     if (!gain || gain <= 0) return undefined;
     const pumps = Math.ceil(
       Math.max(0, ice.effectiveRunQuote.effectiveStrength - strength) / gain,
@@ -183,7 +184,7 @@ export function currentEncounterMitigationForAction(
     if (!server) return false;
     const gain =
       action.type === "pump_breaker"
-        ? pumpStrengthAmountForAction(action, breaker.definitionId)
+        ? pumpStrengthAmountForAction(action)
         : undefined;
     const rig =
       gain && gain > 0
@@ -209,7 +210,7 @@ export function currentEncounterMitigationForAction(
       currentRunPathContext(input),
     );
     if (!path.canReachAccess) return true;
-    const stealCost = server.id.startsWith("remote_")
+    const stealCost = isRemoteServerId(server.id)
       ? runnerAgendaStealCreditRequirement(input, server.id)
       : undefined;
     return (
@@ -352,7 +353,7 @@ export function currentEncounterMitigationForBreaker(
     for (const index of unbroken) {
       if (broken.has(index)) continue;
       const subroutine = quote!.subroutines[index]!;
-      if (subroutine.type === "end_the_run") break;
+      if (isVisibleHardEndRunSubroutine(subroutine)) break;
       if (subroutine.type === "trash_installed_program")
         programsTrashed = Math.min(programCount, programsTrashed + 1);
       if (subroutine.type !== "do_damage") continue;

@@ -6,7 +6,7 @@ import {
   resolveUniqueInstalledNetDamageUpgrade,
 } from "./flow-runtime-bootstrap";
 
-const DIRECT_NET_DAMAGE_UPGRADE = implementation("direct_net_damage_upgrade", {
+const DIRECT_NET_DAMAGE_UPGRADE = implementation(2436642507, {
   kind: "on_access",
   sourceZones: ["installed"],
   effects: [
@@ -22,7 +22,7 @@ const DIRECT_NET_DAMAGE_UPGRADE = implementation("direct_net_damage_upgrade", {
   visibility: "hidden_info_barrier",
 });
 
-const SELF_DESTRUCT_SHAPE = implementation("self_destruct_shape", {
+const SELF_DESTRUCT_SHAPE = implementation(112722184, {
   kind: "on_access",
   sourceZones: ["installed"],
   installedSourceActivation: "requires_rezzed",
@@ -41,7 +41,7 @@ const SELF_DESTRUCT_SHAPE = implementation("self_destruct_shape", {
 });
 
 function implementation(
-  cardDefinitionId: string,
+  cardDefinitionId: number,
   accessEffect: NonNullable<
     CardImplementationDefinition["accessEffects"]
   >[number],
@@ -93,7 +93,7 @@ describe("flow runtime installed net-damage upgrade resolver", () => {
   });
 
   it("fails closed for malformed and duplicate direct upgrade contracts", () => {
-    const malformed = implementation("malformed_upgrade", {
+    const malformed = implementation(1907112289, {
       kind: "on_access",
       sourceZones: ["installed"],
       effects: [
@@ -108,7 +108,7 @@ describe("flow runtime installed net-damage upgrade resolver", () => {
       ],
       visibility: "hidden_info_barrier",
     });
-    const duplicate = implementation("duplicate_upgrade", {
+    const duplicate = implementation(3273768129, {
       kind: "on_access",
       sourceZones: ["installed"],
       effects: [

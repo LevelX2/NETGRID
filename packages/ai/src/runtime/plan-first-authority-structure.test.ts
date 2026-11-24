@@ -113,7 +113,6 @@ describe("plan-first live authority structure", () => {
       readSource("runtime", "ai-live-runtime-composition.ts"),
       readSource("runtime", "semantic-runtime-orchestration-composition.ts"),
       readSource("runtime", "semantic-runtime-entrypoints-composition.ts"),
-      readSource("runtime", "semantic-runtime-decision-composition.ts"),
       readSource("runtime", "semantic-runtime-decision-context.ts"),
       readSource("runtime", "plan-first-live-runtime.ts"),
       extractedOwnerSources,
@@ -411,11 +410,10 @@ describe("plan-first live authority structure", () => {
   });
 
   it("keeps the former ICE placement module sensor-and-facts only", () => {
-    const icePlacement = readSource(
-      "runtime",
-      "corp-ice-placement",
-      "corp-ice-placement.ts",
-    );
+    const icePlacement = [
+      readSource("runtime", "corp-ice-placement", "corp-ice-placement.ts"),
+      readSource("runtime", "corp-ice-placement", "corp-ice-placement-costs.ts"),
+    ].join("\n");
 
     expect(icePlacement).not.toMatch(
       /from\s+["'][^"']*(?:plans\/|plan-scheduler|plan-assessment|choice-ranking|action-order)[^"']*["']/,

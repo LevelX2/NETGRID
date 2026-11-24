@@ -17,6 +17,8 @@ import {
   keepOnlyCorpHqCard,
   moveRunnerCardToGrip,
   moveCorpCardToHq,
+  installRunnerResourceForTest,
+  removeEverywhere,
   mustAction,
   sourceDefinition,
   toRunnerTurn,
@@ -50,7 +52,7 @@ describe("HiddenInfo special zone projection", () => {
     let state = toRunnerTurn(
       createMechanicFixtureGameAfterSetup({ seed: "v122-set-aside" }),
     );
-    const cardId = moveRunnerCardToGrip(state, "simple_economy_event");
+    const cardId = moveRunnerCardToGrip(state, 595);
     state.specialZoneHarness = {
       actor: "runner",
       cardInstanceId: cardId,
@@ -84,7 +86,7 @@ describe("HiddenInfo special zone projection", () => {
     expect(
       getPlayerView(state, "runner").specialZones?.setAside[0],
     ).toMatchObject({
-      definitionId: "simple_economy_event",
+      definitionId: 595,
       owner: "runner",
       controller: "runner",
     });
@@ -111,13 +113,13 @@ describe("HiddenInfo special zone projection", () => {
 });
 
 describe("Proteus Hidden-Resource Foundation Harness", () => {
-  const hiddenResourceDefinitionId = "test_hidden_runner_resource_harness";
+  const hiddenResourceDefinitionId = 1867481;
   const hiddenResourceTitle = "Hidden Resource Harness";
-  const hiddenActivationDefinitionId = "onr_v1_161_fall-guy";
+  const hiddenActivationDefinitionId = 373;
   const hiddenActivationTitle = "Fall Guy";
-  const hiddenActivatedAbilityDefinitionId = "onr_v1_158_danshis-second-id";
+  const hiddenActivatedAbilityDefinitionId = 370;
   const hiddenActivatedAbilityTitle = "Danshi’s Second ID";
-  const hiddenOriginalSubtypesByDefinitionId = new Map<string, string[]>();
+  const hiddenOriginalSubtypesByDefinitionId = new Map<number, string[]>();
 
   afterEach(() => {
     delete TEST_CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId];
@@ -176,10 +178,10 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
         id: `hidden_resource_harness_runner_${seed}`,
         name: "Hidden Resource Fixture Runner",
         side: "runner",
-        identity: "runner_identity_001",
+        identity: 587,
         cards: [
-          { id: "simple_economy_event", quantity: 2 },
-          { id: "simple_fracter", quantity: 1 },
+          { id: 595, quantity: 2 },
+          { id: 597, quantity: 1 },
           { id: hiddenResourceDefinitionId, quantity: 2 },
         ],
       },
@@ -226,6 +228,142 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
     );
     return { initial, state, hiddenResourceId };
   }
+
+  it("projects the same resource target for different concealed definitions and resolves each private card", () => {
+    ensureHiddenResourceHarnessCard();
+    makeExistingCardImplementationResourceHiddenForHarness();
+    const base = createGameAfterSetup({
+      seed: "equivalent-hidden-resource-slots",
+      runnerDeck: {
+        id: "equivalent_hidden_resources",
+        name: "Equivalent hidden resources",
+        side: "runner",
+        identity: 587,
+        cards: [
+          { id: hiddenResourceDefinitionId, quantity: 1 },
+          { id: hiddenActivationDefinitionId, quantity: 1 },
+          { id: 595, quantity: 3 },
+        ],
+      },
+      corpDeck: DEMO_DECKS.demo_corp_008,
+    });
+    const scenarios = [
+      hiddenResourceDefinitionId,
+      hiddenActivationDefinitionId,
+    ].map((definitionId) => {
+      const state = structuredClone(base);
+      const cardId = installRunnerResourceForTest(state, definitionId);
+      Object.assign(state.cardInstances[cardId]!, {
+        faceup: false,
+        rezzed: false,
+      });
+        const secondId = installRunnerResourceForTest(
+          state,
+          definitionId === hiddenResourceDefinitionId
+            ? hiddenActivationDefinitionId
+            : hiddenResourceDefinitionId,
+        );
+        Object.assign(state.cardInstances[secondId]!, {
+          faceup: false,
+          rezzed: false,
+        });
+      state.activeSide = "corp";
+      state.phase = "corp_action_phase";
+      state.timingPoint = "corp_action.main";
+      state.corp.clicks = 3;
+      state.corp.credits = 5;
+      state.runner.tags = 1;
+      expect(validateGameState(state).ok).toBe(true);
+      return { state, cardId, definitionId };
+    });
+    expect(getPlayerView(scenarios[0]!.state, "corp")).toEqual(
+      getPlayerView(scenarios[1]!.state, "corp"),
+    );
+    for (const { state, cardId, definitionId } of scenarios) {
+      const result = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "trash_resource" && action.payload?.cardId === "s0",
+      );
+      expect(result.runner.heap).toContain(cardId);
+      expect(result.eventLog.at(-1)?.publicPayload).toMatchObject({
+        hiddenResourceSlotId: "s0",
+        publicRevealDefinitionId: definitionId,
+      });
+      const replay = replayEvents(
+        state,
+        result.eventLog.slice(state.eventLog.length),
+      );
+      expect(replay.ok).toBe(true);
+      expect(replay.actualFinalStateHash).toBe(hashState(result));
+    }
+  });
+
+  it("rejects an old slot action after removal shifts the next resource into that position", () => {
+    const { state: installed, hiddenResourceId } =
+      installHiddenResource("hidden-slot-reuse");
+    const state = structuredClone(installed);
+    const nextId = Object.keys(state.cardInstances).find(
+      (id) =>
+        id !== hiddenResourceId &&
+        state.cardInstances[id]!.definitionId === hiddenResourceDefinitionId,
+    );
+    if (!nextId) throw new Error("Missing second concealed resource");
+    removeEverywhere(state, nextId);
+    state.runner.rig.resources.push(nextId);
+    Object.assign(state.cardInstances[nextId]!, {
+      zone: { side: "runner", zone: "rig" },
+      faceup: false,
+      rezzed: false,
+    });
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 6;
+    state.runner.tags = 1;
+    const oldAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trash_resource" && action.payload?.cardId === "s0",
+    );
+    const firstTrash = apply(
+      state,
+      "corp",
+      (action) => action.actionId === oldAction.actionId,
+    );
+    expect(firstTrash.runner.heap).toContain(hiddenResourceId);
+    expect(firstTrash.runner.rig.resources).toEqual([nextId]);
+    expect(getPlayerView(firstTrash, "corp").opponent.rig).toContainEqual(
+      expect.objectContaining({ instanceId: "s0", known: false }),
+    );
+    expect(
+      applyAction(firstTrash, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: oldAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      }),
+    ).toMatchObject({ ok: false, error: { code: "ERR_STALE_STATE" } });
+    const secondTrash = apply(
+      firstTrash,
+      "corp",
+      (action) =>
+        action.type === "trash_resource" && action.payload?.cardId === "s0",
+    );
+    expect(secondTrash.runner.rig.resources).toEqual([]);
+    expect(secondTrash.runner.heap).toEqual(
+      expect.arrayContaining([hiddenResourceId, nextId]),
+    );
+    const replay = replayEvents(
+      state,
+      secondTrash.eventLog.slice(state.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(secondTrash));
+  });
 
   it("installs hidden Runner Resources without leaking identity to Corp view or PublicEvents", () => {
     const { initial, state, hiddenResourceId } = installHiddenResource(
@@ -381,19 +519,16 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
           id: "hidden_resource_activation_runner",
           name: "Hidden Resource Activation Runner",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
-            { id: "simple_economy_event", quantity: 2 },
+            { id: 595, quantity: 2 },
             { id: hiddenActivationDefinitionId, quantity: 1 },
           ],
         },
         corpDeck: {
           ...DEMO_DECKS.demo_corp_008,
           id: "hidden_resource_activation_corp",
-          cards: [
-            { id: "onr_v1_306_trojan-horse", quantity: 1 },
-            ...DEMO_DECKS.demo_corp_008.cards,
-          ],
+          cards: [{ id: 518, quantity: 1 }, ...DEMO_DECKS.demo_corp_008.cards],
         },
         agendaPointsToWin: 7,
       }),
@@ -429,7 +564,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
       stoleAgendaThisTurn: state.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
       stoleAgendaLastTurn: true,
     };
-    const trojanId = moveCorpCardToHq(state, "onr_v1_306_trojan-horse");
+    const trojanId = moveCorpCardToHq(state, 518);
     keepOnlyCorpHqCard(state, trojanId);
     state.corp.credits = 8;
     state = apply(
@@ -437,7 +572,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_306_trojan-horse",
+        sourceDefinition(state, action) === 518,
     );
 
     const openedPayload = state.eventLog.at(-1)?.publicPayload ?? {};
@@ -547,9 +682,9 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
           id: "hidden_resource_activated_runner",
           name: "Hidden Resource Activated Runner",
           side: "runner",
-          identity: "runner_identity_001",
+          identity: 587,
           cards: [
-            { id: "simple_economy_event", quantity: 2 },
+            { id: 595, quantity: 2 },
             { id: hiddenActivatedAbilityDefinitionId, quantity: 1 },
           ],
         },
@@ -633,7 +768,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
     expect(
       Object.values(TEST_CARD_DEFINITIONS_BY_ID).filter(
         (card) =>
-          card.id.startsWith("onr_proteus_") &&
+          card.id !== hiddenResourceDefinitionId &&
           card.mechanics.includes("hidden_runner_resource_foundation"),
       ),
     ).toHaveLength(0);

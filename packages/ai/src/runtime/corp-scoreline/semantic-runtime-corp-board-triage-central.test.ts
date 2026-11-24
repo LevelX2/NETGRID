@@ -26,7 +26,7 @@ describe("semantic runtime corp board triage central protection", () => {
     const installAgenda = corpAction(
       "install-agenda-remote-1",
       "install_card",
-      { placement: "root", serverId: "remote_1" },
+      { placement: "root", serverId: "r1" },
       agenda.instanceId,
     );
     const input = corpInput({
@@ -36,14 +36,14 @@ describe("semantic runtime corp board triage central protection", () => {
         centralServer("hq", []),
         centralServer("rd", []),
         remoteServer(
-          "remote_1",
+          "r1",
           [iceCard("remote-ice")],
           [assetCard("visible-root-support")],
         ),
       ],
     });
 
-    expect(existingReadyRemoteCanReceiveScoreline(input, "remote_1")).toBe(
+    expect(existingReadyRemoteCanReceiveScoreline(input, "r1")).toBe(
       true,
     );
     expect(existingScoreRemoteOutletExists(input)).toBe(true);
@@ -96,7 +96,7 @@ describe("semantic runtime corp board triage central protection", () => {
       corpHq: [
         iceCard("rd-wall", {
           title: "Wall of Ice",
-          definitionId: "onr_v1_278_wall-of-ice",
+          definitionId: 490,
           subtypes: ["Wall"],
           rulesText: "End the run.",
           rezCost: 6,
@@ -143,7 +143,7 @@ describe("semantic runtime corp board triage central protection", () => {
     });
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const input = corpInput({
       corpHq: [agendaCard("hq-agenda-1", 2), agendaCard("hq-agenda-2", 2)],
@@ -151,13 +151,13 @@ describe("semantic runtime corp board triage central protection", () => {
       servers: [
         centralServer("hq", []),
         centralServer("rd", []),
-        remoteServer("remote_1", [iceCard("remote-ice")]),
+        remoteServer("r1", [iceCard("remote-ice")]),
       ],
     });
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "durable",
           runnerCanContestNow: false,
           runnerCanReachAccessNow: false,
@@ -190,7 +190,7 @@ describe("semantic runtime corp board triage central protection", () => {
     expect(triage).toMatchObject({
       primary: "force_scoreline_clock",
       severity: "high",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(hqComponent).toMatchObject({
       key: "corp_board_triage_mismatch",
@@ -207,7 +207,7 @@ describe("semantic runtime corp board triage central protection", () => {
     });
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const input = corpInput({
       corpHq: [agendaCard("hq-agenda-1", 2), agendaCard("hq-agenda-2", 2)],
@@ -217,20 +217,20 @@ describe("semantic runtime corp board triage central protection", () => {
         centralServer("hq", [
           iceCard("hq-wall", {
             title: "Wall of Static",
-            definitionId: "onr_v1_279_wall-of-static",
+            definitionId: 491,
             rezzed: true,
             subtypes: ["Wall"],
             rulesText: "End the run.",
           }),
         ]),
         centralServer("rd", []),
-        remoteServer("remote_1", [iceCard("remote-ice")]),
+        remoteServer("r1", [iceCard("remote-ice")]),
       ],
     });
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "durable",
           runnerCanContestNow: false,
           runnerCanReachAccessNow: false,
@@ -263,7 +263,7 @@ describe("semantic runtime corp board triage central protection", () => {
     expect(triage).toMatchObject({
       primary: "force_scoreline_clock",
       severity: "high",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(hqComponent).toMatchObject({
       key: "corp_board_triage_mismatch",
@@ -277,7 +277,7 @@ describe("semantic runtime corp board triage central protection", () => {
     const remoteAgenda = {
       ...corpAction("remote-scoreline", "install_card", {
         placement: "root",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
       source: "hq-agenda",
     } as LegalAction;
@@ -294,7 +294,7 @@ describe("semantic runtime corp board triage central protection", () => {
           agendaCard("hq-agenda", 2),
           iceCard("hq-wall", {
             title: "HQ Wall",
-            definitionId: "onr_v1_279_wall-of-static",
+            definitionId: 491,
             subtypes: ["Wall"],
             rulesText: "End the run.",
           }),
@@ -303,7 +303,7 @@ describe("semantic runtime corp board triage central protection", () => {
         servers: [
           centralServer("hq", []),
           centralServer("rd", [iceCard("rd-ice")]),
-          remoteServer("remote_1", [
+          remoteServer("r1", [
             iceCard("remote-ice-1"),
             iceCard("remote-ice-2"),
           ]),
@@ -318,7 +318,7 @@ describe("semantic runtime corp board triage central protection", () => {
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           scoreHorizon: "slow",
           runnerCanContestNow: false,
@@ -358,7 +358,7 @@ describe("semantic runtime corp board triage central protection", () => {
     expect(remoteComponent).toMatchObject({
       key: "corp_board_triage_alignment",
     });
-    expect(remoteComponent?.reason).toContain("triage_action_server:remote_1");
+    expect(remoteComponent?.reason).toContain("triage_action_server:r1");
     expect(hqComponent).toMatchObject({
       key: "corp_board_triage_alignment",
     });
@@ -367,7 +367,7 @@ describe("semantic runtime corp board triage central protection", () => {
   it("funds instead of forcing a game-ending accessible emergency remote", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const gainCredit = corpAction("gain-credit", "gain_credit");
     const input = corpInput({
@@ -378,13 +378,13 @@ describe("semantic runtime corp board triage central protection", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", []),
-        remoteServer("remote_1", [iceCard("remote-ice")]),
+        remoteServer("r1", [iceCard("remote-ice")]),
       ],
     });
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           runnerCanContestNow: true,
           runnerCanReachAccessNow: true,
@@ -416,7 +416,7 @@ describe("semantic runtime corp board triage central protection", () => {
     expect(triage).toMatchObject({
       primary: "fund_score_remote",
       severity: "critical",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(triage.evidence).not.toContain(
       "corp_hq_agenda_emergency_remote_conversion:true",
@@ -433,7 +433,7 @@ describe("semantic runtime corp board triage central protection", () => {
   it("does not treat scored shuffle-draw agenda actions as remote funding", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const basicCredit = corpAction("gain-credit", "gain_credit");
     const aiCfoShuffleDraw = corpAction("ai-cfo-shuffle-draw", "gain_credit", {
@@ -448,13 +448,13 @@ describe("semantic runtime corp board triage central protection", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [iceCard("rd-ice")]),
-        remoteServer("remote_1", [iceCard("remote-ice")]),
+        remoteServer("r1", [iceCard("remote-ice")]),
       ],
     });
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           agendaStealSeverity: "game_ending",
           runnerAgendaPointsAfterSteal: 7,
@@ -480,7 +480,7 @@ describe("semantic runtime corp board triage central protection", () => {
     expect(triage).toMatchObject({
       primary: "fund_score_remote",
       severity: "critical",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(basicCreditComponent).toMatchObject({
       key: "corp_board_triage_alignment",
@@ -491,7 +491,7 @@ describe("semantic runtime corp board triage central protection", () => {
   it("does not treat scored hidden-zone reveal agenda actions as remote funding", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     const basicCredit = corpAction("gain-credit", "gain_credit");
     const revealRdTop = corpAction(
@@ -513,13 +513,13 @@ describe("semantic runtime corp board triage central protection", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [iceCard("rd-ice")]),
-        remoteServer("remote_1", [iceCard("remote-ice")]),
+        remoteServer("r1", [iceCard("remote-ice")]),
       ],
     });
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteAgenda.actionId]: scoringWindow({
-          serverId: "remote_1",
+          serverId: "r1",
           windowKind: "unsafe",
           agendaStealSeverity: "game_ending",
           runnerAgendaPointsAfterSteal: 7,
@@ -545,7 +545,7 @@ describe("semantic runtime corp board triage central protection", () => {
     expect(triage).toMatchObject({
       primary: "fund_score_remote",
       severity: "critical",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
     expect(basicCreditComponent).toMatchObject({
       key: "corp_board_triage_alignment",

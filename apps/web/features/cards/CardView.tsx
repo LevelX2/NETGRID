@@ -10,12 +10,12 @@ import {
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
-import type { LegalAction, Side } from "@netgrid/shared";
+import type { Side } from "@netgrid/shared";
+import type { LegalAction } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 import { tooltipCardRulesText } from "../../i18n/card-rule-translations";
 
 import {
-  CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS,
   CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS,
   CARD_TOOLTIP_PIN_EVENT,
   type CardDisplayMode,
@@ -59,13 +59,16 @@ import {
 import {
   aiBoonRunStrengthBadgeValue,
   iceStrengthBadgeValue,
+  signedStrengthModifier,
   strengthModifierBadgeValue,
   type DisplayVisibleCard,
 } from "./card-view-model";
 import { CardActionsPopover } from "./CardActionsPopover";
+import { useCardTooltipHover } from "./useCardTooltipHover";
 import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import {
   AdvancementGems,
+  AgendaDifficultyBadge,
   CounterDisplayBadge,
   IceModifierBadges,
   IceStrengthBadge,
@@ -88,7 +91,7 @@ type CardChoiceShortcut = {
 };
 
 export type PaymentSupportShortcut = {
-  identityKey: string;
+  identityKey: string | number;
   selected: boolean;
   disabled: boolean;
   label: string;
@@ -179,12 +182,6 @@ export function CardView({
   const { tooltipPercent } = useCardScaleSettings();
   const tooltipViewId = useId();
   const cardRef = useRef<HTMLButtonElement | null>(null);
-  const tooltipOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
-  const tooltipCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
   const tooltipOutsideCloseTimerRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -192,18 +189,13 @@ export function CardView({
   const lastTouchTooltipPinRef = useRef(0);
   const tooltipPinnedVisibleRef = useRef(false);
   const tooltipRef = useRef<HTMLSpanElement | null>(null);
+  const hover = useCardTooltipHover(cardRef, tooltipRef, hoverOpenDelayMs);
   const [tooltipPositionStyle, setTooltipPositionStyle] =
     useState<CSSProperties>({});
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">(
     "below",
   );
-  const [actionMenuPlacement, setActionMenuPlacement] = useState<
-    "above" | "below"
-  >("below");
-  const [actionMenuPositionStyle, setActionMenuPositionStyle] =
-    useState<CSSProperties>({});
   const [suppressCardTooltip, setSuppressCardTooltip] = useState(false);
-  const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const [tooltipPinnedVisible, setTooltipPinnedVisible] = useState(false);
   const [cardImageUnavailable, setCardImageUnavailable] = useState(false);
@@ -311,7 +303,7 @@ export function CardView({
     tooltipAvailable && (!suppressCardTooltip || tooltipPinnedVisible);
   const showTooltip =
     tooltipEnabled &&
-    (tooltipHoverVisible || tooltipFocusVisible || tooltipPinnedVisible);
+    (hover.visible || tooltipFocusVisible || tooltipPinnedVisible);
   const tooltipDomId = `${card.instanceId}-${tooltipViewId}`.replace(
     /[^A-Za-z0-9_-]/g,
     "-",
@@ -444,6 +436,28 @@ export function CardView({
         count: advancementDisplay.amount,
       })
     : null;
+  const { advancementRequirement, agendaDifficultyModifier } = card;
+  let agendaDifficultyBadge: { value: string; tooltip: string } | undefined;
+  if (
+    card.known &&
+    card.type === "agenda" &&
+    !preview &&
+    !forceCardBack &&
+    advancementRequirement !== undefined &&
+    agendaDifficultyModifier !== undefined &&
+    agendaDifficultyModifier !== 0
+  ) {
+    const sign = agendaDifficultyModifier < 0 ? "−" : "+";
+    const value = `${sign}${Math.abs(agendaDifficultyModifier)}`;
+    agendaDifficultyBadge = {
+      value,
+      tooltip: t("agendaDifficultyModifier", {
+        value,
+        printed: advancementRequirement - agendaDifficultyModifier,
+        current: advancementRequirement,
+      }),
+    };
+  }
   const strengthModifier = strengthModifierBadgeValue(card, {
     preview,
     forceCardBack: Boolean(forceCardBack),
@@ -472,7 +486,9 @@ export function CardView({
         : [];
   const renderedCounterDisplays = preview
     ? []
-    : counterDisplaysForRendering(card);
+    : counterDisplaysForRendering(card).filter(
+        (display) => display.id !== "ice_mark_modifier",
+      );
   const selectedTarget =
     preview || forceCardBack ? null : selectedTargetDisplayLabel(card);
   const counterAriaSuffix = renderedCounterDisplays
@@ -491,7 +507,9 @@ export function CardView({
         : "";
   const strengthModifierAriaSuffix =
     strengthModifier !== null
-      ? t("strengthModifier", { value: strengthModifier })
+      ? t("strengthModifier", {
+          value: signedStrengthModifier(strengthModifier),
+        })
       : "";
   const concealedRunnerResourceAriaSuffix = knownConcealedRunnerResource
     ? t("concealedRunnerResource")
@@ -501,6 +519,7 @@ export function CardView({
     concealedRunnerResourceAriaSuffix,
     visibleStrengthAriaSuffix,
     strengthModifierAriaSuffix,
+    agendaDifficultyBadge?.tooltip,
     counterAriaSuffix,
     scoreStateAriaSuffix,
   ]
@@ -552,20 +571,6 @@ export function CardView({
     return Math.min(Math.round(unscaled * tooltipScale), viewportLimit);
   };
 
-  const clearTooltipOpenTimer = () => {
-    if (tooltipOpenTimerRef.current !== null) {
-      clearTimeout(tooltipOpenTimerRef.current);
-      tooltipOpenTimerRef.current = null;
-    }
-  };
-
-  const clearTooltipCloseTimer = () => {
-    if (tooltipCloseTimerRef.current !== null) {
-      clearTimeout(tooltipCloseTimerRef.current);
-      tooltipCloseTimerRef.current = null;
-    }
-  };
-
   const clearTooltipOutsideCloseTimer = () => {
     if (tooltipOutsideCloseTimerRef.current !== null) {
       clearTimeout(tooltipOutsideCloseTimerRef.current);
@@ -578,117 +583,40 @@ export function CardView({
     setTooltipPinnedVisible(visible);
   };
 
-  const updateOverlayPlacement = () => {
+  const updateTooltipPlacement = () => {
     const element = cardRef.current;
-    if (!element) return;
+    if (!element || !tooltipEnabled) return;
     const cardRect = element.getBoundingClientRect();
     const visualViewport = window.visualViewport;
-    const viewportWidth = visualViewport?.width ?? window.innerWidth;
     const viewportHeight = visualViewport?.height ?? window.innerHeight;
-    const viewportBottom = viewportHeight;
-    const spaceBelow = viewportBottom - cardRect.bottom;
+    const spaceBelow = viewportHeight - cardRect.bottom;
     const spaceAbove = cardRect.top;
     const tooltipHeight = estimatedTooltipHeight();
     const nextTooltipPlacement =
       spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";
-    if (tooltipEnabled) {
-      const tooltipMaxWidth = computedTooltipMaxWidth();
-      const margin = 16;
-      const left = Math.max(
-        margin,
-        Math.min(
-          cardRect.left + 6,
-          window.innerWidth - tooltipMaxWidth - margin,
-        ),
-      );
-      const tooltipSizeStyle = showImageTooltip
-        ? { width: `${tooltipMaxWidth}px` }
-        : { width: "max-content", maxWidth: `${tooltipMaxWidth}px` };
-      setTooltipPositionStyle(
-        nextTooltipPlacement === "below"
-          ? {
-              left: `${left}px`,
-              top: `${cardRect.bottom + 8}px`,
-              ...tooltipSizeStyle,
-            }
-          : {
-              left: `${left}px`,
-              top: `${cardRect.top - 8}px`,
-              ...tooltipSizeStyle,
-            },
-      );
-    }
-    const estimatedActionMenuHeight = Math.min(
-      260,
-      Math.max(56, actions.length * 51 + Math.max(0, actions.length - 1) * 5),
+    const tooltipMaxWidth = computedTooltipMaxWidth();
+    const margin = 16;
+    const left = Math.max(
+      margin,
+      Math.min(cardRect.left + 6, window.innerWidth - tooltipMaxWidth - margin),
     );
-    const nextActionMenuPlacement =
-      spaceBelow < estimatedActionMenuHeight && spaceAbove > spaceBelow
-        ? "above"
-        : "below";
-    if (tooltipEnabled) setTooltipPlacement(nextTooltipPlacement);
-    if (hasCardActions) {
-      const margin = viewportWidth < 360 ? 8 : 16;
-      const availableWidth = Math.max(160, viewportWidth - margin * 2);
-      const preferredWidth = Math.max(
-        cardRect.width,
-        Math.min(availableWidth, 224),
-      );
-      const actionMenuWidth = Math.min(
-        availableWidth,
-        Math.min(260, preferredWidth),
-      );
-      const cardCenter = cardRect.left + cardRect.width / 2;
-      const left = Math.max(
-        margin,
-        Math.min(
-          cardCenter - actionMenuWidth / 2,
-          viewportWidth - actionMenuWidth - margin,
-        ),
-      );
-      const top =
-        nextActionMenuPlacement === "below"
-          ? cardRect.bottom + 7
-          : Math.max(margin, cardRect.top - estimatedActionMenuHeight - 7);
-      setActionMenuPlacement(nextActionMenuPlacement);
-      setActionMenuPositionStyle({
-        position: "fixed",
-        left: `${left}px`,
-        top: `${top}px`,
-        bottom: "auto",
-        width: `${actionMenuWidth}px`,
-        minWidth: `${Math.min(cardRect.width, actionMenuWidth)}px`,
-        maxHeight: `${Math.max(72, viewportHeight - margin * 2)}px`,
-      });
-    }
-  };
-
-  const scheduleTooltipOpen = () => {
-    if (!tooltipEnabled) return;
-    clearTooltipCloseTimer();
-    if (tooltipHoverVisible) return;
-    clearTooltipOpenTimer();
-    tooltipOpenTimerRef.current = setTimeout(() => {
-      tooltipOpenTimerRef.current = null;
-      setTooltipHoverVisible(true);
-    }, hoverOpenDelayMs);
-  };
-
-  const scheduleTooltipClose = () => {
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
-    tooltipCloseTimerRef.current = setTimeout(() => {
-      tooltipCloseTimerRef.current = null;
-      setTooltipHoverVisible(false);
-    }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
+    const tooltipSizeStyle = showImageTooltip
+      ? { width: `${tooltipMaxWidth}px` }
+      : { width: "max-content", maxWidth: `${tooltipMaxWidth}px` };
+    const top =
+      nextTooltipPlacement === "below" ? cardRect.bottom + 8 : cardRect.top - 8;
+    setTooltipPositionStyle({
+      left: `${left}px`,
+      top: `${top}px`,
+      ...tooltipSizeStyle,
+    });
+    setTooltipPlacement(nextTooltipPlacement);
   };
 
   const setCounterHelpTooltipActive = (active: boolean) => {
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
     setSuppressCardTooltip(active);
     if (active) {
-      setTooltipHoverVisible(false);
+      hover.close();
       setTooltipFocusVisible(false);
     }
   };
@@ -699,10 +627,8 @@ export function CardView({
 
   useEffect(() => {
     if (tooltipAvailable) return;
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
+    hover.close();
     clearTooltipOutsideCloseTimer();
-    setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
     setPinnedTooltipVisible(false);
     setTooltipPositionStyle({});
@@ -710,11 +636,9 @@ export function CardView({
 
   const togglePinnedTooltip = () => {
     if (!canPinTooltip) return;
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
+    hover.close();
     clearTooltipOutsideCloseTimer();
     setSuppressCardTooltip(false);
-    setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
     const nextVisible = !tooltipPinnedVisibleRef.current;
     setPinnedTooltipVisible(nextVisible);
@@ -725,21 +649,19 @@ export function CardView({
         }),
       );
     }
-    updateOverlayPlacement();
+    updateTooltipPlacement();
   };
 
   const closePinnedTooltip = () => {
-    clearTooltipOpenTimer();
-    clearTooltipCloseTimer();
+    hover.close();
     clearTooltipOutsideCloseTimer();
-    setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
     setPinnedTooltipVisible(false);
   };
 
   useEffect(() => {
     if (!showTooltip) return;
-    updateOverlayPlacement();
+    updateTooltipPlacement();
   }, [showTooltip, tooltipMode]);
 
   useEffect(() => {
@@ -749,11 +671,9 @@ export function CardView({
           ? (event.detail as { ownerId?: unknown } | null)?.ownerId
           : undefined;
       if (ownerId === tooltipOwnerId) return;
-      clearTooltipOpenTimer();
-      clearTooltipCloseTimer();
+      hover.close();
       clearTooltipOutsideCloseTimer();
       setPinnedTooltipVisible(false);
-      setTooltipHoverVisible(false);
       setTooltipFocusVisible(false);
     };
     window.addEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipPins);
@@ -800,18 +720,8 @@ export function CardView({
     };
   }, [tooltipPinnedVisible]);
 
-  useEffect(() => {
-    if (!showCardActions) {
-      setActionMenuPositionStyle({});
-      return;
-    }
-    updateOverlayPlacement();
-  }, [showCardActions, actions.length]);
-
   useEffect(
     () => () => {
-      clearTooltipOpenTimer();
-      clearTooltipCloseTimer();
       clearTooltipOutsideCloseTimer();
     },
     [],
@@ -833,16 +743,7 @@ export function CardView({
         onPointerDown={(event) => {
           if (tooltipPinnedVisible) event.stopPropagation();
         }}
-        onPointerEnter={(event) => {
-          if (event.pointerType === "touch") return;
-          clearTooltipCloseTimer();
-          clearTooltipOpenTimer();
-          if (!tooltipHoverVisible) setTooltipHoverVisible(true);
-        }}
-        onPointerLeave={(event) => {
-          if (event.pointerType === "touch") return;
-          scheduleTooltipClose();
-        }}
+        onPointerEnter={(event) => hover.open(event, true)}
       >
         {showImageTooltip ? (
           <CardImage
@@ -903,7 +804,7 @@ export function CardView({
 
   return (
     <div
-      className={`cardSlot${slotClassName ? ` ${slotClassName}` : ""}${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}${viewMarkerActive ? " viewMarkerActiveSlot" : ""}`}
+      className={`cardSlot${slotClassName ? ` ${slotClassName}` : ""}${showCardActions ? " actionMenuOpen" : ""}${viewMarkerActive ? " viewMarkerActiveSlot" : ""}`}
     >
       {instanceMarker ? (
         <span
@@ -971,16 +872,17 @@ export function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${concealedRunnerResourceClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${tapped ? " tappedCard" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${effectiveModifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${concealedRunnerResourceClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${tapped ? " tappedCard" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${effectiveModifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        aria-current={runPositionActive ? "step" : undefined}
         style={cardStyle}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
-          updateOverlayPlacement();
+          updateTooltipPlacement();
           if (onSelect) onSelect(card, hiddenSide);
           onFocus?.(card, hiddenSide);
         }}
         onFocus={(event) => {
-          updateOverlayPlacement();
+          updateTooltipPlacement();
           if (tooltipEnabled && event.currentTarget.matches(":focus-visible"))
             setTooltipFocusVisible(true);
           onFocus?.(card, hiddenSide);
@@ -993,9 +895,8 @@ export function CardView({
           togglePinnedTooltip();
         }}
         onPointerEnter={(event) => {
-          updateOverlayPlacement();
-          if (event.pointerType === "touch") return;
-          scheduleTooltipOpen();
+          updateTooltipPlacement();
+          if (tooltipEnabled) hover.open(event);
         }}
         onPointerMove={(event) => {
           if (event.pointerType === "touch") return;
@@ -1006,17 +907,7 @@ export function CardView({
           )
             return;
           if (suppressCardTooltip) setSuppressCardTooltip(false);
-          if (
-            !tooltipAvailable ||
-            tooltipHoverVisible ||
-            tooltipOpenTimerRef.current !== null
-          )
-            return;
-          clearTooltipCloseTimer();
-          tooltipOpenTimerRef.current = setTimeout(() => {
-            tooltipOpenTimerRef.current = null;
-            setTooltipHoverVisible(true);
-          }, hoverOpenDelayMs);
+          if (tooltipAvailable) hover.open(event);
         }}
         onPointerUp={(event) => {
           if (event.pointerType !== "touch" || !canPinTooltip) return;
@@ -1030,9 +921,9 @@ export function CardView({
           }
         }}
         onPointerLeave={(event) => {
-          setSuppressCardTooltip(false);
           if (event.pointerType === "touch") return;
-          scheduleTooltipClose();
+          setSuppressCardTooltip(false);
+          hover.leave(event);
         }}
         aria-label={cardAriaLabel}
         aria-pressed={onSelect ? choiceSelected : undefined}
@@ -1169,6 +1060,12 @@ export function CardView({
         {advancementDisplay ? (
           <AdvancementGems card={card} display={advancementDisplay} />
         ) : null}
+        {agendaDifficultyBadge ? (
+          <AgendaDifficultyBadge
+            {...agendaDifficultyBadge}
+            onHelpTooltipVisibilityChange={setCounterHelpTooltipActive}
+          />
+        ) : null}
         {iceStrength !== null ? (
           <IceStrengthBadge strength={iceStrength} />
         ) : null}
@@ -1294,14 +1191,10 @@ export function CardView({
           aria-haspopup="menu"
           data-testid="card-action-marker"
           onPointerDown={(event) => {
-            if (event.pointerType === "touch") {
-              setSuppressCardTooltip(true);
-              updateOverlayPlacement();
-            }
+            if (event.pointerType === "touch") setSuppressCardTooltip(true);
           }}
           onClick={() => {
             if (showCardActions) setSuppressCardTooltip(true);
-            updateOverlayPlacement();
             onFocus?.(card, hiddenSide);
             if (card.known) onActionContextSelect?.(card, hiddenSide);
           }}
@@ -1309,7 +1202,6 @@ export function CardView({
             if (actions.length === 1 && onAction && !actionDisabled)
               onAction(actions[0]!);
           }}
-          onPointerEnter={updateOverlayPlacement}
           onPointerLeave={() => setSuppressCardTooltip(false)}
         >
           <Play size={10} strokeWidth={2.35} />
@@ -1318,9 +1210,8 @@ export function CardView({
       {showCardActions ? (
         <CardActionsPopover
           actions={actions}
+          anchorRef={cardRef}
           disabled={actionDisabled}
-          placement={actionMenuPlacement}
-          style={actionMenuPositionStyle}
           actionLabelForAction={resolvedActionLabelForAction}
           onAction={onAction!}
         />

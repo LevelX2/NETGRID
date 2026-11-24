@@ -82,7 +82,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("retains the native unused universal source at equal complete current path cost", () => {
   const d = decide("g8d112");
   expect(d.actionId).toBe(
-    "runner.pump_breaker.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.runner_onr_classic_027_early-worm_2.corp_onr_v1_245_fire-wall_2.onr_classic_027_early-worm:pump_strength_three",
+    "rj.c6y.c6y.c6y.c2tq.41",
   );
   const selected = economics(d.input, d.actionId);
   const rent = economics(d.input, load("g8d112-before").decision.actionId);
@@ -101,7 +101,7 @@ it("retains the native unused universal source at equal complete current path co
 it("uses exact offered Pay-or-ETR payment instead of a same-cost newly consumed source", () => {
   const d = decide("g13d22");
   expect(d.actionId).toBe(
-    "runner.continue_run.subroutine_end_run_unless_runner_pays_one.0.1",
+    "r5.0.0.1",
   );
   expect(economics(d.input, d.actionId)).toMatchObject({
     totalCost: 1,
@@ -123,8 +123,8 @@ it("counts an already bound source once, leaves it usable in the same run, and p
   ).toBe(0);
   const { input, state, cp } = engineInput("g8d119");
   const rent = input.playerView.own.rig.find(
-    (c: { definitionId: string }) =>
-      c.definitionId === "onr_classic_031_rent-i-con",
+    (c: { definitionId: number }) =>
+      c.definitionId === 35,
   )!;
   for (const side of ["runner", "corp"] as const) {
     const view = getPlayerView(state, side);
@@ -156,8 +156,8 @@ it("does not count preservation when actual visible inner Gate coverage still co
   const state = load("g8d112-engine") as GameState;
   const hq = state.corp.servers.find((s) => s.id === "hq")!;
   const rd = state.corp.servers.find((s) => s.id === "rd")!;
-  const gate = "corp_onr_proteus_039_sphinx-2006_2",
-    snow = "corp_onr_proteus_038_snowbank_3";
+  const gate = "clq",
+    snow = "clj";
   expect(hq.ice[1]).toBe(gate);
   expect(rd.ice[0]).toBe(snow);
   hq.ice[1] = snow;
@@ -178,12 +178,12 @@ it("does not count preservation when actual visible inner Gate coverage still co
   const early = input.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "pump_breaker" &&
-      a.source === "runner_onr_classic_027_early-worm_2",
+      a.source === "c6y",
   )!;
   const rent = input.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "pump_breaker" &&
-      a.source === "runner_onr_classic_031_rent-i-con_2",
+      a.source === "c7u",
   )!;
   expect(economics(input, early.actionId).newRunEndTrashSourceCount).toBe(1);
   expect(economics(input, rent.actionId).newRunEndTrashSourceCount).toBe(1);
@@ -220,7 +220,7 @@ it.each([
     expect(state.runner.credits).toBe(credits);
     expect(
       getPlayerView(state, "runner").own.rig?.some(
-        (c) => c.definitionId === "onr_classic_031_rent-i-con",
+        (c) => c.definitionId === 35,
       ),
     ).toBe(true);
   },
@@ -243,26 +243,26 @@ it("requires exact offered open continuation payment and rejects an unknown inne
   const action = input.legalActions.find(
     (a: { actionId: string }) =>
       a.actionId ===
-      "runner.continue_run.subroutine_end_run_unless_runner_pays_one.0.1",
+      "r5.0.0.1",
   )!;
-  for (const payload of [
-    { ...action.payload, encounterWillEndRun: true },
-    { ...action.payload, payOrEndRunSubroutinePayment: 2 },
-    { ...action.payload, payOrEndRunSubroutineIndexes: "1" },
-    { ...action.payload, payOrEndRunSubroutineIndexes: "0,x" },
+  for (const altered of [
+    { ...action, payload: { ...action.payload, encounterWillEndRun: true } },
+    { ...action, payload: { ...action.payload, payOrEndRunSubroutinePayment: 2 } },
+    { ...action, payOrEndRunSubroutineIndexes: [1] },
   ]) {
-    expect(
-      pureEndRunEncounterPayment(input, { ...action, payload }),
-    ).toBeUndefined();
+    expect(pureEndRunEncounterPayment(input, altered)).toBeUndefined();
   }
+  expect(() => pureEndRunEncounterPayment(input, {
+    ...action, payOrEndRunSubroutineIndexes: [0, NaN],
+  })).toThrow("Invalid Engine subroutine indexes.");
   const state = load("g8d112-engine") as GameState;
-  state.cardInstances["corp_onr_proteus_038_snowbank_3"]!.rezzed = false;
-  state.cardInstances["corp_onr_proteus_038_snowbank_3"]!.faceup = false;
+  state.cardInstances["clj"]!.rezzed = false;
+  state.cardInstances["clj"]!.faceup = false;
   const unknown = engineInput("g8d112", state).input;
   const early = unknown.legalActions.find(
     (a: { type: string; source: string }) =>
       a.type === "pump_breaker" &&
-      a.source === "runner_onr_classic_027_early-worm_2",
+      a.source === "c6y",
   )!;
   const payment = pureEndRunEncounterPayment(unknown, early);
   expect(payment).toBeDefined();

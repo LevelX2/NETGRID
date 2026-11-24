@@ -17,7 +17,7 @@ import type { CostQuote } from "../payment";
 describe("rez card execution", () => {
   it("rezzes installed ICE by mutating the existing card instance and continuing the encounter", () => {
     const iceId = "ice_1" as CardInstanceId;
-    const iceDefinition = definition("ice_def", "ice", { rezCost: 3 });
+    const iceDefinition = definition(1663273972, "ice", { rezCost: 3 });
     const state = minimalState({
       cardInstances: {
         [iceId]: instance(iceId, iceDefinition.id, "serverIce"),
@@ -47,7 +47,7 @@ describe("rez card execution", () => {
 
   it("preserves variable ICE rez payload validation and stored variable state", () => {
     const iceId = "variable_ice" as CardInstanceId;
-    const iceDefinition = definition("variable_ice_def", "ice", { rezCost: 2 });
+    const iceDefinition = definition(3265875237, "ice", { rezCost: 2 });
     const state = minimalState({
       cardInstances: {
         [iceId]: instance(iceId, iceDefinition.id, "serverIce"),
@@ -91,7 +91,7 @@ describe("rez card execution", () => {
 
   it("uses the current quoted base cost when a run surcharge affects variable ICE", () => {
     const iceId = "surcharged_variable_ice" as CardInstanceId;
-    const iceDefinition = definition("surcharged_variable_ice_def", "ice", {
+    const iceDefinition = definition(1542369052, "ice", {
       rezCost: 2,
     });
     const state = minimalState({
@@ -136,7 +136,7 @@ describe("rez card execution", () => {
 
   it("waives only printed rez credits while preserving variable additional credits", () => {
     const iceId = "effect_variable_ice" as CardInstanceId;
-    const iceDefinition = definition("effect_variable_ice_def", "ice", {
+    const iceDefinition = definition(345607497, "ice", {
       rezCost: 4,
     });
     const state = minimalState({
@@ -185,7 +185,7 @@ describe("rez card execution", () => {
 
   it("preserves agenda-point rez costs when an effect waives printed credits", () => {
     const glacierId = "effect_glacier" as CardInstanceId;
-    const glacierDefinition = definition("onr_classic_011_glacier", "ice", {
+    const glacierDefinition = definition(15, "ice", {
       rezCost: 6,
     });
     const state = minimalState({
@@ -217,7 +217,7 @@ describe("rez card execution", () => {
 
   it("keeps ACME agenda-point rez payloads stable", () => {
     const assetId = "acme" as CardInstanceId;
-    const assetDefinition = definition("acme_def", "asset", { rezCost: 0 });
+    const assetDefinition = definition(2827789559, "asset", { rezCost: 0 });
     const state = minimalState({
       cardInstances: {
         [assetId]: instance(assetId, assetDefinition.id, "serverRoot"),
@@ -249,7 +249,7 @@ describe("rez card execution", () => {
 
   it("spends Glacier's public agenda-point self-rez cost", () => {
     const glacierId = "glacier" as CardInstanceId;
-    const glacierDefinition = definition("onr_classic_011_glacier", "ice", {
+    const glacierDefinition = definition(15, "ice", {
       rezCost: 0,
     });
     const state = minimalState({
@@ -282,7 +282,7 @@ describe("rez card execution", () => {
 
   it("preserves Paris trace-pool counter payloads", () => {
     const upgradeId = "paris" as CardInstanceId;
-    const upgradeDefinition = definition("paris_def", "upgrade", {
+    const upgradeDefinition = definition(3414179284, "upgrade", {
       rezCost: 1,
     });
     const state = minimalState({
@@ -327,7 +327,7 @@ describe("rez card execution", () => {
 });
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
   extras: Partial<CardDefinition> = {},
 ): CardDefinition {
@@ -357,7 +357,7 @@ function instance(
     controller: "corp",
     faceup: false,
     rezzed: false,
-    zone: { side: "corp", zone, serverId: "remote_1" },
+    zone: { side: "corp", zone, serverId: "r1" },
   } as unknown as CardInstance;
 }
 
@@ -392,7 +392,7 @@ function minimalState(input: {
       badPublicity: 0,
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           kind: "remote",
           label: "Remote 1",
           ice: [],
@@ -469,8 +469,8 @@ function testHost(
     run: {
       mustRun: () => {
         state.run ??= {
-          runId: "run_1",
-          attackedServerId: "remote_1",
+          runId: 1,
+          attackedServerId: "r1",
           phase: "encounter_ice",
           approachedIceId: undefined,
           encounteredIceId: undefined,

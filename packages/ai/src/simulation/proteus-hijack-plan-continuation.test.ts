@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
   applyAction,
   createGameAfterSetup,
@@ -8,19 +9,19 @@ import { describe, expect, it } from "vitest";
 
 import proteusDecksJson from "../../../../data/decks/proteus-playtest-decks-2026-05-25.json";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { chooseAiAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 
-const HIJACK = "onr_proteus_110_hijack";
-const INSTALL_TARGET = "onr_proteus_151_sunburst-cranial-interface";
-const MEMORY_INSTALL_TARGET = "onr_proteus_085_disintegrator";
+const HIJACK = 168;
+const INSTALL_TARGET = 209;
+const MEMORY_INSTALL_TARGET = 143;
 const INSTALLED_PROGRAMS = [
-  "onr_proteus_090_highlighter",
-  "onr_v1_014_codecracker",
-  "onr_v1_021_dwarf",
+  148,
+  226,
+  233,
 ] as const;
 
 describe("Proteus Hijack plan continuation", () => {
@@ -32,7 +33,7 @@ describe("Proteus Hijack plan continuation", () => {
     );
     const hijackId = runnerCard(state, HIJACK).instanceId;
     const targetId = runnerCard(state, INSTALL_TARGET).instanceId;
-    const planInstance = `plan:runner.develop_board_and_hand:card%3A${hijackId}`;
+    const planInstance = planInstanceIdForProposal({ moduleId: "runner.develop_board_and_hand", dedupeKey: `card:${hijackId}` });
     const ownDeckSnapshot = deckSnapshot(runnerDeck);
 
     resetResidentPlanPortfolioMemory();
@@ -146,7 +147,7 @@ describe("Proteus Hijack plan continuation", () => {
     );
     const hijackId = runnerCard(state, HIJACK).instanceId;
     const targetId = runnerCard(state, MEMORY_INSTALL_TARGET).instanceId;
-    const planInstance = `plan:runner.develop_board_and_hand:card%3A${hijackId}`;
+    const planInstance = planInstanceIdForProposal({ moduleId: "runner.develop_board_and_hand", dedupeKey: `card:${hijackId}` });
     const ownDeckSnapshot = deckSnapshot(runnerDeck);
 
     resetResidentPlanPortfolioMemory();
@@ -223,7 +224,7 @@ describe("Proteus Hijack plan continuation", () => {
     if (!memorySelectedChoices)
       throw new Error("Hijack memory choice was not bound");
     expect(memoryDecision).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       fallbackUsed: false,
       decisionDebug: { planKind: "runner.develop_board_and_hand" },
     });
@@ -248,7 +249,7 @@ function hijackState(
   runnerDeck: DeckDefinition,
   corpDeck: DeckDefinition,
   installTargetDefinitionId = INSTALL_TARGET,
-  installedProgramDefinitionIds: readonly string[] = [],
+  installedProgramDefinitionIds: readonly number[] = [],
 ): GameState {
   const state = createGameAfterSetup({
     matchId: "proteus-hijack-plan-continuation",
@@ -289,7 +290,7 @@ function hijackState(
   state.runner.rig.resources = [];
   state.runner.memoryUsed = installedPrograms.reduce(
     (total, program) =>
-      total + (CARD_DEFINITIONS_BY_ID[program.definitionId]?.memoryCost ?? 0),
+      total + (planningCardFactsByDefinitionId(program.definitionId)?.memoryCost ?? 0),
     0,
   );
   if (installedPrograms.length > 0) state.runner.memoryLimit = 4;
@@ -310,7 +311,7 @@ function hijackState(
   return state;
 }
 
-function runnerCard(state: GameState, definitionId: string) {
+function runnerCard(state: GameState, definitionId: number) {
   const card = Object.values(state.cardInstances).find(
     (candidate) =>
       candidate.owner === "runner" && candidate.definitionId === definitionId,

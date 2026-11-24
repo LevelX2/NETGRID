@@ -46,12 +46,10 @@ const TRIAGE_ALIGNMENT_BONUS = 850;
 const TRIAGE_MISMATCH_HIGH = -4200;
 const TRIAGE_MISMATCH_MEDIUM = -2200;
 
-export function semanticRuntimeCorpBoardTriageActionComponentForTriage<
-  TConsumer extends string,
->(
+export function semanticRuntimeCorpBoardTriageActionComponentForTriage(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
   triage: CorpBoardTriage,
 ): AiDecisionScoreComponent | undefined {
@@ -121,12 +119,12 @@ export function semanticRuntimeCorpBoardTriageActionComponentForTriage<
   };
 }
 
-function corpBoardTriageActionAlignment<TConsumer extends string>(
+function corpBoardTriageActionAlignment(
   input: AiDecisionInput,
   action: LegalAction,
   actionServerId: string | undefined,
   triage: CorpBoardTriage,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): "match" | "mismatch" | "neutral" {
   switch (triage.primary) {

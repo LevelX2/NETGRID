@@ -134,20 +134,24 @@ export function buildSemanticShadowLeagueDeltaReport({
   baselineReference = "baseline",
   currentReference = "current",
 }: BuildSemanticShadowLeagueDeltaReportInput): SemanticShadowLeagueDeltaReport {
+  const comparable = sameScenarioSet(baseline, current);
   const mistakeCountDelta = buildLowerIsBetterDelta(
     "mistakeCount",
     baseline.metrics.mistakeCount,
     current.metrics.mistakeCount,
+    comparable,
   );
   const agreementRateDelta = buildHigherIsBetterDelta(
     "agreementRate",
     baseline.metrics.agreementRate,
     current.metrics.agreementRate,
+    comparable,
   );
   const followupCandidateCountDelta = buildLowerIsBetterDelta(
     "followupCandidateCount",
     baseline.followupCandidates.length,
     current.followupCandidates.length,
+    comparable,
   );
   const report: SemanticShadowLeagueDeltaReport = {
     schemaVersion: SEMANTIC_SHADOW_LEAGUE_DELTA_SCHEMA_VERSION,
@@ -164,6 +168,7 @@ export function buildSemanticShadowLeagueDeltaReport({
       "pilotEligibilityRate",
       baseline.metrics.pilotEligibilityRate,
       current.metrics.pilotEligibilityRate,
+      comparable,
     ),
     pilotReadinessDelta: buildPilotReadinessDelta(baseline, current),
     targetChoiceCoverageDelta: buildReadinessDelta(
@@ -171,7 +176,7 @@ export function buildSemanticShadowLeagueDeltaReport({
       baseline,
       current,
     ),
-    doctrineFitDelta: buildDoctrineFitDelta(baseline, current),
+    doctrineFitDelta: buildDoctrineFitDelta(baseline, current, comparable),
     remoteContestReadinessDelta: buildReadinessDelta(
       "remote_contest_report_only",
       baseline,
@@ -217,20 +222,42 @@ export function buildSemanticShadowLeagueDeltaReport({
   return report;
 }
 
+function sameScenarioSet(
+  baseline: SemanticShadowLeagueReport,
+  current: SemanticShadowLeagueReport,
+): boolean {
+  const keys = (report: SemanticShadowLeagueReport) =>
+    new Set(
+      report.scenarios.map(({ side, scenarioId }) =>
+        JSON.stringify([side, scenarioId]),
+      ),
+    );
+  const baselineKeys = keys(baseline);
+  const currentKeys = keys(current);
+  return (
+    baselineKeys.size === baseline.scenarioCount &&
+    currentKeys.size === current.scenarioCount &&
+    baselineKeys.size === currentKeys.size &&
+    [...baselineKeys].every((key) => currentKeys.has(key))
+  );
+}
+
 function buildHigherIsBetterDelta(
   label: string,
   baseline: number | null,
   current: number | null,
+  comparable: boolean,
 ): SemanticShadowLeagueMetricDelta {
-  return buildMetricDelta(label, baseline, current, "higher");
+  return buildMetricDelta(label, baseline, current, "higher", comparable);
 }
 
 function buildLowerIsBetterDelta(
   label: string,
   baseline: number | null,
   current: number | null,
+  comparable: boolean,
 ): SemanticShadowLeagueMetricDelta {
-  return buildMetricDelta(label, baseline, current, "lower");
+  return buildMetricDelta(label, baseline, current, "lower", comparable);
 }
 
 function buildMetricDelta(
@@ -238,6 +265,7 @@ function buildMetricDelta(
   baseline: number | null,
   current: number | null,
   favorableDirection: "higher" | "lower",
+  comparable: boolean,
 ): SemanticShadowLeagueMetricDelta {
   if (baseline === null || current === null) {
     return {
@@ -254,11 +282,14 @@ function buildMetricDelta(
     baseline,
     current,
     delta,
-    direction: directionForDelta(delta, favorableDirection),
+    direction: comparable
+      ? directionForDelta(delta, favorableDirection)
+      : "not_comparable",
     evidence: [
       `${safe(label)}:baseline:${baseline}`,
       `${safe(label)}:current:${current}`,
       `${safe(label)}:delta:${delta}`,
+      ...(!comparable ? ["scenario_sets_differ"] : []),
     ],
   };
 }
@@ -350,6 +381,7 @@ function buildReadinessDelta(
 function buildDoctrineFitDelta(
   baseline: SemanticShadowLeagueReport,
   current: SemanticShadowLeagueReport,
+  comparable: boolean,
 ): SemanticShadowLeagueDoctrineFitDelta {
   const baselineFamilies = Object.keys(
     baseline.metrics.doctrineGoalActionFit.topFitByFamily,
@@ -378,21 +410,25 @@ function buildDoctrineFitDelta(
       "doctrineGoalsProduced",
       baseline.metrics.doctrineGoalActionFit.doctrineGoalsProduced,
       current.metrics.doctrineGoalActionFit.doctrineGoalsProduced,
+      comparable,
     ),
     goalsWithAtLeastOneFitDelta: buildHigherIsBetterDelta(
       "goalsWithAtLeastOneFit",
       baseline.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit,
       current.metrics.doctrineGoalActionFit.goalsWithAtLeastOneFit,
+      comparable,
     ),
     goalsOnlyBlockedDelta: buildLowerIsBetterDelta(
       "goalsOnlyBlocked",
       baseline.metrics.doctrineGoalActionFit.goalsOnlyBlocked,
       current.metrics.doctrineGoalActionFit.goalsOnlyBlocked,
+      comparable,
     ),
     goalsNoCandidateDelta: buildLowerIsBetterDelta(
       "goalsNoCandidate",
       baseline.metrics.doctrineGoalActionFit.goalsNoCandidate,
       current.metrics.doctrineGoalActionFit.goalsNoCandidate,
+      comparable,
     ),
     addedTopFitFamilies,
     removedTopFitFamilies,

@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 export type PublicCardPresentation = {
   title: string;
   type?: string;
@@ -13,7 +14,7 @@ export type PublicCardPresentationsById = Readonly<
  * a full card-definition registry.
  */
 export function publicCardTitle(
-  definitionId: string | undefined,
+  definitionId: CardDefinitionId | undefined,
   presentationsById?: PublicCardPresentationsById,
 ): string | undefined {
   return definitionId === undefined
@@ -22,7 +23,7 @@ export function publicCardTitle(
 }
 
 export function publicCardPresentation(
-  definitionId: string | undefined,
+  definitionId: CardDefinitionId | undefined,
   presentationsById?: PublicCardPresentationsById,
 ): PublicCardPresentation | undefined {
   return definitionId === undefined

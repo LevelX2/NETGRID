@@ -1,9 +1,16 @@
-import { listPublicCardViews } from "@netgrid/cards/server";
+import { canonicalCapabilityId, listPublicCardViews } from "@netgrid/cards/server";
+import { buildMatchPlayerOffer, getPlayerView } from "@netgrid/engine";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import {
+  apply,
+  MECHANIC_SMOKE_GAMES,
+  putCorpRootInRemote,
+} from "../../../packages/engine/src/test-fixtures/mechanic-smoke-fixtures";
+import {
   actionButtonLabel,
+  boardCardActionLabel,
   contextualCardActionLabel,
 } from "../app/action-board-ui";
 import {
@@ -15,9 +22,53 @@ const EXPECTED_MULTI_CAPABILITY_CARD_COUNT = 21;
 const EXPECTED_MULTI_CAPABILITY_LABEL_COUNT = 46;
 
 describe("card capability action translations", () => {
+  it.each([
+    [
+      14,
+      "2 Credits von der Karte nehmen",
+      "Take 2 credits from this card",
+      "Prendre 2 crédits sur cette carte",
+    ],
+    [
+      1,
+      "1 Credit von der Karte nehmen",
+      "Take 1 credit from this card",
+      "Prendre 1 crédit sur cette carte",
+    ],
+  ] as const)(
+    "shows the offered payout with %i credits on BBS in the card menu and action list",
+    (balance, de, en, fr) => {
+      let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("bbs-action-menu");
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      const bbsId = putCorpRootInRemote(state, 521);
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "rez_card" && action.payload?.cardId === bbsId,
+      );
+      state.cardInstances[bbsId]!.counters = { bit: balance };
+      const view = buildMatchPlayerOffer(getPlayerView(state, "corp"));
+      const action = view.legalActions.find(
+        (entry) =>
+          entry.type === "activated_card_ability" && entry.source === bbsId,
+      )!;
+      expect(action.costs).toEqual([{ clicks: 1 }]);
+      for (const [locale, text] of [
+        ["de", de],
+        ["en", en],
+        ["fr", fr],
+      ] as const) {
+        expect(boardCardActionLabel(view, action, undefined, locale)).toBe(text);
+        expect(actionButtonLabel(action, undefined, locale)).toBe(
+          `BBS Whispering Campaign${locale === "fr" ? " :" : ":"} ${text}`,
+        );
+      }
+    },
+  );
+
   it("names Data Fort Remapping and its run-ending effect without needing a catalog lookup", () => {
     const capabilityId =
-      "onr_classic_001_data-fort-remapping:spend_remap_counter_end_run";
+      4;
     const action: LegalAction = {
       actionId: "remap_action",
       side: "corp",
@@ -71,7 +122,7 @@ describe("card capability action translations", () => {
     for (const card of multiCapabilityCards) {
       const sourceLabels = card.capabilityText ?? [];
       for (const entry of sourceLabels) {
-        const capabilityId = `${card.cardDefinitionId}:${entry.capabilityKey}`;
+        const capabilityId = canonicalCapabilityId(card.cardDefinitionId, entry.capabilityKey);
         expect(
           CARD_CAPABILITY_ACTION_TRANSLATION_CATALOGS.en[capabilityId],
           `${capabilityId} must have an English execution label`,
@@ -91,7 +142,7 @@ describe("card capability action translations", () => {
           sourceLabels.map(
             (entry) =>
               CARD_CAPABILITY_ACTION_TRANSLATION_CATALOGS[locale][
-                `${card.cardDefinitionId}:${entry.capabilityKey}`
+                canonicalCapabilityId(card.cardDefinitionId, entry.capabilityKey)
               ],
           ),
         );
@@ -150,7 +201,7 @@ describe("card capability action translations", () => {
     const original = structuredClone(action);
 
     expect(cardCapabilityIdForAction(action)).toBe(
-      "onr_v1_154_broker:store_credits",
+      440,
     );
     expect(actionButtonLabel(action, undefined, "en")).toBe(
       "Broker: place 3 credits on Broker",
@@ -161,7 +212,7 @@ describe("card capability action translations", () => {
       ...action,
       payload: {
         ...action.payload,
-        cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
+        cardImplementationAbilityId: 441,
       },
     } satisfies LegalAction;
     expect(cardCapabilityIdForAction(mismatched)).toBeNull();
@@ -172,7 +223,7 @@ function brokerAction(
   capabilityKey: "store_credits" | "withdraw_credits",
   label: string,
 ): LegalAction {
-  const sourceAbilityId = `onr_v1_154_broker:${capabilityKey}`;
+  const sourceAbilityId = capabilityKey === "store_credits" ? 440 : 441;
   return {
     actionId: `action:${capabilityKey}`,
     side: "runner",

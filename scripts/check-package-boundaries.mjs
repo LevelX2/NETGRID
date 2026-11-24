@@ -171,6 +171,12 @@ function boundaryFindings(file, source) {
 }
 
 function allowedWorkspaceSubpath(file, specifier) {
+  if (
+    specifier === "@netgrid/engine/test-fixtures/synthetic-card-definition-id"
+  )
+    return (
+      file.startsWith("packages/ai/") && /\.test(?:-support)?\.tsx?$/.test(file)
+    );
   if (specifier.startsWith("@netgrid/runtime-data/"))
     return [
       "@netgrid/runtime-data/ai-deck-pool",
@@ -303,6 +309,16 @@ function runSelfTest() {
       "packages/ai/src/valid.ts",
       'const value = require("@netgrid/engine");',
       0,
+    ],
+    [
+      "packages/ai/src/card-fixtures.test-support.ts",
+      'import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";',
+      0,
+    ],
+    [
+      "packages/ai/src/invalid-engine-test-support.ts",
+      'import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";',
+      1,
     ],
     [
       "packages/ai/src/valid-cards-planning.ts",

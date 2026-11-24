@@ -37,7 +37,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
       cp.runtime,
     );
     const decision = chooseAiAction(cp.input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.reasonCode).toBe("plan_first.corp.economy");
     expect(decision.fallbackUsed).toBe(false);
     const portfolio = residentPlanPortfolioSnapshot(cp.input)!;
@@ -45,7 +45,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
       (i) =>
         i.moduleId === "corp.score_agenda" &&
         i.dedupeKey ===
-          "agenda:corp_onr_v1_188_ai-chief-financial-officer_1:remote_1",
+          "agenda:c2h1:r1",
     )!;
     expect(score.moduleState).toMatchObject({
       signal: {
@@ -69,18 +69,18 @@ describe("existing terminal score continuation before emergency agenda flood", (
       cp.runtime,
     );
     const decision = chooseAiAction(cp.input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.reasonCode).toBe("plan_first.corp.economy");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("corp_onr_v1_204_ice-transmutation_2"),
+        expect.stringContaining("c2km"),
       ]),
     );
     const owner = residentPlanPortfolioSnapshot(cp.input)!.instances.find(
       (i) =>
         i.moduleId === "corp.score_agenda" &&
-        i.dedupeKey === "agenda:corp_onr_v1_204_ice-transmutation_2:remote_1",
+        i.dedupeKey === "agenda:c2km:r1",
     )!;
     expect(owner.moduleState).toMatchObject({
       signal: {
@@ -107,7 +107,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
       cp.runtime,
     );
     const decision = chooseAiAction(cp.input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.reasonCode).toBe("plan_first.corp.economy");
     expect(decision.fallbackUsed).toBe(false);
     const portfolio = residentPlanPortfolioSnapshot(cp.input)!;
@@ -118,7 +118,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
     // its unprotected terminal steal. Nonterminal flood alternatives remain.
     expect(root.moduleState).toMatchObject({
       signal: {
-        projectId: "agenda:corp_onr_v1_220_tycho-extension_1:new_remote",
+        projectId: "agenda:c2o5:new_remote",
         phase: "install_agenda",
         feasible: false,
         routeAssessment: "corp_score_protection_required",
@@ -174,7 +174,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
           hq === "exposed",
         );
       const quote = cp.input.playerView.servers.find(
-        (s: { id: string }) => s.id === "remote_1",
+        (s: { id: string }) => s.id === "r1",
       ).root[0].scoreContinuationQuote;
       if (condition === "stale_quote") quote.expiresAtStateVersion--;
       if (condition === "incomplete_quote") {
@@ -189,7 +189,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
         cp.runtime,
       );
       const decision = chooseAiAction(cp.input);
-      expect(decision.actionId).toBe("corp.gain_credit");
+      expect(decision.actionId).toBe("cb");
       expect(decision.reasonCode).toBe("plan_first.corp.economy");
       if (hq === "exposed") {
         const portfolio = residentPlanPortfolioSnapshot(cp.input)!;
@@ -201,7 +201,7 @@ describe("existing terminal score continuation before emergency agenda flood", (
         // separate HQ-agenda escape project retains its real multi-turn need.
         expect(root.moduleState).toMatchObject({
           signal: {
-            projectId: "agenda:corp_onr_v1_204_ice-transmutation_3:remote_2",
+            projectId: "agenda:c2kn:r2",
             routeAssessment: "corp_deckout_agenda_flood_score_install",
             fundingMilestone: { deadline: "multi_turn", targetCredits: 5 },
           },

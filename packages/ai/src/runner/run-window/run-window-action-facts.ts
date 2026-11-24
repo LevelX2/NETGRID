@@ -1,4 +1,5 @@
-import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { isRunnerPaymentWindowId, type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { runnerCandidateIsCardAbility } from "../../runtime/runner-information-action-facts";
 import { runnerCandidateHasVisibleAdditionalAccessEffect } from "./runner-run-window-additional-access";
@@ -15,17 +16,15 @@ export function runnerFreeAgendaStealForCurrentAccess(
     run?.phase !== "access" ||
     card?.known !== true ||
     card.type !== "agenda" ||
-    !Number.isFinite(card.agendaPoints) ||
+    !Number.isSafeInteger(card.agendaPoints) ||
     Number(card.agendaPoints) <= 0
   )
     return undefined;
   return input.legalActions.find(
     (action) =>
       action.type === "steal_agenda" &&
-      action.side === "runner" &&
+      actionMatchesCurrentDecision(input, action) &&
       action.source === card.instanceId &&
-      action.timingPoint === input.playerView.timingPoint &&
-      action.expiresAtStateVersion === input.playerView.stateVersion &&
       action.costs.length === 0 &&
       action.targetRequirements.length === 0 &&
       !action.choiceRequirements?.length &&
@@ -45,51 +44,78 @@ function isRunWindowSemantic(candidate: ActionSemanticCandidate): boolean {
   );
 }
 
+function runWindowLegalAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  actionsById: ReadonlyMap<string, LegalAction> | undefined,
+): LegalAction | undefined {
+  const action = actionsById
+    ? actionsById.get(candidate.actionId)
+    : input.legalActions.find(
+        (action) => action.actionId === candidate.actionId,
+      );
+  return input.side === "runner" &&
+    actionMatchesCurrentDecision(input, action) &&
+    candidate.actorSide === action.side &&
+    candidate.actionType === action.type
+    ? action
+    : undefined;
+}
+
 export function isRunnerRunWindowCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  actionsById?: ReadonlyMap<string, LegalAction>,
 ): boolean {
   return (
-    runnerRunPaymentSupportAction(input, candidate) !== undefined ||
+    runnerRunPaymentSupportAction(input, candidate, actionsById) !==
+      undefined ||
     isRunWindowSemantic(candidate) ||
     (input.playerView.run !== undefined &&
       candidate.sourceKind === "card" &&
       candidate.semanticActionType.startsWith("card_ability.")) ||
     runnerCandidateHasVisibleAdditionalAccessEffect(candidate) ||
-    runnerRestrictedRunSequenceAction(input, candidate) !== undefined ||
-    runnerOptionalBonusRunDeclineAction(input, candidate) !== undefined ||
-    runnerSuccessfulRunBeforeAccessEffectAction(input, candidate) !==
+    runnerRestrictedRunSequenceAction(input, candidate, actionsById) !==
       undefined ||
-    runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined ||
-    runnerPostPassTrashAction(input, candidate) !== undefined ||
-    runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined
+    runnerOptionalBonusRunDeclineAction(input, candidate, actionsById) !==
+      undefined ||
+    runnerSuccessfulRunBeforeAccessEffectAction(
+      input,
+      candidate,
+      actionsById,
+    ) !== undefined ||
+    runnerPostPassDerezAndEndRunAction(input, candidate, actionsById) !==
+      undefined ||
+    runnerPostPassTrashAction(input, candidate, actionsById) !== undefined ||
+    runnerRunRemainderStrengthBoostAction(input, candidate, actionsById) !==
+      undefined
   );
 }
 
 export function runnerRunPaymentSupportAction(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  actionsById?: ReadonlyMap<string, LegalAction>,
 ): LegalAction | undefined {
   if (!input.playerView.run) return undefined;
-  return input.legalActions.find(
-    (action) =>
-      action.actionId === candidate.actionId &&
-      action.type === "activated_card_ability" &&
-      typeof action.payload?.costPenaltySupportWindowId === "string" &&
-      typeof action.payload.costPenaltySupportOriginalActionId === "string",
-  );
+  const action = runWindowLegalAction(input, candidate, actionsById);
+  return action &&
+    action.type === "activated_card_ability" &&
+    isRunnerPaymentWindowId(action.payload?.costPenaltySupportWindowId) &&
+    typeof action.payload.costPenaltySupportOriginalActionId === "string"
+    ? action
+    : undefined;
 }
 
 export function runnerSuccessfulRunBeforeAccessEffectAction(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  actionsById?: ReadonlyMap<string, LegalAction>,
 ): LegalAction | undefined {
   if (!runnerCandidateIsCardAbility(candidate)) return undefined;
   if (candidate.abilityBindingMethod !== "canonical_capability_id")
     return undefined;
-  const action = input.legalActions.find(
-    (entry) => entry.actionId === candidate.actionId,
-  );
+  const action = runWindowLegalAction(input, candidate, actionsById);
   if (
     !action ||
     action.type !== "trigger_ability" ||
@@ -125,21 +151,21 @@ export function runnerSuccessfulRunBeforeAccessEffectAction(
 export function runnerOptionalBonusRunDeclineAction(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  actionsById?: ReadonlyMap<string, LegalAction>,
 ): LegalAction | undefined {
-  return input.legalActions.find((action) => {
-    const ability = action.payload?.runnerAbility ?? action.payload?.abilityId;
-    return (
-      action.actionId === candidate.actionId &&
-      action.type === "trigger_ability" &&
-      (ability === "decline_optional_bonus_run" ||
-        ability === "decline_successful_run_extra_run")
-    );
-  });
+  const action = runWindowLegalAction(input, candidate, actionsById);
+  const ability = action?.payload?.runnerAbility ?? action?.payload?.abilityId;
+  return action?.type === "trigger_ability" &&
+    (ability === "decline_optional_bonus_run" ||
+      ability === "decline_successful_run_extra_run")
+    ? action
+    : undefined;
 }
 
 export function runnerRunRemainderStrengthBoostAction(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  actionsById?: ReadonlyMap<string, LegalAction>,
 ): LegalAction | undefined {
   if (!runnerCandidateIsCardAbility(candidate)) return undefined;
   if (
@@ -147,19 +173,20 @@ export function runnerRunRemainderStrengthBoostAction(
     input.playerView.timingPoint !== "run.jack_out_window"
   )
     return undefined;
-  return input.legalActions.find(
-    (action) =>
-      action.actionId === candidate.actionId &&
-      action.type === "trigger_ability" &&
-      action.source === candidate.sourceCardInstanceId &&
-      action.payload?.runnerAbility === "boost_icebreaker_for_run" &&
-      typeof action.payload?.targetCardId === "string",
-  );
+  const action = runWindowLegalAction(input, candidate, actionsById);
+  return action &&
+    action.type === "trigger_ability" &&
+    action.source === candidate.sourceCardInstanceId &&
+    action.payload?.runnerAbility === "boost_icebreaker_for_run" &&
+    typeof action.payload?.targetCardId === "string"
+    ? action
+    : undefined;
 }
 
 export function runnerPostPassDerezAndEndRunAction(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  actionsById?: ReadonlyMap<string, LegalAction>,
 ): LegalAction | undefined {
   if (!runnerCandidateIsCardAbility(candidate)) return undefined;
   const hasBoundPostPassEffect =
@@ -179,45 +206,45 @@ export function runnerPostPassDerezAndEndRunAction(
         effect.target === "ends_run_after_effect",
     );
   if (!hasBoundPostPassEffect) return undefined;
-  return input.legalActions.find(
-    (action) =>
-      action.actionId === candidate.actionId &&
-      action.type === "trigger_ability" &&
-      (action.payload?.abilityId ?? action.payload?.runnerUtilityAbility) ===
-        "derez_fully_broken_passed_ice_and_end_run",
-  );
+  const action = runWindowLegalAction(input, candidate, actionsById);
+  return action &&
+    action.type === "trigger_ability" &&
+    (action.payload?.abilityId ?? action.payload?.runnerUtilityAbility) ===
+      "derez_fully_broken_passed_ice_and_end_run"
+    ? action
+    : undefined;
 }
 
 export function runnerPostPassTrashAction(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  actionsById?: ReadonlyMap<string, LegalAction>,
 ): LegalAction | undefined {
   if (
     !runnerCandidateIsCardAbility(candidate) ||
     candidate.abilityBindingMethod !== "canonical_capability_id"
   )
     return undefined;
-  return input.legalActions.find(
-    (action) =>
-      action.actionId === candidate.actionId &&
-      action.type === "trigger_ability" &&
-      action.source === candidate.sourceCardInstanceId &&
-      action.payload?.cardImplementationCapabilityBindingKind ===
-        "card_spec_capability_key" &&
-      action.payload.cardImplementationAbilityKey === candidate.abilityKey &&
-      action.payload.cardImplementationAbilityId === candidate.abilityId &&
-      (action.payload.abilityId ?? action.payload.runnerUtilityAbility) ===
-        "trash_fully_broken_passed_ice",
-  );
+  const action = runWindowLegalAction(input, candidate, actionsById);
+  return action &&
+    action.type === "trigger_ability" &&
+    action.source === candidate.sourceCardInstanceId &&
+    action.payload?.cardImplementationCapabilityBindingKind ===
+      "card_spec_capability_key" &&
+    action.payload.cardImplementationAbilityKey === candidate.abilityKey &&
+    action.payload.cardImplementationAbilityId === candidate.abilityId &&
+    (action.payload.abilityId ?? action.payload.runnerUtilityAbility) ===
+      "trash_fully_broken_passed_ice"
+    ? action
+    : undefined;
 }
 
 export function runnerRestrictedRunSequenceAction(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
+  actionsById?: ReadonlyMap<string, LegalAction>,
 ): LegalAction | undefined {
-  const action = input.legalActions.find(
-    (entry) => entry.actionId === candidate.actionId,
-  );
+  const action = runWindowLegalAction(input, candidate, actionsById);
   const remainingActions = Number(
     action?.payload?.restrictedActionGrantRemainingActions,
   );

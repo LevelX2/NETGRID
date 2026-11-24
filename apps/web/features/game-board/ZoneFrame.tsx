@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { Children, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import type { PlayerView, Side } from "@netgrid/shared";
+import type { Side } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 
 import {

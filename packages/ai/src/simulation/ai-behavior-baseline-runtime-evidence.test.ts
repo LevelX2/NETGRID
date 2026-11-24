@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { describe, expect, it } from "vitest";
 
 import type { AiSimulationSummary } from "./ai-simulation-summary";
@@ -6,20 +7,20 @@ import { actionLimitDiagnosisForSimulation } from "./ai-behavior-baseline-runtim
 describe("actionLimitDiagnosisForSimulation", () => {
   it("binds a classified action limit to the last owner, plan, step and no-progress class", () => {
     const sequence: AiSimulationSummary["actionSequence"] = [
-      action("start_run", "runner.contest_remote", "remote_1"),
+      action("start_run", "runner.contest_remote", "r1"),
       action("gain_credit", "corp.economy", undefined, "corp"),
-      action("start_run", "runner.contest_remote", "remote_1"),
-      action("start_run", "runner.contest_remote", "remote_1"),
-      action("start_run", "runner.contest_remote", "remote_1"),
-      action("start_run", "runner.contest_remote", "remote_1"),
-      action("access_card", "runner.contest_remote", "remote_1"),
+      action("start_run", "runner.contest_remote", "r1"),
+      action("start_run", "runner.contest_remote", "r1"),
+      action("start_run", "runner.contest_remote", "r1"),
+      action("start_run", "runner.contest_remote", "r1"),
+      action("access_card", "runner.contest_remote", "r1"),
     ];
 
     expect(actionLimitDiagnosisForSimulation(summary(sequence))).toEqual({
       classified: true,
       owner: "plan_module",
-      planInstanceId: "plan:runner.contest_remote:remote_1",
-      stepId: "plan:runner.contest_remote:remote_1:contest",
+      planInstanceId: "pdl5beuqtdrahr4fqagyng1zk5",
+      stepId: "pdl5beuqtdrahr4fqagyng1zk5:contest",
       noProgressCluster: "action_limit_runner_repeated_no_progress_run",
       noProgressSubcluster: "access_pending",
     });
@@ -76,8 +77,8 @@ describe("actionLimitDiagnosisForSimulation", () => {
     expect(actionLimitDiagnosisForSimulation(summary(sequence))).toMatchObject({
       classified: true,
       owner: "plan_module",
-      planInstanceId: "plan:runner.pressure_central:hq",
-      stepId: "plan:runner.pressure_central:hq:contest",
+      planInstanceId: "p38f53wivvzdnt8zjhkltf9hz5",
+      stepId: "p38f53wivvzdnt8zjhkltf9hz5:contest",
       noProgressCluster: "action_limit_low_value_repeat",
       noProgressSubcluster: "access_pending",
     });
@@ -104,8 +105,8 @@ describe("actionLimitDiagnosisForSimulation", () => {
 
     expect(actionLimitDiagnosisForSimulation(summary(sequence))).toMatchObject({
       owner: "plan_module",
-      planInstanceId: "plan:corp.economy:none",
-      stepId: "plan:corp.economy:none:contest",
+      planInstanceId: "p6stm1phkg2qd5r6g7ohfv7iah",
+      stepId: "p6stm1phkg2qd5r6g7ohfv7iah:contest",
     });
   });
 
@@ -130,12 +131,12 @@ function summary(
 
 function action(
   actionType: AiSimulationSummary["actionSequence"][number]["actionType"],
-  planKind?: string,
+  planKind?: `${"corp" | "runner"}.${string}` | "engine_window",
   targetServerId?: string,
   side: "runner" | "corp" = "runner",
 ): AiSimulationSummary["actionSequence"][number] {
-  const planInstanceId = planKind
-    ? `plan:${planKind}:${targetServerId ?? "none"}`
+  const planInstanceId = planKind && planKind !== "engine_window"
+    ? planInstanceIdForProposal({ moduleId: planKind, dedupeKey: targetServerId ?? "none" })
     : undefined;
   return {
     side,

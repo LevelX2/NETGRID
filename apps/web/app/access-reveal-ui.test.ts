@@ -88,7 +88,7 @@ describe("access reveal UI helpers", () => {
     const access = legalAction("access_card", "Karte accessen");
     access.expiresAtStateVersion = 13;
     const continuation = {
-      accessEventId: "evt_access_1",
+      accessEventId: 100,
       breachId: "breach_1",
       fromStateVersion: 12,
       nextAccessSubmitted: false,

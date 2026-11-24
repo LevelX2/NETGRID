@@ -7,7 +7,7 @@ const increaseStrength = capabilityKey("increase_strength");
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_080_black-widow"),
+    cardDefinitionId: cardDefinitionId(138),
     title: "Black Widow",
     side: "runner",
     cardType: "program",

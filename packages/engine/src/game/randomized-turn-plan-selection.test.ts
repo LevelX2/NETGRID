@@ -60,6 +60,15 @@ describe("Engine-randomized TurnPlan selection", () => {
     expect(replay.state.aiTurnPlanRandomDrawRecords?.at(-1)).toEqual(
       applied.receipt.randomDraw,
     );
+    const recorded = structuredClone(applied.state.aiTurnPlanRandomDrawRecords);
+    const privateReceipt = structuredClone(
+      applied.event.privatePayload?.corp?.randomizedTurnPlanSelectionReceipt,
+    );
+    Reflect.set(applied.receipt.randomDraw.purpose, 3, 0);
+    expect(applied.state.aiTurnPlanRandomDrawRecords).toEqual(recorded);
+    expect(
+      applied.event.privatePayload?.corp?.randomizedTurnPlanSelectionReceipt,
+    ).toEqual(privateReceipt);
   });
 
   it("rejects an unsafe aggregate candidate weight", () => {
@@ -81,6 +90,35 @@ describe("Engine-randomized TurnPlan selection", () => {
 
     expect(quoted.ok).toBe(false);
     if (!quoted.ok) expect(quoted.error.code).toBe("ERR_INVALID_TARGET");
+  });
+
+  it("rejects a missing TurnPlan RNG record before consuming randomness", () => {
+    const initial = corpActionState();
+    const quoted = quoteRandomizedTurnPlanSelection(initial, {
+      schemaVersion: ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
+      matchId: initial.matchId,
+      side: "corp",
+      stateVersion: initial.stateVersion,
+      timingPoint: initial.timingPoint,
+      opportunityKey: "opening-rush:missing-record",
+      candidates: turnPlanCandidates(initial),
+    });
+    expect(quoted.ok).toBe(true);
+    if (!quoted.ok) return;
+    const corrupted = structuredClone(initial);
+    corrupted.aiTurnPlanRandomCounter = 1;
+    corrupted.aiTurnPlanRandomDrawRecords = new Array(1);
+    const before = structuredClone(corrupted);
+
+    const applied = applyRandomizedTurnPlanSelection(corrupted, {
+      kind: "engine_randomized_turn_plan_selection",
+      quote: quoted.quote,
+    });
+
+    expect(applied.ok).toBe(false);
+    if (!applied.ok) expect(applied.error.code).toBe("ERR_INVARIANT_FAILED");
+    expect(applied.state).toBe(corrupted);
+    expect(corrupted).toEqual(before);
   });
 
   it("fails closed for a corrupted TurnPlan RNG counter", () => {

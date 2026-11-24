@@ -16,7 +16,7 @@ import {
 import { CounterHelpTooltipTrigger } from "../game-board/CounterHelpTooltip";
 import { SubroutineIcon } from "./CardTextRendering";
 import {
-  strengthModifierBadgeLabel,
+  signedStrengthModifier,
   type DisplayVisibleCard,
 } from "./card-view-model";
 
@@ -134,16 +134,39 @@ export function IceModifierBadges({
 
 export function StrengthModifierBadge({ amount }: { amount: number }) {
   const t = useTranslations("Cards");
-  const value = strengthModifierBadgeLabel(amount).replace(/ Stärke$/u, "");
-  const label = t("strengthModifier", { value });
+  const label = t("strengthModifier", {
+    value: signedStrengthModifier(amount),
+  });
   return (
     <span
       className="strengthBoostBadge"
-      aria-label={label}
+      aria-hidden="true"
       data-testid="strength-modifier-badge"
     >
       {label}
     </span>
+  );
+}
+
+export function AgendaDifficultyBadge({
+  value,
+  tooltip,
+  onHelpTooltipVisibilityChange,
+}: {
+  value: string;
+  tooltip: string;
+  onHelpTooltipVisibilityChange(visible: boolean): void;
+}) {
+  return (
+    <CounterHelpTooltipTrigger
+      className="agendaDifficultyBadge"
+      ariaLabel={tooltip}
+      data-testid="agenda-difficulty-badge"
+      tooltip={tooltip}
+      onVisibilityChange={onHelpTooltipVisibilityChange}
+    >
+      {value}
+    </CounterHelpTooltipTrigger>
   );
 }
 
@@ -252,13 +275,11 @@ export function CounterDisplayBadge({
         ? "projectVeniceActionCounterBadge"
         : display.id === "project_zurich_credits_per_turn"
           ? "projectZurichCreditCounterBadge"
-          : display.id === "ice_mark_modifier"
-            ? "iceMarkModifierCounterBadge"
-            : display.displayKind === "shell"
-              ? "shellCounterBadge"
-              : display.id === "trace_tag_counter"
-                ? "dataRavenCounterBadge"
-                : "ablativeCounterBadge";
+          : display.displayKind === "shell"
+            ? "shellCounterBadge"
+            : display.id === "trace_tag_counter"
+              ? "dataRavenCounterBadge"
+              : "ablativeCounterBadge";
   const testId =
     display.id === "corporate_retreat_active"
       ? "corporate-retreat-active-badge"
@@ -266,15 +287,13 @@ export function CounterDisplayBadge({
         ? "project-venice-action-badge"
         : display.id === "project_zurich_credits_per_turn"
           ? "project-zurich-credit-badge"
-          : display.id === "ice_mark_modifier"
-            ? "ice-mark-modifier-badge"
-            : display.displayKind === "shell"
-              ? "shell-counter-badge"
-              : display.id === "trace_tag_counter"
-                ? "data-raven-counter-badge"
-                : display.id === "ablative"
-                  ? "ablative-counter-badge"
-                  : "counter-display-badge";
+          : display.displayKind === "shell"
+            ? "shell-counter-badge"
+            : display.id === "trace_tag_counter"
+              ? "data-raven-counter-badge"
+              : display.id === "ablative"
+                ? "ablative-counter-badge"
+                : "counter-display-badge";
   return (
     <CounterHelpTooltipTrigger
       className={className}
@@ -307,8 +326,6 @@ function counterDisplayBadgeText(
     return translate("actionsPerTurn", { count: amount });
   if (display.id === "project_zurich_credits_per_turn")
     return translate("creditsPerTurn", { count: amount });
-  if (display.id === "ice_mark_modifier")
-    return translate("iceStrength", { count: amount });
   if (display.displayKind === "shell") return `${amount} Shell`;
   if (display.id === "trace_tag_counter") return `${amount} Raven`;
   return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;

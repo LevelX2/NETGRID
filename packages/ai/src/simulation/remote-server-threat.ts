@@ -1,14 +1,11 @@
+import { quoteVisibleRunnerPathForMetrics } from "./visible-run-path-for-metrics";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import {
-  agendaPointsForMetrics,
-  remoteTrashCostForVisibleCard,
-} from "./card-metric-lookup";
+import { remoteTrashCostForVisibleCard } from "./card-metric-lookup";
 import { remoteTrashRoleForVisibleCard } from "./remote-trash-role";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import {
   assessKnownRezzedIcePath,
   runnerKnownPathAssessmentIsCostNoAccess,
-  runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
 import { actionCreditCost } from "../runtime/action-cost";
 
@@ -24,9 +21,18 @@ export type RunnerRemoteThreatProfile = {
   contestable: boolean;
 };
 
+export type RunnerAdvancedRemoteThreatObservation = {
+  serverId: string;
+  contestable: boolean;
+  blocker?:
+    | "ice_cost"
+    | "post_run_reserve"
+    | "breaker_coverage"
+    | "bait_or_low_value";
+};
+
 export type RunnerRemoteThreatTargetingDiagnostics = Partial<{
-  runnerAdvancedRemoteThreatServerIds: string[];
-  runnerContestableAdvancedRemoteThreatServerIds: string[];
+  runnerAdvancedRemoteThreats: RunnerAdvancedRemoteThreatObservation[];
   runnerContestedAdvancedRemoteServerId: string;
   runnerCentralRunInsteadOfContestableAdvancedRemote: boolean;
   runnerCentralRunInsteadWasJustified: boolean;
@@ -56,25 +62,8 @@ export function remoteServerHasScoreThreat(
   );
 }
 
-export function remoteTrashAccessProtectsAcuteThreatForMetrics(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  if (!server) return false;
-  if (remoteServerHasScoreThreat(input, serverId)) return true;
-  return server.root.some((card) => {
-    if (!card.known || card.type !== "agenda" || !card.definitionId)
-      return false;
-    return (
-      input.playerView.own.agendaPoints +
-        agendaPointsForMetrics(card.definitionId) >=
-      input.playerView.agendaPointsToWin - 1
-    );
-  });
-}
+export const remoteTrashAccessProtectsAcuteThreatForMetrics =
+  remoteServerHasScoreThreat;
 
 export function runnerHasVisibleRemoteScoreThreat(
   input: AiDecisionInput,
@@ -113,14 +102,10 @@ export function runnerRemoteThreatProfile(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
-  const assessment = assessKnownRezzedIcePath(
-    server?.ice ?? [],
-    input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
-    server?.root ?? [],
+  const assessment = quoteVisibleRunnerPathForMetrics(
+    input,
+    server,
+    assessKnownRezzedIcePath,
   );
   const creditsAfterPath = assessment.creditsAfterPath;
   const postRunReserveTarget = runnerPostRunReserveTargetForRemoteInput(
@@ -269,15 +254,17 @@ export function runnerRemoteThreatTargetingDiagnosticsForAction(
     (profile) => profile.blockedByKnownIceCost,
   );
   return {
-    runnerAdvancedRemoteThreatServerIds: advancedProfiles.map(
-      (profile) => profile.serverId,
-    ),
-    ...(contestableProfiles.length > 0
-      ? {
-          runnerContestableAdvancedRemoteThreatServerIds:
-            contestableProfiles.map((profile) => profile.serverId),
-        }
-      : {}),
+    runnerAdvancedRemoteThreats: advancedProfiles.map((profile) => ({
+      serverId: profile.serverId,
+      contestable: profile.contestable,
+      ...(profile.blockedByKnownIceCost
+        ? { blocker: "ice_cost" as const }
+        : profile.blockedByPostRunReserve
+          ? { blocker: "post_run_reserve" as const }
+          : profile.blockedByBreakerCoverage
+            ? { blocker: "breaker_coverage" as const }
+            : {}),
+    })),
     ...(contested
       ? { runnerContestedAdvancedRemoteServerId: selectedProfile.serverId }
       : {}),
@@ -304,10 +291,10 @@ export function runnerRemoteThreatTargetingDiagnosticsForAction(
     ...(centralRun && contestableProfiles.length > 0 && !centralJustified
       ? { runnerRepeatedCentralRunWhileSameRemoteThreat: true }
       : {}),
-    ...(selectedProfile !== undefined && !selectedProfile.contestable
+    ...(contested && selectedProfile.blockedByPostRunReserve
       ? { runnerRemoteRunStartedWithInsufficientPostRunReserve: true }
       : {}),
-    ...(selectedProfile?.contestable === true
+    ...(contested && selectedProfile.contestable
       ? { runnerRemoteRunStartedWithSufficientPostRunReserve: true }
       : {}),
   };
@@ -364,19 +351,16 @@ export function runnerContestBlockedByCredits(
       (candidate) => candidate.id === action.payload?.serverId,
     );
     if (!server) return false;
-    const assessment = assessKnownRezzedIcePath(
-      server.ice,
-      input.playerView.own.rig ?? [],
-      runnerRunPathCreditBudgetWithVisiblePools(
-        input.playerView.own.credits,
-        input.playerView.own.rig ?? [],
-      ),
-      server.root,
+    const assessment = quoteVisibleRunnerPathForMetrics(
+      input,
+      server,
+      assessKnownRezzedIcePath,
     );
     return (
       (assessment.blocked &&
         runnerKnownPathAssessmentIsCostNoAccess(assessment)) ||
-      assessment.creditsAfterPath < Math.min(3, reserveTarget - 2)
+      (assessment.canReachAccess &&
+        assessment.creditsAfterPath < Math.min(3, reserveTarget - 2))
     );
   });
 }

@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { type AiDecisionInput } from "@netgrid/shared";
 import {
   runnerGuaranteedUrgentRemoteCanSpendToZero,
@@ -81,6 +82,7 @@ export function runnerRunFundingSupport(
     runTargets,
     economy,
     urgentScoreThreat: urgentPayoff,
+    considerCombinedHandRepair: true,
     ...(requiredPostRunReserve !== undefined ? { requiredPostRunReserve } : {}),
   });
   if (
@@ -101,22 +103,39 @@ export function runnerRunFundingSupport(
   const parentModule = remote
     ? "runner.contest_remote"
     : "runner.pressure_central";
-  const parentPlanInstanceId = `plan:${parentModule}:${encodeURIComponent(dedupeKey)}`;
+  const parentPlanInstanceId = planInstanceIdForProposal({ moduleId: parentModule, dedupeKey: dedupeKey });
   const conditionalTerminalHazardFunding =
     terminalVisibleHazardFundingGap !== undefined &&
     (evaluation.routeQuote?.unknownIceCount ?? 0) > 0;
-  let route = runnerExactFundingRouteContract(input, candidates, {
+  const routeContext = {
     demandId: `run-support:${dedupeKey}`,
     sourcePlanId: parentPlanInstanceId,
     purpose: "current_run",
+    hardness: "hard",
+    deadline: "end_of_current_turn",
+    remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
+    allowStrategicExchange: true,
+    paymentWindowTarget: evaluation,
+    debtFinancingParent: {
+      planInstanceId: parentPlanInstanceId,
+      runActionId: evaluation.actionId,
+      targetServerId: evaluation.targetServerId,
+      accessPayoff: evaluation.accessPayoff,
+      scoreThreat: evaluation.scoreThreat,
+      score: evaluation.score,
+      pathPassability: evaluation.pathPassability,
+      creditsAfterRun: evaluation.creditsAfterRun,
+      unknownUnrezzedIceCount: evaluation.unknownUnrezzedIceCount ?? 0,
+      riskyUniversalCoverage: evaluation.riskyUniversalCoverage,
+      remainingClicksAfterRun: Math.max(0, input.playerView.own.clicks - 2),
+    },
+  } as const;
+  let route = runnerExactFundingRouteContract(input, candidates, {
+    ...routeContext,
     priority: urgentPayoff
       ? "acute_hard_plan_blocker"
       : "current_foreground_plan",
-    hardness: "hard",
-    deadline: "end_of_current_turn",
     targetCredits: input.playerView.own.credits + conservativeGap,
-    remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
-    allowStrategicExchange: true,
     ...(conditionalTerminalHazardFunding
       ? {
           acceptFundedRun: (fundedInput, fundedTarget) =>
@@ -136,20 +155,6 @@ export function runnerRunFundingSupport(
       !conditionalTerminalHazardFunding)
       ? { requireCompleteKnownPath: true }
       : {}),
-    paymentWindowTarget: evaluation,
-    debtFinancingParent: {
-      planInstanceId: parentPlanInstanceId,
-      runActionId: evaluation.actionId,
-      targetServerId: evaluation.targetServerId,
-      accessPayoff: evaluation.accessPayoff,
-      scoreThreat: evaluation.scoreThreat,
-      score: evaluation.score,
-      pathPassability: evaluation.pathPassability,
-      creditsAfterRun: evaluation.creditsAfterRun,
-      unknownUnrezzedIceCount: evaluation.unknownUnrezzedIceCount ?? 0,
-      riskyUniversalCoverage: evaluation.riskyUniversalCoverage,
-      remainingClicksAfterRun: Math.max(0, input.playerView.own.clicks - 2),
-    },
     evidence: [
       `runner_run_support_target:${evaluation.targetServerId}`,
       "runner_run_conversion_click_reserved:1",
@@ -158,31 +163,11 @@ export function runnerRunFundingSupport(
   });
   if (terminalKnownPathGap !== undefined && route.routeActionIds.length === 0) {
     const terminalRoute = runnerExactFundingRouteContract(input, candidates, {
-      demandId: `run-support:${dedupeKey}`,
-      sourcePlanId: parentPlanInstanceId,
-      purpose: "current_run",
+      ...routeContext,
       priority: "acute_hard_plan_blocker",
-      hardness: "hard",
-      deadline: "end_of_current_turn",
       targetCredits: input.playerView.own.credits + terminalKnownPathGap,
-      remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
-      allowStrategicExchange: true,
       ...(options ? { acceptFundedRun: options.acceptFundedRun } : {}),
       requireCompleteKnownPath: true,
-      paymentWindowTarget: evaluation,
-      debtFinancingParent: {
-        planInstanceId: parentPlanInstanceId,
-        runActionId: evaluation.actionId,
-        targetServerId: evaluation.targetServerId,
-        accessPayoff: evaluation.accessPayoff,
-        scoreThreat: evaluation.scoreThreat,
-        score: evaluation.score,
-        pathPassability: evaluation.pathPassability,
-        creditsAfterRun: evaluation.creditsAfterRun,
-        unknownUnrezzedIceCount: evaluation.unknownUnrezzedIceCount ?? 0,
-        riskyUniversalCoverage: evaluation.riskyUniversalCoverage,
-        remainingClicksAfterRun: Math.max(0, input.playerView.own.clicks - 2),
-      },
       evidence: [
         `runner_run_support_target:${evaluation.targetServerId}`,
         "runner_run_conversion_click_reserved:1",
@@ -499,11 +484,11 @@ export function bestRunTargetsByServer(
       !previous ||
       (evaluationIsMandatoryTerminalContest &&
         !previousIsMandatoryTerminalContest) ||
-      evaluationConversionRank > previousConversionRank ||
       (evaluationIsMandatoryTerminalContest ===
         previousIsMandatoryTerminalContest &&
-        evaluationConversionRank === previousConversionRank &&
-        evaluation.score > previous.score)
+        (evaluationConversionRank > previousConversionRank ||
+          (evaluationConversionRank === previousConversionRank &&
+            evaluation.score > previous.score)))
     ) {
       byServer.set(evaluation.targetServerId, evaluation);
     }

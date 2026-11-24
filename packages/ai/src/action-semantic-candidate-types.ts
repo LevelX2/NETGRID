@@ -1,7 +1,9 @@
 import type {
+  CanonicalCapabilityId,
   CardDefinitionId,
   CardInstanceId,
   LegalAction,
+  RandomPurposeCode,
 } from "@netgrid/shared";
 import type {
   AiHintActionCapacityProfile,
@@ -23,6 +25,8 @@ export type ActionSemanticSourceKind =
   | "game_rule"
   | "choice"
   | "unknown";
+
+export type ActionAbilityIdentity = string | CanonicalCapabilityId;
 
 export type ActionAbilityBindingMethod =
   | "canonical_capability_id"
@@ -286,7 +290,7 @@ export type LegalTarget = {
     | "unknown";
   targetSide: "runner" | "corp" | "both" | "unknown";
   targetZone?: string;
-  targetDefinitionId?: string;
+  targetDefinitionId?: number;
   targetTitle?: string;
   targetSubtypes?: string[];
   targetConstraints?: string[];
@@ -299,7 +303,7 @@ export type LegalTargetSummary = {
   targetKind: LegalTarget["targetKind"];
   targetSide: LegalTarget["targetSide"];
   targetZone?: string;
-  targetDefinitionId?: string;
+  targetDefinitionId?: number;
   targetTitle?: string;
   targetSubtypes?: string[];
   targetConstraints?: string[];
@@ -390,7 +394,7 @@ export type ActionRunAccessDecisionModel = {
 export type ActionRandomOutcomeModel = {
   schemaVersion: "random-outcome-model-v1";
   outcomeStatus: "not_drawn";
-  purpose?: string;
+  purpose?: RandomPurposeCode;
   randomCounterAfter?: number;
   source: "engine_random_draw_records_only";
   futureOutcomeAccess: "forbidden";
@@ -518,7 +522,7 @@ export type ActionSemanticCandidate = {
   sourceCardId?: CardInstanceId | CardDefinitionId;
   sourceCardInstanceId?: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
-  abilityId?: string;
+  abilityId?: ActionAbilityIdentity;
   abilityKey?: string;
   primitiveKind?: string;
   effectKind?: string;
@@ -609,13 +613,13 @@ export type SideSafeActionAbilityBinding = {
    */
   sourceCardId: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
-  abilityId: string;
+  abilityId: ActionAbilityIdentity;
   method: "single_legal_ability_inferred";
   evidence: string[];
 };
 
 export type ActionCardAbilitySemanticProfile = {
-  abilityId: string;
+  abilityId: ActionAbilityIdentity;
   tacticSignals: readonly string[];
   functionalEffects?: readonly AiHintStructuredEffect[];
   compatibilitySignals?: readonly string[];

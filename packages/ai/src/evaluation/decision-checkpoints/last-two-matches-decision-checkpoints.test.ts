@@ -81,9 +81,10 @@ describe("last two matches exact decision checkpoints", () => {
   it("does not force the kill bid when no visible tag payoff remains in HQ", () => {
     const noVisiblePayoff = mutateFixture(cp04Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
-      const payoffCardIds = state.corp.hq.filter((cardId) =>
-        TRACE_PAYOFFS.has(state.cardInstances[cardId]?.definitionId ?? ""),
-      );
+      const payoffCardIds = state.corp.hq.filter((cardId) => {
+        const definitionId = state.cardInstances[cardId]?.definitionId;
+        return definitionId !== undefined && TRACE_PAYOFFS.has(definitionId);
+      });
       if (payoffCardIds.length === 0) {
         throw new Error("Missing Corp tag payoff for trace counterprobe");
       }
@@ -109,10 +110,10 @@ describe("last two matches exact decision checkpoints", () => {
   });
 });
 
-const PREARRANGED_DROP = "onr_proteus_118_prearranged-drop";
+const PREARRANGED_DROP = 176;
 const TRACE_PAYOFFS = new Set([
-  "onr_v1_302_scorched-earth",
-  "onr_v1_307_urban-renewal",
+  514,
+  519,
 ]);
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

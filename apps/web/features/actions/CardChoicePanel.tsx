@@ -1,9 +1,11 @@
 "use client";
 
+import { optionPresentation, type SelectionId } from "../../lib/presented-player-view";
 import { Check, Clipboard, Eye, Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
+import type { VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import {
@@ -77,14 +79,14 @@ export function CardChoicePanel({
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   onChoiceOptions(
     action: LegalAction,
-    choiceId: string,
-    selectedOptionIds: string[],
+    choiceId: SelectionId,
+    selectedOptionIds: SelectionId[],
   ): void;
 }) {
   const t = useTranslations("Actions.cardChoice");
   const locale = useLocale();
   const cardPresentationsById = useCatalogCardPresentations();
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<SelectionId[]>([]);
   const [showOnlySelectable, setShowOnlySelectable] = useState(false);
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(
@@ -147,7 +149,7 @@ export function CardChoicePanel({
     setShowOnlySelectable(false);
   }, [choice.choiceId]);
 
-  const toggleOption = (optionId: string) => {
+  const toggleOption = (optionId: SelectionId) => {
     const option = choice.options.find(
       (candidate) => candidate.id === optionId,
     );
@@ -460,13 +462,13 @@ function cardChoiceReadonlyPrivateLookTitle(
     choice.source.startsWith("card_implementation.agenda_purge_runner_review:")
   ) {
     const shownCards = choice.options.filter(
-      (option) => option.id !== "done",
+      (option) => optionPresentation(option) !== "done",
     ).length;
     return t("readonly.securityPurgeTitle", { count: shownCards });
   }
   if (choice.source.startsWith("p3_38.mystery_box_corp_review:")) {
     const shownCards = choice.options.filter(
-      (option) => option.id !== "done",
+      (option) => optionPresentation(option) !== "done",
     ).length;
     return t("readonly.mysteryBoxTitle", { count: shownCards });
   }
@@ -475,7 +477,7 @@ function cardChoiceReadonlyPrivateLookTitle(
     ? visibleCardsByInstanceId(view).get(sourceCardId)?.title
     : null;
   const shownCards = choice.options.filter(
-    (option) => option.id !== "done",
+    (option) => optionPresentation(option) !== "done",
   ).length;
   const zoneLabel =
     zone === "rd"

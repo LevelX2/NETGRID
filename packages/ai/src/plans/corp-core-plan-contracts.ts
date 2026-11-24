@@ -1,11 +1,11 @@
-import { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
+import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
 import type {
   CorpCentralDefenseAllocation,
   CorpCentralDefenseHqHoldCadence,
 } from "../corp/defense/corp-central-defense-allocation";
-import { CorpDefenseSignal } from "./corp-defense-contracts";
+import type { CorpDefenseSignal } from "./corp-defense-contracts";
 import type { CorpRemoteProjectSignal } from "../corp/scoring-remote/scoring-remote-types";
-import { CorpScoreProjectSignal } from "./corp-score-contracts";
+import type { CorpScoreProjectSignal } from "./corp-score-contracts";
 
 export type CorpCorePlanDomain = {
   scoreProjects: CorpScoreProjectSignal[];

@@ -38,9 +38,12 @@ it.each([
     ).toBe(action);
     expect(decision.fallbackUsed).toBe(false);
     const portfolio = residentPlanPortfolioSnapshot(input)!;
-    expect(portfolio.rootForegroundInstanceId).toMatch(
-      /^plan:corp.score_agenda:/,
-    );
+    expect(
+      portfolio.instances.find(
+        (instance) =>
+          instance.instanceId === portfolio.rootForegroundInstanceId,
+      )?.moduleId,
+    ).toBe("corp.score_agenda");
     expect(portfolio.executorInstanceId).toBe(
       portfolio.rootForegroundInstanceId,
     );
@@ -88,10 +91,7 @@ it.each([
     const card = structuredClone(input.playerView.own.gripOrHq[0]!);
     card.instanceId = "ordering-boundary-card";
     card.type = variant === "other_agenda" ? "agenda" : "asset";
-    card.definitionId =
-      variant === "other_agenda"
-        ? "onr_v1_203_hostile-takeover"
-        : "onr_v1_309_bbs-whispering-campaign";
+    card.definitionId = variant === "other_agenda" ? 415 : 521;
     input.playerView.servers.find((s) => s.id === "hq")!.root.push(card);
   }
   const candidates = buildActionSemanticCandidates({
@@ -101,5 +101,5 @@ it.each([
   });
   expect([
     ...corpBasicCreditsDominatedByCurrentScore(input, candidates, [project]),
-  ]).toEqual(variant === "exact" ? ["corp.gain_credit"] : []);
+  ]).toEqual(variant === "exact" ? ["cb"] : []);
 });

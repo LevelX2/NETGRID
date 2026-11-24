@@ -6,7 +6,8 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-import { RUNTIME_CARDS } from "../ai-hints";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
+import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
 import { corpAgendaInstallRequirement } from "../plans/corp-agenda-install-requirement";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 
@@ -60,14 +61,16 @@ export function assessCorpScorelineFeasibility(
   input: CorpScorelineFeasibilityInput,
 ): CorpScorelineFeasibility | undefined {
   if (input.side !== "corp" || !input.deckSnapshot) return undefined;
-  const totalAgendaPoints = input.deckSnapshot.cards.reduce((sum, entry) => {
-    const agendaPoints = RUNTIME_CARDS[entry.cardId]?.numeric.agendaPoints;
-    return (
-      sum +
-      (typeof agendaPoints === "number" ? agendaPoints * entry.quantity : 0)
-    );
-  }, 0);
-  if (totalAgendaPoints <= 0) return undefined;
+  const inventory = corpKnownAgendaInventory({
+    side: input.side,
+    playerView: input.playerView,
+    ownDeckSnapshot: input.deckSnapshot,
+  });
+  if (!inventory) return undefined;
+  const {
+    totalAgendaPoints,
+    remainingStealableAgendaPoints: remainingAgendaPoints,
+  } = inventory;
 
   const currentAgendaPoints = nonNegativeNumber(
     input.playerView.own.agendaPoints,
@@ -79,24 +82,24 @@ export function assessCorpScorelineFeasibility(
     1,
     nonNegativeNumber(input.playerView.agendaPointsToWin),
   );
-  const remainingAgendaPoints = Math.max(
-    0,
-    totalAgendaPoints - currentAgendaPoints - opponentAgendaPoints,
-  );
   const maxReachablePoints = currentAgendaPoints + remainingAgendaPoints;
   const remainingDeckCards = optionalNonNegativeNumber(
     input.playerView.own.stackOrRdCount,
   );
-  const mandatoryDrawCardsPerWindow = currentCorpMandatoryDrawCardsPerWindow(
-    input.playerView,
-  );
+  const mandatoryDrawCardsPerWindow =
+    input.playerView.corpMandatoryBaseDrawQuote?.baseCount;
   const remainingMandatoryDraws =
-    remainingDeckCards === undefined
-      ? undefined
-      : Math.floor(remainingDeckCards / mandatoryDrawCardsPerWindow);
+    remainingDeckCards === 0
+      ? 0
+      : remainingDeckCards === undefined ||
+          mandatoryDrawCardsPerWindow === undefined
+        ? undefined
+        : Math.floor(remainingDeckCards / mandatoryDrawCardsPerWindow);
   const deadline = scorelineDeadline(remainingMandatoryDraws);
-  const legalScoreActions = input.legalActions.filter((action) =>
-    actionAdvancesConcreteScoreline(input.playerView, action),
+  const legalScoreActions = input.legalActions.filter(
+    (action) =>
+      actionMatchesCurrentDecision(input, action) &&
+      actionAdvancesConcreteScoreline(input.playerView, action),
   );
   const affordableScoreActions = legalScoreActions.filter((action) =>
     actionIsCurrentlyAffordable(input.playerView, action),
@@ -140,7 +143,7 @@ export function assessCorpScorelineFeasibility(
       `scoreline_points_needed:${Math.max(0, pointsToWin - currentAgendaPoints)}`,
       `scoreline_deadline:${deadline}`,
       `scoreline_current_clicks:${nonNegativeNumber(input.playerView.own.clicks)}`,
-      `scoreline_mandatory_draw_cards_per_window:${mandatoryDrawCardsPerWindow}`,
+      `scoreline_mandatory_draw_cards_per_window:${mandatoryDrawCardsPerWindow ?? "unknown"}`,
       `scoreline_legal_actions:${legalScoreActions.length}`,
       `scoreline_affordable_actions:${affordableScoreActions.length}`,
       `scoreline_current_turn_closeouts:${currentTurnClosableActionIds.length}`,
@@ -149,25 +152,6 @@ export function assessCorpScorelineFeasibility(
         : []),
     ],
   };
-}
-
-export function currentCorpMandatoryDrawCardsPerWindow(
-  playerView: PlayerView,
-): number {
-  for (let index = playerView.publicEvents.length - 1; index >= 0; index -= 1) {
-    const event = playerView.publicEvents[index];
-    if (
-      event?.type !== "mandatory_draw" ||
-      event.publicPayload?.actor !== "corp"
-    ) {
-      continue;
-    }
-    const total = event.publicPayload.corpMandatoryTotalBaseDrawCount;
-    if (typeof total === "number" && Number.isSafeInteger(total) && total > 0) {
-      return total;
-    }
-  }
-  return 1;
 }
 
 export function corpScorelineAllowsMultiTurnDevelopment(

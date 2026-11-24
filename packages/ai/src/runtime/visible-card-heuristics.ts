@@ -1,6 +1,6 @@
 import type { PlayerView, VisibleCard } from "@netgrid/shared";
 
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 export type VisibleCardHeuristicDefinition = {
   title?: string;

@@ -32,7 +32,7 @@ export function createRunnerRecurringEconomyModule(): PlanModule {
             signal,
           } satisfies RecurringEconomyState,
           priorityClass: signal.priorityClass,
-          target: { kind: "card", id: signal.definitionId },
+          target: { kind: "card", id: String(signal.definitionId) },
           routeExists: recurringEconomyCandidates(context, signal).length > 0,
           blockerCode:
             signal.phase === "hold"
@@ -71,7 +71,7 @@ export function createRunnerRecurringEconomyModule(): PlanModule {
               : {}),
           },
           ...(signal.phase === "install"
-            ? { target: { kind: "card" as const, id: signal.definitionId } }
+            ? { target: { kind: "card" as const, id: String(signal.definitionId) } }
             : {}),
           purpose:
             signal.phase === "install"
@@ -88,6 +88,8 @@ function recurringEconomyCandidates(
   context: PlanSchedulerContext,
   signal: RunnerRecurringEconomySignal,
 ): PlanMaterialization["candidates"] {
+  // The installed commitment defers runs while other plans still own their actions.
+  if (signal.phase === "hold") return [];
   const actionIds = new Set(signal.actionIds);
   return context.actionCandidates
     .filter(
@@ -99,10 +101,6 @@ function recurringEconomyCandidates(
     )
     .map((candidate) => ({
       candidate,
-      stepValue:
-        signal.value +
-        (signal.phase === "hold" && candidate.semanticActionType === "draw.card"
-          ? 10
-          : 0),
+      stepValue: signal.value,
     }));
 }

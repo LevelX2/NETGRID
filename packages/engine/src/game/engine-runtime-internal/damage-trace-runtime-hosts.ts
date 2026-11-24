@@ -788,10 +788,11 @@ export function createDamageTraceRuntimeHosts(
         if (!legalAction)
           throw new Error("Run-Start-Damage benötigt eine LegalAction.");
         const event = createDamageImminentEvent(state, {
-          damageId: `${state.run?.runId ?? `run_${state.stateVersion + 1}`}.${counterEffect.counterType}_counter_${counterOrdinal + 1}_start_damage`,
+          damageId: `${state.run?.runId ?? state.stateVersion + 1}.${counterEffect.counterType}_counter_${counterOrdinal + 1}_start_damage`,
           damageType,
           amount: counterEffect.runStart.amountPerCounter,
           source: `counter:${counterEffect.sourceDefinitionId}`,
+          randomSource: ["c", counterEffect.sourceDefinitionId],
         });
         legalAction.payload = {
           ...(legalAction.payload ?? {}),

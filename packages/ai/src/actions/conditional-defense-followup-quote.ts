@@ -83,7 +83,14 @@ function conditionalDefenseFollowupQuote(
   if (
     candidate.actorSide !== "corp" ||
     action.side !== "corp" ||
+    action.type !== "rez_card" ||
+    candidate.actionType !== action.type ||
+    candidate.timingProfile.window !== action.timingPoint ||
     action.expiresAtStateVersion !== candidate.stateVersion ||
+    action.costs.some(
+      (cost) =>
+        cost.credits !== undefined && !isNonNegativeInteger(cost.credits),
+    ) ||
     payload?.cardImplementationFortRunRezSupportQuoteSchemaVersion !==
       CORP_FORT_RUN_REZ_SUPPORT_QUOTE_SCHEMA_VERSION ||
     (kind !== CORP_FORT_RUN_REZ_SUPPORT_KIND &&

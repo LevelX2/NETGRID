@@ -9,15 +9,6 @@ export function runnerHandTextHasRiskyBreakerSignal(text: string): boolean {
   );
 }
 
-export function runnerHandTextHasDamagePreventionSignal(text: string): boolean {
-  const tokens = runnerHandTextTokens(text);
-  return (
-    runnerHandTokensIncludeInOrder(tokens, "prevent", "damage") ||
-    runnerHandTokensIncludePhrase(tokens, ["damage", "prevention"]) ||
-    runnerHandTokensIncludeInOrder(tokens, "avoid", "damage")
-  );
-}
-
 export function runnerHandTextHasHandSizeSignal(text: string): boolean {
   const tokens = runnerHandTextTokens(text);
   return (
@@ -70,33 +61,6 @@ export function runnerHandTextHasIceStrengthReductionSignal(
       "reduction",
       "modifier",
     ])
-  );
-}
-
-export function runnerHandTextHasRecurringBreakerEconomySignal(
-  text: string,
-): boolean {
-  const tokens = runnerHandTextTokens(text);
-  const renewablePool =
-    runnerHandTokensIncludeAny(tokens, ["recurring"]) ||
-    (runnerHandTokensIncludeAny(tokens, ["replace", "replenish", "refill"]) &&
-      runnerHandTokensIncludePhrase(tokens, [
-        "start",
-        "of",
-        "your",
-        "next",
-        "turn",
-      ]));
-  return (
-    renewablePool &&
-    runnerHandTokensIncludeAny(tokens, [
-      "bit",
-      "bits",
-      "credit",
-      "credits",
-      "economy",
-    ]) &&
-    runnerHandTokensIncludeAny(tokens, ["breaker", "icebreaker"])
   );
 }
 
@@ -222,84 +186,6 @@ export function runnerHandTextHasPlayableSignal(text: string): boolean {
   ]);
 }
 
-export function runnerHandTextHasRecoveryUtilitySignal(text: string): boolean {
-  const tokens = runnerHandTextTokens(text);
-  return (
-    runnerHandTokensIncludePhrase(tokens, ["trash", "recovery"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["setup", "recovery"]) ||
-    runnerHandTokensIncludePhrase(tokens, [
-      "setup",
-      "top",
-      "trash",
-      "recovery",
-    ]) ||
-    runnerHandTokensIncludePhrase(tokens, ["search", "trash"]) ||
-    runnerHandTokensIncludePhrase(tokens, [
-      "top",
-      "card",
-      "from",
-      "your",
-      "trash",
-    ]) ||
-    runnerHandTokensIncludePhrase(tokens, ["trash", "into", "your", "hand"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["heap", "recovery"])
-  );
-}
-
-export function runnerHandTextHasProgramSearchUtilitySignal(
-  text: string,
-): boolean {
-  const tokens = runnerHandTextTokens(text);
-  return (
-    runnerHandTokensIncludePhrase(tokens, ["program", "search"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["setup", "program", "search"]) ||
-    runnerHandTokensIncludePhrase(tokens, [
-      "search",
-      "your",
-      "stack",
-      "for",
-      "a",
-      "program",
-    ]) ||
-    runnerHandTokensIncludePhrase(tokens, ["program", "cards"])
-  );
-}
-
-export function runnerHandTextHasStackSearchUtilitySignal(
-  text: string,
-): boolean {
-  const tokens = runnerHandTextTokens(text);
-  return (
-    runnerHandTokensIncludePhrase(tokens, ["stack", "search"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["search", "stack"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["setup", "stack", "filter"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["setup", "card", "search"]) ||
-    runnerHandTokensIncludePhrase(tokens, [
-      "setup",
-      "prep",
-      "resource",
-      "search",
-    ]) ||
-    runnerHandTokensIncludePhrase(tokens, ["setup", "hardware", "search"]) ||
-    runnerHandTokensIncludePhrase(tokens, [
-      "top",
-      "four",
-      "cards",
-      "of",
-      "your",
-      "stack",
-    ]) ||
-    runnerHandTokensIncludePhrase(tokens, [
-      "top",
-      "five",
-      "cards",
-      "of",
-      "your",
-      "stack",
-    ])
-  );
-}
-
 export function runnerHandTextHasHiddenZoneSearchSignal(text: string): boolean {
   const tokens = runnerHandTextTokens(text);
   const hiddenZone =
@@ -402,7 +288,7 @@ export function runnerHandTokensIncludeInOrder(
   return firstIndex >= 0 && tokens.indexOf(second, firstIndex + 1) >= 0;
 }
 
-export function runnerHandTokensIncludeNumberBefore(
+function runnerHandTokensIncludeNumberBefore(
   tokens: readonly string[],
   tokenAfterNumber: string,
 ): boolean {
@@ -412,7 +298,7 @@ export function runnerHandTokensIncludeNumberBefore(
   );
 }
 
-export function runnerHandTokenIsDigits(token: string): boolean {
+function runnerHandTokenIsDigits(token: string): boolean {
   for (const character of token) {
     if (character < "0" || character > "9") return false;
   }

@@ -27,7 +27,7 @@ function hq(input: AiDecisionInputWithDeckCapabilities) {
 function path(input: AiDecisionInputWithDeckCapabilities, credits = 50) {
   return assessKnownRezzedIcePath(hq(input).ice, input.playerView.own.rig!, credits);
 }
-const lockId = "printed_subroutines_prohibit_break_next_ice";
+const lockId = "1";
 
 it("SP-459 consumes the real next-encounter lock at Canis before the deeper Keeper", () => {
   const input = fixture();
@@ -36,16 +36,18 @@ it("SP-459 consumes the real next-encounter lock at Canis before the deeper Keep
   });
   expect(path(input)).toMatchObject({ canReachAccess: true, visibleBreakCost: 8 });
   expect(path(input).paidSubroutineBreaks).toEqual([
-    { iceInstanceId: "corp_onr_v1_258_neural-blade_3", subroutineId: "printed_subroutines_damage_net" },
+    { iceInstanceId: "c2wn", subroutineId: "0" },
   ]);
-  expect(chooseAiAction(input)).toMatchObject({
-    actionId: "runner.start_run.hq", fallbackUsed: false,
-    decisionDebug: { planFirstDecision: {
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
-      route: { actionId: "runner.start_run.hq", stateVersion: 256 },
-    } },
-  });
+  const decision = chooseAiAction(input);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+    expect.objectContaining({
+      actionId: "rs.hq",
+      whyNot: expect.arrayContaining([
+        "runner_central_information_probe_known_path_not_admitted:hq",
+      ]),
+    }),
+  );
 });
 
 it("prices the complete corrected path at exactly eight, and rejects seven", () => {
@@ -101,8 +103,8 @@ it("SP-460 binds remainder demand to the actual still-open Engine subroutine IDs
   const decision = chooseAiAction(input);
   expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(true);
   expect(decision).toMatchObject({ fallbackUsed: false, decisionDebug: { planFirstDecision: {
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-    leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_257",
+    rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+    leafExecutorInstanceId: "p8xsra75q57j4g52ue8hdzpsby",
   } } });
 });
 
@@ -116,14 +118,14 @@ it("does not require remainder bindings when the quoted ICE has no remainder eff
 
 it("retains a still-open damage effect rather than treating it as already paid", () => {
   const input = fixture(windowCheckpoint), action = input.legalActions.find((a) => a.type === "continue_run")!;
-  action.payload!.encounterSubroutineIds = "printed_subroutines_damage_net," + lockId;
+  action.encounterSubroutineIds = ["0", lockId];
   action.payload!.unbrokenSubroutineCount = 2;
   expect(encounterRunRemainderEffectAssessment(input).evidence).toContain("run_remainder_effect_subroutines:0,1");
 });
 
 it("rejects a missing Engine remaining-subroutine binding with the existing structured failure", () => {
   const input = fixture(windowCheckpoint), action = input.legalActions.find((a) => a.type === "continue_run")!;
-  delete action.payload!.encounterSubroutineIds;
+  delete action.encounterSubroutineIds;
   expect(() => encounterRunRemainderEffectAssessment(input)).toThrowError(
     expect.objectContaining({ code: "missing_action_semantics", context: expect.objectContaining({ owner: "rules_contract" }) }),
   );

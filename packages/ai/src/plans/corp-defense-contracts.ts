@@ -1,9 +1,10 @@
+import type { RunId, TraceId } from "@netgrid/shared";
 import type { CorpRestrictedCreditRouteQuote } from "@netgrid/shared";
 import type { CorpDefenseScoreReserveAssessment } from "../corp/defense/corp-defense-score-reserve";
 import { type CorpExactIceRezRouteProjection } from "../runtime/corp-exact-ice-rez-route";
 import { type KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-funded-score-protection";
 import { type ExactProbability } from "../runtime/corp-score-protection-assessment";
-import { CorpScorePriorityClass } from "./corp-score-contracts";
+import type { CorpScorePriorityClass } from "./corp-score-contracts";
 
 export type CorpDefenseSignalBase = {
   defenseId: string;
@@ -29,7 +30,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "recover_exposed_agenda"
     | "pass_encounter"
     | "decline_rez";
-  sourceDefinitionIds: string[];
+  sourceDefinitionIds: number[];
   parentKind?: "remote";
   parentProjectId?: string;
   parentNeedId?: string;
@@ -40,6 +41,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   urgent: boolean;
   visibleAgendaExposureDefense?: true;
   centralPressure?: "material" | "acute" | "terminal";
+  protectedCentralServerId?: "hq" | "rd";
   immediateInstallSupport?: boolean;
   iceInstallCostSupportActionId?: string;
   rezWindowVerdict?: "productive" | "nonproductive" | "open";
@@ -90,10 +92,10 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         choiceId: string;
         choiceSource: string;
         sourceStateVersion: number;
-        traceId: string;
-        runId: string;
+        traceId: TraceId;
+        runId: RunId;
         sourceIceInstanceId: string;
-        sourceDefinitionId: string;
+        sourceDefinitionId: number;
         subroutineIndex: number;
         selectedOptionId: string;
         targetCardInstanceId: string;
@@ -104,8 +106,8 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         choiceSource: string;
         sourceStateVersion: number;
         origin:
-          | { kind: "encounter"; runId: string }
-          | { kind: "trace_success"; traceId: string };
+          | { kind: "encounter"; runId: RunId }
+          | { kind: "trace_success"; traceId: TraceId };
         sourceIceInstanceId: string;
         selectedOptionId: string;
         targetCardInstanceId: string;
@@ -123,12 +125,21 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
         }>;
       }
     | {
+        kind: "start_run_redirect";
+        choiceId: string;
+        sourceStateVersion: number;
+        runId: RunId;
+        originalServerId: string;
+        selectedOptionId: string;
+        target?: { sourceCardInstanceId: string; sourceDefinitionId: number; serverId: string; creditCost: number };
+      }
+    | {
         kind: "classic_deflector_redirect";
         choiceId: string;
         sourceStateVersion: number;
-        runId: string;
+        runId: RunId;
         sourceIceInstanceId: string;
-        sourceDefinitionId: string;
+        sourceDefinitionId: number;
         subroutineIndex: number;
         subroutineId: string;
         targetProfile: "archives" | "any_data_fort" | "subsidiary_data_fort";
@@ -153,7 +164,7 @@ export type CorpScoreProtectionInstallSignal = CorpDefenseSignalBase & {
   delegatedPriorityClass: CorpScorePriorityClass;
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   effect: "progress" | "satisfied";
   runnerAccessSuccessProbability: ExactProbability;
   totalInstallAndRezCredits: number;
@@ -185,7 +196,7 @@ export type CorpScoreProtectionStagingInstallSignal = CorpDefenseSignalBase & {
   delegatedPriorityClass: CorpScorePriorityClass;
   actionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   developmentRisk?: "unmodeled_access_path";
 };
 

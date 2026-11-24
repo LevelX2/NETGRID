@@ -42,8 +42,16 @@ describe("meta 403 round 7 concrete plan feasibility", () => {
       input.playerView.own.maxHandSize,
     );
     expect(action.type).toBe("draw_card");
-    expect(plan?.rootPlanInstanceId).toContain("runner.contest_remote");
-    expect(plan?.leafExecutorInstanceId).toContain("runner.rig_and_coverage");
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+      )?.moduleId,
+    ).toBe("runner.contest_remote");
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.rig_and_coverage");
     expect(plan?.priority?.effectiveClass).toBe("P2");
   });
 
@@ -52,13 +60,17 @@ describe("meta 403 round 7 concrete plan feasibility", () => {
       input.playerView.opponent.agendaPoints = 0;
     });
     expect(action.type).not.toBe("draw_card");
-    expect(plan?.rootPlanInstanceId).not.toContain("runner.contest_remote");
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.rootPlanInstanceId,
+      )?.moduleId,
+    ).not.toBe("runner.contest_remote");
   });
 
   it("does not value an unfunded duplicated ICE suffix above the already protected score server", () => {
     const { action, plan } = decide(protection);
     expect(action.type).toBe("install_card");
-    expect(action.payload?.serverId).toBe("remote_1");
+    expect(action.payload?.serverId).toBe("r1");
     expect(plan?.selectedPlan?.moduleId).toBe("corp.score_agenda");
     expect(plan?.rootPlanInstanceId).toBe(plan?.leafExecutorInstanceId);
   });

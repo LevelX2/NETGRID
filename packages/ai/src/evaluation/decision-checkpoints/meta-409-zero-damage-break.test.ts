@@ -14,7 +14,7 @@ describe("meta 409 zero-damage encounter purpose", () => {
     "preserves the run owner with ETR already broken=%s",
     (etrBroken) => {
       const capture = structuredClone(checkpoint);
-      const input = capture.input as AiDecisionInputWithDeckCapabilities;
+      const input = capture.input as unknown as AiDecisionInputWithDeckCapabilities;
       const zeroBreak = input.legalActions.find(
         (a) =>
           a.type === "break_subroutine" && a.payload?.subroutineIndex === 0,
@@ -35,11 +35,10 @@ describe("meta 409 zero-damage encounter purpose", () => {
           (a) => a.type === "continue_run",
         )!;
         continuation.actionId =
-          "runner.continue_run.subroutine_relative_net_damage";
+          "r5.0";
         continuation.payload!.encounterWillEndRun = false;
         continuation.payload!.unbrokenSubroutineCount = 1;
-        continuation.payload!.encounterSubroutineIds =
-          "subroutine_relative_net_damage";
+        continuation.encounterSubroutineIds = ["0"];
         expected = continuation.actionId;
       }
       resetResidentPlanPortfolioMemory();
@@ -55,11 +54,11 @@ describe("meta 409 zero-damage encounter purpose", () => {
         reasonCode: "plan_first.runner.convert_run_window",
         decisionDebug: {
           planFirstDecision: {
-            rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+            rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
             leafExecutorInstanceId:
-              "plan:runner.convert_run_window:run%3Arun_455",
+              "pd3ud8dnm4rxa0w40uezulqgby",
             selectedStep: {
-              planInstanceId: "plan:runner.convert_run_window:run%3Arun_455",
+              planInstanceId: "pd3ud8dnm4rxa0w40uezulqgby",
             },
             route: {
               actionId: expected,

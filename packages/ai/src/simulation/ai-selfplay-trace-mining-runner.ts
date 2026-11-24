@@ -17,10 +17,6 @@ import {
   retainActionAlternativesForFindingWindows,
   stripSelfplayActionAlternatives,
 } from "./selfplay-trace-facts";
-import {
-  countPassiveActionWithScoreLineAvailable,
-  countUnsafeScoreChosen,
-} from "./score-window-counts";
 import { CURRENT_BENCHMARK_SEEDS } from "./soak-seed-data";
 
 export type AiSelfplayTraceMiningRunnerDependencies = {
@@ -135,10 +131,9 @@ export function createAiSelfplayTraceMiningRunner(
         : DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS;
     const progression =
       dependencies.summarizeMatchProgressionMetrics(summaries);
-    const allRedactionSafe = isSelfplayTraceRedactionSafe({
-      findings,
-      topFindings,
-    });
+    const allRedactionSafe =
+      isSelfplayTraceRedactionSafe(findings) &&
+      summaries.every(isSelfplayTraceRedactionSafe);
     const aggregate = {
       games: summaries.length,
       decisions: summaries.reduce((sum, summary) => sum + summary.actions, 0),
@@ -166,9 +161,6 @@ export function createAiSelfplayTraceMiningRunner(
           summary.winner === "corp" && summary.gameEndReason === "flatline",
       ).length,
       scoreWindowMissed: progression.missedScoreWindows,
-      unsafeScoreChosen: countUnsafeScoreChosen(summaries),
-      passiveActionWithScoreLineAvailable:
-        countPassiveActionWithScoreLineAvailable(summaries),
       actionLimitClusters: summarizeSelfplayActionLimitClusters(summaries),
       actionLimitSubclusters:
         summarizeSelfplayActionLimitSubclusters(summaries),

@@ -70,7 +70,9 @@ export function assessRunnerDevelopmentCashOutAdmission(params: {
   }
 
   const routes = params.evaluations.flatMap(
-    (evaluation): RunnerDevelopmentCashOutRoute[] => {
+    (
+      evaluation,
+    ): { priority: number; route: RunnerDevelopmentCashOutRoute }[] => {
       if (
         !(
           (evaluation.availability === "missing_credits" &&
@@ -112,7 +114,9 @@ export function assessRunnerDevelopmentCashOutAdmission(params: {
       }
       if (
         fundingNeed.targetCredits <= currentCredits ||
-        fundingNeed.missingCredits <= 0
+        fundingNeed.targetCredits < fundingNeed.installOrPlayCost ||
+        fundingNeed.missingCredits !==
+          fundingNeed.targetCredits - currentCredits
       ) {
         rejectionCodes.add(
           `development_cashout_rejected:invalid_funding_need:${evaluation.cardInstanceId}`,
@@ -153,28 +157,31 @@ export function assessRunnerDevelopmentCashOutAdmission(params: {
         projectedCreditsAfterCashOut - fundingNeed.installOrPlayCost;
       return [
         {
-          targetCardInstanceId: evaluation.cardInstanceId,
-          ...(exceptionKind ? { exceptionKind } : {}),
-          requiredCredits: fundingNeed.targetCredits,
-          missingCredits: fundingNeed.missingCredits,
-          projectedCreditsAfterCashOut,
-          projectedCreditsAfterDevelopment,
-          projectedHandAfterDevelopment,
-          evidenceCodes: [
-            `development_cashout_target:${evaluation.cardInstanceId}`,
-            `development_cashout_missing_credits:${fundingNeed.missingCredits}`,
-            `development_cashout_required_credits:${fundingNeed.targetCredits}`,
-            `development_cashout_install_cost:${fundingNeed.installOrPlayCost}`,
-            `development_cashout_projected_credits:${projectedCreditsAfterCashOut}`,
-            `development_cashout_projected_hand:${projectedHandAfterDevelopment}`,
-            `development_cashout_required_hand_buffer:${minimumHandBuffer}`,
-            ...(exceptionKind
-              ? [
-                  `development_cashout_exception:${exceptionKind}`,
-                  params.explicitException?.evidenceCode ?? "",
-                ].filter(Boolean)
-              : ["development_cashout_hand_buffer_preserved:true"]),
-          ],
+          priority: evaluation.priority,
+          route: {
+            targetCardInstanceId: evaluation.cardInstanceId,
+            ...(exceptionKind ? { exceptionKind } : {}),
+            requiredCredits: fundingNeed.targetCredits,
+            missingCredits: fundingNeed.missingCredits,
+            projectedCreditsAfterCashOut,
+            projectedCreditsAfterDevelopment,
+            projectedHandAfterDevelopment,
+            evidenceCodes: [
+              `development_cashout_target:${evaluation.cardInstanceId}`,
+              `development_cashout_missing_credits:${fundingNeed.missingCredits}`,
+              `development_cashout_required_credits:${fundingNeed.targetCredits}`,
+              `development_cashout_install_cost:${fundingNeed.installOrPlayCost}`,
+              `development_cashout_projected_credits:${projectedCreditsAfterCashOut}`,
+              `development_cashout_projected_hand:${projectedHandAfterDevelopment}`,
+              `development_cashout_required_hand_buffer:${minimumHandBuffer}`,
+              ...(exceptionKind
+                ? [
+                    `development_cashout_exception:${exceptionKind}`,
+                    params.explicitException?.evidenceCode ?? "",
+                  ].filter(Boolean)
+                : ["development_cashout_hand_buffer_preserved:true"]),
+            ],
+          },
         },
       ];
     },
@@ -192,13 +199,14 @@ export function assessRunnerDevelopmentCashOutAdmission(params: {
     };
   }
 
-  const route = [...routes].sort(
+  const route = routes.sort(
     (left, right) =>
-      routeEvaluationPriority(params.evaluations, right) -
-        routeEvaluationPriority(params.evaluations, left) ||
-      left.missingCredits - right.missingCredits ||
-      left.targetCardInstanceId.localeCompare(right.targetCardInstanceId),
-  )[0];
+      right.priority - left.priority ||
+      left.route.missingCredits - right.route.missingCredits ||
+      left.route.targetCardInstanceId.localeCompare(
+        right.route.targetCardInstanceId,
+      ),
+  )[0]?.route;
   if (!route) {
     return {
       admitted: false,
@@ -218,6 +226,7 @@ function runnerDevelopmentCashOutTargetIsPlanEligible(
   evaluation: RunnerHandDevelopmentEvaluation,
 ): boolean {
   if (
+    !Number.isFinite(evaluation.priority) ||
     evaluation.priority < 500 ||
     evaluation.strategicFit === "blocked" ||
     evaluation.currentNeed === "none" ||
@@ -277,17 +286,6 @@ function matchingExplicitException(
     return witness.kind;
   }
   return undefined;
-}
-
-function routeEvaluationPriority(
-  evaluations: readonly RunnerHandDevelopmentEvaluation[],
-  route: RunnerDevelopmentCashOutRoute,
-): number {
-  return (
-    evaluations.find(
-      (evaluation) => evaluation.cardInstanceId === route.targetCardInstanceId,
-    )?.priority ?? 0
-  );
 }
 
 function invalidCashOutNumericInputs(params: {

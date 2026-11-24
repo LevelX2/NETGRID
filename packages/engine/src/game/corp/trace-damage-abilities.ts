@@ -48,7 +48,7 @@ export type CorpTraceDamageAbilityLegalActionResult = {
   handled: boolean;
   actions: LegalAction[];
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   traceBase?: number;
   traceLimit?: number;
   damageType?: DamageType;
@@ -60,7 +60,7 @@ export type CorpTraceDamageAbilityExecutionResult = {
   handled: boolean;
   stateChanged?: boolean;
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   traceStarted?: boolean;
   traceBase?: number;
   traceLimit?: number;

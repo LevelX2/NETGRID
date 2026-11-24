@@ -45,7 +45,7 @@ function routeFor(input: AiDecisionInputWithDeckCapabilities, count: number) {
   const position = input.playerView.run?.position;
   if (!position || position.kind !== "ice")
     throw Error("Native ICE position required");
-  const sourceCard = input.playerView.servers.find((s) => s.id === "remote_1")!
+  const sourceCard = input.playerView.servers.find((s) => s.id === "r1")!
     .ice[position.iceIndex]!;
   const candidate = buildActionSemanticCandidates({
     cardSemanticProfilesByDefinitionId:
@@ -65,7 +65,7 @@ function routeFor(input: AiDecisionInputWithDeckCapabilities, count: number) {
     input,
     candidate,
     sourceCard,
-    targetServerId: "remote_1",
+    targetServerId: "r1",
   })!;
 }
 
@@ -100,11 +100,11 @@ it.each([
     expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       selectedStep: {
-        stepId: "plan:corp.defend_servers:server-defense-portfolio:allocate",
+        stepId: "penw02zfrkklof54c2nuye5att:allocate",
       },
       route: {
         actionId: action.actionId,

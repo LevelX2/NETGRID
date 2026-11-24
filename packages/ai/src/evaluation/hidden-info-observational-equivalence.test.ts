@@ -13,7 +13,7 @@ import {
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { chooseAiAction } from "../index";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { resetPlanPortfolioMemory } from "../plans/plan-portfolio-memory";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
@@ -26,10 +26,10 @@ const RUNNER_DECK = withCards(
   DEMO_DECKS.demo_runner_001,
   "hidden-equivalence-runner",
   [
-    "onr_v1_154_broker",
-    "onr_v1_161_fall-guy",
-    "onr_classic_046_executive-file-clerk",
-    "onr_classic_050_sandbox-dig",
+    366,
+    373,
+    50,
+    54,
   ],
 );
 const CORP_DECK = withCards(
@@ -80,7 +80,7 @@ describe("hidden-info observational equivalence", () => {
       hiddenOwnedCardIds(left, "corp").find(
         (cardId) =>
           cardId !== installedId &&
-          CARD_DEFINITIONS_BY_ID[left.cardInstances[cardId]!.definitionId]
+          planningCardFactsByDefinitionId(left.cardInstances[cardId]!.definitionId)
             ?.type === "ice" &&
           left.cardInstances[cardId]!.definitionId !== installedDefinition,
       ),
@@ -100,11 +100,11 @@ describe("hidden-info observational equivalence", () => {
       "Corp remote-root definition",
     );
     RealEngineFixtureBuilder.forState(left).withCorpRemoteRoot(
-      "remote_1",
+      "r1",
       remoteDefinition,
     );
     const remoteId = required(
-      left.corp.servers.find((server) => server.id === "remote_1")?.root[0],
+      left.corp.servers.find((server) => server.id === "r1")?.root[0],
       "facedown remote card",
     );
     const hiddenOtherId = required(
@@ -123,8 +123,8 @@ describe("hidden-info observational equivalence", () => {
 
   it("ignores different hidden Runner grip, facedown resource, and future stack from the Corp perspective", () => {
     const hiddenDefinitionIds = [
-      "onr_classic_046_executive-file-clerk",
-      "onr_classic_050_sandbox-dig",
+      50,
+      54,
     ];
     const left = corpMainState("hidden-equivalence-runner-private");
     const resourceDefinition = required(
@@ -181,7 +181,7 @@ describe("hidden-info observational equivalence", () => {
     const brokerId = required(
       hiddenOwnedCardIds(left, "runner").find(
         (cardId) =>
-          left.cardInstances[cardId]?.definitionId === "onr_v1_154_broker",
+          left.cardInstances[cardId]?.definitionId === 366,
       ),
       "hidden Broker instance",
     );
@@ -189,17 +189,17 @@ describe("hidden-info observational equivalence", () => {
       hiddenOwnedCardIds(left, "runner").find(
         (cardId) =>
           cardId !== brokerId &&
-          left.cardInstances[cardId]?.definitionId !== "onr_v1_154_broker",
+          left.cardInstances[cardId]?.definitionId !== 366,
       ),
       "other hidden Runner instance",
     );
     const right = structuredClone(left);
     swapDefinitions(right, brokerId, otherId);
     expect(left.cardInstances[brokerId]?.definitionId).toBe(
-      "onr_v1_154_broker",
+      366,
     );
     expect(right.cardInstances[otherId]?.definitionId).toBe(
-      "onr_v1_154_broker",
+      366,
     );
 
     expectEquivalentDecision(left, right, "corp");
@@ -299,12 +299,12 @@ function ownedDefinitionsOfType(
   state: GameState,
   side: Side,
   type: "agenda" | "asset" | "ice" | "resource",
-): string[] {
+ ): number[] {
   return [
     ...new Set(
       Object.values(state.cardInstances).flatMap((card) =>
         card.zone.side === side &&
-        CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === type
+        planningCardFactsByDefinitionId(card.definitionId)?.type === type
           ? [card.definitionId]
           : [],
       ),
@@ -353,7 +353,7 @@ function required<T>(value: T | undefined, label: string): T {
 function withCards(
   base: DeckDefinition,
   id: string,
-  additions: string[],
+  additions: number[],
 ): DeckDefinition {
   return {
     ...base,

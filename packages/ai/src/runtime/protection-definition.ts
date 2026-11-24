@@ -1,7 +1,7 @@
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 
 export function isProtectionDefinitionId(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
   return (

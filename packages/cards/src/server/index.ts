@@ -1,3 +1,5 @@
+export { canonicalCapabilityId } from "../capability-identity";
+import type { CardDefinitionId } from "@netgrid/shared";
 import {
   publicCardViewForDefinitionId,
   publicCardViews,
@@ -37,7 +39,7 @@ export const listPublicSetViews = (): ReturnType<typeof publicSetViews> =>
 
 export type ServerCardSpecSupportSummary = DeepReadonly<{
   schemaVersion: "card-spec-support-summary-v1";
-  cardDefinitionId: string;
+  cardDefinitionId: CardDefinitionId;
   validationStatus: "valid";
   runtimeProjectionStatus: "playable_mvp" | "catalog_only";
   planningProjectionStatus: "available" | "unavailable";
@@ -97,7 +99,7 @@ const CARD_SPEC_SUPPORT_SUMMARIES = deepFreezeSerializable(
   }),
 );
 const CARD_SPEC_SUPPORT_SUMMARIES_BY_ID = new Map<
-  string,
+  CardDefinitionId,
   (typeof CARD_SPEC_SUPPORT_SUMMARIES)[number]
 >(
   CARD_SPEC_SUPPORT_SUMMARIES.map((summary) => [
@@ -107,6 +109,6 @@ const CARD_SPEC_SUPPORT_SUMMARIES_BY_ID = new Map<
 );
 
 /** Sanitized, registry-bound support evidence; no CardSpec or registry handle. */
-export const getCardSpecSupportSummary = (definitionId: string) =>
+export const getCardSpecSupportSummary = (definitionId: CardDefinitionId) =>
   CARD_SPEC_SUPPORT_SUMMARIES_BY_ID.get(definitionId);
 export const listCardSpecSupportSummaries = () => CARD_SPEC_SUPPORT_SUMMARIES;

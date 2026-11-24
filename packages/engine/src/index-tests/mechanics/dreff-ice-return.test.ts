@@ -21,23 +21,23 @@ import {
   addRezzedCorpRootForTest,
 } from "../../test-fixtures/index-test-helpers";
 
-const MARIONETTE = "onr_proteus_029_marionette";
+const MARIONETTE = 87;
 const returnCases = [
-  ["onr_proteus_018_datacomb", "pay", 0],
+  [76, "pay", 0],
   [MARIONETTE, "pay", 0],
-  ["onr_proteus_043_twisty-passages", "pay", 0],
-  ["onr_proteus_019_death-yo-yo", "decline", 1],
-  ["onr_proteus_037_scaffolding", "decline", 1],
-  ["onr_proteus_042_tumblers", "decline", 1],
+  [101, "pay", 0],
+  [77, "decline", 1],
+  [95, "decline", 1],
+  [100, "decline", 1],
 ] as const;
 
 function setup(definitionId = MARIONETTE) {
   const state = toRunnerTurn(onrV1Game(`dreff-return-${definitionId}`));
   state.corp.credits = 20;
   state.runner.credits = 20;
-  addRezzedCorpRootForTest(state, "onr_v1_358_dr-dreff", "remote_1", "dreff");
+  addRezzedCorpRootForTest(state, 570, "r1", "dreff");
   const iceId = addCorpCardToHqForTest(state, definitionId, "temporary");
-  const secretId = addCorpCardToHqForTest(state, "onr_v1_223_banpei", "secret");
+  const secretId = addCorpCardToHqForTest(state, 435, "secret");
   return { state, iceId, secretId };
 }
 
@@ -45,7 +45,7 @@ function encounter(state: GameState, iceId: string) {
   state = apply(
     state,
     "runner",
-    (a) => a.type === "start_run" && a.payload?.serverId === "remote_1",
+    (a) => a.type === "start_run" && a.payload?.serverId === "r1",
   );
   const option = state.pendingChoice!.options.find((o) => o.value === iceId)!;
   return applyChoice(state, "corp", option.id);
@@ -66,7 +66,7 @@ describe("Dr. Dreff temporary ICE pass lifecycle", () => {
     const setupState = setup();
     let { state } = setupState;
     const { iceId, secretId } = setupState;
-    addInstalledRunnerProgramForTest(state, "onr_v1_040_loony-goon", "breaker");
+    addInstalledRunnerProgramForTest(state, 252, "breaker");
     const initial = structuredClone(state);
     for (let run = 0; run < 2; run++) {
       state = encounter(state, iceId);
@@ -132,7 +132,7 @@ describe("Dr. Dreff temporary ICE pass lifecycle", () => {
         JSON.stringify(getPlayerView(state, "runner")),
       ]) {
         expect(serialized).not.toContain(secretId);
-        expect(serialized).not.toContain("onr_v1_223_banpei");
+        expect(serialized).not.toContain(435);
         expect(serialized).not.toContain(iceId);
       }
       state = apply(state, "runner", (a) => a.type === "continue_run");

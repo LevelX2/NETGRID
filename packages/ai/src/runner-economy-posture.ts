@@ -1,3 +1,7 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { assessVisibleRunnerServerPath } from "./run-analysis/visible-run-server-path";
+import { actionHasImmediateCreditGain, exactImmediateCreditGainAmount } from "./actions/action-effect-classification";
+import { actionMatchesCurrentDecision } from "./actions/current-legal-action";
 import {
   hasRiskyUniversalPressure,
   runnerCreditReservePhase,
@@ -12,10 +16,6 @@ import {
   exactBankCashOutPayout,
   exactBankCashOutTakeAmount,
 } from "./actions/action-economy-projection";
-import {
-  assessKnownRezzedIcePath,
-  runnerRunPathCreditBudgetWithVisiblePools,
-} from "./visible-run-analysis";
 import type {
   EvaluateRunnerRunTargetsParams,
   RunnerCreditBasePlan,
@@ -310,10 +310,10 @@ function legalHandEconomyEvaluation(
 function runnerHasInstalledActionEconomy(input: AiDecisionInput): boolean {
   return input.legalActions.some(
     (action) =>
+      actionMatchesCurrentDecision(input, action) &&
       (action.type === "activated_card_ability" ||
         action.type === "trigger_ability") &&
-      (isBankPayoutAction(action) ||
-        runnerLegalActionPayloadCreditGain(action) > 1),
+      (isBankPayoutAction(action) || hasAboveBasicImmediateGain(action)),
   );
 }
 
@@ -321,11 +321,12 @@ function runnerCanGrowPressureEconomy(input: AiDecisionInput): boolean {
   if (
     input.legalActions.some(
       (action) =>
+        actionMatchesCurrentDecision(input, action) &&
         !isBankPayoutAction(action) &&
         (action.type === "activated_card_ability" ||
           action.type === "trigger_ability" ||
           action.type === "play_event") &&
-        runnerLegalActionPayloadCreditGain(action) > 1,
+        hasAboveBasicImmediateGain(action),
     )
   ) {
     return true;
@@ -349,26 +350,15 @@ function runnerCanGrowPressureEconomy(input: AiDecisionInput): boolean {
 function runnerHasBurstEconomyEvent(input: AiDecisionInput): boolean {
   return input.legalActions.some(
     (action) =>
+      actionMatchesCurrentDecision(input, action) &&
       action.type === "play_event" &&
-      runnerLegalActionPayloadCreditGain(action) > 1,
+      hasAboveBasicImmediateGain(action),
   );
 }
 
-function runnerLegalActionPayloadCreditGain(action: LegalAction): number {
-  return Math.max(
-    0,
-    runnerLegalActionNumberPayload(action, "gainCreditsAmount"),
-    runnerLegalActionNumberPayload(action, "gainedCredits"),
-    runnerLegalActionNumberPayload(action, "amount"),
-  );
-}
-
-function runnerLegalActionNumberPayload(
-  action: LegalAction,
-  key: string,
-): number {
-  const value = action.payload?.[key];
-  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+function hasAboveBasicImmediateGain(action: LegalAction): boolean {
+  return actionHasImmediateCreditGain(action) &&
+    (exactImmediateCreditGainAmount(action) ?? 0) > 1;
 }
 
 function buildRunnerCreditBasePlan(params: {
@@ -610,12 +600,7 @@ function runnerCanContestRemoteIfFunded(
         action.type === "start_run" && actionServerId(action) === server.id,
     );
     if (!hasRunAction) return false;
-    const path = assessKnownRezzedIcePath(
-      server.ice,
-      input.playerView.own.rig ?? [],
-      input.playerView.own.credits,
-      server.root,
-    );
+    const path = assessVisibleRunnerServerPath(input, server);
     return (
       !path.knownPathBlockedByMissingCoverage &&
       !path.knownPathBlockedByUnbreakableIce
@@ -902,7 +887,7 @@ function runnerRemotePressureReserveAssessment(params: {
         : 5;
   const candidates = params.input.playerView.servers.flatMap((server) => {
     if (
-      !server.id.startsWith("remote_") ||
+      !isRemoteServerId(server.id) ||
       server.ice.length < 2 ||
       server.root.length === 0
     )
@@ -912,15 +897,7 @@ function runnerRemotePressureReserveAssessment(params: {
         action.type === "start_run" && actionServerId(action) === server.id,
     );
     if (!hasLegalRun) return [];
-    const path = assessKnownRezzedIcePath(
-      server.ice,
-      params.input.playerView.own.rig ?? [],
-      runnerRunPathCreditBudgetWithVisiblePools(
-        params.input.playerView.own.credits,
-        params.input.playerView.own.rig ?? [],
-      ),
-      server.root,
-    );
+    const path = assessVisibleRunnerServerPath(params.input, server);
     if (
       path.knownPathBlockedByMissingCoverage ||
       path.knownPathBlockedByUnbreakableIce
@@ -985,15 +962,7 @@ function runnerRdPressureSpendTarget(input: AiDecisionInput): number {
   ) {
     return 0;
   }
-  const path = assessKnownRezzedIcePath(
-    rd.ice,
-    input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
-    rd.root,
-  );
+  const path = assessVisibleRunnerServerPath(input, rd);
   if (
     path.knownPathBlockedByMissingCoverage ||
     path.knownPathBlockedByUnbreakableIce
@@ -1014,7 +983,7 @@ function runnerRdPressureSpendTarget(input: AiDecisionInput): number {
 function runnerHasImmediateRemoteScoreThreat(input: AiDecisionInput): boolean {
   return input.playerView.servers.some(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       server.root.some(
         (card) =>
           (card.known === false && (card.advancementCounters ?? 0) > 0) ||
@@ -1123,7 +1092,7 @@ function runnerEmergencyReserve(input: AiDecisionInput): number {
 function remoteHasScoreThreat(
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): boolean {
-  if (!server?.id.startsWith("remote_")) return false;
+  if (!isRemoteServerId(server?.id)) return false;
   return server.root.some(
     (card) =>
       card.type === "agenda" ||

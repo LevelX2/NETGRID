@@ -14,7 +14,7 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { quoteCorpHostedCreditBankCycle } from "./hosted-credit-bank-cycle-quote";
 
-const bankDefinition = "onr_v1_318_department-of-truth-enhancement";
+const bankDefinition = 530;
 function fixture(credits = 3, clicks = 3, rezzed = false) {
   let state = createGameAfterSetup({
     seed: "hosted-bank-cycle-boundary",
@@ -30,7 +30,7 @@ function fixture(credits = 3, clicks = 3, rezzed = false) {
   const source = findCard(state, bankDefinition);
   removeEverywhere(state, source);
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     root: [source],
@@ -39,7 +39,7 @@ function fixture(credits = 3, clicks = 3, rezzed = false) {
   state.cardInstances[source]!.zone = {
     side: "corp",
     zone: "serverRoot",
-    serverId: "remote_1",
+    serverId: "r1",
   };
   state.cardInstances[source]!.rezzed = rezzed;
   state.cardInstances[source]!.faceup = rezzed;

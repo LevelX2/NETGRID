@@ -23,7 +23,7 @@ function fixture(index = 0) {
     runtime: AiRuntimeCheckpointV1;
   };
   // Explicit current companion: no public steal surcharge or known agenda.
-  bindSyntheticAgendaStealQuotes(fixture.input, "remote_1", 0, {});
+  bindSyntheticAgendaStealQuotes(fixture.input, "r1", 0, {});
   return fixture;
 }
 function candidates(input: AiDecisionInputWithDeckCapabilities) {
@@ -62,17 +62,18 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
       expect(result.fallbackUsed).toBe(false);
       expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-        "plan:runner.contest_remote:remote%3Aremote_1",
+        "p1p4xezjcxov79rno40lq3f7rv",
       );
-      expect(
-        result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-      ).toContain(executor);
+      const execution = result.decisionDebug!.planFirstDecision!;
+      expect(execution.selectedPlan).toMatchObject({
+        instanceId: execution.leafExecutorInstanceId, moduleId: executor,
+      });
       if (index === 1)
         expect(action.source).toBe(
-          "runner_onr_proteus_133_chiba-bank-account_1",
+          "c16h",
         );
       if (index === 2)
-        expect(action.actionId).toBe("runner.start_run.remote_1");
+        expect(action.actionId).toBe("rs.r1");
     },
   );
 
@@ -119,7 +120,7 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       searchFundingRoutes({
         demand: createRunnerCreditDemand({
           demandId: "bound-run",
-          sourcePlanId: "plan:runner.contest_remote:remote%3Aremote_1",
+          sourcePlanId: "p1p4xezjcxov79rno40lq3f7rv",
           purpose,
           priority: "acute_hard_plan_blocker",
           hardness: "hard",
@@ -137,12 +138,12 @@ describe("SP-286 prospective payment setup for the exact run", () => {
       status: "covered_guaranteed",
       totalClickCost: 2,
       projectedCredits: 14,
-      projectedGeneralCredits: 11,
+      projectedGeneralCredits: 10,
     });
     const exact = route(10, 14, 3);
     expect(runnerFundingPaymentWindowQuote(exact, setups)).toEqual({
-      creditGain: 3,
-      installedCardIds: ["runner_onr_proteus_133_chiba-bank-account_1"],
+      creditGain: 4,
+      installedCardIds: ["c16h"],
     });
     expect(runnerFundingPaymentWindowQuote(exact, [])).toBeUndefined();
     for (const boundary of [

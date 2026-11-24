@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_classic_025_strategic-planning-group",
+      29,
     ),
     title: "Strategic Planning Group",
     side: "corp",

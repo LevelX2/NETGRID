@@ -30,9 +30,6 @@ describe("CurrentAiHoldoutRunner", () => {
         status: "reconstruction_error",
         caseKey: currentAiHoldoutCaseKey({
           matchId: "match-3",
-          traceId: "trace-3",
-          eventId: "event-3",
-          stateVersion: 3,
           decisionIndex: 3,
         }),
         side: "runner",
@@ -73,6 +70,43 @@ describe("CurrentAiHoldoutRunner", () => {
       "IllegalActions",
     );
   });
+
+  it("fails the legal-action gate when an evaluated case lacks a decision", () => {
+    const report = buildCurrentAiHoldoutRunnerReport(
+      [
+        {
+          status: "evaluated",
+          caseKey: "holdout-missing-decision",
+          side: "corp",
+          historical: { actionType: "constructor" },
+        },
+        {
+          status: "ai_error",
+          caseKey: "holdout-ai-error",
+          side: "corp",
+          historical: { actionType: "__proto__" },
+          errorCode: "test_error",
+        },
+      ],
+      {
+        runId: "unit-incomplete",
+        sourceLabel: "fixture",
+        dbProvided: false,
+      },
+    );
+
+    expect(report.gates.reconstructionComplete).toBe(true);
+    expect(report.gates.noIllegalActions).toBe(false);
+    expect(report.aggregate.illegalActions).toBe(1);
+    expect(report.byHistoricalActionType.constructor).toBe(1);
+    expect(Object.hasOwn(report.byHistoricalActionType, "__proto__")).toBe(
+      true,
+    );
+    expect(report.byHistoricalActionType["__proto__"]).toBe(1);
+    expect(report.examples.map((entry) => entry.caseKey)).toContain(
+      "holdout-missing-decision",
+    );
+  });
 });
 
 function evaluated(input: {
@@ -87,9 +121,6 @@ function evaluated(input: {
     status: "evaluated",
     caseKey: currentAiHoldoutCaseKey({
       matchId: `match-${input.historicalType}`,
-      traceId: `trace-${input.historicalType}`,
-      eventId: `event-${input.historicalType}`,
-      stateVersion: 1,
       decisionIndex: 1,
     }),
     side: "runner",

@@ -18,7 +18,7 @@ function fixture() {
 it("recognizes the public installed mode before requesting another Code-Gate answer", () => {
   const { input, runtime } = fixture();
   const fubar = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_proteus_088_fubar",
+    (c) => c.definitionId === 146,
   )!;
   expect(fubar.selectedSubtype).toBe("code_gate");
   input.ownDeckCapabilities = buildDeckCapabilityProfileFromInput(
@@ -39,19 +39,19 @@ it("recognizes the public installed mode before requesting another Code-Gate ans
     true,
   );
   expect(decision).toMatchObject({
-    actionId: "runner.gain_credit",
+    actionId: "rb",
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId:
-          "plan:runner.economy:runner-portfolio-credit-reserve",
+          "pc7ebuiw5dxhlbzbf1nhcs4p4z",
         leafExecutorInstanceId:
-          "plan:runner.economy:runner-portfolio-credit-reserve",
+          "pc7ebuiw5dxhlbzbf1nhcs4p4z",
         selectedStep: {
           stepId:
-            "plan:runner.economy:runner-portfolio-credit-reserve:fund:runner-portfolio-credit-reserve",
+            "pc7ebuiw5dxhlbzbf1nhcs4p4z:fund:runner-portfolio-credit-reserve",
         },
         route: {
-          actionId: "runner.gain_credit",
+          actionId: "rb",
           stateVersion: input.playerView.stateVersion,
         },
       },
@@ -64,7 +64,7 @@ it.each(["wall", "code_gate", "sentry", undefined] as const)(
   (selectedSubtype) => {
     const { input } = fixture();
     const fubar = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_proteus_088_fubar",
+      (c) => c.definitionId === 146,
     )!;
     const installed = { ...fubar };
     if (selectedSubtype === undefined) delete installed.selectedSubtype;
@@ -88,7 +88,7 @@ it.each(["wall", "code_gate", "sentry", undefined] as const)(
 it("combines the actual modes of separate installed copies", () => {
   const { input } = fixture();
   const fubar = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_proteus_088_fubar",
+    (c) => c.definitionId === 146,
   )!;
   input.playerView.own.rig = [
     { ...fubar, selectedSubtype: "wall" },
@@ -114,12 +114,12 @@ it.each(["wall", "code_gate", "sentry"] as const)(
   (selectedSubtype) => {
     const { input } = fixture();
     const fubar = input.playerView.own.rig!.find(
-      (c) => c.definitionId === "onr_proteus_088_fubar",
+      (c) => c.definitionId === 146,
     )!;
     input.playerView.own.rig = [
       {
         ...fubar,
-        definitionId: "onr_proteus_092_morphing-tool",
+        definitionId: 150,
         selectedSubtype,
       },
     ];

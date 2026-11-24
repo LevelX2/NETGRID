@@ -15,8 +15,8 @@ import {
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 
 const positions = [
-  [7, 280, "runner_onr_classic_031_rent-i-con_3"],
-  [19, 186, "runner_onr_classic_031_rent-i-con_3"],
+  [7, 280, "c7v"],
+  [19, 186, "c7v"],
 ] as const;
 
 function fixture(game: number, decision: number) {
@@ -55,7 +55,7 @@ describe("pairing 582 incoming identical program preserves recurring economy", (
         selected = chooseAiAction(cp.input);
       expect(selected.fallbackUsed).toBe(false);
       expect(selected.timeoutUsed).toBe(false);
-      expect(selected.actionId).toBe("runner.resolve_choice");
+      expect(selected.actionId).toBe("rn");
       expect(selected.selectedChoices).toEqual({
         choiceId: cp.input.playerView.pendingChoice.choiceId,
         selectedOptionIds: [`card_${oldId}`],
@@ -89,15 +89,15 @@ describe("pairing 582 incoming identical program preserves recurring economy", (
       expect(rig.some((c) => c.instanceId === oldId)).toBe(false);
       const supports = cp.input.playerView.own.rig.filter((c: any) =>
         [
-          "onr_v1_011_cloak",
-          "onr_v1_035_invisibility",
-          "onr_v1_071_vewy-vewy-quiet",
+          223,
+          247,
+          283,
         ].includes(c.definitionId),
       );
       for (const card of supports)
         expect(rig.some((c) => c.instanceId === card.instanceId)).toBe(true);
       expect(
-        rig.some((c) => c.definitionId === "onr_classic_031_rent-i-con"),
+        rig.some((c) => c.definitionId === 35),
       ).toBe(true);
       expect(view.own.memoryUsed).toBeLessThanOrEqual(view.own.memoryLimit!);
       const replay = applyAction(f.state, command);
@@ -150,7 +150,7 @@ describe("pairing 582 incoming identical program preserves recurring economy", (
       // two consumable breakers still preserves six recurring credits.
       expect(selected.selectedChoices).toEqual({
         choiceId: cp.input.playerView.pendingChoice.choiceId,
-        selectedOptionIds: ["card_runner_onr_v1_071_vewy-vewy-quiet_1"],
+        selectedOptionIds: ["card_c1qx"],
       });
       if (!selected.actionId || !selected.selectedChoices)
         throw new Error("Expected the direct native memory choice.");
@@ -167,14 +167,14 @@ describe("pairing 582 incoming identical program preserves recurring economy", (
       const rig = view.own.rig;
       if (!rig) throw new Error("Native Runner rig projection missing.");
       expect(
-        rig.filter((c) => c.definitionId === "onr_classic_031_rent-i-con"),
+        rig.filter((c) => c.definitionId === 35),
       ).toHaveLength(2);
       expect(
-        rig.some((c) => c.instanceId === "runner_onr_v1_071_vewy-vewy-quiet_2"),
+        rig.some((c) => c.instanceId === "c1qy"),
       ).toBe(true);
-      expect(rig.some((c) => c.definitionId === "onr_v1_011_cloak")).toBe(true);
+      expect(rig.some((c) => c.definitionId === 223)).toBe(true);
       expect(
-        rig.some((c) => c.definitionId === "onr_v1_035_invisibility"),
+        rig.some((c) => c.definitionId === 247),
       ).toBe(true);
     },
   );

@@ -68,7 +68,7 @@ describe("candidate path bindings", () => {
         actionType: "install_card",
         semanticActionType: "coverage_setup",
         sourceKind: "visible_card_or_ability",
-        sourceDefinitionId: "Wall of Static",
+        sourceDefinitionId: 491,
         targetIdentity: "unknown_target",
       }),
       redactedActionRef: "redacted:install",
@@ -98,6 +98,25 @@ describe("candidate path bindings", () => {
     expect(candidatePathBindingIsRedactionSafe(binding)).toBe(true);
     expect(JSON.stringify(binding)).not.toContain("cardInstances");
     expect(binding.blockers).toContain("hidden_target_identity_blocked");
+  });
+
+  it("clears copied identity keys and evidence when the binding is unsafe", () => {
+    const binding = buildCandidatePathBinding({
+      signature: buildSemanticActionSignature({
+        actionType: "start_run",
+        targetIdentity: "server:hq",
+      }),
+      actionId: "privatePayload.private-record",
+      stateVersion: 4,
+      side: "runner",
+      intentContractId: "test.run",
+      blockedReason: "deckTop.private-record",
+      evidence: ["reconnectToken.private-record"],
+    });
+    expect(binding.proofStatus).toBe("blocked");
+    expect(binding.blockers).toEqual(["hidden_info_marker_detected"]);
+    expect(candidatePathBindingIsRedactionSafe(binding)).toBe(true);
+    expect(JSON.stringify(binding)).not.toContain("private-record");
   });
 
   it("bounds hidden-info marker detection to exact tokens", () => {

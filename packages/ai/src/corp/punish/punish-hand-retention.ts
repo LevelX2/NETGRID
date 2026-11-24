@@ -1,4 +1,4 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
   cardImplementationForDefinitionId,
   traceRulesDefinition,
@@ -13,7 +13,7 @@ import {
   type FixedTagOperation,
 } from "../../runtime/corp-fixed-tag-damage-operation-facts";
 import { visibleRunnerTraceEstimateAtCorpBid } from "../../runtime/trace-context";
-import { canAvoidOneNextCorpTag } from "../../runtime/visible-runner-tag-prevention";
+import { countAvoidableRunnerTags } from "../../runtime/visible-runner-tag-prevention";
 
 type Retention = Readonly<{
   value: number;
@@ -26,7 +26,7 @@ type DevelopmentLine = {
   cardInstanceIds: readonly string[];
 };
 type DevelopmentOption = {
-  definitionId: string;
+  definitionId: number;
   copies: number;
   missingRole: "tag" | "damage";
   line: DevelopmentLine;
@@ -70,13 +70,20 @@ export function prepareCorpPunishHandAssessment(input: AiDecisionInput) {
   }
 
   const rig = opponent.rig;
-  const avoidedTags = rig.filter((card) =>
-    canAvoidOneNextCorpTag(card, opponent.credits),
-  ).length;
+  const unavoidableNewTags = new Map<number, number>();
+  function tagsAfterPrevention(tags: number): number {
+    const known = unavoidableNewTags.get(tags);
+    if (known !== undefined) return known;
+    const remaining =
+      tags -
+      countAvoidableRunnerTags(rig, tags, opponent.credits, "next_corp_turn");
+    unavoidableNewTags.set(tags, remaining);
+    return remaining;
+  }
   const visibleMeatPrevention = [opponent.identity, ...rig].some((card) =>
-    cardSpecPlanningCardByDefinitionId(
+    planningCardByDefinitionId(
       card.definitionId!,
-    )?.planning.engine.damagePreventionSources?.some(
+    )?.engine.damagePreventionSources?.some(
       (source) =>
         source.visibility === "public" && source.damageTypes.includes("meat"),
     ),
@@ -98,8 +105,8 @@ export function prepareCorpPunishHandAssessment(input: AiDecisionInput) {
     input,
     turnSerial === undefined ? undefined : turnSerial - 1,
   );
-  const operationCache = new Map<string, Operations>();
-  function operations(definitionId: string): Operations {
+  const operationCache = new Map<number, Operations>();
+  function operations(definitionId: number): Operations {
     const cached = operationCache.get(definitionId);
     if (cached) return cached;
     const tag = fixedTagOperation(definitionId);
@@ -190,14 +197,14 @@ export function prepareCorpPunishHandAssessment(input: AiDecisionInput) {
       const first = tags[index]!;
       // Assess retagging after a clear separately from retaining current tags.
       record(
-        first.tags - avoidedTags,
+        tagsAfterPrevention(first.tags),
         liquidCredits - first.credits,
         ordinaryCorpClicks - 1,
         [first],
       );
       for (const second of tags.slice(index + 1)) {
         record(
-          first.tags + second.tags - avoidedTags,
+          tagsAfterPrevention(first.tags + second.tags),
           liquidCredits - first.credits - second.credits,
           ordinaryCorpClicks - 2,
           [first, second],
@@ -291,7 +298,7 @@ export function prepareCorpPunishHandAssessment(input: AiDecisionInput) {
         cardInstanceIds: readonly string[],
         missingRole: DevelopmentOption["missingRole"],
       ) => {
-        const tagsAfterResponse = tag.tags - avoidedTags;
+        const tagsAfterResponse = tagsAfterPrevention(tag.tags);
         const credits =
           tag.credits + damage.reduce((sum, card) => sum + card.credits, 0);
         const amount = damage.reduce((sum, card) => sum + card.damage, 0);

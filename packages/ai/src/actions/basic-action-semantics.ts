@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { LegalAction } from "@netgrid/shared";
 import type {
   ActionGateResult,
@@ -331,7 +332,7 @@ function dynamicBasicActionSignals(action: LegalAction): string[] {
     signals.push(`run.server:${serverId}`);
     if (serverId === "hq" || serverId === "rd" || serverId === "archives") {
       signals.push("run.target:central");
-    } else if (serverId.startsWith("remote_")) {
+    } else if (isRemoteServerId(serverId)) {
       signals.push("run.target:remote");
     }
   }

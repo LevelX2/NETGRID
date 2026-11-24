@@ -59,7 +59,7 @@ export const ORDERED_FORT_REBUILD_SEQUENCE_CONTRACT: OrderedFortRebuildSequenceC
   };
 
 export type OrderedFortRebuildPublicPayloadInput = {
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   targetServerId: Exclude<ServerId, "hq" | "rd" | "archives" | "new_remote">;
   removedCardCount: number;
   replacementCardCount: number;

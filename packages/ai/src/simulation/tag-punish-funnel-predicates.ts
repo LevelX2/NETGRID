@@ -5,15 +5,28 @@ export function tagSourceConvertsToRunnerTagged(
   sequence: AiSimulationSummary["actionSequence"],
   index: number,
 ): boolean {
-  return sequence
-    .slice(index + 1, index + 8)
-    .some(
-      (entry) =>
-        entry.runnerTagAddedByAction === true ||
-        entry.runnerTaggedAtCorpDecision === true ||
-        (entry.runnerTagsAfterAction ?? 0) >
-          (entry.runnerTagsBeforeAction ?? 0),
-    );
+  const source = sequence[index];
+  if (!source) return false;
+  for (const [offset, entry] of sequence.slice(index, index + 8).entries()) {
+    if (offset > 0 && entry.corpTagSourceTaken === true) return false;
+    if (
+      entry.runnerTagAddedByAction === true ||
+      (entry.runnerTagsAfterAction ?? 0) > (entry.runnerTagsBeforeAction ?? 0)
+    )
+      return true;
+    if (
+      entry.runnerTagClearedByAction === true &&
+      entry.runnerTagsAfterAction === 0
+    )
+      return false;
+    if (
+      offset > 0 &&
+      entry.runnerTaggedAtCorpDecision === true &&
+      (source.runnerTagsBeforeAction ?? 0) === 0
+    )
+      return true;
+  }
+  return false;
 }
 
 export function tagSourceConvertsToPunishOpportunity(

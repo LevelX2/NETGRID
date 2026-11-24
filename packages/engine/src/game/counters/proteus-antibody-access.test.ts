@@ -41,7 +41,7 @@ function apply(
 
 function corpCard(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   rezzed = false,
 ): CardInstance {
@@ -58,7 +58,7 @@ function corpCard(
   };
 }
 
-function runnerProgram(id: string, definitionId: string): CardInstance {
+function runnerProgram(id: string, definitionId: number): CardInstance {
   return {
     instanceId: id as CardInstanceId,
     definitionId: definitionId as CardDefinitionId,
@@ -73,7 +73,7 @@ function runnerProgram(id: string, definitionId: string): CardInstance {
 }
 
 function accessFixture(
-  definitionId: string,
+  definitionId: number,
   zone: "rd" | "archives",
 ): GameState {
   const state = createGame({
@@ -91,7 +91,7 @@ function accessFixture(
   state.phase = "run";
   state.timingPoint = "access.resolve_card";
   state.run = {
-    runId: "run_1",
+    runId: 1,
     attackedServerId: zone,
     phase: "access",
     position: { kind: "server", serverId: zone },
@@ -122,14 +122,14 @@ function accessFixture(
 }
 
 function installedAccessFixture(
-  definitionId: string,
+  definitionId: number,
   rezzed: boolean,
 ): GameState {
   const state = createGame({
     seed: `proteus-8b-${definitionId}-installed-${rezzed}`,
     setupMode: "completed",
   });
-  const serverId = "remote_1";
+  const serverId = "r1";
   const cardId = `${definitionId}_installed_test` as CardInstanceId;
   state.corp.servers.push({
     id: serverId,
@@ -148,7 +148,7 @@ function installedAccessFixture(
   state.phase = "run";
   state.timingPoint = "access.resolve_card";
   state.run = {
-    runId: "run_1",
+    runId: 1,
     attackedServerId: serverId,
     phase: "access",
     position: { kind: "server", serverId },
@@ -180,8 +180,8 @@ function installedAccessFixture(
 
 describe("Proteus Phase 8b Corp Antibody access", () => {
   it.each([
-    ["onr_proteus_057_doppelganger-antibody", 2],
-    ["onr_proteus_068_pattel-antibody", 3],
+    [115, 2],
+    [126, 3],
   ] as const)(
     "opens the installed %s payment only while the source is rezzed",
     (definitionId, cost) => {
@@ -213,7 +213,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
   );
 
   it("lets Doppelganger Antibody create removable public Runner status counters", () => {
-    let state = accessFixture("onr_proteus_057_doppelganger-antibody", "rd");
+    let state = accessFixture(115, "rd");
     state.corp.credits = 2;
     const initial = structuredClone(state);
 
@@ -234,7 +234,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       state.cardInstances[state.runner.identity]?.counters?.doppelganger,
     ).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      ambushDefinitionId: 115,
       ambushPaidCost: 2,
       counterType: "doppelganger",
       addedCounterAmount: 1,
@@ -269,11 +269,11 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
   });
 
   it("puts Pattel counters only on installed icebreakers and reduces strength below zero", () => {
-    let state = accessFixture("onr_proteus_068_pattel-antibody", "rd");
+    let state = accessFixture(126, "rd");
     const breakerId = "proteus_8b_dwarf" as CardInstanceId;
     state.cardInstances[breakerId] = runnerProgram(
       breakerId,
-      "onr_v1_021_dwarf",
+      233,
     );
     state.runner.rig.programs.push(breakerId);
     state.corp.credits = 3;
@@ -309,7 +309,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
       seed: "proteus-8b-shuffle-antibodies",
       setupMode: "completed",
     });
-    const serverId = "remote_1";
+    const serverId = "r1";
     state.corp.servers.push({
       id: serverId,
       kind: "remote",
@@ -324,7 +324,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
     const belId = "proteus_8b_bel" as CardInstanceId;
     state.cardInstances[belId] = corpCard(
       belId,
-      "onr_proteus_054_bel-digmo-antibody",
+      112,
       { side: "corp", zone: "serverRoot", serverId },
     );
     server.root.push(belId);
@@ -332,7 +332,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
     state.phase = "run";
     state.timingPoint = "run.movement_rez_window";
     state.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: serverId,
       phase: "movement",
       position: { kind: "server", serverId },
@@ -359,7 +359,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
         ?.movedCardCount,
     ).toBe(1);
 
-    state = accessFixture("onr_proteus_075_stereogram-antibody", "archives");
+    state = accessFixture(133, "archives");
     const stereogramId = state.run?.breach?.queue[0]?.cardInstanceId;
     expect(stereogramId).toBeDefined();
     state = apply(state, "runner", (action) => action.type === "access_card");

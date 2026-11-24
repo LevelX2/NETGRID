@@ -12,6 +12,7 @@ export type CorpScoreRecoveryPreparation = {
 export function corpScoreRecoveryPreparations(
   input: AiDecisionInput,
 ): CorpScoreRecoveryPreparation[] {
+  if (input.side !== "corp") return [];
   const result: CorpScoreRecoveryPreparation[] = [];
   for (const action of input.legalActions) {
     const q = action.corpScoreRecoveryQuote;
@@ -20,6 +21,7 @@ export function corpScoreRecoveryPreparations(
       q.schemaVersion !== "corp-score-recovery-quote-v1" ||
       action.side !== "corp" ||
       action.type !== "play_operation" ||
+      action.timingPoint !== input.playerView.timingPoint ||
       action.expiresAtStateVersion !== input.playerView.stateVersion ||
       q.stateVersion !== input.playerView.stateVersion ||
       q.actionId !== action.actionId ||

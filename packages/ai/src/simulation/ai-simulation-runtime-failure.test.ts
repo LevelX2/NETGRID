@@ -14,10 +14,10 @@ describe("simulation runtime failure classification", () => {
         stateVersion: 9,
         timingPoint: "runner_action.main",
         legalActionTypes: ["install_card"],
-        unresolvedActionIds: ["runner.install_card"],
+        unresolvedActionIds: ["rc"],
         owner: "plan_registry",
         removalCondition: "Register the missing plan module.",
-        planInstanceId: "plan:runner.coverage:code_gate",
+        planInstanceId: "pf2zkpdwfw6z415exzb40l9whq",
         stepId: "find_breaker",
       }),
       {
@@ -35,13 +35,13 @@ describe("simulation runtime failure classification", () => {
       stateVersion: 9,
       timingPoint: "runner_action.main",
       removalCondition: "Register the missing plan module.",
-      planInstanceId: "plan:runner.coverage:code_gate",
+      planInstanceId: "pf2zkpdwfw6z415exzb40l9whq",
       stepId: "find_breaker",
       legalActionTypes: ["install_card"],
-      unresolvedActionIds: ["runner.install_card"],
+      unresolvedActionIds: ["rc"],
     });
     expect(simulationRuntimeFailureToken(failure)).toBe(
-      "runtime_failure:missing_plan_module_coverage classified:true owner:plan_registry side:runner stateVersion:9 timing:runner_action.main removalCondition:Register the missing plan module. plan:plan:runner.coverage:code_gate step:find_breaker legalActionTypes:install_card unresolvedActionIds:runner.install_card",
+      "runtime_failure:missing_plan_module_coverage classified:true owner:plan_registry side:runner stateVersion:9 timing:runner_action.main removalCondition:Register the missing plan module. plan:pf2zkpdwfw6z415exzb40l9whq step:find_breaker legalActionTypes:install_card unresolvedActionIds:rc",
     );
   });
 

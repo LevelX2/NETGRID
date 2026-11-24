@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -5,6 +6,7 @@ import type {
   CardInstanceId,
   CounterType,
   DamageType,
+  DamageRandomSource,
   GameState,
   LegalAction,
   ServerId,
@@ -88,6 +90,7 @@ export type AccessFlowCompositionHost = {
         damageType: DamageType;
         amount: number;
         source: CardDefinitionId;
+        randomSource: DamageRandomSource;
       },
     ) => ReturnType<AccessEffectHandlerHost["damage"]["doDamage"]>;
     setDamagePayload: (
@@ -210,7 +213,7 @@ export type AccessFlowCompositionHost = {
     ) => NonNullable<GameState["runnerTurnFlags"]>;
   };
   random: {
-    nextRandom: (state: GameState, purpose: string) => number;
+    nextRandom: (state: GameState, purpose: RandomPurpose) => number;
   };
   callbacks: {
     agendaPointsForScoredCard: (
@@ -426,6 +429,7 @@ export function createAccessFlowAdapters(
             damageType,
             amount,
             source: sourceDefinitionId,
+            randomSource: ["c", sourceDefinitionId],
           }),
         setDamagePayload: (summary) => {
           if (!legalAction) throw new Error("Damage-Aktion fehlt.");

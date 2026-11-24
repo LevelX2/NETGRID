@@ -50,7 +50,11 @@ it("keeps an agenda flood behind safe HQ protection instead of exposing unfunded
   expect(result.actionId).toBe(funding.actionId);
   expect(result.reasonCode).toBe("plan_first.corp.economy");
   const plan = result.decisionDebug?.planFirstDecision;
-  expect(plan?.leafExecutorInstanceId).toMatch(/^plan:corp\.economy:/);
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.economy");
   expect(plan?.route).toMatchObject({
     actionId: funding.actionId,
     stateVersion: input.playerView.stateVersion,

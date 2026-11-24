@@ -2,10 +2,14 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../../runtime/corp-exact-ice-rez-route";
 import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 import { scoreContinuationClaims } from "./corp-defense-score-reserve";
-import { sanitizeForcedIceRezChoiceQuote } from "../../runtime/forced-ice-rez-choice-quote";
+import {
+  forcedIceRezChoiceIceId,
+  sanitizeForcedIceRezChoiceQuote,
+} from "../../runtime/forced-ice-rez-choice-quote";
 import { selectForcedRezVariant } from "./forced-rez-variant-selection";
 
 export function validCorpRezOrTrashChoiceResolution(
@@ -54,41 +58,24 @@ export function currentCorpRezOrTrashChoice(
   action: LegalAction,
 ) {
   const choice = input.playerView.pendingChoice;
-  const match =
-    choice &&
-    /^card_implementation\.corp_choice_rez_or_trash_ice_decision:([^:]+):([0-9]+)$/.exec(
-      choice.source,
-    );
-  const requirement = action.choiceRequirements?.[0];
+  const iceId =
+    choice && forcedIceRezChoiceIceId(choice.source, choice.stateVersion);
   if (
     !Number.isSafeInteger(input.playerView.own.credits) ||
     input.playerView.own.credits < 0 ||
     !Number.isSafeInteger(input.playerView.own.agendaPoints) ||
     input.playerView.own.agendaPoints < 0 ||
     !choice ||
-    !match ||
+    !iceId ||
     input.side !== "corp" ||
     choice.side !== "corp" ||
     choice.kind !== "select_option" ||
     choice.visibility !== "public" ||
-    choice.stateVersion !== input.playerView.stateVersion ||
-    Number(match[2]) !== choice.stateVersion ||
     choice.minSelections !== 1 ||
     choice.maxSelections !== 1 ||
-    action.side !== "corp" ||
-    action.type !== "resolve_choice" ||
-    action.source !== "game_rule" ||
-    action.timingPoint !== input.playerView.timingPoint ||
-    action.expiresAtStateVersion !== choice.stateVersion ||
-    action.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1 ||
-    requirement.optionIds.length !== choice.options.length ||
-    new Set(requirement.optionIds).size !== requirement.optionIds.length ||
+    exactCurrentChoiceAction(input, choice) !== action ||
     choice.options.some(
       (option) =>
-        !requirement.optionIds.includes(option.id) ||
         option.selectable === false ||
         option.value !== option.id ||
         (option.id !== "trash_ice" &&
@@ -97,9 +84,9 @@ export function currentCorpRezOrTrashChoice(
   )
     return undefined;
   const server = input.playerView.servers.find((s) =>
-    s.ice.some((ice) => ice.instanceId === match[1]),
+    s.ice.some((ice) => ice.instanceId === iceId),
   );
-  const ice = server?.ice.find((ice) => ice.instanceId === match[1]);
+  const ice = server?.ice.find((ice) => ice.instanceId === iceId);
   if (
     !server ||
     !ice ||

@@ -1,4 +1,5 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -9,16 +10,16 @@ import {
 } from "./tag-punish-ontology-consumer";
 import type { LegalAction } from "@netgrid/shared";
 
-const marked = "onr_proteus_005_marked-accounts";
-const trap = "onr_v1_345_trap";
-const hunting = "onr_proteus_026_hunting-pack";
+const marked = 63;
+const trap = 557;
+const hunting = 84;
 
-function entry(id: string) {
-  const result = cardSpecPlanningCards().find((c) => c.definition.id === id);
+function entry(id: CardDefinitionId) {
+  const result = listPlanningCardsWithFacts().find((c) => c.facts.id === id);
   if (!result) throw new Error(`missing_native_tag_witness:${id}`);
   return result;
 }
-function mechanicalHint(id: string) {
+function mechanicalHint(id: CardDefinitionId) {
   const card = entry(id);
   const planning = { ...card.planning };
   delete planning.planningAnnotations;
@@ -69,10 +70,10 @@ describe("native access and relative-ICE tag producers", () => {
 
   it("keeps non-tag accesses and damage-only relative ICE outside tag classification", () => {
     expect(
-      classifyTagSourceFromOntology(mechanicalHint("onr_proteus_004_fetal-ai")),
+      classifyTagSourceFromOntology(mechanicalHint(62)),
     ).toBeUndefined();
     expect(
-      classifyTagSourceFromOntology(mechanicalHint("onr_proteus_021_dog-pile")),
+      classifyTagSourceFromOntology(mechanicalHint(79)),
     ).toBeUndefined();
   });
 
@@ -111,7 +112,7 @@ describe("native access and relative-ICE tag producers", () => {
       traceTagSource: true,
     });
     const action = {
-      actionId: "corp.rez_ice",
+      actionId: "cq",
       side: "corp",
       type: "rez_ice",
       source: "ice-instance",

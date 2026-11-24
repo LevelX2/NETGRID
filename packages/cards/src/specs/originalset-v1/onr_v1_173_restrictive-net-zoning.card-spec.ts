@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_173_restrictive-net-zoning"),
+    cardDefinitionId: cardDefinitionId(385),
     title: "Restrictive Net Zoning",
     side: "runner",
     cardType: "resource",

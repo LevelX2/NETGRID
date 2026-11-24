@@ -14,9 +14,10 @@ import { buildActionCardSemanticProfilesByDefinitionId } from "../../actions/act
 import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-source-definitions";
 import { assessRunnerHandRotation } from "../../runtime/runner-hand-rotation-assessment";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { runnerCoverageDrawCadence } from "./coverage-signals";
 import { coverageSupportActionIds } from "./coverage-support";
 
-const SILICON = "onr_v1_179_silicon-saloon-franchise";
+const SILICON = 391;
 beforeEach(() => resetResidentPlanPortfolioMemory());
 function fixture(emptyStack = false) {
   const deck = (side: "runner" | "corp") => {
@@ -55,20 +56,20 @@ function fixture(emptyStack = false) {
   RealEngineFixtureBuilder.forState(state)
     .withRunnerGripSize(0)
     .withCorpHqSize(5)
-    .withRunnerProgramInstalled("onr_v1_074_worm")
-    .withRunnerProgramInstalled("onr_v1_054_raptor")
+    .withRunnerProgramInstalled(286)
+    .withRunnerProgramInstalled(266)
     .withRunnerResourceInstalled(SILICON)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_270_sleeper")
-    .withRezzedCorpIceOnServer("hq", "onr_v1_244_filter")
+    .withRezzedCorpIceOnServer("rd", 482)
+    .withRezzedCorpIceOnServer("hq", 456)
     .withRunnerCredits(10);
   state.runner.memoryUsed = 2;
   if (!emptyStack) {
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerCardInGrip("onr_v1_145_wutech-mem-chip")
-      .withRunnerCardInGrip("onr_v1_123_bodyweight-data-creche")
-      .withRunnerCardInGrip("onr_v1_094_inside-job")
-      .withRunnerCardInGrip("onr_v1_095_jack-n-joe")
-      .withRunnerCardInGrip("onr_v1_139_r-and-d-interface");
+      .withRunnerCardInGrip(357)
+      .withRunnerCardInGrip(335)
+      .withRunnerCardInGrip(306)
+      .withRunnerCardInGrip(307)
+      .withRunnerCardInGrip(351);
   }
   if (emptyStack) {
     for (const id of state.runner.stack) {
@@ -147,6 +148,21 @@ it("admits the native one-card plus credit route under the exact Coverage draw n
   expect(result.state.runner.credits).toBe(11);
   expect(result.state.runner.grip).toHaveLength(6);
   expect(result.state.runner.clicks).toBe(2);
+  const drawEvent = result.event;
+  expect(
+    runnerCoverageDrawCadence({ ...input, eventTail: [drawEvent] })
+      .drawAvailable,
+  ).toBe(true);
+  expect(
+    runnerCoverageDrawCadence({
+      ...input,
+      playerView: {
+        ...input.playerView,
+        stateVersion: drawEvent.stateVersionAfter,
+      },
+      eventTail: [drawEvent],
+    }).drawAvailable,
+  ).toBe(false);
   const replay = replayEvents(state, [result.event]);
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(result.state));

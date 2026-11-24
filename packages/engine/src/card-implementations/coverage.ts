@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
+import { CARD_DEFINITIONS } from "../card-definitions";
 /**
  * Reports CardImplementation coverage for the original set.
  *
@@ -10,6 +10,7 @@ import type { CardDefinitionId } from "@netgrid/shared";
 import {
   cardSpecImplementationDefinitionIds,
   cardSpecRuntimeDefinitionIds,
+  cardSpecSetIdsForDefinitionId,
   cardSpecSourceRefByDefinitionId,
 } from "@netgrid/cards/engine";
 import { CARD_IMPLEMENTATIONS } from "./registry";
@@ -29,18 +30,17 @@ export type CardImplementationCoverageEntry = {
   currentLocations?: string[];
 };
 
-const CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN = /^onr_v1_\d{3}_/;
-const CARD_SPEC_IMPLEMENTATION_DEFINITION_IDS = new Set<string>(
+const CARD_SPEC_IMPLEMENTATION_DEFINITION_IDS = new Set<CardDefinitionId>(
   cardSpecImplementationDefinitionIds(),
 );
-const CARD_SPEC_RUNTIME_DEFINITION_IDS = new Set<string>(
+const CARD_SPEC_RUNTIME_DEFINITION_IDS = new Set<CardDefinitionId>(
   cardSpecRuntimeDefinitionIds(),
 );
 
 export function isCurrentCardImplementationReleaseScopeDefinitionId(
   definitionId: CardDefinitionId,
 ): boolean {
-  return CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN.test(definitionId);
+  return cardSpecSetIdsForDefinitionId(definitionId)?.includes("originalset-v1") === true;
 }
 
 function implementedCoverageFor(
@@ -116,7 +116,7 @@ export const CARD_IMPLEMENTATION_COVERAGE_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, CardImplementationCoverageEntry>
 > = {
   ...Object.fromEntries(
-    Object.keys(CARD_DEFINITIONS_BY_ID).map((cardDefinitionId) => [
+    CARD_DEFINITIONS.map(({ id: cardDefinitionId }) => [
       cardDefinitionId,
       pendingCoverageFor(cardDefinitionId),
     ]),

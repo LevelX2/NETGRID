@@ -129,7 +129,7 @@ function tagsForCorpAgendaInstall(selectedDecision: AiDecision): string[] {
         ({
           instanceId: "agenda-instance",
           known: true,
-          definitionId: "onr_v1_203_hostile-takeover",
+          definitionId: 415,
           type: "agenda",
         }) as never,
       rolesForAction: () => [],
@@ -197,7 +197,7 @@ function decision(): AiDecision {
 function centralRun(reasonCode: string) {
   return {
     side: "runner",
-    actionType: "start_run",
+    runnerRunStarted: true as const,
     targetServerId: "rd",
     reasonCode,
   } as const;

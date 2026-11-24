@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { afterEach, expect, it } from "vitest";
 import { applyAction, hashState, replayEvents } from "@netgrid/engine";
 import type { GameState } from "@netgrid/shared";
@@ -46,9 +47,10 @@ function prefix(name: "bbs" | "accounts", actionTypes: string[]) {
   const saved = fixture(name);
   let current = structuredClone(saved.engineState);
   expect(Object.values(saved.validation).every(Boolean)).toBe(true);
-  const expectedParent =
-    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_" +
-    (name === "bbs" ? "3" : "1");
+  const expectedParent = planInstanceIdForProposal({
+    moduleId: "corp.score_agenda",
+    dedupeKey: `agenda:c2i5:r${name === "bbs" ? "3" : "1"}`,
+  });
   for (const [index, type] of actionTypes.entries()) {
     const input =
       index === 0
@@ -135,13 +137,15 @@ it.each([
     .map((i) => (i.moduleState as EconomyState).signal);
   const signal = structuredClone(
     signals.find(
-      (s) => s.kind === "parent_funding" && s.freeRezPayoutPreparation,
+      (s) =>
+        s.kind === "parent_funding" &&
+        s.fundingRouteAssessment?.freeRezPayoutPreparation,
     )! as CorpEconomyParentFundingSignal,
   );
   const campaigns = signals.filter(
     (s): s is CorpEconomyDevelopmentSignal => s.kind === "develop_campaign",
   );
-  expect(signal.freeRezPayoutPreparation).toBeDefined();
+  expect(signal.fundingRouteAssessment?.freeRezPayoutPreparation).toBeDefined();
   if (change === "two_clicks") input.playerView.own.clicks = 2;
   if (change === "one_click") input.playerView.own.clicks = 1;
   if (change === "urgent_parent") signal.delegatedPriorityClass = "P2";
@@ -155,7 +159,9 @@ it.each([
   }
   if (change === "stale")
     input.legalActions.find(
-      (a) => a.actionId === signal.freeRezPayoutPreparation!.actionId,
+      (a) =>
+        a.actionId ===
+        signal.fundingRouteAssessment!.freeRezPayoutPreparation!.actionId,
     )!.expiresAtStateVersion--;
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -167,7 +173,8 @@ it.each([
       input,
       candidates,
       signal,
-      signal.freeRezPayoutPreparation!.basicFundingActionId,
+      signal.fundingRouteAssessment!.freeRezPayoutPreparation!
+        .basicFundingActionId,
       campaigns,
     ),
   ).toBeUndefined();

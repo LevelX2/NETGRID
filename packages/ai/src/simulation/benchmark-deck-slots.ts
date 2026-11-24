@@ -1,8 +1,9 @@
 import type {
   AiBenchmarkDeckSlotDefinition,
   AiBenchmarkRunnerArchetype,
+  LocalRealisticBenchmarkDeckManifest,
+  RealSceneBenchmarkDeckManifest,
 } from "./benchmark-deck-types";
-import { benchmarkDeckManifestEntry } from "./benchmark-deck-manifest-entry";
 import {
   benchmarkCorpArchetypeFromRole,
   missingCorpStrategyPanelSlots,
@@ -12,54 +13,18 @@ import {
   REAL_SCENE_BENCHMARK_DECKS,
 } from "./benchmark-local-deck-data";
 
-const LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
-  LOCAL_REALISTIC_BENCHMARK_DECKS.slots.map((slot) => {
-    const runner = benchmarkDeckManifestEntry(
-      LOCAL_REALISTIC_BENCHMARK_DECKS.decks,
-      slot.runnerLocalDeckId,
+function manifestDeckSlots(
+  manifest:
+    | LocalRealisticBenchmarkDeckManifest
+    | RealSceneBenchmarkDeckManifest,
+  manifestLabel: string,
+): AiBenchmarkDeckSlotDefinition[] {
+  return manifest.slots.map((slot) => {
+    const runner = manifest.decks.find(
+      (entry) => entry.localDeckId === slot.runnerLocalDeckId,
     );
-    const corp = benchmarkDeckManifestEntry(
-      LOCAL_REALISTIC_BENCHMARK_DECKS.decks,
-      slot.corpLocalDeckId,
-    );
-    return {
-      slotId: slot.slotId,
-      label: slot.label,
-      slotType: slot.slotType,
-      status: slot.status,
-      runner: runner
-        ? { kind: "frozen_local_snapshot", snapshotId: runner.snapshotId }
-        : {
-            kind: "pending_real_scene",
-            label: `${slot.runnerLocalDeckId}:missing_manifest_entry`,
-          },
-      corp: corp
-        ? { kind: "frozen_local_snapshot", snapshotId: corp.snapshotId }
-        : {
-            kind: "pending_real_scene",
-            label: `${slot.corpLocalDeckId}:missing_manifest_entry`,
-          },
-      runnerArchetype: runnerArchetypeFromRole(runner?.role),
-      corpArchetype: benchmarkCorpArchetypeFromRole(corp?.role),
-      tuningUse: slot.tuningUse,
-      ...(!runner || !corp
-        ? {
-            pendingReason:
-              "Local realistic benchmark manifest references a missing deck entry.",
-          }
-        : {}),
-    };
-  });
-
-const REAL_SCENE_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
-  REAL_SCENE_BENCHMARK_DECKS.slots.map((slot) => {
-    const runner = benchmarkDeckManifestEntry(
-      REAL_SCENE_BENCHMARK_DECKS.decks,
-      slot.runnerLocalDeckId,
-    );
-    const corp = benchmarkDeckManifestEntry(
-      REAL_SCENE_BENCHMARK_DECKS.decks,
-      slot.corpLocalDeckId,
+    const corp = manifest.decks.find(
+      (entry) => entry.localDeckId === slot.corpLocalDeckId,
     );
     return {
       slotId: slot.slotId,
@@ -84,11 +49,22 @@ const REAL_SCENE_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
       ...(!runner || !corp
         ? {
             pendingReason:
-              "Real-scene benchmark manifest references a missing deck entry.",
+              manifestLabel +
+              " benchmark manifest references a missing deck entry.",
           }
         : {}),
     };
   });
+}
+
+const LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS = manifestDeckSlots(
+  LOCAL_REALISTIC_BENCHMARK_DECKS,
+  "Local realistic",
+);
+const REAL_SCENE_BENCHMARK_DECK_SLOTS = manifestDeckSlots(
+  REAL_SCENE_BENCHMARK_DECKS,
+  "Real-scene",
+);
 
 const STRATEGY_PANEL_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] = [
   {

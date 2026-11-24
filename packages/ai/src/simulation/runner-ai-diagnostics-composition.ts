@@ -34,6 +34,7 @@ export type RunnerAiDiagnosticsCompositionDependencies =
       | "hasRunnerPlayableEconomyAction"
       | "hasRunnerInstallableBreakerAction"
       | "hasRunnerRunnablePressureAction"
+      | "hasRunnerPlayablePressureCard"
       | "runnerDiscardChoiceRoles"
       | "isRunnerDuplicateInstall"
       | "isRunnerRigInstallAction"
@@ -44,7 +45,6 @@ export type RunnerAiDiagnosticsCompositionDependencies =
       | "runnerVisibleMissingBreakerCoverage"
       | "runnerHasKnownBlockedPathByCoverage"
       | "runnerMissingCoverageTypesForInput"
-      | "runnerRunKnownPathCost"
     >;
 
 export function createRunnerAiDiagnosticsComposition(
@@ -81,6 +81,8 @@ export function createRunnerAiDiagnosticsComposition(
       installClassification.hasRunnerInstallableBreakerAction,
     hasRunnerRunnablePressureAction:
       installClassification.hasRunnerRunnablePressureAction,
+    hasRunnerPlayablePressureCard:
+      installClassification.hasRunnerPlayablePressureCard,
     runnerDiscardChoiceRoles: installClassification.runnerDiscardChoiceRoles,
     isRunnerDuplicateInstall: installClassification.isRunnerDuplicateInstall,
     isRunnerRigInstallAction: installClassification.isRunnerRigInstallAction,
@@ -97,7 +99,6 @@ export function createRunnerAiDiagnosticsComposition(
       knownPath.runnerHasKnownBlockedPathByCoverage,
     runnerMissingCoverageTypesForInput:
       knownPath.runnerMissingCoverageTypesForInput,
-    runnerRunKnownPathCost: knownPath.runnerRunKnownPathCost,
   });
 
   return {

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-422-two-click-score-order-d157.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -25,7 +26,7 @@ it("keeps both remaining credits after the exact free score instead of erasing t
     agendaPoints: 1,
   });
   expect(
-    input.legalActions.some((a) => a.actionId === "corp.gain_credit"),
+    input.legalActions.some((a) => a.actionId === "cb"),
   ).toBe(true);
   const score = input.legalActions.find((a) => a.type === "score_agenda")!;
   expect(score.costs).toEqual([]);
@@ -70,7 +71,7 @@ it.each([
   const score = input.legalActions.find((a) => a.type === "score_agenda")!;
   const project: CorpScoreProjectSignal = {
     projectId: "current-score",
-    agendaDefinitionId: "onr_v1_196_corporate-war",
+    agendaDefinitionId: 408,
     agendaInstanceId: score.source,
     agendaPoints: 3,
     phase: "score_agenda",
@@ -85,35 +86,35 @@ it.each([
   if (variant === "hand_operation") {
     const card = input.playerView.own.gripOrHq[0]!;
     card.type = "operation";
-    card.definitionId = "onr_v1_295_night-shift";
+    card.definitionId = 507;
   }
   if (variant === "recovery_only" || variant === "advance_only") {
     const card = input.playerView.own.gripOrHq[0]!;
     card.type = "operation";
     card.definitionId =
       variant === "recovery_only"
-        ? "onr_v1_296_off-site-backups"
-        : "onr_v1_300_project-consultants";
+        ? 508
+        : 512;
   }
   const otherRoot = input.playerView.servers.find((s) => s.id === "hq")!
     .root[0]!;
   if (variant === "unrezzed_income") {
     otherRoot.type = "asset";
-    otherRoot.definitionId = "onr_v1_309_bbs-whispering-campaign";
+    otherRoot.definitionId = 521;
   }
   if (variant === "scored_payout")
     input.playerView.own.scoreArea[0]!.definitionId =
-      "onr_v1_209_political-coup";
+      421;
   if (variant === "other_agenda") {
     otherRoot.type = "agenda";
-    otherRoot.definitionId = "onr_v1_203_hostile-takeover";
+    otherRoot.definitionId = 415;
     otherRoot.advancementCounters = 2;
   }
   if (variant === "unknown_card")
-    otherRoot.definitionId = "unmapped-test-definition";
+    otherRoot.definitionId = syntheticCardDefinitionId("unmapped-test-definition");
   if (variant === "live_run")
     input.playerView.run = {
-      runId: "live",
+      runId: input.playerView.stateVersion,
       attackedServerId: "hq",
       phase: "movement",
       successful: false,
@@ -127,7 +128,7 @@ it.each([
     ...corpBasicCreditsDominatedByCurrentScore(input, candidates, [project]),
   ]).toEqual(
     ["bounded", "recovery_only", "advance_only"].includes(variant)
-      ? ["corp.gain_credit"]
+      ? ["cb"]
       : [],
   );
 });

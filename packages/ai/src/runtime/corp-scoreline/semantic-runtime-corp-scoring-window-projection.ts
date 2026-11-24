@@ -1,13 +1,14 @@
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
-import { RUNTIME_CARDS } from "../../ai-hints";
+import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtime-corp-central-pressure";
-import { decisionDerivedValue } from "../decision-derived-cache";
+import { decisionDerivedValue } from "../../decision-derived-cache";
 import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-route";
+import { currentLegalActionResourceCost } from "../visible-action-facts";
 import type {
   CorpScoringWindowAgendaStealSeverity,
   CorpScoringWindowAssessment,
@@ -25,7 +26,6 @@ import {
   scoringWindowVisibleCardTextTokens,
   tokensIncludePhrase,
 } from "./semantic-runtime-corp-scoring-window-runner-pressure";
-import { SCORING_WINDOW_AI_HINTS_BY_CARD } from "./semantic-runtime-corp-scoring-window-card-data";
 export {
   scoringWindowAccessAssessment,
   scoringWindowPostRezProtectionAssessment,
@@ -98,46 +98,29 @@ export function scoringWindowHorizon<TServer extends CorpServerLike>(
   const remainingCorpClicksAfterAction = Math.max(
     0,
     Math.floor(
-      input.playerView.own.clicks - scoringWindowActionClickCost(action),
+      input.playerView.own.clicks - currentLegalActionResourceCost(action, "clicks"),
     ),
   );
-  if (remainingCorpClicksAfterAction >= requirement) return "immediate";
+  const liquidCreditsAfterAction =
+    input.playerView.own.credits -
+    (input.playerView.own.installRezOnlyCredits ?? 0) -
+    currentLegalActionResourceCost(action, "credits");
+  if (
+    remainingCorpClicksAfterAction >= requirement &&
+    liquidCreditsAfterAction >= requirement
+  ) return "immediate";
   if (
     scoringWindowVisibleInTurnAdvancementBurstAvailable(
       input,
-      action,
       sourceCard,
       requirement,
       remainingCorpClicksAfterAction,
-      dependencies,
+      liquidCreditsAfterAction,
     )
   ) {
     return "immediate";
   }
   return requirement <= 3 ? "next_turn" : "slow";
-}
-
-function scoringWindowActionClickCost(action: LegalAction): number {
-  const explicitClicks = (action.costs ?? []).reduce(
-    (sum, cost) =>
-      sum +
-      (typeof cost.clicks === "number" && Number.isFinite(cost.clicks)
-        ? Math.max(0, Math.floor(cost.clicks))
-        : 0),
-    0,
-  );
-  if (explicitClicks > 0) return explicitClicks;
-  if (
-    action.type === "install_card" ||
-    action.type === "advance_card" ||
-    action.type === "score_agenda" ||
-    action.type === "play_operation" ||
-    action.type === "gain_credit" ||
-    action.type === "draw_card"
-  ) {
-    return 1;
-  }
-  return 0;
 }
 
 export function scoringWindowPreExposureAdvancementCreditReserve<
@@ -172,7 +155,7 @@ export function scoringWindowPreExposureAdvancementCreditReserve<
   const remainingCorpClicksAfterAction = Math.max(
     0,
     Math.floor(
-      input.playerView.own.clicks - scoringWindowActionClickCost(action),
+      input.playerView.own.clicks - currentLegalActionResourceCost(action, "clicks"),
     ),
   );
   return Math.min(remainingCorpClicksAfterAction, advancesStillNeeded);
@@ -204,7 +187,7 @@ function scoringWindowAdvancementRequirement(
   }
   const demoRequirement =
     card.definitionId !== undefined
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement
+      ? planningCardFactsByDefinitionId(card.definitionId)?.advancementRequirement
       : undefined;
   if (typeof demoRequirement === "number" && Number.isFinite(demoRequirement)) {
     return Math.max(0, Math.floor(demoRequirement));
@@ -212,20 +195,15 @@ function scoringWindowAdvancementRequirement(
   return undefined;
 }
 
-function scoringWindowVisibleInTurnAdvancementBurstAvailable<
-  TServer extends CorpServerLike,
->(
+function scoringWindowVisibleInTurnAdvancementBurstAvailable(
   input: AiDecisionInput,
-  action: LegalAction,
   sourceCard: VisibleCard | undefined,
   requirement: number,
   remainingCorpClicksAfterAction: number,
-  dependencies: SemanticRuntimeCorpScoringWindowDependencies<TServer>,
+  creditsAfterAction: number,
 ): boolean {
   if (!sourceCard || sourceCard.type !== "agenda") return false;
   if (remainingCorpClicksAfterAction < 2) return false;
-  const creditsAfterAction =
-    input.playerView.own.credits - dependencies.actionCreditCost(action);
   return input.playerView.own.gripOrHq.some((card) => {
     if (card.known === false || card.instanceId === sourceCard.instanceId) {
       return false;
@@ -250,7 +228,7 @@ function scoringWindowVisibleAdvancementBurstAmount(card: VisibleCard): number {
     ? Math.max(
         0,
         ...(
-          SCORING_WINDOW_AI_HINTS_BY_CARD.get(card.definitionId)?.effects ?? []
+          AI_HINTS_BY_CARD.get(card.definitionId)?.effects ?? []
         )
           .filter(
             (effect) =>
@@ -341,6 +319,8 @@ export function scoringWindowRunnerExposureCreditActions(
 ): number {
   if (!scoreLineAction || scoreHorizon === "immediate") return 0;
   if (scoreHorizon !== "next_turn" && scoreHorizon !== "slow") return 0;
+  const pendingCreditActions = input.playerView.runnerNextTurnCreditClicks;
+  if (nonNegativeSafeInteger(pendingCreditActions)) return pendingCreditActions;
   const visibleClicks = input.playerView.opponent.clicks;
   const availableRunnerClicks =
     typeof visibleClicks === "number" && Number.isFinite(visibleClicks)
@@ -665,7 +645,7 @@ function iceHasSameFortRepositionRisk(ice: VisibleCard): boolean {
 
 function scoringWindowCardSignals(card: VisibleCard): string[] {
   const hint = card.definitionId
-    ? SCORING_WINDOW_AI_HINTS_BY_CARD.get(card.definitionId)
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
     : undefined;
   return [
     ...(hint?.roles ?? []),
@@ -701,7 +681,7 @@ function scoringWindowSignalMatches(
 }
 
 export function scoringWindowKind(params: {
-  action: LegalAction;
+  iceInstall: boolean;
   access: ReturnType<typeof scoringWindowAccessAssessment>;
   centralPressure: boolean;
   delayedExposureRisk: boolean;
@@ -745,8 +725,7 @@ export function scoringWindowKind(params: {
     return "unsafe";
   }
   if (
-    params.action.type === "install_card" &&
-    params.action.payload?.placement === "ice" &&
+    params.iceInstall &&
     (params.existingWindow === "durable" ||
       params.existingWindow === "temporary_safe") &&
     !remoteContainsScoreLine(params.projectedServer) &&
@@ -790,8 +769,7 @@ export function scoringWindowKind(params: {
     return "temporary_safe";
   }
   if (
-    params.action.type === "install_card" &&
-    params.action.payload?.placement === "ice" &&
+    params.iceInstall &&
     params.hasScorePressure &&
     params.rezBudget.affordableRelevantIceCount > 0 &&
     params.existingWindow !== "durable" &&
@@ -938,7 +916,7 @@ function visibleAgendaPoints(card: VisibleCard): number {
   }
   const demoAgendaPoints =
     card.definitionId !== undefined
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.agendaPoints
+      ? planningCardFactsByDefinitionId(card.definitionId)?.agendaPoints
       : undefined;
   if (
     typeof demoAgendaPoints === "number" &&
@@ -1104,19 +1082,7 @@ export function strongestExistingScoringRemote<TServer extends CorpServerLike>(
       input.playerView.own.credits,
     );
     const kind = scoringWindowKind({
-      action: {
-        actionId: "existing_remote_capacity",
-        label: "existing_remote_capacity",
-        type: "install_card",
-        side: "corp",
-        source: "game_rule",
-        timingPoint: "corp_action.main",
-        costs: [],
-        targetRequirements: [],
-        visibility: "private_to_actor",
-        expiresAtStateVersion: input.playerView.stateVersion,
-        payload: { placement: "ice" },
-      } as unknown as LegalAction,
+      iceInstall: true,
       access,
       centralPressure: false,
       exposureAccess: access,

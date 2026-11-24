@@ -3,13 +3,13 @@ import { describe, expect, it } from "vitest";
 
 import traceBidEconomyJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-03575-01-trace-bid-economy.json";
 import rdRepeatFreshMatchpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-03575-02-rd-repeat-fresh-matchpoint.json";
-import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
+import { bindHistoricalRunEventCadence, publishOpenTraceBid } from "./checkpoint-cadence-fixture.test-support";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
 describe("match 03575 runner decision checkpoints", () => {
   it("pays the minimal modern Trace bid", () => {
-    expectCheckpointToPass(fixture(traceBidEconomyJson));
+    expectCheckpointToPass(mutateFixture(traceBidEconomyJson, publishOpenTraceBid));
   });
 
   it("keeps the admitted remote probe under its current execution owner", () => {
@@ -44,6 +44,7 @@ describe("match 03575 runner decision checkpoints", () => {
       delete latestCorpBid.publicPayload.baseTraceStrength;
       delete latestCorpBid.publicPayload.corpBidMax;
       delete latestCorpBid.publicPayload.traceStrength;
+      publishOpenTraceBid(checkpoint);
       checkpoint.expectation = {
         choice: { mustSelectOptionIds: ["bid_1"] },
       };
@@ -62,12 +63,12 @@ describe("match 03575 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "03575-C02-STALE-RD-TOP";
         checkpoint.expectation = {
-          acceptableActions: [{ actionId: "runner.start_run.remote_1" }],
+          acceptableActions: [{ actionId: "rs.r1" }],
           planExecution: {
             acceptablePlanKinds: ["runner.contest_remote"],
             acceptableCapabilities: ["contest_remote"],
             requiredAssessmentEvidence: [
-              "runner_productive_remote_probe_converts_now:remote_1",
+              "runner_productive_remote_probe_converts_now:r1",
             ],
           },
         };
@@ -85,7 +86,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
   );
   if (checkpoint.checkpointId === "cp-03575-02-rd-repeat-fresh-matchpoint") {
     checkpoint.expectation.planExecution!.requiredAssessmentEvidence = [
-      "runner_productive_remote_probe_converts_now:remote_1",
+      "runner_productive_remote_probe_converts_now:r1",
     ];
   }
   return checkpoint;

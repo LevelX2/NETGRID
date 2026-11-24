@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -35,7 +36,7 @@ function staging(input: any) {
         .map((c: any) => [c.instanceId, c.definitionId]),
     ),
   }).find(
-    (c) => c.actionId.includes("data-wall") && c.actionId.includes(".hq."),
+    (c) => referencesDefaultDeckCard(c.actionId, 449) && c.actionId.includes(".hq."),
   )!;
   expect(candidate).toBeDefined();
   return corpQualitativeIceStagingSignal(input, candidate, "hq", undefined, {

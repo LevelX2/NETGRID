@@ -110,7 +110,8 @@ export function buildRunnerProgramInstallMemoryChoice(input: {
 
 export function parseRunnerProgramInstallMemoryContinuation(
   source: string,
-): RunnerProgramInstallMemoryContinuation {
+): RunnerProgramInstallMemoryContinuation | undefined {
+  const parts = source.split(":");
   const [
     prefix,
     kind,
@@ -118,25 +119,32 @@ export function parseRunnerProgramInstallMemoryContinuation(
     automaticFreedMemoryRaw,
     originalChoiceIdRaw,
     originalChoiceSourceRaw,
-  ] = source.split(":");
+  ] = parts;
   if (
+    parts.length !== 6 ||
     prefix !== RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX ||
     (kind !== "hidden_search" && kind !== "nonsearch" && kind !== "access") ||
     !targetCardId ||
+    !automaticFreedMemoryRaw ||
+    !/^(0|[1-9]\d*)$/.test(automaticFreedMemoryRaw) ||
     !originalChoiceIdRaw ||
     !originalChoiceSourceRaw
   )
-    throw new Error("Die MU-Installationsfortsetzung ist ungültig.");
+    return undefined;
   const automaticFreedMemory = Number(automaticFreedMemoryRaw);
-  if (!Number.isInteger(automaticFreedMemory) || automaticFreedMemory < 0)
-    throw new Error("Die automatische MU-Freimachung ist ungültig.");
-  return {
-    kind,
-    targetCardId: targetCardId as CardInstanceId,
-    automaticFreedMemory,
-    originalChoiceId: decodeURIComponent(originalChoiceIdRaw),
-    originalChoiceSource: decodeURIComponent(originalChoiceSourceRaw),
-  };
+  if (!Number.isSafeInteger(automaticFreedMemory)) return undefined;
+  try {
+    return {
+      kind,
+      targetCardId: targetCardId as CardInstanceId,
+      automaticFreedMemory,
+      originalChoiceId: decodeURIComponent(originalChoiceIdRaw),
+      originalChoiceSource: decodeURIComponent(originalChoiceSourceRaw),
+    };
+  } catch (error) {
+    if (error instanceof URIError) return undefined;
+    throw error;
+  }
 }
 
 export function resolveRunnerProgramInstallMemoryTrashSelection(input: {
@@ -156,6 +164,8 @@ export function resolveRunnerProgramInstallMemoryTrashSelection(input: {
   const continuation = parseRunnerProgramInstallMemoryContinuation(
     input.choice.source,
   );
+  if (!continuation)
+    throw new Error("Die MU-Installationsfortsetzung ist ungültig.");
   const selectedCardIds = input.selectedOptionIds.map((optionId) => {
     const option = input.choice.options.find(
       (candidate) => candidate.id === optionId,

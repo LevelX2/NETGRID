@@ -1,3 +1,5 @@
+import { isCardDefinitionId } from "@netgrid/shared";
+import { type CardDefinitionId } from "@netgrid/shared";
 import {
   CATALOG_STATUS_KEYS,
   assertCatalogPayloadSafe,
@@ -57,7 +59,8 @@ export function catalogListResponse(searchParams: URLSearchParams) {
   });
 }
 
-export function catalogDetailResponse(catalogCardId: string) {
+export function catalogDetailResponse(cardId: unknown) {
+  const catalogCardId = typeof cardId === "string" ? Number(cardId) : cardId;
   const { snapshot, snapshotHash, validation } = createCatalogRuntime();
   if (!validation.ok)
     return safeCatalogError(
@@ -65,7 +68,9 @@ export function catalogDetailResponse(catalogCardId: string) {
       "catalog_invalid",
       "Katalogdaten sind ungültig.",
     );
-  const card = getCatalogCard(snapshot, catalogCardId);
+  const card = isCardDefinitionId(catalogCardId) &&
+    (typeof cardId !== "string" || String(catalogCardId) === cardId)
+    ? getCatalogCard(snapshot, catalogCardId) : undefined;
   if (!card)
     return safeCatalogError(
       404,
@@ -158,7 +163,7 @@ function createCatalogRuntime() {
   return runtime;
 }
 
-function catalogSummaryWithAiInspector<T extends { catalogCardId: string }>(
+function catalogSummaryWithAiInspector<T extends { catalogCardId: CardDefinitionId }>(
   card: T,
 ) {
   return {
@@ -168,7 +173,7 @@ function catalogSummaryWithAiInspector<T extends { catalogCardId: string }>(
 }
 
 function catalogAiInspectorSummaryForCard(
-  catalogCardId: string,
+  catalogCardId: CardDefinitionId,
 ): CatalogAiInspectorListSummary | null {
   const summary = catalogAiHintSummaryForCardId(catalogCardId);
   if (!summary) return null;

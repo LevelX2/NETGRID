@@ -9,10 +9,47 @@ import {
   residentPlanPortfolioSnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
+import { projectRunnerRunActions } from "../../actions/run-action-projection";
+import { runnerCentralPressureRunTracePurpose } from "./central-pressure-plan-module";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
 describe("HQ success-window value belongs to its admitted route", () => {
+  it.each([
+    [13, "corp_lose_credits", 0, true],
+    [5, "runner_spend_corp_lose_credits", 3, true],
+    [27, "corp_lose_credits", 3, true],
+    [27, "corp_lose_credits", 0, false],
+  ] as const)(
+    "describes the selected HQ replacement from G%i with replacement %s and %i Corp credits",
+    (game, replacement, credits, isCreditDenial) => {
+      const fixture = JSON.parse(
+        readFileSync(
+          new URL(
+            `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r8-hq-window-g${game}.json`,
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
+      const input: AiDecisionInput = {
+        ...fixture.input,
+        ...buildAiDecisionInputDto(fixture.input),
+      };
+      input.playerView.opponent.credits = credits;
+      const projections = projectRunnerRunActions({ input });
+      const event = projections.find(
+        (projection) => projection.accessReplacement === replacement,
+      )!;
+      const basic = projections.find(
+        (projection) => projection.actionId === "rs.hq",
+      )!;
+      expect(runnerCentralPressureRunTracePurpose(input, event)).toBe(
+        isCreditDenial ? "Execute credit-denial pressure on hq." : undefined,
+      );
+      expect(runnerCentralPressureRunTracePurpose(input, basic)).toBeUndefined();
+    },
+  );
   it("retains the original basic HQ preparation preceding the actual G27 removal", () => {
     const cp = JSON.parse(
       readFileSync(
@@ -33,10 +70,10 @@ describe("HQ success-window value belongs to its admitted route", () => {
       cp.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.start_run.hq");
+    expect(decision.actionId).toBe("rs.hq");
     expect(decision.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ahq",
+      "pa7nez1ioecg7mf06q1uwqq57o",
     );
     const owner = residentPlanPortfolioSnapshot(input)!.instances.find(
       (p) => p.moduleId === "runner.pressure_central" && p.target?.id === "hq",
@@ -65,7 +102,7 @@ describe("HQ success-window value belongs to its admitted route", () => {
         ...buildAiDecisionInputDto(cp.input),
       };
       const targets = evaluateRunnerRunTargets({ input });
-      const basic = targets.find((e) => e.actionId === "runner.start_run.hq")!;
+      const basic = targets.find((e) => e.actionId === "rs.hq")!;
       const event = targets.find(
         (e) => e.targetServerId === "hq" && e.actionId !== basic.actionId,
       )!;
@@ -85,13 +122,13 @@ describe("HQ success-window value belongs to its admitted route", () => {
         input.legalActions.some((a) => a.actionId === decision.actionId),
       ).toBe(true);
       if (game === 5) {
-        expect(decision.actionId).toBe("runner.start_run.rd");
+        expect(decision.actionId).toBe("rs.rd");
         expect(
           decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-        ).toBe("plan:runner.pressure_central:central%3Ard");
+        ).toBe("pa90fufw9vc5bkshp96ztlryxl");
       } else {
         // The one-credit denial does not pay for the six-credit ICE path.
-        expect(decision.actionId).toBe("runner.gain_credit");
+        expect(decision.actionId).toBe("rb");
       }
       const owner = residentPlanPortfolioSnapshot(input)!.instances.find(
         (p) =>

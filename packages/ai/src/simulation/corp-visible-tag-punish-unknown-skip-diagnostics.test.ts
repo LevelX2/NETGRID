@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { createCorpVisibleTagPunishUnknownSkipDiagnosticsContext } from "./corp-visible-tag-punish-unknown-skip-diagnostics";
@@ -20,34 +21,64 @@ describe("corp visible tag punish unknown skip diagnostics", () => {
       "unknown_skip_unclassified_missing_evidence",
     );
   });
+
+  it("uses visible damage to identify payoffs that can empty the current hand", () => {
+    expect(
+      diagnose([], 3).corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
+    ).toBeUndefined();
+    expect(
+      diagnose([], 4, 514)
+        .corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
+    ).toBe(true);
+    expect(
+      diagnose([], 3, 514, true)
+        .corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
+    ).toBeUndefined();
+  });
 });
 
 function attributionForEvidence(evidence: string[]) {
+  return diagnose(evidence, 5).corpVisibleTagPunishUnknownSkipAttribution;
+}
+
+function diagnose(
+  evidence: string[],
+  handCount: number,
+  cardId?: number,
+  damagePrevention = false,
+) {
   const diagnostics: Record<string, unknown> = {};
   createCorpVisibleTagPunishUnknownSkipDiagnosticsContext({
-    sourceDefinitionIdForAction: () => "operation",
+    sourceDefinitionIdForAction: () => syntheticCardDefinitionId("operation"),
     isCorpTraceTagSourceAction: () => false,
   }).applyCorpVisibleTagPunishUnknownSkipDiagnostics(
     diagnostics,
     {
       playerView: {
         opponent: {
-          handCount: 5,
+          handCount,
         },
       },
     } as AiDecisionInput,
     action(),
     { reasonCode: "corp.plan.operation", evidence } as AiDecision,
-    [{ category: "damage" } as never],
+    [
+      {
+        action: action(),
+        category: "damage",
+        kind: "scorched_earth_like",
+        cardId,
+      },
+    ],
     {
       any: false,
-      damage: false,
+      damage: damagePrevention,
       flatline: false,
       link: false,
       trace: false,
     },
   );
-  return diagnostics.corpVisibleTagPunishUnknownSkipAttribution;
+  return diagnostics;
 }
 
 function action(): LegalAction {

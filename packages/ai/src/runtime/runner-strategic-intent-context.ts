@@ -9,24 +9,13 @@ type AiDecisionInputWithRunnerStrategicIntent = AiDecisionInput & {
   ownRunnerStrategicIntent?: RunnerStrategicIntentProfile;
 };
 
-export type RunnerStrategicIntentContext = {
-  runnerStrategicIntentForInput: (
-    input: AiDecisionInput,
-    deckCapabilities: DeckCapabilityProfile,
-  ) => RunnerStrategicIntentProfile;
-};
-
-export function createRunnerStrategicIntentContext(): RunnerStrategicIntentContext {
-  function runnerStrategicIntentForInput(
-    input: AiDecisionInput,
-    deckCapabilities: DeckCapabilityProfile,
-  ): RunnerStrategicIntentProfile {
-    return (
-      (input as AiDecisionInputWithRunnerStrategicIntent)
-        .ownRunnerStrategicIntent ??
-      buildRunnerStrategicIntentProfile({ deckCapabilities })
-    );
-  }
-
-  return { runnerStrategicIntentForInput };
+export function runnerStrategicIntentForInput(
+  input: AiDecisionInput,
+  deckCapabilities: DeckCapabilityProfile,
+): RunnerStrategicIntentProfile {
+  return (
+    (input as AiDecisionInputWithRunnerStrategicIntent)
+      .ownRunnerStrategicIntent ??
+    buildRunnerStrategicIntentProfile({ deckCapabilities })
+  );
 }

@@ -142,7 +142,8 @@ function transientPlanSignalInvalidReason(
   if (signal.side !== context.side) return "side_mismatch";
   if (
     !nonEmptyToken(signal.planModuleId) ||
-    !signal.planModuleId.startsWith(`${signal.side}.`)
+    !signal.planModuleId.startsWith(`${signal.side}.`) ||
+    !nonEmptyToken(signal.planModuleId.slice(signal.side.length + 1))
   ) {
     return "invalid_or_side_mismatched_plan_module";
   }
@@ -176,7 +177,9 @@ function transientPlanSignalInvalidReason(
   if (!nonEmptyToken(signal.signalId)) return "invalid_signal_id";
   if (!nonEmptyToken(signal.evidenceCode)) return "missing_evidence";
   if (!GUARANTEES.has(signal.guarantee)) return "weak_or_invalid_guarantee";
-  if (signal.target && !validTarget(signal.target)) return "invalid_target";
+  if (signal.target !== undefined && !validTarget(signal.target)) {
+    return "invalid_target";
+  }
   return undefined;
 }
 

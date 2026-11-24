@@ -7,7 +7,7 @@ import type { CreateSideCreditDemandParams } from "../../plans/credit-demand";
 export type RunnerResourceLifecycleSignal = {
   lifecycleId: string;
   sourceCardInstanceId: string;
-  definitionId: string;
+  definitionId: number;
   phase: "retain" | "leave_play";
   actionIds: string[];
   rejectedActionIds?: string[];

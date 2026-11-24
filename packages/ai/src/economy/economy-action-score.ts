@@ -224,7 +224,9 @@ function highestCompatibleCreditDemand(
     mode === "non_economy" ||
     mode === "strategic_bank_setup" ||
     mode === "automatic_credit" ||
-    (candidate.economyProjection?.netLiquidCreditGain ?? 0) <= 0
+    candidate.economyProjection?.timing !== "immediate" ||
+    candidate.economyProjection.reliability !== "guaranteed" ||
+    (candidate.economyProjection.netLiquidCreditGain ?? 0) <= 0
   ) {
     return undefined;
   }
@@ -274,7 +276,8 @@ function economyActionsAreComparable(
     leftProjection.clickCost === rightProjection.clickCost &&
     leftProjection.creditCost === rightProjection.creditCost &&
     leftProjection.creditRestriction === rightProjection.creditRestriction &&
-    leftProjection.reliability === rightProjection.reliability &&
+    leftProjection.reliability === "guaranteed" &&
+    rightProjection.reliability === "guaranteed" &&
     leftProjection.netHandDelta === rightProjection.netHandDelta &&
     leftProjection.payoutMode === rightProjection.payoutMode
   );

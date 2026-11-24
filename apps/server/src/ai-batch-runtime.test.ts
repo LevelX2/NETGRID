@@ -124,8 +124,8 @@ describe("cooperative AI batches", () => {
     );
     if (
       "error" in humanPayload ||
-      !humanPayload.pendingChoice ||
-      !humanPayload.legalActions[0]
+      !humanPayload.playerView.pendingChoice ||
+      !humanPayload.playerView.legalActions[0]
     )
       throw new Error("Missing human choice");
     const handle = createNetgridHttpServer(service, {
@@ -169,11 +169,12 @@ describe("cooperative AI batches", () => {
           matchId: human.matchId,
           side: "runner",
           sessionToken: human.hostSessionToken,
-          actionId: humanPayload.legalActions[0]!.actionId,
+          actionId: humanPayload.playerView.legalActions[0]!.actionId,
+          clientKnownMatchVersion: humanPayload.matchVersion,
           clientKnownStateVersion: humanPayload.playerView.stateVersion,
           idempotencyKey: "human-during-ai",
           selectedChoices: {
-            choiceId: humanPayload.pendingChoice!.choiceId,
+            choiceId: humanPayload.playerView.pendingChoice!.choiceId,
             selectedOptionIds: ["keep"],
           },
         });

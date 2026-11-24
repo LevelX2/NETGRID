@@ -14,6 +14,7 @@ import {
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import { runnerDefenseHandBufferFacts } from "../../runner/defense-recovery/defense-signals";
 import { runnerCostEffectiveCoverageRecovery } from "../../runner/rig-coverage/coverage-recovery";
 function fixture() {
   const cp = JSON.parse(
@@ -40,7 +41,7 @@ it("rejects false recovery savings caused by comparing differently funded trace 
     server = i.playerView.servers.find((s) => s.id === "rd")!,
     rig = i.playerView.own.rig!,
     copy = i.playerView.own.gripOrHq.find(
-      (c) => c.definitionId === "onr_v1_039_krash",
+      (c) => c.definitionId === 251,
     )!,
     target = evaluateRunnerRunTargets({
       input: i,
@@ -75,6 +76,7 @@ it("rejects false recovery savings caused by comparing differently funded trace 
       candidates,
       target,
       i.ownDeckCapabilities!,
+      runnerDefenseHandBufferFacts(i, [target], () => false).minimumHandBuffer,
     ),
   ).toBeUndefined();
   const decision = chooseAiAction(i);

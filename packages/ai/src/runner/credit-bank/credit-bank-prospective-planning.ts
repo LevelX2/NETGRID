@@ -15,7 +15,7 @@ export type ProspectivePlanningStatus =
   | "unknown";
 
 export type RunnerCreditBankProspectivePlan = {
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceCardInstanceId: string;
   owner: "runner.credit_bank";
   install: {
@@ -33,7 +33,7 @@ export type RunnerCreditBankProspectivePlan = {
         projection: ProspectivePlanningStatus;
         resolution: ProspectivePlanningStatus;
         capabilityKey: string;
-        canonicalCapabilityId: string;
+        canonicalCapabilityId: number;
         actionCost: number;
         hostedCreditsAdded: number;
         sharedLimit?: {
@@ -57,7 +57,7 @@ export type RunnerCreditBankProspectivePlan = {
         projection: ProspectivePlanningStatus;
         resolution: ProspectivePlanningStatus;
         capabilityKey: string;
-        canonicalCapabilityId: string;
+        canonicalCapabilityId: number;
       }
     | {
         kind: "automatic_lifecycle";
@@ -74,7 +74,7 @@ export type RunnerCreditBankProspectivePlan = {
  * Engine rematerializes the exact current LegalAction after installation.
  */
 export function runnerCreditBankProspectivePlan(params: {
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceCardInstanceId: string;
   currentCredits: number;
   currentActions: number;
@@ -83,7 +83,7 @@ export function runnerCreditBankProspectivePlan(params: {
   const card = planningCardByDefinitionId(params.sourceDefinitionId);
   if (card?.side !== "runner") return undefined;
 
-  const build = card.prospectiveCapabilities.capabilities.find(
+  const buildCapabilities = card.prospectiveCapabilities.capabilities.filter(
     (capability) =>
       capability.identity.kind === "keyed" &&
       capability.planningAnnotations?.some(
@@ -93,7 +93,7 @@ export function runnerCreditBankProspectivePlan(params: {
           annotation.route === "build",
       ),
   );
-  const cashOut = card.prospectiveCapabilities.capabilities.find(
+  const cashOutCapabilities = card.prospectiveCapabilities.capabilities.filter(
     (capability) =>
       capability.identity.kind === "keyed" &&
       capability.planningAnnotations?.some(
@@ -103,6 +103,10 @@ export function runnerCreditBankProspectivePlan(params: {
           annotation.route === "cash_out",
       ),
   );
+  if (buildCapabilities.length > 1 || cashOutCapabilities.length > 1)
+    return undefined;
+  const [build] = buildCapabilities;
+  const [cashOut] = cashOutCapabilities;
   const automaticPayout = automaticRunnerTurnPayout(card);
   if (cashOut?.identity.kind !== "keyed" && !automaticPayout) return undefined;
 
@@ -120,7 +124,15 @@ export function runnerCreditBankProspectivePlan(params: {
   if (!activatedBuild && !installLifecycleLoad) return undefined;
 
   const installCost = card.engine.characteristics.numeric.installCost;
-  if (installCost === null || installCost < 0) return undefined;
+  if (
+    typeof installCost !== "number" ||
+    !Number.isSafeInteger(installCost) ||
+    installCost < 0 ||
+    !Number.isSafeInteger(params.currentActions) ||
+    params.currentActions < 0 ||
+    !Number.isSafeInteger(params.currentCredits) ||
+    params.currentCredits < 0
+  ) return undefined;
   const installActionCost = 1;
   const remainingActions = Math.max(
     0,
@@ -239,7 +251,7 @@ function automaticRunnerTurnPayout(card: PlanningCard): number | undefined {
     if (payout?.kind !== "take_hosted_credits") continue;
     if (
       typeof payout.amount === "number" &&
-      Number.isFinite(payout.amount) &&
+      Number.isSafeInteger(payout.amount) &&
       payout.amount > 0
     ) {
       return payout.amount;
@@ -256,6 +268,7 @@ export function rematerializedRunnerCreditBankBuildCandidate(
   const build = plan.build;
   const matches = candidates.filter(
     (candidate) =>
+      candidate.actorSide === "runner" &&
       candidate.sourceDefinitionId === plan.sourceDefinitionId &&
       candidate.sourceCardInstanceId === plan.sourceCardInstanceId &&
       candidate.abilityId === build.canonicalCapabilityId &&
@@ -329,8 +342,7 @@ function descriptorArray(
   const value = capability.descriptors.find((descriptor) =>
     descriptor.path.endsWith(suffix),
   )?.value;
-  if (!Array.isArray(value)) return [];
-  return value.filter(isObject);
+  return Array.isArray(value) && value.every(isObject) ? value : [];
 }
 
 function descriptorObject(

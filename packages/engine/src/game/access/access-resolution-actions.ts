@@ -1,3 +1,5 @@
+import { parseRunIdToken } from "@netgrid/shared";
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import { delayedAgendaAccessReplacementEffect } from "./access-run-effects";
 import type {
   CardDefinition,
@@ -237,9 +239,13 @@ export function resolveMercenaryCurrentAccessTrashChoice(
     )
   )
     throw new Error("Die Current-Access-Trash-Choice ist nicht offen.");
-  const [, runId, sourceCardId, sourceDefinitionId] = choice.source.split(":");
+  const [, runId, sourceCardId, sourceDefinitionIdToken] =
+    choice.source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    sourceDefinitionIdToken,
+  );
   const run = mustRun(host);
-  if (run.runId !== runId)
+  if (run.runId !== parseRunIdToken(runId))
     throw new Error(
       "Die Current-Access-Trash-Choice gehoert zu einem anderen Run.",
     );
@@ -283,7 +289,7 @@ export function resolveMercenaryCurrentAccessTrashChoice(
     };
   }
 
-  const trashedDefinitionIds: string[] = [];
+  const trashedDefinitionIds: number[] = [];
   for (const cardId of selectedIds) {
     const definition = host.cards.definitionFor(cardId);
     const instance = host.cards.cardInstanceFor(cardId);

@@ -7,10 +7,10 @@ describe("Proteus family decision scenarios", () => {
     const pilotCards = inventoryData.cards
       .filter((card) => card.pilotDeckIds.length > 0)
       .map((card) => card.cardId)
-      .sort();
+      .sort((a, b) => a - b);
     const coveredCards = scenarioData.scenarios
       .flatMap((scenario) => scenario.cards)
-      .sort();
+      .sort((a, b) => a - b);
 
     expect(scenarioData.schemaVersion).toBe(
       "netgrid.proteus-ai-family-scenarios.v1",

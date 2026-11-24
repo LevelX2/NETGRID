@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -31,7 +32,7 @@ it.each([
   resetResidentPlanPortfolioMemory();
   const input = currentRuleTagRemovalCounterInput(cp.input);
   const meat = input.legalActions.find((a: { actionId: string }) =>
-    a.actionId.includes("meat-upgrade"),
+    referencesDefaultDeckCard(a.actionId, 44),
   )!;
   expect(visibleRunnerDrawTaxSourceCount(input)).toBe(0);
   expect(runnerDrawTaxLiabilityProjection(input, meat)).toMatchObject({
@@ -52,7 +53,7 @@ it.each([
   const decision = chooseAiAction(input);
   // With the now explicit two-tag quote, G29's two tags are cleared by the
   // event; G28's single tag still uses the cheaper basic action.
-  expect(decision.actionId).toBe(g === 29 ? meat.actionId : "runner.remove_tag");
+  expect(decision.actionId).toBe(g === 29 ? meat.actionId : "rm");
   expect(decision.fallbackUsed).toBe(false);
   expect(input.legalActions).toContainEqual(
     expect.objectContaining({
@@ -61,8 +62,8 @@ it.each([
     }),
   );
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-    leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+    rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+    leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
     route: {
       actionId: decision.actionId,
       stateVersion: input.playerView.stateVersion,

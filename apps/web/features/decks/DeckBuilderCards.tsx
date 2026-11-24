@@ -1,5 +1,6 @@
 "use client";
 
+import { type CardDefinitionId } from "@netgrid/shared";
 import { Trash2 } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useTranslations } from "use-intl/react";
@@ -13,7 +14,7 @@ import { DeckCardThumb } from "./DeckCardThumb";
 import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
 
 type DeckBuilderCard = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   type: string;
   subtypes: string[];
@@ -26,7 +27,7 @@ type DeckBuilderDetail = DeckBuilderCard & {
   setId: string;
   setName: string;
   collectorNumber: string;
-  definitionId?: string;
+  definitionId?: CardDefinitionId;
 };
 
 export function DeckTableLibraryCard({
@@ -259,7 +260,7 @@ export function DeckListCard({
   onSelect,
 }: {
   card: DeckBuilderCard | null;
-  cardId: string;
+  cardId: CardDefinitionId;
   detail: DeckBuilderDetail | undefined;
   quantity: number;
   onIncrement(): void;
@@ -279,7 +280,7 @@ export function DeckListCard({
     >
       <DeckCardThumb
         cardId={card?.catalogCardId ?? cardId}
-        title={card?.title ?? cardId}
+        title={card?.title ?? String(cardId)}
         {...(card?.type ? { cardType: card.type } : {})}
         {...(card ? { typeLine: formatCardTypeLine(card) } : {})}
         {...(metrics ? { metricLine: metrics } : {})}

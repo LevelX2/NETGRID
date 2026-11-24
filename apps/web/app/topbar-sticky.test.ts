@@ -10,7 +10,7 @@ const pageSource = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
 describe("global sticky header", () => {
   it("pins the topbar independently of an active match", () => {
     expect(globalsCss).toMatch(
-      /\.app\s*>\s*\.topbar\s*\{[^}]*position:\s*sticky[^}]*top:\s*0/s,
+      /\.app > \.topbar,\s*\.app > \.activeMatchChrome\s*\{[^}]*position:\s*sticky[^}]*top:\s*var\(--match-viewport-top,\s*0px\)/s,
     );
     expect(globalsCss).not.toMatch(/\.app\.activeMatch\s*>\s*\.topbar/);
   });
@@ -34,15 +34,21 @@ describe("global sticky header", () => {
     );
   });
 
-  it("disables both parts through the existing header setting", () => {
+  it("unpins the header through the existing header setting", () => {
     expect(globalsCss).toMatch(
-      /\.app\.topbarStickyDisabled\s*>\s*\.topbar\s*\{[^}]*position:\s*relative/s,
+      /\.app\.topbarStickyDisabled > \.topbar\s*\{[^}]*position:\s*relative/s,
     );
     expect(globalsCss).toMatch(
       /\.app\.topbarStickyDisabled\s+\.entryTabs\s*\{[^}]*position:\s*relative/s,
     );
     expect(pageSource).toContain(
       'className={`app ${topbarStickyEnabled ? "" : "topbarStickyDisabled"}`}',
+    );
+  });
+
+  it("lets the resource strip stick independently when the header scrolls", () => {
+    expect(globalsCss).toMatch(
+      /\.app\.topbarStickyDisabled > \.activeMatchChrome\s*\{[^}]*top:\s*calc\(var\(--match-viewport-top,\s*0px\)\s*-\s*var\(--match-topbar-height\)\)/s,
     );
   });
 });

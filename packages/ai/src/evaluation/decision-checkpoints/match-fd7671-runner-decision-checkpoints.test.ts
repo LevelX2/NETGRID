@@ -38,7 +38,7 @@ describe("match FD7671 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "FD7671-C01-NO-FOLLOW-UP-CLICK";
       checkpoint.expectation = {
-        forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+        forbiddenActions: [{ actionId: "rx" }],
       };
     });
 
@@ -51,7 +51,7 @@ describe("match FD7671 runner decision checkpoints", () => {
       const decoderId = state.runner.rig.programs.find(
         (instanceId) =>
           state.cardInstances[instanceId]?.definitionId ===
-          "onr_v1_016_cyfermaster",
+          228,
       );
       if (!decoderId) throw new Error("Expected installed Cyfermaster");
       state.runner.rig.programs = state.runner.rig.programs.filter(
@@ -67,15 +67,15 @@ describe("match FD7671 runner decision checkpoints", () => {
       checkpoint.source.findingId = "FD7671-C02-EARLY-CHECK-BEFORE-COVERAGE";
       checkpoint.expectation = {
         acceptableActions: [
-          { actionId: "runner.start_run.hq" },
+          { actionId: "rs.hq" },
           { type: "gain_credit" },
         ],
         forbiddenActions: [
-          { sourceDefinitionId: "onr_v1_099_mantis-fixer-at-large" },
+          { sourceDefinitionId: 311 },
         ],
         runTargets: [
           {
-            actionId: "runner.start_run.hq",
+            actionId: "rs.hq",
             pathPassability: "reachable",
             recommendation: "run_if_free",
           },
@@ -123,12 +123,12 @@ describe("match FD7671 runner decision checkpoints", () => {
       const pendingChoice = checkpoint.engine.testOnlyGameState.pendingChoice;
       if (!pendingChoice) throw new Error("Expected expose choice");
       pendingChoice.options = pendingChoice.options.filter(
-        (option) => option.id === "card_hidden_4ff3e639",
+        (option) => option.id === "card_h12xsk9g",
       );
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "FD7671-C04-SOLE-EXPOSE-TARGET";
       checkpoint.expectation = {
-        choice: { mustSelectOptionIds: ["card_hidden_4ff3e639"] },
+        choice: { mustSelectOptionIds: ["card_h12xsk9g"] },
       };
     });
 
@@ -146,7 +146,7 @@ function expectProspectiveCampaignTrash(
       {
         type: "trash_accessed_card",
         actionId:
-          "runner.trash_accessed_card.corp_onr_v1_337_rockerboy-promotion_1.3",
+          "rv.c3e5.3",
       },
     ],
     planExecution: { acceptablePlanKinds: ["runner.convert_run_window"] },

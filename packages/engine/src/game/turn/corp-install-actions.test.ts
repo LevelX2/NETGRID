@@ -21,7 +21,7 @@ describe("corp install main actions", () => {
     const cardId = "corp_ice_test" as CardInstanceId;
 
     expect(buildCorpNewRemoteIceInstallAction(state, cardId)).toMatchObject({
-      actionId: "corp.install_card.corp_ice_test.new_remote.corp_ice_test",
+      actionId: "cc.corp_ice_test.new_remote.corp_ice_test",
       side: "corp",
       type: "install_card",
       label: "ICE vor neuem Remote installieren",
@@ -49,13 +49,13 @@ describe("corp install main actions", () => {
           baseCost: 1,
           additionalCost: 2,
           reduction: 1,
-          reductionSourceDefinitionIds: "reducer",
-          increaseSourceDefinitionIds: "increaser",
+          reductionSourceDefinitionIds: "1864145823",
+          increaseSourceDefinitionIds: "600872093",
           totalCost: 2,
         },
       ),
     ).toMatchObject({
-      actionId: "corp.install_card.corp_ice_test.hq.corp_ice_test.2.reducer",
+      actionId: "cc.corp_ice_test.hq.corp_ice_test.2.1864145823",
       side: "corp",
       type: "install_card",
       label: "ICE vor HQ installieren",
@@ -68,8 +68,8 @@ describe("corp install main actions", () => {
         iceInstallBaseCost: 1,
         iceInstallAdditionalCost: 2,
         iceInstallReduction: 1,
-        iceInstallReductionSourceDefinitionIds: "reducer",
-        iceInstallIncreaseSourceDefinitionIds: "increaser",
+        iceInstallReductionSourceDefinitionIds: "1864145823",
+        iceInstallIncreaseSourceDefinitionIds: "600872093",
         iceInstallTotalCost: 2,
       },
       visibility: "private_to_actor",
@@ -82,9 +82,7 @@ describe("corp install main actions", () => {
       setupMode: "completed",
     });
     const cardId = Object.values(state.cardInstances).find(
-      (instance) =>
-        instance.owner === "corp" &&
-        instance.definitionId === "onr_v1_237_data-wall",
+      (instance) => instance.owner === "corp" && instance.definitionId === 449,
     )?.instanceId;
     if (!cardId) throw new Error("Expected Data Wall in the Corp deck");
 
@@ -101,13 +99,13 @@ describe("corp install main actions", () => {
     const action = buildCorpNewRemoteIceInstallAction(state, cardId);
     expect(action.payload).toMatchObject({
       postInstallRezQuoteComplete: true,
-      postInstallRezQuoteProjectedServerId: "remote_1",
+      postInstallRezQuoteProjectedServerId: "r1",
     });
     expect(
       JSON.parse(action.payload?.postInstallEffectiveRunQuoteJson as string),
     ).toMatchObject({
       iceInstanceId: cardId,
-      iceDefinitionId: "onr_v1_237_data-wall",
+      iceDefinitionId: 449,
       subroutines: expect.any(Array),
     });
   });
@@ -121,7 +119,7 @@ describe("corp install main actions", () => {
 
     expect(buildCorpNewRemoteRootInstallAction(state, cardId, 3)).toMatchObject(
       {
-        actionId: "corp.install_card.corp_root_test.new_remote.corp_root_test",
+        actionId: "cc.corp_root_test.new_remote.corp_root_test",
         side: "corp",
         type: "install_card",
         label: "Karte in neuem Remote installieren",
@@ -144,12 +142,12 @@ describe("corp install main actions", () => {
       buildCorpServerRootInstallAction(
         state,
         cardId,
-        { id: "remote_1", label: "Remote 1" },
+        { id: "r1", label: "Remote 1" },
         0,
         { replacesRootAsset: true, replacesRegion: true },
       ),
     ).toMatchObject({
-      actionId: "corp.install_card.corp_root_test.remote_1.corp_root_test",
+      actionId: "cc.corp_root_test.r1.corp_root_test",
       side: "corp",
       type: "install_card",
       label: "Karte in Remote 1 installieren",
@@ -157,7 +155,7 @@ describe("corp install main actions", () => {
       costs: [{ clicks: 1 }],
       payload: {
         cardId,
-        serverId: "remote_1",
+        serverId: "r1",
         placement: "root",
         rootReplacement: "asset_to_agenda",
         regionReplacementWarning: true,
@@ -184,7 +182,7 @@ describe("corp install main actions", () => {
       CARD_DEFINITIONS_BY_ID[state.cardInstances[agendaId]!.definitionId]!
         .advancementRequirement!;
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -197,7 +195,7 @@ describe("corp install main actions", () => {
     const unbounded = buildCorpServerRootInstallAction(
       state,
       agendaId,
-      { id: "remote_1", label: "Remote 1" },
+      { id: "r1", label: "Remote 1" },
       0,
     );
     expect(unbounded.payload).toMatchObject({
@@ -205,7 +203,7 @@ describe("corp install main actions", () => {
         CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
       agendaInstallScoreHorizonQuoteComplete: false,
       agendaInstallScoreHorizonQuoteCardId: agendaId,
-      agendaInstallScoreHorizonQuoteTargetServerId: "remote_1",
+      agendaInstallScoreHorizonQuoteTargetServerId: "r1",
       agendaInstallScoreHorizonQuoteAdvancementRequirement: requirement,
       agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 0,
       agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn:
@@ -219,7 +217,7 @@ describe("corp install main actions", () => {
     const bounded = buildCorpServerRootInstallAction(
       state,
       agendaId,
-      { id: "remote_1", label: "Remote 1" },
+      { id: "r1", label: "Remote 1" },
       0,
     );
     expect(bounded.payload).toMatchObject({

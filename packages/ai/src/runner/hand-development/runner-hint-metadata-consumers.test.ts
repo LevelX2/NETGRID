@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { describe, expect, it } from "vitest";
 import { evaluateRunnerHandDevelopment } from "./hand-development-evaluation";
 import { readFileSync } from "node:fs";
@@ -33,7 +34,7 @@ describe("Runner hint metadata consumers", () => {
       checkpoint.runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).not.toContain("startup-immolator");
+    expect(referencesDefaultDeckCard(decision.actionId, 280)).toBe(false);
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
     ).not.toContain("startup-immolator");
@@ -43,7 +44,7 @@ describe("Runner hint metadata consumers", () => {
     "keeps post-break ICE payment out of income setup at %i credits",
     (credits) => {
       const startup = visibleCard("startup", {
-        definitionId: "onr_v1_068_startup-immolator",
+        definitionId: 280,
         title: "Startup Immolator",
         type: "program",
         installCost: 0,
@@ -76,7 +77,7 @@ describe("Runner hint metadata consumers", () => {
   );
   it("recognizes Microtech Backup Drive as program-protection support", () => {
     const backupDrive = visibleCard("microtech-backup-drive", {
-      definitionId: "onr_v1_131_microtech-backup-drive",
+      definitionId: 343,
       title: "Microtech Backup Drive",
       type: "hardware",
       installCost: 0,

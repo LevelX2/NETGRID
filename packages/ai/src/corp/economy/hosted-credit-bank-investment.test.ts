@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { corpHostedBankLoadMatches } from "./hosted-credit-bank-facts";
 import { afterEach, describe, expect, it } from "vitest";
 import {
@@ -10,9 +11,9 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { corpHostedBankInvestments } from "./hosted-credit-bank-investment";
 
-const DEPARTMENT = "onr_v1_318_department-of-truth-enhancement";
-const LOAD = `${DEPARTMENT}:abilities_activated_corp_main_add_hosted_credits`;
-const CASH = `${DEPARTMENT}:abilities_activated_corp_main_take_hosted_credits`;
+const DEPARTMENT = 530;
+const LOAD = canonicalCapabilityId(DEPARTMENT, capabilityKey("abilities_activated_corp_main_add_hosted_credits"));
+const CASH = canonicalCapabilityId(DEPARTMENT, capabilityKey("abilities_activated_corp_main_take_hosted_credits"));
 afterEach(resetResidentPlanPortfolioMemory);
 
 function fixture(
@@ -86,12 +87,12 @@ function fixture(
       source: "future-ice",
       payload: {
         cardId: "future-ice",
-        sourceDefinitionId: "onr_v1_254_liche",
+        sourceDefinitionId: 466,
         serverId: "new_remote",
         placement: "ice",
         postInstallRezQuoteCardId: "future-ice",
         postInstallRezQuoteTargetServerId: "new_remote",
-        postInstallRezQuoteProjectedServerId: "remote_2",
+        postInstallRezQuoteProjectedServerId: "r2",
         postInstallRezQuoteExpiresAtStateVersion: 1,
         postInstallRezQuoteCostKind: "fixed",
         postInstallRezQuoteBaseCredits: params.futureCost ?? 14,
@@ -104,7 +105,7 @@ function fixture(
   const input = aiInput("corp", [
     load,
     ...(stored > 0 ? [cash] : []),
-    legalAction("corp.gain_credit", "corp", "gain_credit", "1 Credit", {
+    legalAction("cb", "corp", "gain_credit", "1 Credit", {
       credits: 0,
       clicks: 1,
     }),
@@ -115,13 +116,13 @@ function fixture(
   input.playerView.own.stackOrRdCount = 20;
   input.playerView.own.gripOrHq = [
     visibleCard("future-ice", "corp", "ice", {
-      definitionId: "onr_v1_254_liche",
+      definitionId: 466,
       rezCost: 14,
     }),
   ];
   input.playerView.opponent.rig = [];
   input.playerView.servers.push({
-    id: "remote_1",
+    id: "r1",
     label: "Remote 1",
     root: [
       visibleCard("department", "corp", "asset", {
@@ -135,13 +136,13 @@ function fixture(
         ? []
         : [
             visibleCard("wall", "corp", "ice", {
-              definitionId: "onr_v1_237_data-wall",
+              definitionId: 449,
               rezzed: true,
               strength: 2,
               subtypes: ["wall"],
               effectiveRunQuote: {
                 iceInstanceId: "wall",
-                iceDefinitionId: "onr_v1_237_data-wall",
+                iceDefinitionId: 449,
                 effectiveStrength: 2,
                 subroutines: [{ id: "wall:etr", type: "end_the_run" }],
               },
@@ -258,7 +259,7 @@ describe("Department demand-bound multi-turn investment", () => {
           kind: "parent_funding",
           needId: "remote-budget",
           parentNeedId: "remote-budget",
-          parentPlanInstanceId: "plan:corp.establish_scoring_remote:future",
+          parentPlanInstanceId: "p3ssvqclmebloi1upe4m6xfsjs", parentPlanModuleId: "corp.establish_scoring_remote",
           gap: 6,
           actionIds: ["department-cash"],
           parentPriorityClass: "P6",
@@ -284,7 +285,7 @@ describe("Department demand-bound multi-turn investment", () => {
             needId: "defense-now",
             parentNeedId: "defense-now",
             parentPlanInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att", parentPlanModuleId: "corp.defend_servers",
             gap: 6,
             actionIds: ["department-cash"],
             parentPriorityClass: "P2",
@@ -305,7 +306,7 @@ describe("Department demand-bound multi-turn investment", () => {
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.economy:economy-hosted-bank-investment%3Adepartment",
+        "par3l96pmrdm5ql6fdoite25y8",
       route: { actionId: "department-load", stateVersion: 1 },
     });
   });

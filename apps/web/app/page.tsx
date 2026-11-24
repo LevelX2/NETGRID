@@ -1,5 +1,10 @@
 "use client";
-import { nextChronicleWidth, type ChronicleWidth } from "../features/chronicle/chronicle-width";
+
+import { type SelectionId } from "../lib/presented-player-view";
+import {
+  nextChronicleWidth,
+  type ChronicleWidth,
+} from "../features/chronicle/chronicle-width";
 import { localizedDeckValidationIssues } from "../i18n/deck-validation";
 
 import {
@@ -52,33 +57,9 @@ import type {
   MouseEvent as ReactMouseEvent,
   ReactNode,
 } from "react";
-import type {
-  ApiClientGameMode,
-  ApiCreateMatchResponse,
-  ApiGameResultSummary,
-  ApiJoinMatchResponse,
-  ApiLifecycleResultSummary,
-  ApiLobbyParticipantPayload,
-  ApiLobbyPayload,
-  ApiMatchCardPool,
-  ApiMatchStartLobbyPayload,
-  ApiMatchStatus,
-  ApiPlayerClockSnapshot,
-  ApiRecentResultEntry,
-  ApiSeriesResultSummary,
-  ApiServerMessage,
-  ApiSidePayload,
-  ApiUserErrorPayload,
-  LegalAction,
-  PlayerView,
-  PublicGameEvent,
-  Side,
-  TraceRulesProfile,
-  VisibleCard,
-  VisibleRunnerPaymentSupportAbility,
-  Winner,
-} from "@netgrid/shared";
-import { isApiUserErrorCode } from "@netgrid/shared";
+import type { ApiClientGameMode, ApiCreateMatchResponse, ApiGameResultSummary, ApiJoinMatchResponse, ApiLifecycleResultSummary, ApiLobbyParticipantPayload, ApiLobbyPayload, ApiMatchCardPool, ApiMatchStartLobbyPayload, ApiMatchStatus, ApiPlayerClockSnapshot, ApiRecentResultEntry, ApiSeriesResultSummary, ApiServerMessage, ApiSidePayload, ApiUserErrorPayload, MatchEventId, PublicGameEvent, Side, TraceRulesProfile, VisibleCard, VisibleRunnerPaymentSupportAbility, Winner } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../lib/presented-player-view";
+import { isApiUserErrorCode, isMatchOfferId } from "@netgrid/shared";
 import { formatChronicleEvent, type ChronicleTranslate } from "./chronicle";
 import {
   deckAgendaStatusForEditor,
@@ -87,6 +68,7 @@ import {
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
+  coalesceActionCues,
   damageAudioCueFromPublicPayload,
   deriveDamageImpactCues,
   deriveOpponentActionCues,
@@ -99,7 +81,6 @@ import {
 import {
   actionCueAfterAiAdvanceRequest,
   accessPresentationOwnsActionCue,
-  coalesceAccessActionCues,
   interactionPresentationBlocksAi,
   latestStolenAgendaEvent,
   observerAccessAutoDismissMs,
@@ -111,6 +92,7 @@ import {
 import {
   confirmedNextAccessAction,
   shouldKeepAccessRevealOpen,
+  type AccessPresentationId,
   type PendingAccessContinuation,
 } from "./access-reveal-ui";
 import { matchOverlayPresentation } from "./match-overlay-presentation";
@@ -214,10 +196,10 @@ import {
   loadRecentSession,
   loadStoredSession,
   persistSession,
-  rememberRecentSession,
   removeRecentSession,
   storedSessionMatches,
   subscribeToRecoverableSessionChanges,
+  updateSessionRecovery,
   type RecentSessionInfo,
   type SessionInfo,
 } from "./session-recovery";
@@ -226,7 +208,7 @@ import {
   preparedAiDecisionDebugTrace,
   retainPreparedAiDecisionDebugTurnPlanTrace,
 } from "./ai-decision-debug-prepared-trace";
-import type { MaintenanceAiTraceDetail } from "./maintenance";
+import type { AiDecisionDebugTrace } from "./maintenance";
 import {
   ACTION_CUE_SETTINGS_STORAGE_KEY,
   ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
@@ -296,6 +278,11 @@ import {
 import { ActiveMatchWorkspaceArea } from "../features/app-shell/ActiveMatchWorkspaceArea";
 import { ActiveMatchTopbar } from "../features/app-shell/ActiveMatchTopbar";
 import { useObservedElementHeight } from "../features/app-shell/useObservedElementHeight";
+import {
+  ActiveMatchChrome,
+  matchViewportTop,
+  observeMatchViewport,
+} from "../features/app-shell/ActiveMatchChrome";
 import {
   ConfirmationDialog,
   type ConfirmationDialogRequest,
@@ -405,6 +392,7 @@ import {
 } from "../features/game-board/RunnerBoardStrips";
 import { ActiveServerGrid } from "../features/game-board/ActiveServerGrid";
 import { ActiveRunnerZoneBoard } from "../features/game-board/ActiveRunnerZoneBoard";
+import { ScoredAgendaActions } from "../features/game-board/ScoredAgendaActions";
 import { ScoredAgendaOverlay } from "../features/game-board/ScoredAgendaOverlay";
 import { RunTimelineOverlay } from "../features/game-board/RunTimelineOverlay";
 import { SpecialZonesStrip } from "../features/game-board/SpecialZonesStrip";
@@ -435,6 +423,7 @@ import {
   accessRevealFromLatestEvent,
   archivesRevealFromLatestEvent,
   exposeReviewFromLatestEvent,
+  exposedBoardIceForReview,
   gypsyScheduleAnalyzerRevealFromPendingChoice,
   hqAgendaRevealFromLatestEvent,
   retainedArchivesRevealEvent,
@@ -456,9 +445,7 @@ import { PublicGamesPanel } from "../features/games/PublicGamesPanel";
 import { shouldRefreshPublicGames } from "../features/games/public-games-model";
 import {
   effectiveAiTurnPresentation,
-  removePendingUndo,
-  withPlayerView,
-  withVersionedLegalActions,
+  latestSideUpdate,
 } from "../features/match-session/client-payload-helpers";
 import {
   noticeAfterActionReceipt,
@@ -491,12 +478,10 @@ import {
   playerSlotForSide,
   resultReasonLabel,
   seriesStatusText,
-  shouldForgetRecoveryStatus,
 } from "../features/match-start/lobby-format";
 import {
   formatCardCount,
   opponentSide,
-  sideFromPublicPayload,
   sideLabel,
   sideStatusLineForView,
   turnActionHeaderLabel,
@@ -835,16 +820,16 @@ export default function Page() {
   const [undoPanelOpen, setUndoPanelOpen] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventIds, setDismissedAccessEventIds] = useState<
-    string[]
+    AccessPresentationId[]
   >([]);
   const [pendingAccessPresentationEvents, setPendingAccessPresentationEvents] =
     useState<PublicGameEvent[]>([]);
   const [dismissedExposeReviewEventId, setDismissedExposeReviewEventId] =
-    useState<string | null>(null);
+    useState<MatchEventId | null>(null);
   const [
     dismissedSuccessfulRunOutcomeEventId,
     setDismissedSuccessfulRunOutcomeEventId,
-  ] = useState<string | null>(null);
+  ] = useState<MatchEventId | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
@@ -860,7 +845,9 @@ export default function Page() {
   const [cardImageSkinSettingsLoaded, setCardImageSkinSettingsLoaded] =
     useState(false);
   const [chronicleDetailMode, setChronicleDetailMode] =
-    useState<ChronicleDetailMode>(() => normalizeChronicleDetailMode(undefined));
+    useState<ChronicleDetailMode>(() =>
+      normalizeChronicleDetailMode(undefined),
+    );
   const [chronicleDetailModeLoaded, setChronicleDetailModeLoaded] =
     useState(false);
 
@@ -947,7 +934,7 @@ export default function Page() {
   const [preparedAiDecisionDebug, setPreparedAiDecisionDebug] =
     useState<PreparedAiDecisionDebug | null>(null);
   const [aiDecisionDebugTurnPlanTrace, setAiDecisionDebugTurnPlanTrace] =
-    useState<MaintenanceAiTraceDetail | null>(null);
+    useState<AiDecisionDebugTrace | null>(null);
   const [aiDecisionDebugPreview, setAiDecisionDebugPreview] =
     useState<AiDecisionPreview | null>(null);
   const [aiDecisionDebugPreviewError, setAiDecisionDebugPreviewError] =
@@ -957,20 +944,21 @@ export default function Page() {
   const [statusPanelsVisible, setStatusPanelsVisible] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
   const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{
-    choiceId: string;
-    selectedOptionIds: string[];
+    choiceId: SelectionId;
+    selectedOptionIds: SelectionId[];
   } | null>(null);
   const [fieldCardChoiceSelection, setFieldCardChoiceSelection] = useState<{
-    choiceId: string;
-    selectedOptionIds: string[];
+    choiceId: SelectionId;
+    selectedOptionIds: SelectionId[];
   } | null>(null);
   const [cuePosition, setCuePosition] =
     useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
   const [cuePositionLoaded, setCuePositionLoaded] = useState(false);
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] =
     useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
-  const [cardTooltipMode, setCardTooltipMode] =
-    useState<CardTooltipMode>(() => normalizeCardTooltipMode(undefined));
+  const [cardTooltipMode, setCardTooltipMode] = useState<CardTooltipMode>(() =>
+    normalizeCardTooltipMode(undefined),
+  );
   const [
     translateCardRulesToSelectedLanguage,
     setTranslateCardRulesToSelectedLanguage,
@@ -1009,9 +997,9 @@ export default function Page() {
   const lastAnimatedMatchIdRef = useRef<string | null>(null);
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
-  const lastSeenCueEventIdRef = useRef<string | null>(null);
-  const lastSeenAccessPresentationEventIdRef = useRef<string | null>(null);
-  const lastSeenExposeHighlightEventIdRef = useRef<string | null>(null);
+  const lastSeenCueEventIdRef = useRef<MatchEventId | null>(null);
+  const lastSeenAccessPresentationEventIdRef = useRef<MatchEventId | null>(null);
+  const lastSeenExposeHighlightEventIdRef = useRef<MatchEventId | null>(null);
   const exposedCardHighlightTimerRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -1035,6 +1023,7 @@ export default function Page() {
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const hasStoredMatchStartSettingsRef = useRef(false);
   const statusPanelsRef = useRef<HTMLElement | null>(null);
+  const resourceStripRef = useRef<HTMLElement | null>(null);
   const lastActionSlotTurnRef = useRef<{
     matchId: string;
     activeSide: Side;
@@ -1138,11 +1127,7 @@ export default function Page() {
     catalogDetailsById,
     catalogPanelProps,
     ensureCatalogDetails,
-  } = useCatalogWorkspace(
-    payload
-      ? { eventTail: payload.eventTail, playerView: payload.playerView }
-      : null,
-  );
+  } = useCatalogWorkspace(payload?.playerView);
 
   useEffect(() => {
     lobbyRef.current = lobby;
@@ -2020,7 +2005,7 @@ export default function Page() {
     const decisionKey = matchTimerDecisionKey({
       matchId: payload.matchId,
       playerView: activeView,
-      legalActions: payload.legalActions,
+      legalActions: payload.playerView.legalActions,
       winner: payload.winner,
     });
     const now = Date.now();
@@ -2043,7 +2028,12 @@ export default function Page() {
       }
       return current;
     });
-  }, [activeView, payload?.legalActions, payload?.matchId, payload?.winner]);
+  }, [
+    activeView,
+    payload?.playerView.legalActions,
+    payload?.matchId,
+    payload?.winner,
+  ]);
 
   useEffect(() => {
     if (!payload || !activeView) return;
@@ -2061,7 +2051,7 @@ export default function Page() {
       : null;
   const activeDiscardOptionIds = useMemo(
     () =>
-      new Set(activeDiscardChoice?.options.map((option) => option.id) ?? []),
+      new Set<SelectionId>(activeDiscardChoice?.options.map((option) => option.id) ?? []),
     [activeDiscardChoice],
   );
   const currentDiscardChoiceSelection = discardChoiceSelection;
@@ -2083,7 +2073,7 @@ export default function Page() {
       : null;
   const activeFieldCardChoiceOptionIds = useMemo(
     () =>
-      new Set(
+      new Set<SelectionId>(
         activeFieldCardChoice?.options
           .filter((option) => option.selectable !== false)
           .map((option) => option.id) ?? [],
@@ -2103,28 +2093,32 @@ export default function Page() {
     [selectedFieldCardChoiceOptionIds.join("|")],
   );
   const activeFieldCardChoiceAction = activeFieldCardChoice
-    ? payload?.legalActions.find(
+    ? payload?.playerView.legalActions.find(
         (action) =>
           action.type === "resolve_choice" &&
           action.payload?.choiceId === activeFieldCardChoice.choiceId,
       )
     : undefined;
-  const latestEventId = payload?.eventTail.at(-1)?.eventId;
+  const latestEventId = payload?.playerView.publicEvents.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
+  const cardSetsById = useMemo(
+    () => Object.fromEntries(allCatalogCards.map((card) => [card.catalogCardId, card])),
+    [allCatalogCards],
+  );
   const selectionCardPool = mode === "join" ? joinCardPool : matchCardPool;
   const runnerSnapshots = deckSnapshots.filter(
     (snapshot) =>
       selectionCardPool !== undefined &&
       snapshot.side === "runner" &&
       snapshot.validation.ok &&
-      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool),
+      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool, cardSetsById),
   );
   const corpSnapshots = deckSnapshots.filter(
     (snapshot) =>
       selectionCardPool !== undefined &&
       snapshot.side === "corp" &&
       snapshot.validation.ok &&
-      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool),
+      snapshotAllowedForMatchCardPool(snapshot, selectionCardPool, cardSetsById),
   );
   const runnerDeckSlotSnapshots = attachStandardDeckGuides(
     runnerSnapshots,
@@ -2137,7 +2131,7 @@ export default function Page() {
   const matchStartLocalDecks = localDecks.filter(
     (deck) =>
       selectionCardPool !== undefined &&
-      editableDeckAllowedForMatchCardPool(deck, selectionCardPool),
+      editableDeckAllowedForMatchCardPool(deck, selectionCardPool, cardSetsById),
   );
   const defaultCorpSnapshot =
     corpSnapshots.find(
@@ -2251,7 +2245,7 @@ export default function Page() {
         (snapshot) =>
           snapshot.side === side &&
           snapshot.validation.ok &&
-          snapshotAllowedForMatchCardPool(snapshot, cardPool),
+          snapshotAllowedForMatchCardPool(snapshot, cardPool, cardSetsById),
       );
       const defaultSnapshot =
         snapshots.find((snapshot) =>
@@ -2281,7 +2275,7 @@ export default function Page() {
         (deck) =>
           deck.deckId === selection.cloudDeckId &&
           deck.side === side &&
-          editableDeckAllowedForMatchCardPool(deck, cardPool),
+          editableDeckAllowedForMatchCardPool(deck, cardPool, cardSetsById),
       );
       if (!accountDeck) return fallback();
       if (side === "runner") {
@@ -2298,7 +2292,7 @@ export default function Page() {
         snapshot.sourceDeckId === selection.standardDeckId &&
         snapshot.side === side &&
         snapshot.validation.ok &&
-        snapshotAllowedForMatchCardPool(snapshot, cardPool),
+        snapshotAllowedForMatchCardPool(snapshot, cardPool, cardSetsById),
     );
     if (!standard) return fallback();
     if (side === "runner") {
@@ -2353,6 +2347,7 @@ export default function Page() {
       !matchStartSettingsLoaded ||
       !localDecksLoaded ||
       !standardDecksLoaded ||
+      allCatalogCards.length === 0 ||
       accountMatchStartPreferencesLoadedFor === accountId
     )
       return;
@@ -2385,6 +2380,7 @@ export default function Page() {
     accountMatchStartPreferencesLoadedFor,
     accountSession.account?.accountId,
     accountSession.status,
+    allCatalogCards.length,
     localDecksLoaded,
     matchStartSettingsLoaded,
     standardDecksLoaded,
@@ -2569,13 +2565,15 @@ export default function Page() {
     humanOpponentIsAi &&
     humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
       payload?.playerView,
-      payload?.legalActions ?? [],
+      payload?.playerView.legalActions ?? [],
       corpRunAutoPassActive,
     ),
   );
   const hasPendingAiCue =
     currentActionCue?.source === "ai" ||
     actionCueQueue.some((cue) => cue.source === "ai");
+  const traceTagConfirmationRequired =
+    currentActionCue?.traceTagOutcome?.pending === false;
   const aiPacingFallbackDelay = aiPacingFallbackDelayMs(
     localAiPacingMode,
     hasPendingAiCue,
@@ -2594,6 +2592,7 @@ export default function Page() {
   const showAiPacingFallbackControls = Boolean(
     aiTurnPresentation?.canAdvanceAi &&
     !matchEnded &&
+    !traceTagConfirmationRequired &&
     (isAiVsAiMatch ||
       (aiPacingFallbackDelay !== null &&
         (aiPacingFallbackDelay === 0 || aiPacingFallbackVisible))),
@@ -2790,7 +2789,7 @@ export default function Page() {
       ? fieldCardChoiceOptionsForCard(activeFieldCardChoice, activeView, card)
       : [];
   };
-  const toggleDiscardOption = (optionId: string) => {
+  const toggleDiscardOption = (optionId: SelectionId) => {
     if (!activeDiscardChoice) return;
     const required = activeDiscardChoice.maxSelections;
     setDiscardChoiceSelection((current) => {
@@ -2811,7 +2810,7 @@ export default function Page() {
       };
     });
   };
-  const toggleFieldCardChoiceCardOptions = (optionIds: string[]) => {
+  const toggleFieldCardChoiceCardOptions = (optionIds: SelectionId[]) => {
     if (!activeFieldCardChoice || optionIds.length === 0) return;
     const minSelections = Math.max(
       0,
@@ -2929,7 +2928,7 @@ export default function Page() {
   };
   const successfulRunOutcome = payload
     ? latestSuccessfulRunOutcomePresentation(
-        payload.eventTail,
+        payload.playerView.publicEvents,
         dismissedSuccessfulRunOutcomeEventId,
       )
     : null;
@@ -2938,11 +2937,14 @@ export default function Page() {
     ? (catalogDetailsById[successfulRunOutcome.sourceDefinitionId] ?? null)
     : null;
   const latestAccessRevealEvent = payload
-    ? latestRetainableAccessRevealEvent(payload.eventTail)
+    ? latestRetainableAccessRevealEvent(payload.playerView.publicEvents)
     : null;
   const lastDismissedAccessEventId = dismissedAccessEventIds.at(-1) ?? null;
   const retainedAccessReveal = payload
-    ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId)
+    ? retainedAccessRevealEvent(
+        payload.playerView.publicEvents,
+        lastDismissedAccessEventId,
+      )
     : null;
   const runnerWonByAgendaPoints = Boolean(
     resultSummary?.winner === "runner" &&
@@ -2950,7 +2952,10 @@ export default function Page() {
   );
   const concludingAgendaStealEvent =
     matchEnded && runnerWonByAgendaPoints && payload
-      ? latestStolenAgendaEvent(payload.eventTail, dismissedAccessEventIds)
+      ? latestStolenAgendaEvent(
+          payload.playerView.publicEvents,
+          dismissedAccessEventIds,
+        )
       : null;
   const concludingAgendaReveal = payload
     ? accessRevealFromLatestEvent(
@@ -2958,7 +2963,7 @@ export default function Page() {
         catalogDetailsById,
         [],
         payload.side,
-        payload.eventTail,
+        payload.playerView.publicEvents,
       )
     : null;
   const queuedAccessRevealEvent =
@@ -2977,7 +2982,10 @@ export default function Page() {
     latestAccessRevealEvent?.eventId === accessRevealEvent.eventId,
   );
   const hqAgendaRevealEvent = payload
-    ? retainedHqAgendaRevealEvent(payload.eventTail, dismissedAccessEventIds)
+    ? retainedHqAgendaRevealEvent(
+        payload.playerView.publicEvents,
+        dismissedAccessEventIds,
+      )
     : null;
   const hqAgendaReveal = payload
     ? hqAgendaRevealFromLatestEvent(
@@ -2987,7 +2995,10 @@ export default function Page() {
       )
     : null;
   const archivesRevealEvent = payload
-    ? retainedArchivesRevealEvent(payload.eventTail, dismissedAccessEventIds)
+    ? retainedArchivesRevealEvent(
+        payload.playerView.publicEvents,
+        dismissedAccessEventIds,
+      )
     : null;
   const archivesReveal = payload
     ? archivesRevealFromLatestEvent(
@@ -3000,9 +3011,9 @@ export default function Page() {
     ? gypsyScheduleAnalyzerRevealFromPendingChoice(
         payload.playerView,
         catalogDetailsById,
-        payload.legalActions,
+        payload.playerView.legalActions,
         payload.side,
-        payload.eventTail,
+        payload.playerView.publicEvents,
       )
     : null;
   const securityPurgeInstallChoiceActive =
@@ -3011,7 +3022,7 @@ export default function Page() {
     ) === true;
   const securityPurgeRevealEvent = payload
     ? retainedSecurityPurgeRevealEvent(
-        payload.eventTail,
+        payload.playerView.publicEvents,
         dismissedAccessEventIds,
         {
           suppressTargetChoiceOpened: securityPurgeInstallChoiceActive,
@@ -3030,9 +3041,9 @@ export default function Page() {
       ? accessRevealFromCurrentRun(
           payload.playerView,
           catalogDetailsById,
-          payload.legalActions,
+          payload.playerView.legalActions,
           payload.side,
-          payload.eventTail,
+          payload.playerView.publicEvents,
           accessRevealEvent,
         )
       : null;
@@ -3040,9 +3051,11 @@ export default function Page() {
     ? accessRevealFromLatestEvent(
         accessRevealEvent ?? undefined,
         catalogDetailsById,
-        accessRevealUsesCurrentState && !matchEnded ? payload.legalActions : [],
+        accessRevealUsesCurrentState && !matchEnded
+          ? payload.playerView.legalActions
+          : [],
         payload.side,
-        payload.eventTail,
+        payload.playerView.publicEvents,
       )
     : null;
   const accessReveal =
@@ -3070,7 +3083,7 @@ export default function Page() {
     terminalAccessFlatline: accessRevealEvent?.publicPayload.flatline === true,
   });
   const showAccessReveal = overlayPresentation.showAccessReveal;
-  const dismissAccessPresentation = useCallback((eventId: string) => {
+  const dismissAccessPresentation = useCallback((eventId: AccessPresentationId) => {
     setPendingAccessPresentationEvents((events) =>
       dismissPendingAccessPresentationEvent(events, eventId),
     );
@@ -3095,13 +3108,11 @@ export default function Page() {
     accessReveal?.kind === "access" &&
     accessReveal.outcomeStatus,
   );
-  const interactionPresentationBlocked = interactionPresentationBlocksAi({
-    damageOpen: Boolean(currentDamageImpact),
-    accessOutcomeOpen: accessOutcomeAwaitingConfirmation,
-    successfulRunOutcomeOpen: showSuccessfulRunOutcome,
-  });
   const exposeReviewEvent = payload
-    ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId)
+    ? retainedExposeReviewEvent(
+        payload.playerView.publicEvents,
+        dismissedExposeReviewEventId,
+      )
     : null;
   const exposeReview = payload
     ? exposeReviewFromLatestEvent(
@@ -3111,7 +3122,7 @@ export default function Page() {
       )
     : null;
   const viewedApproachIceId = approachIceExposeViewingIceId(
-    payload?.legalActions ?? [],
+    payload?.playerView.legalActions ?? [],
   );
   const viewedInstalledExposeCardId = installedCorpExposeReviewCardId(
     activeView?.pendingChoice,
@@ -3125,6 +3136,20 @@ export default function Page() {
     !viewedApproachIceId &&
     !viewedInstalledExposeCardId,
   );
+  const outermostIceReviewOpen = Boolean(
+    activeMatchIsGame && showExposeReview && exposeReview?.outermostIce,
+  );
+  const exposedBoardIce =
+    outermostIceReviewOpen && exposeReview && activeView
+      ? exposedBoardIceForReview(exposeReview, activeView)
+      : null;
+  const interactionPresentationBlocked =
+    outermostIceReviewOpen ||
+    interactionPresentationBlocksAi({
+      damageOpen: Boolean(currentDamageImpact),
+      accessOutcomeOpen: accessOutcomeAwaitingConfirmation,
+      successfulRunOutcomeOpen: showSuccessfulRunOutcome,
+    });
   const showResultModal = overlayPresentation.showResultModal;
   const canReturnToStart = Boolean(
     payload &&
@@ -3159,7 +3184,7 @@ export default function Page() {
           ),
           scopeLabel: payload.winner
             ? gameT("gameEnded")
-            : matchTimerScopeLabel(activeView, payload.legalActions),
+            : matchTimerScopeLabel(activeView, payload.playerView.legalActions),
           graceLabel: playerClockGraceDisplay(
             payload.playerClock,
             matchClockNowMs,
@@ -3171,7 +3196,7 @@ export default function Page() {
         }
       : null;
   useEffect(() => {
-    if (!activeMatchIsGame) {
+    if (!activeMatchIsGame || resourceStripMode !== "auto") {
       setStatusPanelsVisible(true);
       return;
     }
@@ -3180,34 +3205,36 @@ export default function Page() {
       setStatusPanelsVisible(true);
       return;
     }
+    const resourceRows = Array.from(
+      statusPanels.querySelectorAll(".sideStatusPanel > .stats"),
+    );
     let animationFrame = 0;
     const topOffset = topbarStickyEnabled ? topbarHeightPx : 0;
-    const hideBelow = topOffset + 24;
-    const showAbove = topOffset + 72;
     const updateVisibility = () => {
       animationFrame = 0;
-      const rect = statusPanels.getBoundingClientRect();
-      setStatusPanelsVisible((current) => {
-        if (current && rect.bottom <= hideBelow) return false;
-        if (!current && rect.bottom >= showAbove) return true;
-        return current;
-      });
+      const resourceRowsBottom = Math.max(
+        ...resourceRows.map((row) => row.getBoundingClientRect().bottom),
+      );
+      const stripHeight = resourceStripRef.current?.offsetHeight ?? 0;
+      // A returning row counts as visible once it clears the pinned strip.
+      const visibleTop = matchViewportTop() + topOffset + stripHeight;
+      setStatusPanelsVisible(
+        (current) => resourceRowsBottom > visibleTop + (current ? 0 : 8),
+      );
     };
     const scheduleUpdate = () => {
       if (animationFrame) return;
       animationFrame = window.requestAnimationFrame(updateVisibility);
     };
-    scheduleUpdate();
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate);
+    const stopObserving = observeMatchViewport(scheduleUpdate);
     return () => {
+      stopObserving();
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
-      window.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
     };
   }, [
     activeMatchIsGame,
     payload?.matchId,
+    resourceStripMode,
     topbarHeightPx,
     topbarStickyEnabled,
   ]);
@@ -3217,18 +3244,18 @@ export default function Page() {
     !matchEnded &&
     (activeView?.pendingChoice ||
       (activeView?.activeSide === activeView?.side &&
-        payload?.legalActions.length)),
+        payload?.playerView.legalActions.length)),
   );
   const legalActionSplit = useMemo(
-    () => splitLegalActions(payload?.legalActions ?? []),
-    [payload?.legalActions],
+    () => splitLegalActions(payload?.playerView.legalActions ?? []),
+    [payload?.playerView.legalActions],
   );
   const runActions = useMemo(
     () =>
       activeView
-        ? runWindowActions(activeView, payload?.legalActions ?? [])
+        ? runWindowActions(activeView, payload?.playerView.legalActions ?? [])
         : [],
-    [activeView, payload?.legalActions],
+    [activeView, payload?.playerView.legalActions],
   );
   const selectedPanelContext =
     selectedActionContext?.kind === "server" ? selectedActionContext : null;
@@ -3488,8 +3515,8 @@ export default function Page() {
     try {
       const preview = await fetchAiDecisionPreview(session, payload);
       if (aiDecisionDebugPreviewRequestKeyRef.current !== requestKey) return;
-      const legalAction = payload.legalActions.find(
-        (action) => action.actionId === preview.actionId,
+      const legalAction = payload.playerView.legalActions.find(
+        (action) => action.actionId === preview.actionOfferId,
       );
       if (
         !humanAiDecisionProbeMatchesPayload(preview, session, payload) ||
@@ -3733,8 +3760,9 @@ export default function Page() {
 
   useEffect(() => {
     lastSeenAccessPresentationEventIdRef.current =
-      payload?.eventTail.at(-1)?.eventId ?? null;
+      payload?.playerView.publicEvents.at(-1)?.eventId ?? null;
     setDismissedAccessEventIds([]);
+    setDismissedExposeReviewEventId(null);
     setPendingAccessPresentationEvents([]);
     pendingAccessContinuationRef.current = null;
     setDismissedSuccessfulRunOutcomeEventId(null);
@@ -3750,7 +3778,7 @@ export default function Page() {
 
   useEffect(() => {
     lastSeenExposeHighlightEventIdRef.current =
-      payload?.eventTail.at(-1)?.eventId ?? null;
+      payload?.playerView.publicEvents.at(-1)?.eventId ?? null;
     clearExposedCardHighlights();
   }, [clearExposedCardHighlights, payload?.matchId]);
 
@@ -3769,7 +3797,7 @@ export default function Page() {
 
   useEffect(() => {
     if (!payload) return;
-    const latestId = payload.eventTail.at(-1)?.eventId ?? null;
+    const latestId = payload.playerView.publicEvents.at(-1)?.eventId ?? null;
     const lastSeen = lastSeenExposeHighlightEventIdRef.current;
     if (lastSeen === null) {
       lastSeenExposeHighlightEventIdRef.current = latestId;
@@ -3777,7 +3805,7 @@ export default function Page() {
     }
     if (latestId === lastSeen) return;
     const exposedCardIds = publicEventsAfter(
-      payload.eventTail,
+      payload.playerView.publicEvents,
       lastSeen,
     ).flatMap(exposedCardInstanceIdsForEvent);
     lastSeenExposeHighlightEventIdRef.current = latestId;
@@ -3791,18 +3819,25 @@ export default function Page() {
       exposedCardHighlightTimerRef.current = null;
       setExposedCardHighlightIds([]);
     }, 10_000);
-  }, [exposedCardHighlightEnabled, payload?.eventTail, payload?.matchId]);
+  }, [
+    exposedCardHighlightEnabled,
+    payload?.playerView.publicEvents,
+    payload?.matchId,
+  ]);
 
   useEffect(() => {
     if (!payload) return;
-    const latestId = payload.eventTail.at(-1)?.eventId ?? null;
+    const latestId = payload.playerView.publicEvents.at(-1)?.eventId ?? null;
     const lastSeen = lastSeenAccessPresentationEventIdRef.current;
     if (lastSeen === null) {
       lastSeenAccessPresentationEventIdRef.current = latestId;
       return;
     }
     if (latestId === lastSeen) return;
-    const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
+    const newEvents = publicEventsAfter(
+      payload.playerView.publicEvents,
+      lastSeen,
+    );
     lastSeenAccessPresentationEventIdRef.current = latestId;
     if (newEvents.length === 0) return;
     setPendingAccessPresentationEvents((current) =>
@@ -3812,10 +3847,15 @@ export default function Page() {
         dismissedAccessEventIds,
       ),
     );
-  }, [payload?.matchId, payload?.eventTail, dismissedAccessEventIds]);
+  }, [
+    payload?.matchId,
+    payload?.playerView.publicEvents,
+    dismissedAccessEventIds,
+  ]);
 
   useEffect(() => {
-    lastSeenCueEventIdRef.current = payload?.eventTail.at(-1)?.eventId ?? null;
+    lastSeenCueEventIdRef.current =
+      payload?.playerView.publicEvents.at(-1)?.eventId ?? null;
     lastTurnStartAudioStateRef.current = null;
     lastTurnStartAudioCueKeyRef.current = null;
     setActionCueQueue([]);
@@ -3876,13 +3916,50 @@ export default function Page() {
 
   useEffect(() => {
     if (!payload) return;
-    const latestId = payload.eventTail.at(-1)?.eventId ?? null;
+    const latestId = payload.playerView.publicEvents.at(-1)?.eventId ?? null;
     const lastSeen = lastSeenCueEventIdRef.current;
     if (lastSeen === null) {
       lastSeenCueEventIdRef.current = latestId;
       return;
     }
-    const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
+    if (
+      !payload.playerView.publicEvents.some(
+        (event) => event.eventId === lastSeen,
+      )
+    ) {
+      // Undo removes the previous end of the event history. Replayed choices
+      // must derive their display from the new history.
+      lastSeenCueEventIdRef.current = latestId;
+      setCurrentActionCue((current) =>
+        current?.traceTagOutcome || current?.creditChanges?.length
+          ? null
+          : current,
+      );
+      setActionCueQueue((queue) =>
+        queue.filter(
+          (cue) => !cue.traceTagOutcome && !cue.creditChanges?.length,
+        ),
+      );
+      return;
+    }
+    const newEvents = publicEventsAfter(
+      payload.playerView.publicEvents,
+      lastSeen,
+    );
+    const locallySoundedEventIds = new Set<MatchEventId>();
+    for (const event of newEvents) {
+      if (
+        event.publicPayload.actor === payload.side &&
+        locallyPlayedActionSoundKeysRef.current.delete(
+          localActionSoundKey(
+            payload.side,
+            event.stateVersionBefore,
+            eventActionType(event),
+          ),
+        )
+      )
+        locallySoundedEventIds.add(event.eventId);
+    }
     const contextByEventId = chronicleContextByEventId(
       payload.playerView.publicEvents,
       catalogDetailsById,
@@ -3896,8 +3973,10 @@ export default function Page() {
         ? deriveOpponentActionCues({
             viewerSide: payload.side,
             playerView: payload.playerView,
-            events: payload.eventTail,
+            events: payload.playerView.publicEvents,
             lastPresentedEventId: lastSeen,
+            includeOwnCreditChanges: actionCueDisplayMode === "floating",
+            locallySoundedEventIds,
             includeAutomaticEffectCues: automaticEffectCuesEnabled,
             translate: chronicleTranslate,
             contextByEventId,
@@ -3906,13 +3985,13 @@ export default function Page() {
     const damageImpacts = deriveDamageImpactCues({
       viewerSide: payload.side,
       playerView: payload.playerView,
-      events: payload.eventTail,
+      events: payload.playerView.publicEvents,
       lastPresentedEventId: lastSeen,
       translate: chronicleTranslate,
     });
     lastSeenCueEventIdRef.current = latestId;
     if (cues.length > 0) {
-      const coalescedCues = coalesceAccessActionCues(
+      const coalescedCues = coalesceActionCues(
         currentActionCue,
         actionCueQueue,
         cues,
@@ -3938,21 +4017,17 @@ export default function Page() {
         );
         continue;
       }
-      if (overlayEventIds.has(event.eventId)) continue;
+      if (
+        overlayEventIds.has(event.eventId) ||
+        locallySoundedEventIds.has(event.eventId)
+      )
+        continue;
       const item = formatChronicleEvent(
         event,
         payload.side,
         contextByEventId[event.eventId] ?? {},
       );
       const actionType = eventActionType(event);
-      const actor = sideFromPublicPayload(event.publicPayload.actor);
-      if (
-        actor === payload.side &&
-        locallyPlayedActionSoundKeysRef.current.delete(
-          localActionSoundKey(actor, event.stateVersionBefore, actionType),
-        )
-      )
-        continue;
       const sound = actionSoundForActionType(
         actionType,
         item.visibility,
@@ -3969,11 +4044,12 @@ export default function Page() {
     actionCuesEnabled,
     automaticEffectCuesEnabled,
     audioEnabled,
+    actionCueDisplayMode,
     audioVolume,
     actionCueQueue,
     currentActionCue,
     matchEnded,
-    payload?.eventTail,
+    payload?.playerView.publicEvents,
     payload?.playerView.stateVersion,
     payload?.side,
     catalogDetailsById,
@@ -3993,16 +4069,18 @@ export default function Page() {
     if (!showSuccessfulRunOutcome || !outcomeEventId || !sourceDefinitionId)
       return;
     setCurrentActionCue((current) =>
-      current?.eventId === outcomeEventId ||
-      current?.cardDefinitionId === sourceDefinitionId
+      !current?.traceTagOutcome &&
+      (current?.eventId === outcomeEventId ||
+        current?.cardDefinitionId === sourceDefinitionId)
         ? null
         : current,
     );
     setActionCueQueue((current) =>
       current.filter(
         (cue) =>
-          cue.eventId !== outcomeEventId &&
-          cue.cardDefinitionId !== sourceDefinitionId,
+          cue.traceTagOutcome ||
+          (cue.eventId !== outcomeEventId &&
+            cue.cardDefinitionId !== sourceDefinitionId),
       ),
     );
   }, [
@@ -4090,6 +4168,7 @@ export default function Page() {
         audioVolume,
         currentActionCue.soundCount,
       );
+    if (currentActionCue.traceTagOutcome) return;
     if (
       localAiPacingMode === "manual" &&
       currentActionCue.source === "ai" &&
@@ -4122,7 +4201,8 @@ export default function Page() {
       priorityWindowHoldEnabled ||
       humanCorpRunServerActionBlocksAiPacing ||
       aiDecisionDebugShouldWaitForPreparation ||
-      interactionPresentationBlocked
+      interactionPresentationBlocked ||
+      traceTagConfirmationRequired
     )
       return;
     const delayMs = aiPacingDelayMs(
@@ -4171,6 +4251,7 @@ export default function Page() {
     connection,
     currentActionCue,
     interactionPresentationBlocked,
+    traceTagConfirmationRequired,
     isAiVsAiMatch,
     localAiPacingMode,
     payload?.matchId,
@@ -4375,6 +4456,8 @@ export default function Page() {
         ...(next.joinUrl ? { joinUrl: next.joinUrl } : {}),
       };
       persistSession(nextSession);
+      removeRecentSession(session);
+      sessionRef.current = nextSession;
       setSession(nextSession);
       presentMatchStartLogo(next.matchId);
       setPayload(fromInitialResponse(next, next.hostSide));
@@ -4795,7 +4878,7 @@ export default function Page() {
         reconnectToken: reconnected.reconnectToken,
         webSocketUrl: reconnected.webSocketUrl,
       };
-      persistSession(nextSession);
+      persistSession(nextSession, reconnected);
       setSession(nextSession);
       if (reconnected.lobby || !reconnected.playerView) {
         setPayload(null);
@@ -4829,24 +4912,13 @@ export default function Page() {
       setLobby(remotePayload);
     }
     if (session) {
-      rememberRecentSession(session, remotePayload);
+      updateSessionRecovery(session, remotePayload);
       setRecentSession(loadRecentSession());
     }
     if (isInvalidatingTerminalStatus(remotePayload.matchStatus)) {
-      if (session) {
-        clearStoredSession(session);
-        removeRecentSession(session);
-        setRecentSession(loadRecentSession());
-      } else {
-        clearStoredSession();
-      }
+      if (!session) clearStoredSession();
       closeSocket();
       setConnection("offline");
-    }
-    if (session && shouldForgetRecoveryStatus(remotePayload.matchStatus)) {
-      clearStoredSession(session);
-      removeRecentSession(session);
-      setRecentSession(loadRecentSession());
     }
   }
 
@@ -4878,11 +4950,11 @@ export default function Page() {
     if (bootstrapped && "playerView" in bootstrapped) {
       setPayload(bootstrapped);
       setLobby(null);
-      rememberRecentSession(nextSession, bootstrapped);
+      persistSession(nextSession, bootstrapped);
     } else if (bootstrapped) {
       setPayload(null);
       setLobby(bootstrapped);
-      rememberRecentSession(nextSession, bootstrapped);
+      persistSession(nextSession, bootstrapped);
     } else {
       setNotice(noticeT("recentLoadFailed"));
     }
@@ -4931,7 +5003,15 @@ export default function Page() {
     action: LegalAction,
     options: { immediateAudio?: boolean; confirmed?: boolean } = {},
   ): boolean => {
-    if (!session || !payload || !ensureSocketConnected()) return false;
+    if (
+      outermostIceReviewOpen ||
+      !session ||
+      !payload ||
+      !isMatchOfferId(action.actionId) ||
+      !payload.playerView.legalActions.some((candidate) => candidate === action) ||
+      !ensureSocketConnected()
+    )
+      return false;
     if (
       !options.confirmed &&
       actionNeedsRegionReplacementConfirmation(action)
@@ -4974,6 +5054,7 @@ export default function Page() {
       side: session.side,
       actionId: action.actionId,
       clientKnownStateVersion: stateVersion,
+      clientKnownMatchVersion: payload.matchVersion,
       idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${runtimeRandomId()}`,
     });
     return true;
@@ -5008,7 +5089,7 @@ export default function Page() {
     const nextAccessAction = confirmedNextAccessAction(
       continuation,
       payload.playerView,
-      payload.legalActions,
+      payload.playerView.legalActions,
     );
     if (!nextAccessAction) return;
     continuation.nextAccessSubmitted = true;
@@ -5017,7 +5098,7 @@ export default function Page() {
   }, [
     connection,
     latestAccessRevealEvent?.eventId,
-    payload?.legalActions,
+    payload?.playerView.legalActions,
     payload?.playerView,
     session,
   ]);
@@ -5063,7 +5144,7 @@ export default function Page() {
       return;
     const resolution = resolveHiddenResourcePaymentPreselection(
       paymentSupportPreselection,
-      payload.legalActions,
+      payload.playerView.legalActions,
     );
     if (resolution.kind === "waiting") return;
     if (resolution.kind === "invalid") {
@@ -5114,7 +5195,7 @@ export default function Page() {
     const resolution = resolvePaymentSupportContinuation(
       paymentSupportContinuation,
       payload.playerView.stateVersion,
-      payload.legalActions,
+      payload.playerView.legalActions,
     );
     if (resolution.kind === "waiting") return;
     if (resolution.kind === "invalid") {
@@ -5164,7 +5245,7 @@ export default function Page() {
       return;
     const action = automaticCorpRunPassAction(
       payload.playerView,
-      payload.legalActions,
+      payload.playerView.legalActions,
       session.side,
     );
     if (!action) return;
@@ -5192,7 +5273,7 @@ export default function Page() {
       return;
     const action = automaticCorpMandatoryDrawAction(
       payload.playerView,
-      payload.legalActions,
+      payload.playerView.legalActions,
       session.side,
     );
     if (!action) return;
@@ -5220,7 +5301,7 @@ export default function Page() {
       return;
     const action = automaticEndTurnAction(
       payload.playerView,
-      payload.legalActions,
+      payload.playerView.legalActions,
       session.side,
       {
         accessRevealVisible: showAccessReveal || showSuccessfulRunOutcome,
@@ -5254,29 +5335,27 @@ export default function Page() {
 
   const submitChoiceOption = (
     action: LegalAction,
-    choiceId: string,
-    selectedOptionId: string,
-  ) => {
-    if (!session || !payload || !ensureSocketConnected()) return;
-    const stateVersion = payload.playerView.stateVersion;
-    playImmediateActionAudio(action, stateVersion);
-    sendSocketMessage("submit_action", {
-      matchId: session.matchId,
-      side: session.side,
-      actionId: action.actionId,
-      clientKnownStateVersion: stateVersion,
-      selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
-      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionId}-${runtimeRandomId()}`,
-    });
-  };
+    choiceId: SelectionId,
+    selectedOptionId: SelectionId,
+  ) => submitChoiceOptions(action, choiceId, [selectedOptionId]);
 
   const submitChoiceOptions = (
     action: LegalAction,
-    choiceId: string,
-    selectedOptionIds: string[],
+    choiceId: SelectionId,
+    selectedOptionIds: SelectionId[],
     options: { immediateAudio?: boolean } = {},
   ): boolean => {
-    if (!session || !payload || !ensureSocketConnected()) return false;
+    if (
+      !session ||
+      !payload ||
+      !isMatchOfferId(action.actionId) ||
+      !isMatchOfferId(choiceId) ||
+      !selectedOptionIds.every(isMatchOfferId) ||
+      payload.playerView.pendingChoice?.choiceId !== choiceId ||
+      !payload.playerView.legalActions.some((candidate) => candidate === action) ||
+      !ensureSocketConnected()
+    )
+      return false;
     const stateVersion = payload.playerView.stateVersion;
     if (options.immediateAudio !== false)
       playImmediateActionAudio(action, stateVersion);
@@ -5285,6 +5364,7 @@ export default function Page() {
       side: session.side,
       actionId: action.actionId,
       clientKnownStateVersion: stateVersion,
+      clientKnownMatchVersion: payload.matchVersion,
       selectedChoices: { choiceId, selectedOptionIds },
       idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${runtimeRandomId()}`,
     });
@@ -5301,7 +5381,7 @@ export default function Page() {
       !activeDiscardChoice
     )
       return;
-    const discardAction = payload.legalActions.find(
+    const discardAction = payload.playerView.legalActions.find(
       (action) =>
         action.type === "resolve_choice" &&
         action.payload?.choiceId === activeDiscardChoice.choiceId,
@@ -5592,13 +5672,17 @@ export default function Page() {
   };
 
   const requestUndo = () => {
-    if (!latestEventId || !ensureSocketConnected()) return;
+    if (!payload || latestEventId === undefined || !ensureSocketConnected())
+      return;
     setPaymentSupportPreselection(null);
     paymentSupportSubmittedKeyRef.current = null;
     setPaymentSupportContinuation(null);
     paymentSupportContinuationSubmittedKeyRef.current = null;
     setUndoNotice("");
-    sendSocketMessage("request_undo", { targetEventId: latestEventId });
+    sendSocketMessage("request_undo", {
+      targetEventId: latestEventId,
+      clientKnownMatchVersion: payload.matchVersion,
+    });
   };
 
   const resolveUndo = (accepted: boolean) => {
@@ -5615,18 +5699,35 @@ export default function Page() {
     });
   };
 
-  const leaveMatch = () => {
-    const leavingSession = session;
+  const clearMatchView = () => {
     closeSocket();
-    clearStoredSession(leavingSession ?? undefined);
-    if (leavingSession) removeRecentSession(leavingSession);
-    setRecentSession(loadRecentSession());
+    sessionRef.current = null;
     setSession(null);
     setPayload(null);
     setLobby(null);
     setConnection("offline");
     setSeriesTransitioning(false);
+    setDismissedResultKey(null);
     setNotice("");
+  };
+
+  const leaveMatch = () => {
+    clearStoredSession(session ?? undefined);
+    if (session) removeRecentSession(session);
+    setRecentSession(loadRecentSession());
+    clearMatchView();
+  };
+
+  const returnToStartFromGame = () => {
+    if (!session || !payload || !canStartNextSeriesGame) {
+      leaveMatch();
+      return;
+    }
+    updateSessionRecovery(session, payload);
+    setRecentSession(loadRecentSession());
+    clearMatchView();
+    setEntryTab("play");
+    selectStartTab("resume");
   };
 
   const copyJoinLink = async () => {
@@ -5806,7 +5907,7 @@ export default function Page() {
     void commitDeckLibrary(localDecks, noticeT("deckSaved"));
   };
 
-  const updateDeckCardQuantity = (cardId: string, quantity: number) => {
+  const updateDeckCardQuantity = (cardId: import("@netgrid/shared").CardDefinitionId, quantity: number) => {
     if (!selectedDeck) return;
     const nextQuantity = Math.max(0, Math.floor(quantity));
     const existing = selectedDeck.cards.some(
@@ -6184,89 +6285,50 @@ export default function Page() {
 
   function applyServerMessage(message: ServerMessage) {
     if (message.type === "lobby_update") {
-      setLobby(message.payload);
+      const next = message.payload;
+      const activeSession = sessionRef.current;
+      if (
+        !activeSession ||
+        activeSession.matchId !== next.matchId ||
+        activeSession.side !== next.side
+      )
+        return;
+      setLobby(next);
       setPayload(null);
-      if (sessionRef.current)
-        rememberRecentSession(sessionRef.current, message.payload);
+      updateSessionRecovery(activeSession, next);
       return;
     }
     if (message.type === "state_update") {
-      const noticeSession = sessionRef.current;
-      if (noticeSession)
-        setMatchNotice((current) =>
-          noticeAfterStateUpdate(current, {
-            matchId: noticeSession.matchId,
-            side: message.payload.playerView.side,
-            stateVersion: message.payload.playerView.stateVersion,
-          }),
-        );
+      const next = message.payload;
+      const activeSession = sessionRef.current;
+      if (
+        !activeSession ||
+        activeSession.matchId !== next.matchId ||
+        activeSession.side !== next.side
+      )
+        return;
+      setMatchNotice((current) =>
+        noticeAfterStateUpdate(current, {
+          matchId: next.matchId,
+          side: next.side,
+          stateVersion: next.playerView.stateVersion,
+        }),
+      );
       pendingAiAdvanceKeyRef.current = null;
       const activeLobby = lobbyRef.current;
       if (activeLobby) presentMatchStartLogo(activeLobby.matchId);
-      setPayload((current) => {
-        if (!current) {
-          const currentLobby = lobbyRef.current;
-          const activeSession = sessionRef.current;
-          const side = currentLobby?.side ?? activeSession?.side;
-          const matchId = currentLobby?.matchId ?? activeSession?.matchId;
-          const nextFromLobby =
-            side && matchId
-              ? {
-                  matchId,
-                  matchStatus: message.payload.matchStatus,
-                  matchVersion: message.payload.matchVersion,
-                  isPublic: currentLobby?.isPublic ?? true,
-                  side,
-                  playerView: message.payload.playerView,
-                  ...(message.payload.playerClock
-                    ? { playerClock: message.payload.playerClock }
-                    : {}),
-                  legalActions: message.payload.playerView.legalActions,
-                  eventTail: [],
-                  opponentStatus: currentLobby?.opponentStatus ?? {
-                    side: side === "runner" ? "corp" : "runner",
-                    connected: false,
-                  },
-                }
-              : null;
-          return nextFromLobby;
-        }
-        const next = withPlayerView(
-          {
-            ...current,
-            matchStatus: message.payload.matchStatus,
-            matchVersion: message.payload.matchVersion,
-            ...(message.payload.playerClock
-              ? { playerClock: message.payload.playerClock }
-              : {}),
-          },
-          message.payload.playerView,
-        );
-        const nextWithUndo = message.payload.pendingUndo
-          ? { ...next, pendingUndo: message.payload.pendingUndo }
-          : removePendingUndo(next);
-        if (message.payload.playerView.winner)
-          return { ...next, winner: message.payload.playerView.winner };
-        const {
-          winner: _winner,
-          finalStateHash: _finalStateHash,
-          ...withoutWinner
-        } = nextWithUndo;
-        return withoutWinner;
-      });
+      if (next.pendingUndo) {
+        setPaymentSupportPreselection(null);
+        paymentSupportSubmittedKeyRef.current = null;
+        setPaymentSupportContinuation(null);
+        paymentSupportContinuationSubmittedKeyRef.current = null;
+      }
+      setPayload((current) => latestSideUpdate(current, next));
       setLobby(null);
-      return;
-    }
-    if (message.type === "legal_actions") {
-      setPayload((current) =>
-        current ? withVersionedLegalActions(current, message.payload) : current,
-      );
-      return;
-    }
-    if (message.type === "event_log_update") {
-      setPayload((current) =>
-        current ? { ...current, eventTail: message.payload.events } : current,
-      );
+      if (next.matchStatus !== "active") {
+        updateSessionRecovery(activeSession, next);
+        setRecentSession(loadRecentSession());
+      }
       return;
     }
     if (message.type === "opponent_status") {
@@ -6276,53 +6338,6 @@ export default function Page() {
       setLobby((current) =>
         current ? { ...current, opponentStatus: message.payload } : current,
       );
-      return;
-    }
-    if (message.type === "ai_turn") {
-      pendingAiAdvanceKeyRef.current = null;
-      setPayload((current) => {
-        if (!current) return current;
-        if (message.payload)
-          return { ...current, aiTurnPresentation: message.payload };
-        const { aiTurnPresentation: _aiTurnPresentation, ...withoutAiTurn } =
-          current;
-        return withoutAiTurn;
-      });
-      return;
-    }
-    if (message.type === "undo_request") {
-      setPaymentSupportPreselection(null);
-      paymentSupportSubmittedKeyRef.current = null;
-      setPaymentSupportContinuation(null);
-      paymentSupportContinuationSubmittedKeyRef.current = null;
-      setPayload((current) =>
-        current ? { ...current, pendingUndo: message.payload } : current,
-      );
-      return;
-    }
-    if (message.type === "match_finished") {
-      setPayload((current) =>
-        current
-          ? {
-              ...current,
-              winner: message.payload.winner,
-              finalStateHash: message.payload.finalStateHash,
-              ...(message.payload.resultSummary
-                ? { resultSummary: message.payload.resultSummary }
-                : {}),
-              matchStatus: message.payload.matchStatus,
-            }
-          : current,
-      );
-      const activeSession = sessionRef.current;
-      if (
-        activeSession &&
-        shouldForgetRecoveryStatus(message.payload.matchStatus)
-      ) {
-        clearStoredSession(activeSession);
-        removeRecentSession(activeSession);
-        setRecentSession(loadRecentSession());
-      }
       return;
     }
     if (message.type === "action_receipt") {
@@ -6341,11 +6356,12 @@ export default function Page() {
           current,
           message.payload.code,
           localizedError,
-          sessionRef.current && message.payload.playerView
+          sessionRef.current &&
+            message.payload.currentStateVersion !== undefined
             ? {
                 matchId: sessionRef.current.matchId,
-                side: message.payload.playerView.side,
-                stateVersion: message.payload.playerView.stateVersion,
+                side: sessionRef.current.side,
+                stateVersion: message.payload.currentStateVersion,
               }
             : undefined,
         ),
@@ -6353,13 +6369,6 @@ export default function Page() {
       if (message.payload.code.startsWith("undo_")) {
         setUndoNotice(localizedError);
         setUndoPanelOpen(true);
-      }
-      if (message.payload.playerView) {
-        setPayload((current) =>
-          current
-            ? withPlayerView(current, message.payload.playerView!)
-            : current,
-        );
       }
     }
   }
@@ -7082,93 +7091,117 @@ export default function Page() {
                   </div>
                 </div>
               ) : null}
-              <ActiveMatchTopbar
-                topbarRef={topbarRef}
-                appName={APP_NAME}
-                appStatusLabel={APP_STATUS_LABEL}
-                appIconSrc={APP_ICON_SRC}
-                appWordmarkSrc={APP_WORDMARK_SRC}
-                statusText={statusText}
-                connection={connection}
-                workspace={activeMatchWorkspace}
-                activeMatchIsGame={activeMatchIsGame}
-                undoPanelOpen={undoPanelOpen}
-                pendingUndo={payload.pendingUndo}
-                canReconnect={canReconnect}
-                matchDetailsOpen={matchDetailsOpen}
-                canStartNextSeriesGame={canStartNextSeriesGame}
-                seriesTransitioning={seriesTransitioning}
-                canReturnToStart={canReturnToStart}
-                canForfeit={canForfeit}
-                canCancelSimulation={canCancelSimulation}
-                rightRailCollapsed={rightRailCollapsed}
-                chronicleWidth={chronicleWidth}
-                canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
-                canOpenDeckGuide={Boolean(activeStandardDeckGuide)}
-                humanAiAdvice={humanAiAdvice}
-                humanAiAdviceError={aiDecisionDebugPreviewError}
-                humanAiAdviceLoading={aiDecisionDebugPreviewLoading}
-                onWorkspace={setActiveMatchWorkspace}
-                onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
-                onReconnect={reconnect}
-                onToggleMatchDetails={() =>
-                  setMatchDetailsOpen((open) => !open)
-                }
-                onStartNextSeriesGame={startNextSeriesGame}
-                onLeaveMatch={leaveMatch}
-                onRequestForfeitMatch={requestForfeitMatch}
-                onRequestCancelSimulation={requestCancelSimulation}
-                onToggleRightRail={() =>
-                  setChronicleWidth(nextChronicleWidth)
-                }
-                onRequestHumanAiAdvice={() =>
-                  void requestHumanAiDecisionPreview()
-                }
-                onOpenDeckGuide={() => setMatchDeckGuideOpen(true)}
-                onCloseHumanAiAdvice={() => {
-                  setAiDecisionDebugPreview(null);
-                  setAiDecisionDebugPreviewError("");
-                  setAiDecisionDebugPreviewLoading(false);
-                }}
-              />
+              <ActiveMatchChrome topbarHeight={topbarHeightPx}>
+                <ActiveMatchTopbar
+                  topbarRef={topbarRef}
+                  appName={APP_NAME}
+                  appStatusLabel={APP_STATUS_LABEL}
+                  appIconSrc={APP_ICON_SRC}
+                  appWordmarkSrc={APP_WORDMARK_SRC}
+                  statusText={statusText}
+                  connection={connection}
+                  workspace={activeMatchWorkspace}
+                  activeMatchIsGame={activeMatchIsGame}
+                  undoPanelOpen={undoPanelOpen}
+                  pendingUndo={payload.pendingUndo}
+                  canReconnect={canReconnect}
+                  matchDetailsOpen={matchDetailsOpen}
+                  canStartNextSeriesGame={canStartNextSeriesGame}
+                  seriesTransitioning={seriesTransitioning}
+                  canReturnToStart={canReturnToStart}
+                  canForfeit={canForfeit}
+                  canCancelSimulation={canCancelSimulation}
+                  rightRailCollapsed={rightRailCollapsed}
+                  chronicleWidth={chronicleWidth}
+                  canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
+                  canOpenDeckGuide={Boolean(activeStandardDeckGuide)}
+                  humanAiAdvice={humanAiAdvice}
+                  humanAiAdviceError={aiDecisionDebugPreviewError}
+                  humanAiAdviceLoading={aiDecisionDebugPreviewLoading}
+                  onWorkspace={setActiveMatchWorkspace}
+                  onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
+                  onReconnect={reconnect}
+                  onToggleMatchDetails={() =>
+                    setMatchDetailsOpen((open) => !open)
+                  }
+                  onStartNextSeriesGame={startNextSeriesGame}
+                  onLeaveMatch={returnToStartFromGame}
+                  onRequestForfeitMatch={requestForfeitMatch}
+                  onRequestCancelSimulation={requestCancelSimulation}
+                  onToggleRightRail={() =>
+                    setChronicleWidth(nextChronicleWidth)
+                  }
+                  onRequestHumanAiAdvice={() =>
+                    void requestHumanAiDecisionPreview()
+                  }
+                  onOpenDeckGuide={() => setMatchDeckGuideOpen(true)}
+                  onCloseHumanAiAdvice={() => {
+                    setAiDecisionDebugPreview(null);
+                    setAiDecisionDebugPreviewError("");
+                    setAiDecisionDebugPreviewLoading(false);
+                  }}
+                />
+                {activeMatchIsGame && activeView ? (
+                  <ActiveMatchResourceStrip
+                    ref={resourceStripRef}
+                    view={activeView}
+                    agendaPointsToWin={effectiveAgendaTarget}
+                    actionCapacities={actionSlotCapacities}
+                    ariaHidden={!resourceStripVisible}
+                    observerMode={isAiVsAiMatch}
+                  />
+                ) : null}
+              </ActiveMatchChrome>
 
               {matchDetailsOpen ? (
                 <div
-                  className="matchStrip"
+                  className="matchStrip matchDetailsStrip"
                   id="match-details-strip"
-                  aria-label={gameT("activeGameStatus")}
                 >
-                  <span title={payload.matchStatus}>
-                    <strong>{gameT("status")}</strong> {payload.matchStatus}
-                  </span>
-                  <span className="matchStripMatchId" title={payload.matchId}>
-                    <strong>{gameT("match")}</strong> {payload.matchId}
-                  </span>
-                  <span>
-                    <strong>{gameT("opponent")}</strong>{" "}
-                    {opponentDisplayName ??
-                      sideLabel(payload.opponentStatus.side)}
-                  </span>
-                  {activeView.deckMetadata ? (
-                    <span title={activeView.deckMetadata.own.deckName}>
-                      <strong>{gameT("ownDeck")}</strong>{" "}
-                      {activeView.deckMetadata.own.deckName}
-                    </span>
-                  ) : null}
-                  {activeView.deckMetadata && humanOpponentIsAi ? (
-                    <span title={activeView.deckMetadata.opponent.deckName}>
-                      <strong>{gameT("aiDeck")}</strong>{" "}
-                      {activeView.deckMetadata.opponent.deckName}
-                    </span>
-                  ) : null}
-                  <span>
-                    <strong>{gameT("version")}</strong> {payload.matchVersion}
-                  </span>
-                  <span>
-                    <strong>{gameT("state")}</strong> {activeView.stateVersion}
-                  </span>
+                  <dl
+                    className="matchDetailsFields"
+                    aria-label={gameT("activeGameStatus")}
+                  >
+                    <div>
+                      <dt>{gameT("status")}</dt>
+                      <dd>{payload.matchStatus}</dd>
+                    </div>
+                    <div>
+                      <dt>{gameT("match")}</dt>
+                      <dd>{payload.matchId}</dd>
+                    </div>
+                    <div>
+                      <dt>{gameT("opponent")}</dt>
+                      <dd>
+                        {opponentDisplayName ??
+                          sideLabel(payload.opponentStatus.side)}
+                      </dd>
+                    </div>
+                    {activeView.deckMetadata ? (
+                      <div>
+                        <dt>{gameT("ownDeck")}</dt>
+                        <dd>{activeView.deckMetadata.own.deckName}</dd>
+                      </div>
+                    ) : null}
+                    {activeView.deckMetadata && humanOpponentIsAi ? (
+                      <div>
+                        <dt>{gameT("aiDeck")}</dt>
+                        <dd>{activeView.deckMetadata.opponent.deckName}</dd>
+                      </div>
+                    ) : null}
+                    <div>
+                      <dt>{gameT("version")}</dt>
+                      <dd>{payload.matchVersion}</dd>
+                    </div>
+                    <div>
+                      <dt>{gameT("state")}</dt>
+                      <dd>{activeView.stateVersion}</dd>
+                    </div>
+                  </dl>
                   {notice ? (
-                    <span className="matchStripNotice">{notice}</span>
+                    <p className="matchStripNotice" role="status">
+                      {notice}
+                    </p>
                   ) : null}
                 </div>
               ) : notice ? (
@@ -7196,6 +7229,7 @@ export default function Page() {
               !matchEnded &&
               !currentDamageImpact &&
               !showAccessReveal &&
+              !outermostIceReviewOpen &&
               !showSuccessfulRunOutcome ? (
                 <OpponentActionOverlay
                   cue={currentActionCue}
@@ -7206,7 +7240,9 @@ export default function Page() {
                   cueDisplayMode={actionCueDisplayMode}
                   autoDismissMs={actionCueAutoDismissMs}
                   canAdvanceAi={Boolean(
-                    aiTurnPresentation?.canAdvanceAi && connection === "online",
+                    aiTurnPresentation?.canAdvanceAi &&
+                    connection === "online" &&
+                    !traceTagConfirmationRequired,
                   )}
                   manualAdvanceRequired={Boolean(
                     localAiPacingMode === "manual" &&
@@ -7244,7 +7280,7 @@ export default function Page() {
               {activeMatchIsGame && !matchEnded && activeView?.run ? (
                 <RunTimelineOverlay
                   view={activeView}
-                  legalActions={payload.legalActions}
+                  legalActions={payload.playerView.legalActions}
                   runActions={runActions}
                   cardDetailsById={catalogDetailsById}
                   actionDisabled={
@@ -7377,17 +7413,6 @@ export default function Page() {
                 />
               ) : null}
 
-              {activeMatchIsGame && activeView ? (
-                <ActiveMatchResourceStrip
-                  view={activeView}
-                  agendaPointsToWin={effectiveAgendaTarget}
-                  actionCapacities={actionSlotCapacities}
-                  ariaHidden={!resourceStripVisible}
-                  topOffsetPx={topbarStickyEnabled ? topbarHeightPx : 0}
-                  observerMode={isAiVsAiMatch}
-                />
-              ) : null}
-
               {activeMatchIsGame ? (
                 <div
                   className={`main chronicle-${chronicleWidth}${rightRailCollapsed ? " rightRailCollapsed" : ""}`}
@@ -7399,6 +7424,7 @@ export default function Page() {
                   >
                     <OpponentPanel
                       view={activeView}
+                      showResourceStats={resourceStripMode !== "on"}
                       scoreAreaCards={scoreAreaCardsBySide(
                         opponentSide(activeView.side),
                       )}
@@ -7485,6 +7511,7 @@ export default function Page() {
                     )}
                     <PlayerPanel
                       view={activeView}
+                      showResourceStats={resourceStripMode !== "on"}
                       title={
                         isAiVsAiMatch
                           ? gameT("aiPlayerTitle", {
@@ -7505,7 +7532,18 @@ export default function Page() {
                       onToggleScoreArea={() =>
                         toggleScoreAreaOverlay(activeView.side)
                       }
-                    />
+                    >
+                      {activeView.side === "corp" && !isAiVsAiMatch ? (
+                        <ScoredAgendaActions
+                          view={activeView}
+                          actions={payload.playerView.legalActions}
+                          disabled={
+                            Boolean(payload.winner) || connection !== "online"
+                          }
+                          onAction={submitAction}
+                        />
+                      ) : null}
+                    </PlayerPanel>
                     <SpecialZonesStrip
                       view={activeView}
                       cardDetailsById={catalogDetailsById}
@@ -7625,6 +7663,7 @@ export default function Page() {
                       activeRunIceId={activeRunIceId}
                       viewedApproachIceId={viewedApproachIceId}
                       viewedInstalledExposeCardId={viewedInstalledExposeCardId}
+                      {...(exposedBoardIce ? { exposedBoardIce } : {})}
                       exposedCardHighlightIds={new Set(exposedCardHighlightIds)}
                       selectedActionContext={selectedActionContext}
                       selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
@@ -7691,7 +7730,7 @@ export default function Page() {
                             : {})}
                         />
                         <ChroniclePanel
-                          events={payload.eventTail}
+                          events={payload.playerView.publicEvents}
                           turnContextEvents={payload.playerView.publicEvents}
                           side={payload.side}
                           cardDetailsById={catalogDetailsById}

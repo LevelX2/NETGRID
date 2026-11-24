@@ -1,9 +1,10 @@
-import type {
-  CardInstanceId,
-  GameState,
-  LegalAction,
-  MultiServerSuccessSequenceState,
-  ServerId,
+import {
+  isCardDefinitionId,
+  type CardInstanceId,
+  type GameState,
+  type LegalAction,
+  type MultiServerSuccessSequenceState,
+  type ServerId,
 } from "@netgrid/shared";
 import type { StartRunOptions } from "./run-core-execution";
 import type { RunTaxPaymentResult } from "./run-duration-payment";
@@ -57,7 +58,7 @@ export function executeStartRunAction(
   if (bodyweightExtraRunPending) {
     if (
       legalAction.payload?.bonusRunNoClick !== true ||
-      typeof legalAction.payload?.bonusRunSource !== "string" ||
+      !isCardDefinitionId(legalAction.payload?.bonusRunSource) ||
       legalAction.payload?.multiServerSuccessSequenceRun === true
     )
       throw new Error(

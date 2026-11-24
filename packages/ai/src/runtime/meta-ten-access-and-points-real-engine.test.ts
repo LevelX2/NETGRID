@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -19,6 +20,12 @@ import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
+
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
+import type { RunnerPlanDomain } from "../plans/runner-tactical-plan-contracts";
+import { centralPressureModule } from "../runner/central-pressure/central-pressure-plan-module";
+import { remoteContestModule } from "../runner/remote-contest/remote-contest-plan-module";
 
 afterEach(resetResidentPlanPortfolioMemory);
 function fixture(runnerId: string, corpId: string) {
@@ -69,7 +76,7 @@ function conditionalPointFixture() {
       id: "fixture_hot_tip_runner",
       cards: [
         ...DEMO_DECKS.demo_runner_001.cards,
-        { id: "onr_v1_090_hot-tip-for-wns", quantity: 1 },
+        { id: 302, quantity: 1 },
       ],
     },
     {
@@ -77,7 +84,7 @@ function conditionalPointFixture() {
       id: "fixture_hot_tip_corp",
       cards: [
         ...DEMO_DECKS.demo_corp_001.cards,
-        { id: "onr_v1_196_corporate-war", quantity: 1 },
+        { id: 408, quantity: 1 },
       ],
     },
   );
@@ -100,7 +107,7 @@ it("admits HQ access via empty Archives while rejecting the ordinary Archives ru
   );
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(26)
-    .withRunnerProgramInstalled("onr_v1_062_shredder-uplink-protocol");
+    .withRunnerProgramInstalled(274);
   const input = buildAiDecisionInput(state, "runner", {
     difficulty: "hard",
     ownDeckSnapshot: snapshot,
@@ -108,7 +115,7 @@ it("admits HQ access via empty Archives while rejecting the ordinary Archives ru
   });
   const targets = evaluateRunnerRunTargets({ input });
   const shredder = targets.find((t) =>
-    t.actionId.includes("shredder-uplink-protocol"),
+    referencesDefaultDeckCard(t.actionId, 274),
   );
   expect(shredder).toMatchObject({
     targetServerId: "archives",
@@ -130,10 +137,98 @@ it("admits HQ access via empty Archives while rejecting the ordinary Archives ru
   });
   expect(
     decision.decisionDebug?.actionAlternatives
-      ?.find((a) => a.actionId === "runner.start_run.archives")
+      ?.find((a) => a.actionId === "rs.archives")
       ?.whyNot?.join("|"),
   ).toContain("runner_archives_visible_state_has_no_agenda_payoff");
 });
+
+it.each(["rd", "r1"] as const)(
+  "blocks a route to %s whose exact action is dispositioned by Defense",
+  (serverId) => {
+    const { state, snapshot } = fixture(
+      "standard_runner_ice_destruction_runner",
+      "standard_corp_cheap_bag_tricks",
+    );
+    RealEngineFixtureBuilder.forState(state).withCorpIceOnServer(
+      "r1",
+      473,
+    );
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "hard",
+      ownDeckSnapshot: snapshot,
+    });
+    const actionCandidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+    });
+    const actionId = "rs." + serverId;
+    expect(
+      actionCandidates.some((candidate) => candidate.actionId === actionId),
+    ).toBe(true);
+    const centralPressure: RunnerPlanDomain["centralPressure"] = [
+      {
+        pressureId: "central:rd",
+        serverId: "rd",
+        purpose: "access",
+        priorityClass: "P4",
+        strategyLineIds: [],
+        reachable: true,
+        marginalValue: 10,
+        evidenceCode: "central_run_available_before_safety_assessment",
+        runActionIds: [actionId],
+      },
+    ];
+    const remoteContests: RunnerPlanDomain["remoteContests"] = [
+      {
+        contestId: "remote:r1",
+        serverId: "r1",
+        purpose: "access",
+        knownAgendaThreat: false,
+        reachable: true,
+        marginalValue: 10,
+        evidenceCode: "remote_run_available_before_safety_assessment",
+        runActionAssessments: {
+          [actionId]: {
+            verdict: "executable",
+            stepValue: 10,
+            evidenceCodes: [],
+          },
+        },
+      },
+    ];
+    const context = {
+      input,
+      actionCandidates,
+      turnKey: "runner:turn:1",
+      domain: {
+        centralPressure: serverId === "rd" ? centralPressure : [],
+        remoteContests: serverId === "rd" ? [] : remoteContests,
+        terminalWins: [],
+        developments: [],
+        runWindows: [],
+      },
+    };
+    const owner =
+      serverId === "rd" ? centralPressureModule() : remoteContestModule();
+    expect(owner.discover(context)[0]?.initialViability).toBe("ready");
+    expect(
+      owner.discover({
+        ...context,
+        actionDispositions: [
+          {
+            actionId,
+            disposition: "explicitly_nonproductive",
+            ownerModuleId: "runner.defense_and_recovery",
+            evidenceCode: "runner_optional_run_would_enable_known_next_corp_turn_flatline",
+          },
+        ],
+      })[0]?.initialViability,
+    ).toBe("blocked");
+  },
+);
 
 it.each([false, true])(
   "uses the conditional points through its existing owner, terminal=%s",
@@ -142,10 +237,10 @@ it.each([false, true])(
     RealEngineFixtureBuilder.forState(state)
       .withRunnerCredits(10)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("onr_v1_090_hot-tip-for-wns");
+      .withRunnerCardInGrip(302);
     if (terminal) {
       const agenda = Object.values(state.cardInstances).find((c) =>
-        c.definitionId.includes("corporate-war"),
+        c.definitionId === 408,
       )!;
       RealEngineFixtureBuilder.forState(state).withCorpCardInHq(
         agenda.definitionId,
@@ -173,7 +268,7 @@ it.each([false, true])(
     });
     const projected = { ...input, ...buildAiDecisionInputDto(input) };
     const event = projected.legalActions.find((a) =>
-      a.source?.includes("hot-tip-for-wns"),
+      referencesDefaultDeckCard(a.source, 302),
     )!;
     expect(event.payload?.runnerConditionalAgendaPointQuoteAmount).toBe(1);
     const decision = chooseAiAction(projected);
@@ -197,7 +292,7 @@ it.each(["none", "previous_turn"])(
     RealEngineFixtureBuilder.forState(state)
       .withRunnerCredits(10)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("onr_v1_090_hot-tip-for-wns");
+      .withRunnerCardInGrip(302);
     state.agendaPointsToWin =
       getPlayerView(state, "runner").own.agendaPoints + 1;
     state.runnerTurnFlags = {
@@ -212,10 +307,10 @@ it.each(["none", "previous_turn"])(
       eventTail: state.eventLog,
     });
     expect(
-      input.legalActions.find((a) => a.source?.includes("hot-tip-for-wns"))
+      input.legalActions.find((a) => referencesDefaultDeckCard(a.source, 302))
         ?.payload?.runnerConditionalAgendaPointQuoteAmount,
     ).toBe(0);
-    expect(chooseAiAction(input).actionId).not.toContain("hot-tip-for-wns");
+    expect(referencesDefaultDeckCard(chooseAiAction(input).actionId, 302)).toBe(false);
   },
 );
 
@@ -226,7 +321,7 @@ it.each(["missing", "stale", "source", "capability"])(
     RealEngineFixtureBuilder.forState(state)
       .withRunnerCredits(10)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("onr_v1_090_hot-tip-for-wns");
+      .withRunnerCardInGrip(302);
     state.runnerTurnFlags = {
       ...state.runnerTurnFlags,
       stoleAgendaThisTurn: true,
@@ -239,7 +334,7 @@ it.each(["missing", "stale", "source", "capability"])(
       eventTail: state.eventLog,
     });
     const payload = input.legalActions.find((a) =>
-      a.source?.includes("hot-tip-for-wns"),
+      referencesDefaultDeckCard(a.source, 302),
     )!.payload!;
     if (boundary === "missing")
       delete payload.runnerConditionalAgendaPointQuoteSchema;

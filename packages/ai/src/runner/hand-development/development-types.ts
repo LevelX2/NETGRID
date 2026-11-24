@@ -6,7 +6,7 @@ import type {
 export type RunnerRestrictedProgramInstallSequenceStep = {
   order: number;
   cardInstanceId: string;
-  definitionId: string;
+  definitionId: number;
   installCost: number;
   memoryCost: number;
   projectedRunnerCreditsAfter: number;
@@ -20,7 +20,7 @@ export type RunnerRestrictedProgramInstallSequenceCommitment = {
   kind: "restricted_program_install_sequence";
   sourceActionId: string;
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   plannedAtStateVersion: number;
   runnerCreditsBeforeOpening: number;
   grantedActionCount: number;
@@ -35,10 +35,21 @@ export type RunnerRestrictedProgramInstallSequenceCommitment = {
   evidenceCodes: string[];
 };
 
-export type RunnerDevelopmentSignal = {
+type DevelopmentInstallMemorySacrificeBinding = {
+  targetCardInstanceId: string;
+  targetMemoryCost: number;
+  requiredMemoryToFree: number;
+  selectedCards: Array<{
+    cardInstanceId: string;
+    memoryCost: number;
+  }>;
+};
+
+export type RunnerDevelopmentSignal = (
+  | { targetKind?: "card"; definitionId: number }
+  | { targetKind: "capability"; definitionId: number | string }
+) & {
   developmentId: string;
-  definitionId: string;
-  targetKind?: "card" | "capability";
   phase:
     | "execute"
     | "fund"
@@ -67,59 +78,43 @@ export type RunnerDevelopmentSignal = {
   eventInstallChoiceCommitment?: {
     sourceActionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     sourceCapabilityKey: string;
     selectedAtStateVersion?: number;
     engineContinuationAtStateVersion?: number;
     targetCardInstanceId: string;
-    targetDefinitionId: string;
-    installMemorySacrificeBinding?: {
-      targetCardInstanceId: string;
-      targetMemoryCost: number;
-      requiredMemoryToFree: number;
-      selectedCards: Array<{
-        cardInstanceId: string;
-        memoryCost: number;
-      }>;
-    };
+    targetDefinitionId: number;
+    installMemorySacrificeBinding?: DevelopmentInstallMemorySacrificeBinding;
   };
   eventInstallChoiceBinding?: {
     choiceId: string;
     actionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     sourceCapabilityKey: string;
     sourceStateVersion: number;
     originSelectedAtStateVersion: number;
     choiceSource: string;
     selectedOptionId: string;
     targetCardInstanceId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
   };
   delayedProgramSearchChoiceBinding?: {
     choiceId: string;
     choiceSource: string;
     actionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     sourceStateVersion: number;
     selectedOptionId: string;
     targetCardInstanceId: string;
-    targetDefinitionId: string;
-    installMemorySacrificeBinding?: {
-      targetCardInstanceId: string;
-      targetMemoryCost: number;
-      requiredMemoryToFree: number;
-      selectedCards: Array<{
-        cardInstanceId: string;
-        memoryCost: number;
-      }>;
-    };
+    targetDefinitionId: number;
+    installMemorySacrificeBinding?: DevelopmentInstallMemorySacrificeBinding;
   };
   programSearchCommitment?: {
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
-    targetDefinitionId: string;
+    sourceDefinitionId: number;
+    targetDefinitionId: number;
     targetPurpose:
       | "recurring_breaker_economy"
       | "memory_support"
@@ -132,10 +127,10 @@ export type RunnerDevelopmentSignal = {
   };
   recoverySearchCommitment?: {
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     searchFilter: "program" | "any_card";
     targetCardInstanceId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     targetPurpose: "generic_heap_recovery" | "generic_hosted_program_recovery";
     plannedAtStateVersion: number;
     selectedActionId?: string;

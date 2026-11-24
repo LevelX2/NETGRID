@@ -14,7 +14,7 @@ describe("match 802F search-role and remote-probe decision checkpoints", () => {
     // reaction reserve unfinished. That safe current action is independent
     // of the search classification being tested.
     cp.expectation = {
-      acceptableActions: [{ actionId: "runner.gain_credit" }],
+      acceptableActions: [{ actionId: "rb" }],
       planExecution: {
         acceptablePlanKinds: ["runner.defense_and_recovery"],
         acceptableCapabilities: ["build_damage_reaction_reserve"],
@@ -25,7 +25,7 @@ describe("match 802F search-role and remote-probe decision checkpoints", () => {
     };
     const result = runAiDecisionCheckpoint(cp);
     expect(result.ok, result.message).toBe(true);
-    const id = "onr_classic_032_schematics-search-engine";
+    const id = 36;
     expect(cp.deckSnapshot.cards.some((card) => card.cardId === id)).toBe(true);
     const profile = buildDeckCapabilityProfile({
       side: "runner",

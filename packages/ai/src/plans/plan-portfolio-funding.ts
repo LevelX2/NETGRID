@@ -44,6 +44,12 @@ export function allocatePlanPortfolioFunding(
   const currentLegalActionIds = new Set(
     params.input.legalActions.map((action) => action.actionId),
   );
+  const currentCandidates = params.candidates.filter((candidate) =>
+    currentLegalActionIds.has(candidate.actionId),
+  );
+  const candidateById = new Map(
+    currentCandidates.map((candidate) => [candidate.actionId, candidate]),
+  );
   const entries = params.entries.map((entry) => {
     const primaryDemand = primaryCreditDemand(entry.creditDemands ?? []);
     if (!primaryDemand) {
@@ -76,7 +82,7 @@ export function allocatePlanPortfolioFunding(
           currentLegalActionIds,
         )
       : undefined;
-    const availableCandidates = params.candidates.filter(
+    const availableCandidates = currentCandidates.filter(
       (candidate) => !usedNonrepeatableActionIds.has(candidate.actionId),
     );
     const search = searchFundingRoutes({
@@ -101,9 +107,7 @@ export function allocatePlanPortfolioFunding(
     );
     for (const step of currentRouteSteps) {
       if (!step.actionId) continue;
-      const candidate = params.candidates.find(
-        (item) => item.actionId === step.actionId,
-      );
+      const candidate = candidateById.get(step.actionId);
       if (candidate?.economyProjection?.repeatable !== true) {
         usedNonrepeatableActionIds.add(step.actionId);
       }

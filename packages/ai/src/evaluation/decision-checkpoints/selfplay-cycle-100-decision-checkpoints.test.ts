@@ -32,7 +32,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
       capture.input.playerView.servers
         .find((server) => server.id === "rd")
         ?.ice.find(
-          (ice) => ice.instanceId === "corp_onr_proteus_014_chihuahua_2",
+          (ice) => ice.instanceId === "cg6",
         )?.effectivePostRezRunQuote,
     ).toMatchObject({
       complete: false,
@@ -47,14 +47,14 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     );
     expect(selectedAction).toMatchObject({
       type: "rez_ice",
-      source: "corp_onr_proteus_014_chihuahua_2",
+      source: "cg6",
       costs: [{ credits: 0 }],
     });
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       route: {
         actionId: selectedAction?.actionId,
         actionType: "rez_ice",
@@ -63,7 +63,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
   });
 
   it("runs visible agenda Archives instead of classifying the selected route as inactive", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       visibleArchivesWinJson,
     ) as ReconstructedDecisionCapture;
     bindExplicitZeroPublicStealQuotes(capture.input, []);
@@ -81,8 +81,8 @@ describe("selfplay cycle 100 decision checkpoints", () => {
       payload: { serverId: "archives" },
     });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.pressure_central:central%3Aarchives",
-      leafExecutorInstanceId: "plan:runner.pressure_central:central%3Aarchives",
+      rootPlanInstanceId: "p22f66p721g9dgs7gsawwpf6hs",
+      leafExecutorInstanceId: "p22f66p721g9dgs7gsawwpf6hs",
       route: {
         actionId: selectedAction?.actionId,
         actionType: "start_run",
@@ -105,14 +105,14 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     );
     const cashout = capture.input.legalActions.find(
       (action) =>
-        action.payload?.targetCardId === "corp_onr_classic_013_puzzle_2" &&
+        action.payload?.targetCardId === "c3y" &&
         action.payload?.gainedCredits === 4,
     );
     expect(cashout).toMatchObject({
       type: "activated_card_ability",
-      source: "corp_onr_proteus_076_syd-meyer-superstores_3",
+      source: "ctz",
       payload: {
-        targetCardId: "corp_onr_classic_013_puzzle_2",
+        targetCardId: "c3y",
         gainedCredits: 4,
       },
     });
@@ -127,9 +127,9 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     });
     expect(selectedAction?.actionId).not.toBe(cashout!.actionId);
     const root =
-      "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_1";
+      "p7yxlodiop6lk6q584gbpqwldp";
     const executor =
-      "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_1";
+      "p1uo1vyc0dph2d6kedvd58hdp0";
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: root,
       leafExecutorInstanceId: executor,

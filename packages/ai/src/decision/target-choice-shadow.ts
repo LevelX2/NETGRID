@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
@@ -194,6 +195,16 @@ export type BuildTargetChoiceShadowReportParams = {
 export function buildTargetChoiceShadowReport(
   params: BuildTargetChoiceShadowReportParams,
 ): TargetChoiceShadowReport {
+  const { candidate, action } = params;
+  if (
+    candidate &&
+    (candidate.actionId !== action.actionId ||
+      candidate.actorSide !== action.side ||
+      (candidate.stateVersion !== undefined &&
+        candidate.stateVersion !== action.expiresAtStateVersion))
+  ) {
+    throw new Error("target_choice_shadow_candidate_does_not_match_action");
+  }
   const preferred = new Set((params.preferredOptionIds ?? []).map(safe));
   const avoid = new Set((params.avoidOptionIds ?? []).map(safe));
   const rankedOptions = rankOptions([
@@ -202,6 +213,7 @@ export function buildTargetChoiceShadowReport(
   ]);
   const blocked = blockedRequirements(params);
   const scorecard = buildTargetChoiceShadowScorecardV2(rankedOptions, blocked);
+  const selection = targetChoiceWouldSelect(rankedOptions, blocked);
   const report: TargetChoiceShadowReport = {
     schemaVersion: TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
     scope: "target_choice_shadow_report_only",
@@ -214,7 +226,7 @@ export function buildTargetChoiceShadowReport(
     selectionOutput: {
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
-      ...targetChoiceWouldSelect(rankedOptions, blocked),
+      ...selection,
     },
     productiveUseAllowed: false,
     runtimeConsumerStatus: "none",
@@ -226,9 +238,7 @@ export function buildTargetChoiceShadowReport(
       `scorecard_coverage_status:${scorecard.coverageStatus}`,
       "selected_choices_created:false",
       "selected_targets_created:false",
-      ...(targetChoiceWouldSelect(rankedOptions, blocked).wouldSelect
-        ? ["would_select:dry_run"]
-        : []),
+      ...(selection.wouldSelect ? ["would_select:dry_run"] : []),
     ],
   };
   assertTargetChoiceShadowReportSideSafe(report);
@@ -239,18 +249,7 @@ function targetChoiceWouldSelect(
   rankedOptions: readonly TargetChoiceShadowOption[],
   blocked: readonly TargetChoiceShadowBlockedRequirement[],
 ): Pick<TargetChoiceShadowReport["selectionOutput"], "wouldSelect"> {
-  if (
-    blocked.some((requirement) => requirement.reason === "engine_only_target")
-  ) {
-    return {};
-  }
-  if (
-    blocked.some((requirement) =>
-      requirement.evidence.some(targetChoiceEvidenceHasHiddenInfoMarker),
-    )
-  ) {
-    return {};
-  }
+  if (blocked.length > 0) return {};
   const [top, second] = rankedOptions;
   if (!top) return {};
   const dryRunReadyKind =
@@ -262,7 +261,7 @@ function targetChoiceWouldSelect(
     wouldSelect: {
       requirementId: top.requirementId,
       optionId: top.optionId,
-      confidence: gap >= 40 ? "high" : gap >= 20 ? "medium" : "low",
+      confidence: gap >= 40 ? "high" : "medium",
       evidence: [
         "target_choice_would_select:dry_run",
         `top_score:${top.score}`,
@@ -535,10 +534,7 @@ function optionsWithEvidence(
   options: readonly TargetChoiceShadowOption[],
   evidence: string,
 ): number {
-  return options.filter((option) => {
-    const optionEvidenceSet = new Set(option.evidence);
-    return optionEvidenceSet.has(evidence);
-  }).length;
+  return options.filter((option) => option.evidence.includes(evidence)).length;
 }
 
 function optionsWithEvidencePrefix(
@@ -552,7 +548,7 @@ function optionsWithEvidencePrefix(
 
 function targetShapeBonus(optionId: string): number {
   if (optionId === "hq" || optionId === "rd") return 10;
-  if (optionId.startsWith("remote_")) return 5;
+  if (isRemoteServerId(optionId)) return 5;
   return 0;
 }
 
@@ -670,7 +666,7 @@ function isCentralTarget(optionId: string): boolean {
 }
 
 function isRemoteTarget(optionId: string): boolean {
-  return optionId.startsWith("remote_");
+  return isRemoteServerId(optionId);
 }
 
 function isScorelineTarget(
@@ -713,7 +709,10 @@ function targetOptionIdsForRequirement(
     };
   }
   const explicitOptions =
-    params.sideSafeTargetIdsByRequirementId?.[requirement.id];
+    params.sideSafeTargetIdsByRequirementId &&
+    Object.hasOwn(params.sideSafeTargetIdsByRequirementId, requirement.id)
+      ? params.sideSafeTargetIdsByRequirementId[requirement.id]
+      : undefined;
   if (explicitOptions !== undefined) {
     return {
       optionIds: uniqueStrings(explicitOptions),

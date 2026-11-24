@@ -6,7 +6,7 @@ const withdrawCredits = capabilityKey("withdraw_credits");
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_154_broker"),
+    cardDefinitionId: cardDefinitionId(366),
     title: "Broker",
     side: "runner",
     cardType: "resource",

@@ -1,9 +1,15 @@
 "use client";
 
+import {
+  isCardDefinitionId,
+  type CardDefinitionId,
+  type MatchEventId,
+  type PublicGameEvent,
+  type Side,
+} from "@netgrid/shared";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "use-intl/react";
-import type { PublicGameEvent, Side } from "@netgrid/shared";
 
 import {
   chronicleAccessOutcomePlan,
@@ -24,6 +30,7 @@ import {
   type ChronicleTranslate,
 } from "../../app/chronicle";
 import { coalesceAiPumpPresentationEvents } from "../../app/ai-pump-presentation";
+import { payloadHasAbility } from "../../app/action-payload";
 import type { PublicCardPresentationsById } from "../../app/public-card-presentation";
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
@@ -44,7 +51,7 @@ import {
 import { ChronicleEntry, type ChronicleGroupKind } from "./ChronicleEntry";
 
 type CatalogCardSummary = {
-  catalogCardId: string;
+  catalogCardId: CardDefinitionId;
   title: string;
   type: string;
   subtypes: string[];
@@ -57,7 +64,7 @@ type CatalogCardDetail = CatalogCardSummary & {
   collectorNumber: string;
   text: string;
   numeric: Record<string, number | null | undefined>;
-  definitionId?: string;
+  definitionId?: CardDefinitionId;
 };
 
 const CATALOG_NUMERIC_LABEL_KEYS = [
@@ -186,14 +193,14 @@ function payloadPositiveInteger(
     : null;
 }
 
-function revealedEventCardId(event: PublicGameEvent): string | null {
+function revealedEventCardId(event: PublicGameEvent): CardDefinitionId | null {
   const cardId =
     event.publicPayload.cardDefinitionId ??
     event.publicPayload.sourceDefinitionId ??
     event.publicPayload.targetCardDefinitionId ??
     event.publicPayload.publicRevealDefinitionId ??
     event.publicPayload.priorityRequisitionTargetDefinitionId;
-  return typeof cardId === "string" ? cardId : null;
+  return isCardDefinitionId(cardId) ? cardId : null;
 }
 
 function eventCardDetail(
@@ -212,10 +219,13 @@ export function chronicleContextByEventId(
     cardPresentationsById?: PublicCardPresentationsById;
     translate?: ChronicleTranslate;
   } = {},
-): Record<string, Omit<ChronicleContext, "side">> {
+): Record<MatchEventId, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
-  const projectionPlan = chronicleEventProjectionPlan(events);
+  const projectionPlan = chronicleEventProjectionPlan(
+    events,
+    options.translate,
+  );
   const hasServerTurnContext = events.some((event) =>
     payloadPositiveInteger(event.publicPayload, "chronicleTurnNumber"),
   );
@@ -365,9 +375,9 @@ export function ChroniclePanel({
               group.label,
               group.kind,
               group.turnGroupLabel,
-              group.firstItemId,
+              group.oldestItemId,
             );
-            const groupRenderKey = `${groupKey}:${group.firstItemId}`;
+            const groupRenderKey = `${groupKey}:${group.oldestItemId}`;
             const turnKey = group.turnGroupLabel
               ? chronicleTurnGroupCollapseKey(group.turnGroupLabel)
               : null;
@@ -447,11 +457,11 @@ function chronicleGroupCollapseKey(
   label: string,
   kind: ChronicleGroupKind,
   turnGroupLabel: string | null,
-  firstItemId: string,
+  oldestItemId: string,
 ): string {
   if (turnGroupLabel && label === turnGroupLabel)
     return chronicleTurnGroupCollapseKey(label);
-  return `${kind}:${turnGroupLabel ?? "none"}:${label}:${firstItemId}`;
+  return `${kind}:${turnGroupLabel ?? "none"}:${label}:${oldestItemId}`;
 }
 
 function chronicleGroupShouldRender(
@@ -471,9 +481,9 @@ function chronicleDeduplicatedGroupLabel(label: string): boolean {
 function chronicleEntriesWithRunGroups(
   events: PublicGameEvent[],
   side: Side,
-  contextByEventId: Record<string, Omit<ChronicleContext, "side">>,
+  contextByEventId: Record<MatchEventId, Omit<ChronicleContext, "side">>,
   cardDetailsById: Record<string, CatalogCardDetail>,
-  projectionSuppressedEventIds: ReadonlySet<string>,
+  projectionSuppressedEventIds: ReadonlySet<MatchEventId>,
   accessOutcomePlan: ReturnType<typeof chronicleAccessOutcomePlan>,
   translate: ChronicleTranslate,
 ): Array<{
@@ -692,7 +702,8 @@ function chronicleActionContinuesCompletedRun(
 ): boolean {
   if (
     actionType === "trigger_ability" &&
-    isISpySuccessfulRunFollowupPayload(event.publicPayload)
+    (isISpySuccessfulRunFollowupPayload(event.publicPayload) ||
+      payloadHasAbility(event.publicPayload, "decline_optional_bonus_run"))
   )
     return true;
   return (
@@ -708,8 +719,9 @@ function chronicleActionCompletesRun(
   event: PublicGameEvent,
   actionType: string,
 ): boolean {
+  if (actionType === "jack_out")
+    return event.publicPayload.runnerCostPenaltySupportWindowOpened !== true;
   if (
-    actionType === "jack_out" ||
     actionType === "trash_accessed_card" ||
     actionType === "steal_agenda" ||
     actionType === "decline_trash"

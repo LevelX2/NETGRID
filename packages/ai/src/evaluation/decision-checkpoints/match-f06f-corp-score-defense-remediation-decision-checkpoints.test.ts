@@ -35,17 +35,17 @@ describe("match f06f Corp score and defense remediation checkpoints", () => {
     checkpoint.expectation = {
       acceptableActions: [{
         type: "activated_card_ability",
-        sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+        sourceDefinitionId: 521,
       }],
       forbiddenActions: [{
         type: "install_card",
-        sourceDefinitionId: "onr_v1_266_scramble",
+        sourceDefinitionId: 478,
         targetServerId: "rd",
       }],
       planExecution: {
         acceptablePlanKinds: ["corp.economy"],
         acceptableCapabilities: ["develop_or_convert_corp_economy"],
-        requiredAssessmentEvidence: ["corp_engine_certified_visible_card_payout:onr_v1_309_bbs-whispering-campaign"],
+        requiredAssessmentEvidence: ["corp_engine_certified_visible_card_payout:521"],
       },
     };
     const result = runAiDecisionCheckpoint(checkpoint);
@@ -61,7 +61,7 @@ describe("match f06f Corp score and defense remediation checkpoints", () => {
         acceptableActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_196_corporate-war",
+            sourceDefinitionId: 408,
           },
         ],
         planExecution: {
@@ -81,7 +81,7 @@ describe("match f06f Corp score and defense remediation checkpoints", () => {
       const interfaceId = state.runner.stack.find(
         (cardId) =>
           state.cardInstances[cardId]?.definitionId ===
-          "onr_v1_139_r-and-d-interface",
+          351,
       );
       if (!interfaceId) throw new Error("Missing R&D Interface control card");
       state.runner.stack = state.runner.stack.filter(
@@ -98,7 +98,7 @@ describe("match f06f Corp score and defense remediation checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+              "cc.cfx.rd.cfx.4",
           },
         ],
         planExecution: {

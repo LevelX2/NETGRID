@@ -5,12 +5,15 @@ export function runnerCreditBankActionDispositions(
   signals: readonly RunnerCreditBankSignal[],
   otherEconomyActionIds: readonly string[],
 ): PlanActionDisposition[] {
-  const activeNonBankEconomyActionIds = new Set(otherEconomyActionIds);
+  const admittedActionIds = new Set([
+    ...otherEconomyActionIds,
+    ...signals.flatMap((signal) => signal.actionIds),
+  ]);
   const dispositions: PlanActionDisposition[] = [];
   for (const signal of signals) {
-    if ((signal.rejectedActionIds?.length ?? 0) === 0) continue;
     for (const actionId of signal.rejectedActionIds ?? []) {
-      if (activeNonBankEconomyActionIds.has(actionId)) continue;
+      if (admittedActionIds.has(actionId)) continue;
+      admittedActionIds.add(actionId);
       dispositions.push({
         actionId,
         disposition: "explicitly_nonproductive",

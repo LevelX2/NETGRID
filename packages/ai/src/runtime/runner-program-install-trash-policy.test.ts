@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
 
@@ -101,6 +102,21 @@ describe("selectedMinimalProgramSacrificeCandidates", () => {
     ).toEqual(["economy"]);
   });
 
+  it("does not bundle a cheap but unnecessary sacrifice into an optional install", () => {
+    const small = selectableCandidate("small", 2, 100, 40);
+    const sufficient = selectableCandidate("sufficient", 3, 20, 80);
+    const assessment = runnerProgramInstallTrashAssessmentFromCards({
+      memoryUsed: 5,
+      memoryLimit: 5,
+      sourceMemoryCost: 3,
+      candidates: [small, sufficient],
+    });
+    expect(
+      assessment.selectedCandidates.map((entry) => entry.option?.id),
+    ).toEqual(["sufficient"]);
+    expect(assessment.memoryFreedBySelectedCandidates).toBe(3);
+  });
+
   it("does not reward surplus MU accumulated across a sufficient set", () => {
     expect(
       selectedMinimalProgramSacrificeCandidates(
@@ -181,7 +197,7 @@ function candidate(roles: readonly string[]) {
 function card(): VisibleCard {
   return {
     instanceId: "program-instance",
-    definitionId: "program-definition",
+    definitionId: syntheticCardDefinitionId("program-definition"),
     title: "Program",
     type: "program",
     known: true,

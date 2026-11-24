@@ -7,7 +7,7 @@ const revealAndInstallProgram = capabilityKey(
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_043_mystery-box"),
+    cardDefinitionId: cardDefinitionId(255),
     title: "Mystery Box",
     side: "runner",
     cardType: "program",

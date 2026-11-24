@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   ActionRunProjectionSummary,
   ActionSemanticCandidate,
@@ -69,18 +70,20 @@ function candidateRunServers(candidate: ActionSemanticCandidate): {
       source: candidate.runProjectionSummary?.source ?? "run_action_projection",
     };
   }
-  const fromTargets = [
-    ...(candidate.targetContext?.selectedTargets ?? []),
-    ...(candidate.targetContext?.availableTargets ?? []),
-  ]
-    .filter((target) => target.targetKind === "server")
-    .map((target) => normalizeServerId(target.targetId))
-    .filter((targetId): targetId is string => targetId !== undefined);
-  if (fromTargets.length > 0) {
-    return {
-      serverIds: uniqueStrings(fromTargets),
-      source: "target_context",
-    };
+  const selected =
+    candidate.targetContext?.selectedTargets.filter(
+      (target) => target.targetKind === "server",
+    ) ?? [];
+  const available =
+    candidate.targetContext?.availableTargets?.filter(
+      (target) => target.targetKind === "server",
+    ) ?? [];
+  const targets = selected.length > 0 ? selected : available;
+  if (targets.length > 0) {
+    const serverIds = targets
+      .map((target) => normalizeServerId(target.targetId))
+      .filter((serverId): serverId is string => serverId !== undefined);
+    return { serverIds: uniqueStrings(serverIds), source: "target_context" };
   }
   const fromEvidence = candidate.evidence
     .flatMap((entry) => [
@@ -118,8 +121,7 @@ function normalizeServerId(value: unknown): string | undefined {
   if (normalized === "archives") {
     return "archives";
   }
-  const remoteId = normalizeRemoteServerId(normalized);
-  if (remoteId) return remoteId;
+  if (isRemoteServerId(normalized)) return normalized;
   return undefined;
 }
 
@@ -129,21 +131,6 @@ function stripServerPrefix(value: string): string {
   return value;
 }
 
-function normalizeRemoteServerId(value: string): string | undefined {
-  const prefix = value.startsWith("remote_")
-    ? "remote_"
-    : value.startsWith("remote-")
-      ? "remote-"
-      : undefined;
-  if (!prefix) return undefined;
-  const suffix = value.slice(prefix.length);
-  if (suffix.length === 0 || !onlyAsciiDigits(suffix)) return undefined;
-  return `remote_${suffix}`;
-}
-
-function onlyAsciiDigits(value: string): boolean {
-  return [...value].every((character) => character >= "0" && character <= "9");
-}
 
 function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values)];

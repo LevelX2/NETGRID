@@ -1,4 +1,8 @@
+import { runnerCoverageTraceContext } from "./coverage-support";
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { actionClickCost, actionCreditCost } from "../../runtime/action-cost";
+import { serverBlocksStealthBitPayments } from "../../runtime/server-target";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import {
@@ -67,17 +71,26 @@ export function runnerSameTurnBreakerPreparation(
     (s) => s.id === evaluation.targetServerId,
   );
   const runAction = input.legalActions.find(
-    (a) => a.actionId === evaluation.actionId,
+    (a) =>
+      a.actionId === evaluation.actionId &&
+      a.type === "start_run" &&
+      a.payload?.serverId === evaluation.targetServerId &&
+      actionMatchesCurrentDecision(input, a),
   );
   if (!server || !runAction || !server.ice.some((c) => c.known && c.rezzed))
     return undefined;
   const rig = input.playerView.own.rig ?? [];
+  const pathTraceContext = {
+    ...runnerCoverageTraceContext(input, candidates),
+    excludeStealthTraceCredits: serverBlocksStealthBitPayments(server),
+  };
   const currentPath = assessKnownRezzedIcePath(
     server.ice,
     rig,
     Number.MAX_SAFE_INTEGER,
     server.root,
     input.playerView.opponent.credits,
+    pathTraceContext,
   );
   const currentCost = currentPath.visibleBreakCost;
   if (
@@ -86,8 +99,8 @@ export function runnerSameTurnBreakerPreparation(
     currentCost! <= 0
   )
     return undefined;
-  const runClicks = runAction.costs.reduce((n, c) => n + (c.clicks ?? 0), 0);
-  const runCredits = runAction.costs.reduce((n, c) => n + (c.credits ?? 0), 0);
+  const runClicks = actionClickCost(runAction);
+  const runCredits = actionCreditCost(runAction);
   const memoryUsed = input.playerView.own.memoryUsed;
   const memoryLimit = input.playerView.own.memoryLimit;
   if (!Number.isSafeInteger(memoryUsed) || !Number.isSafeInteger(memoryLimit))
@@ -127,6 +140,7 @@ export function runnerSameTurnBreakerPreparation(
         Number.MAX_SAFE_INTEGER,
         server.root,
         input.playerView.opponent.credits,
+        pathTraceContext,
       );
       const cost = path.visibleBreakCost;
       if (

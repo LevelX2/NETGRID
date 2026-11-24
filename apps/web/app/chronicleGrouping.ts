@@ -20,7 +20,7 @@ export type ChronicleRenderGroup<T extends ChronicleGroupableEntry> = {
   kind: T["groupKind"];
   turnGroupLabel: string | null;
   groupInstanceKey: string;
-  firstItemId: string;
+  oldestItemId: string;
   entries: T[];
 };
 
@@ -38,13 +38,14 @@ export function groupChronicleEntriesForRender<
       chronicleEntriesShareRenderGroup(currentGroup, entry, entryInstanceKey)
     ) {
       currentGroup.entries.push(entry);
+      if (entry.item?.id) currentGroup.oldestItemId = entry.item.id;
     } else {
       groupedEntries.push({
         label,
         kind: entry.groupKind,
         turnGroupLabel: entry.turnGroupLabel,
         groupInstanceKey: entryInstanceKey,
-        firstItemId: entry.item?.id ?? "empty",
+        oldestItemId: entry.item?.id ?? "empty",
         entries: [entry],
       });
     }

@@ -1,5 +1,6 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 export type CardRuleTranslationSource = Readonly<{
-  definitionId: string;
+  definitionId: CardDefinitionId;
   title: string;
   englishRulesText: string;
 }>;

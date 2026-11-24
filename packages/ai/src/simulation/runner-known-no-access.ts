@@ -1,18 +1,24 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { rolesMatch } from "../runtime/role-match";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
+import { rolesMatch } from "../role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import {
   runnerRunPathCreditBudgetWithVisiblePools,
   runnerKnownPathAssessmentIsCostNoAccess,
+  type assessKnownRezzedIcePath,
   type KnownRezzedIcePathAssessment,
-  type RunnerRunPathCreditBudget,
 } from "../visible-run-analysis";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 type VisibleCardDefinitionLookup = (
   input: AiDecisionInput,
   cardId: string,
-) => { definitionId?: string } | undefined;
+) => { definitionId?: number } | undefined;
 
 export type RunnerKnownNoAccessTarget = {
   serverId: string;
@@ -20,12 +26,7 @@ export type RunnerKnownNoAccessTarget = {
 };
 
 type RunnerKnownNoAccessDependencies = {
-  assessKnownRezzedIcePath: (
-    iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-    rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number | RunnerRunPathCreditBudget,
-    rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
-  ) => KnownRezzedIcePathAssessment;
+  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   runnerKnownPathAssessmentIsKnownNoAccess: (
     assessment: KnownRezzedIcePathAssessment,
   ) => boolean;
@@ -40,26 +41,26 @@ type RunnerKnownPathCostDependencies = Pick<
   "assessKnownRezzedIcePath"
 >;
 
-export function runnerRunKnownPathCost(
+function assessSimulationRunnerPath(
   input: AiDecisionInput,
-  targetServerId: string | undefined,
   dependencies: RunnerKnownPathCostDependencies,
-): number {
-  if (!targetServerId) return 0;
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === targetServerId,
-  );
-  if (!server) return 0;
-  return (
-    dependencies.assessKnownRezzedIcePath(
-      server.ice,
-      input.playerView.own.rig ?? [],
-      runnerRunPathCreditBudgetWithVisiblePools(
-        input.playerView.own.credits,
-        input.playerView.own.rig ?? [],
-      ),
-      server.root,
-    ).visibleBreakCost ?? 0
+  ice: VisibleCard[],
+  root: VisibleCard[],
+  activeRun = false,
+): KnownRezzedIcePathAssessment {
+  const rig = input.playerView.own.rig ?? [];
+  return dependencies.assessKnownRezzedIcePath(
+    ice,
+    rig,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      rig,
+    ),
+    root,
+    input.playerView.opponent.credits,
+    activeRun
+      ? currentRunPathContext(input)
+      : visibleRunnerPathTraceContext(input),
   );
 }
 
@@ -78,13 +79,10 @@ export function runnerHasKnownUnaffordableLegalRun(
       (candidate) => candidate.id === action.payload?.serverId,
     );
     if (!server) return false;
-    const assessment = dependencies.assessKnownRezzedIcePath(
+    const assessment = assessSimulationRunnerPath(
+      input,
+      dependencies,
       server.ice,
-      input.playerView.own.rig ?? [],
-      runnerRunPathCreditBudgetWithVisiblePools(
-        input.playerView.own.credits,
-        input.playerView.own.rig ?? [],
-      ),
       server.root,
     );
     return (
@@ -96,15 +94,9 @@ export function runnerHasKnownUnaffordableLegalRun(
 export function createRunnerKnownPathCostContext(
   dependencies: RunnerKnownPathCostDependencies,
 ): {
-  runnerRunKnownPathCost: (
-    input: AiDecisionInput,
-    targetServerId: string | undefined,
-  ) => number;
   runnerHasKnownUnaffordableLegalRun: (input: AiDecisionInput) => boolean;
 } {
   return {
-    runnerRunKnownPathCost: (input, targetServerId) =>
-      runnerRunKnownPathCost(input, targetServerId, dependencies),
     runnerHasKnownUnaffordableLegalRun: (input) =>
       runnerHasKnownUnaffordableLegalRun(input, dependencies),
   };
@@ -128,13 +120,10 @@ export function runnerKnownNoAccessLegalRunTargets(
         (candidate) => candidate.id === serverId,
       );
       if (!server) return undefined;
-      const assessment = dependencies.assessKnownRezzedIcePath(
+      const assessment = assessSimulationRunnerPath(
+        input,
+        dependencies,
         server.ice,
-        input.playerView.own.rig ?? [],
-        runnerRunPathCreditBudgetWithVisiblePools(
-          input.playerView.own.credits,
-          input.playerView.own.rig ?? [],
-        ),
         server.root,
       );
       if (
@@ -174,7 +163,7 @@ type RunnerKnownPathDiagnosticsDependencies =
       serverId: string,
     ) => boolean;
     rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-    rolesForCardId: (definitionId: string | undefined) => string[];
+    rolesForCardId: (definitionId: number | undefined) => string[];
     runnerCoverageRepairDiagnostic: (
       input: AiDecisionInput,
       action: LegalAction,
@@ -231,26 +220,26 @@ export function runnerKnownPathDiagnosticsForAction(
       currentIce?.known &&
       currentIce.rezzed === true &&
       (run?.position?.kind === "ice" ? run.position.iceIndex : 99) <= 1 &&
-      dependencies.assessKnownRezzedIcePath(
+      assessSimulationRunnerPath(
+        input,
+        dependencies,
         [currentIce],
-        input.playerView.own.rig ?? [],
-        runnerRunPathCreditBudgetWithVisiblePools(
-          input.playerView.own.credits,
-          input.playerView.own.rig ?? [],
-        ),
         server?.root ?? [],
+        true,
       ).blocked
     ) {
       const fullPath =
         server !== undefined
-          ? dependencies.assessKnownRezzedIcePath(
-              server.ice,
-              input.playerView.own.rig ?? [],
-              runnerRunPathCreditBudgetWithVisiblePools(
-                input.playerView.own.credits,
-                input.playerView.own.rig ?? [],
+          ? assessSimulationRunnerPath(
+              input,
+              dependencies,
+              server.ice.slice(
+                0,
+                (run?.position?.kind === "ice" ? run.position.iceIndex : -1) +
+                  1,
               ),
               server.root,
+              true,
             )
           : undefined;
       return {
@@ -368,13 +357,10 @@ export function runnerKnownPathDiagnosticsForAction(
         ? { runnerRunAllowedAsFirstProbeUnknownIce: true }
         : {}),
     };
-  const assessment = dependencies.assessKnownRezzedIcePath(
+  const assessment = assessSimulationRunnerPath(
+    input,
+    dependencies,
     server.ice,
-    input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
     server.root,
   );
   const knownPathCost = assessment.visibleBreakCost ?? 0;
@@ -607,8 +593,8 @@ export function runnerCoverageRepairDiagnostic(
     sourceDefinitionIdForAction: (
       input: AiDecisionInput,
       action: LegalAction,
-    ) => string | undefined;
-    rolesForCardId: (definitionId: string | undefined) => string[];
+    ) => number | undefined | undefined;
+    rolesForCardId: (definitionId: number | undefined) => string[];
   },
 ): RunnerCoverageRepairDiagnostic {
   const knownNoAccessTargets =
@@ -617,9 +603,12 @@ export function runnerCoverageRepairDiagnostic(
   const definitionId = dependencies.sourceDefinitionIdForAction(input, action);
   const roles = definitionId ? dependencies.rolesForCardId(definitionId) : [];
   const actionKind = action.type;
-  const isSearchOrRecovery =
-    rolesMatch(roles, ["search", "tutor", "recovery", "trash_recovery"]) ||
-    actionKind === "resolve_choice";
+  const isSearchOrRecovery = rolesMatch(roles, [
+    "search",
+    "tutor",
+    "recovery",
+    "trash_recovery",
+  ]);
   const isRecovery = rolesMatch(roles, ["recovery", "trash_recovery"]);
   const isCoverageInstall =
     actionKind === "install_card" &&
@@ -668,7 +657,7 @@ export function createRunnerCoverageRepairDiagnostic(dependencies: {
     input: AiDecisionInput,
   ) => RunnerKnownNoAccessTarget[];
   findVisibleCard: VisibleCardDefinitionLookup;
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
 }): (
   input: AiDecisionInput,
   action: LegalAction,

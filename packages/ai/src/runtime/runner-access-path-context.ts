@@ -43,6 +43,7 @@ import {
 } from "./encounter-subroutine";
 import {
   runnerEncounterPaymentForAction,
+  type RunnerEncounterPaymentProjection,
   spendRunnerEncounterActionCost,
   spendRunnerEncounterGeneralCost,
 } from "./runner-encounter-credit-budget";
@@ -60,17 +61,13 @@ export type RunnerAccessPathContextDependencies = {
     input: AiDecisionInput,
   ) => VisibleCard | undefined;
   actionCreditCost: (action: LegalAction) => number;
-  estimatedEncounterBreakCost: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => number | undefined;
   assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   knownIcePathReason: (
     assessment: KnownIcePathAssessment,
     serverId: string,
   ) => string;
   isRemoteServerTarget: (serverId: string | undefined) => boolean;
-  definitionType: (definitionId: string) => string | undefined;
+  definitionType: (definitionId: number) => string | undefined;
   remoteRootTrashCost: (
     card: VisibleServer["root"][number],
   ) => number | undefined;
@@ -148,7 +145,7 @@ export function createRunnerAccessPathContext(
       };
 
     const unknownRootCount = server.root.filter(
-      (card) => !card.known || typeof card.definitionId !== "string",
+      (card) => !card.known || typeof card.definitionId !== "number",
     ).length;
     if (unknownRootCount > 0) return { blocksBreak: false, evidence: [] };
 
@@ -192,15 +189,22 @@ export function createRunnerAccessPathContext(
         evidence: [...evidenceBase, "encounter_remote_payoff:known_low_value"],
       };
 
-    const trashProjection = projectKnownRemoteTrashCommitment(input, {
-      serverId: server.id,
-      definitionId: cheapestTrashRoot.definitionId,
-      rootType: cheapestTrashRoot.type,
-      trashCost: cheapestTrashRoot.trashCost,
-      creditsAfterPath: creditsAfterAccessPath,
-      visibleCard: cheapestTrashRoot.card,
-    });
-    if (!trashProjection.knownNoCurrentPayoff)
+    const projectTrash = (root: (typeof trashableRoots)[number]) =>
+      projectKnownRemoteTrashCommitment(input, {
+        serverId: server.id,
+        definitionId: root.definitionId,
+        rootType: root.type,
+        trashCost: root.trashCost,
+        creditsAfterPath: creditsAfterAccessPath,
+        visibleCard: root.card,
+      });
+    const trashProjection = projectTrash(cheapestTrashRoot);
+    if (
+      !trashProjection.knownNoCurrentPayoff ||
+      trashableRoots
+        .slice(1)
+        .some((root) => !projectTrash(root).knownNoCurrentPayoff)
+    )
       return { blocksBreak: false, evidence: [] };
 
     return {
@@ -324,32 +328,6 @@ export function createRunnerAccessPathContext(
       (conditionalEndRunPayment.affordable
         ? 0
         : remainingPayEndRunSubroutines.length);
-    const currentEncounterContinue = input.legalActions.find(
-      (candidate) =>
-        candidate.type === "continue_run" &&
-        candidate.payload?.encounterContinue === true,
-    );
-    if (
-      currentEncounterContinue?.payload?.encounterWillEndRun === true &&
-      remainingCurrentEndRunAfterBreak > 0 &&
-      !spendRunnerEncounterActionCost({
-        input,
-        action,
-        budget: budgetAfterBreak,
-        cost: dependencies.estimatedEncounterBreakCost(input, action) ?? 1,
-      }).affordable
-    )
-      return {
-        canPreserveAccessPath: false,
-        evidence: [
-          "break_cannot_clear_current_ice:true",
-          `break_credits_after:${creditsAfterBreak}`,
-          `break_remaining_current_end_run:${remainingCurrentEndRunAfterBreak}`,
-          `break_remaining_pay_end_run_cost:${remainingPayEndRunCost}`,
-          `break_remaining_pay_end_run_affordable:${conditionalEndRunPayment.affordable}`,
-        ],
-      };
-
     const futureIce = currentRunRemainingIce(input);
     const futureRig = runnerRigAfterEncounter(input.playerView.own.rig ?? []);
     const currentIce = dependencies.currentEncounteredIceCard(input);
@@ -397,6 +375,15 @@ export function createRunnerAccessPathContext(
         ),
       );
     };
+    const conditionalEndRunIndexes = new Set(
+      quote?.subroutines.flatMap((subroutine, index) =>
+        unbrokenIndexes.has(index) &&
+        !breakIndexes.has(index) &&
+        isVisiblePayEndRunSubroutine(subroutine)
+          ? [index]
+          : [],
+      ) ?? [],
+    );
     const remainingForcedIndexes = new Set(
       quote?.subroutines.flatMap((subroutine, index) => {
         if (!unbrokenIndexes.has(index) || breakIndexes.has(index)) return [];
@@ -421,7 +408,27 @@ export function createRunnerAccessPathContext(
           : [];
       }) ?? [],
     );
-    if (remainingForcedIndexes.size > 0) {
+    const assessFuturePath = (
+      budget: RunnerEncounterPaymentProjection["budget"],
+    ) =>
+      pathAfterDamageBudget(
+        dependencies.assessKnownRezzedIcePath(
+          futureIce,
+          futureRig,
+          runnerRunPathCreditBudgetAfterEncounter(budget),
+          server.root,
+          input.playerView.opponent.credits,
+          {
+            ...currentRunPathContext(input),
+            quoteNextEncounterDamageForHandBudget: true,
+          },
+        ),
+      );
+    let forcedContinuationPath: KnownIcePathAssessment | undefined;
+    if (
+      remainingForcedIndexes.size > 0 ||
+      !conditionalEndRunPayment.affordable
+    ) {
       // All current forced breaks consume the same pools, including on the
       // innermost ICE. Optional prevention must leave the whole set payable.
       // Any inner path consumes the remaining budget afterwards.
@@ -432,12 +439,15 @@ export function createRunnerAccessPathContext(
           unbroken: new Set(
             [...unbrokenIndexes].filter((index) => !breakIndexes.has(index)),
           ),
-          budget: budgetAfterBreak,
+          budget: breakPayment.budget,
         },
       ];
       const visited = new Set<string>();
-      let payableContinuation = false;
-      while (pending.length > 0 && !payableContinuation) {
+      const compareRemotePayoff = dependencies.isRemoteServerTarget(server.id);
+      while (
+        pending.length > 0 &&
+        (!forcedContinuationPath || compareRemotePayoff)
+      ) {
         const state = pending.pop()!;
         const key = JSON.stringify([
           [...state.remaining].sort((a, b) => a - b),
@@ -446,20 +456,32 @@ export function createRunnerAccessPathContext(
         ]);
         if (visited.has(key)) continue;
         visited.add(key);
-        if (state.remaining.size === 0) {
-          payableContinuation = pathAfterDamageBudget(
-            dependencies.assessKnownRezzedIcePath(
-              futureIce,
-              futureRig,
-              runnerRunPathCreditBudgetAfterEncounter(state.budget),
-              server.root,
-              input.playerView.opponent.credits,
-              {
-                ...currentRunPathContext(input),
-                quoteNextEncounterDamageForHandBudget: true,
-              },
-            ),
-          ).canReachAccess;
+        const currentPaymentCost = [...conditionalEndRunIndexes].reduce(
+          (cost, index) =>
+            cost +
+            (state.unbroken.has(index)
+              ? Math.max(0, Math.floor(quote?.subroutines[index]?.amount ?? 0))
+              : 0),
+          0,
+        );
+        const remainingPayment = spendRunnerEncounterGeneralCost(
+          state.budget,
+          currentPaymentCost,
+        );
+        if (state.remaining.size === 0 && remainingPayment.affordable) {
+          const path = assessFuturePath(remainingPayment.budget);
+          if (
+            path.canReachAccess &&
+            (!forcedContinuationPath ||
+              runnerGeneralCreditsAfterCompletedPath(
+                path.creditBudgetAfterPath,
+              ) >
+                runnerGeneralCreditsAfterCompletedPath(
+                  forcedContinuationPath.creditBudgetAfterPath,
+                ))
+          ) {
+            forcedContinuationPath = path;
+          }
           continue;
         }
         for (const candidate of input.legalActions) {
@@ -471,7 +493,12 @@ export function createRunnerAccessPathContext(
           const indexes =
             dependencies.breakSubroutineIndexesForAction(candidate);
           if (
-            ![...indexes].some((index) => state.remaining.has(index)) ||
+            ![...indexes].some(
+              (index) =>
+                state.remaining.has(index) ||
+                (!remainingPayment.affordable &&
+                  conditionalEndRunIndexes.has(index)),
+            ) ||
             [...indexes].some((index) => !state.unbroken.has(index))
           )
             continue;
@@ -493,7 +520,7 @@ export function createRunnerAccessPathContext(
           });
         }
       }
-      if (!payableContinuation)
+      if (!forcedContinuationPath)
         return {
           canPreserveAccessPath: false,
           evidence: [
@@ -503,12 +530,17 @@ export function createRunnerAccessPathContext(
         };
     }
     if (futureIce.length <= 0) {
+      const remainingGeneralCredits = forcedContinuationPath
+        ? runnerGeneralCreditsAfterCompletedPath(
+            forcedContinuationPath.creditBudgetAfterPath,
+          )
+        : creditsAfterBreak;
       const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
         input,
         server,
         targetSubroutines,
-        creditsAfterBreak,
-        remainingCurrentEndRunAfterBreak,
+        remainingGeneralCredits,
+        forcedContinuationPath ? 0 : remainingCurrentEndRunAfterBreak,
       );
       if (remotePayoff.blocksBreak)
         return {
@@ -520,23 +552,12 @@ export function createRunnerAccessPathContext(
         };
       return {
         canPreserveAccessPath: true,
-        evidence: [`break_credits_after:${creditsAfterBreak}`],
+        evidence: [`break_credits_after:${remainingGeneralCredits}`],
       };
     }
 
-    const pathAssessment = pathAfterDamageBudget(
-      dependencies.assessKnownRezzedIcePath(
-        futureIce,
-        futureRig,
-        runnerRunPathCreditBudgetAfterEncounter(budgetAfterBreak),
-        server.root,
-        input.playerView.opponent.credits,
-        {
-          ...currentRunPathContext(input),
-          quoteNextEncounterDamageForHandBudget: true,
-        },
-      ),
-    );
+    const pathAssessment =
+      forcedContinuationPath ?? assessFuturePath(budgetAfterBreak);
     if (pathAssessment.canReachAccess) {
       const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
         input,
@@ -545,7 +566,7 @@ export function createRunnerAccessPathContext(
         runnerGeneralCreditsAfterCompletedPath(
           pathAssessment.creditBudgetAfterPath,
         ),
-        remainingCurrentEndRunAfterBreak,
+        forcedContinuationPath ? 0 : remainingCurrentEndRunAfterBreak,
       );
       if (remotePayoff.blocksBreak)
         return {

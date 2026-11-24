@@ -1,3 +1,5 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import standardDeckCatalog from "../../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { applyAction, createGameAfterSetup, getLegalActions, getPlayerView } from "@netgrid/engine";
 import type { DeckDefinition, GameState, LegalAction } from "@netgrid/shared";
@@ -33,17 +35,17 @@ function fixture(credits: number, clicks: number, terminal = false): GameState {
     agendaPointsToWin: 7, runnerDeck, corpDeck });
   state = step(state, (a) => a.type === "mandatory_draw");
   RealEngineFixtureBuilder.forState(state)
-    .withCorpRemoteRoot("remote_1", "onr_v1_220_tycho-extension", 4)
-    .withCorpRemoteRoot("remote_2", "onr_v1_308_acme-savings-and-loan")
+    .withCorpRemoteRoot("r1", 432, 4)
+    .withCorpRemoteRoot("r2", 520)
     .withCorpHqSize(0)
-    .withCorpCardInHq(terminal ? "onr_v1_193_corporate-coup" : "onr_v1_215_security-net-optimization");
+    .withCorpCardInHq(terminal ? 405 : 427);
   state = step(state, (a) => a.type === "score_agenda");
-  const loan = getLegalActions(state, "corp").find((a) => a.type === "rez_card" && a.source.includes("acme-savings-and-loan"));
+  const loan = getLegalActions(state, "corp").find((a) => a.type === "rez_card" && referencesDefaultDeckCard(a.source, 520));
   expect(loan).toBeDefined();
   state = apply(state, loan!);
   expect(getPlayerView(state, "corp").own.agendaPoints).toBe(3);
   if (terminal) {
-    RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot("remote_3", "onr_v1_215_security-net-optimization", 5);
+    RealEngineFixtureBuilder.forState(state).withCorpRemoteRoot("r3", 427, 5);
     state = step(state, (a) => a.type === "score_agenda" && a.payload?.selectedServerId === "archives");
     expect(getPlayerView(state, "corp").own.agendaPoints).toBe(6);
   }
@@ -55,11 +57,11 @@ function fixture(credits: number, clicks: number, terminal = false): GameState {
   state = step(state, (a) => a.type === "end_turn");
   state = step(state, (a) => a.type === "mandatory_draw");
   RealEngineFixtureBuilder.forState(state).withCorpHqSize(0)
-    .withCorpCardInHq(terminal ? "onr_v1_374_washington-d-c-city-grid" : "onr_v1_193_corporate-coup")
-    .withCorpIceOnServer("rd", "onr_v1_245_fire-wall")
+    .withCorpCardInHq(terminal ? 586 : 405)
+    .withCorpIceOnServer("rd", 457)
     .withCorpCredits(credits).withRunnerCredits(5)
-    .withRunnerProgramInstalled("onr_proteus_079_big-frackin-gun")
-    .withRunnerProgramInstalled("onr_proteus_095_skeleton-passkeys");
+    .withRunnerProgramInstalled(137)
+    .withRunnerProgramInstalled(153);
   state.corp.clicks = clicks;
   state.runner.memoryUsed = 2;
   return state;
@@ -82,7 +84,7 @@ it("binds the exact native obligation conversion cost and credit horizon before 
   const decision = chooseAiAction(input);
   expect(decision.actionId).toBe(action.actionId);
   expect(decision.fallbackUsed).toBe(false);
-  expect(decision.evidence).toContain("plan_step_id:plan:corp.score_agenda:obligation-debt-removal:convert_agenda");
+  expect(decision.evidence).toContain(`plan_step_id:${obligationScorePlanId}:convert_agenda`);
   expect(signalFor(input)).toMatchObject({ sameTurnConversionProof: "engine_quoted_path",
     sameTurnConversionResourceCost: { stateVersion: input.playerView.stateVersion, credits: 12, clicks: 1 },
     sameTurnConversionCreditHorizon: { stateVersion: input.playerView.stateVersion, creditsBeforeScorePayout: 5 } });
@@ -115,13 +117,13 @@ it("funds one missing reserve credit under the same score parent before native r
   const firstInput = inputFor(state), first = chooseAiAction(firstInput);
   const gain = firstInput.legalActions.find((a) => a.actionId === first.actionId)!;
   expect(gain.type).toBe("gain_credit");
-  expect(first.evidence).toContain("plan_first_root:plan:corp.score_agenda:obligation-debt-removal");
+  expect(first.evidence).toContain(`plan_first_root:${obligationScorePlanId}`);
   expect(signalFor(firstInput)).toMatchObject({ feasible: true, fundingGap: 1 });
   state = apply(state, gain);
   const nextInput = inputFor(state), next = chooseAiAction(nextInput);
   const removal = nextInput.legalActions.find((a) => a.actionId === next.actionId)!;
   expect(removal.payload?.obligationDebtAbility).toBe("remove_obligation");
-  expect(next.evidence).toContain("plan_first_root:plan:corp.score_agenda:obligation-debt-removal");
+  expect(next.evidence).toContain(`plan_first_root:${obligationScorePlanId}`);
   state = apply(state, removal);
   expect(state.corp.credits).toBe(5);
   expect(getPlayerView(state, "corp").own.agendaPoints).toBe(4);
@@ -136,3 +138,5 @@ it("keeps a native terminal obligation conversion at P1 even below the reserve",
   expect(end.corp.credits).toBe(4);
   expect(end.winner).toBe("corp");
 });
+
+const obligationScorePlanId = planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: "obligation-debt-removal" });

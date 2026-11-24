@@ -24,19 +24,19 @@ import {
   type ServerId,
 } from "@netgrid/shared";
 
-const EMERGENCY_RIG = "onr_proteus_049_emergency-rig";
-const RENT_TO_OWN = "onr_proteus_051_rent-to-own-contract";
-const ICE_AND_DATA = "onr_proteus_111_ice-and-data-special-report";
-const HERMAN = "onr_proteus_060_herman-revista";
-const MARCEL = "onr_proteus_064_marcel-desoleil";
-const OBFUSCATED = "onr_proteus_066_obfuscated-fortress";
-const PAVIT = "onr_proteus_069_pavit-bharat";
-const SIMON = "onr_proteus_073_simon-francisco";
-const WALL = "onr_v1_279_wall-of-static";
-const CHIHUAHUA = "onr_proteus_014_chihuahua";
-const SIMPLE_ASSET = "simple_economy_asset";
-const SIMPLE_AGENDA = "simple_agenda";
-const SIMPLE_UPGRADE = "simple_upgrade";
+const EMERGENCY_RIG = 107;
+const RENT_TO_OWN = 109;
+const ICE_AND_DATA = 169;
+const HERMAN = 118;
+const MARCEL = 122;
+const OBFUSCATED = 124;
+const PAVIT = 127;
+const SIMON = 131;
+const WALL = 491;
+const CHIHUAHUA = 72;
+const SIMPLE_ASSET = 594;
+const SIMPLE_AGENDA = 588;
+const SIMPLE_UPGRADE = 606;
 
 const PRO019_IDS = [
   EMERGENCY_RIG,
@@ -87,7 +87,7 @@ function removeEverywhere(state: GameState, cardId: CardInstanceId): void {
 
 function addCorpHq(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -109,7 +109,7 @@ function addCorpHq(
 
 function addRunnerGrip(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -131,7 +131,7 @@ function addRunnerGrip(
 
 function addCorpIce(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = false,
@@ -168,7 +168,7 @@ function addCorpIce(
 
 function addCorpRoot(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
   serverId: Exclude<ServerId, "new_remote">,
   rezzed = true,
@@ -205,7 +205,7 @@ function addCorpRoot(
 
 function addCorpRd(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -275,7 +275,7 @@ function forceRunAtServer(
 ): void {
   const server = remoteServer(state, serverId);
   state.run = {
-    runId: `${state.matchId}_${serverId}_forced_run`,
+    runId: state.stateVersion + 1,
     attackedServerId: serverId,
     phase: "movement",
     position: { kind: "server", serverId },
@@ -300,7 +300,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
           (implementation) =>
             implementation.cardDefinitionId === cardDefinitionId,
         ),
-        cardDefinitionId,
+        String(cardDefinitionId),
       ).toHaveLength(1);
     }
   });
@@ -309,7 +309,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     let state = corpActionState("pro019-emergency");
     state.corp.credits = 5;
     addCorpHq(state, EMERGENCY_RIG, "emergency_1");
-    const iceId = addCorpIce(state, WALL, "wall_1", "remote_1");
+    const iceId = addCorpIce(state, WALL, "wall_1", "r1");
 
     const actions = getLegalActions(state, "corp")
       .filter(
@@ -395,7 +395,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       const state = corpActionState(seed);
       state.corp.credits = credits;
       addCorpHq(state, EMERGENCY_RIG, "emergency_cost_guard");
-      addCorpIce(state, WALL, "emergency_cost_wall", "remote_1");
+      addCorpIce(state, WALL, "emergency_cost_wall", "r1");
       return state;
     };
     const emergencyActions = (state: GameState) =>
@@ -483,7 +483,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
   it("removes Kludge counters at Corp turn start and trashes ICE on the last counter", () => {
     let state = corpActionState("pro019-emergency-lifecycle");
     addCorpHq(state, EMERGENCY_RIG, "emergency_lifecycle");
-    const iceId = addCorpIce(state, WALL, "wall_kludge", "remote_1");
+    const iceId = addCorpIce(state, WALL, "wall_kludge", "r1");
 
     state = apply(
       state,
@@ -503,7 +503,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
   it("plays Rent-to-Own Contract and binds Term counters to target rez cost", () => {
     let state = corpActionState("pro019-rent");
     addCorpHq(state, RENT_TO_OWN, "rent_1");
-    const iceId = addCorpIce(state, WALL, "wall_2", "remote_1");
+    const iceId = addCorpIce(state, WALL, "wall_2", "r1");
 
     const selected = getLegalActions(state, "corp").find(
       (action) =>
@@ -521,7 +521,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
   it("ticks Rent-to-Own Term counters according to Corp credits", () => {
     let payState = corpActionState("pro019-rent-pay");
     addCorpHq(payState, RENT_TO_OWN, "rent_pay");
-    const payIce = addCorpIce(payState, WALL, "wall_term_pay", "remote_1");
+    const payIce = addCorpIce(payState, WALL, "wall_term_pay", "r1");
     payState = apply(
       payState,
       "corp",
@@ -545,7 +545,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
 
     let growState = corpActionState("pro019-rent-grow");
     addCorpHq(growState, RENT_TO_OWN, "rent_grow");
-    const growIce = addCorpIce(growState, WALL, "wall_term_grow", "remote_1");
+    const growIce = addCorpIce(growState, WALL, "wall_term_grow", "r1");
     growState = apply(
       growState,
       "corp",
@@ -578,13 +578,13 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state.phase = "runner_action_phase";
     state.timingPoint = "runner_action.main";
     state.runner.clicks = 4;
-    addCorpRoot(state, HERMAN, "herman_1", "remote_1", true);
-    const outerIce = addCorpIce(state, WALL, "herman_outer", "remote_1", true);
+    addCorpRoot(state, HERMAN, "herman_1", "r1", true);
+    const outerIce = addCorpIce(state, WALL, "herman_outer", "r1", true);
     const innerIce = addCorpIce(
       state,
       CHIHUAHUA,
       "herman_inner",
-      "remote_1",
+      "r1",
       true,
     );
 
@@ -592,7 +592,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(state.pendingChoice?.source).toContain("corp.start_of_run_redirect");
     expect(
@@ -607,7 +607,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       `card_${outerIce}`,
     ]);
     expect(
-      state.corp.servers.find((server) => server.id === "remote_1")?.ice,
+      state.corp.servers.find((server) => server.id === "r1")?.ice,
     ).toEqual([innerIce, outerIce]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
@@ -619,7 +619,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     wrongFort.phase = "runner_action_phase";
     wrongFort.timingPoint = "runner_action.main";
     wrongFort.runner.clicks = 4;
-    addCorpRoot(wrongFort, HERMAN, "herman_wrong", "remote_1", true);
+    addCorpRoot(wrongFort, HERMAN, "herman_wrong", "r1", true);
     const hqRun = apply(
       wrongFort,
       "runner",
@@ -637,8 +637,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state.phase = "runner_action_phase";
     state.timingPoint = "runner_action.main";
     state.runner.clicks = 4;
-    const marcelId = addCorpRoot(state, MARCEL, "marcel_1", "remote_1", true);
-    addCorpIce(state, WALL, "marcel_wall", "remote_1", true);
+    const marcelId = addCorpRoot(state, MARCEL, "marcel_1", "r1", true);
+    addCorpIce(state, WALL, "marcel_wall", "r1", true);
     addCorpRd(state, WALL, "marcel_rd_1");
     addCorpRd(state, CHIHUAHUA, "marcel_rd_2");
 
@@ -651,7 +651,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     if (state.pendingChoice?.side === "corp")
       state = applyChoice(state, "corp", "pass");
@@ -680,10 +680,10 @@ describe("PRO019 rule-contract baseline utilities", () => {
       shortRd,
       MARCEL,
       "marcel_short",
-      "remote_1",
+      "r1",
       true,
     );
-    addCorpIce(shortRd, WALL, "marcel_short_wall", "remote_1", true);
+    addCorpIce(shortRd, WALL, "marcel_short_wall", "r1", true);
     const keptRd = shortRd.corp.rd.slice(0, 1);
     const movedRd = shortRd.corp.rd.slice(1);
     shortRd.corp.rd = keptRd;
@@ -698,7 +698,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       shortRd,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(
       getLegalActions(shortRun, "corp").some(
@@ -713,15 +713,15 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state.phase = "runner_action_phase";
     state.timingPoint = "runner_action.main";
     state.runner.clicks = 4;
-    addCorpRoot(state, OBFUSCATED, "obfuscated_1", "remote_1", true);
-    addCorpIce(state, WALL, "obfuscated_wall", "remote_1", true);
+    addCorpRoot(state, OBFUSCATED, "obfuscated_1", "r1", true);
+    addCorpIce(state, WALL, "obfuscated_wall", "r1", true);
     state.runner.credits = 5;
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(state.pendingChoice?.source).toContain("runner_spend_cap");
     state = applyChoice(state, "runner", "spend_3");
@@ -842,13 +842,13 @@ describe("PRO019 rule-contract baseline utilities", () => {
 
   it("offers Pavit only at server approach and replaces fort cards through a redacted HQ choice", () => {
     let beforeServer = corpActionState("pro019-pavit-before-server");
-    addCorpRoot(beforeServer, PAVIT, "pavit_before", "remote_1", false);
-    addCorpIce(beforeServer, WALL, "pavit_before_ice", "remote_1", true);
+    addCorpRoot(beforeServer, PAVIT, "pavit_before", "r1", false);
+    addCorpIce(beforeServer, WALL, "pavit_before_ice", "r1", true);
     beforeServer.run = {
-      runId: "pavit_before_run",
-      attackedServerId: "remote_1",
+      runId: 189855,
+      attackedServerId: "r1",
       phase: "approach_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       approachedIceId: "pavit_before_ice" as CardInstanceId,
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
@@ -868,19 +868,19 @@ describe("PRO019 rule-contract baseline utilities", () => {
       wrongTiming,
       WALL,
       "pavit_wrong_timing_old_ice",
-      "remote_1",
+      "r1",
       true,
     );
     const wrongTimingPavitId = addCorpRoot(
       wrongTiming,
       PAVIT,
       "pavit_wrong_timing_source",
-      "remote_1",
+      "r1",
       false,
     );
     addCorpHq(wrongTiming, WALL, "pavit_wrong_timing_new_ice");
     addCorpHq(wrongTiming, SIMPLE_UPGRADE, "pavit_wrong_timing_new_root");
-    forceRunAtServer(wrongTiming, "remote_1");
+    forceRunAtServer(wrongTiming, "r1");
     wrongTiming.timingPoint = "run.approach_ice";
     expect(
       getLegalActions(wrongTiming, "corp").some(
@@ -895,27 +895,27 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       CHIHUAHUA,
       "pavit_old_ice",
-      "remote_1",
+      "r1",
       true,
     );
     const pavitId = addCorpRoot(
       state,
       PAVIT,
       "pavit_source",
-      "remote_1",
+      "r1",
       false,
     );
     const oldRoot = addCorpRoot(
       state,
       SIMPLE_ASSET,
       "pavit_old_root",
-      "remote_1",
+      "r1",
       false,
     );
     const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_new_root");
     const newAsset = addCorpHq(state, SIMPLE_ASSET, "pavit_new_asset");
     addCorpHq(state, SIMPLE_UPGRADE, "pavit_extra_root");
-    forceRunAtServer(state, "remote_1");
+    forceRunAtServer(state, "r1");
 
     const rezAction = mustAction(
       state,
@@ -964,8 +964,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     });
     expect(invalid.ok).toBe(false);
     expect(hashState(invalid.state)).toBe(hashState(state));
-    expect(remoteServer(invalid.state, "remote_1").ice).toEqual([oldIce]);
-    expect(remoteServer(invalid.state, "remote_1").root).toEqual([
+    expect(remoteServer(invalid.state, "r1").ice).toEqual([oldIce]);
+    expect(remoteServer(invalid.state, "r1").root).toEqual([
       pavitId,
       oldRoot,
     ]);
@@ -981,18 +981,18 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
       String(newAsset),
     );
-    const server = remoteServer(state, "remote_1");
+    const server = remoteServer(state, "r1");
     expect(server.ice).toEqual([oldIce]);
     expect(server.root).toEqual(expect.arrayContaining([newAsset, newRoot]));
     expect(state.corp.hq).toEqual(expect.arrayContaining([oldRoot, pavitId]));
     expect(state.corp.hq).not.toContain(oldIce);
     expect(state.cardInstances[newAsset]?.zone).toMatchObject({
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     expect(state.cardInstances[newRoot]?.zone).toMatchObject({
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     expect(state.cardInstances[newAsset]?.rezzed).toBe(false);
     expect(state.cardInstances[newRoot]?.rezzed).toBe(false);
@@ -1005,27 +1005,27 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       CHIHUAHUA,
       "pavit_stale_old_ice",
-      "remote_1",
+      "r1",
       true,
     );
     const pavitId = addCorpRoot(
       state,
       PAVIT,
       "pavit_stale_source",
-      "remote_1",
+      "r1",
       false,
     );
     const oldRoot = addCorpRoot(
       state,
       SIMPLE_ASSET,
       "pavit_stale_old_root",
-      "remote_1",
+      "r1",
       false,
     );
     const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_stale_new_root");
     const newAsset = addCorpHq(state, SIMPLE_ASSET, "pavit_stale_new_asset");
     addCorpHq(state, SIMPLE_UPGRADE, "pavit_stale_extra_root");
-    forceRunAtServer(state, "remote_1");
+    forceRunAtServer(state, "r1");
 
     state = apply(
       state,
@@ -1035,7 +1035,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     );
     state.run = {
       ...state.run!,
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       approachedIceId: oldIce,
     };
     const beforeStaleHash = hashState(state);
@@ -1063,8 +1063,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(stale.error.message).not.toContain(String(newRoot));
     expect(hashState(stale.state)).toBe(beforeStaleHash);
     expect(stale.state.eventLog).toHaveLength(beforeStaleEventCount);
-    expect(remoteServer(stale.state, "remote_1").ice).toEqual([oldIce]);
-    expect(remoteServer(stale.state, "remote_1").root).toEqual([
+    expect(remoteServer(stale.state, "r1").ice).toEqual([oldIce]);
+    expect(remoteServer(stale.state, "r1").root).toEqual([
       pavitId,
       oldRoot,
     ]);
@@ -1080,27 +1080,27 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       CHIHUAHUA,
       "pavit_timing_old_ice",
-      "remote_1",
+      "r1",
       true,
     );
     const pavitId = addCorpRoot(
       state,
       PAVIT,
       "pavit_timing_source",
-      "remote_1",
+      "r1",
       false,
     );
     const oldRoot = addCorpRoot(
       state,
       SIMPLE_ASSET,
       "pavit_timing_old_root",
-      "remote_1",
+      "r1",
       false,
     );
     const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_timing_new_root");
     const newAsset = addCorpHq(state, SIMPLE_ASSET, "pavit_timing_new_asset");
     addCorpHq(state, SIMPLE_UPGRADE, "pavit_timing_extra_root");
-    forceRunAtServer(state, "remote_1");
+    forceRunAtServer(state, "r1");
 
     state = apply(
       state,
@@ -1134,8 +1134,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(stale.error.message).not.toContain(String(newRoot));
     expect(hashState(stale.state)).toBe(beforeStaleHash);
     expect(stale.state.eventLog).toHaveLength(beforeStaleEventCount);
-    expect(remoteServer(stale.state, "remote_1").ice).toEqual([oldIce]);
-    expect(remoteServer(stale.state, "remote_1").root).toEqual([
+    expect(remoteServer(stale.state, "r1").ice).toEqual([oldIce]);
+    expect(remoteServer(stale.state, "r1").root).toEqual([
       pavitId,
       oldRoot,
     ]);
@@ -1147,24 +1147,24 @@ describe("PRO019 rule-contract baseline utilities", () => {
   it("does not offer Pavit when only individually plausible HQ cards form no legal set", () => {
     const state = corpActionState("pro019-pavit-no-joint-set");
     clearCorpHq(state);
-    addCorpIce(state, CHIHUAHUA, "pavit_blocked_old_ice", "remote_1", true);
+    addCorpIce(state, CHIHUAHUA, "pavit_blocked_old_ice", "r1", true);
     const pavitId = addCorpRoot(
       state,
       PAVIT,
       "pavit_blocked_source",
-      "remote_1",
+      "r1",
       false,
     );
     addCorpRoot(
       state,
       SIMPLE_UPGRADE,
       "pavit_blocked_old_root",
-      "remote_1",
+      "r1",
       false,
     );
     addCorpHq(state, SIMPLE_ASSET, "pavit_blocked_asset");
     addCorpHq(state, SIMPLE_AGENDA, "pavit_blocked_agenda");
-    forceRunAtServer(state, "remote_1");
+    forceRunAtServer(state, "r1");
 
     expect(
       getLegalActions(state, "corp").some(
@@ -1181,14 +1181,14 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       CHIHUAHUA,
       "pavit_mix_old_ice",
-      "remote_1",
+      "r1",
       true,
     );
     const pavitId = addCorpRoot(
       state,
       PAVIT,
       "pavit_mix_source",
-      "remote_1",
+      "r1",
       false,
     );
     const newUpgrade = addCorpHq(
@@ -1196,7 +1196,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       SIMPLE_UPGRADE,
       "pavit_mix_new_upgrade",
     );
-    forceRunAtServer(state, "remote_1");
+    forceRunAtServer(state, "r1");
     const replayStart = structuredClone(state);
     const replayStartIndex = state.eventLog.length;
 
@@ -1207,7 +1207,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
         action.type === "rez_card" && action.payload?.cardId === pavitId,
     );
 
-    const server = remoteServer(state, "remote_1");
+    const server = remoteServer(state, "r1");
     expect(server.ice).toEqual([oldIce]);
     expect(server.root).toEqual([newUpgrade]);
     expect(state.corp.hq).toContain(pavitId);
@@ -1221,26 +1221,26 @@ describe("PRO019 rule-contract baseline utilities", () => {
   it("rejects a Pavit choice that is individually plausible but jointly illegal without leaking HQ cards", () => {
     let state = corpActionState("pro019-pavit-invalid-joint-choice");
     clearCorpHq(state);
-    addCorpIce(state, CHIHUAHUA, "pavit_invalid_old_ice", "remote_1", true);
+    addCorpIce(state, CHIHUAHUA, "pavit_invalid_old_ice", "r1", true);
     const pavitId = addCorpRoot(
       state,
       PAVIT,
       "pavit_invalid_source",
-      "remote_1",
+      "r1",
       false,
     );
     addCorpRoot(
       state,
       SIMPLE_UPGRADE,
       "pavit_invalid_old_root",
-      "remote_1",
+      "r1",
       false,
     );
     addCorpHq(state, WALL, "pavit_invalid_new_ice");
     addCorpHq(state, SIMPLE_UPGRADE, "pavit_invalid_upgrade");
     const assetId = addCorpHq(state, SIMPLE_ASSET, "pavit_invalid_asset");
     const agendaId = addCorpHq(state, SIMPLE_AGENDA, "pavit_invalid_agenda");
-    forceRunAtServer(state, "remote_1");
+    forceRunAtServer(state, "r1");
 
     state = apply(
       state,
@@ -1285,15 +1285,15 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       WALL,
       "obfuscated_trace_source",
-      "remote_1",
+      "r1",
       true,
     );
     state.runner.credits = 5;
     state.run = {
-      runId: "obfuscated_trace_run",
-      attackedServerId: "remote_1",
+      runId: 604039,
+      attackedServerId: "r1",
       phase: "encounter_ice",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       approachedIceId: sourceIce,
       encounteredIceId: sourceIce,
       brokenSubroutineIndexes: [],
@@ -1308,7 +1308,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       },
     };
     state.trace = {
-      traceId: "obfuscated_trace",
+      traceId: 1,
       sourceCardInstanceId: sourceIce,
       sourceDefinitionId: WALL as CardDefinitionId,
       traceLimit: 1,
@@ -1323,9 +1323,9 @@ describe("PRO019 rule-contract baseline utilities", () => {
       returnActiveSide: state.activeSide,
     };
     state.pendingChoice = {
-      choiceId: "obfuscated_trace.runner.bid",
+      choiceId: "1.runner.bid",
       side: "runner",
-      source: "trace:obfuscated_trace",
+      source: "trace:1",
       prompt: "Runner Link-Bid wählen",
       kind: "bid_amount",
       options: [
@@ -1366,7 +1366,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state.timingPoint = "runner_action.main";
     state.runner.clicks = 4;
     addRunnerGrip(state, ICE_AND_DATA, "ice_data_1");
-    addCorpIce(state, WALL, "wall_3", "remote_1");
+    addCorpIce(state, WALL, "wall_3", "r1");
     const replayStart = structuredClone(state);
     const replayStartIndex = state.eventLog.length;
 
@@ -1381,8 +1381,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
       "expose_installed_cards_fort_select",
     );
     expect(state.pendingChoice?.maxSelections).toBe(1);
-    state = applyChoice(state, "runner", "fort_remote_1");
-    expect(state.pendingChoice?.source).toContain("single_data_fort:remote_1");
+    state = applyChoice(state, "runner", "fort_r1");
+    expect(state.pendingChoice?.source).toContain("single_data_fort:r1");
     expect(state.pendingChoice?.minSelections).toBe(0);
     expect(state.pendingChoice?.maxSelections).toBe(1);
     const exposedCardOptionId = state.pendingChoice?.options.find(
@@ -1393,7 +1393,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "expose_installed_cards_single_fort",
       publicRevealKind: "expose",
-      publicRevealDefinitionIds: WALL,
+      publicRevealDefinitionIds: String(WALL),
       exposedCardInstanceIds: "wall_3",
       exposedServerLabels: "Remote 1 ICE 1",
     });
@@ -1413,7 +1413,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state.timingPoint = "runner_action.main";
     state.runner.clicks = 4;
     addRunnerGrip(state, ICE_AND_DATA, "ice_data_scope");
-    const remoteIce = addCorpIce(state, WALL, "ice_data_remote", "remote_1");
+    const remoteIce = addCorpIce(state, WALL, "ice_data_remote", "r1");
     const hqIce = addCorpIce(state, WALL, "ice_data_hq", "hq");
 
     state = apply(

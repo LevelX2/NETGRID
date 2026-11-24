@@ -1,13 +1,18 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { parseRunIdToken, type RunId } from "@netgrid/shared";
+import { isCardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
+import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
 import { corpServerAgendaExposure } from "./corp-server-protection-reserve";
 import {
   assessCorpScoreProtection,
   corpVisibleSingleSubroutineIsUnbreakable,
 } from "../../runtime/corp-score-protection-assessment";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
+import { parseCardDefinitionId } from "../../card-definition-id-input";
 import { preferredAgendaPurgeArchivesOptions } from "./agenda-purge-archives-defense";
 import {
   knownNonNegativeInteger,
@@ -44,42 +49,24 @@ export function corpAgendaPurgeDefenseChoiceSignal(
           card.instanceId === sourceAgendaId &&
           card.known &&
           card.type === "agenda" &&
-          nonEmptyString(card.definitionId),
+          isCardDefinitionId(card.definitionId),
       )
     : undefined;
-  const action = input.legalActions.find(
-    (legalAction) =>
-      legalAction.side === "corp" &&
-      legalAction.type === "resolve_choice" &&
-      legalAction.source === "game_rule" &&
-      legalAction.timingPoint === input.playerView.timingPoint &&
-      legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
-      legalAction.choiceRequirements?.length === 1 &&
-      legalAction.choiceRequirements[0]?.choiceId === choice.choiceId,
-  );
+  const action = exactCurrentChoiceAction(input, choice);
   const candidate = action
     ? candidates.find(
         (entry) =>
           entry.actionId === action.actionId &&
+          entry.actorSide === "corp" &&
+          entry.stateVersion === choice.stateVersion &&
           entry.semanticActionType === "choice.resolve",
       )
     : undefined;
-  const requirement = action?.choiceRequirements?.[0];
-  const choiceOptionIds = choice.options.map((option) => option.id);
-  const actionChoiceContractIsExact =
-    requirement !== undefined &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === choiceOptionIds.length &&
-    choiceOptionIds.every((optionId) =>
-      requirement.optionIds.includes(optionId),
-    );
   if (
     !sourceAgendaId ||
     !sourceAgenda?.definitionId ||
     !action ||
     !candidate ||
-    !actionChoiceContractIsExact ||
     sourceStateVersion !== input.playerView.stateVersion ||
     revealedCardIds.length === 0 ||
     new Set(revealedCardIds).size !== revealedCardIds.length ||
@@ -155,32 +142,54 @@ export function corpAgendaPurgeDefenseChoiceSignal(
   }
 
   const plannedLayers = new Map<string, number>();
+  const minimumCosts = new Map(
+    [...optionsByCardId].map(([cardId, byServer]) => [
+      cardId,
+      Math.min(
+        ...[...byServer.values()].flatMap((variants) =>
+          variants.map(({ creditCost }) => creditCost),
+        ),
+      ),
+    ]),
+  );
+  let requiredRemainingCredits = [...minimumCosts.values()].reduce(
+    (sum, value) => sum + value,
+    0,
+  );
   let remainingCredits = input.playerView.own.credits;
+  if (requiredRemainingCredits > remainingCredits) return undefined;
   const targets: Array<{
     cardId: string;
     serverId: string;
     optionId: string;
   }> = [];
   for (const [cardId, byServer] of optionsByCardId.entries()) {
-    const serverId = [...byServer.keys()].sort((left, right) => {
-      const difference =
-        corpAgendaPurgeDefenseTargetValue(
-          input,
-          right,
-          centralAllocation,
-          plannedLayers,
-        ) -
-        corpAgendaPurgeDefenseTargetValue(
-          input,
-          left,
-          centralAllocation,
-          plannedLayers,
-        );
-      return difference || technicalCompare(left, right);
-    })[0]!;
+    requiredRemainingCredits -= minimumCosts.get(cardId)!;
+    const currentBudget = remainingCredits - requiredRemainingCredits;
+    const serverId = [...byServer]
+      .filter(([, variants]) =>
+        variants.some(({ creditCost }) => creditCost <= currentBudget),
+      )
+      .map(([id]) => id)
+      .sort((left, right) => {
+        const difference =
+          corpAgendaPurgeDefenseTargetValue(
+            input,
+            right,
+            centralAllocation,
+            plannedLayers,
+          ) -
+          corpAgendaPurgeDefenseTargetValue(
+            input,
+            left,
+            centralAllocation,
+            plannedLayers,
+          );
+        return difference || technicalCompare(left, right);
+      })[0]!;
     const selectedVariant = byServer
       .get(serverId)!
-      .filter((variant) => variant.creditCost <= remainingCredits)
+      .filter((variant) => variant.creditCost <= currentBudget)
       .sort(
         (left, right) =>
           left.creditCost - right.creditCost ||
@@ -226,10 +235,10 @@ export function corpAgendaPurgeDefenseChoiceSignal(
 }
 
 type ClassicDeflectorChoiceContext = Readonly<{
-  runId: string;
+  runId: RunId;
   sourceIceInstanceId: string;
   subroutineIndex: number;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   subroutineId: string;
   targetProfile: "archives" | "any_data_fort" | "subsidiary_data_fort";
   creditCost: number;
@@ -259,33 +268,16 @@ export function corpClassicDeflectorDefenseChoiceSignal(
   ) {
     return undefined;
   }
-  const action = input.legalActions.find(
-    (legalAction) =>
-      legalAction.side === "corp" &&
-      legalAction.type === "resolve_choice" &&
-      legalAction.source === "game_rule" &&
-      legalAction.timingPoint === input.playerView.timingPoint &&
-      legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
-      legalAction.choiceRequirements?.length === 1 &&
-      legalAction.choiceRequirements[0]?.choiceId === choice.choiceId,
-  );
+  const action = exactCurrentChoiceAction(input, choice);
   const candidate = action
     ? candidates.find(
         (entry) =>
           entry.actionId === action.actionId &&
+          entry.actorSide === "corp" &&
+          entry.stateVersion === choice.stateVersion &&
           entry.semanticActionType === "choice.resolve",
       )
     : undefined;
-  const requirement = action?.choiceRequirements?.[0];
-  const choiceOptionIds = choice.options.map((option) => option.id);
-  const exactActionBinding =
-    requirement !== undefined &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === choiceOptionIds.length &&
-    choiceOptionIds.every((optionId) =>
-      requirement.optionIds.includes(optionId),
-    );
   const run = input.playerView.run;
   const sourceServer = run
     ? input.playerView.servers.find(
@@ -304,8 +296,8 @@ export function corpClassicDeflectorDefenseChoiceSignal(
   if (
     !action ||
     !candidate ||
-    !exactActionBinding ||
     !run ||
+    run.runId !== context.runId ||
     run.phase !== "encounter_ice" ||
     run.encounteredIce?.instanceId !== context.sourceIceInstanceId ||
     sourceIce?.definitionId !== context.sourceDefinitionId ||
@@ -329,7 +321,7 @@ export function corpClassicDeflectorDefenseChoiceSignal(
       context.targetProfile === "archives"
         ? server.id === "archives"
         : context.targetProfile === "subsidiary_data_fort"
-          ? server.id.startsWith("remote_")
+          ? isRemoteServerId(server.id)
           : true,
     )
     .map((server) => server.id);
@@ -374,7 +366,7 @@ export function corpClassicDeflectorDefenseChoiceSignal(
   const targetExposure = (serverId: string) =>
     entryEffects.get(serverId) === "stops_run"
       ? 0
-      : classicDeflectorServerExposure(input, serverId, centralAllocation);
+      : corpRedirectServerExposure(input, serverId, centralAllocation);
   const redirectTargets = eligibleServerIds
     .filter(
       (serverId) =>
@@ -417,7 +409,7 @@ export function corpClassicDeflectorDefenseChoiceSignal(
     : redirectTargets;
   const selectedServerId = selectableRedirectTargets[0];
   const sourceExposure =
-    classicDeflectorServerExposure(
+    corpRedirectServerExposure(
       input,
       run.attackedServerId,
       centralAllocation,
@@ -503,7 +495,7 @@ function classicDeflectorEntryEffect(
         ? {
             strength: Math.max(
               card.strength,
-              CARD_DEFINITIONS_BY_ID[card.definitionId ?? ""]?.strength ?? 0,
+              planningCardFactsByDefinitionId(card.definitionId ?? 0)?.strength ?? 0,
             ),
           }
         : {}),
@@ -526,7 +518,7 @@ function classicDeflectorEntryEffect(
     subroutine.deflectorTarget === "archives"
       ? s.id === "archives"
       : subroutine.deflectorTarget === "subsidiary_data_fort"
-        ? s.id.startsWith("remote_")
+        ? isRemoteServerId(s.id)
         : subroutine.deflectorTarget === "any_data_fort",
   );
   return returnTargets.length === 1 &&
@@ -567,11 +559,16 @@ function parseClassicDeflectorChoiceContext(
     return undefined;
   }
   try {
+    const sourceDefinitionId = parseCardDefinitionId(
+      decodeURIComponent(parts[4]),
+    );
+    const runId = parseRunIdToken(decodeURIComponent(parts[1]));
+    if (sourceDefinitionId === undefined || runId === undefined) return undefined;
     return {
-      runId: decodeURIComponent(parts[1]),
+      runId,
       sourceIceInstanceId: decodeURIComponent(parts[2]),
       subroutineIndex,
-      sourceDefinitionId: decodeURIComponent(parts[4]),
+      sourceDefinitionId,
       subroutineId: decodeURIComponent(parts[5]),
       targetProfile: parts[6],
       creditCost,
@@ -582,7 +579,7 @@ function parseClassicDeflectorChoiceContext(
   }
 }
 
-function classicDeflectorServerExposure(
+export function corpRedirectServerExposure(
   input: AiDecisionInput,
   serverId: string,
   centralAllocation: CorpCentralDefenseAllocation | undefined,
@@ -637,7 +634,7 @@ function corpAgendaPurgeDefenseTargetValue(
   const visibleAgendaCount =
     server?.root.filter((card) => card.known && card.type === "agenda")
       .length ?? 0;
-  if (serverId.startsWith("remote_") && visibleAgendaCount > 0) {
+  if (isRemoteServerId(serverId) && visibleAgendaCount > 0) {
     return 5_000 + visibleAgendaCount * 250 - layerPenalty;
   }
   if (
@@ -651,10 +648,10 @@ function corpAgendaPurgeDefenseTargetValue(
       (centralAllocation?.status === "known" ? 3_000 : 2_750) - layerPenalty
     );
   }
-  if (serverId.startsWith("remote_") && (server?.root.length ?? 0) > 0) {
+  if (isRemoteServerId(serverId) && (server?.root.length ?? 0) > 0) {
     return 2_500 - layerPenalty;
   }
   if (serverId === "archives") return 750 - layerPenalty;
-  if (serverId.startsWith("remote_")) return 500 - layerPenalty;
+  if (isRemoteServerId(serverId)) return 500 - layerPenalty;
   return 250 - layerPenalty;
 }

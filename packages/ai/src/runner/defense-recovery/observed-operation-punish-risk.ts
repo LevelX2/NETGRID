@@ -1,4 +1,8 @@
-import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
+import {
+  isCardDefinitionId,
+  type AiDecisionInput,
+  type PublicGameEvent,
+} from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
 import { classifyTagPunishPayoffFromOntology } from "../../tag-punish-ontology-consumer";
 
@@ -16,7 +20,7 @@ export function observedAffordableOperationPunishRisk(
   return history.some((event) => {
     if (event.type !== "access_card") return false;
     const id = event.publicPayload.cardDefinitionId;
-    if (typeof id !== "string") return false;
+    if (!isCardDefinitionId(id)) return false;
     const card = RUNTIME_CARDS[id];
     const cost = card?.playCost;
     const profile = classifyTagPunishPayoffFromOntology(id);

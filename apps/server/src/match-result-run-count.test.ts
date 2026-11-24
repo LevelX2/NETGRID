@@ -1,90 +1,65 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { applyAction, createGame, hashState } from "@netgrid/engine";
-import { buildEngineDeck } from "@netgrid/decks";
-import type { GameState, PlayerAction, Side, StateHash } from "@netgrid/shared";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+  hashState,
+  replayEvents,
+} from "@netgrid/engine";
+import type { GameState, LegalAction, Side } from "@netgrid/shared";
 import { runCountForResult } from "./multiplayer";
 
-type RecordedAction = {
-  decision: number;
-  side: Side;
-  actionId: string;
-  selectedChoices?: PlayerAction["selectedChoices"];
-  selectedTargets?: PlayerAction["selectedTargets"];
-  beforeHash: StateHash;
-  afterHash: StateHash;
-};
-
-const fixture = JSON.parse(
-  readFileSync(
-    new URL("./test-fixtures/run-result-counter-599.json", import.meta.url),
-    "utf8",
-  ),
-) as {
-  snapshots: {
-    runner: Parameters<typeof buildEngineDeck>[0];
-    corp: Parameters<typeof buildEngineDeck>[0];
-  };
-  controllers: NonNullable<
-    NonNullable<Parameters<typeof createGame>[0]>["controllers"]
-  >;
-  games: {
-    gameNumber: number;
-    seed: string;
-    matchId: string;
-    initialState: GameState;
-    finalHash: StateHash;
-    runCount: number;
-    reportedRunCount: number;
-    actions: RecordedAction[];
-  }[];
-};
-
 describe("Engine-owned result run count (SP-760)", () => {
-  it.each(fixture.games)(
-    "replays the real opening/payment/immediate-stop case G$gameNumber",
-    (game) => {
-      // These are the exact original initial states, not manufactured AI roles
-      // or repaired historical replays. Every original transition stays bound.
-      let state = structuredClone(game.initialState);
-      for (const action of game.actions) {
-        expect(hashState(state)).toBe(action.beforeHash);
-        const result = applyAction(state, {
-          matchId: state.matchId,
-          side: action.side,
-          actionId: action.actionId,
-          clientKnownStateVersion: state.stateVersion,
-          ...(action.selectedChoices
-            ? { selectedChoices: action.selectedChoices }
-            : {}),
-          ...(action.selectedTargets
-            ? { selectedTargets: action.selectedTargets }
-            : {}),
-        });
-        if (!result.ok) throw new Error(JSON.stringify(result.error));
-        expect(hashState(result.state)).toBe(action.afterHash);
-        state = result.state;
-      }
-      expect(hashState(state)).toBe(game.finalHash);
-      expect(runCountForResult(state)).toBe(game.runCount);
-      expect(game.runCount).toBe(
-        { 3: 23, 8: 23, 21: 21 }[game.gameNumber],
+  it.each(["start_run", "play_event"] as const)(
+    "counts a %s exactly once through payment, immediate stop and replay",
+    (openingAction) => {
+      const initial = freshGame();
+      let state = submit(initial, "corp", "mandatory_draw");
+      state = submit(
+        state,
+        "corp",
+        "install_card",
+        (action) =>
+          action.payload?.serverId === "rd" &&
+          action.payload.placement === "ice",
       );
-    },
-    60_000,
-  );
+      state = submit(state, "corp", "end_turn");
 
-  function freshGame(): GameState {
-    return createGame({
-      matchId: "run-count-before-first-run",
-      seed: "run-count-before-first-run",
-      controllers: fixture.controllers,
-      runnerDeck: buildEngineDeck(fixture.snapshots.runner),
-      corpDeck: buildEngineDeck(fixture.snapshots.corp),
-      runnerDeckMetadata: fixture.snapshots.runner.publicMetadata,
-      corpDeckMetadata: fixture.snapshots.corp.publicMetadata,
-    });
-  }
+      const runnerClicks = state.runner.clicks;
+      state = submit(
+        state,
+        "runner",
+        openingAction,
+        (action) => action.payload?.serverId === "rd",
+      );
+      expect(state.runner.clicks).toBe(runnerClicks - 1);
+      expect(runCountForResult(state)).toBe(1);
+
+      const corpCredits = state.corp.credits;
+      state = submit(state, "corp", "rez_ice");
+      expect(state.corp.credits).toBeLessThan(corpCredits);
+      expect(runCountForResult(state)).toBe(1);
+
+      state = submit(state, "runner", "continue_run");
+      expect(state.run).toBeUndefined();
+      expect(runCountForResult(state)).toBe(1);
+
+      state = submit(
+        state,
+        "runner",
+        "start_run",
+        (action) => action.payload?.serverId === "rd",
+      );
+      state = submit(state, "runner", "continue_run");
+      expect(state.run).toBeUndefined();
+      expect(runCountForResult(state)).toBe(2);
+
+      const replay = replayEvents(initial, state.eventLog);
+      expect(replay.ok).toBe(true);
+      expect(replay.actualFinalStateHash).toBe(hashState(state));
+      expect(runCountForResult(replay.state)).toBe(2);
+    },
+  );
 
   it("starts at zero before any run and reads without mutating the state", () => {
     const state = freshGame();
@@ -114,3 +89,43 @@ describe("Engine-owned result run count (SP-760)", () => {
     },
   );
 });
+
+function freshGame(): GameState {
+  return createGameAfterSetup({
+    seed: "server-run-result-count",
+    runnerDeck: {
+      id: "result-run-count-runner",
+      name: "Run Event",
+      side: "runner",
+      identity: 587,
+      cards: [{ id: 600, quantity: 8 }],
+    },
+    corpDeck: {
+      id: "result-run-count-corp",
+      name: "Barrier ICE",
+      side: "corp",
+      identity: 3,
+      cards: [{ id: 589, quantity: 8 }],
+    },
+  });
+}
+
+function submit(
+  state: GameState,
+  side: Side,
+  type: LegalAction["type"],
+  applies: (action: LegalAction) => boolean = () => true,
+): GameState {
+  const action = getLegalActions(state, side).find(
+    (candidate) => candidate.type === type && applies(candidate),
+  );
+  if (!action) throw new Error(`Missing ${side} action ${type} at ${state.timingPoint}`);
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}

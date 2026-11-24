@@ -42,8 +42,8 @@ describe("semantic-redaction", () => {
     expect(redactSemanticString("runtime_action_legal:true")).toBe(
       "runtime_action_legal:true",
     );
-    expect(redactSemanticString("remote_1:known_payoff")).toBe(
-      "remote_1:known_payoff",
+    expect(redactSemanticString("r1:known_payoff")).toBe(
+      "r1:known_payoff",
     );
     expect(redactSemanticString("server_1:central")).toBe("server_1:central");
     expect(redactSemanticString("scenario_1:fixture")).toBe(
@@ -65,7 +65,7 @@ describe("semantic-redaction", () => {
   it("throws for unsafe semantic objects with a caller label", () => {
     expect(() =>
       assertSemanticObjectSideSafe(
-        { trace: { evidence: ["hiddenRemoteIdentity:remote_1"] } },
+        { trace: { evidence: ["hiddenRemoteIdentity:r1"] } },
         "SemanticTrace",
       ),
     ).toThrow(/SemanticTrace contains forbidden hidden-info marker/);

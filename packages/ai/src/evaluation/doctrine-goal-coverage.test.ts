@@ -3,7 +3,7 @@ import type {
   DeckDoctrineV2Diagnostic,
   DeckDoctrineV2DiagnosticStatus,
   DeckDoctrineV2StrategyDiagnostic,
-} from "../deck-doctrine-strategy";
+} from "../deck-doctrine-diagnostic";
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import { buildRealEngineDecisionCorpusScenarios } from "./real-engine-decision-corpus-fixtures";
 import { buildRealEngineDecisionCorpus } from "./real-engine-decision-corpus";

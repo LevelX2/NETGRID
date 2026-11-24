@@ -39,8 +39,10 @@ function tagEffectProfileFromPayload(
     amount === undefined ||
     (mode === "all" && amount !== "all") ||
     ((mode === "amount" || mode === "up_to_amount") &&
-      (typeof amount !== "number" || !Number.isInteger(amount) || amount <= 0)) ||
-    mode === undefined || mode === "support_only"
+      (typeof amount !== "number" ||
+        !Number.isInteger(amount) ||
+        amount <= 0)) ||
+    mode === undefined
   ) {
     throw new PlanResolutionFailure("missing_action_semantics", {
       side: action.side,
@@ -49,7 +51,8 @@ function tagEffectProfileFromPayload(
       legalActionTypes: [action.type],
       unresolvedActionIds: [action.actionId],
       owner: "action_semantics",
-      removalCondition: "Preserve the Engine's exact tag-removal mode and positive integer amount (or all) for this current LegalAction.",
+      removalCondition:
+        "Preserve the Engine's exact tag-removal mode and positive integer amount (or all) for this current LegalAction.",
     });
   }
   return {
@@ -72,33 +75,20 @@ export function currentRunnerTagReduction(
   if (amount === "all") return activeTags;
   if (typeof amount === "number" && Number.isInteger(amount) && amount > 0)
     return Math.min(activeTags, amount);
-  throw new Error(JSON.stringify({
-    code: "missing_current_tag_removal_amount",
-    owner: "action_semantics",
-    actionId: candidate.actionId,
-    stateVersion: candidate.stateVersion,
-  }));
+  throw new Error(
+    JSON.stringify({
+      code: "missing_current_tag_removal_amount",
+      owner: "action_semantics",
+      actionId: candidate.actionId,
+      stateVersion: candidate.stateVersion,
+    }),
+  );
 }
 
 function withTagEffectProfile(
   candidate: ActionSemanticCandidate,
   tagEffectProfile: ActionTagEffectProfile,
 ): ActionSemanticCandidate {
-  if (!tagEffectProfile.acuteTagRemoval) {
-    return {
-      ...candidate,
-      tagEffectProfile,
-      actionTacticSignals: uniqueStrings([
-        ...candidate.actionTacticSignals,
-        `tag.${tagEffectProfile.kind}`,
-      ]),
-      evidence: [
-        ...candidate.evidence,
-        ...tagEffectProfile.evidence.map((entry) => `AI-TAG-SEM:${entry}`),
-      ],
-    };
-  }
-
   return {
     ...candidate,
     tagEffectProfile,

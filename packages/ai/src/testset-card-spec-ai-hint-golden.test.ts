@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
@@ -30,13 +30,13 @@ describe("Testset CardSpec AI hint reviewed semantic golden", () => {
   });
 
   it("pins all 36 full hint objects and their explicit absences", () => {
-    const compiled = cardSpecPlanningCards()
-      .filter((entry) => reviewedIds.has(entry.definition.id))
+    const compiled = listPlanningCardsWithFacts()
+      .filter((entry) => reviewedIds.has(entry.facts.id))
       .map((entry) => ({
-        cardId: entry.definition.id,
+        cardId: entry.facts.id,
         hint: deriveCardSpecAiHint(entry),
       }))
-      .sort((left, right) => left.cardId.localeCompare(right.cardId));
+      .sort((left, right) => (left.cardId - right.cardId));
 
     expect(reviewedGolden.cards).toHaveLength(36);
     expect(compiled).toEqual(reviewedGolden.cards);
@@ -46,10 +46,10 @@ describe("Testset CardSpec AI hint reviewed semantic golden", () => {
         .map(({ cardId, hint }) => ({ cardId, hint })),
     ).toEqual(reviewedGolden.cards);
     expect(generatedArtifact.cardIds).not.toContain(
-      "catalog_preview_operation_001",
+      1,
     );
     expect(generatedArtifact.cardIds).not.toContain(
-      "catalog_preview_resource_001",
+      2,
     );
   });
 
@@ -65,25 +65,25 @@ describe("Testset CardSpec AI hint reviewed semantic golden", () => {
     for (const { cardId, hint } of reviewedGolden.cards)
       expect(
         (hint.requiredMechanics ?? []).filter((token) => forbidden.has(token)),
-        cardId,
+        String(cardId),
       ).toEqual([]);
   });
 
   it("does not infer breaker or remote roles from card type alone", () => {
-    const entries = cardSpecPlanningCards();
+    const entries = listPlanningCardsWithFacts();
     const hardware = entries.find(
-      (entry) => entry.definition.id === "simple_setup_hardware",
+      (entry) => entry.facts.id === 602,
     )!;
     const programWithoutBreaker = {
       ...hardware,
-      definition: { ...hardware.definition, type: "program" as const },
+      facts: { ...hardware.facts, type: "program" as const },
     };
     expect(
       deriveCardSpecAiHint(programWithoutBreaker as never).riskTags ?? [],
     ).not.toContain("encounter");
 
     const upgrade = entries.find(
-      (entry) => entry.definition.id === "simple_upgrade",
+      (entry) => entry.facts.id === 606,
     )!;
     const upgradeWithoutRemoteValue = {
       ...upgrade,

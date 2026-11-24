@@ -42,7 +42,7 @@ it("preserves the current run capability's successful-run self tag in the existi
 it("does not transfer the held event's self tag to basic runs", () => {
   const { input } = fixture();
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   expect(target.runActionProjection.riskSignals).not.toContain(
     "tag_self:successful_run",
@@ -50,7 +50,7 @@ it("does not transfer the held event's self tag to basic runs", () => {
   expect(target.runActionPayoff.riskPenalty).toBe(0);
 });
 
-it("keeps the revised event evaluation under the central-pressure owner and current Engine action", () => {
+it("excludes the paid HQ information route at its central-pressure owner", () => {
   const { input, runtime } = fixture();
   restoreAiRuntimeCheckpoint(
     input,
@@ -63,7 +63,15 @@ it("keeps the revised event evaluation under the central-pressure owner and curr
   )!;
   expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
   expect(decision.fallbackUsed).toBe(false);
-  expect(decision.evidence).toContain(
-    "plan_first_root:plan:runner.pressure_central:central%3Ahq",
+  const event = input.legalActions.find(
+    (legalAction) => legalAction.type === "play_event" && legalAction.payload?.serverId === "hq",
+  )!;
+  expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+    expect.objectContaining({
+      actionId: event.actionId,
+      whyNot: expect.arrayContaining([
+        "explicitly_nonproductive:runner.pressure_central:runner_central_information_probe_known_path_not_admitted:hq",
+      ]),
+    }),
   );
 });

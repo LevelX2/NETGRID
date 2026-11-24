@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -7,9 +7,9 @@ import { visibleCard } from "./runner-hand-development.test-support";
 
 describe("tag prevention consumption follows the actual typed source cost", () => {
   it.each(
-    cardSpecPlanningCards()
+    listPlanningCardsWithFacts()
       .filter((c) => c.planning.engine.tagPreventionSources !== undefined)
-      .map((c) => [c.definition.id, c] as const),
+      .map((c) => [c.facts.id, c] as const),
   )("keeps canonical and generated semantics for %s", (id, entry) => {
     const sources = entry.planning.engine.tagPreventionSources!;
     const consumed = sources.some(
@@ -49,7 +49,7 @@ describe("tag prevention consumption follows the actual typed source cost", () =
   });
   it("does not mark repeatable Nasuko protection as a self-consuming persistent provider", () => {
     const card = visibleCard("nasuko", {
-      definitionId: "onr_v1_135_nasuko-cycle",
+      definitionId: 347,
       type: "hardware",
       installCost: 1,
     });
@@ -62,7 +62,7 @@ describe("tag prevention consumption follows the actual typed source cost", () =
   });
   it("retains the actual consuming Fall Guy counterpart", () => {
     const card = visibleCard("fall-guy", {
-      definitionId: "onr_v1_161_fall-guy",
+      definitionId: 373,
       type: "resource",
       installCost: 0,
     });

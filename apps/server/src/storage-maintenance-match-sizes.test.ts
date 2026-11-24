@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
 import { MultiplayerService } from "./multiplayer";
+import { initialPublicEventHistory } from "./public-event-history";
 import { SqliteMatchStorage } from "./storage-sqlite";
 
 describe("SQLite maintenance match sizes", () => {
@@ -25,6 +26,10 @@ describe("SQLite maintenance match sizes", () => {
     });
     const database = new DatabaseSync(dbPath);
     try {
+      const eventHistory = JSON.stringify({
+        before: { ...initialPublicEventHistory(), eventCount: 1 },
+      });
+      const publicEvent = "{}";
       const largeEnginePayload = "engine-event-payload Grüße 🃏".repeat(8_000);
       const largeTracePayload = "ai-decision-trace-payload Größe 🃏".repeat(
         8_000,
@@ -33,35 +38,30 @@ describe("SQLite maintenance match sizes", () => {
         .prepare(
           "INSERT INTO engine_events (match_id, event_id, event_index, event_json) VALUES (?, ?, ?, ?)",
         )
-        .run(
-          created.matchId,
-          "maintenance-engine-event",
-          1,
-          largeEnginePayload,
-        );
+        .run(created.matchId, 2, 1, largeEnginePayload);
       database
         .prepare(
-          `INSERT INTO events (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, private_payload_local_only, hidden_info_barrier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO events (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, history_json, private_payload_local_only, hidden_info_barrier) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
         .run(
           created.matchId,
-          "maintenance-engine-event",
+          2,
           1,
           1,
           1,
           "maintenance-state-hash",
-          "{}",
+          publicEvent,
+          eventHistory,
           0,
           0,
         );
       database
         .prepare(
-          `INSERT INTO ai_decision_traces (match_id, trace_id, event_id, state_version, match_version, side, turn, decision_index, created_at, schema_version, trace_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO ai_decision_traces (match_id, event_id, state_version, match_version, side, turn, decision_index, created_at, schema_version, trace_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
         .run(
           created.matchId,
-          "maintenance-ai-trace",
-          "maintenance-engine-event",
+          2,
           1,
           1,
           "runner",
@@ -100,6 +100,26 @@ describe("SQLite maintenance match sizes", () => {
           .prepare("SELECT event_json FROM engine_events WHERE match_id = ?")
           .all(created.matchId) as Array<{ event_json: string }>
       ).reduce((sum, row) => sum + Buffer.byteLength(row.event_json), 0);
+      const events = database
+        .prepare(
+          "SELECT public_payload_json, history_json FROM events WHERE match_id = ?",
+        )
+        .all(created.matchId) as Array<{
+        public_payload_json: string;
+        history_json: string;
+      }>;
+      expect(events).toContainEqual({
+        public_payload_json: publicEvent,
+        history_json: eventHistory,
+      });
+      const eventBytes = events.reduce(
+        (sum, row) =>
+          sum +
+          Buffer.byteLength(row.public_payload_json) +
+          Buffer.byteLength(row.history_json),
+        0,
+      );
+      expect(entry!.sizes.eventPayloadBytes).toBe(eventBytes);
       expect(entry!.sizes.engineEventBytes).toBe(engineBytes);
       expect(entry!.sizes.engineEventBytes).toBeGreaterThan(
         stored.engineEventBytes!,
@@ -117,6 +137,10 @@ describe("SQLite maintenance match sizes", () => {
       const summary = await storage.maintenanceSummary();
       expect(summary.matchCount).toBe(1);
       expect(summary.largestMatches[0]!.sizes).toEqual(entry!.sizes);
+      expect(
+        summary.tableSizes.find((table) => table.key === "events")!
+          .approximatePayloadBytes,
+      ).toBe(eventBytes);
       expect(
         summary.tableSizes.find((table) => table.key === "engine_events")!
           .approximatePayloadBytes,

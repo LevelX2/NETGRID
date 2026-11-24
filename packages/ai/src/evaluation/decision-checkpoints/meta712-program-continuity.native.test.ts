@@ -1,4 +1,5 @@
 import { afterEach, expect, it } from "vitest";
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import checkpoint from "./fixtures/meta712-d245-program-continuity.json";
 import {
   aiLiveRuntimeDependencies,
@@ -25,7 +26,7 @@ const services = createRunnerProgramInstallTrashContext({
 
 it("does not declare the only stable breaker redundant to an incoming random-loss breaker", () => {
   expect(Object.values(checkpoint.validation).every(Boolean)).toBe(true);
-  const input = structuredClone(
+  const input = structuredClone<unknown>(
     checkpoint.input,
   ) as AiDecisionInputWithDeckCapabilities;
   const choice = input.playerView.pendingChoice!;
@@ -35,7 +36,9 @@ it("does not declare the only stable breaker redundant to an incoming random-los
     choice.options,
   );
   expect(
-    assessment.candidates.find((c) => c.card?.instanceId.endsWith("krash_2")),
+    assessment.candidates.find((c) =>
+      referencesDefaultDeckCard(c.card?.instanceId, 251, 2),
+    ),
   ).toMatchObject({ protectedRole: true });
   expect(
     services.selectedRunnerProgramInstallTrashOptionIds(
@@ -43,11 +46,11 @@ it("does not declare the only stable breaker redundant to an incoming random-los
       choice,
       choice.options,
     ),
-  ).toEqual(["card_runner_onr_v1_059_self-modifying-code_2"]);
+  ).toEqual(["card_c1oa"]);
 });
 
 it("preserves the previously bound historical choice and its plan owner", () => {
-  const input = structuredClone(
+  const input = structuredClone<unknown>(
     checkpoint.input,
   ) as AiDecisionInputWithDeckCapabilities;
   restoreAiRuntimeCheckpoint(
@@ -65,19 +68,19 @@ it("preserves the previously bound historical choice and its plan owner", () => 
   const result = chooseAiAction(input);
   expect(JSON.stringify(input.playerView)).toBe(before);
   expect(result).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     selectedChoices: {
       choiceId: "runner_program_trash_before_install_244",
-      selectedOptionIds: ["card_runner_onr_v1_039_krash_2"],
+      selectedOptionIds: ["card_c1ju"],
     },
     fallbackUsed: false,
     timeoutUsed: false,
     decisionDebug: {
       planFirstDecision: {
         rootPlanInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_universal%3Aefficiency%3Ard%3Arun%3Arunner.start_run.rd",
+          "pegqo75sg3y86rnv0cxwj4jnrf",
         leafExecutorInstanceId:
-          "plan:runner.rig_and_coverage:coverage%3Abreaker_universal%3Aefficiency%3Ard%3Arun%3Arunner.start_run.rd",
+          "pegqo75sg3y86rnv0cxwj4jnrf",
       },
     },
   });

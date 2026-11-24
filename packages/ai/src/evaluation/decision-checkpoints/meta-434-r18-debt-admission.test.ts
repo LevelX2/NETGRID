@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -38,7 +39,7 @@ it.each([
       (a) => a.actionId === result.actionId,
     )!;
     expect(selected).toBeDefined();
-    expect(selected.source).not.toContain("loan-from-chiba");
+    expect(selected.source).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 380));
     expect(result.fallbackUsed).toBe(false);
     expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: selected.actionId,
@@ -60,7 +61,7 @@ it.each(["runner.grip", "runner.heap"])(
       ),
     ) as { input: AiDecisionInputWithDeckCapabilities };
     const action = input.legalActions.find(
-      (a) => a.type === "install_card" && a.source.includes("loan-from-chiba"),
+      (a) => a.type === "install_card" && referencesDefaultDeckCard(a.source, 380),
     )!;
     action.targetRequirements[0]!.zoneScope = [zone];
     const [candidate] = buildActionSemanticCandidates({

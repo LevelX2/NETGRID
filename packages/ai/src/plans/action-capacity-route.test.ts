@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type { ActionCapacityProjection } from "../action-semantic-candidate-types";
@@ -215,6 +216,58 @@ describe("action capacity routes", () => {
     );
   });
 
+  it("cannot execute one native setup twice through distinct future projections", () => {
+    const demand = createCorpActionDemand({
+      demandId: "corp:next-turn-capacity",
+      purpose: "next_turn_setup",
+      priority: "next_own_turn",
+      hardness: "soft",
+      deadline: "start_of_next_own_turn",
+      currentActions: 0,
+      targetActions: 2,
+    });
+    const setup = candidate("install-action-engine", 0, {
+      actionType: "install_card",
+      listedActionCost: 1,
+      kind: "future_recurring_gain",
+      timing: "future_turn_start",
+      gainAmountPerTurn: 1,
+      durationTurns: 3,
+    });
+    const search = searchActionCapacityRoutes({
+      demand,
+      candidates: [setup],
+      remainingActions: 2,
+      futureProjections: [{
+        projectionId: "quoted-start-of-turn-gain",
+        actionsGained: 1,
+        reliability: "contingent",
+        earliestOwnTurnOffset: 1,
+        requiredCurrentActionId: setup.actionId,
+      }],
+    });
+    expect(search.bestRoute.status).toBe("uncovered");
+  });
+
+  it("does not resolve a soft blocker with an invalidated or unrelated route", () => {
+    const base = scoreDemand(1, 2);
+    const demand = { ...base, hardness: "soft" as const };
+    const { bestRoute } = searchActionCapacityRoutes({
+      demand,
+      candidates: [candidate("gain", 1)],
+      remainingActions: 1,
+    });
+    expect(actionDemandHardBlockerIsResolved(demand, bestRoute)).toBe(true);
+    expect(actionDemandHardBlockerIsResolved(
+      demand,
+      revalidateActionCapacityRoute(bestRoute, new Set()),
+    )).toBe(false);
+    expect(actionDemandHardBlockerIsResolved(
+      { ...demand, demandId: "corp:another-score" },
+      bestRoute,
+    )).toBe(false);
+  });
+
   it("prefers a larger otherwise identical guaranteed source", () => {
     const result = searchActionCapacityRoutes({
       demand: scoreDemand(1, 2),
@@ -363,7 +416,7 @@ function candidate(
     ...(overrides.sourceCardInstanceId
       ? { sourceCardInstanceId: overrides.sourceCardInstanceId }
       : {}),
-    sourceDefinitionId: actionId,
+    sourceDefinitionId: syntheticCardDefinitionId(actionId),
     costProfile: {
       clickCost: listedActionCost,
       creditCost: overrides.creditCost ?? 0,

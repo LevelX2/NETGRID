@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 /** Declarative typed port implemented by hidden-zone-search-runtime.ts. */
 import type {
   CardDefinition,
@@ -36,7 +37,7 @@ export type HiddenZoneSearchRuntimePort = {
       ) => boolean;
     };
     runnerMemoryLimit: () => number;
-    shuffleRunnerStack: (purpose: string) => void;
+    shuffleRunnerStack: (purpose: RandomPurpose) => void;
   };
   hiddenZoneSearchChoiceHandlerHost: (
     state: GameState,
@@ -75,7 +76,7 @@ export type HiddenZoneSearchRuntimePort = {
   ) => void;
   revealCorpRdTop: (state: GameState, legalAction: LegalAction) => void;
   revealRunnerStackTop: (state: GameState, legalAction: LegalAction) => void;
-  shuffleRunnerStack: (state: GameState, purpose: string) => void;
+  shuffleRunnerStack: (state: GameState, purpose: RandomPurpose) => void;
   startRunnerProgramFreeMemoryChoice: (
     state: GameState,
     selectedProgramId: CardInstanceId,

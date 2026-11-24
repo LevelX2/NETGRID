@@ -2,7 +2,6 @@ import {
   REMOTE_ROLE_KIND_METRIC_KEYS,
   REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS,
 } from "./ontology-metric-key-types";
-import { progressionEntriesWithRunTargets } from "./progression-action-sequence";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { hasEvidenceFlag } from "../runtime/evidence-value";
@@ -106,8 +105,7 @@ export function summarizeRemoteRoleOntologyMetrics(
   };
 
   for (const summary of summaries) {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    for (const entry of sequence) {
+    for (const entry of summary.actionSequence) {
       const roleKinds = new Set<string>();
       const serverScopes = new Set<string>();
       for (const evidence of entry.evidence) {
@@ -126,12 +124,15 @@ export function summarizeRemoteRoleOntologyMetrics(
       }
 
       for (const roleKind of roleKinds) {
+        if (!Object.hasOwn(REMOTE_ROLE_KIND_METRIC_KEYS, roleKind)) continue;
         const key = REMOTE_ROLE_KIND_METRIC_KEYS[roleKind];
         if (!key) continue;
         metrics.remoteRoleByKind += 1;
         metrics[key] += 1;
       }
       for (const serverScope of serverScopes) {
+        if (!Object.hasOwn(REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS, serverScope))
+          continue;
         const key = REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS[serverScope];
         if (!key) continue;
         metrics.remoteRoleByServerScope += 1;

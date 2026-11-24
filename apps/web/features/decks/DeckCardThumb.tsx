@@ -1,5 +1,6 @@
 "use client";
 
+import { type CardDefinitionId } from "@netgrid/shared";
 import { useEffect, useState } from "react";
 
 import { CardImage } from "../cards/card-image-service";
@@ -28,7 +29,7 @@ export function DeckCardThumb({
   preview = false,
   table = false,
 }: {
-  cardId: string;
+  cardId: CardDefinitionId;
   title: string;
   cardType?: string;
   rulesText?: string;

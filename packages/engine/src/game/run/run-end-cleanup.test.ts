@@ -20,13 +20,17 @@ import {
 } from "./run-end-cleanup";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
 
-function definition(id: string, type: CardDefinition["type"]): CardDefinition {
-  return { id: id as CardDefinitionId, title: id, type } as CardDefinition;
+function definition(
+  id: number,
+  type: CardDefinition["type"],
+  title = String(id),
+): CardDefinition {
+  return { id: id as CardDefinitionId, title, type } as CardDefinition;
 }
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"],
   options: Partial<CardInstance> = {},
 ): CardInstance {
@@ -73,36 +77,36 @@ function makeHost(
   cleanupDelayedCount: () => number;
 } {
   const definitions: Record<string, CardDefinition> = {
-    ice_def: definition("ice_def", "ice"),
-    onr_v1_020_dupre: definition("onr_v1_020_dupre", "program"),
-    tokyo_def: definition("tokyo_def", "upgrade"),
-    lucidrine_def: definition("lucidrine_def", "operation"),
+    1663273972: definition(1663273972, "ice"),
+    232: definition(232, "program"),
+    1433344137: definition(1433344137, "upgrade", "tokyo_def"),
+    932235382: definition(932235382, "operation"),
     ...(options.definitions ?? {}),
   };
   const instances: Record<string, CardInstance> = {
     ice_1: instance(
       "ice_1",
-      "ice_def",
+      1663273972,
       {
         side: "corp",
         zone: "serverIce",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"],
       { rezzed: true, faceup: true },
     ),
     dupre: instance(
       "dupre",
-      "onr_v1_020_dupre",
+      232,
       { side: "runner", zone: "rig" },
-      { counters: { power: 2 }, selectedServerId: "remote_0" },
+      { counters: { power: 2 }, selectedServerId: "r0" },
     ),
     tokyo: instance(
       "tokyo",
-      "tokyo_def",
+      1433344137,
       {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       } as CardInstance["zone"],
       { rezzed: true, faceup: true },
     ),
@@ -110,7 +114,7 @@ function makeHost(
   };
   const servers = [
     {
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: ["ice_1"],
@@ -146,10 +150,10 @@ function makeHost(
     run:
       options.run ??
       ({
-        runId: "run_1",
-        attackedServerId: "remote_1",
+        runId: 1,
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
       } as unknown as NonNullable<GameState["run"]>),
   } as unknown as GameState;
   let resetBreakerStrengthCount = 0;
@@ -355,7 +359,7 @@ describe("multi-server success sequence run-end cleanup", () => {
   it("continues the sequence after an unsuccessful run and remembers the failure", () => {
     const { host, state, legalAction } = makeHost({
       run: {
-        runId: "run_pirate",
+        runId: 314974,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -363,8 +367,7 @@ describe("multi-server success sequence run-end cleanup", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
-          sourceDefinitionId:
-            "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+          sourceDefinitionId: 174 as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
@@ -407,7 +410,7 @@ describe("multi-server success sequence run-end cleanup", () => {
   it("adds exactly one future action debt only after the final run when any sequence run failed", () => {
     const { host, state, legalAction } = makeHost({
       run: {
-        runId: "run_pirate_final",
+        runId: 339289,
         attackedServerId: "archives",
         phase: "movement",
         position: { kind: "server", serverId: "archives" },
@@ -415,8 +418,7 @@ describe("multi-server success sequence run-end cleanup", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
-          sourceDefinitionId:
-            "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+          sourceDefinitionId: 174 as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: [],
           successfulServerIds: ["hq"],
@@ -448,7 +450,7 @@ describe("multi-server success sequence run-end cleanup", () => {
   it("keeps the next sequence run pending without consuming existing debt after a successful partial run", () => {
     const { host, state, legalAction } = makeHost({
       run: {
-        runId: "run_pirate",
+        runId: 314974,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -456,8 +458,7 @@ describe("multi-server success sequence run-end cleanup", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
-          sourceDefinitionId:
-            "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+          sourceDefinitionId: 174 as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
@@ -498,19 +499,19 @@ describe("run end cleanup", () => {
   it("returns run temporary credits and applies Lucidrine-style run-end core damage", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_lucidrine",
-        attackedServerId: "remote_1",
+        runId: 428980,
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
         runnerRunTemporaryCredits: {
           amount: 9,
           remaining: 4,
           returnUnusedAtRunEnd: true,
-          sourceDefinitionId: "lucidrine_def",
+          sourceDefinitionId: 932235382,
         },
         unpreventableCoreDamageAtRunEnd: {
           amount: 1,
-          sourceDefinitionId: "lucidrine_def",
+          sourceDefinitionId: 932235382,
         },
       } as unknown as NonNullable<GameState["run"]>,
     });
@@ -530,7 +531,7 @@ describe("run end cleanup", () => {
       stateChanged: true,
     });
     expect(fixture.damageCalls).toEqual([
-      { sourceDefinitionId: "lucidrine_def", amount: 1 },
+      { sourceDefinitionId: 932235382, amount: 1 },
     ]);
     expect(fixture.legalAction.payload).toMatchObject({
       temporaryRunCreditsReturned: 4,
@@ -551,9 +552,9 @@ describe("run end cleanup", () => {
       const fixture = makeHost({
         run: {
           runId: `run_all_nighter_${successful}`,
-          attackedServerId: "remote_1",
+          attackedServerId: "r1",
           phase: "movement",
-          position: { kind: "server", serverId: "remote_1" },
+          position: { kind: "server", serverId: "r1" },
           grantBonusRunOnFinish: true,
         } as unknown as NonNullable<GameState["run"]>,
       });
@@ -572,7 +573,7 @@ describe("run end cleanup", () => {
   it("adds Proteus purgeable Corp-bucket counters after successful central runs", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_highlighter",
+        runId: 529758,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -581,16 +582,13 @@ describe("run end cleanup", () => {
       instances: {
         highlighter: instance(
           "highlighter",
-          "onr_proteus_090_highlighter",
+          148,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        onr_proteus_090_highlighter: definition(
-          "onr_proteus_090_highlighter",
-          "program",
-        ),
+        148: definition(148, "program"),
       },
       virusImplementations: {
         highlighter: {
@@ -612,19 +610,19 @@ describe("run end cleanup", () => {
     });
     expect(fixture.legalAction.payload).toMatchObject({
       proteusRunnerVirusCounter: true,
-      runId: "run_highlighter",
+      runId: 529758,
       serverId: "rd",
       counterType: "highlighter",
       counterDelta: 1,
       counterTotalAfter: 1,
-      sourceCardDefinitionId: "onr_proteus_090_highlighter",
+      sourceCardDefinitionId: 148,
     });
   });
 
   it("adds Cascade as a Corp-bucket counter after successful R&D runs", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_cascade",
+        runId: 192103,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -633,13 +631,13 @@ describe("run end cleanup", () => {
       instances: {
         cascade: instance(
           "cascade",
-          "onr_v1_010_cascade",
+          222,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        onr_v1_010_cascade: definition("onr_v1_010_cascade", "program"),
+        222: definition(222, "program"),
       },
       virusImplementations: {
         cascade: {
@@ -664,12 +662,12 @@ describe("run end cleanup", () => {
     });
     expect(fixture.legalAction.payload).toMatchObject({
       proteusRunnerVirusCounter: true,
-      runId: "run_cascade",
+      runId: 192103,
       serverId: "rd",
       counterType: "cascade",
       counterDelta: 1,
       counterTotalAfter: 1,
-      sourceCardDefinitionId: "onr_v1_010_cascade",
+      sourceCardDefinitionId: 222,
     });
     expect(fixture.legalAction.resolvedEffects).toContainEqual(
       expect.objectContaining({
@@ -678,7 +676,7 @@ describe("run end cleanup", () => {
         counterType: "cascade",
         addedCounterAmount: 1,
         remainingCounters: 1,
-        sourceDefinitionId: "onr_v1_010_cascade",
+        sourceDefinitionId: 222,
       }),
     );
   });
@@ -686,7 +684,7 @@ describe("run end cleanup", () => {
   it("adds Proteus access-trash counters after matching successful runs", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_garbage",
+        runId: 623546,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -695,16 +693,13 @@ describe("run end cleanup", () => {
       instances: {
         garbage: instance(
           "garbage",
-          "onr_proteus_089_garbage-in",
+          147,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        "onr_proteus_089_garbage-in": definition(
-          "onr_proteus_089_garbage-in",
-          "program",
-        ),
+        147: definition(147, "program"),
       },
       virusImplementations: {
         garbage: {
@@ -728,14 +723,14 @@ describe("run end cleanup", () => {
       proteusRunnerVirusCounter: true,
       serverId: "rd",
       counterType: "garbage",
-      sourceCardDefinitionId: "onr_proteus_089_garbage-in",
+      sourceCardDefinitionId: 147,
     });
   });
 
   it("adds Scaldan purgeable counters after successful HQ runs", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_scaldan",
+        runId: 874571,
         attackedServerId: "hq",
         phase: "movement",
         position: { kind: "server", serverId: "hq" },
@@ -744,16 +739,13 @@ describe("run end cleanup", () => {
       instances: {
         scaldan: instance(
           "scaldan",
-          "onr_proteus_094_scaldan",
+          152,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        onr_proteus_094_scaldan: definition(
-          "onr_proteus_094_scaldan",
-          "program",
-        ),
+        152: definition(152, "program"),
       },
       virusImplementations: {
         scaldan: {
@@ -775,19 +767,19 @@ describe("run end cleanup", () => {
     });
     expect(fixture.legalAction.payload).toMatchObject({
       proteusRunnerVirusCounter: true,
-      runId: "run_scaldan",
+      runId: 874571,
       serverId: "hq",
       counterType: "scaldan",
       counterDelta: 1,
       counterTotalAfter: 1,
-      sourceCardDefinitionId: "onr_proteus_094_scaldan",
+      sourceCardDefinitionId: 152,
     });
   });
 
   it("spends Superserum-style prevention charges before adding purgeable counters", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_superserum_charges",
+        runId: 246664,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -796,33 +788,27 @@ describe("run end cleanup", () => {
       instances: {
         cascade: instance(
           "cascade",
-          "onr_v1_010_cascade",
+          222,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
         highlighter: instance(
           "highlighter",
-          "onr_proteus_090_highlighter",
+          148,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
         garbage: instance(
           "garbage",
-          "onr_proteus_089_garbage-in",
+          147,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        onr_v1_010_cascade: definition("onr_v1_010_cascade", "program"),
-        onr_proteus_090_highlighter: definition(
-          "onr_proteus_090_highlighter",
-          "program",
-        ),
-        "onr_proteus_089_garbage-in": definition(
-          "onr_proteus_089_garbage-in",
-          "program",
-        ),
+        222: definition(222, "program"),
+        148: definition(148, "program"),
+        147: definition(147, "program"),
       },
       virusImplementations: {
         cascade: {
@@ -885,7 +871,7 @@ describe("run end cleanup", () => {
   it("adds a central socket counter without automatically converting a complete set", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_pipeline",
+        runId: 578057,
         attackedServerId: "archives",
         phase: "movement",
         position: { kind: "server", serverId: "archives" },
@@ -894,16 +880,13 @@ describe("run end cleanup", () => {
       instances: {
         viral_pipeline: instance(
           "viral_pipeline",
-          "onr_proteus_099_viral-pipeline",
+          157,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        "onr_proteus_099_viral-pipeline": definition(
-          "onr_proteus_099_viral-pipeline",
-          "program",
-        ),
+        157: definition(157, "program"),
       },
       virusImplementations: {
         viral_pipeline: {
@@ -936,12 +919,12 @@ describe("run end cleanup", () => {
     expect(fixture.state.purgeableRunnerVirusCounters?.corp?.pipe ?? 0).toBe(0);
     expect(fixture.legalAction.payload).toMatchObject({
       proteusRunnerVirusCounter: true,
-      runId: "run_pipeline",
+      runId: 578057,
       serverId: "archives",
       counterType: "socket_archives",
       counterDelta: 1,
       counterTotalAfter: 1,
-      sourceCardDefinitionId: "onr_proteus_099_viral-pipeline",
+      sourceCardDefinitionId: 157,
     });
     expect(fixture.legalAction.resolvedEffects).toEqual(
       expect.arrayContaining([
@@ -950,7 +933,7 @@ describe("run end cleanup", () => {
           counterType: "socket_archives",
           addedCounterAmount: 1,
           reason: "runner_virus_successful_run",
-          sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+          sourceDefinitionId: 157,
         }),
       ]),
     );
@@ -959,7 +942,7 @@ describe("run end cleanup", () => {
   it("uses the semantic successful-run server for flags and virus triggers", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_shredder_pipeline",
+        runId: 379669,
         attackedServerId: "archives",
         successfulRunServerOverride: "hq",
         phase: "movement",
@@ -969,16 +952,13 @@ describe("run end cleanup", () => {
       instances: {
         viral_pipeline: instance(
           "viral_pipeline",
-          "onr_proteus_099_viral-pipeline",
+          157,
           { side: "runner", zone: "rig" },
           { faceup: true, rezzed: true },
         ),
       },
       definitions: {
-        "onr_proteus_099_viral-pipeline": definition(
-          "onr_proteus_099_viral-pipeline",
-          "program",
-        ),
+        157: definition(157, "program"),
       },
       virusImplementations: {
         viral_pipeline: {
@@ -1016,7 +996,7 @@ describe("run end cleanup", () => {
   it("removes Garbage counters once at run end after one or more free trashes", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_garbage",
+        runId: 623546,
         attackedServerId: "rd",
         phase: "movement",
         position: { kind: "server", serverId: "rd" },
@@ -1024,7 +1004,7 @@ describe("run end cleanup", () => {
           {
             counterType: "garbage",
             removeAtRunEnd: 2,
-            sourceDefinitionId: "onr_proteus_089_garbage-in",
+            sourceDefinitionId: 147,
           },
         ],
       } as unknown as NonNullable<GameState["run"]>,
@@ -1038,17 +1018,17 @@ describe("run end cleanup", () => {
       proteusRunnerVirusFreeTrashCounterType: "garbage",
       garbageCountersSpent: 2,
       garbageCountersAfter: 1,
-      garbageCounterRemovalSourceDefinitionId: "onr_proteus_089_garbage-in",
+      garbageCounterRemovalSourceDefinitionId: 147,
     });
   });
 
   it("derezzes Olivia Salazar temporary rezzed ICE at run end", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_olivia",
-        attackedServerId: "remote_1",
+        runId: 707261,
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
         temporaryDiscountedRezzedIceIds: ["ice_1"],
       } as unknown as NonNullable<GameState["run"]>,
     });
@@ -1071,17 +1051,17 @@ describe("run end cleanup", () => {
   it("applies Dupré run-end counters and resets fort binding on fort change", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_dupre",
-        attackedServerId: "remote_1",
+        runId: 742965,
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
         runEndCounterAwardBreakerIds: ["dupre"],
       } as unknown as NonNullable<GameState["run"]>,
     });
 
     recordFortBoundBreakerUsage(fixture.host, "dupre", false);
     expect(fixture.state.cardInstances.dupre?.selectedServerId).toBe(
-      "remote_1",
+      "r1",
     );
     expect(fixture.state.cardInstances.dupre?.counters?.power).toBe(0);
 
@@ -1093,7 +1073,7 @@ describe("run end cleanup", () => {
 
     expect(result.placedCounters).toBe(1);
     expect(fixture.state.cardInstances.dupre?.selectedServerId).toBe(
-      "remote_1",
+      "r1",
     );
     expect(fixture.state.cardInstances.dupre?.counters?.power).toBe(1);
   });
@@ -1101,10 +1081,10 @@ describe("run end cleanup", () => {
   it("does not award a fort-bound breaker counter after pump-only use", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_dupre_pump_only",
-        attackedServerId: "remote_1",
+        runId: 734383,
+        attackedServerId: "r1",
         phase: "encounter_ice",
-        position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+        position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       } as unknown as NonNullable<GameState["run"]>,
     });
 
@@ -1117,7 +1097,7 @@ describe("run end cleanup", () => {
 
     expect(result.placedCounters).toBeUndefined();
     expect(fixture.state.cardInstances.dupre?.selectedServerId).toBe(
-      "remote_1",
+      "r1",
     );
     expect(fixture.state.cardInstances.dupre?.counters?.power).toBe(0);
   });
@@ -1128,16 +1108,16 @@ describe("run end cleanup", () => {
       instances: {
         dupre_2: instance(
           "dupre_2",
-          "onr_v1_020_dupre",
+          232,
           { side: "runner", zone: "rig" },
           { counters: { power: 0 } },
         ),
       },
       run: {
-        runId: "run_dupre_multi",
-        attackedServerId: "remote_1",
+        runId: 190055,
+        attackedServerId: "r1",
         phase: "encounter_ice",
-        position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+        position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       } as unknown as NonNullable<GameState["run"]>,
     });
 
@@ -1158,10 +1138,10 @@ describe("run end cleanup", () => {
   it("records Dupré usage during the run and resolves Pattel's Virus choices through stable pending-choice fields", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_dupre_record",
-        attackedServerId: "remote_1",
+        runId: 419019,
+        attackedServerId: "r1",
         phase: "encounter_ice",
-        position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+        position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       } as unknown as NonNullable<GameState["run"]>,
     });
 
@@ -1201,7 +1181,7 @@ describe("run end cleanup", () => {
 
     resolveBrokenIceVirusCounterChoice(fixture.host, fixture.legalAction, {
       side: "runner",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       type: "resolve_choice",
       selectedChoices: {
         selectedOptionIds: ["source_pattel_1_target_ice_1"],
@@ -1214,7 +1194,7 @@ describe("run end cleanup", () => {
     expect(fixture.legalAction.payload).toMatchObject({
       abilityId: "broken_ice_virus_counter",
       brokenIceVirusCounterAdded: 2,
-      targetCardDefinitionId: "ice_def",
+      targetCardDefinitionId: 1663273972,
       remainingCounters: 2,
       choiceVisibility: "public",
     });
@@ -1225,18 +1205,18 @@ describe("run end cleanup", () => {
       instances: {
         pattel_1: instance(
           "pattel_1",
-          "pattel_def",
+          2022055323,
           { side: "runner", zone: "rig" },
           { faceup: true },
         ),
         pattel_2: instance(
           "pattel_2",
-          "pattel_def",
+          2022055323,
           { side: "runner", zone: "rig" },
           { faceup: true },
         ),
       },
-      definitions: { pattel_def: definition("pattel_def", "resource") },
+      definitions: { 2022055323: definition(2022055323, "resource") },
     });
     fixture.state.pendingChoice = {
       choiceId: "broken_ice_virus_counter_8",
@@ -1271,7 +1251,7 @@ describe("run end cleanup", () => {
 
     resolveBrokenIceVirusCounterChoice(fixture.host, fixture.legalAction, {
       side: "runner",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       type: "resolve_choice",
       selectedChoices: {
         selectedOptionIds: [
@@ -1292,17 +1272,17 @@ describe("run end cleanup", () => {
   it("records and trashes Rent-I-Con-style breakers used during the run", () => {
     const fixture = makeHost({
       run: {
-        runId: "run_rent",
-        attackedServerId: "remote_1",
+        runId: 836004,
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
       } as unknown as NonNullable<GameState["run"]>,
       runnerPrograms: ["rent" as CardInstanceId],
       definitions: {
-        rent_def: definition("rent_def", "program"),
+        4209413918: definition(4209413918, "program"),
       },
       instances: {
-        rent: instance("rent", "rent_def", { side: "runner", zone: "rig" }),
+        rent: instance("rent", 4209413918, { side: "runner", zone: "rig" }),
       },
       dupreSourceIds: [],
       runEndTrashSourceIds: ["rent" as CardInstanceId],
@@ -1326,8 +1306,8 @@ describe("run end cleanup", () => {
     expect(fixture.legalAction.payload).toMatchObject({
       v1922RunnerProgramAbility: "run_end_trash_used_breaker",
       trashedCount: 1,
-      trashedCardDefinitionId: "rent_def",
-      publicRevealDefinitionIds: "rent_def",
+      trashedCardDefinitionId: 4209413918,
+      publicRevealDefinitionIds: "4209413918",
     });
   });
 
@@ -1335,17 +1315,17 @@ describe("run end cleanup", () => {
     let trashResolutionCalls = 0;
     const fixture = makeHost({
       run: {
-        runId: "run_rent_twice",
-        attackedServerId: "remote_1",
+        runId: 436879,
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
       } as unknown as NonNullable<GameState["run"]>,
       runnerPrograms: ["rent" as CardInstanceId],
       definitions: {
-        rent_def: definition("rent_def", "program"),
+        4209413918: definition(4209413918, "program"),
       },
       instances: {
-        rent: instance("rent", "rent_def", { side: "runner", zone: "rig" }),
+        rent: instance("rent", 4209413918, { side: "runner", zone: "rig" }),
       },
       runEndTrashSourceIds: ["rent" as CardInstanceId],
       resolveRunnerInstalledProgramTrash: (state, cardId, source) => {
@@ -1408,7 +1388,7 @@ describe("run end cleanup", () => {
       runEndTrashEffectCount: 2,
       runEndTrashPreventedOrReplacedCount: 1,
       trashedCount: 1,
-      trashedCardDefinitionId: "rent_def",
+      trashedCardDefinitionId: 4209413918,
     });
   });
 
@@ -1428,8 +1408,8 @@ describe("run end cleanup", () => {
     ).toBeUndefined();
     expect(fixture.legalAction.payload).toMatchObject({
       unsuccessfulRunCorpCreditBonus: true,
-      sourceDefinitionId: "tokyo_def",
-      serverId: "remote_1",
+      sourceDefinitionId: 1433344137,
+      serverId: "r1",
       corpCreditsGained: 3,
       corpCreditsAfter: 7,
       sourceCardId: "tokyo",
@@ -1441,9 +1421,9 @@ describe("run end cleanup", () => {
         side: "corp",
         amount: 3,
         reason: "unsuccessful_run",
-        sourceDefinitionId: "tokyo_def",
+        sourceDefinitionId: 1433344137,
         sourceTitle: "tokyo_def",
-        serverId: "remote_1",
+        serverId: "r1",
         serverLabel: "Remote 1",
       }),
     );
@@ -1451,11 +1431,11 @@ describe("run end cleanup", () => {
 
   it("clears encounter temporary trace credits with the existing payload fields", () => {
     const run = {
-      runId: "run_trace",
-      attackedServerId: "remote_1",
+      runId: 773228,
+      attackedServerId: "r1",
       encounterTemporaryTraceCredits: {
         remaining: 2,
-        sourceDefinitionId: "trace_pool_def",
+        sourceDefinitionId: 3532417201,
       },
     } as unknown as NonNullable<GameState["run"]>;
     const legalAction = { payload: {} } as LegalAction;
@@ -1465,7 +1445,7 @@ describe("run end cleanup", () => {
     expect(run.encounterTemporaryTraceCredits).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
       temporaryCreditsReturned: 2,
-      temporaryTraceCreditsSourceDefinitionId: "trace_pool_def",
+      temporaryTraceCreditsSourceDefinitionId: 3532417201,
     });
   });
 
@@ -1473,11 +1453,11 @@ describe("run end cleanup", () => {
     "rejects invalid encounter temporary trace credit remainder %s before cleanup mutation",
     (remaining) => {
       const run = {
-        runId: "run_trace",
-        attackedServerId: "remote_1",
+        runId: 773228,
+        attackedServerId: "r1",
         encounterTemporaryTraceCredits: {
           remaining,
-          sourceDefinitionId: "trace_pool_def",
+          sourceDefinitionId: 3532417201,
         },
       } as unknown as NonNullable<GameState["run"]>;
       const legalAction = {

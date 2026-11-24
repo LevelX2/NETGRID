@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import {
   applyAction,
   createGame,
@@ -6,37 +5,37 @@ import {
   hashState,
   visibleCorpMandatoryDrawCount,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState, LegalAction } from "@netgrid/shared";
+import {
+  ORIGINALSET_DEFAULT_DECKS,
+  type DeckDefinition,
+  type GameState,
+  type LegalAction,
+} from "@netgrid/shared";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import {
   buildAiDecisionInput,
   type AiDecisionInputWithDeckCapabilities,
 } from "../../runtime/ai-decision-input";
-import {
-  resetResidentPlanPortfolioMemory,
-  restoreResidentPlanPortfolioMemorySnapshot,
-} from "../../plans/resident-plan-portfolio-memory";
+import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { releaseAiMatchRuntime } from "../../runtime/match-runtime-memory";
 import { RealEngineFixtureBuilder } from "../real-engine-fixture-builder";
-import {
-  restoreAiRuntimeCheckpoint,
-  type AiRuntimeCheckpointV1,
-} from "./runtime-checkpoint";
+import { shadoeTagAndBagDeckForTest } from "../meta-ten-standard-decks.test-support";
 
-const CHANCE = "onr_v1_284_chance-observation";
-const AUDIT = "onr_v1_283_audit-of-call-records";
-const PUNITIVE = "onr_v1_301_punitive-counterstrike";
-const SCORCHED = "onr_v1_302_scorched-earth";
-const URBAN = "onr_v1_307_urban-renewal";
-const SHOCK = "onr_v1_268_shock-r";
-const HUNTER = "onr_v1_249_hunter";
-const WALL = "onr_v1_279_wall-of-static";
-const POLITICAL = "onr_v1_209_political-coup";
-const ON_CALL = "onr_v1_208_on-call-solo-team";
-const FILLER = "onr_v1_192_corporate-boon";
-const LAB = "onr_classic_003_unlisted-research-lab";
-const DRAW = "corp.draw_card";
+const CHANCE = 496;
+const AUDIT = 495;
+const ACCOUNTS_RECEIVABLE = 493;
+const PUNITIVE = 513;
+const SCORCHED = 514;
+const URBAN = 519;
+const SHOCK = 480;
+const HUNTER = 461;
+const WALL = 491;
+const POLITICAL = 421;
+const ON_CALL = 420;
+const FILLER = 404;
+const LAB = 7;
+const DRAW = "c8";
 
 const testedMatches = new Set<string>();
 afterEach(() => {
@@ -45,36 +44,13 @@ afterEach(() => {
   resetResidentPlanPortfolioMemory();
 });
 
-it("D5 samples once for six compatible damage cards with the exact Hand leaf and Punish parent", () => {
-  const { input, runtime, validation, stateHash, stateVersion } = JSON.parse(
-    readFileSync(
-      new URL(
-        "../../../../../data/scenarios/ai-decision-checkpoints/cp-manual-20261113-corp-punish-draw-d5.json",
-        import.meta.url,
-      ),
-      "utf8",
-    ),
-  ) as {
-    input: AiDecisionInputWithDeckCapabilities;
-    runtime: AiRuntimeCheckpointV1;
-    validation: Record<string, boolean>;
-    stateHash: string;
-    stateVersion: number;
-  };
-  expect(stateHash).toBe("fnv1a:aba2c536");
-  expect(stateVersion).toBe(5);
-  expect(Object.values(validation).every(Boolean)).toBe(true);
-  expect(input.matchId).toBe("match_f9840b7522f5d61e");
+it("samples once for six compatible damage cards with the exact Hand leaf and Punish parent", () => {
+  const { input } = fixture({
+    corpDeck: shadoeTagAndBagDeckForTest(),
+    archives: [ACCOUNTS_RECEIVABLE],
+  });
+  const { stateVersion } = input.playerView;
   expect(input.playerView.opponent).not.toHaveProperty("gripOrHq");
-  restoreAiRuntimeCheckpoint(
-    input,
-    input.ownDeckSnapshot!.deckSnapshotId,
-    runtime,
-  );
-  restoreResidentPlanPortfolioMemorySnapshot(
-    input,
-    runtime.residentPlanPortfolio,
-  );
   const { decision, action } = select(input);
   expect(action.type).toBe("draw_card");
   expect(action.costs).toEqual([{ clicks: 1 }]);
@@ -219,7 +195,7 @@ it.each([
   { variant: "no finishing damage in R&D", extras: [PUNITIVE, PUNITIVE] },
   {
     variant: "too few hits",
-    extras: [SCORCHED, ...Array<string>(6).fill(FILLER)],
+    extras: [SCORCHED, ...Array<number>(6).fill(FILLER)],
   },
   { variant: "tag plus both damage cards cannot be paid", credits: 3 },
   { variant: "the tag response stops the combo", fallGuy: true },
@@ -271,10 +247,12 @@ function apply(state: GameState, action: LegalAction) {
 
 function fixture(
   options: {
-    hand?: string[];
-    extras?: string[];
-    scored?: string;
-    top?: string;
+    corpDeck?: DeckDefinition;
+    archives?: number[];
+    hand?: number[];
+    extras?: number[];
+    scored?: number;
+    top?: number;
     score?: boolean;
     defense?: boolean;
     fallGuy?: boolean;
@@ -283,20 +261,20 @@ function fixture(
   } = {},
 ) {
   const hand = options.hand ?? [CHANCE, AUDIT, PUNITIVE, SHOCK];
-  const corpDeck = deck("corp", [
-    ...hand,
-    ...(options.extras ?? [SCORCHED, SCORCHED, URBAN, URBAN]),
-    HUNTER,
-    ...(options.score ? [WALL, POLITICAL] : []),
-    ...(options.defense ? [POLITICAL, ON_CALL] : []),
-    ...(options.scored ? [options.scored] : []),
-    ...Array<string>(6).fill(FILLER),
-  ]);
-  const fallGuy = "onr_v1_161_fall-guy";
-  const runnerDeck = deck("runner", [
-    fallGuy,
-    ...Array<string>(7).fill("onr_v1_039_krash"),
-  ]);
+  const corpDeck =
+    options.corpDeck ??
+    deck("corp", [
+      ...(options.archives ?? []),
+      ...hand,
+      ...(options.extras ?? [SCORCHED, SCORCHED, URBAN, URBAN]),
+      HUNTER,
+      ...(options.score ? [WALL, POLITICAL] : []),
+      ...(options.defense ? [POLITICAL, ON_CALL] : []),
+      ...(options.scored ? [options.scored] : []),
+      ...Array<number>(6).fill(FILLER),
+    ]);
+  const fallGuy = 373;
+  const runnerDeck = deck("runner", [fallGuy, ...Array<number>(7).fill(251)]);
   const state = createGame({
     seed: "punish-component-draw",
     setupMode: "completed",
@@ -308,22 +286,26 @@ function fixture(
     .withCorpHqSize(0)
     .withCorpCredits(options.credits ?? 9)
     .withRunnerCredits(5);
-  for (const definitionId of hand) {
+  function moveFromRd(definitionId: number, zone: "hq" | "archives") {
     const index = state.corp.rd.findIndex(
       (id) => state.cardInstances[id]?.definitionId === definitionId,
     );
+    if (index < 0) throw new Error(`Missing fixture card ${definitionId}`);
     const [id] = state.corp.rd.splice(index, 1);
-    state.corp.hq.push(id!);
-    state.cardInstances[id!]!.zone = { side: "corp", zone: "hq" };
+    state.corp[zone].push(id!);
+    state.cardInstances[id!]!.zone = { side: "corp", zone };
   }
+  for (const definitionId of hand) moveFromRd(definitionId, "hq");
+  for (const definitionId of options.archives ?? [])
+    moveFromRd(definitionId, "archives");
   if (!options.defense) builder.withCorpIceOnServer("rd", HUNTER);
   if (options.score)
     builder
-      .withCorpRemoteRoot("remote_1", POLITICAL, 3)
-      .withRezzedCorpIceOnServer("remote_1", WALL);
+      .withCorpRemoteRoot("r1", POLITICAL, 3)
+      .withRezzedCorpIceOnServer("r1", WALL);
   if (options.fallGuy)
     builder.withRunnerResourceInstalled(fallGuy).withRunnerGripSize(5);
-  const score = (definitionId: string, side: "corp" | "runner") => {
+  const score = (definitionId: number, side: "corp" | "runner") => {
     const index = state.corp.rd.findIndex(
       (id) => state.cardInstances[id]?.definitionId === definitionId,
     );
@@ -368,14 +350,14 @@ function fixture(
   return { state, input, buildInput };
 }
 
-function deck(side: "corp" | "runner", definitions: string[]): DeckDefinition {
-  const counts = new Map<string, number>();
+function deck(side: "corp" | "runner", definitions: number[]): DeckDefinition {
+  const counts = new Map<number, number>();
   for (const id of definitions) counts.set(id, (counts.get(id) ?? 0) + 1);
   return {
     id: `punish-draw-${side}`,
     name: `Punish draw ${side}`,
     side,
-    identity: `${side}_identity_001`,
+    identity: ORIGINALSET_DEFAULT_DECKS[side].identity,
     cards: [...counts].map(([id, quantity]) => ({ id, quantity })),
   };
 }

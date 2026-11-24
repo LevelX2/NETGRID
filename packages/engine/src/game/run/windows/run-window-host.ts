@@ -67,7 +67,7 @@ export type RunRezWindowResult = {
   handled: boolean;
   rezzedCardId?: CardInstanceId;
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   serverId?: Exclude<ServerId, "new_remote"> | string;
   rootEffectResolved?: boolean;
   rezInterruptChoiceStarted?: boolean;

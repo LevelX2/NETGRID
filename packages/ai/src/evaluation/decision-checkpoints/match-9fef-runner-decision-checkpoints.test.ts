@@ -40,7 +40,7 @@ describe("match 9FEF runner decision checkpoints", () => {
       "F05 follows the current HQ pressure route at D95",
       rdAfterKnownTopInvalidatedD95Json,
     ],
-    ["F06 builds the liquid reserve at D109", hqProbeD109Json],
+    ["F06 certifies the zero-cost HQ probe at D109", hqProbeD109Json],
     ["F05 avoids the repeated costly R&D run at D115", noRepeatRdD115Json],
     ["F07 builds the liquid reserve at D127", noDeadFundingD127Json],
     ["F08 classifies the D143 remote run as a probe", remote2ProbeD143Json],
@@ -79,14 +79,14 @@ describe("match 9FEF runner decision checkpoints", () => {
       portfolio.instances.find(
         (instance) =>
           instance.instanceId ===
-          "plan:runner.credit_bank:runner_onr_v1_154_broker_2",
+          "pdeckcw9fkuryyxs8xionefklm",
       )?.moduleState,
     ).toMatchObject({
       phase: "build",
       signal: {
         priorityClass: "P4",
         actionIds: expect.arrayContaining([
-          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+          "r1.c29e.c29e.activated.440",
         ]),
       },
     });
@@ -120,24 +120,40 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     // The six liquid credits already fund the successful-HQ-run/Jettison
     // setup. Cashing three stored credits out first would add an unnecessary prefix.
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      acceptableActions: [{ actionId: "rs.hq" }],
       planExecution: {
         acceptablePlanKinds: ["runner.pressure_central"],
         acceptableCapabilities: ["pressure_hq_access"],
         requiredAssessmentEvidence: [
-          "runner_hq_success_window_setup:onr_v1_080_core-command-jettison-ice",
+          "runner_hq_success_window_setup:292",
         ],
       },
     };
   }
+  if (checkpoint.checkpointId === "9FEF-F06-HQ-PROBE-CLASSIFICATION-D109") {
+    checkpoint.expectation = {
+      acceptableActions: [{ actionId: "rs.hq" }],
+      planExecution: {
+        acceptablePlanKinds: ["runner.pressure_central"],
+        acceptableCapabilities: ["pressure_hq_information"],
+      },
+      runTargets: [{
+        actionId: "rs.hq",
+        targetServerId: "hq",
+        pathPassability: "reachable",
+        pathCost: 0,
+        recommendation: "run_if_free",
+      }],
+    };
+  }
   if (checkpoint.checkpointId === "9FEF-F04-PROBE-NOT-FUNDING-D88") {
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "runner.gain_credit" }],
+      acceptableActions: [{ actionId: "rb" }],
       planExecution: {
         acceptablePlanKinds: ["runner.economy"],
         acceptableCapabilities: ["gain_general_liquid_credits"],
         requiredAssessmentEvidence: [
-          "runner_run_support_fund_concrete_gap:remote_1:concrete_funding_gap_admitted",
+          "runner_run_support_fund_concrete_gap:r1:concrete_funding_gap_admitted",
         ],
       },
     };

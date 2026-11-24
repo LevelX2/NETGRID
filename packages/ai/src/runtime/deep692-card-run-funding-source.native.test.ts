@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -53,8 +54,8 @@ function funding(
 ) {
   const input = original(),
     actionId = cardRun
-      ? "runner.play_event.runner_onr_classic_039_library-search_1.rd.runner_onr_classic_039_library-search_1"
-      : "runner.start_run.rd";
+      ? "rh.c9l.rd.c9l"
+      : "rs.rd";
   const target = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === actionId,
   );
@@ -87,13 +88,13 @@ it("does not fund Library Search by randomly discarding the event required by th
   expect(action).toBeDefined();
   expect(action!.expiresAtStateVersion).toBe(input.playerView.stateVersion);
   expect(action!.payload?.damageAmount).toBeUndefined();
-  expect(action!.actionId).toBe("runner.gain_credit");
+  expect(action!.actionId).toBe("rb");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.economy:runner-portfolio-credit-reserve",
+    "pc7ebuiw5dxhlbzbf1nhcs4p4z",
   );
   expect(
     decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toBe("plan:runner.economy:runner-portfolio-credit-reserve");
+  ).toBe("pc7ebuiw5dxhlbzbf1nhcs4p4z");
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: decision.actionId,
@@ -116,11 +117,11 @@ it("does not certify any random-self-damage funding route for the exact grip-bac
   );
 });
 it("retains the original funded basic run when its zero hand buffer needs no grip source", () => {
-  expect(funding(false).routeActionIds[0]).toContain("do-the-drine");
+  expect(referencesDefaultDeckCard(funding(false).routeActionIds[0], 40)).toBe(true);
   expect(funding(false).routeAssessment.status).toBe("covered_guaranteed");
 });
 it("keeps ordinary credit funding for the same event when its hand source survives", () => {
   const route = funding(true, false, 7, 2);
-  expect(route.routeActionIds).toEqual(["runner.gain_credit"]);
+  expect(route.routeActionIds).toEqual(["rb"]);
   expect(route.routeAssessment.status).toBe("covered_guaranteed");
 });

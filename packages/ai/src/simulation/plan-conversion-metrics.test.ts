@@ -6,6 +6,23 @@ import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { summarizePlanConversionMetrics } from "./plan-conversion-metrics";
 
 describe("summarizePlanConversionMetrics", () => {
+  it("counts no-progress turns by simulation even when two results share a seed", () => {
+    const metrics = summarizePlanConversionMetrics([
+      {
+        seed: "paired-seed",
+        actionSequence: [
+          { ...entry("runner", "gain_credit", "reserve"), turnNumber: 1 },
+        ],
+      } as AiSimulationSummary,
+      {
+        seed: "paired-seed",
+        actionSequence: [
+          { ...entry("corp", "score_agenda", "score"), turnNumber: 1 },
+        ],
+      } as AiSimulationSummary,
+    ]);
+    expect(metrics.turnsWithNoProgress).toBe(1);
+  });
   it("does not credit one side's board progress to the other side's plan", () => {
     const metrics = summarizePlanConversionMetrics([
       {

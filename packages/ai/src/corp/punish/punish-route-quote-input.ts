@@ -6,42 +6,19 @@ import {
   type CorpPunishRouteQuoteRequest,
   type CorpPunishRouteQuoteResult,
   type CorpPunishRouteQuoteSet,
-  type CorpPunishRouteStepKind,
   type LegalAction,
   type PlayerView,
   type VisibleCard,
 } from "@netgrid/shared";
-import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { sanitizeCorpPunishRouteQuoteSet } from "../../input-dto";
-import {
-  corpDirectTagOperationProfile,
-  corpPunishFixedCapabilityCost,
-  corpInstalledHardwareTrashOperationProfile,
-  corpTaggedCreditDenialOperationProfile,
-  corpTraceTagSourceProfile,
-  corpScoredTraceTagSourceProfile,
-  corpTaggedMeatDamageOperationProfile,
-  corpScoredTaggedMeatDamageProfile,
-  corpInstalledTaggedMeatDamageProfile,
-} from "../../runtime/corp-canonical-card-facts";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { corpPunishFixedCapabilityCost } from "../../runtime/corp-canonical-card-facts";
 import { currentLegalActionResourceCost } from "../../runtime/visible-action-facts";
+import { structuredPunishComponentAdapter, type PunishComponentAdapter } from "./punish-capability-adapters";
 import { PUNISH_PAYOFF_CAMPAIGN_ID } from "./punish-types";
 
 const MAX_PUNISH_ROUTES = 8;
 const MAX_PUNISH_ROUTE_STEPS = 6;
-
-type PunishComponentAdapter = {
-  kind: Extract<
-    CorpPunishRouteStepKind,
-    "tag" | "trace_tag" | "meat_damage" | "hardware_trash" | "other_punish"
-  >;
-  definitionId: string;
-  routeOrder: number;
-  sourceCapabilityBindingKind: "card_spec_capability_key";
-  sourceCapabilityId: string;
-  agendaPointCost?: number;
-  damageAmount?: number;
-};
 
 /**
  * A semantic adapter only states which visible Engine capability may be
@@ -80,14 +57,28 @@ export function withDecisionLocalCorpPunishRouteQuotes(
     try {
       result = quoteCorpPunishRoute(structuredClone(request));
     } catch {
-      continue;
+      throw punishQuoteFailure(input, request, "provider_threw");
     }
-    if (!result.ok || !quoteMatchesRequest(result.quote, request)) continue;
+    if (result?.ok !== true) {
+      throw punishQuoteFailure(
+        input,
+        request,
+        result?.ok === false ? "request_rejected" : "invalid_response_schema",
+      );
+    }
+    if (!quoteMatchesRequest(result.quote, request)) {
+      throw punishQuoteFailure(input, request, "response_binding_mismatch");
+    }
     const sanitized = sanitizeSingleQuote(input.playerView, result.quote);
-    if (sanitized) validQuotes.push(sanitized);
+    if (!sanitized) {
+      throw punishQuoteFailure(input, request, "invalid_response_schema");
+    }
+    validQuotes.push(sanitized);
   }
   const quoteSet = sanitizedDecisionQuoteSet(input.playerView, validQuotes);
-  if (!quoteSet) return input;
+  if (!quoteSet) {
+    throw punishQuoteFailure(input, requests[0]!, "invalid_response_schema");
+  }
   return {
     ...input,
     playerView: {
@@ -103,6 +94,8 @@ export function buildBoundedCorpPunishRouteRequests(
   if (
     input.side !== "corp" ||
     input.playerView.side !== "corp" ||
+    input.playerView.activeSide !== "corp" ||
+    input.playerView.timingPoint !== "corp_action.main" ||
     typeof input.matchId !== "string" ||
     input.matchId.trim().length === 0
   ) {
@@ -308,7 +301,7 @@ function visiblePunishComponent(
       ? card.rezzed !== true ||
         (card.type !== "asset" && card.type !== "upgrade")
       : card.type !== (sourceZone === "scoreArea" ? "agenda" : "operation")) ||
-    typeof card.definitionId !== "string"
+    typeof card.definitionId !== "number"
   ) {
     return undefined;
   }
@@ -342,140 +335,6 @@ function visiblePunishComponent(
     ...(headAction ? { headAction } : {}),
     ...(fixedCost ? { fixedCost } : {}),
   };
-}
-
-function structuredPunishComponentAdapter(
-  definitionId: string,
-): PunishComponentAdapter | undefined {
-  return (
-    structuredTraceTagAdapter(definitionId) ??
-    structuredHardwareTrashAdapter(definitionId) ??
-    structuredDirectTagAdapter(definitionId) ??
-    structuredTaggedCreditDenialAdapter(definitionId) ??
-    structuredTaggedDamageAdapter(definitionId)
-  );
-}
-
-/**
- * Discovers reviewed finite Trace -> tag heads without assigning any trace
- * strength, bid or cost in the AI layer. The Engine remains responsible for
- * certifying the exact current action and the complete response window.
- */
-function structuredTraceTagAdapter(
-  definitionId: string,
-): PunishComponentAdapter | undefined {
-  const profile =
-    corpTraceTagSourceProfile(definitionId) ??
-    corpScoredTraceTagSourceProfile(definitionId);
-  if (!profile) return undefined;
-  return {
-    definitionId,
-    kind: "trace_tag",
-    routeOrder: 1,
-    sourceCapabilityBindingKind: "card_spec_capability_key",
-    sourceCapabilityId: profile.sourceCapabilityId,
-  };
-}
-
-/**
- * Discovers the Power-Grid family from reviewed semantic hints. The visible
- * definition id only joins the visible card to its hint record; no concrete
- * card id, title, rules text or visible printed cost determines the role.
- * The Engine subsequently proves the exact corpUtility capability.
- */
-function structuredHardwareTrashAdapter(
-  definitionId: string,
-): PunishComponentAdapter | undefined {
-  const profile = corpInstalledHardwareTrashOperationProfile(definitionId);
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  if (
-    !profile ||
-    !hint ||
-    hint.side !== "corp" ||
-    hint.cardType !== "operation" ||
-    hint.planRoles?.includes("tag_punish") !== true ||
-    hint.conditions?.some(
-      (condition) => condition.kind === "requires_runner_tagged",
-    ) !== true ||
-    hint.conditions.some(
-      (condition) => condition.kind === "requires_installed_hardware",
-    ) !== true ||
-    hint.effects?.some(
-      (effect) =>
-        effect.kind === "hardware_trash" &&
-        effect.scope === "runner" &&
-        effect.timing === "action" &&
-        effect.finite === true,
-    ) !== true ||
-    hint.effects.some(
-      (effect) =>
-        effect.kind === "tag_punish_payoff" &&
-        effect.scope === "runner" &&
-        effect.timing === "action" &&
-        effect.finite === true,
-    ) !== true
-  ) {
-    return undefined;
-  }
-  return {
-    definitionId,
-    kind: "hardware_trash",
-    routeOrder: 6,
-    sourceCapabilityBindingKind: "card_spec_capability_key",
-    sourceCapabilityId: profile.sourceCapabilityId,
-  };
-}
-
-function structuredDirectTagAdapter(
-  definitionId: string,
-): PunishComponentAdapter | undefined {
-  const profile = corpDirectTagOperationProfile(definitionId);
-  return profile
-    ? {
-        definitionId,
-        kind: "tag",
-        routeOrder: 0,
-        sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: profile.sourceCapabilityId,
-      }
-    : undefined;
-}
-
-function structuredTaggedCreditDenialAdapter(
-  definitionId: string,
-): PunishComponentAdapter | undefined {
-  const profile = corpTaggedCreditDenialOperationProfile(definitionId);
-  return profile
-    ? {
-        definitionId,
-        kind: "other_punish",
-        routeOrder: 5,
-        sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: profile.sourceCapabilityId,
-      }
-    : undefined;
-}
-
-function structuredTaggedDamageAdapter(
-  definitionId: string,
-): PunishComponentAdapter | undefined {
-  const profile =
-    corpTaggedMeatDamageOperationProfile(definitionId) ??
-    corpScoredTaggedMeatDamageProfile(definitionId) ??
-    corpInstalledTaggedMeatDamageProfile(definitionId);
-  return profile
-    ? {
-        definitionId,
-        kind: "meat_damage",
-        routeOrder: 10,
-        sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: profile.sourceCapabilityId,
-        damageAmount: profile.damageAmount,
-        ...(profile.agendaPointCost !== undefined
-          ? { agendaPointCost: profile.agendaPointCost }
-          : {}),
-      }
-    : undefined;
 }
 
 function boundedDamageCombinations(
@@ -620,11 +479,41 @@ function routeComponentKey(route: readonly VisiblePunishComponent[]): string {
   return route.map((component) => component.card.instanceId).join("\u0000");
 }
 
+const PUNISH_QUOTE_FAILURE_REMEDIATIONS = {
+  provider_threw: "Return a structured result for the bound Corp Punish Engine quote request.",
+  request_rejected: "Bind the Corp Punish Engine quote request to the current match, state and action window.",
+  response_binding_mismatch: "Echo the exact Corp Punish Engine quote request and step bindings.",
+  invalid_response_schema: "Return a side-safe Corp Punish Engine quote conforming to the quote schema.",
+} as const;
+
+function punishQuoteFailure(
+  input: AiDecisionInput,
+  request: CorpPunishRouteQuoteRequest,
+  reason: keyof typeof PUNISH_QUOTE_FAILURE_REMEDIATIONS,
+): PlanResolutionFailure {
+  const stepId = request.steps[0]?.stepId;
+  return new PlanResolutionFailure("engine_quote_contract_failed", {
+    side: input.side,
+    stateVersion: request.stateVersion,
+    timingPoint: request.timingPoint,
+    legalActionTypes: input.legalActions.map((action) => action.type),
+    unresolvedActionIds: request.steps.flatMap((step) =>
+      step.currentLegalActionId ? [step.currentLegalActionId] : [],
+    ),
+    owner: "rules_contract",
+    removalCondition: `corp_punish_quote:${reason}. ${PUNISH_QUOTE_FAILURE_REMEDIATIONS[reason]}`,
+    ...(stepId ? { stepId } : {}),
+  });
+}
+
 function quoteMatchesRequest(
   quote: CorpPunishRouteQuote,
   request: CorpPunishRouteQuoteRequest,
 ): boolean {
   return (
+    quote != null &&
+    quote.requestEcho != null &&
+    Array.isArray(quote.requestEcho.steps) &&
     quote.matchId === request.matchId &&
     quote.side === request.side &&
     quote.stateVersion === request.stateVersion &&
@@ -642,6 +531,7 @@ function quoteMatchesRequest(
       const requested = request.steps[index];
       return (
         requested !== undefined &&
+        echoed != null &&
         echoed.stepId === requested.stepId &&
         echoed.order === requested.order &&
         echoed.kind === requested.kind &&

@@ -26,10 +26,10 @@ describe("selfplay cycle 128 decision checkpoints", () => {
     expect(deckSnapshotId).toBeDefined();
     // Both targets tie on current affordable coverage. Both are canonical
     // icebreakers, so the existing install-cost tie-break selects Rent-I-Con.
-    expect(AI_HINTS_BY_CARD.get("onr_classic_030_psychic-friend")?.roles).toContain(
+    expect(AI_HINTS_BY_CARD.get(34)?.roles).toContain(
       "icebreaker",
     );
-    expect(AI_HINTS_BY_CARD.get("onr_classic_031_rent-i-con")?.roles).toContain(
+    expect(AI_HINTS_BY_CARD.get(35)?.roles).toContain(
       "icebreaker",
     );
     resetResidentPlanPortfolioMemory();
@@ -38,28 +38,28 @@ describe("selfplay cycle 128 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       selectedChoices: {
         choiceId: "trash_installed_program_120",
-        selectedOptionIds: ["card_runner_onr_classic_031_rent-i-con_1"],
+        selectedOptionIds: ["card_c7t"],
       },
     });
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       lane: "plan",
       selectionAuthority: "turn_plan_commitment",
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       selectedPlan: {
         moduleId: "corp.defend_servers",
         evidenceCodes: ["corp_program_trash_ranked_by_visible_coverage_loss"],
       },
       selectedStep: {
-        planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        planInstanceId: "penw02zfrkklof54c2nuye5att",
       },
       route: {
-        actionId: "corp.resolve_choice",
+        actionId: "cn",
         actionType: "resolve_choice",
         stateVersion: capture.input.playerView.stateVersion,
       },

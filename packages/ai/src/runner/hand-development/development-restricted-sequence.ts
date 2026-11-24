@@ -1,14 +1,13 @@
-import { type AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import type { PlanActionDisposition } from "../../plans/plan-scheduler";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { type RunnerPlanDomain } from "../../plans/runner-tactical-plan-contracts";
 import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
-import type {
-  RunnerEconomyPosture,
-  RunnerRunTargetEvaluation,
-} from "../../runner-run-target-evaluation";
+import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
 import {
   type RunnerRestrictedProgramInstallSequenceCommitment,
   type RunnerRestrictedProgramInstallSequenceStep,
@@ -17,15 +16,15 @@ import {
 export function runnerRestrictedProgramInstallSequenceCommitment(
   input: AiDecisionInput,
   source: ActionSemanticCandidate,
-  _candidates: readonly ActionSemanticCandidate[],
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
-  economy: RunnerEconomyPosture,
+  minimumCreditFloor: number,
 ): RunnerRestrictedProgramInstallSequenceCommitment | undefined {
   const projection = source.actionCapacityProjection;
   if (
     projection?.kind !== "immediate_restricted_gain" ||
     projection.restriction !== "program_install_only" ||
     projection.reliability !== "guaranteed" ||
+    !Number.isSafeInteger(projection.followupActionCapacity) ||
     projection.followupActionCapacity <= 0 ||
     !projection.allowedActionTypes.includes("install_card") ||
     !projection.allowedCardTypes?.includes("program") ||
@@ -37,7 +36,14 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
   const sourceAction = input.legalActions.find(
     (action) => action.actionId === source.actionId,
   );
-  if (!sourceAction) {
+  if (
+    input.side !== "runner" ||
+    source.actorSide !== input.side ||
+    source.stateVersion !== input.playerView.stateVersion ||
+    !actionMatchesCurrentDecision(input, sourceAction) ||
+    sourceAction.type !== source.actionType ||
+    sourceAction.source !== source.sourceCardInstanceId
+  ) {
     throw new PlanResolutionFailure("stale_or_future_action_reference", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -53,7 +59,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
     sourceAction.payload?.actionCapacityTemporaryCredits;
   if (
     typeof rawTemporaryInstallCredits !== "number" ||
-    !Number.isFinite(rawTemporaryInstallCredits) ||
+    !Number.isSafeInteger(rawTemporaryInstallCredits) ||
     rawTemporaryInstallCredits < 0
   ) {
     throw new PlanResolutionFailure("missing_card_definition", {
@@ -67,10 +73,21 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
         "Define finite non-negative temporary program-install credits for Valu-Pak.",
     });
   }
-  const temporaryInstallCredits = Math.max(
-    0,
-    Math.floor(projection.temporaryCredits ?? 0),
-  );
+  const temporaryInstallCredits = rawTemporaryInstallCredits;
+  const expectedProjection =
+    temporaryInstallCredits > 0 ? temporaryInstallCredits : undefined;
+  if (projection.temporaryCredits !== expectedProjection) {
+    throw new PlanResolutionFailure("stale_or_future_action_reference", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [source.actionId],
+      owner: "action_semantics",
+      removalCondition:
+        "Project temporary program-install credits from the same current LegalAction used by the restricted sequence.",
+    });
+  }
   if (temporaryInstallCredits <= 0) return undefined;
 
   const options = handDevelopment
@@ -78,10 +95,10 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
       const install = evaluation.persistentInstallEvaluation;
       if (
         install?.cardType === "program" &&
-        (!Number.isFinite(install.installCost) ||
+        (!Number.isSafeInteger(install.installCost) ||
           install.installCost < 0 ||
           typeof install.memoryCost !== "number" ||
-          !Number.isFinite(install.memoryCost) ||
+          !Number.isSafeInteger(install.memoryCost) ||
           install.memoryCost < 0)
       ) {
         throw new PlanResolutionFailure("missing_card_definition", {
@@ -148,7 +165,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
           right.evaluation.cardInstanceId,
         ),
     );
-  if (options.length === 0 || options.length > 20) return undefined;
+  if (options.length === 0) return undefined;
 
   const availableMemory = Math.max(
     0,
@@ -164,6 +181,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
   const maxTargets = Math.min(
     projection.followupActionCapacity,
     options.length,
+    gripCountAfterOpening - minimumHandBuffer,
   );
   let best:
     | {
@@ -171,15 +189,12 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
         count: number;
         utility: number;
         totalCost: number;
-        totalMemory: number;
       }
     | undefined;
-  for (let mask = 1; mask < 2 ** options.length; mask += 1) {
-    const indices: number[] = [];
-    for (let index = 0; index < options.length; index += 1) {
-      if ((mask & (2 ** index)) !== 0) indices.push(index);
-    }
-    if (indices.length < 2 || indices.length > maxTargets) continue;
+  for (const indices of boundedProgramInstallSubsets(
+    options.length,
+    maxTargets,
+  )) {
     const totalCost = indices.reduce(
       (sum, index) => sum + options[index]!.installCost,
       0,
@@ -191,7 +206,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
     const normalCreditsSpent = Math.max(0, totalCost - temporaryInstallCredits);
     if (
       input.playerView.own.credits - normalCreditsSpent <
-        economy.minimumCreditFloor ||
+        minimumCreditFloor ||
       totalMemory > availableMemory ||
       gripCountAfterOpening - indices.length < minimumHandBuffer
     ) {
@@ -214,7 +229,6 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
         count: indices.length,
         utility,
         totalCost,
-        totalMemory,
       };
     }
   }
@@ -232,7 +246,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
         memoryCost <= availableMemory &&
         input.playerView.own.credits -
           Math.max(0, installCost - temporaryInstallCredits) >=
-          economy.minimumCreditFloor &&
+          minimumCreditFloor &&
         gripCountAfterOpening - 1 >= minimumHandBuffer,
     );
     if (!acuteBridge) return undefined;
@@ -245,7 +259,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
   let memoryAvailable = availableMemory;
   let gripCount = gripCountAfterOpening;
   const targetSteps: RunnerRestrictedProgramInstallSequenceStep[] =
-    selected.map(({ evaluation, install, installCost, memoryCost }, index) => {
+    selected.map(({ evaluation, installCost, memoryCost }, index) => {
       const temporarySpent = Math.min(temporaryCredits, installCost);
       temporaryCredits -= temporarySpent;
       normalCredits -= installCost - temporarySpent;
@@ -275,7 +289,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
     runnerCreditsBeforeOpening: input.playerView.own.credits,
     grantedActionCount: projection.followupActionCapacity,
     temporaryInstallCredits,
-    minimumCreditFloor: economy.minimumCreditFloor,
+    minimumCreditFloor,
     minimumHandBuffer,
     ordinaryClicksAfterOpening: Math.max(
       0,
@@ -293,7 +307,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
         0,
       )}`,
       `runner_restricted_program_sequence_temporary_credits:${temporaryInstallCredits}`,
-      `runner_restricted_program_sequence_credit_floor:${economy.minimumCreditFloor}`,
+      `runner_restricted_program_sequence_credit_floor:${minimumCreditFloor}`,
       `runner_restricted_program_sequence_hand_floor:${minimumHandBuffer}`,
       `runner_restricted_program_sequence_ordinary_clicks_after_opening:${Math.max(
         0,
@@ -301,6 +315,23 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
       )}`,
     ],
   };
+}
+
+function* boundedProgramInstallSubsets(
+  optionCount: number,
+  maximumTargets: number,
+  selected: readonly number[] = [],
+): Generator<number[]> {
+  // Visit subsets in the previous increasing bit-mask order, without
+  // generating subsets that exceed the actual action capacity.
+  if (maximumTargets < 2) return;
+  for (let index = 0; index < optionCount; index += 1) {
+    const indices = [index, ...selected];
+    if (indices.length >= 2) yield indices;
+    if (indices.length < maximumTargets) {
+      yield* boundedProgramInstallSubsets(index, maximumTargets, indices);
+    }
+  }
 }
 
 function runnerDevelopmentNeedSequenceValue(
@@ -325,6 +356,8 @@ function activeRestrictedProgramInstallActions(
 ): AiDecisionInput["legalActions"] {
   return input.legalActions.filter(
     (action) =>
+      input.side === "runner" &&
+      actionMatchesCurrentDecision(input, action) &&
       action.payload?.actionCapacityRestriction === "program_install_only" &&
       action.payload?.actionCapacityAllowedActionType === "install_card" &&
       action.payload?.actionCapacityAllowedCardType === "program" &&
@@ -332,7 +365,9 @@ function activeRestrictedProgramInstallActions(
       action.payload?.restrictedActionGrantActionType === "install_card" &&
       action.payload?.restrictedActionGrantCostProfile ===
         "temporary_credit_bundle" &&
-      Number(action.payload?.restrictedActionGrantRemainingActions) > 0,
+      typeof action.payload?.restrictedActionGrantRemainingActions === "number" &&
+      Number.isSafeInteger(action.payload.restrictedActionGrantRemainingActions) &&
+      action.payload.restrictedActionGrantRemainingActions > 0,
   );
 }
 
@@ -392,13 +427,13 @@ function restrictedProgramInstallCommitmentHasFiniteResources(
   commitment: RunnerRestrictedProgramInstallSequenceCommitment,
 ): boolean {
   return (
-    Number.isFinite(commitment.temporaryInstallCredits) &&
+    Number.isSafeInteger(commitment.temporaryInstallCredits) &&
     commitment.temporaryInstallCredits >= 0 &&
     commitment.targetSteps.every(
       (step) =>
-        Number.isFinite(step.installCost) &&
+        Number.isSafeInteger(step.installCost) &&
         step.installCost >= 0 &&
-        Number.isFinite(step.memoryCost) &&
+        Number.isSafeInteger(step.memoryCost) &&
         step.memoryCost >= 0,
     )
   );
@@ -471,7 +506,10 @@ function runnerRestrictedProgramInstallSequenceProgress(
           entry.actionType === "install_card" &&
           entry.sourceCardInstanceId === nextStep.cardInstanceId &&
           restrictedActions.some(
-            (action) => action.actionId === entry.actionId,
+            (action) =>
+              action.actionId === entry.actionId &&
+              action.source === nextStep.cardInstanceId &&
+              action.payload?.runnerProgramTrashBeforeInstall !== true,
           ),
       )
     : candidates.find(
@@ -498,14 +536,6 @@ function runnerRestrictedProgramInstallSequenceProgress(
       ? "execute_restricted_sequence"
       : "complete_restricted_sequence",
   };
-}
-
-export function assertRunnerRestrictedProgramInstallCommitment(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  previous: ResidentPlanPortfolio | undefined,
-): void {
-  runnerRestrictedProgramInstallSequenceProgress(input, candidates, previous);
 }
 
 export function runnerRestrictedProgramInstallSequenceSignals(
@@ -562,7 +592,7 @@ function runnerRestrictedSequenceFailure(
     owner: "continuation",
     removalCondition,
     planInstanceId:
-      "plan:runner.develop_board_and_hand:restricted_program_install_sequence",
+      "p9kwr76kr643oivfln5fcmyf0r",
   });
 }
 
@@ -600,8 +630,8 @@ export function restrictedActionCapacityHasProductiveFollowup(
       const evaluation = handDevelopment.find(
         (entry) =>
           entry.legalActionId === candidate.actionId ||
-          (entry.definitionId !== undefined &&
-            entry.definitionId === candidate.sourceDefinitionId),
+          (candidate.sourceCardInstanceId !== undefined &&
+            entry.cardInstanceId === candidate.sourceCardInstanceId),
       );
       return (
         evaluation?.availability === "legal_now" &&
@@ -616,6 +646,7 @@ export function restrictedActionCapacityHasProductiveFollowup(
       const serverId = candidate.runProjectionSummary?.serverId;
       return runTargets.some(
         (evaluation) =>
+          evaluation.actionId === candidate.actionId &&
           evaluation.targetServerId === serverId &&
           evaluation.pathPassability === "reachable" &&
           evaluation.score > 0,
@@ -623,4 +654,30 @@ export function restrictedActionCapacityHasProductiveFollowup(
     }
     return false;
   });
+}
+
+export function runnerRestrictedActionCapacityDisposition(
+  source: ActionSemanticCandidate,
+  candidates: readonly ActionSemanticCandidate[],
+  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
+  runTargets: readonly RunnerRunTargetEvaluation[],
+  developments: readonly RunnerPlanDomain["developments"][number][],
+): PlanActionDisposition | undefined {
+  if (
+    restrictedActionCapacityHasProductiveFollowup(
+      source,
+      candidates,
+      handDevelopment,
+      runTargets,
+      developments,
+    )
+  ) {
+    return undefined;
+  }
+  return {
+    actionId: source.actionId,
+    disposition: "explicitly_nonproductive",
+    ownerModuleId: "runner.develop_board_and_hand",
+    evidenceCode: "runner_restricted_action_capacity_has_no_productive_followup",
+  };
 }

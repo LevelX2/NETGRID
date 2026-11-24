@@ -18,8 +18,8 @@ import {
 } from "../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
-const stockId = "onr_proteus_091_lockjaw",
-  breakerId = "onr_v1_039_krash";
+const stockId = 149,
+  breakerId = 251;
 const runner = catalog.decks.find(
   (d) =>
     d.standardDeckId ===
@@ -76,8 +76,8 @@ function fixture() {
     .withRunnerGripSize(0)
     .withRunnerProgramInstalled(breakerId)
     .withRunnerCardInGrip(stockId)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_245_fire-wall")
-    .withRezzedCorpIceOnServer("hq", "onr_v1_252_keeper");
+    .withRezzedCorpIceOnServer("rd", 457)
+    .withRezzedCorpIceOnServer("hq", 464);
   s.runner.memoryUsed = 1;
   return s;
 }
@@ -128,8 +128,8 @@ describe("run-strength consumable stock through the real development owner", () 
     for (const id of [
       breakerId,
       breakerId,
-      "onr_proteus_139_eurocorpse-tm-spin-chip",
-      "onr_v1_146_zetatech-mem-chip",
+      197,
+      358,
     ]) {
       const instance = s.runner.stack.find(
         (c) => s.cardInstances[c]!.definitionId === id,
@@ -175,8 +175,8 @@ describe("run-strength consumable stock through the real development owner", () 
   it("keeps urgent advanced remote contest ahead of inventory", () => {
     const s = fixture();
     RealEngineFixtureBuilder.forState(s).withCorpRemoteRoot(
-      "remote_1",
-      "onr_v1_220_tycho-extension",
+      "r1",
+      432,
       3,
     );
     const { stock, input, evaluation } = assess(s);

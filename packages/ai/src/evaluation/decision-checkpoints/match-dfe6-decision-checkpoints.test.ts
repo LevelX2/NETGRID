@@ -35,8 +35,16 @@ describe("match DFE6 exact decision checkpoints", () => {
       const fetch = state.corp.servers
         .find((server) => server.id === "hq")!
         .ice.map((id) => state.cardInstances[id]!)
-        .find((card) => card.definitionId === "onr_v1_243_fetch-4-0-1")!;
+        .find((card) => card.definitionId === 455)!;
       fetch.strengthModifier += 10;
+      // Isolate the unmitigated Trace: the original position has two Fall Guys.
+      state.runner.rig.resources = state.runner.rig.resources.filter((id) => {
+        const card = state.cardInstances[id]!;
+        if (card.definitionId !== 373) return true;
+        card.zone = { side: "runner", zone: "heap" };
+        state.runner.heap.push(id);
+        return false;
+      });
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.expectation = structuredClone(
         cp03Json.expectation,
@@ -60,7 +68,7 @@ describe("match DFE6 exact decision checkpoints", () => {
       checkpoint.source.findingId = "DFE6-F01-CORP-DECK-PRESSURE";
       checkpoint.expectation = {
         acceptableActions: [
-          { type: "start_run", targetServerId: "remote_1" },
+          { type: "start_run", targetServerId: "r1" },
           { type: "start_run", targetServerId: "rd" },
         ],
         forbiddenActions: [{ type: "start_run", targetServerId: "archives" }],
@@ -102,7 +110,7 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     // cannot qualify that alternative for preferential treatment.
     checkpoint.expectation = {
       ...checkpoint.expectation,
-      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      acceptableActions: [{ actionId: "rs.hq" }],
       planExecution: {
         acceptablePlanKinds: ["runner.pressure_central"],
         acceptableCapabilities: ["pressure_hq_access"],

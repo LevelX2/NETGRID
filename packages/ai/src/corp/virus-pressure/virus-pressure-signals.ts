@@ -1,53 +1,39 @@
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { AiDecisionInput } from "@netgrid/shared";
-import { runnerVirusCounterEffectThreshold } from "@netgrid/engine";
 import type { CorpVirusPressureSignal } from "./virus-pressure-types";
-import {
-  corpPurgeHasVisibleStrategicPressure,
-  corpPurgeRecurringActionLoss,
-} from "./corp-purge-impact";
+import { assessCorpPurgeImpact } from "./corp-purge-impact";
+
 export function buildCorpVirusPressureSignals(
   input: AiDecisionInput,
 ): CorpVirusPressureSignal[] {
-  const purgeAction = input.legalActions.find(
-    (action) =>
-      action.type === "purge_virus_counters" ||
-      action.type === "purge_runner_virus_counters",
-  );
-  if (!purgeAction) return [];
-  const visibleVirusCounters = visibleRunnerVirusCounters(input);
-  const virusPressure: CorpVirusPressureSignal[] = purgeAction
-    ? [
-        {
-          pressureId: "visible-virus-pressure",
-          virusCounters: visibleVirusCounters,
-          strategicDamage:
-            visibleVirusCounters +
-            corpPurgeRecurringActionLoss(input, purgeAction) * 3,
-          critical:
-            visibleVirusCounters >= 3 ||
-            corpPurgeRecurringActionLoss(input, purgeAction) > 0,
-          purgeUseful: corpPurgeHasVisibleStrategicPressure(input, purgeAction),
-          evidenceCode: "visible_runner_virus_counters",
-        },
-      ]
-    : [];
-  return virusPressure;
-}
-
-function visibleRunnerVirusCounters(input: AiDecisionInput): number {
-  const installedCounters = (input.playerView.opponent.rig ?? []).reduce(
-    (sum, card) => sum + (card.counters?.virus ?? 0),
-    0,
-  );
-  const identityCounters =
-    input.playerView.own.identity.counterDisplays?.reduce((sum, display) => {
-      if (display.displayKind !== "virus") return sum;
-      const amount = Math.max(0, Math.floor(display.amount ?? 0));
-      if (amount === 0) return sum;
-      const activeThreshold = runnerVirusCounterEffectThreshold(
-        display.counterType,
-      );
-      return amount >= activeThreshold ? sum + amount : sum;
-    }, 0) ?? 0;
-  return installedCounters + identityCounters;
+  if (input.side !== "corp") return [];
+  const { stateVersion } = input.playerView;
+  return input.legalActions.flatMap((action): CorpVirusPressureSignal[] => {
+    if (
+      !actionMatchesCurrentDecision(input, action) ||
+      (action.type !== "purge_virus_counters" &&
+        action.type !== "purge_runner_virus_counters")
+    )
+      return [];
+    const impact = assessCorpPurgeImpact(input, action, {
+      primary: "low_value",
+      severity: "low",
+    });
+    if (!impact) return [];
+    const { activeCounterTotal, recurringActionLoss, clickCost, component } =
+      impact;
+    return [
+      {
+        pressureId: `visible-virus-pressure:${action.actionId}`,
+        actionId: action.actionId,
+        stateVersion,
+        actionCost: clickCost,
+        virusCounters: activeCounterTotal,
+        strategicDamage: activeCounterTotal + recurringActionLoss * 3,
+        critical: activeCounterTotal >= 3 || recurringActionLoss > 0,
+        purgeUseful: component.value > 0,
+        evidenceCode: "visible_runner_virus_counters",
+      },
+    ];
+  });
 }

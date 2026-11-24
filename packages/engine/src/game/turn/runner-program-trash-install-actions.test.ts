@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type { CardDefinition, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
@@ -9,7 +10,7 @@ function runnerProgramDefinition(
   installCost: number,
 ): CardDefinition {
   return {
-    id,
+    id: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     title,
     side: "runner",
     type: "program",
@@ -39,7 +40,7 @@ describe("runner program trash install action builder", () => {
 
     expect(action).toMatchObject({
       actionId:
-        "runner.install_card.runner_program_trash_target.runner_program_trash_target.runner_program_trash_before_install",
+        "rc.runner_program_trash_target.runner_program_trash_target.runner_program_trash_before_install",
       side: "runner",
       type: "install_card",
       label: "Test Program mit Programmtrash installieren",

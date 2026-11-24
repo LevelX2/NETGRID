@@ -5,21 +5,21 @@
   "originalPrefixActions": 342,
   "prefixEveryHashMatches": true,
   "nativeCheckpointHashMatches": true,
-  "originalAction": "corp.install_card.corp_onr_v1_191_black-ice-quality-assurance_2.new_remote.corp_onr_v1_191_black-ice-quality-assurance_2",
-  "alternative": "corp.advance_card.corp_onr_v1_191_black-ice-quality-assurance_1.corp_onr_v1_191_black-ice-quality-assurance_1",
+  "originalAction": "cc.c2hq.new_remote.c2hq",
+  "alternative": "c2.c2hp.c2hp",
   "allCommandsActualEngineLegal": true,
   "steps": [
     {
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_191_black-ice-quality-assurance_1.corp_onr_v1_191_black-ice-quality-assurance_1",
+      "actionId": "c2.c2hp.c2hp",
       "before": {
-        "hash": "fnv1a:b8988aea",
+        "hash": "fnv1a:5c377a12",
         "stateVersion": 342,
         "credits": 8,
         "clicks": 1
       },
       "after": {
-        "hash": "fnv1a:3879c222",
+        "hash": "fnv1a:7831eea4",
         "stateVersion": 343,
         "credits": 7,
         "clicks": 0
@@ -27,15 +27,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.end_turn",
+      "actionId": "c9",
       "before": {
-        "hash": "fnv1a:3879c222",
+        "hash": "fnv1a:7831eea4",
         "stateVersion": 343,
         "credits": 7,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:7c4c3184",
+        "hash": "fnv1a:d24a0838",
         "stateVersion": 344,
         "credits": 7,
         "clicks": 0
@@ -43,21 +43,21 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.resolve_choice",
+      "actionId": "cn",
       "selectedChoices": {
         "choiceId": "discard_corp_344",
         "selectedOptionIds": [
-          "card_corp_onr_v1_258_neural-blade_2"
+          "card_c2wm"
         ]
       },
       "before": {
-        "hash": "fnv1a:7c4c3184",
+        "hash": "fnv1a:d24a0838",
         "stateVersion": 344,
         "credits": 7,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:27bedd4c",
+        "hash": "fnv1a:6ae8b65c",
         "stateVersion": 345,
         "credits": 7,
         "clicks": 0
@@ -65,15 +65,15 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.start_run.remote_1",
+      "actionId": "rs.r1",
       "before": {
-        "hash": "fnv1a:27bedd4c",
+        "hash": "fnv1a:6ae8b65c",
         "stateVersion": 345,
         "credits": 9,
         "clicks": 4
       },
       "after": {
-        "hash": "fnv1a:a957116a",
+        "hash": "fnv1a:fff6ba8f",
         "stateVersion": 346,
         "credits": 9,
         "clicks": 3
@@ -81,15 +81,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.rez_ice.corp_onr_v1_261_quandary_2.corp_onr_v1_261_quandary_2",
+      "actionId": "cq.c2xa.c2xa",
       "before": {
-        "hash": "fnv1a:a957116a",
+        "hash": "fnv1a:fff6ba8f",
         "stateVersion": 346,
         "credits": 7,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:687c245e",
+        "hash": "fnv1a:16681251",
         "stateVersion": 347,
         "credits": 5,
         "clicks": 0
@@ -97,15 +97,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "before": {
-        "hash": "fnv1a:687c245e",
+        "hash": "fnv1a:16681251",
         "stateVersion": 347,
         "credits": 5,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:f79dfe76",
+        "hash": "fnv1a:f2d3bb20",
         "stateVersion": 348,
         "credits": 5,
         "clicks": 0
@@ -113,15 +113,15 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.break_subroutine.runner_onr_v1_016_cyfermaster_1.runner_onr_v1_016_cyfermaster_1.runner_onr_v1_016_cyfermaster_1.corp_onr_v1_261_quandary_2.0.printed_subroutines_end_the_run.onr_v1_016_cyfermaster:icebreaker_abilities_break_subroutine",
+      "actionId": "r3.c1ep.c1ep.c1ep.c2xa.0.0.294",
       "before": {
-        "hash": "fnv1a:f79dfe76",
+        "hash": "fnv1a:f2d3bb20",
         "stateVersion": 348,
         "credits": 9,
         "clicks": 3
       },
       "after": {
-        "hash": "fnv1a:72a3267a",
+        "hash": "fnv1a:19fd41a7",
         "stateVersion": 349,
         "credits": 7,
         "clicks": 3
@@ -129,15 +129,15 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
-        "hash": "fnv1a:72a3267a",
+        "hash": "fnv1a:19fd41a7",
         "stateVersion": 349,
         "credits": 7,
         "clicks": 3
       },
       "after": {
-        "hash": "fnv1a:3238d153",
+        "hash": "fnv1a:ac476ff0",
         "stateVersion": 350,
         "credits": 7,
         "clicks": 3
@@ -145,15 +145,15 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
-        "hash": "fnv1a:3238d153",
+        "hash": "fnv1a:ac476ff0",
         "stateVersion": 350,
         "credits": 7,
         "clicks": 3
       },
       "after": {
-        "hash": "fnv1a:85096ff9",
+        "hash": "fnv1a:cc5316e2",
         "stateVersion": 351,
         "credits": 7,
         "clicks": 3
@@ -161,15 +161,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.remote_1",
+      "actionId": "c6.r1",
       "before": {
-        "hash": "fnv1a:85096ff9",
+        "hash": "fnv1a:cc5316e2",
         "stateVersion": 351,
         "credits": 5,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:6d5bb23c",
+        "hash": "fnv1a:d992cd16",
         "stateVersion": 352,
         "credits": 5,
         "clicks": 0
@@ -177,15 +177,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "before": {
-        "hash": "fnv1a:6d5bb23c",
+        "hash": "fnv1a:d992cd16",
         "stateVersion": 352,
         "credits": 5,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:ebc88903",
+        "hash": "fnv1a:73f02ea1",
         "stateVersion": 353,
         "credits": 5,
         "clicks": 0
@@ -193,15 +193,15 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
-        "hash": "fnv1a:ebc88903",
+        "hash": "fnv1a:73f02ea1",
         "stateVersion": 353,
         "credits": 7,
         "clicks": 3
       },
       "after": {
-        "hash": "fnv1a:aef3a5bf",
+        "hash": "fnv1a:f2899aad",
         "stateVersion": 354,
         "credits": 7,
         "clicks": 3
@@ -209,15 +209,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.remote_1",
+      "actionId": "c6.r1",
       "before": {
-        "hash": "fnv1a:aef3a5bf",
+        "hash": "fnv1a:f2899aad",
         "stateVersion": 354,
         "credits": 5,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:f1e46546",
+        "hash": "fnv1a:369d54e9",
         "stateVersion": 355,
         "credits": 5,
         "clicks": 0
@@ -225,15 +225,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "before": {
-        "hash": "fnv1a:f1e46546",
+        "hash": "fnv1a:369d54e9",
         "stateVersion": 355,
         "credits": 5,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:348d590c",
+        "hash": "fnv1a:59dafdfe",
         "stateVersion": 356,
         "credits": 5,
         "clicks": 0
@@ -241,15 +241,15 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
-        "hash": "fnv1a:348d590c",
+        "hash": "fnv1a:59dafdfe",
         "stateVersion": 356,
         "credits": 7,
         "clicks": 3
       },
       "after": {
-        "hash": "fnv1a:11a76c42",
+        "hash": "fnv1a:74299960",
         "stateVersion": 357,
         "credits": 7,
         "clicks": 3
@@ -257,15 +257,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.remote_1",
+      "actionId": "c6.r1",
       "before": {
-        "hash": "fnv1a:11a76c42",
+        "hash": "fnv1a:74299960",
         "stateVersion": 357,
         "credits": 5,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:20ac6694",
+        "hash": "fnv1a:298887fb",
         "stateVersion": 358,
         "credits": 5,
         "clicks": 0
@@ -273,15 +273,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez",
+      "actionId": "c6",
       "before": {
-        "hash": "fnv1a:20ac6694",
+        "hash": "fnv1a:298887fb",
         "stateVersion": 358,
         "credits": 5,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:2da9b028",
+        "hash": "fnv1a:f4baebd3",
         "stateVersion": 359,
         "credits": 5,
         "clicks": 0
@@ -289,15 +289,15 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.continue_run",
+      "actionId": "r5",
       "before": {
-        "hash": "fnv1a:2da9b028",
+        "hash": "fnv1a:f4baebd3",
         "stateVersion": 359,
         "credits": 7,
         "clicks": 3
       },
       "after": {
-        "hash": "fnv1a:e3a2f11d",
+        "hash": "fnv1a:0f481016",
         "stateVersion": 360,
         "credits": 7,
         "clicks": 3
@@ -305,15 +305,15 @@
     },
     {
       "side": "corp",
-      "actionId": "corp.decline_rez.remote_1",
+      "actionId": "c6.r1",
       "before": {
-        "hash": "fnv1a:e3a2f11d",
+        "hash": "fnv1a:0f481016",
         "stateVersion": 360,
         "credits": 5,
         "clicks": 0
       },
       "after": {
-        "hash": "fnv1a:c379057e",
+        "hash": "fnv1a:b3afff3f",
         "stateVersion": 361,
         "credits": 5,
         "clicks": 0
@@ -321,15 +321,15 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.access_card",
+      "actionId": "r0",
       "before": {
-        "hash": "fnv1a:c379057e",
+        "hash": "fnv1a:b3afff3f",
         "stateVersion": 361,
         "credits": 7,
         "clicks": 3
       },
       "after": {
-        "hash": "fnv1a:6a56748b",
+        "hash": "fnv1a:45143b59",
         "stateVersion": 362,
         "credits": 7,
         "clicks": 3
@@ -337,15 +337,15 @@
     },
     {
       "side": "runner",
-      "actionId": "runner.steal_agenda.corp_onr_v1_191_black-ice-quality-assurance_1",
+      "actionId": "rt.c2hp",
       "before": {
-        "hash": "fnv1a:6a56748b",
+        "hash": "fnv1a:45143b59",
         "stateVersion": 362,
         "credits": 7,
         "clicks": 3
       },
       "after": {
-        "hash": "fnv1a:e156b25e",
+        "hash": "fnv1a:717635b5",
         "stateVersion": 363,
         "credits": 7,
         "clicks": 3

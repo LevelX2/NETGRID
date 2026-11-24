@@ -1,5 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import { delayedInstallAbilityForAction } from "./delayed-install-action";
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 
 export type PersistentDevelopmentRoute =
   | "direct_install"
@@ -9,7 +10,7 @@ export type PersistentDevelopmentRoute =
 export type PersistentDevelopmentActionProjection = {
   route: PersistentDevelopmentRoute;
   targetCardId: string;
-  targetDefinitionId?: string;
+  targetDefinitionId?: number;
   developsGripCard: boolean;
   appliesInstallFitNow: boolean;
   evidence: string[];
@@ -20,16 +21,20 @@ export function persistentDevelopmentActionProjection(
 ): PersistentDevelopmentActionProjection | undefined {
   if (action.side !== "runner") return undefined;
   if (action.type === "install_card") {
+    const sourceCardId =
+      action.source === "basic_action" || action.source === "game_rule"
+        ? undefined
+        : action.source;
     const targetCardId = firstString(
       action.payload?.cardId,
+      sourceCardId,
       action.payload?.targetCardId,
-      action.source,
     );
     if (!targetCardId) return undefined;
-    const targetDefinitionId = firstString(
-      action.payload?.cardDefinitionId,
-      action.payload?.targetCardDefinitionId,
-    );
+    const targetDefinitionId =
+      cardDefinitionIdValue(action.payload?.cardDefinitionId) ??
+      cardDefinitionIdValue(action.payload?.sourceDefinitionId) ??
+      cardDefinitionIdValue(action.payload?.targetCardDefinitionId);
     return projection({
       route: "direct_install",
       targetCardId,
@@ -48,7 +53,7 @@ export function persistentDevelopmentActionProjection(
   }
   const targetCardId = firstString(action.payload?.targetCardId);
   if (!targetCardId) return undefined;
-  const targetDefinitionId = firstString(
+  const targetDefinitionId = cardDefinitionIdValue(
     action.payload?.targetCardDefinitionId,
   );
   return projection({
@@ -63,7 +68,7 @@ export function persistentDevelopmentActionProjection(
   });
 }
 
-export function actionDevelopsPersistentCardNow(action: LegalAction): boolean {
+export function actionAppliesPersistentInstallFitNow(action: LegalAction): boolean {
   return (
     persistentDevelopmentActionProjection(action)?.appliesInstallFitNow === true
   );

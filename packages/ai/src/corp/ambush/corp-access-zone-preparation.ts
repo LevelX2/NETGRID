@@ -1,5 +1,6 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { reconstructBeliefState } from "../../belief-state";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -8,8 +9,8 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import { corpBluffDefenseNeed } from "../defense/corp-bluff-defense";
 
 /** Mechanical profile only. No remote damage is inferred from central access. */
-export function corpAccessZonePreparationProfile(definitionId: string) {
-  const spec = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+export function corpAccessZonePreparationProfile(definitionId: number) {
+  const spec = planningCardByDefinitionId(definitionId);
   if (spec?.side !== "corp" || spec.cardType !== "asset") return undefined;
   const engine = spec.engine;
   const zoneEffect = engine.accessEffects?.find(
@@ -65,13 +66,17 @@ export function corpRdRecyclingSignals(
   reservedScoreServerIds: ReadonlySet<string> = new Set(),
   reservedScoreCredits = 0,
 ): CorpAmbushSignal[] {
+  if (input.side !== "corp") return [];
+  const actionsById = new Map(
+    input.legalActions.map((action) => [action.actionId, action]),
+  );
   const locations = [
     ...input.playerView.own.gripOrHq.map((card) => ({
       card,
       server: undefined,
     })),
     ...input.playerView.servers
-      .filter((server) => server.id.startsWith("remote_"))
+      .filter((server) => isRemoteServerId(server.id))
       .flatMap((server) => server.root.map((card) => ({ card, server }))),
   ];
   const fastAgenda = locations
@@ -123,16 +128,17 @@ export function corpRdRecyclingSignals(
     );
     const actions = candidates.filter((candidate) => {
       if (
+        candidate.actorSide !== "corp" ||
         candidate.sourceCardInstanceId !== card.instanceId ||
         candidate.costProfile.costKnownStatus !== "known" ||
         candidate.costProfile.additionalCosts.length > 0
       )
         return false;
-      const action = input.legalActions.find(
-        (action) => action.actionId === candidate.actionId,
-      );
+      const action = actionsById.get(candidate.actionId);
       if (
         !action ||
+        action.side !== "corp" ||
+        action.source !== card.instanceId ||
         action.expiresAtStateVersion !== input.playerView.stateVersion ||
         action.costs.some((cost) => (cost.credits ?? 0) !== 0) ||
         action.targetRequirements.length ||
@@ -156,7 +162,7 @@ export function corpRdRecyclingSignals(
           (entry) =>
             entry.id === target &&
             !reservedScoreServerIds.has(entry.id) &&
-            entry.id.startsWith("remote_") &&
+            isRemoteServerId(entry.id) &&
             entry.root.length === 0,
         )
       );
@@ -184,9 +190,7 @@ export function corpRdRecyclingSignals(
     );
     actions.sort((left, right) => {
       const defense = (candidate: ActionSemanticCandidate) => {
-        const target = input.legalActions.find(
-          (a) => a.actionId === candidate.actionId,
-        )?.payload?.serverId;
+        const target = actionsById.get(candidate.actionId)?.payload?.serverId;
         return typeof target === "string"
           ? defenseByServer.get(target)
           : undefined;
@@ -206,8 +210,7 @@ export function corpRdRecyclingSignals(
     if (!selected && !server) return [];
     const target =
       server?.id ??
-      input.legalActions.find((a) => a.actionId === selected?.actionId)?.payload
-        ?.serverId;
+      (selected && actionsById.get(selected.actionId)?.payload?.serverId);
     if (typeof target !== "string") return [];
     const run = input.playerView.run;
     // Preserve an unknown protected remote through its ICE toll. There is no

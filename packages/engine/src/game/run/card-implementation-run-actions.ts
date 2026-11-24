@@ -15,7 +15,7 @@ export type RunCardImplementationActionHost = {
     cardInstanceFor: (cardId: CardInstanceId) => CardInstance | undefined;
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     runnerInstalledCardIds: () => CardInstanceId[];
-    cardImplementationForDefinitionId?: (definitionId: string) => any;
+    cardImplementationForDefinitionId?: (definitionId: number) => any;
   };
   actions?: {
     buildLegalAction: (

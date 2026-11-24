@@ -16,8 +16,7 @@ export function cardLooksLikeBreaker(card: VisibleCard): boolean {
     ((card.subtypes ?? []).some((subtype) =>
       cardTokens(subtype).some((token) => BREAKER_SUBTYPE_TOKENS.has(token)),
     ) ||
-      cardHasAnyToken(card.title, ["breaker", "icebreaker"]) ||
-      cardHasAnyToken(card.definitionId, ["breaker", "icebreaker"]))
+      cardHasAnyToken(card.title, ["breaker", "icebreaker"]))
   );
 }
 
@@ -70,7 +69,6 @@ export function cardProvidesBreakerCoverage(
 export function cardCoverageSearchText(card: VisibleCard): string {
   return [
     card.title,
-    card.definitionId,
     ...(card.subtypes ?? []),
     card.rulesText,
   ]
@@ -82,7 +80,6 @@ export function cardCoverageSearchText(card: VisibleCard): string {
 function cardCoverageTokens(card: VisibleCard): string[] {
   return [
     card.title,
-    card.definitionId,
     ...(card.subtypes ?? []),
     card.rulesText,
   ].flatMap((entry) => cardTokens(entry));

@@ -1,3 +1,5 @@
+import { isRandomHistory, isDamageRandomSource, isSubroutineProvenance } from "@netgrid/shared";
+import { isRunId, isTraceId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 // Read-only Game invariant validation. This module does not execute actions,
 // mutate state, or build PublicPayloads.
@@ -9,8 +11,10 @@ import {
   type GameState,
   type RestrictedActionGrantBucket,
   type TraceSuccessEffect,
+  isEventWindowId,
   type ValidationResult,
   PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES,
+  isRunnerPaymentWindowId,
 } from "@netgrid/shared";
 import { runnerMemoryLimit } from "../ability-engine/effective-values";
 import {
@@ -120,9 +124,17 @@ export function validateGameState(state: GameState): ValidationResult {
     }
   }
 
+  const paymentWindow = state.runnerCostPenaltySupportWindow;
+  if (
+    paymentWindow &&
+    (!isRunnerPaymentWindowId(paymentWindow.windowId) ||
+      paymentWindow.windowId !== paymentWindow.createdAtStateVersion + 1)
+  )
+    errors.push("Runner payment window requires its opening state version.");
+
   if (state.pendingCorpDraw) {
     const transaction = state.pendingCorpDraw;
-    if (!transaction.transactionId)
+    if (!Number.isSafeInteger(transaction.transactionId) || transaction.transactionId < 1)
       errors.push("Pending Corp draw requires a transactionId.");
     if (
       !Number.isInteger(transaction.baseDrawCount) ||
@@ -307,6 +319,16 @@ export function validateGameState(state: GameState): ValidationResult {
     );
   if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes))
     errors.push("Run resolved subroutine index list is missing.");
+  if (state.run && !isRunId(state.run.runId))
+    errors.push("Run id must be a positive safe integer.");
+  for (const [index, record] of (state.run?.encounterAdditionalSubroutines ?? []).entries()) {
+    if (
+      record.copiedSubroutine &&
+      (!isSubroutineProvenance(record.originalSubroutineProvenance) ||
+        !isSubroutineProvenance(record.copiedSubroutine.provenance))
+    )
+      errors.push(`run.encounterAdditionalSubroutines[${index}] must bind the copied subroutine provenance.`);
+  }
   if (state.run?.remainderStrengthBonusByBreaker) {
     for (const [breakerId, amount] of Object.entries(
       state.run.remainderStrengthBonusByBreaker,
@@ -418,6 +440,17 @@ export function validateGameState(state: GameState): ValidationResult {
     }
   }
   if (state.trace) {
+    if (!isTraceId(state.trace.traceId) || state.trace.traceId > state.stateVersion)
+      errors.push("Trace id must identify a current or earlier GameState version.");
+    if (
+      state.trace.sourceRunId !== undefined &&
+      (!isRunId(state.trace.sourceRunId) ||
+        state.trace.sourceRunId > state.trace.traceId ||
+        state.trace.subroutineIndex === undefined ||
+        !Number.isSafeInteger(state.trace.subroutineIndex) ||
+        state.trace.subroutineIndex < 0)
+    )
+      errors.push("Encounter Trace must identify its originating run and subroutine.");
     const traceRules = traceRulesDefinitionForTrace(state.trace);
     if (
       normalizeTraceRulesProfile(state.trace.traceRulesProfile) !==
@@ -598,7 +631,7 @@ export function validateGameState(state: GameState): ValidationResult {
     errors.push("End-turn tag continuation has an invalid accumulator.");
   if (state.runnerDrawSequence) {
     const sequence = state.runnerDrawSequence;
-    if (!sequence.sequenceId)
+    if (!Number.isSafeInteger(sequence.sequenceId) || sequence.sequenceId < 1)
       errors.push("Runner draw sequence requires an id.");
     if (!sequence.originActionId)
       errors.push("Runner draw sequence requires its origin action id.");
@@ -768,7 +801,21 @@ export function validateGameState(state: GameState): ValidationResult {
     "corpTurnFlags.restrictedActionGrants",
     state.corpTurnFlags?.restrictedActionGrants,
   );
+  if (
+    state.imminentEvent?.eventType === "damage" &&
+    !isDamageRandomSource(state.imminentEvent.payload.randomSource)
+  )
+    errors.push("imminentEvent.payload.randomSource must identify the damage source.");
+  const modificationWindowId = state.imminentEvent?.modificationWindowId;
+  if (modificationWindowId !== undefined &&
+    (!isEventWindowId(modificationWindowId) || modificationWindowId > state.stateVersion))
+    errors.push("ImminentEvent modificationWindowId must identify an opened window.");
   if (state.eventModificationWindow) {
+    if (
+      state.eventModificationWindow.windowId !== state.eventModificationWindow.createdAtStateVersion ||
+      state.eventModificationWindow.windowId !== modificationWindowId
+    )
+      errors.push("EventModificationWindow windowId must match its opening version and ImminentEvent.");
     if (!state.imminentEvent)
       errors.push("EventModificationWindow requires an ImminentEvent.");
     if (state.eventModificationWindow.eventId !== state.imminentEvent?.eventId)
@@ -785,6 +832,11 @@ export function validateGameState(state: GameState): ValidationResult {
     }
   }
   if (state.replacementWindow) {
+    if (
+      state.replacementWindow.windowId !== state.replacementWindow.createdAtStateVersion ||
+      state.replacementWindow.windowId !== modificationWindowId
+    )
+      errors.push("ReplacementWindow windowId must match its opening version and ImminentEvent.");
     if (!state.imminentEvent)
       errors.push("ReplacementWindow requires an ImminentEvent.");
     if (
@@ -802,32 +854,10 @@ export function validateGameState(state: GameState): ValidationResult {
 }
 
 function validateRandomState(errors: string[], state: GameState): void {
-  if (
-    !Number.isSafeInteger(state.randomCounter) ||
-    state.randomCounter < 0 ||
-    !Array.isArray(state.randomDrawRecords)
-  ) {
-    errors.push(
-      "Random state must have a non-negative safe cursor and records.",
-    );
-    return;
-  }
-  if (state.randomCounter !== state.randomDrawRecords.length)
-    errors.push("Random counter must equal the recorded draw count.");
-  state.randomDrawRecords.forEach((record, index) => {
-    if (
-      !record ||
-      typeof record !== "object" ||
-      !Number.isSafeInteger(record.counter) ||
-      record.counter !== index ||
-      typeof record.purpose !== "string" ||
-      record.purpose.trim().length === 0 ||
-      !Number.isFinite(record.value) ||
-      record.value < 0 ||
-      record.value >= 1
-    )
-      errors.push(`Random draw record ${index} is invalid.`);
-  });
+  if (!isRandomHistory(state.randomCounter, state.randomDrawRecords, "engine"))
+    errors.push("Engine random history must contain contiguous domain-bound draw records.");
+  if (!isRandomHistory(state.aiTurnPlanRandomCounter, state.aiTurnPlanRandomDrawRecords, "ai_turn_plan_selection"))
+    errors.push("AI random history must contain contiguous domain-bound draw records.");
 }
 
 function validateCorpActionDebt(errors: string[], state: GameState): void {
@@ -1164,7 +1194,7 @@ function validateRestrictedActionGrants(
     const grantPath = `${path}.${key}`;
     if (typeof grant.sourceCardInstanceId !== "string")
       errors.push(`${grantPath}.sourceCardInstanceId must be a string.`);
-    if (typeof grant.sourceDefinitionId !== "string")
+    if (typeof grant.sourceDefinitionId !== "number")
       errors.push(`${grantPath}.sourceDefinitionId must be a string.`);
     if (typeof grant.actionType !== "string")
       errors.push(`${grantPath}.actionType must be a string.`);

@@ -71,7 +71,7 @@ describe("Security Purge target labels", () => {
     "distinguishes every destination in %s instead of repeating the ICE title",
     (locale, expected) => {
       const labels = (
-        ["hq", "rd", "archives", "remote_1", "new_remote"] as const
+        ["hq", "rd", "archives", "r1", "new_remote"] as const
       ).map((server) =>
         choiceOptionPresentationLabel(choice, targetOption(server), locale),
       );

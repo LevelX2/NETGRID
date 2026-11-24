@@ -11,21 +11,21 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
     [
       "funds the first exact Corporate Coup score parent instead of drawing redundant ICE",
       fundExposedRemoteJson,
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
+      "pf0wbtspdkhsgytgy7y4jsto42",
       true,
       "P3",
     ],
     [
       "converts exact burst economy before the reused Corporate Coup defense draw",
       safeAdvanceControlJson,
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_1%3Aremote_1",
+      "pf0wbtspdkhsgytgy7y4jsto42",
       false,
       "P4",
     ],
     [
       "converts exact burst economy before the second Corporate Coup defense draw",
       safeLowCreditAdvanceJson,
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
+      "p2tcxni66t4khx105fvo2h746t",
       false,
       "P4",
     ],
@@ -39,7 +39,7 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
       expectedPriorityClass,
     ) => {
       const result = runAiDecisionCheckpoint(
-        structuredClone(json) as AiDecisionCheckpointV1,
+        structuredClone(json) as unknown as AiDecisionCheckpointV1,
       );
 
       expect(result.ok, `${result.code}: ${result.message}`).toBe(true);

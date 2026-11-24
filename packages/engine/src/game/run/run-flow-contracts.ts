@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -12,6 +13,7 @@ import type {
   ServerId,
   Side,
   SubroutineDefinition,
+  TraceId,
   TraceSuccessEffect,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
@@ -242,7 +244,7 @@ export type RunFlowHost = {
       state: GameState,
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       damageAmount: number,
       legalAction: LegalAction,
     ) => { payload: Record<string, unknown>; suspended: boolean };
@@ -250,14 +252,14 @@ export type RunFlowHost = {
       state: GameState,
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       targetCardId: CardInstanceId,
     ) => Record<string, unknown>;
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
     traceBidChoice: (
       state: GameState,
       side: Side,
-      traceId: string,
+      traceId: TraceId,
       prompt: string,
       maxBid: number,
     ) => ChoiceRequest;
@@ -410,12 +412,12 @@ export type RunFlowHost = {
     revealCorpRdTop: (state: GameState, legalAction: LegalAction) => void;
   };
   rng: {
-    nextRandom: (state: GameState, purpose: string) => number;
-    rollDie: (state: GameState, purpose: string) => number;
+    nextRandom: (state: GameState, purpose: RandomPurpose) => number;
+    rollDie: (state: GameState, purpose: RandomPurpose) => number;
     shuffleStateIds: (
       state: GameState,
       ids: CardInstanceId[],
-      purpose: string,
+      purpose: RandomPurpose,
     ) => CardInstanceId[];
   };
   callbacks: {

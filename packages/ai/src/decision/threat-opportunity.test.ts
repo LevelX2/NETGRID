@@ -30,7 +30,7 @@ describe("Threat and Opportunity projections", () => {
   it("projects remote score threat as contest window and corp score threat", () => {
     const frame = frameWithRunTargets([
       runTarget({
-        targetServerId: "remote-1",
+        targetServerId: "r1",
         targetKind: "remote",
         accessPayoff: "score_threat",
         recommendation: "find_breaker_first",
@@ -178,6 +178,25 @@ describe("Threat and Opportunity projections", () => {
         (projection) => projection.threat === "corp_low_rez_reserve",
       ),
     ).toBe(false);
+  });
+
+  it("identifies funding rather than missing breakers on a covered but unaffordable path", () => {
+    const frame = frameWithRunTargets([
+      runTarget({
+        targetServerId: "rd",
+        targetKind: "rd",
+        pathPassability: "blocked_unpayable",
+        recommendation: "gain_credits_first",
+        accessPayoff: "unknown",
+      }),
+    ]);
+
+    const pathThreats = buildAiThreatProjections(frame).filter(
+      (threat) => threat.targetId === "rd",
+    );
+    expect(pathThreats.map((threat) => threat.threat)).toEqual([
+      "runner_economy_starvation",
+    ]);
   });
 
   it("projects runner economy starvation from economy posture", () => {

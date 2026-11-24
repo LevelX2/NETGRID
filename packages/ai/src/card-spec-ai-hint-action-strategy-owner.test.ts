@@ -1,11 +1,13 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-function actionStrategyEntry(cardId: string) {
-  const entry = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+function actionStrategyEntry(cardId: CardDefinitionId) {
+  const entry = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   return {
@@ -32,8 +34,8 @@ function actionStrategyEntry(cardId: string) {
 
 describe("CardSpec action-strategy typed owners", () => {
   it("compiles all 41 Originalset capability bindings from their exact owner nodes", () => {
-    const entries = cardSpecPlanningCards().filter((entry) =>
-      entry.definition.id.startsWith("onr_v1_"),
+    const entries = listPlanningCardsWithFacts().filter((entry) =>
+      ORIGINALSET_V1_CARD_IDS.includes(entry.facts.id),
     );
     const bindingCount = entries.reduce(
       (count, entry) =>
@@ -60,20 +62,20 @@ describe("CardSpec action-strategy typed owners", () => {
       );
       if (!capabilityBindings) continue;
       expect(() =>
-        deriveCardSpecAiHint(actionStrategyEntry(entry.definition.id)),
+        deriveCardSpecAiHint(actionStrategyEntry(entry.facts.id)),
       ).not.toThrow();
     }
   });
 
   it("covers nested and printed trace, tag source, tagged payoff, and ice-tax clusters", () => {
     const witnesses = [
-      ["onr_v1_213_private-cybernet-police", "tag.source"],
-      ["onr_v1_207_netwatch-operations-office", "trace.source"],
-      ["onr_v1_236_data-raven", "tag.source"],
-      ["onr_v1_208_on-call-solo-team", "tag.payoff"],
-      ["onr_v1_271_tko-2-0", "corp_ice.runner_action_loss"],
-      ["onr_v1_313_city-surveillance", "tag.source"],
-      ["onr_v1_299_power-grid-overload", "tag.payoff"],
+      [425, "tag.source"],
+      [419, "trace.source"],
+      [448, "tag.source"],
+      [420, "tag.payoff"],
+      [483, "corp_ice.runner_action_loss"],
+      [525, "tag.source"],
+      [511, "tag.payoff"],
     ] as const;
 
     for (const [cardId, evidenceAnchor] of witnesses)
@@ -90,7 +92,7 @@ describe("CardSpec action-strategy typed owners", () => {
   });
 
   it("rejects near-matching nodes that lack the asserted typed evidence", () => {
-    const forged = (cardId: string, engine: Record<string, unknown>) => {
+    const forged = (cardId: CardDefinitionId, engine: Record<string, unknown>) => {
       const entry = actionStrategyEntry(cardId);
       return () =>
         deriveCardSpecAiHint({
@@ -102,10 +104,10 @@ describe("CardSpec action-strategy typed owners", () => {
         } as never);
     };
 
-    const edited = actionStrategyEntry("onr_v1_213_private-cybernet-police");
+    const edited = actionStrategyEntry(425);
     const editedAbility = edited.planning.engine.abilities?.[0];
     expect(
-      forged("onr_v1_213_private-cybernet-police", {
+      forged(425, {
         abilities: [
           {
             ...editedAbility,
@@ -122,11 +124,11 @@ describe("CardSpec action-strategy typed owners", () => {
     ).toThrow("card_spec_action_strategy_binding_mismatch");
 
     const netwatch = actionStrategyEntry(
-      "onr_v1_207_netwatch-operations-office",
+      419,
     );
     const traceAbility = netwatch.planning.engine.abilities?.[0];
     expect(
-      forged("onr_v1_207_netwatch-operations-office", {
+      forged(419, {
         abilities: [
           {
             ...traceAbility,
@@ -143,16 +145,16 @@ describe("CardSpec action-strategy typed owners", () => {
       }),
     ).toThrow("card_spec_action_strategy_binding_mismatch");
 
-    const solo = actionStrategyEntry("onr_v1_208_on-call-solo-team");
+    const solo = actionStrategyEntry(420);
     const damageAbility = solo.planning.engine.abilities?.[0];
     expect(
-      forged("onr_v1_208_on-call-solo-team", {
+      forged(420, {
         abilities: [{ ...damageAbility, condition: undefined }],
       }),
     ).toThrow("card_spec_action_strategy_binding_mismatch");
 
     expect(
-      forged("onr_v1_313_city-surveillance", {
+      forged(525, {
         remainingReplacementLongtail: {
           kind: "runner_run_lock_actions",
           amount: 1,

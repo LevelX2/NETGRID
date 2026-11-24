@@ -2,10 +2,12 @@ import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts"
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
-import { accessStrengthTargetsExpireBeforeNextEncounter } from "./access-target-expiry";
+import {
+  accessStrengthTargetsExpireBeforeNextEncounter,
+  currentPaidAccessEffect,
+} from "./access-target-expiry";
 
 const ACCESS_PAYMENT_SOURCE = "p3_35.access_payment";
-const ACCESS_ZONES = new Set(["installed", "hq", "rd", "archives"]);
 
 export function corpAccessPaymentChoiceSignal(
   input: AiDecisionInput,
@@ -32,19 +34,6 @@ export function corpAccessPaymentChoiceSignal(
     return undefined;
   }
 
-  const sourceParts = choice.source.split(":");
-  if (
-    sourceParts.length !== 5 ||
-    sourceParts[0] !== ACCESS_PAYMENT_SOURCE ||
-    sourceParts[1] === "" ||
-    !nonNegativeInteger(sourceParts[2]) ||
-    !ACCESS_ZONES.has(sourceParts[3] ?? "") ||
-    !nonNegativeInteger(sourceParts[4]) ||
-    Number(sourceParts[4]) !== input.playerView.stateVersion
-  ) {
-    return undefined;
-  }
-
   const pay = selectableOptions.find(
     (option) => option.id === "pay" && option.value === "pay",
   );
@@ -65,11 +54,12 @@ export function corpAccessPaymentChoiceSignal(
     creditCost > input.playerView.own.credits ||
     typeof noOpCertified !== "boolean" ||
     !sourceDefinitionId ||
-    !sourceInstanceId ||
-    sourceInstanceId !== sourceParts[1]
+    !sourceInstanceId
   ) {
     return undefined;
   }
+  const effect = currentPaidAccessEffect(choice, creditCost);
+  if (!effect) return undefined;
   const originEvent = input.eventTail.at(-1);
   if (
     !originEvent ||
@@ -110,12 +100,7 @@ export function corpAccessPaymentChoiceSignal(
     return undefined;
   const targetExpiry = noOpCertified
     ? undefined
-    : accessStrengthTargetsExpireBeforeNextEncounter(
-        input,
-        sourceDefinitionId,
-        sourceParts[3]!,
-        creditCost,
-      );
+    : accessStrengthTargetsExpireBeforeNextEncounter(input, effect);
   const declinePayment = noOpCertified || targetExpiry !== undefined;
   return {
     commitmentVersion: "corp_ambush_commitment_v1",
@@ -152,10 +137,4 @@ export function corpAccessPaymentChoiceSignal(
       ...(targetExpiry ? { targetExpiry } : {}),
     },
   };
-}
-
-function nonNegativeInteger(value: string | undefined): boolean {
-  if (value === undefined || value === "") return false;
-  const parsed = Number(value);
-  return Number.isSafeInteger(parsed) && parsed >= 0;
 }

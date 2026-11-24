@@ -21,10 +21,10 @@ import { corpSameTurnScoreConversionPaths } from "../plans/tactical-plan-corp-sc
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { sanitizeCorpScoreRecoveryQuote } from "./corp-score-recovery-quote-input";
 
-const RECOVERY = "onr_v1_296_off-site-backups";
-const SUPPORT = "onr_v1_300_project-consultants";
-const AGENDA = "onr_v1_196_corporate-war";
-const HOSTILE = "onr_v1_203_hostile-takeover";
+const RECOVERY = 508;
+const SUPPORT = 512;
+const AGENDA = 408;
+const HOSTILE = 415;
 const extra = [RECOVERY, SUPPORT, AGENDA, HOSTILE];
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,
@@ -252,6 +252,12 @@ it.each(["origin", "state", "target", "source"] as const)(
       if (variant === "source")
         signal.recoveryChoiceBinding.sourceCardId = "wrong";
     }
+    if (variant === "state") {
+      expect(() => rememberResidentPlanPortfolio(initial, portfolio)).toThrow(
+        /executor_invariant_broken/,
+      );
+      return;
+    }
     rememberResidentPlanPortfolio(initial, portfolio);
     state = apply(
       state,
@@ -268,6 +274,22 @@ it("rejects a malformed DTO quote instead of dropping its binding", () => {
   recovery.corpScoreRecoveryQuote = {
     ...recovery.corpScoreRecoveryQuote!,
     actionId: "wrong",
+  };
+  expect(() => sanitizeCorpScoreRecoveryQuote(recovery)).toThrow(
+    "invalid_corp_score_recovery_quote_binding",
+  );
+});
+
+it("rejects duplicate operation rows for an exact recovery choice", () => {
+  const recovery = inputFor(fixture()).legalActions.find(
+    (action) => action.corpScoreRecoveryQuote,
+  )!;
+  const quote = recovery.corpScoreRecoveryQuote!;
+  const first = quote.options[0]!;
+  expect(first).toBeDefined();
+  recovery.corpScoreRecoveryQuote = {
+    ...quote,
+    options: [...quote.options, first],
   };
   expect(() => sanitizeCorpScoreRecoveryQuote(recovery)).toThrow(
     "invalid_corp_score_recovery_quote_binding",

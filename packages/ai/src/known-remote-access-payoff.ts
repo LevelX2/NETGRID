@@ -1,5 +1,9 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import type { MatchEventId } from "@netgrid/shared";
+import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
+import { currentRunPathContext } from "./run-analysis/current-run-path-context";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
-import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
 import {
@@ -18,10 +22,7 @@ import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { currentRunRemainingIce } from "./runtime/current-encounter";
 import { runnerAgendaStealCreditRequirement } from "./run-analysis/runner-agenda-steal-cost";
 import type { AccessReserveEconomyPosture } from "./access/access-reserve-adapter";
-import {
-  mergedPublicHistory,
-  serverIdFromEvent,
-} from "./runtime/public-event-history";
+import { mergedPublicHistory, serverIdFromEvent } from "./public-event-history";
 import {
   projectKnownCorpCardAccessEffect,
   projectKnownCorpCardProspectiveAccessEffect,
@@ -69,17 +70,17 @@ export type KnownRemoteAccessPayoff = {
 };
 
 type KnownRemoteRoot = {
-  definitionId: string;
+  definitionId: number;
   positionKey: string;
   source: "player_view" | "position_memory";
-  sourceEventId?: string;
+  sourceEventId?: MatchEventId;
   visibleCard?: VisibleCard;
 };
 
 export type ObservedRemoteAccessDamage = {
   amount: number;
   damageType: "net" | "meat" | "core";
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   preventionRemaining: number;
   survivalCapacity: number;
   survivable: boolean;
@@ -91,7 +92,7 @@ export function evaluateKnownRemoteAccessPayoff(
   beliefState: BeliefState = reconstructBeliefState(input),
   economyPosture?: AccessReserveEconomyPosture,
 ): KnownRemoteAccessPayoff {
-  if (!serverId?.startsWith("remote_")) return unknownRemotePayoff("none");
+  if (!isRemoteServerId(serverId)) return unknownRemotePayoff("none");
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
@@ -154,12 +155,11 @@ export function evaluateKnownRemoteAccessPayoff(
   }
 
   const rootCount = server.root.length;
-  const knownPositions = new Set(knownRoots.map((root) => root.positionKey));
-  const allRootsKnown = knownPositions.size >= rootCount;
+  const allRootsKnown = knownRoots.length === rootCount;
   if (!allRootsKnown) {
     return unknownRemotePayoff(serverId, [
       `known_remote_cards:${knownRoots.length}`,
-      `remote_memory_known_root_positions:${knownPositions.size}`,
+      `remote_memory_known_root_positions:${knownRoots.length}`,
       `remote_memory_root_count:${rootCount}`,
       "remote_memory_payoff:partial_unknown",
     ]);
@@ -204,15 +204,17 @@ export function evaluateKnownRemoteAccessPayoff(
     .sort(
       (left, right) =>
         right.threatValue - left.threatValue ||
-        left.sourceDefinitionId.localeCompare(right.sourceDefinitionId),
+        (left.sourceDefinitionId - right.sourceDefinitionId),
     )[0];
   const accessThreatUnknown = accessThreatProjections.some(
     (projection) => projection.status === "unknown",
   );
-  const unsafeKnownAccessThreat =
-    knownAccessThreatProjection?.status === "complete" &&
-    (knownAccessThreatProjection.damage?.runnerSurvivable === false ||
-      knownAccessThreatProjection.damage?.runnerHandBufferPreserved === false);
+  const unsafeKnownAccessThreat = accessThreatProjections.some(
+    (projection) =>
+      projection.status === "complete" &&
+      (projection.damage?.runnerSurvivable === false ||
+        projection.damage?.runnerHandBufferPreserved === false),
+  );
   const accessThreatEvidence = accessThreatProjections.flatMap((projection) => [
     `known_access_effect_source:${projection.sourceDefinitionId}`,
     `known_access_effect_status:${projection.status}`,
@@ -533,7 +535,7 @@ function observedRemoteAccessDamage(
       publicActionType(event) !== "access_card" ||
       publicActor(event) !== "runner" ||
       remoteEventServerId(event) !== serverId ||
-      stringPayloadValue(event, "cardDefinitionId") !== root.definitionId ||
+      event.publicPayload.cardDefinitionId !== root.definitionId ||
       stringPayloadValue(event, "accessedCardPositionKey") !==
         root.positionKey ||
       event.publicPayload.damageResolved !== true
@@ -587,7 +589,7 @@ function remoteEventServerId(
   if (direct) return direct;
   const label = stringPayloadValue(event, "serverLabel")?.trim().toLowerCase();
   const match = /^remote[\s_-]+(\d+)$/.exec(label ?? "");
-  return match?.[1] ? `remote_${Number.parseInt(match[1], 10)}` : undefined;
+  return match?.[1] ? `r${Number.parseInt(match[1], 10)}` : undefined;
 }
 
 function stringPayloadValue(
@@ -622,40 +624,36 @@ function knownRemoteRoots(
       entry,
     ]),
   );
-  const byPosition = new Map<string, KnownRemoteRoot>();
-  server?.root.forEach((card, index) => {
-    if (!card.known || !card.definitionId) return;
-    const positionKey = `root:${index}`;
-    const memory = memoryByPosition.get(positionKey);
-    byPosition.set(positionKey, {
-      definitionId: card.definitionId,
-      positionKey,
-      source: "player_view",
-      ...(memory?.definitionId === card.definitionId
-        ? { sourceEventId: memory.sourceEventId }
-        : {}),
-      visibleCard: card,
-    });
-  });
-  for (const entry of knownRemoteRootMemory(beliefState, serverId)) {
-    if (byPosition.has(entry.positionKey)) continue;
-    byPosition.set(entry.positionKey, {
-      definitionId: entry.definitionId,
-      positionKey: entry.positionKey,
-      source: "position_memory",
-      sourceEventId: entry.sourceEventId,
-      ...(server?.root[Number.parseInt(entry.positionKey.slice(5), 10)] !==
-      undefined
-        ? {
-            visibleCard:
-              server.root[Number.parseInt(entry.positionKey.slice(5), 10)]!,
-          }
-        : {}),
-    });
-  }
-  return [...byPosition.values()].sort((left, right) =>
-    left.positionKey.localeCompare(right.positionKey),
-  );
+  return (server?.root ?? [])
+    .flatMap((card, index): KnownRemoteRoot[] => {
+      const positionKey = `root:${index}`;
+      const memory = memoryByPosition.get(positionKey);
+      if (card.known && card.definitionId) {
+        return [
+          {
+            definitionId: card.definitionId,
+            positionKey,
+            source: "player_view",
+            ...(memory?.definitionId === card.definitionId
+              ? { sourceEventId: memory.sourceEventId }
+              : {}),
+            visibleCard: card,
+          },
+        ];
+      }
+      return memory
+        ? [
+            {
+              definitionId: memory.definitionId,
+              positionKey,
+              source: "position_memory",
+              sourceEventId: memory.sourceEventId,
+              visibleCard: card,
+            },
+          ]
+        : [];
+    })
+    .sort((left, right) => left.positionKey.localeCompare(right.positionKey));
 }
 
 function invalidationEntryReferencesServer(
@@ -704,6 +702,10 @@ function knownRemotePathCost(
     input.playerView.own.rig ?? [],
     input.playerView.own.credits,
     server.root,
+    input.playerView.opponent.credits,
+    input.playerView.run?.attackedServerId === serverId
+      ? currentRunPathContext(input)
+      : visibleRunnerPathTraceContext(input),
   );
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
   return {
@@ -793,16 +795,16 @@ function changedRemotePayoff(
   };
 }
 
-function cardDefinitionTrashCost(definitionId: string): number | undefined {
+function cardDefinitionTrashCost(definitionId: number): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
+    planningCardFactsByDefinitionId(definitionId)?.trashCost
   );
 }
 
-function cardDefinitionType(definitionId: string): string | undefined {
+function cardDefinitionType(definitionId: number): string | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.type ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type
+    planningCardFactsByDefinitionId(definitionId)?.type
   );
 }

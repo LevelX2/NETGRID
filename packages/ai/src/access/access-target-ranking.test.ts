@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import { rankKnownRemoteAccessTargets } from "./access-target-ranking";
 import type { KnownRemoteAccessCandidate } from "./access-target-ranking";
@@ -43,11 +44,11 @@ function candidate(
 ): KnownRemoteAccessCandidate {
   return {
     positionKey,
-    definitionId: `${targetKind}-${positionKey}`,
+    definitionId: syntheticCardDefinitionId(`${targetKind}-${positionKey}`),
     targetKind,
     valueScore,
     commitment: {
-      serverId: "remote_1",
+      serverId: "r1",
       knownAccessState:
         intent === "decline" ? "known_no_current_payoff" : "known_payoff",
       intendedAccessAction: intent,
@@ -56,7 +57,7 @@ function candidate(
     },
     projection: {
       source: "pre_run",
-      serverId: "remote_1",
+      serverId: "r1",
       target: targetKind,
       intendedAccessAction: intent,
       projections: [],

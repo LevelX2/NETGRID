@@ -2,11 +2,14 @@ import {
   createAiLiveRuntimeComposition,
   type AiLiveRuntimeCompositionDependencies,
 } from "../runtime/ai-live-runtime-composition";
-import { createAiContextDiagnosticsComposition } from "../runtime/ai-context-diagnostics-composition";
 import {
-  createSemanticRuntimeCorpScoringComposition,
-  type SemanticRuntimeCorpScoringCompositionDependencies,
-} from "../runtime/semantic-runtime-corp-scoring-composition";
+  aiContextDiagnosticDependencies,
+  createAiContextDiagnosticsComposition,
+} from "../runtime/ai-context-diagnostics-composition";
+import {
+  createCorpTagPunishWindowComposition,
+  type CorpTagPunishWindowCompositionDependencies,
+} from "./corp-tag-punish-window-composition";
 import {
   createAiGameSimulator,
   type AiGameSimulatorDependencies,
@@ -14,17 +17,9 @@ import {
 import { createSimulationDecisionContext } from "./simulation-decision-context";
 import { createQualityTagsForAction } from "./simulation-quality-adapters";
 
-type ContextDiagnostics = ReturnType<
-  typeof createAiContextDiagnosticsComposition
+type ContextDependencyKeys = keyof ReturnType<
+  typeof aiContextDiagnosticDependencies
 >;
-type ContextDependencyKeys =
-  | keyof ContextDiagnostics
-  | "closeout"
-  | "extractFeatures"
-  | "hasKnownUnaffordableLegalRun"
-  | "remoteTrashAccessContext"
-  | "tagPunishAssessmentForAction"
-  | "trashAccessContext";
 
 export type AiProductSimulationCompositionDependencies =
   AiLiveRuntimeCompositionDependencies &
@@ -36,40 +31,21 @@ export type AiProductSimulationCompositionDependencies =
       | "tagPunishWindowDiagnosticsForSimulationAction"
       | ContextDependencyKeys
     > &
-    Omit<
-      SemanticRuntimeCorpScoringCompositionDependencies<string>,
-      ContextDependencyKeys
-    > &
+    Omit<CorpTagPunishWindowCompositionDependencies, ContextDependencyKeys> &
     Omit<
       Parameters<typeof createQualityTagsForAction>[0],
       ContextDependencyKeys
     >;
 
-function withContextDiagnostics(
-  dependencies: AiProductSimulationCompositionDependencies,
-  diagnostics: ContextDiagnostics,
-) {
-  return {
-    ...dependencies,
-    ...diagnostics,
-    closeout: diagnostics.bestTrueCentralCloseoutProfileForMetrics,
-    extractFeatures: diagnostics.extractAiFeatures,
-    hasKnownUnaffordableLegalRun:
-      diagnostics.runnerHasKnownUnaffordableLegalRun,
-    remoteTrashAccessContext: diagnostics.runnerRemoteTrashAccessContext,
-    tagPunishAssessmentForAction:
-      diagnostics.corpTagPunishOntologyAssessmentForAction,
-    trashAccessContext: diagnostics.runnerRemoteTrashAccessContext,
-  };
-}
-
 export function createAiProductSimulationComposition(
   dependencies: AiProductSimulationCompositionDependencies,
 ) {
   const diagnostics = createAiContextDiagnosticsComposition(dependencies);
-  const corpScoring = createSemanticRuntimeCorpScoringComposition(
-    withContextDiagnostics(dependencies, diagnostics),
-  );
+  const { tagPunishWindowDiagnosticsForSimulationAction } =
+    createCorpTagPunishWindowComposition({
+      ...dependencies,
+      ...aiContextDiagnosticDependencies(diagnostics),
+    });
   const runtime = createAiLiveRuntimeComposition(dependencies);
   const qualityTagsForAction = createQualityTagsForAction({
     extractFeatures: diagnostics.extractAiFeatures,
@@ -81,7 +57,6 @@ export function createAiProductSimulationComposition(
       chooseAiAction: runtime.chooseAiAction,
       chooseRunnerAction: runtime.chooseRunnerAction,
       chooseCorpAction: runtime.chooseCorpAction,
-      selectedChoicesForDecision: runtime.selectedChoicesForDecision,
     });
   const { simulateAiGame } = createAiGameSimulator({
     chooseDecisionForSimulation,
@@ -96,8 +71,7 @@ export function createAiProductSimulationComposition(
       diagnostics.runnerBreakerCoverageDiagnosticsForSimulationAction,
     runnerEconomySetupDiagnosticsForSimulationAction:
       diagnostics.runnerEconomySetupDiagnosticsForSimulationAction,
-    tagPunishWindowDiagnosticsForSimulationAction:
-      corpScoring.tagPunishWindowDiagnosticsForSimulationAction,
+    tagPunishWindowDiagnosticsForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction:
       diagnostics.corpFutureRunIceDiagnosticsForSimulationAction,
     qualityTagsForAction,

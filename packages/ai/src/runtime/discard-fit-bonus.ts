@@ -1,6 +1,6 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
 export function discardPlanFitBonus(
@@ -84,8 +84,7 @@ export function discardStrategicFitBonus(
   type: string | undefined,
   cost: number,
 ): number {
-  const strategies = discardStrategyIds(input);
-  const strategySet = new Set(strategies);
+  const strategySet = discardStrategyIds(input);
   let bonus = 0;
   if (input.side === "runner") {
     if (
@@ -166,7 +165,7 @@ export function discardStrategicFitBonus(
   return Math.max(0, Math.min(35, bonus));
 }
 
-function discardStrategyIds(input: AiDecisionInput): string[] {
+function discardStrategyIds(input: AiDecisionInput): ReadonlySet<string> {
   const semanticInput = input as AiDecisionInputWithDeckCapabilities;
   const profile = semanticInput.ownDeckStrategyProfile;
   const intent = semanticInput.ownStrategicIntentState;
@@ -174,9 +173,9 @@ function discardStrategyIds(input: AiDecisionInput): string[] {
     intent && intent.primaryStrategy.family !== "neutral"
       ? [intent.primaryStrategy.strategyId]
       : [];
-  return [
+  return new Set([
     ...committedStrategy,
     ...(profile?.primaryStrategies ?? []),
     ...(profile?.secondaryStrategies ?? []),
-  ].filter((strategyId, index, all) => all.indexOf(strategyId) === index);
+  ]);
 }

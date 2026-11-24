@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -57,14 +58,14 @@ it("rejects the two-acceleration score route before it consumes a funded termina
     agendaPoints: 0,
   });
   const result = decide(cp);
-  expect(result.actionId).not.toContain("overtime-incentives");
+  expect(result.actionId).not.toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 509));
   const scores = residentPlanPortfolioSnapshot(cp.input)!
     .instances.filter((p) => p.moduleId === "corp.score_agenda")
     .map(
       (p) =>
         p.moduleState as {
           signal: {
-            agendaDefinitionId?: string;
+            agendaDefinitionId?: number;
             sameTurnConversionProof?: string;
             feasible: boolean;
             routeAssessment?: string;
@@ -74,7 +75,7 @@ it("rejects the two-acceleration score route before it consumes a funded termina
   expect(
     scores.some(
       (p) =>
-        p.signal.agendaDefinitionId === "onr_v1_201_executive-extraction" &&
+        p.signal.agendaDefinitionId === 413 &&
         p.signal.sameTurnConversionProof === "engine_quoted_path" &&
         !p.signal.feasible &&
         p.signal.routeAssessment ===
@@ -87,7 +88,7 @@ it("retains the exact acceleration action when the complete score also leaves fi
   cp.input.playerView.own.credits = 16;
   const result = decide(cp),
     plan = result.decisionDebug!.planFirstDecision!;
-  expect(result.actionId).toContain("overtime-incentives");
+  expect(result.actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 509));
   expect(plan.selectedPlan?.moduleId).toBe("corp.score_agenda");
   expect(plan.selectedStep?.planInstanceId).toBe(plan.leafExecutorInstanceId);
 });
@@ -95,7 +96,7 @@ it("preserves terminal own-score precedence", () => {
   const cp = checkpoint();
   cp.input.playerView.own.agendaPoints = 6;
   const result = decide(cp);
-  expect(result.actionId).toContain("overtime-incentives");
+  expect(result.actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 509));
   expect(
     result.decisionDebug!.planFirstDecision!.priority?.effectiveClass,
   ).toBe("P1");
@@ -103,15 +104,15 @@ it("preserves terminal own-score precedence", () => {
 it("does not reserve breakable tax under ordinary nonterminal central pressure", () => {
   const cp = checkpoint();
   cp.input.playerView.opponent.agendaPoints = 0;
-  expect(decide(cp).actionId).toContain("overtime-incentives");
+  expect(decide(cp).actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 509));
 });
 it("does not reserve the already paid ICE again", () => {
   const cp = checkpoint();
   cp.input.playerView.servers
     .find((s) => s.id === "rd")!
-    .ice.find((c) => c.definitionId === "onr_v1_259_in-the-face")!.rezzed =
+    .ice.find((c) => c.definitionId === 471)!.rezzed =
     true;
-  expect(decide(cp).actionId).toContain("overtime-incentives");
+  expect(decide(cp).actionId).toSatisfy((reference: string | undefined) => referencesDefaultDeckCard(reference, 509));
 });
 it("fails closed when the funded claim loses its complete current score horizon", () => {
   const cp = checkpoint();
@@ -121,7 +122,7 @@ it("fails closed when the funded claim loses its complete current score horizon"
       (p) =>
         p.moduleId === "corp.score_agenda" &&
         (p.moduleState as { signal: CorpScoreProjectSignal }).signal
-          .agendaDefinitionId === "onr_v1_201_executive-extraction",
+          .agendaDefinitionId === 413,
     )!.moduleState as { signal: CorpScoreProjectSignal }
   ).signal;
   const withoutHorizon = { ...signal, feasible: true };

@@ -30,7 +30,7 @@ it("preserves the actual cheaper breaker search under the canonical deck profile
   const snapshot = {
     ...source,
     cards: source.cards.map(
-      (c: { cardId?: string; definitionId?: string; quantity: number }) => ({
+      (c: { cardId?: string; definitionId?: number; quantity: number }) => ({
         cardId: c.cardId ?? c.definitionId!,
         quantity: c.quantity,
       }),
@@ -64,6 +64,8 @@ it("preserves the actual cheaper breaker search under the canonical deck profile
     input.playerView.stateVersion,
   );
   expect(
-    decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("runner.rig_and_coverage");
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("runner.rig_and_coverage");
 });

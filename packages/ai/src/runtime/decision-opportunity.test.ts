@@ -28,33 +28,89 @@ describe("assessDecisionOpportunity", () => {
     });
   });
 
-  it("classifies a single selectable mandatory choice as forced", () => {
-    const resolve = action("resolve", "resolve_choice");
-    const decisionInput = input([resolve]);
-    decisionInput.playerView.pendingChoice = {
-      choiceId: "forced-choice",
-      side: "corp",
-      source: "test",
-      prompt: "Choose",
-      kind: "select_option",
-      options: [
-        {
-          id: "only",
-          label: "Only",
-          value: "only",
-        },
-      ],
-      minSelections: 1,
-      maxSelections: 1,
-      stateVersion: 1,
-      visibility: "private_to_side",
-    };
-
-    expect(assessDecisionOpportunity(decisionInput, resolve)).toMatchObject({
+  it.each([
+    {
+      min: 1,
+      max: 1,
+      options: 1,
+      ordered: false,
       kind: "forced_choice",
-      actionableAlternativeCount: 0,
-    });
-  });
+      alternatives: 0,
+    },
+    {
+      min: 0,
+      max: 1,
+      options: 1,
+      ordered: false,
+      kind: "competitive",
+      alternatives: 1,
+    },
+    {
+      min: 1,
+      max: 1,
+      options: 3,
+      ordered: false,
+      kind: "competitive",
+      alternatives: 2,
+    },
+    {
+      min: 2,
+      max: 2,
+      options: 2,
+      ordered: false,
+      kind: "forced_choice",
+      alternatives: 0,
+    },
+    {
+      min: 2,
+      max: 2,
+      options: 2,
+      ordered: true,
+      kind: "competitive",
+      alternatives: 1,
+    },
+  ])(
+    "counts legal selections ($min-$max of $options, ordered=$ordered)",
+    ({ min, max, options, ordered, kind, alternatives }) => {
+      const choiceOptions = Array.from({ length: options }, (_, i) => ({
+        id: `card_${i}`,
+        label: `Card ${i}`,
+      }));
+      const disabled = { id: "disabled", label: "Disabled", selectable: false };
+      const opts = [...choiceOptions, disabled];
+      const resolve: LegalAction = {
+        ...action("resolve", "resolve_choice"),
+        source: "game_rule",
+        choiceRequirements: [
+          {
+            choiceId: "current-choice",
+            optionIds: opts.map(({ id }) => id),
+            minSelections: min,
+            maxSelections: max,
+          },
+        ],
+      };
+      const decisionInput = input([resolve]);
+      decisionInput.playerView.pendingChoice = {
+        choiceId: "current-choice",
+        side: "corp",
+        source: "test",
+        prompt: "Choose",
+        kind: "select_cards",
+        options: opts,
+        minSelections: min,
+        maxSelections: max,
+        selectionOrdering: ordered ? "ordered" : "unordered",
+        stateVersion: 1,
+        visibility: "private_to_side",
+      };
+
+      expect(assessDecisionOpportunity(decisionInput, resolve)).toMatchObject({
+        kind,
+        actionableAlternativeCount: alternatives,
+      });
+    },
+  );
 });
 
 function input(legalActions: LegalAction[]): AiDecisionInput {

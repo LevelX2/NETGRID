@@ -15,7 +15,7 @@ function runtimePrintedSubroutines(
   definitionId: CardDefinitionId,
 ): SubroutineDefinition[] {
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-  expect(definition, definitionId).toBeDefined();
+  expect(definition, String(definitionId)).toBeDefined();
   return (
     printedSubroutinesForCardImplementation(definition!) ??
     definition!.subroutines ??
@@ -26,7 +26,7 @@ function runtimePrintedSubroutines(
 describe("printed subroutine implementations", () => {
   it("maps pay-or-end-run printed subroutines with variable amounts", () => {
     const definition = {
-      id: "test_variable_pay_or_end_ice",
+      id: 3474921859,
     } as CardDefinition;
 
     expect(
@@ -40,7 +40,8 @@ describe("printed subroutine implementations", () => {
         0,
       ),
     ).toEqual({
-      id: "card_implementation.test_variable_pay_or_end_ice.printed_subroutine.1.end_the_run_unless_runner_pays",
+      id: "0",
+      provenance: ["p", 3474921859, 0],
       type: "end_the_run_unless_runner_pays",
       amount: 2,
     });
@@ -48,55 +49,55 @@ describe("printed subroutine implementations", () => {
 
   it("registers P3.25 simple ICE printed subroutines as implemented", () => {
     const p325IceCases = [
-      ["onr_v1_232_crystal-wall", 1],
-      ["onr_v1_237_data-wall", 1],
-      ["onr_v1_238_data-wall-2-0", 1],
-      ["onr_v1_244_filter", 1],
-      ["onr_v1_252_keeper", 1],
-      ["onr_v1_256_mazer", 1],
-      ["onr_v1_261_quandary", 1],
-      ["onr_v1_265_rock-is-strong", 1],
-      ["onr_v1_266_scramble", 1],
-      ["onr_v1_270_sleeper", 1],
-      ["onr_v1_279_wall-of-static", 1],
-      ["onr_v1_239_endless-corridor", 2],
-      ["onr_v1_263_reinforced-wall", 2],
-      ["onr_v1_230_cortical-scanner", 3],
-      ["onr_v1_253_laser-wire", 2],
-      ["onr_v1_262_razor-wire", 2],
-      ["onr_v1_269_shotgun-wire", 2],
-      ["onr_v1_257_nerve-labyrinth", 2],
-      ["onr_v1_231_cortical-scrub", 2],
-      ["onr_v1_229_code-corpse", 3],
-      ["onr_v1_280_zombie", 3],
-      ["onr_v1_254_liche", 4],
-      ["onr_v1_278_wall-of-ice", 4],
+      [444, 1],
+      [449, 1],
+      [450, 1],
+      [456, 1],
+      [464, 1],
+      [468, 1],
+      [473, 1],
+      [477, 1],
+      [478, 1],
+      [482, 1],
+      [491, 1],
+      [451, 2],
+      [475, 2],
+      [442, 3],
+      [465, 2],
+      [474, 2],
+      [481, 2],
+      [469, 2],
+      [443, 2],
+      [441, 3],
+      [492, 3],
+      [466, 4],
+      [490, 4],
     ] as const;
 
     for (const [definitionId, subroutineCount] of p325IceCases) {
       expect(
         runtimePrintedSubroutines(definitionId),
-        definitionId,
+        String(definitionId),
       ).toHaveLength(subroutineCount);
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
 
   it("registers P3.26 program-trash ICE printed subroutines as implemented", () => {
     const p326IceCases = [
-      "onr_v1_223_banpei",
-      "onr_v1_233_d-arc-knight",
-      "onr_v1_235_data-naga",
-      "onr_v1_250_ice-pick-willie",
-      "onr_v1_267_sentinels-prime",
-      "onr_v1_273_triggerman",
+      435,
+      445,
+      447,
+      462,
+      479,
+      485,
     ] as const;
 
     for (const definitionId of p326IceCases) {
-      expect(runtimePrintedSubroutines(definitionId), definitionId).toEqual([
+      expect(runtimePrintedSubroutines(definitionId), String(definitionId)).toEqual([
         expect.objectContaining({
           type: "trash_installed_program",
         }),
@@ -106,7 +107,7 @@ describe("printed subroutine implementations", () => {
       ]);
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
@@ -114,7 +115,7 @@ describe("printed subroutine implementations", () => {
   it("registers P3.27 next-ICE restriction printed subroutines as implemented", () => {
     const p327IceCases = [
       {
-        definitionId: "onr_v1_224_bolter-cluster",
+        definitionId: 436,
         subroutines: [
           expect.objectContaining({
             type: "do_damage",
@@ -127,7 +128,7 @@ describe("printed subroutine implementations", () => {
         ],
       },
       {
-        definitionId: "onr_v1_234_data-darts",
+        definitionId: 446,
         subroutines: [
           expect.objectContaining({
             type: "do_damage",
@@ -140,7 +141,7 @@ describe("printed subroutine implementations", () => {
         ],
       },
       {
-        definitionId: "onr_v1_258_neural-blade",
+        definitionId: 470,
         subroutines: [
           expect.objectContaining({
             type: "do_damage",
@@ -153,7 +154,7 @@ describe("printed subroutine implementations", () => {
         ],
       },
       {
-        definitionId: "onr_v1_268_shock-r",
+        definitionId: 480,
         subroutines: [
           expect.objectContaining({
             type: "set_next_encounter_lock",
@@ -164,12 +165,12 @@ describe("printed subroutine implementations", () => {
     ] as const;
 
     for (const { definitionId, subroutines } of p327IceCases) {
-      expect(runtimePrintedSubroutines(definitionId), definitionId).toEqual(
+      expect(runtimePrintedSubroutines(definitionId), String(definitionId)).toEqual(
         subroutines,
       );
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
   });
@@ -177,15 +178,15 @@ describe("printed subroutine implementations", () => {
   it("registers P3.30 run-duration and ETR catchup ICE as implemented", () => {
     const p330IceCases = [
       {
-        definitionId: "onr_v1_245_fire-wall",
+        definitionId: 457,
         subroutines: [expect.objectContaining({ type: "end_the_run" })],
       },
       {
-        definitionId: "onr_v1_259_in-the-face",
+        definitionId: 471,
         subroutines: [expect.objectContaining({ type: "end_the_run" })],
       },
       {
-        definitionId: "onr_v1_226_canis-minor",
+        definitionId: 438,
         subroutines: [
           expect.objectContaining({
             type: "set_run_future_strength_bonus",
@@ -194,7 +195,7 @@ describe("printed subroutine implementations", () => {
         ],
       },
       {
-        definitionId: "onr_v1_225_canis-major",
+        definitionId: 437,
         subroutines: [
           expect.objectContaining({
             type: "set_run_future_strength_bonus",
@@ -203,7 +204,7 @@ describe("printed subroutine implementations", () => {
         ],
       },
       {
-        definitionId: "onr_v1_274_tutor",
+        definitionId: 486,
         subroutines: [
           expect.objectContaining({
             type: "set_run_future_end_the_run_subroutine",
@@ -211,7 +212,7 @@ describe("printed subroutine implementations", () => {
         ],
       },
       {
-        definitionId: "onr_v1_277_virizz",
+        definitionId: 489,
         subroutines: [
           expect.objectContaining({
             type: "set_run_break_subroutine_cost_modifier",
@@ -220,7 +221,7 @@ describe("printed subroutine implementations", () => {
         ],
       },
       {
-        definitionId: "onr_v1_251_jack-attack",
+        definitionId: 463,
         subroutines: [
           expect.objectContaining({ type: "set_run_jack_out_lock" }),
           expect.objectContaining({
@@ -232,22 +233,22 @@ describe("printed subroutine implementations", () => {
     ] as const;
 
     for (const { definitionId, subroutines } of p330IceCases) {
-      expect(runtimePrintedSubroutines(definitionId), definitionId).toEqual(
+      expect(runtimePrintedSubroutines(definitionId), String(definitionId)).toEqual(
         subroutines,
       );
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
-        definitionId,
+        String(definitionId),
       ).toBe("implemented");
     }
-    expect(runtimePrintedSubroutines("onr_v1_222_ball-and-chain")).toEqual([
+    expect(runtimePrintedSubroutines(434)).toEqual([
       expect.objectContaining({
         type: "set_run_encounter_tax",
         amount: 2,
       }),
     ]);
     expect(
-      cardImplementationCoverageForDefinitionId("onr_v1_222_ball-and-chain")
+      cardImplementationCoverageForDefinitionId(434)
         ?.status,
     ).toBe("implemented");
   });

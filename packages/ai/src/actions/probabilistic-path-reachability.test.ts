@@ -9,7 +9,7 @@ import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
   [4, 178, "hq"],
-  [34, 203, "remote_1"],
+  [34, 203, "r1"],
 ] as const)(
   "preserves the real unbreakable path at G%i D%i",
   (g, d, server) => {
@@ -29,7 +29,7 @@ it.each([
     };
     expect(input.playerView.opponent).not.toHaveProperty("gripOrHq");
     const target = evaluateRunnerRunTargets({ input }).find(
-      (x) => x.actionId === `runner.start_run.${server}`,
+      (x) => x.actionId === `rs.${server}`,
     )!;
     expect(target.routeQuote!.reachability).toBe("no_access");
     expect(target.pathPassability).not.toBe("reachable");

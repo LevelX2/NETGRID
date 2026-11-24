@@ -66,28 +66,28 @@ function run() {
     .withRunnerCredits(8)
     .withRunnerClicks(4)
     .withRunnerGripSize(0)
-    .withRunnerResourceInstalled("onr_v1_165_junkyard-bbs")
-    .withRunnerResourceInstalled("onr_proteus_128_airport-locker")
-    .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet")
-    .withRunnerProgramInstalled("onr_v1_011_cloak")
+    .withRunnerResourceInstalled(377)
+    .withRunnerResourceInstalled(186)
+    .withRunnerProgramInstalled(283)
+    .withRunnerProgramInstalled(223)
     .withCorpCredits(7)
-    .withCorpRemoteRoot("remote_1", "onr_v1_208_on-call-solo-team", 1)
-    .withRezzedCorpIceOnServer("remote_1", "onr_v1_244_filter")
-    .withRezzedCorpIceOnServer("remote_1", "onr_v1_243_fetch-4-0-1")
-    .withRezzedCorpIceOnServer("remote_1", "onr_v1_237_data-wall");
+    .withCorpRemoteRoot("r1", 420, 1)
+    .withRezzedCorpIceOnServer("r1", 456)
+    .withRezzedCorpIceOnServer("r1", 455)
+    .withRezzedCorpIceOnServer("r1", 449);
   for (const def of [
-    "onr_v1_114_temple-microcode-outlet",
-    "onr_v1_035_invisibility",
-    "onr_proteus_133_chiba-bank-account",
-    "onr_proteus_134_cortical-cybermodem",
-    "onr_v1_176_the-shell-traders",
+    326,
+    247,
+    191,
+    192,
+    388,
   ])
     fixture.withRunnerCardInGrip(def);
   state.runner.memoryUsed = 2;
   for (const [definitionId, side] of [
-    ["onr_v1_220_tycho-extension", "runner"],
-    ["onr_v1_196_corporate-war", "corp"],
-    ["onr_v1_194_corporate-downsizing", "corp"],
+    [432, "runner"],
+    [408, "corp"],
+    [406, "corp"],
   ] as const) {
     const [id, card] = Object.entries(state.cardInstances).find(
       ([, c]) => c.definitionId === definitionId,
@@ -104,12 +104,12 @@ function run() {
   }
   for (const id of state.runner.rig.programs)
     state.cardInstances[id]!.counters = {
-      bit: state.cardInstances[id]!.definitionId === "onr_v1_011_cloak" ? 3 : 2,
+      bit: state.cardInstances[id]!.definitionId === 223 ? 3 : 2,
     };
   for (const [id, card] of Object.entries(state.cardInstances).filter(
     ([, c]) =>
-      c.definitionId === "onr_classic_031_rent-i-con" ||
-      c.definitionId === "onr_classic_042_panzer-run",
+      c.definitionId === 35 ||
+      c.definitionId === 46,
   )) {
     state.runner.grip = state.runner.grip.filter((x) => x !== id);
     state.runner.stack = state.runner.stack.filter((x) => x !== id);
@@ -125,24 +125,24 @@ function run() {
   const topPanzer = state.runner.heap
     .filter(
       (id) =>
-        state.cardInstances[id]!.definitionId === "onr_classic_042_panzer-run",
+        state.cardInstances[id]!.definitionId === 46,
     )
     .at(-1)!;
   state.runner.heap = [
     ...state.runner.heap.filter(
       (id) =>
         id !== topPanzer &&
-        state.cardInstances[id]!.definitionId !== "onr_classic_031_rent-i-con",
+        state.cardInstances[id]!.definitionId !== 35,
     ),
     ...state.runner.heap.filter(
       (id) =>
-        state.cardInstances[id]!.definitionId === "onr_classic_031_rent-i-con",
+        state.cardInstances[id]!.definitionId === 35,
     ),
     topPanzer,
   ];
   const selected: Array<{
     type: string;
-    target: string | undefined;
+    target: number | undefined;
     owner: string | undefined;
   }> = [];
   for (let step = 0; step < 40 && !state.winner; step++) {

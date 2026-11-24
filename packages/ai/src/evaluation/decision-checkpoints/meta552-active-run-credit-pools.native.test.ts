@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -66,13 +67,13 @@ describe("native active run-only credit pools", () => {
       const d = chooseAiAction(input);
       const action = input.legalActions.find((a) => a.actionId === d.actionId)!;
       expect(action.type).toBe("break_subroutine");
-      if (key === "g2") expect(action.payload?.subroutineIndexes).toBe("0");
+      if (key === "g2") expect(action.subroutineIndexes).toEqual([0]);
       else expect(action.payload?.subroutineIndex).toBe(0);
       expect(d.fallbackUsed).toBe(false);
       expect(d.timeoutUsed).toBe(false);
       const p = d.decisionDebug?.planFirstDecision;
       expect(p?.rootPlanInstanceId).toBe(
-        `plan:runner.pressure_central:central%3A${key === "g2" ? "hq" : "rd"}`,
+        planInstanceIdForProposal({ moduleId: "runner.pressure_central", dedupeKey: `central:${key === "g2" ? "hq" : "rd"}` }),
       );
       expect(p?.selectedPlan?.moduleId).toBe("runner.convert_run_window");
       expect(p?.route).toMatchObject({

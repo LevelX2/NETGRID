@@ -1,5 +1,6 @@
+import type { RunnerSurvivalCounterContext } from "./runner-survival-counter-context";
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { titleForCardId } from "../runtime/card-title";
@@ -9,23 +10,19 @@ import type {
   CorpTagPunishUnknownSkipPlausibility,
   CorpVisibleTagPayoffCategory,
 } from "../runtime/corp-tag-punish-types";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
-import type { CorpVisibleTagPunishOpportunity } from "./corp-visible-tag-punish-taken-diagnostics";
-
-export type RunnerSurvivalCounterContext = {
-  any: boolean;
-  trace: boolean;
-  damage: boolean;
-  flatline: boolean;
-  link: boolean;
-};
+import {
+  visibleCurrentPunishDamageQuote,
+  type CorpVisibleTagPunishOpportunity,
+} from "./corp-visible-tag-punish-opportunities";
+import { fixedTaggedDamageOperation } from "../runtime/corp-fixed-tag-damage-operation-facts";
 
 export type CorpVisibleTagPunishUnknownSkipDiagnosticsDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
   isCorpTraceTagSourceAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -57,7 +54,6 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
       dependencies.sourceDefinitionIdForAction(input, action) || undefined;
     const chosenCardTitle = titleForCardId(chosenCardId);
     const attribution = corpUnknownSkipAttribution(
-      action,
       decision,
       opportunities,
       chosenFamily,
@@ -74,7 +70,13 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
         chosenCardTitle;
     diagnostics.corpVisibleTagPunishUnknownSkipAttribution = attribution;
     diagnostics.corpVisibleTagPunishUnknownSkipPlausibility = plausibility;
-    if (corpUnknownSkipPayoffLethalOrNearLethal(input, opportunities))
+    if (
+      corpUnknownSkipPayoffLethalOrNearLethal(
+        input,
+        opportunities,
+        survivalContext,
+      )
+    )
       diagnostics.corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal = true;
     if (fixGate.eligible)
       diagnostics.corpVisibleTagPunishUnknownSkipFixGateEligible = true;
@@ -106,9 +108,9 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
         input,
         action,
       );
-      const type =
-        RUNTIME_CARDS[definitionId]?.type ??
-        CARD_DEFINITIONS_BY_ID[definitionId]?.type;
+      const type = definitionId === undefined
+        ? undefined
+        : RUNTIME_CARDS[definitionId]?.type ?? planningCardFactsByDefinitionId(definitionId)?.type;
       if (type === "agenda") return "install_agenda";
       if (type === "ice" || action.payload?.placement === "ice")
         return "install_ice";
@@ -123,7 +125,6 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
 }
 
 function corpUnknownSkipAttribution(
-  action: LegalAction,
   decision: AiDecision,
   opportunities: CorpVisibleTagPunishOpportunity[],
   chosenFamily: CorpTagPunishUnknownChosenFamily,
@@ -257,10 +258,28 @@ function corpUnknownSkipFixGate(
 
 function corpUnknownSkipPayoffLethalOrNearLethal(
   input: AiDecisionInput,
-  opportunities: Array<{ category: CorpVisibleTagPayoffCategory }>,
+  opportunities: readonly CorpVisibleTagPunishOpportunity[],
+  survival: RunnerSurvivalCounterContext,
 ): boolean {
-  return (
-    opportunities.some((opportunity) => opportunity.category === "damage") &&
-    input.playerView.opponent.handCount <= 3
-  );
+  const handCount = input.playerView.opponent.handCount;
+  if (!Number.isSafeInteger(handCount) || handCount < 0) return false;
+  return opportunities.some((opportunity) => {
+    if (opportunity.category !== "damage") return false;
+    const quote = visibleCurrentPunishDamageQuote(input, opportunity);
+    if (quote) {
+      const minimum = quote.damageEnvelope.effectiveDamage.minimum;
+      return (
+        quote.guarantee === "guaranteed" && minimum > 0 && minimum >= handCount
+      );
+    }
+    if (
+      survival.damage ||
+      survival.flatline ||
+      opportunity.action.type !== "play_operation" ||
+      !opportunity.cardId
+    )
+      return false;
+    const fixedDamage = fixedTaggedDamageOperation(opportunity.cardId)?.damage;
+    return fixedDamage !== undefined && fixedDamage >= handCount;
+  });
 }

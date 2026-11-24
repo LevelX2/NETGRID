@@ -8,7 +8,7 @@ export {
 export { checkWinConditions } from "../win-conditions";
 export { quoteCorpRezCost } from "../payment";
 export { createGame, createGameAfterSetup } from "../create-game";
-export { applyAction } from "../apply-action";
+export { applyAction, applyMatchActionOffer } from "../apply-action";
 export {
   applyRandomizedIceInstallSelection,
   candidateFingerprint,

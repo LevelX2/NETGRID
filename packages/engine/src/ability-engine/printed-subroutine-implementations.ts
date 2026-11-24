@@ -9,41 +9,37 @@ import { cardImplementationForDefinitionId } from "../card-implementations/regis
 import type { CardPrintedSubroutineImplementation } from "./definition-types";
 import { traceSuccessEffectForCardImplementation } from "./trace-implementations";
 
-function printedSubroutineId(
-  definition: CardDefinition,
-  index: number,
-  subroutine: CardPrintedSubroutineImplementation,
-): string {
-  return `card_implementation.${definition.id}.printed_subroutine.${index + 1}.${subroutine.kind === "damage" ? `${subroutine.damageType}_damage` : subroutine.kind}`;
-}
-
 export function printedSubroutineDefinitionForImplementation(
   definition: CardDefinition,
   subroutine: CardPrintedSubroutineImplementation,
   index: number,
 ): SubroutineDefinition {
+  const identity = {
+    id: index.toString(36),
+    provenance: ["p", definition.id, index] as const,
+  };
   if (subroutine.kind === "end_the_run") {
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "end_the_run",
     };
   }
   if (subroutine.kind === "end_the_run_and_trash_source_at_end_of_turn") {
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "end_the_run_and_trash_source_at_end_of_turn",
     };
   }
   if (subroutine.kind === "end_the_run_unless_runner_pays") {
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "end_the_run_unless_runner_pays",
       amount: subroutine.amount,
     };
   }
   if (subroutine.kind === "trash_program") {
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "trash_installed_program",
     };
   }
@@ -54,7 +50,7 @@ export function printedSubroutineDefinitionForImplementation(
         "Pay-or-trash-program subroutines require a positive amount.",
       );
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "trash_installed_program_unless_runner_pays",
       amount,
     };
@@ -65,7 +61,7 @@ export function printedSubroutineDefinitionForImplementation(
   ) {
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type:
         subroutine.kind === "prohibit_break_next_ice"
           ? "set_next_encounter_no_break_subroutines"
@@ -81,7 +77,7 @@ export function printedSubroutineDefinitionForImplementation(
         "Run-duration ICE-strength subroutines require a positive amount.",
       );
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_run_future_strength_bonus",
       amount,
       ...(subroutine.runnerMayCancelOnPassingSource
@@ -103,7 +99,7 @@ export function printedSubroutineDefinitionForImplementation(
     )
       throw new Error("Unsupported run-duration additional subroutine.");
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_run_future_end_the_run_subroutine",
       ...(breakTags.length ? { breakTags } : {}),
     };
@@ -116,7 +112,7 @@ export function printedSubroutineDefinitionForImplementation(
         "Run-duration break-cost subroutines require a positive amount.",
       );
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_run_break_subroutine_cost_modifier",
       amount,
       ...(breakTags.length ? { breakTags } : {}),
@@ -125,7 +121,7 @@ export function printedSubroutineDefinitionForImplementation(
   if (subroutine.kind === "run_duration_cannot_jack_out") {
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_run_jack_out_lock",
       ...(breakTags.length ? { breakTags } : {}),
     };
@@ -138,7 +134,7 @@ export function printedSubroutineDefinitionForImplementation(
         "Run-duration encounter-tax subroutines require a positive amount.",
       );
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_run_encounter_tax",
       amount,
       ...(breakTags.length ? { breakTags } : {}),
@@ -152,7 +148,7 @@ export function printedSubroutineDefinitionForImplementation(
         "Run-duration jack-out-cost subroutines require a positive amount.",
       );
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_run_jack_out_additional_cost",
       amount,
       ...(breakTags.length ? { breakTags } : {}),
@@ -164,7 +160,7 @@ export function printedSubroutineDefinitionForImplementation(
   ) {
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_run_pass_rezzed_ice_program_trash",
       ...(breakTags.length ? { breakTags } : {}),
     };
@@ -177,7 +173,7 @@ export function printedSubroutineDefinitionForImplementation(
     if (subroutine.allowedAmounts.join(",") !== "0,1,2")
       throw new Error("Secret-spend comparison supports only 0/1/2.");
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "secret_spend_compare_end_run_unless_corp_spent_at_least_runner",
       ...(breakTags.length ? { breakTags } : {}),
     };
@@ -185,7 +181,7 @@ export function printedSubroutineDefinitionForImplementation(
   if (subroutine.kind === "random_resume_from_rezzed_ice_back_or_jack_out") {
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "rewind_run_to_rezzed_ice_by_die",
       ...(breakTags.length ? { breakTags } : {}),
     };
@@ -198,7 +194,7 @@ export function printedSubroutineDefinitionForImplementation(
         "Next-encounter damage subroutines require a positive amount.",
       );
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_next_encounter_unless_fully_break_damage",
       damageType: subroutine.damageType,
       amount,
@@ -211,7 +207,7 @@ export function printedSubroutineDefinitionForImplementation(
     if (amount <= 0)
       throw new Error("Runner run-lock subroutines require a positive amount.");
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_runner_run_lock_actions",
       amount,
       ...(breakTags.length ? { breakTags } : {}),
@@ -220,7 +216,7 @@ export function printedSubroutineDefinitionForImplementation(
   if (subroutine.kind === "runner_forgoes_next_action") {
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "set_runner_forgo_next_action",
       ...(breakTags.length ? { breakTags } : {}),
     };
@@ -232,7 +228,7 @@ export function printedSubroutineDefinitionForImplementation(
     )
       throw new Error("Unsupported end-run/action-forgo sequence.");
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "end_the_run_and_runner_forgoes_next_action",
       ...(breakTags.length ? { breakTags } : {}),
     };
@@ -244,7 +240,7 @@ export function printedSubroutineDefinitionForImplementation(
         ? Math.max(0, Math.floor(subroutine.cost.amount))
         : undefined;
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "deflect_run",
       deflectorTarget: subroutine.target,
       ...(cost !== undefined ? { deflectorCost: cost } : {}),
@@ -280,7 +276,7 @@ export function printedSubroutineDefinitionForImplementation(
     if (amount <= 0)
       throw new Error("Printed damage subroutines require a positive amount.");
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "do_damage",
       damageType: subroutine.damageType === "brain" ? "core" : "net",
       amount,
@@ -305,7 +301,7 @@ export function printedSubroutineDefinitionForImplementation(
     if (damageOnResults.length === 0)
       throw new Error("Printed random damage subroutines require die results.");
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "random_damage",
       dieFaces: subroutine.dieFaces,
       damageOnResults,
@@ -317,7 +313,7 @@ export function printedSubroutineDefinitionForImplementation(
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     const traceLimit = Math.max(0, Math.floor(subroutine.traceLimit));
     return {
-      id: printedSubroutineId(definition, index, subroutine),
+      ...identity,
       type: "initiate_trace",
       traceLimit,
       traceSuccessEffect: traceSuccessEffectForCardImplementation(

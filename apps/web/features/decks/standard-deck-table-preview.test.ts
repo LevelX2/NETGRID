@@ -9,12 +9,12 @@ const standardDeck: StandardDeck = {
   status: "active",
   name: "Ghost Circuit",
   side: "runner",
-  identityCardId: "identity_runner",
+  identityCardId: 9139,
   cardPoolSnapshotId: "card_pool_original",
   cardPoolVersion: "1.0.0",
   formatProfileId: "format_original",
   formatProfileVersion: "1.0.0",
-  cards: [{ cardId: "card_a", quantity: 3 }],
+  cards: [{ cardId: 9141, quantity: 3 }],
   guideStatus: "missing",
 };
 
@@ -28,7 +28,7 @@ describe("standard deck table preview", () => {
       name: "Ghost Circuit",
       side: "runner",
       validationStatus: "valid",
-      cards: [{ cardId: "card_a", quantity: 3 }],
+      cards: [{ cardId: 9141, quantity: 3 }],
     });
     expect(preview.createdAt).toBe("1970-01-01T00:00:00.000Z");
     expect(preview.cards).not.toBe(standardDeck.cards);

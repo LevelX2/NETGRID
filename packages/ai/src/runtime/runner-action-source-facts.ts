@@ -7,7 +7,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 export function runnerCandidateSourceDefinitionId(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
-): string | undefined {
+): number | undefined {
   const legalAction = input.legalActions.find(
     (action) => action.actionId === candidate.actionId,
   );
@@ -16,7 +16,7 @@ export function runnerCandidateSourceDefinitionId(
     candidate.sourceCardInstanceId ?? legalAction?.source;
   return (
     candidate.sourceDefinitionId ??
-    (typeof payloadDefinitionId === "string"
+    (typeof payloadDefinitionId === "number"
       ? payloadDefinitionId
       : undefined) ??
     (sourceInstanceId
@@ -33,10 +33,11 @@ export function visibleOwnCardByInstanceId(
     ...input.playerView.own.gripOrHq,
     ...input.playerView.own.scoreArea,
     ...(input.playerView.own.rig ?? []),
-    ...input.playerView.servers.flatMap((server) => [
-      ...server.root,
-      ...server.ice,
-    ]),
+    ...input.playerView.servers.flatMap((server) =>
+      [...server.root, ...server.ice].filter(
+        (card) => card.controller === input.side,
+      ),
+    ),
   ].find((card) => card.instanceId === instanceId);
 }
 

@@ -78,6 +78,8 @@ const EN_ACTION_PRESENTATION_MESSAGES = {
   targetSubroutine: "Subroutine {number}",
   actionBreakSubroutines: "Break {count} subroutines",
   actionTakeCredits: "Take {count} {credits}",
+  actionTakeCreditsFromThisCard:
+    "{card}: Take {count} {credits} from this card",
   actionLoadCredits: "Load {count} {credits}",
   actionPayCredits: "Pay {count} {credits}",
   actionRemoveCounter: "Remove {counter}",
@@ -400,6 +402,8 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   targetSubroutine: "Subroutine {number}",
   actionBreakSubroutines: "{count} Subroutinen brechen",
   actionTakeCredits: "{count} {credits} nehmen",
+  actionTakeCreditsFromThisCard:
+    "{card}: {count} {credits} von der Karte nehmen",
   actionLoadCredits: "{count} {credits} laden",
   actionPayCredits: "{count} {credits} bezahlen",
   actionRemoveCounter: "{counter} entfernen",
@@ -722,6 +726,8 @@ const FR_ACTION_PRESENTATION_MESSAGES: Record<
   targetSubroutine: "Routine {number}",
   actionBreakSubroutines: "Neutraliser {count} routines",
   actionTakeCredits: "Prendre {count} {credits}",
+  actionTakeCreditsFromThisCard:
+    "{card} : Prendre {count} {credits} sur cette carte",
   actionLoadCredits: "Charger {count} {credits}",
   actionPayCredits: "Payer {count} {credits}",
   actionRemoveCounter: "Retirer {counter}",

@@ -46,7 +46,7 @@ export type CorpHandActionDispositionInput = {
 
 export type CorpHandRouteCoverageRecord = {
   sourceInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId?: number;
   duplicateCount: number;
   legalActionIds: string[];
   exactCurrentProjections: string[];
@@ -113,6 +113,14 @@ export function buildCorpHandInventoryFacts(params: {
 }): CorpHandInventoryFacts | undefined {
   if (params.input.side !== "corp") return undefined;
   const ownHqCards = params.input.playerView.own.gripOrHq;
+  const duplicateCounts = new Map<number, number>();
+  for (const card of ownHqCards) {
+    if (!card.known || !card.definitionId) continue;
+    duplicateCounts.set(
+      card.definitionId,
+      (duplicateCounts.get(card.definitionId) ?? 0) + 1,
+    );
+  }
   const records = ownHqCards.map((card) => {
     const sourceCandidates = params.candidates.filter(
       (candidate) => candidate.sourceCardInstanceId === card.instanceId,
@@ -137,13 +145,15 @@ export function buildCorpHandInventoryFacts(params: {
     const actionDispositions = params.actionDispositions.filter((disposition) =>
       legalActionIds.includes(disposition.actionId),
     );
-    const duplicateCount = corpHandDuplicateCount(
-      params.input,
-      card.definitionId ?? "unknown-own-card",
-    );
+    const duplicateCount =
+      card.known && card.definitionId
+        ? (duplicateCounts.get(card.definitionId) ?? 0)
+        : 0;
     const actionHandDeltas = sourceCandidates.flatMap((candidate) => {
       const projection = candidate.economyProjection;
-      return projection &&
+      return projection?.source === "legal_action_payload" &&
+        projection.confidence === "high" &&
+        projection.reliability === "guaranteed" &&
         Number.isSafeInteger(projection.netHandDelta) &&
         Number.isSafeInteger(projection.cardsDrawn) &&
         Number.isSafeInteger(projection.cardsConsumed)
@@ -172,7 +182,9 @@ export function buildCorpHandInventoryFacts(params: {
     });
     return {
       sourceInstanceId: card.instanceId,
-      sourceDefinitionId: card.definitionId ?? "unknown-own-card",
+      ...(card.known && card.definitionId !== undefined
+        ? { sourceDefinitionId: card.definitionId }
+        : {}),
       duplicateCount,
       legalActionIds,
       exactCurrentProjections: sortedUnique(
@@ -314,7 +326,7 @@ function handPlanningDisposition(params: {
 
 export function corpHandDuplicateCount(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): number {
   if (input.side !== "corp") return 0;
   return input.playerView.own.gripOrHq.filter(

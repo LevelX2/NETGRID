@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import {
   type CardInstance,
   type CardInstanceId,
@@ -28,7 +29,7 @@ function card(
 ): CardInstance {
   return {
     instanceId: id,
-    definitionId: `${id}_definition`,
+    definitionId: syntheticCardDefinitionId(`${id}_definition`),
     owner: side,
     controller: side,
     zone,
@@ -41,7 +42,7 @@ function card(
 
 function state(): GameState {
   const remote: CorpServer = {
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -78,7 +79,7 @@ function state(): GameState {
       [CORP_ASSET]: card(CORP_ASSET, "corp", {
         side: "corp",
         zone: "serverRoot",
-        serverId: "remote_1",
+        serverId: "r1",
       }),
     },
   } as unknown as GameState;
@@ -142,7 +143,7 @@ describe("zone-mutation", () => {
     const current = state();
     current.cardInstances[CORP_ASSET] = {
       ...current.cardInstances[CORP_ASSET]!,
-      definitionId: "onr_v1_331_nevinyrral",
+      definitionId: 543,
       rezzed: true,
     };
 
@@ -164,7 +165,7 @@ describe("zone-mutation", () => {
         {
           side: "corp",
           sourceCardInstanceId: CORP_ASSET,
-          sourceDefinitionId: "onr_v1_335_remote-facility",
+          sourceDefinitionId: 547,
           restriction: "any_action",
           optional: true,
           remaining: 1,
@@ -205,7 +206,7 @@ describe("zone-mutation", () => {
 
     const created = createRemote(current);
     expect(created).toMatchObject({
-      id: "remote_2",
+      id: "r2",
       kind: "remote",
       label: "Remote 2",
       ice: [],
@@ -214,8 +215,8 @@ describe("zone-mutation", () => {
     expect(current.corp.servers).toContain(created);
 
     current.run = {
-      runId: "run_1",
-      attackedServerId: "remote_2",
+      runId: 1,
+      attackedServerId: "r2",
       brokenSubroutineIndexes: [],
       phase: "approach_server",
       position: "approach_server",
@@ -224,18 +225,18 @@ describe("zone-mutation", () => {
     } as unknown as NonNullable<GameState["run"]>;
     cleanupEmptyRemotes(current);
     expect(current.corp.servers.map((server) => server.id)).toContain(
-      "remote_2",
+      "r2",
     );
 
     delete current.run;
-    current.spyCountersByServer = { remote_2: 1 };
+    current.spyCountersByServer = { r2: 1 };
     cleanupEmptyRemotes(current);
     expect(current.corp.servers.map((server) => server.id)).not.toContain(
-      "remote_2",
+      "r2",
     );
     expect(current.corp.servers.map((server) => server.id)).toContain(
-      "remote_1",
+      "r1",
     );
-    expect(current.spyCountersByServer?.remote_2).toBeUndefined();
+    expect(current.spyCountersByServer?.r2).toBeUndefined();
   });
 });

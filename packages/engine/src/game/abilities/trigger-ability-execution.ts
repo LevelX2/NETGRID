@@ -33,7 +33,7 @@ export type TriggerAbilityExecutionHost = {
       state: GameState,
       cardId: CardInstanceId,
     ) => string | undefined;
-    cardImplementationForDefinitionId?: (definitionId: string) => any;
+    cardImplementationForDefinitionId?: (definitionId: number) => any;
   };
   credits: {
     spend: (state: GameState, side: Side, amount: number) => void;

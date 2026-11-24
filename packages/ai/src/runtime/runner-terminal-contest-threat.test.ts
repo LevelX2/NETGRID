@@ -5,13 +5,32 @@ import { runnerInput } from "../runner-hand-development.test-support";
 import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
 
 describe("runnerTerminalContestThreat", () => {
+  it.each([2, 3])(
+    "does not treat a known single point as the missing %s points",
+    (pointsNeeded) => {
+      const decisionInput = input({
+        agendaPoints: 7 - pointsNeeded,
+        advancement: 2,
+      });
+      const remote = decisionInput.playerView.servers.find(
+        ({ id }) => id === "r1",
+      )!;
+      remote.root[0] = {
+        ...remote.root[0]!,
+        known: true,
+        type: "agenda",
+        agendaPoints: 1,
+      };
+      expect(runnerTerminalContestThreat(decisionInput)).toBeUndefined();
+    },
+  );
   it("recognizes a public two-point terminal remote without revealing its card", () => {
     expect(
       runnerTerminalContestThreat(input({ agendaPoints: 5, advancement: 2 })),
     ).toMatchObject({
       kind: "visible_two_point_remote",
       pointsNeeded: 2,
-      remoteServerIds: ["remote_1"],
+      remoteServerIds: ["r1"],
     });
   });
 
@@ -29,7 +48,7 @@ describe("runnerTerminalContestThreat", () => {
     ).toMatchObject({
       kind: "protected_two_point_matchpoint_remote",
       pointsNeeded: 2,
-      remoteServerIds: ["remote_1"],
+      remoteServerIds: ["r1"],
       evidence: expect.arrayContaining([
         "terminal_contest_public_basis:protected_unknown_root_at_two_point_matchpoint",
       ]),
@@ -42,7 +61,7 @@ describe("runnerTerminalContestThreat", () => {
     ).toMatchObject({
       kind: "visible_three_point_remote",
       pointsNeeded: 3,
-      remoteServerIds: ["remote_1"],
+      remoteServerIds: ["r1"],
     });
   });
 
@@ -58,14 +77,14 @@ describe("runnerTerminalContestThreat", () => {
     ).toMatchObject({
       kind: "visible_four_point_remote",
       pointsNeeded: 4,
-      remoteServerIds: ["remote_1"],
+      remoteServerIds: ["r1"],
     });
   });
 
   it("includes the first public advancement in a possible four-point scoring turn", () => {
     expect(
       runnerTerminalContestThreat(input({ agendaPoints: 3, advancement: 1 })),
-    ).toMatchObject({ remoteServerIds: ["remote_1"] });
+    ).toMatchObject({ remoteServerIds: ["r1"] });
   });
 
   it("does not infer a four-point win from an unadvanced remote", () => {
@@ -97,7 +116,7 @@ describe("runnerTerminalContestThreat", () => {
     const decisionInput = input({ agendaPoints: 6, advancement: 0 });
     decisionInput.playerView.publicEvents = [
       {
-        eventId: "corp-score-remote-1",
+        eventId: 6,
         type: "score_agenda",
         stateVersionBefore: 4,
         stateVersionAfter: 5,
@@ -106,7 +125,7 @@ describe("runnerTerminalContestThreat", () => {
         publicPayload: {
           actor: "corp",
           actionType: "score_agenda",
-          targets: { scoredFromServerId: "remote_1" },
+          targets: { scoredFromServerId: "r1" },
         },
       },
     ];
@@ -115,7 +134,7 @@ describe("runnerTerminalContestThreat", () => {
     expect(runnerTerminalContestThreat(decisionInput)).toMatchObject({
       kind: "opponent_matchpoint",
       pointsNeeded: 1,
-      remoteServerIds: ["remote_1"],
+      remoteServerIds: ["r1"],
       evidence: expect.arrayContaining([
         "terminal_contest_public_basis:occupied_remote_previously_scored_by_corp",
       ]),
@@ -144,7 +163,7 @@ function input(params: {
     legalActions: [],
     servers: [
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: Array.from({ length: params.iceCount ?? 0 }, (_, index) => ({
           instanceId: `hidden-ice-${index}`,

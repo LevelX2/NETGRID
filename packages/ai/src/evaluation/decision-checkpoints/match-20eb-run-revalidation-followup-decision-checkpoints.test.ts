@@ -22,9 +22,9 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
       upgradeOnlyRemoteJson,
       (checkpoint) => {
         const replacedEvent = checkpoint.engine.eventPrefix.find(
-          (event) => event.eventId === "evt_183",
+          (event) => event.eventId === 183,
         );
-        if (!replacedEvent) throw new Error("Expected evt_183 in event prefix");
+        if (!replacedEvent) throw new Error("Expected 184 in event prefix");
         replacedEvent.type = "install_card";
         replacedEvent.visibilityClass = "private_to_side";
         replacedEvent.publicPayload = {
@@ -51,13 +51,13 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
           "20EB-C06-POST-SCORE-UNKNOWN-REMOTE-CONTEST";
         checkpoint.expectation = {
           acceptableActions: [
-            { type: "start_run", targetServerId: "remote_1" },
+            { type: "start_run", targetServerId: "r1" },
           ],
           planExecution: {
             acceptablePlanKinds: ["runner.contest_remote"],
             acceptableCapabilities: ["contest_remote"],
             requiredAssessmentEvidence: [
-              "runner_terminal_remote_contest_mandatory:remote_1:runner.start_run.remote_1",
+              "runner_terminal_remote_contest_mandatory:r1:rs.r1",
             ],
           },
         };
@@ -68,11 +68,11 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(
       evaluateRunnerRunTargets({ input: result.input }).find(
-        (target) => target.targetServerId === "remote_1",
+        (target) => target.targetServerId === "r1",
       ),
     ).toMatchObject({
       knownAccessState: "unknown",
-      recommendation: "run_if_free",
+      recommendation: "gain_credits_first",
       pathPassability: "reachable",
     });
   });

@@ -23,7 +23,7 @@ describe("runner main action generation", () => {
     const actions = buildRunnerMainActions(testRunnerMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "runner.end_turn",
+      "r9",
     ]);
     expect(JSON.stringify(state)).toBe(before);
   });
@@ -35,12 +35,12 @@ describe("runner main action generation", () => {
     const actions = buildRunnerMainActions(testRunnerMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "runner.gain_credit",
-      "runner.draw_card",
-      "runner.start_run.hq",
-      "runner.start_run.rd",
-      "runner.start_run.archives",
-      "runner.end_turn",
+      "rb",
+      "r8",
+      "rs.hq",
+      "rs.rd",
+      "rs.archives",
+      "r9",
     ]);
     expect(new Set(actions.map((candidate) => candidate.actionId)).size).toBe(
       actions.length,
@@ -56,13 +56,13 @@ describe("runner main action generation", () => {
     const actions = buildRunnerMainActions(testRunnerMainHost(state));
 
     expect(actions.map((candidate) => candidate.actionId)).toEqual([
-      "runner.gain_credit",
-      "runner.draw_card",
-      "runner.remove_tag",
-      "runner.start_run.hq",
-      "runner.start_run.rd",
-      "runner.start_run.archives",
-      "runner.end_turn",
+      "rb",
+      "r8",
+      "rm",
+      "rs.hq",
+      "rs.rd",
+      "rs.archives",
+      "r9",
     ]);
     expect(
       actions.find((candidate) => candidate.type === "remove_tag"),
@@ -88,7 +88,7 @@ describe("runner main action generation", () => {
       state.cardInstances[eventCardId] = {
         id: eventCardId,
         instanceId: eventCardId,
-        definitionId: "locked_run_event",
+        definitionId: 1992158918,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "grip" },
@@ -152,7 +152,7 @@ describe("runner main action generation", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1",
-          sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+          sourceDefinitionId: 174,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["rd", "archives"],
           successfulServerIds: ["hq"],
@@ -174,13 +174,11 @@ describe("runner main action generation", () => {
         serverId: "rd",
         bonusRunNoClick: true,
         multiServerSuccessSequenceRun: true,
-        bonusRunSource: "onr_proteus_116_pirate-broadcast",
+        bonusRunSource: 174,
       },
     });
     expect(actions[0]?.payload?.optionalBonusRun).toBeUndefined();
-    expect(actions[0]?.actionId).toBe(
-      "runner.start_run.rd.bonus_run.onr_proteus_116_pirate-broadcast",
-    );
+    expect(actions[0]?.actionId).toBe("rs.rd.bonus_run.174");
   });
 
   it("gives the immediate Bodyweight decision priority over normal actions and pending run sequences", () => {
@@ -190,7 +188,7 @@ describe("runner main action generation", () => {
     state.cardInstances[sourceCardId] = {
       id: sourceCardId,
       instanceId: sourceCardId,
-      definitionId: "bodyweight_data_creche",
+      definitionId: 2334816537,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -209,7 +207,7 @@ describe("runner main action generation", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1",
-          sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+          sourceDefinitionId: 174,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["rd", "archives"],
           successfulServerIds: ["hq"],
@@ -271,7 +269,7 @@ describe("runner main action generation", () => {
     state.cardInstances[sourceCardId] = {
       id: sourceCardId,
       instanceId: sourceCardId,
-      definitionId: "all_nighter",
+      definitionId: 1235935470,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "heap" },
@@ -345,7 +343,7 @@ describe("runner main action generation", () => {
     state.cardInstances[eventCardId] = {
       id: eventCardId,
       instanceId: eventCardId,
-      definitionId: "onr_classic_041_networking",
+      definitionId: 45,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "grip" },
@@ -357,7 +355,7 @@ describe("runner main action generation", () => {
     const host = testRunnerMainHost(state);
     host.cards.definitionFor = () =>
       ({
-        id: "onr_classic_041_networking",
+        id: 45,
         title: "Networking",
         side: "runner",
         type: "event",
@@ -390,7 +388,7 @@ describe("runner main action generation", () => {
     expect(action?.costs).toEqual([{ clicks: 2, credits: 0 }]);
     expect(action?.abilityRef).toMatchObject({
       sourceCardInstanceId: eventCardId,
-      sourceAbilityId: expect.stringContaining("onr_classic_041_networking:"),
+      sourceAbilityId: 59,
     });
   });
 
@@ -403,9 +401,9 @@ describe("runner main action generation", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1",
-          sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+          sourceDefinitionId: 174,
           sourceTitle: "Pirate Broadcast",
-          pendingServerIds: ["remote_99"],
+          pendingServerIds: ["r99"],
           successfulServerIds: ["hq"],
           anyUnsuccessful: false,
           onAllSuccessful: "gain_runner_event_agenda_point",

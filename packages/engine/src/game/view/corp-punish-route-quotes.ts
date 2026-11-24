@@ -1,6 +1,9 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
+  isCanonicalCapabilityId,
+  type CanonicalCapabilityId,
+  type CardInstanceId,
   type CorpPunishRouteIncompleteReason,
   type CorpPunishRouteQuote,
   type CorpPunishRouteQuoteRequest,
@@ -11,6 +14,7 @@ import {
   type GameEvent,
   type GameState,
   type LegalAction,
+  type TraceId,
 } from "@netgrid/shared";
 import {
   CapabilityIdentityError,
@@ -29,8 +33,14 @@ import {
 } from "../../ability-engine/card-capability-binding";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { applyAction } from "../apply-action";
-import { createRunnerInstalledTrashImminentEvent } from "../damage/damage-event-resolution";
-import { collectEventModificationCandidates } from "../damage/prevention-sources";
+import {
+  createDamageImminentEvent,
+  createRunnerInstalledTrashImminentEvent,
+} from "../damage/damage-event-resolution";
+import {
+  cardImplementationDamagePreventionCandidates,
+  collectEventModificationCandidates,
+} from "../damage/prevention-sources";
 import { getLegalActions } from "../legal-actions";
 import {
   fixedPlayCostCredits,
@@ -75,6 +85,17 @@ type CertifiedDirectTagResponse = {
   maximumTagAmount: number;
   concealedRunnerResponsesUnknown: boolean;
   visibleTagPreventionResponse: boolean;
+};
+
+type CertifiedTagResponse<T> = T & {
+  publicOutcomeStates: readonly GameState[];
+};
+type VisiblePrevention =
+  CorpPunishRouteQuote["damageEnvelope"]["visiblePrevention"];
+type DamageByType = Record<"meat" | "net" | "core", number>;
+type VisibleDamageBound = {
+  prevention: VisiblePrevention;
+  minimumEffectiveDamage?: number;
 };
 
 /**
@@ -281,24 +302,33 @@ export function quoteCorpPunishRoute(
     minimumMeatDamage + minimumNetDamage + minimumCoreDamage;
   const maximumDamage =
     maximumMeatDamage + maximumNetDamage + maximumCoreDamage;
-  const visibleDamagePrevention =
+  const damageBound =
     maximumDamage > 0
-      ? visibleDamagePreventionEnvelope(state, {
-          meat: maximumMeatDamage,
-          net: maximumNetDamage,
-          core: maximumCoreDamage,
-        })
+      ? visibleDamagePreventionEnvelope(
+          state,
+          {
+            meat: maximumMeatDamage,
+            net: maximumNetDamage,
+            core: maximumCoreDamage,
+          },
+          certifiedSteps,
+          traceTagResponse?.publicOutcomeStates ??
+            directTagResponse?.publicOutcomeStates ?? [state],
+        )
       : {
-          knowledge: "none_visible" as const,
-          maximumPreventableDamage: 0,
-          creditCost: { minimum: 0, maximum: 0 },
+          prevention: {
+            knowledge: "none_visible" as const,
+            maximumPreventableDamage: 0,
+            creditCost: { minimum: 0, maximum: 0 },
+          },
         };
-  if (visibleDamagePrevention === undefined) {
+  if (damageBound === undefined) {
     return {
       ok: true,
       quote: incompleteQuote(base, "damage_prevention_quote_incomplete"),
     };
   }
+  const visibleDamagePrevention = damageBound.prevention;
 
   const totalClicks = certifiedSteps.reduce(
     (sum, step) => sum + step.quote.clicks,
@@ -434,10 +464,14 @@ export function quoteCorpPunishRoute(
           total: maximumDamage,
         },
         effectiveDamage: {
-          minimum: Math.max(
-            0,
-            minimumDamage - visibleDamagePrevention.maximumPreventableDamage,
-          ),
+          minimum:
+            damageBound.minimumEffectiveDamage === undefined
+              ? Math.max(
+                  0,
+                  minimumDamage -
+                    visibleDamagePrevention.maximumPreventableDamage,
+                )
+              : Math.min(minimumDamage, damageBound.minimumEffectiveDamage),
           maximum: maximumDamage,
         },
         visiblePrevention: visibleDamagePrevention,
@@ -520,7 +554,7 @@ function certifyExactDirectTagResponse(
   state: GameState,
   steps: readonly CertifiedStep[],
   currentHeadAction: LegalAction | undefined,
-): CertifiedDirectTagResponse | undefined {
+): CertifiedTagResponse<CertifiedDirectTagResponse> | undefined {
   const directTagSteps = steps.filter((step) =>
     step.effects.some((effect) => effect.kind === "add_tags"),
   );
@@ -586,6 +620,7 @@ function certifyExactDirectTagResponse(
     maximumTagAmount: Math.max(...tagAmounts),
     concealedRunnerResponsesUnknown,
     visibleTagPreventionResponse: outcomes.usedTagPreventionWindow,
+    publicOutcomeStates: outcomes.states,
   };
 }
 
@@ -599,7 +634,7 @@ function certifyExactTraceTagResponse(
   state: GameState,
   steps: readonly CertifiedStep[],
   currentHeadAction: LegalAction | undefined,
-): CertifiedTraceTagResponse | undefined {
+): CertifiedTagResponse<CertifiedTraceTagResponse> | undefined {
   const traceSteps = steps.filter((step) =>
     step.effects.some((effect) => effect.kind === "trace"),
   );
@@ -843,12 +878,13 @@ function certifyExactTraceTagResponse(
     visibleTagPreventionResponse:
       successfulOutcomes.usedTagPreventionWindow ||
       maximumResponseOutcomes.usedTagPreventionWindow,
+    publicOutcomeStates: responseOutcomes,
   };
 }
 
 function exactCorpTracePaymentCredits(
   event: GameEvent,
-  traceId: string,
+  traceId: TraceId,
   bid: number,
 ): number | undefined {
   const {
@@ -994,7 +1030,7 @@ export function corpPunishRouteRequestFingerprint(
       step.kind,
       step.sourceCardInstanceId,
       step.sourceCapabilityBindingKind,
-      step.sourceCapabilityId,
+      String(step.sourceCapabilityId),
       ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
     ]),
   ]);
@@ -1279,7 +1315,7 @@ function certifyActivatedStep(
 function certifyEncounterTagStep(
   state: GameState,
   request: CorpPunishRouteQuoteRequest["steps"][number],
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string],
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[number],
 ):
   | { ok: true; step: CertifiedStep }
   | { ok: false; reason: CorpPunishRouteIncompleteReason }
@@ -1340,7 +1376,7 @@ function certifyEncounterTagStep(
 function certifyHardwareTrashStep(
   state: GameState,
   request: CorpPunishRouteQuoteRequest["steps"][number],
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string],
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[number],
 ):
   | { ok: true; step: CertifiedStep }
   | { ok: false; reason: CorpPunishRouteIncompleteReason } {
@@ -1534,9 +1570,9 @@ function exactRequestedHardwareTrashAction(
 }
 
 function onPlayCapability(
-  definition: (typeof CARD_DEFINITIONS_BY_ID)[string] & {},
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[number] & {},
   bindingKind: "card_spec_capability_key",
-  capabilityId: string,
+  capabilityId: CanonicalCapabilityId,
 ): OnPlayCardAbilityImplementation | undefined {
   return onPlayAbilityForCapabilityIdentity(definition, {
     kind: bindingKind,
@@ -1725,12 +1761,12 @@ function conditionStatusAfterPriorSteps(
 
 function visibleDamagePreventionEnvelope(
   state: GameState,
-  rawDamage: Readonly<Record<"meat" | "net" | "core", number>>,
-): CorpPunishRouteQuote["damageEnvelope"]["visiblePrevention"] | undefined {
-  const supportedSources: {
-    matchingDamage: number;
-    maximumPrevention: number;
-  }[] = [];
+  rawDamage: Readonly<DamageByType>,
+  steps: readonly CertifiedStep[],
+  publicOutcomeStates: readonly GameState[],
+): VisibleDamageBound | undefined {
+  const counterSources: number[] = [];
+  const sacrificeSourceIds = new Set<CardInstanceId>();
   for (const instance of Object.values(state.cardInstances)) {
     if (!instance.faceup) continue;
     if (instance.zone.side !== "runner" || instance.zone.zone !== "rig") {
@@ -1755,12 +1791,20 @@ function visibleDamagePreventionEnvelope(
       if (matchingDamage <= 0) continue;
       if (
         source.visibility !== "public" ||
-        source.cost.kind !== "source_counter" ||
         source.corpMayPayToBypass ||
         source.corpMayCancelUntilEndOfTurn
       ) {
         return undefined;
       }
+      if (
+        source.cost.kind === "trash_source" &&
+        source.amount === "all" &&
+        !source.limit
+      ) {
+        sacrificeSourceIds.add(instance.instanceId);
+        continue;
+      }
+      if (source.cost.kind !== "source_counter") return undefined;
       const availableUses = Math.floor(
         cardCounter(state, instance.instanceId, source.cost.counterType) /
           source.cost.amount,
@@ -1778,28 +1822,154 @@ function visibleDamagePreventionEnvelope(
               damagePreventionUsedThisTurn(state, instance.instanceId),
           )
         : sourceCapacity;
-      supportedSources.push({
-        matchingDamage,
-        maximumPrevention: Math.min(
-          matchingDamage,
-          sourceCapacity,
-          remainingTurnLimit,
-        ),
-      });
+      counterSources.push(
+        Math.min(matchingDamage, sourceCapacity, remainingTurnLimit),
+      );
     }
   }
-  if (supportedSources.length === 0) {
-    return {
-      knowledge: "none_visible",
-      maximumPreventableDamage: 0,
-      creditCost: { minimum: 0, maximum: 0 },
-    };
+  if (sacrificeSourceIds.size > 0) {
+    if (
+      counterSources.length > 0 ||
+      (state.runnerPermanentMeatDamagePrevention === true &&
+        rawDamage.meat > 0) ||
+      state.runner.rig.programs.some((id) => {
+        const program = state.cardInstances[id];
+        return (
+          program?.faceup === true &&
+          cardImplementationForDefinitionId(
+            program.definitionId,
+          )?.flatlineReplacementSources?.some(
+            (source) => source.kind === "flatline_replacement_installed",
+          )
+        );
+      })
+    )
+      return undefined;
+    return quoteOneShotDamagePrevention(
+      publicOutcomeStates,
+      steps,
+      sacrificeSourceIds,
+    );
   }
-  if (supportedSources.length > 1) return undefined;
+  if (counterSources.length > 1) return undefined;
   return {
-    knowledge: "bounded_public",
-    maximumPreventableDamage: supportedSources[0]?.maximumPrevention ?? 0,
-    creditCost: { minimum: 0, maximum: 0 },
+    prevention: {
+      knowledge: counterSources.length ? "bounded_public" : "none_visible",
+      maximumPreventableDamage: counterSources[0] ?? 0,
+      creditCost: { minimum: 0, maximum: 0 },
+    },
+  };
+}
+
+/** Reuse the real tag branches. A sacrificed card only exists in the
+ * branches where it was kept. Assign each surviving source to at most one
+ * compatible damage packet without touching the Runner's hidden Grip. */
+function quoteOneShotDamagePrevention(
+  publicOutcomeStates: readonly GameState[],
+  steps: readonly CertifiedStep[],
+  sourceIds: ReadonlySet<CardInstanceId>,
+): VisibleDamageBound | undefined {
+  if (
+    steps.some(
+      ({ quote }) =>
+        quote.kind === "hardware_trash" || quote.kind === "other_punish",
+    )
+  ) {
+    return undefined;
+  }
+  let minimumEffectiveDamage = Infinity;
+  let maximumPreventableDamage = 0;
+  for (const state of publicOutcomeStates) {
+    const hits = steps.flatMap((step) => {
+      if (
+        step.condition &&
+        conditionStatusAfterPriorSteps(
+          step.condition,
+          state.runner.tags,
+          state.runner.tags,
+          step.quote.order === 0,
+        ) !== "met"
+      )
+        return [];
+      return step.effects.flatMap((effect) =>
+        effect.kind === "damage"
+          ? [
+              {
+                amount: effect.amount,
+                event: createDamageImminentEvent(state, {
+                  damageId: step.quote.stepId,
+                  damageType: effect.damageType,
+                  amount: effect.amount,
+                  source: step.quote.sourceCardInstanceId,
+                  randomSource: ["c", step.quote.sourceCardDefinitionId, step.quote.sourceCardInstanceId],
+                }),
+              },
+            ]
+          : [],
+      );
+    });
+    if (
+      hits.length > 6 ||
+      hits.some(({ event, amount }) => event.payload.amount !== amount)
+    )
+      return undefined;
+    const installed = runnerInstalledCardIds(state);
+    let coveredSets = new Set([0]);
+    for (const id of sourceIds) {
+      if (!installed.includes(id)) continue;
+      // Losing a host could also remove a later public response. That
+      // sequence needs its own validated lifecycle projection.
+      if (
+        installed.some((cardId) => {
+          const card = state.cardInstances[cardId];
+          return card?.faceup === true && card.hostedOn === id;
+        })
+      )
+        return undefined;
+      const definition = definitionFor(state, id);
+      const sources =
+        cardImplementationForDefinitionId(definition.id)
+          ?.damagePreventionSources ?? [];
+      const next = new Set(coveredSets);
+      for (const [index, { amount, event }] of hits.entries()) {
+        const protects = cardImplementationDamagePreventionCandidates(
+          state,
+          event,
+          id,
+          definition,
+          sources,
+        ).some(
+          (candidate) =>
+            candidate.controller === "runner" &&
+            candidate.preventAmount === amount,
+        );
+        if (!protects) continue;
+        const bit = 1 << index;
+        for (const covered of coveredSets)
+          if ((covered & bit) === 0) next.add(covered | bit);
+      }
+      coveredSets = next;
+    }
+    const raw = hits.reduce((sum, { amount }) => sum + amount, 0);
+    const prevented = Math.max(
+      ...[...coveredSets].map((covered) =>
+        hits.reduce(
+          (sum, { amount }, index) =>
+            sum + ((covered & (1 << index)) !== 0 ? amount : 0),
+          0,
+        ),
+      ),
+    );
+    minimumEffectiveDamage = Math.min(minimumEffectiveDamage, raw - prevented);
+    maximumPreventableDamage = Math.max(maximumPreventableDamage, prevented);
+  }
+  return {
+    minimumEffectiveDamage,
+    prevention: {
+      knowledge: "bounded_public",
+      maximumPreventableDamage,
+      creditCost: { minimum: 0, maximum: 0 },
+    },
   };
 }
 
@@ -1918,7 +2088,7 @@ function isCorpPunishRouteQuoteRequest(request: unknown): boolean {
         step.order === index &&
         validStepKind(step.kind) &&
         nonblank(step.sourceCardInstanceId) &&
-        nonblank(step.sourceCapabilityId) &&
+        isCanonicalCapabilityId(step.sourceCapabilityId) &&
         (step.currentLegalActionId === undefined ||
           (index === 0 && nonblank(step.currentLegalActionId))),
     )

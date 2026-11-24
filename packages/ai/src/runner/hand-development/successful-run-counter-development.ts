@@ -1,5 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { actionClickCost, actionCreditCost } from "../../runtime/action-cost";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development-types";
 import type {
   RunnerEconomyPosture,
@@ -19,7 +21,11 @@ export function assessSuccessfulRunCounterDevelopment(
   targets: readonly RunnerRunTargetEvaluation[],
   economy: RunnerEconomyPosture,
 ) {
-  if (!successfulRunStrengthCounter(evaluation.definitionId)) return undefined;
+  if (
+    input.side !== "runner" ||
+    !successfulRunStrengthCounter(evaluation.definitionId)
+  )
+    return undefined;
   const deferred = {
     admitted: false,
     value: 0,
@@ -37,23 +43,32 @@ export function assessSuccessfulRunCounterDevelopment(
     (a) =>
       a.actionId === evaluation.legalActionId &&
       a.type === "install_card" &&
-      a.side === "runner" &&
       a.source === evaluation.cardInstanceId &&
-      a.expiresAtStateVersion === input.playerView.stateVersion,
+      actionMatchesCurrentDecision(input, a),
   );
+  if (!support || !action) return deferred;
+  const { memoryUsed, memoryLimit } = input.playerView.own;
   if (
-    !support ||
-    !action ||
+    typeof memoryUsed !== "number" ||
+    !Number.isSafeInteger(memoryUsed) ||
+    memoryUsed < 0 ||
+    typeof memoryLimit !== "number" ||
+    !Number.isSafeInteger(memoryLimit) ||
+    memoryLimit < 0
+  ) {
+    return {
+      ...deferred,
+      evidenceCodes: ["runner_success_counter_deferred_missing_memory_quote"],
+    };
+  }
+  if (
     action.payload?.runnerProgramTrashBeforeInstall ||
     action.targetRequirements.length ||
     action.choiceRequirements?.length ||
-    action.costs.reduce((n, c) => n + (c.clicks ?? 0), 0) >
-      input.playerView.own.clicks ||
-    input.playerView.own.credits -
-      action.costs.reduce((n, c) => n + (c.credits ?? 0), 0) <
+    actionClickCost(action) > input.playerView.own.clicks ||
+    input.playerView.own.credits - actionCreditCost(action) <
       economy.minimumCreditFloor ||
-    input.playerView.own.memoryUsed! + support.memoryUnits >
-      input.playerView.own.memoryLimit! ||
+    memoryUsed + support.memoryUnits > memoryLimit ||
     targets.some(
       (t) =>
         t.scoreThreat ||

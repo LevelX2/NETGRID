@@ -39,7 +39,7 @@ it("classifies an unbound canonical heap search without inventing a recovery tar
   expect(input.playerView.stateVersion).toBe(295);
   expect(
     input.playerView.own.rig!.filter(
-      (card) => card.definitionId === "onr_classic_031_rent-i-con",
+      (card) => card.definitionId === 35,
     ),
   ).toHaveLength(2);
   const recovery = input.legalActions.find(
@@ -57,7 +57,7 @@ it("classifies an unbound canonical heap search without inventing a recovery tar
   // The current information-route quote requires H4. Defense first prepares
   // that exact need; it still must not invent a target for the heap search.
   expect(input.playerView.own.gripOrHq).toHaveLength(3);
-  expect(decision.actionId).toBe("runner.draw_card");
+  expect(decision.actionId).toBe("r8");
   expect(
     input.legalActions.some((action) => action.actionId === decision.actionId),
   ).toBe(true);

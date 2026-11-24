@@ -29,10 +29,10 @@ it("retains counter creation ahead of a transfer operation without an installed 
     cp.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.resolve_choice");
+  expect(decision.actionId).toBe("cn");
   expect(decision.selectedChoices).toEqual({
     choiceId: "discard_corp_64",
-    selectedOptionIds: ["card_corp_onr_v1_291_falsified-transactions-expert_1"],
+    selectedOptionIds: ["card_c33x"],
   });
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,

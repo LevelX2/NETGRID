@@ -1,7 +1,10 @@
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { cardDefinitionIdValue } from "../../card-definition-id-input";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { actionCreditCost } from "../../runtime/action-cost";
 import { delayedInstallAbilityForAction } from "../../actions/delayed-install-action";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import { type RunnerShellTradersPipelineSignal } from "./shell-traders-types";
@@ -17,7 +20,7 @@ import { runnerInstalledProgramTrashLoss } from "../../runtime/runner-installed-
 
 import { shellCoverageSubstitution } from "./shell-traders-coverage-substitution";
 
-const SHELL_TRADERS_DEFINITION_ID = "onr_v1_176_the-shell-traders" as const;
+const SHELL_TRADERS_DEFINITION_ID = 388 as const;
 
 export type BuildRunnerShellTradersPipelineSignalsInput = Readonly<{
   input: AiDecisionInput;
@@ -51,10 +54,8 @@ export function buildRunnerShellTradersPipelineSignals({
     );
     const ability = action ? delayedInstallAbilityForAction(action) : undefined;
     if (
-      !action ||
-      action.side !== "runner" ||
+      !actionMatchesCurrentDecision(input, action) ||
       action.type !== "trigger_ability" ||
-      action.expiresAtStateVersion !== input.playerView.stateVersion ||
       !installedSources.has(action.source) ||
       candidate.sourceCardInstanceId !== action.source ||
       candidate.sourceDefinitionId !== SHELL_TRADERS_DEFINITION_ID ||
@@ -80,7 +81,7 @@ export function buildRunnerShellTradersPipelineSignals({
     }
     const targetDefinitionId =
       targetCard.definitionId ??
-      stringValue(action.payload?.targetCardDefinitionId);
+      cardDefinitionIdValue(action.payload?.targetCardDefinitionId);
     if (!targetDefinitionId) return [];
     const roles = rolesForDeckDoctrineCard(targetDefinitionId);
     const coverageBinding = bestCoverageBinding(coverageGaps, roles);
@@ -116,7 +117,6 @@ export function buildRunnerShellTradersPipelineSignals({
       ability === "set_aside_from_grip"
         ? shellCountersBefore
         : Math.max(0, shellCountersBefore - 1);
-    const targetInstallCost = visibleInstallCost(targetCard);
     const targetMemoryCost =
       targetCard.type === "program" ? visibleMemoryCost(targetCard) : 0;
     const rawFreeMemory = Math.max(
@@ -127,7 +127,10 @@ export function buildRunnerShellTradersPipelineSignals({
     const otherPreparedCards = (
       input.playerView.specialZones?.setAside ?? []
     ).filter(
-      (card) => card.known === true && card.instanceId !== targetCardInstanceId,
+      (card) =>
+        card.known === true &&
+        card.instanceId !== targetCardInstanceId &&
+        visibleShellCounters(card) > 0,
     );
     const reservedPreparedProgramMemory = otherPreparedCards
       .filter((card) => card.type === "program")
@@ -179,7 +182,7 @@ export function buildRunnerShellTradersPipelineSignals({
       ability === "set_aside_from_grip" && shellCountersBefore === 0;
     const paidAccelerationWithoutCurrentUse =
       ability === "remove_shell_counter" &&
-      visibleActionCreditCost(action) > 0 &&
+      actionCreditCost(action) > 0 &&
       coverageBinding === undefined &&
       development?.currentNeed !== "acute" &&
       development?.currentNeed !== "useful_now";
@@ -221,7 +224,7 @@ export function buildRunnerShellTradersPipelineSignals({
       requiresMainPhaseAccess &&
       ability === "remove_shell_counter" &&
       coverageBinding !== undefined &&
-      visibleActionCreditCost(action) > 0 &&
+      actionCreditCost(action) > 0 &&
       accessAssessment?.status !== "funded" &&
       coverageSubstitution === undefined;
     const phase =
@@ -254,6 +257,29 @@ export function buildRunnerShellTradersPipelineSignals({
         shellCountersAfterAction * 8 -
         replacementAssessment.displacedValue,
     );
+    const holdEvidence = [
+      ...(paidCoverageWithoutAccess
+        ? ["runner_shell_traders_holds_unfunded_access"]
+        : []),
+      ...(redundantTarget
+        ? ["runner_shell_traders_rejected_redundant_target"]
+        : []),
+      ...(noCurrentTargetNeed
+        ? ["runner_shell_traders_rejected_no_current_target_need"]
+        : []),
+      ...(pendingDuplicateDefinition
+        ? ["runner_shell_traders_rejected_pending_duplicate_definition"]
+        : []),
+      ...(zeroCounterPreparation
+        ? ["runner_shell_traders_rejected_zero_counter_preparation"]
+        : []),
+      ...(completionWouldBeHarmful
+        ? ["runner_shell_traders_holds_harmful_completion"]
+        : []),
+      ...(paidAccelerationWithoutCurrentUse
+        ? ["runner_shell_traders_holds_unneeded_paid_acceleration"]
+        : []),
+    ];
     const evidenceCodes = [
       ...(coverageSubstitution
         ? ["runner_shell_traders_substitutes_current_coverage_install"]
@@ -277,27 +303,7 @@ export function buildRunnerShellTradersPipelineSignals({
             `runner_shell_traders_access:${accessAssessment.status}:${accessAssessment.reason}`,
           ]
         : []),
-      ...(paidCoverageWithoutAccess
-        ? ["runner_shell_traders_holds_unfunded_access"]
-        : []),
-      ...(redundantTarget
-        ? ["runner_shell_traders_rejected_redundant_target"]
-        : []),
-      ...(noCurrentTargetNeed
-        ? ["runner_shell_traders_rejected_no_current_target_need"]
-        : []),
-      ...(pendingDuplicateDefinition
-        ? ["runner_shell_traders_rejected_pending_duplicate_definition"]
-        : []),
-      ...(zeroCounterPreparation
-        ? ["runner_shell_traders_rejected_zero_counter_preparation"]
-        : []),
-      ...(completionWouldBeHarmful
-        ? ["runner_shell_traders_holds_harmful_completion"]
-        : []),
-      ...(paidAccelerationWithoutCurrentUse
-        ? ["runner_shell_traders_holds_unneeded_paid_acceleration"]
-        : []),
+      ...holdEvidence,
       ...(doctrineStageBeforeOverflow
         ? [
             "runner_engine_doctrine:stage_before_overflow_draw",
@@ -318,12 +324,22 @@ export function buildRunnerShellTradersPipelineSignals({
         targetDefinitionId,
         targetCardType: targetCard.type,
         actionIds: phase === "hold" ? [] : [action.actionId],
-        ...(phase === "hold" ? { rejectedActionIds: [action.actionId] } : {}),
+        ...(phase === "hold"
+          ? {
+              rejectedActions: [
+                {
+                  actionId: action.actionId,
+                  evidenceCode:
+                    holdEvidence[0] ??
+                    "runner_shell_traders_rejected_target_fit",
+                },
+              ],
+            }
+          : {}),
         priorityClass,
         value,
         shellCountersBefore,
         shellCountersAfterAction,
-        targetInstallCost,
         targetMemoryCost,
         freeMemory,
         ...(coverageSubstitution ? { coverageSubstitution } : {}),
@@ -397,7 +413,7 @@ export function assessShellTradersRigReplacement({
         visibleMemoryCost,
       );
       const values = loss.cards.map((lost) => {
-        const roles = rolesForDeckDoctrineCard(lost.definitionId ?? "");
+        const roles = rolesForDeckDoctrineCard(lost.definitionId);
         const protectsOtherGap = coverageGaps.some(
           (gap) =>
             gap.gapId !== coverageBinding?.gapId &&
@@ -584,7 +600,7 @@ function visibleInstallCost(card: VisibleCard): number {
     0,
     card.installCost ??
       (card.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.installCost
+        ? planningCardFactsByDefinitionId(card.definitionId)?.installCost
         : undefined) ??
       card.cost ??
       0,
@@ -596,7 +612,7 @@ function visibleMemoryCost(card: VisibleCard): number {
     0,
     card.memoryCost ??
       (card.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.memoryCost
+        ? planningCardFactsByDefinitionId(card.definitionId)?.memoryCost
         : undefined) ??
       0,
   );
@@ -609,19 +625,6 @@ function visibleShellCounters(card: VisibleCard): number {
       card.counterDisplays?.find((display) => display.displayKind === "shell")
         ?.amount ??
       0,
-  );
-}
-
-function visibleActionCreditCost(
-  action: AiDecisionInput["legalActions"][number],
-): number {
-  return Math.max(
-    0,
-    ...action.costs.map((cost) =>
-      typeof cost.credits === "number" && Number.isFinite(cost.credits)
-        ? cost.credits
-        : 0,
-    ),
   );
 }
 
@@ -645,7 +648,7 @@ function uniqueSignals(
       !current ||
       priorityRank(signal.priorityClass) <
         priorityRank(current.priorityClass) ||
-      signal.value > current.value
+      (signal.priorityClass === current.priorityClass && signal.value > current.value)
     ) {
       byId.set(signal.pipelineId, signal);
     }

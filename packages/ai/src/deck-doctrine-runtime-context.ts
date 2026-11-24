@@ -6,11 +6,13 @@ import {
 } from "./deck-strategy-snapshot-validation";
 import {
   buildDeckDoctrineV2Diagnostic,
-  buildDeckStrategyProfile,
-  type AiDeckStrategyProfile,
   type DeckDoctrineV2Diagnostic,
   type DeckDoctrineV2DiagnosticStatus,
   type DeckDoctrineV2RoleDiagnosticSummary,
+} from "./deck-doctrine-diagnostic";
+import {
+  buildDeckStrategyProfile,
+  type AiDeckStrategyProfile,
 } from "./deck-doctrine-strategy";
 
 export type DeckDoctrineRuntimeContext = {
@@ -29,12 +31,15 @@ export function buildDeckDoctrineRuntimeContext(params: {
   const deckSnapshot = assertValidAiDeckSnapshotForRuntime(
     params.deckSnapshot,
     {
-      side: params.side,
       ...params.expectedDeckSnapshot,
+      side: params.side,
     },
   );
   const strategyProfile = buildDeckStrategyProfile(deckSnapshot);
-  const v2Diagnostic = buildDeckDoctrineV2Diagnostic(deckSnapshot);
+  const v2Diagnostic = buildDeckDoctrineV2Diagnostic(
+    deckSnapshot,
+    strategyProfile,
+  );
 
   return {
     strategyProfile,

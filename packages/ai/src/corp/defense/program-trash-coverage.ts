@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
@@ -49,7 +50,10 @@ export function programTrashCoverageLosses(
           ),
           server.root,
           input.playerView.own.credits,
-          { targetServerId: server.id },
+          {
+            targetServerId: server.id,
+            ...visibleIcePathTraceContext(input),
+          },
         );
       const before = assess(rig);
       // Conditional/special routes do not prove a coverage loss. Never promote

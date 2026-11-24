@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_066_obfuscated-fortress"),
+    cardDefinitionId: cardDefinitionId(124),
     title: "Obfuscated Fortress",
     side: "corp",
     cardType: "upgrade",

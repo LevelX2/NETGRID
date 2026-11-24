@@ -19,12 +19,12 @@ function apply(state: GameState, action: LegalAction): GameState {
   if (!r.ok) throw Error(JSON.stringify(r.error));
   return r.state;
 }
-function fixture(card: string, credits: number) {
+function fixture(card: number, credits: number) {
   let s = createGameAfterSetup({ seed: "meta548-base-subtype", corpDeck, runnerDeck });
   s = apply(s, getLegalActions(s, "corp").find((a) => a.type === "mandatory_draw")!);
   while (s.corp.clicks > 1) s = apply(s, getLegalActions(s, "corp").find((a) => a.type === "gain_credit")!);
   RealEngineFixtureBuilder.forState(s).withCorpHqSize(0).withCorpCredits(credits).withRunnerCredits(3)
-    .withCorpCardInHq("onr_proteus_005_marked-accounts").withCorpCardInHq(card);
+    .withCorpCardInHq(63).withCorpCardInHq(card);
   return s;
 }
 function input(s: GameState) {
@@ -33,20 +33,20 @@ function input(s: GameState) {
 afterEach(resetResidentPlanPortfolioMemory);
 
 it.each([
-  ["onr_proteus_017_credit-blocks", 6],
-  ["onr_proteus_040_sumo-2008", 8],
+  [75, 6],
+  [98, 8],
 ] as const)("binds the minimum base-subtype installation, Defense plan and actual rez of %s", (card, cost) => {
   let s = fixture(card, cost);
   const before = hashState(s), i = input(s), serialized = JSON.stringify(i);
   const decision = chooseAiAction(i), pf = decision.decisionDebug!.planFirstDecision!;
   const install = i.legalActions.find((a) => a.actionId === decision.actionId)!;
   expect(install.type).toBe("install_card");
-  expect(install.source).toContain(card);
+  expect(s.cardInstances[install.source]?.definitionId).toBe(card);
   expect(["hq", "rd"]).toContain(install.payload?.serverId);
   const predicted = JSON.parse(install.payload!.postInstallEffectiveRunQuoteJson as string);
   expect(predicted.subroutines).toContainEqual(expect.objectContaining({ type: "end_the_run" }));
   expect(install.payload).toMatchObject({ postInstallRezQuoteVariableRezKind: "alternate_subtype", postInstallRezQuoteVariableBaseSubtypesFinalCredits: cost });
-  expect(pf).toMatchObject({ rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio", selectedPlan: { moduleId: "corp.defend_servers" }, route: { actionId: install.actionId, stateVersion: i.playerView.stateVersion } });
+  expect(pf).toMatchObject({ rootPlanInstanceId: "penw02zfrkklof54c2nuye5att", selectedPlan: { moduleId: "corp.defend_servers" }, route: { actionId: install.actionId, stateVersion: i.playerView.stateVersion } });
   expect(decision.fallbackUsed).toBe(false);
   expect(JSON.stringify(i)).toBe(serialized);
   expect(hashState(s)).toBe(before);
@@ -64,9 +64,9 @@ it.each([
   expect(getPlayerView(s, "runner").opponent).not.toHaveProperty("gripOrHq");
 });
 
-it.each(["onr_proteus_025_homing-missile"])("does not invent an unbound variable projection for %s", (card) => {
+it.each([83])("does not invent an unbound variable projection for %s", (card) => {
   const s = fixture(card, 20), before = hashState(s), i = input(s);
-  const installs = i.legalActions.filter((a) => a.type === "install_card" && a.source.includes(card));
+  const installs = i.legalActions.filter((a) => a.type === "install_card" && s.cardInstances[a.source]?.definitionId === card);
   expect(installs.length).toBeGreaterThan(0);
   for (const a of installs) expect(a.payload?.postInstallEffectiveRunQuoteJson).toBeUndefined();
   expect(hashState(s)).toBe(before);

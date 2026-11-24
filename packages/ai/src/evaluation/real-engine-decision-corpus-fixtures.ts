@@ -6,12 +6,17 @@ import {
 import snapshotsData08 from "../../../../data/decks/deck-snapshots-0.8.json";
 import {
   DEMO_DECKS,
+  type AiDecision,
   type GameState,
   type LegalAction,
   type Side,
 } from "@netgrid/shared";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
-import { buildDeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
+import {
+  applySimulationEngineSelection,
+  simulationEngineRuntimeOptions,
+} from "../simulation/engine-selection";
+import { buildDeckDoctrineV2Diagnostic } from "../deck-doctrine-diagnostic";
 import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
@@ -26,6 +31,13 @@ import {
   RealEngineFixtureBuilder,
   type RealEngineFixtureMutator,
 } from "./real-engine-fixture-builder";
+
+type EngineBoundCorpusScenario = RealEngineDecisionCorpusScenario & {
+  engineOptions: ReturnType<typeof simulationEngineRuntimeOptions>;
+  applyEngineSelection: (
+    decision: AiDecision,
+  ) => ReturnType<typeof applySimulationEngineSelection>;
+};
 
 export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "runner_real_low_credits",
@@ -192,7 +204,7 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   >
 >;
 
-export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorpusScenario[] {
+export function buildRealEngineDecisionCorpusScenarios(): EngineBoundCorpusScenario[] {
   return [
     runnerScenario(
       "runner_real_low_credits",
@@ -225,7 +237,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "runner_real_target_choice_hq_remote_mix",
       "real-runner-target-choice-mix",
       (fixture) => {
-        fixture.withRunnerCredits(9).withCorpRemoteAgenda("remote_1", 2, {
+        fixture.withRunnerCredits(9).withCorpRemoteAgenda("r1", 2, {
           faceup: true,
           rezzed: false,
         });
@@ -242,7 +254,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "runner_real_remote_score_threat",
       "real-runner-remote-threat",
       (fixture) => {
-        fixture.withRunnerCredits(8).withCorpRemoteAgenda("remote_1", 2, {
+        fixture.withRunnerCredits(8).withCorpRemoteAgenda("r1", 2, {
           faceup: true,
           rezzed: false,
         });
@@ -257,8 +269,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
         fixture
           .withRunnerCredits(4)
           .withRunnerGripSize(1)
-          .withRezzedCorpIceOnServer("hq", "simple_code_gate_ice")
-          .withRezzedCorpIceOnServer("rd", "simple_sentry_ice");
+          .withRezzedCorpIceOnServer("hq", 590)
+          .withRezzedCorpIceOnServer("rd", 601);
       },
       ["fixture:low_hand_buffer"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -285,7 +297,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "runner_real_remote_probe",
       "real-runner-remote-probe",
       (fixture) => {
-        fixture.withRunnerCredits(6).ensureServer("remote_2");
+        fixture.withRunnerCredits(6).ensureServer("r2");
       },
       ["fixture:runner_remote_probe"],
       "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
@@ -341,8 +353,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withRunnerCredits(9)
-          .ensureServer("remote_2")
-          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+          .ensureServer("r2")
+          .withCorpIceOnServer("r2", 589);
       },
       ["fixture:runner_remote_with_ice_probe"],
       "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
@@ -360,7 +372,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "runner_real_remote_unknown_no_contest",
       "real-runner-remote-unknown-no-contest",
       (fixture) => {
-        fixture.withRunnerCredits(6).ensureServer("remote_3");
+        fixture.withRunnerCredits(6).ensureServer("r3");
       },
       ["fixture:runner_remote_unknown_no_contest"],
       "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
@@ -369,7 +381,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "runner_real_remote_known_agenda_contest",
       "real-runner-remote-known-agenda-contest",
       (fixture) => {
-        fixture.withRunnerCredits(9).withCorpRemoteAgenda("remote_2", 2, {
+        fixture.withRunnerCredits(9).withCorpRemoteAgenda("r2", 2, {
           faceup: true,
           rezzed: false,
         });
@@ -383,8 +395,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withRunnerCredits(5)
-          .ensureServer("remote_2")
-          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+          .ensureServer("r2")
+          .withCorpIceOnServer("r2", 589);
       },
       ["fixture:runner_run_blocked_missing_coverage"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -395,8 +407,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withRunnerCredits(0)
-          .ensureServer("remote_2")
-          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+          .ensureServer("r2")
+          .withCorpIceOnServer("r2", 589);
       },
       ["fixture:runner_run_blocked_unpayable"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -417,8 +429,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
         fixture
           .withRunnerCredits(4)
           .withRunnerGripSize(1)
-          .withRezzedCorpIceOnServer("hq", "simple_code_gate_ice")
-          .withRezzedCorpIceOnServer("rd", "simple_sentry_ice");
+          .withRezzedCorpIceOnServer("hq", 590)
+          .withRezzedCorpIceOnServer("rd", 601);
       },
       ["fixture:runner_draw_before_damage_risk"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -463,7 +475,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_score_agenda_window",
       "real-corp-score-window",
       (fixture) => {
-        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_1", 3);
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("r1", 3);
       },
       ["fixture:score_agenda_window"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -472,7 +484,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_advance_score_window",
       "real-corp-advance-window",
       (fixture) => {
-        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_1", 2);
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("r1", 2);
       },
       ["fixture:advance_to_score_window"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -483,8 +495,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withCorpCredits(10)
-          .withCorpRemoteAgenda("remote_1", 3)
-          .withCorpRemoteAgenda("remote_2", 3);
+          .withCorpRemoteAgenda("r1", 3)
+          .withCorpRemoteAgenda("r2", 3);
       },
       ["fixture:target_choice_multi_score_payload"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -495,8 +507,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withCorpCredits(10)
-          .withCorpRemoteAgenda("remote_1", 2)
-          .withCorpRemoteAgenda("remote_2", 2);
+          .withCorpRemoteAgenda("r1", 2)
+          .withCorpRemoteAgenda("r2", 2);
       },
       ["fixture:target_choice_multi_advance_payload"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -505,7 +517,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_low_rez_reserve",
       "real-corp-low-rez-reserve",
       (fixture) => {
-        fixture.withCorpCredits(1);
+        fixture.withCorpCredits(1).withCorpHqSize(0);
       },
       [],
       "onr_origin_corp_ai_snapshot_v1",
@@ -520,7 +532,11 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_basic_economy_draw",
       "real-corp-economy-draw",
       (fixture) => {
-        fixture.withCorpCredits(0);
+        fixture
+          .withCorpCredits(0)
+          .withCorpHqSize(0)
+          .withCorpIceOnServer("hq", 589)
+          .withCorpIceOnServer("rd", 590);
       },
       [],
       "demo_corp_008_snapshot_v0_8",
@@ -529,7 +545,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_remote_defense_setup",
       "real-corp-remote-defense-setup",
       (fixture) => {
-        fixture.withCorpCredits(6).withCorpRemoteAgenda("remote_1", 1);
+        fixture.withCorpCredits(6).withCorpRemoteAgenda("r1", 1);
       },
       ["fixture:corp_remote_defense_setup"],
       "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -556,7 +572,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_score_low_credits",
       "real-corp-score-low-credits",
       (fixture) => {
-        fixture.withCorpCredits(1).withCorpRemoteAgenda("remote_1", 3);
+        fixture.withCorpCredits(1).withCorpRemoteAgenda("r1", 3);
       },
       ["fixture:corp_score_low_credits"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -567,8 +583,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withCorpCredits(5)
-          .ensureServer("remote_2")
-          .withCorpIceOnServer("remote_2", "simple_barrier_ice");
+          .ensureServer("r2")
+          .withCorpIceOnServer("r2", 589);
       },
       ["fixture:corp_remote_ice_defense"],
       "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -594,8 +610,8 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withCorpCredits(7)
-          .withCorpRemoteRoot("remote_1", "simple_economy_asset")
-          .ensureServer("remote_2");
+          .withCorpRemoteRoot("r1", 594)
+          .ensureServer("r2");
       },
       ["fixture:corp_remote_double_asset_setup"],
       "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -613,7 +629,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_score_now_vs_gain_credit",
       "real-corp-score-now-vs-gain-credit",
       (fixture) => {
-        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_1", 3);
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("r1", 3);
       },
       ["fixture:corp_score_now_vs_gain_credit"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -622,7 +638,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_advance_not_score_yet",
       "real-corp-advance-not-score-yet",
       (fixture) => {
-        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_1", 1);
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("r1", 1);
       },
       ["fixture:corp_advance_not_score_yet"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -639,7 +655,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withCorpCredits(5)
-          .withCorpIceOnServer("hq", "simple_barrier_ice");
+          .withCorpIceOnServer("hq", 589);
       },
       ["fixture:corp_hq_pressure_defend"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -650,7 +666,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withCorpCredits(5)
-          .withCorpIceOnServer("rd", "simple_barrier_ice");
+          .withCorpIceOnServer("rd", 589);
       },
       ["fixture:corp_rnd_pressure_defend"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -677,7 +693,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_install_remote_when_safe",
       "real-corp-install-remote-when-safe",
       (fixture) => {
-        fixture.withCorpCredits(7).ensureServer("remote_2");
+        fixture.withCorpCredits(7).ensureServer("r2");
       },
       ["fixture:corp_install_remote_when_safe"],
       "demo_corp_008_snapshot_v0_8",
@@ -688,7 +704,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       (fixture) => {
         fixture
           .withCorpCredits(7)
-          .withCorpRemoteRoot("remote_1", "simple_economy_asset");
+          .withCorpRemoteRoot("r1", 594);
       },
       ["fixture:corp_asset_economy_install"],
       "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -697,7 +713,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_fast_advance_support_shadow_only",
       "real-corp-fast-advance-support-shadow",
       (fixture) => {
-        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_2", 2);
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("r2", 2);
       },
       ["fixture:corp_fast_advance_support_shadow_only"],
       "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -713,13 +729,13 @@ export const SELFPLAY_PROMOTED_REAL_ENGINE_CORPUS_SCENARIO_IDS = [
   "selfplay_promoted_corp_rez_decline",
 ] as const;
 
-export function buildSelfplayPromotedRealEngineCorpusScenarios(): RealEngineDecisionCorpusScenario[] {
+export function buildSelfplayPromotedRealEngineCorpusScenarios(): EngineBoundCorpusScenario[] {
   return [
     runnerScenario(
       "selfplay_promoted_runner_remote_no_payoff_pivot",
       "selfplay-promoted-runner-remote-no-payoff",
       (fixture) => {
-        fixture.withRunnerCredits(5).ensureServer("remote_3");
+        fixture.withRunnerCredits(5).ensureServer("r3");
       },
       ["selfplay_promotion:repeated_known_no_payoff_remote"],
       "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
@@ -746,7 +762,7 @@ export function buildSelfplayPromotedRealEngineCorpusScenarios(): RealEngineDeci
       "selfplay_promoted_corp_score_window",
       "selfplay-promoted-corp-score-window",
       (fixture) => {
-        fixture.withCorpCredits(8).withCorpRemoteAgenda("remote_1", 3);
+        fixture.withCorpCredits(8).withCorpRemoteAgenda("r1", 3);
       },
       ["selfplay_promotion:missed_score_window"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -767,7 +783,7 @@ function runnerScenario(
   mutate: RealEngineFixtureMutator,
   evidence: readonly string[] = [],
   deckSnapshotId?: string,
-): RealEngineDecisionCorpusScenario {
+): EngineBoundCorpusScenario {
   return RealEngineDecisionCorpusScenarioBuilder.runnerTurn(scenarioId, seed)
     .mutateFixture(mutate)
     .addEvidence(evidence)
@@ -781,7 +797,7 @@ function corpScenario(
   mutate: RealEngineFixtureMutator,
   evidence: readonly string[] = [],
   deckSnapshotId?: string,
-): RealEngineDecisionCorpusScenario {
+): EngineBoundCorpusScenario {
   return RealEngineDecisionCorpusScenarioBuilder.corpMain(scenarioId, seed)
     .mutateFixture(mutate)
     .addEvidence(evidence)
@@ -795,7 +811,7 @@ function corpRezScenario(
   corpCredits: number,
   deckSnapshotId?: string,
   evidence: readonly string[] = [],
-): RealEngineDecisionCorpusScenario {
+): EngineBoundCorpusScenario {
   let state = toRunnerTurn(createCorpusGame(seed));
   RealEngineFixtureBuilder.forState(state).withCorpRezWindow(corpCredits);
   state = apply(
@@ -821,7 +837,7 @@ function runnerDiscardChoiceScenario(
   scenarioId: string,
   seed: string,
   deckSnapshotId?: string,
-): RealEngineDecisionCorpusScenario {
+): EngineBoundCorpusScenario {
   let state = toRunnerTurn(createCorpusGame(seed));
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(5)
@@ -907,10 +923,8 @@ class RealEngineDecisionCorpusScenarioBuilder {
     return this;
   }
 
-  build(): RealEngineDecisionCorpusScenario {
-    const deckSnapshot = snapshotById(
-      this.deckSnapshotId ?? defaultSnapshotIdForSide(this.side),
-    );
+  build(): EngineBoundCorpusScenario {
+    const deckSnapshot = snapshotById(defaultSnapshotIdForSide(this.side));
     const input = buildAiDecisionInput(this.state, this.side, {
       decisionId: this.scenarioId,
       profileId: `${this.side}-ai-real-engine-corpus`,
@@ -919,6 +933,9 @@ class RealEngineDecisionCorpusScenarioBuilder {
     return {
       scenarioId: this.scenarioId,
       input,
+      engineOptions: simulationEngineRuntimeOptions(this.state),
+      applyEngineSelection: (decision) =>
+        applySimulationEngineSelection(this.state, decision, this.scenarioId),
       ...(this.side === "runner"
         ? {
             runner: {
@@ -1000,8 +1017,8 @@ function deckDoctrineForSnapshot(snapshotId: string) {
 
 function defaultSnapshotIdForSide(side: Side): string {
   return side === "runner"
-    ? "demo_runner_008_snapshot_v0_8"
-    : "demo_corp_008_snapshot_v0_8";
+    ? "demo_runner_001_snapshot_v0_6"
+    : "demo_corp_001_snapshot_v0_6";
 }
 
 function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
@@ -1041,9 +1058,15 @@ function toRunnerTurn(state: GameState): GameState {
     next.pendingChoice?.source === "discard_phase" &&
     next.pendingChoice.side === "corp"
   ) {
-    next = applyChoice(next, "corp", [
-      String(next.pendingChoice.options[0]?.id),
-    ]);
+    const choice = next.pendingChoice;
+    const selectedOptionIds = choice.options
+      .filter((option) => option.selectable !== false)
+      .slice(0, choice.minSelections)
+      .map((option) => option.id);
+    if (selectedOptionIds.length !== choice.minSelections) {
+      throw new Error("Incomplete current Corp discard offer in corpus fixture");
+    }
+    next = applyChoice(next, "corp", selectedOptionIds);
   }
   return next;
 }
@@ -1082,14 +1105,17 @@ function applyChoice(
   const selected = legalActions.find(
     (action) => action.type === "resolve_choice",
   );
-  if (!selected) throw new Error("Missing resolve_choice action");
+  const choice = state.pendingChoice;
+  if (!selected || !choice || choice.side !== side) {
+    throw new Error("Missing current resolve_choice action in corpus fixture");
+  }
   const result = applyAction(state, {
     matchId: state.matchId,
     side,
     actionId: selected.actionId,
     clientKnownStateVersion: state.stateVersion,
     selectedChoices: {
-      choiceId: state.pendingChoice?.choiceId,
+      choiceId: choice.choiceId,
       selectedOptionIds,
     },
     idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}-${selectedOptionIds.join(".")}`,

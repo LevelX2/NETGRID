@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import {
   candidateTargetIds,
   exactBasicLiquidCreditCandidate,
@@ -44,12 +45,16 @@ export function economyCandidates(
   context: PlanSchedulerContext,
   signal: CorpEconomyNeedSignal,
 ): PlanMaterialization["candidates"] {
-  if (signal.kind === "parent_funding" && signal.freeRezPayoutPreparation) {
+  if (
+    signal.kind === "parent_funding" &&
+    signal.fundingRouteAssessment?.freeRezPayoutPreparation
+  ) {
     const current = corpFreeRezPayoutPreparation(
       context.input,
       context.actionCandidates,
       signal,
-      signal.freeRezPayoutPreparation.basicFundingActionId,
+      signal.fundingRouteAssessment?.freeRezPayoutPreparation
+        .basicFundingActionId,
       domain(context).economyNeeds.filter(
         (s): s is CorpEconomyDevelopmentSignal => s.kind === "develop_campaign",
       ),
@@ -57,7 +62,7 @@ export function economyCandidates(
     if (
       !current ||
       JSON.stringify(current) !==
-        JSON.stringify(signal.freeRezPayoutPreparation)
+        JSON.stringify(signal.fundingRouteAssessment?.freeRezPayoutPreparation)
     )
       return [];
     return context.actionCandidates
@@ -67,9 +72,14 @@ export function economyCandidates(
         stepValue: Math.min(signal.gap, current.payoutCredits) * 10,
       }));
   }
-  if (signal.kind === "parent_funding" && signal.hostedCreditBankCycle) {
+  if (
+    signal.kind === "parent_funding" &&
+    signal.fundingRouteAssessment?.hostedCreditBankCycle
+  ) {
     const quote = currentCorpHostedBankCycleQuotes(context.input).find(
-      (q) => JSON.stringify(q) === JSON.stringify(signal.hostedCreditBankCycle),
+      (q) =>
+        JSON.stringify(q) ===
+        JSON.stringify(signal.fundingRouteAssessment?.hostedCreditBankCycle),
     );
     return quote
       ? context.actionCandidates
@@ -273,34 +283,31 @@ export function assessCorpEconomyFundingRoute(
   fundingContext?: CorpHostedBankFundingWindowContext,
 ): CorpEconomyFundingRouteAssessment {
   let liquidationAdmitted = false;
-  const candidates = context.actionCandidates
-    .filter(
-      (candidate) =>
-        signal.actionIds.includes(candidate.actionId) &&
-        immediateCorpLiquidCreditGain(candidate) > 0 &&
-        candidate.economyProjection?.reliability === "guaranteed" &&
-        corpEconomyCandidateHasExecutablePayload(context.input, candidate),
+  const candidates = context.actionCandidates.filter((candidate) => {
+    if (
+      !signal.actionIds.includes(candidate.actionId) ||
+      immediateCorpLiquidCreditGain(candidate) <= 0 ||
+      candidate.economyProjection?.reliability !== "guaranteed"
     )
-    .filter((candidate) => {
-      const action = context.input.legalActions.find(
-        (a) => a.actionId === candidate.actionId,
-      );
-      if (!action) return false;
-      const assessment = assessCorpIceLiquidation(context.input, action);
-      if (assessment.status === "not_applicable") return true;
-      // Two individually redundant layers must never be sold together in a
-      // precomputed funding route. Execute one head, then requote the board.
-      if (
-        assessment.status !== "preserved" ||
-        signal.kind !== "parent_funding" ||
-        !signal.parentPlanInstanceId ||
-        !signal.parentNeedId ||
-        liquidationAdmitted
-      )
-        return false;
-      liquidationAdmitted = true;
-      return true;
-    });
+      return false;
+    const assessment = corpEconomyExecutableAssessment(
+      context.input,
+      candidate,
+    );
+    if (!assessment) return false;
+    if (assessment.status === "not_applicable") return true;
+    // Two individually redundant layers must never be sold together in a
+    // precomputed funding route. Execute one head, then requote the board.
+    if (
+      signal.kind !== "parent_funding" ||
+      !signal.parentPlanInstanceId ||
+      !signal.parentNeedId ||
+      liquidationAdmitted
+    )
+      return false;
+    liquidationAdmitted = true;
+    return true;
+  });
   const currentCredits = context.input.playerView.own.credits;
   const demandForTarget = (
     targetCredits: number,
@@ -395,8 +402,7 @@ export function assessCorpEconomyFundingRoute(
   const exactIncrementalScoreFunding =
     signal.kind === "parent_funding" &&
     signal.needId.startsWith("score-support:") &&
-    signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.score_agenda" &&
     signal.delegatedPriorityClass !== undefined &&
     signal.urgentForScore === true &&
     signal.scoreFundingMilestone?.deadline === "multi_turn" &&
@@ -422,8 +428,7 @@ export function assessCorpEconomyFundingRoute(
     signal.kind === "parent_funding" &&
     (signal.needId.startsWith("ambush-funding:") ||
       signal.needId.startsWith("ambush-defense-funding:")) &&
-    signal.parentPlanInstanceId?.startsWith("plan:corp.ambush_and_bluff:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.ambush_and_bluff" &&
     signal.parentNeedId === signal.needId &&
     signal.delegatedPriorityClass === undefined &&
     (signal.parentPriorityClass === "P5" ||
@@ -558,15 +563,30 @@ export function corpEconomyCandidateHasExecutablePayload(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
+  return corpEconomyExecutableAssessment(input, candidate) !== undefined;
+}
+
+function corpEconomyExecutableAssessment(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+) {
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
-  const drawCardsAmount = Number(action?.payload?.drawCardsAmount ?? 0);
-  if (!action) return false;
+  if (
+    input.side !== "corp" ||
+    action?.side !== "corp" ||
+    action.timingPoint !== input.playerView.timingPoint ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    (Number(action.payload?.drawCardsAmount ?? 0) > 0 &&
+      input.playerView.own.stackOrRdCount <= 0)
+  )
+    return undefined;
   const liquidation = assessCorpIceLiquidation(input, action);
-  if (liquidation.status === "blocked" || liquidation.status === "unknown")
-    return false;
-  return !(drawCardsAmount > 0 && input.playerView.own.stackOrRdCount <= 0);
+  return liquidation.status === "not_applicable" ||
+    liquidation.status === "preserved"
+    ? liquidation
+    : undefined;
 }
 
 function economyDevelopmentStepValue(
@@ -584,7 +604,7 @@ function economyDevelopmentStepValue(
     return Math.max(1, signal.payback.projectedNetCredits * 10);
 
   const targetServerId = candidateTargetIds(candidate).find(
-    (targetId) => targetId === "new_remote" || targetId.startsWith("remote_"),
+    (targetId) => targetId === "new_remote" || isRemoteServerId(targetId),
   );
   if (!targetServerId) return 10;
   if (targetServerId === "new_remote") {
@@ -597,7 +617,14 @@ function economyDevelopmentStepValue(
     (candidateServer) => candidateServer.id === targetServerId,
   );
   if (!server) return 10;
-  if (server.root.length > 0) return 10;
+  if (
+    server.root.length > 0 &&
+    !(
+      signal.riskAdjustment?.fundedLightProtection &&
+      server.root.every((card) => card.known && card.type === "upgrade")
+    )
+  )
+    return 10;
   return 60 + Math.min(3, server.ice.length) * 10;
 }
 
@@ -619,7 +646,8 @@ export function economyMaterialization(
         ],
       },
       purpose:
-        signal.kind === "parent_funding" && signal.freeRezPayoutPreparation
+        signal.kind === "parent_funding" &&
+        signal.fundingRouteAssessment?.freeRezPayoutPreparation
           ? "Prepare the admitted free finite-pool source for the exact funding parent; revalidate rez and liquid payout after each Engine transition."
           : signal.kind === "develop_campaign"
             ? `Advance the admitted ${signal.sourceDefinitionId} economy campaign from ${signal.phase} to ${signal.completion.expectedState}.`
@@ -646,7 +674,8 @@ export function economyMaterialization(
                               signal.restrictedCreditFunding
                             ? "Take the exact restricted payout for the bound current install/rez consumer, then return control to its resident parent."
                             : signal.kind === "parent_funding" &&
-                                signal.hostedCreditBankCycle
+                                signal.fundingRouteAssessment
+                                  ?.hostedCreditBankCycle
                               ? "Execute the current Engine-quoted hosted-bank head for the bound Corp funding need; revalidate the source and remaining rest-turn cycle after this transition."
                               : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },

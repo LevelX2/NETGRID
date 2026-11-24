@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import { hashState } from "../hash";
 import {
   assertCorpRootRezCostQuoteValid,
+  projectInstalledCorpIceRezCost,
   quoteCorpRezCost,
   quoteCorpRootRezCost,
   rezCostForCard,
@@ -20,11 +21,11 @@ import {
 } from "./root-rez-credit-outcome";
 
 const BASKERVILLE_ID = "baskerville_1" as CardInstanceId;
-const BASKERVILLE_DEFINITION_ID = "onr_classic_005_baskerville";
+const BASKERVILLE_DEFINITION_ID = 9;
 const GLACIER_ID = "glacier_1" as CardInstanceId;
-const GLACIER_DEFINITION_ID = "onr_classic_011_glacier";
+const GLACIER_DEFINITION_ID = 15;
 const ACME_ID = "acme_1" as CardInstanceId;
-const ACME_DEFINITION_ID = "onr_v1_308_acme-savings-and-loan";
+const ACME_DEFINITION_ID = 520;
 
 function makeState(noisyUsed = false): GameState {
   return {
@@ -99,7 +100,7 @@ function makeState(noisyUsed = false): GameState {
     winner: null,
     agendaPointsToWin: 7,
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: "approach_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -113,6 +114,33 @@ function makeState(noisyUsed = false): GameState {
 }
 
 describe("corp rez costs", () => {
+  it("preserves each rezzed modifier copy in the numeric rez projection", () => {
+    const state = makeState();
+    const wall = state.cardInstances[BASKERVILLE_ID]!;
+    wall.definitionId = 450;
+    for (const [index, serverId] of (["r1", "r2"] as const).entries()) {
+      const instanceId = "data-masons-" + index;
+      state.corp.servers.push({
+        id: serverId,
+        kind: "remote",
+        label: serverId,
+        ice: [],
+        root: [instanceId],
+      });
+      state.cardInstances[instanceId] = {
+        ...wall,
+        instanceId,
+        definitionId: 529,
+        zone: { side: "corp", zone: "serverRoot", serverId },
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    expect(projectInstalledCorpIceRezCost(state, BASKERVILLE_ID)).toMatchObject({
+      complete: true,
+      reductionSourceDefinitionIds: [529, 529],
+    });
+  });
   it("applies Classic Sleepy self-rez reduction only after noisy breaker use this run", () => {
     const normalState = makeState(false);
     expect(rezCostForCard(normalState, BASKERVILLE_ID)).toBe(10);
@@ -126,7 +154,7 @@ describe("corp rez costs", () => {
       finalCredits: 5,
       costs: [{ credits: 5 }],
       publicPayload: {
-        rezCostReductionSourceDefinitionIds: BASKERVILLE_DEFINITION_ID,
+        rezCostReductionSourceDefinitionIds: String(BASKERVILLE_DEFINITION_ID),
         rezCostReductionAmount: 5,
         rezCostPaid: 5,
       },
@@ -203,7 +231,7 @@ describe("corp rez costs", () => {
     state.corpBonusAgendaPoints = 1;
     const quote = quoteCorpRootRezCost(state, ACME_ID);
     const action = {
-      actionId: "corp.rez_card.acme_1.rd.acme_1",
+      actionId: "cp.acme_1.rd.acme_1",
       type: "rez_card",
       side: "corp",
       label: "ACME rezzen",

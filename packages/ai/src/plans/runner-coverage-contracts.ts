@@ -1,4 +1,33 @@
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
+
+export const RUNNER_BREAKER_COVERAGE = {
+  breaker_wall: {
+    deckKind: "wall",
+    needles: ["breaker_wall", "breaker_fracter"],
+  },
+  breaker_code_gate: {
+    deckKind: "code_gate",
+    needles: ["breaker_code_gate", "breaker_decoder"],
+  },
+  breaker_sentry: {
+    deckKind: "sentry",
+    needles: ["breaker_sentry", "breaker_killer"],
+  },
+  breaker_ap: { deckKind: "ap", needles: ["breaker_ap"] },
+  breaker_trace: { deckKind: "trace", needles: ["breaker_trace"] },
+  breaker_universal: { deckKind: "universal", needles: ["breaker_universal"] },
+} as const;
+
+export type RunnerBreakerCoverageRole = keyof typeof RUNNER_BREAKER_COVERAGE;
+
+export const RUNNER_BREAKER_COVERAGE_ROLES: readonly RunnerBreakerCoverageRole[] =
+  Object.keys(RUNNER_BREAKER_COVERAGE).filter(isRunnerBreakerCoverageRole);
+
+export function isRunnerBreakerCoverageRole(
+  role: string,
+): role is RunnerBreakerCoverageRole {
+  return Object.hasOwn(RUNNER_BREAKER_COVERAGE, role);
+}
 
 export type RunnerCoverageGapSignal = {
   gapId: string;
@@ -6,13 +35,7 @@ export type RunnerCoverageGapSignal = {
     | "missing_coverage"
     | "cost_ineffective_coverage"
     | "coverage_upgrade";
-  requiredRole:
-    | "breaker_wall"
-    | "breaker_code_gate"
-    | "breaker_sentry"
-    | "breaker_ap"
-    | "breaker_trace"
-    | "breaker_universal";
+  requiredRole: RunnerBreakerCoverageRole;
   targetServerId?: string;
   targetRunActionId?: string;
   requesterModuleId?: "runner.pressure_central" | "runner.contest_remote";
@@ -22,7 +45,7 @@ export type RunnerCoverageGapSignal = {
   evidenceCode: string;
   deckHasAnswer: boolean;
   answerInHand: boolean;
-  handAnswerDefinitionId?: string;
+  handAnswerDefinitionId?: number;
   answerInstallCost?: number;
   installActionIds?: string[];
   installActionValues?: Record<string, number>;
@@ -31,7 +54,7 @@ export type RunnerCoverageGapSignal = {
     actionId: string;
     sourceCardInstanceId: string;
     targetCardInstanceId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     savedLiquidCredits: number;
     stateVersion: number;
   };
@@ -41,7 +64,7 @@ export type RunnerCoverageGapSignal = {
     sourceCardInstanceId: string;
     currentTopCardInstanceId: string;
     targetCardInstanceId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     recoveryCount: number;
     requiredClicks: number;
     upfrontCredits: number;
@@ -54,7 +77,7 @@ export type RunnerCoverageGapSignal = {
     needId: string;
     parentPlanInstanceId: string;
     gapId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     targetCredits: number;
     gap: number;
     bankId: string;
@@ -84,7 +107,7 @@ export type RunnerCoverageGapSignal = {
   recoveryEvidenceCodes?: string[];
   upgradeQuote?: {
     schemaVersion: "runner-breaker-upgrade-economic-quote-v2";
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     currentKnownPathCost: number;
     projectedKnownPathCost: number;
     savingsPerRun: number;
@@ -108,14 +131,14 @@ export type RunnerCoverageGapSignal = {
   directSearchChoiceBindings?: Array<{
     actionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     resolvedSearchChoice?: {
       choiceId: string;
       choiceSource: string;
       stateVersion: number;
     };
     targetCardInstanceId?: string;
-    targetDefinitionId?: string;
+    targetDefinitionId?: number;
     installMemorySacrificeBinding?: {
       targetCardInstanceId: string;
       targetMemoryCost?: number;
@@ -133,24 +156,9 @@ export type RunnerCoverageGapSignal = {
 };
 
 export function runnerCoverageRoleNeedles(
-  requiredRole: RunnerCoverageGapSignal["requiredRole"],
+  requiredRole: RunnerBreakerCoverageRole,
 ): readonly string[] {
-  switch (requiredRole) {
-    case "breaker_wall":
-      return ["breaker_wall", "breaker_fracter"];
-    case "breaker_code_gate":
-      return ["breaker_code_gate", "breaker_decoder"];
-    case "breaker_sentry":
-      return ["breaker_sentry", "breaker_killer"];
-    case "breaker_ap":
-      return ["breaker_ap"];
-    case "breaker_trace":
-      return ["breaker_trace"];
-    case "breaker_universal":
-      return ["breaker_universal"];
-  }
-  const exhaustiveRole: never = requiredRole;
-  return exhaustiveRole;
+  return RUNNER_BREAKER_COVERAGE[requiredRole].needles;
 }
 
 export function runnerRolesCoverCoverageGap(
@@ -162,12 +170,3 @@ export function runnerRolesCoverCoverageGap(
     rolesMatch(roles, ["universal_breaker", "breaker_universal"])
   );
 }
-
-export const RUNNER_BREAKER_COVERAGE_ROLES = [
-  "breaker_wall",
-  "breaker_code_gate",
-  "breaker_sentry",
-  "breaker_ap",
-  "breaker_trace",
-  "breaker_universal",
-] as const satisfies readonly RunnerCoverageGapSignal["requiredRole"][];

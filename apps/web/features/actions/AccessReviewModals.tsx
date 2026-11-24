@@ -1,10 +1,13 @@
+import { optionPresentation, type SelectionId } from "../../lib/presented-player-view";
 import { Award as AgendaIcon, Check, Eye, Trash2, X } from "lucide-react";
-import type { LegalAction, Side, VisibleChoiceRequest } from "@netgrid/shared";
+import type { MatchEventId, Side } from "@netgrid/shared";
+import type { LegalAction, VisibleChoiceRequest } from "../../lib/presented-player-view";
 import type { DamageImpactCue } from "../../app/action-cues";
 import { useLocale, useTranslations } from "use-intl/react";
 import type { AccessPresentationOutcomeKind } from "../../app/access-presentation";
 
 import {
+  type AccessPresentationId,
   accessDecisionDisplayLabel,
   accessDecisionLabel,
   accessRevealActionGroups,
@@ -27,7 +30,7 @@ const reviewCardPreviewStyle = {
 } as const;
 
 export type AccessReveal = {
-  eventId: string;
+  eventId: AccessPresentationId;
   kind:
     | "access"
     | "archives_reveal"
@@ -57,13 +60,19 @@ export type AccessReveal = {
 };
 
 export type ExposeReview = {
-  eventId: string;
+  eventId: MatchEventId;
   actorSide: Side;
   viewerSide: Side;
   cards: DisplayVisibleCard[];
   serverLabels: string[];
   title: string;
   description: string;
+  outermostIce?: {
+    stateVersion: number;
+    sourceTitle: string | null;
+    serverIds: string[];
+    positionKeys: string[];
+  };
 };
 
 export function AccessRevealModal({
@@ -83,8 +92,8 @@ export function AccessRevealModal({
   onAction(action: LegalAction): boolean | void;
   onChoiceOption?: (
     action: LegalAction,
-    choiceId: string,
-    selectedOptionId: string,
+    choiceId: SelectionId,
+    selectedOptionId: SelectionId,
   ) => void;
   onDamageDismiss?(): void;
   onDismiss(): void;
@@ -117,7 +126,7 @@ export function AccessRevealModal({
       return;
     onDismiss();
   };
-  const runChoiceOption = (selectedOptionId: string) => {
+  const runChoiceOption = (selectedOptionId: SelectionId) => {
     if (!reveal.choice || !reveal.choiceAction || !onChoiceOption) return;
     onChoiceOption(
       reveal.choiceAction,
@@ -277,7 +286,7 @@ export function AccessRevealModal({
                           type="button"
                           data-testid={`gypsy-rd-reveal-choice-${option.id}`}
                         >
-                          {option.id === "reveal_next" ? (
+                          {optionPresentation(option) === "reveal_next" ? (
                             <Eye size={15} />
                           ) : (
                             <Check size={15} />
@@ -457,6 +466,7 @@ export function ExposeReviewModal({
   onDismiss(): void;
 }) {
   const t = useTranslations("Actions.access");
+  const outermostIce = review.outermostIce;
   return (
     <div
       className="accessRevealOverlay exposeReviewOverlay"
@@ -466,24 +476,30 @@ export function ExposeReviewModal({
     >
       <div className="accessRevealBackdrop" aria-hidden="true" />
       <section
-        className={`accessRevealPanel exposeReviewPanel ${interactionAmbienceClassName("access")}`}
+        className={`accessRevealPanel exposeReviewPanel ${outermostIce ? "outermostIceReviewPanel " : ""}${interactionAmbienceClassName("access")}`}
       >
         <div className="accessRevealHeader">
           <div>
-            <p className="eyebrow">{t("view")}</p>
-            <h2 id="expose-review-title">{review.title}</h2>
-            <p>{review.description}</p>
+            <p className="eyebrow">{outermostIce?.sourceTitle ?? t("view")}</p>
+            <h2 id="expose-review-title">
+              {outermostIce
+                ? t("outermostIceExposed", { count: review.cards.length })
+                : review.title}
+            </h2>
+            {outermostIce ? null : <p>{review.description}</p>}
           </div>
           <div className="accessRevealHeaderActions">
             <WindowEventIcon kind="access" side={review.actorSide} />
-            <button
-              className="button iconOnly"
-              onClick={onDismiss}
-              aria-label={t("closeView")}
-              title={t("closeView")}
-            >
-              <X size={16} />
-            </button>
+            {outermostIce ? null : (
+              <button
+                className="button iconOnly"
+                onClick={onDismiss}
+                aria-label={t("closeView")}
+                title={t("closeView")}
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         </div>
         <div className="exposeReviewCards" data-testid="expose-review-cards">
@@ -508,6 +524,7 @@ export function ExposeReviewModal({
           <button
             className="button primary"
             onClick={onDismiss}
+            autoFocus={Boolean(outermostIce)}
             type="button"
             data-testid="expose-review-dismiss"
           >

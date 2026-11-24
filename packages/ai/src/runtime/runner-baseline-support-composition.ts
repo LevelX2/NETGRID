@@ -6,22 +6,14 @@ import type {
 
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import {
-  createRunnerBaselinePlanGuardContext,
-  type RunnerBaselinePlanGuardContextDependencies,
-} from "./runner-baseline-plan-guard-context";
-import {
-  createRunnerProgramPressureComposition,
-  type RunnerProgramPressureCompositionDependencies,
-} from "./runner-program-pressure-composition";
+  createRunnerProgramInstallTrashContext,
+  type RunnerProgramInstallTrashContextDependencies,
+} from "./runner-program-install-trash-context";
 import {
   createRunnerVisibleCardDiscardComposition,
   type RunnerVisibleCardDiscardCompositionDependencies,
 } from "./runner-visible-card-discard-composition";
-import {
-  createRunnerRunOnlyActionContext,
-  type RunnerRunOnlyActionAdjustmentDependencies,
-} from "./runner-run-only-action-adjustment";
-import { createRunnerStrategicIntentContext } from "./runner-strategic-intent-context";
+import { runnerStrategicIntentForInput } from "./runner-strategic-intent-context";
 import {
   selectedChoicesForDecision as selectedChoicesForRuntimeDecision,
   type SelectedChoicesForDecisionDependencies,
@@ -30,48 +22,31 @@ import { createVisibleIcebreakerProgramPredicate } from "./visible-icebreaker-pr
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import type { AiCardHint } from "../ai-hints";
 
-export type RunnerBaselineSupportCompositionDependencies =
-  RunnerBaselinePlanGuardContextDependencies &
-    RunnerRunOnlyActionAdjustmentDependencies & {
-      visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
-      hintForDefinitionId: (definitionId: string) => AiCardHint | undefined;
-    } & Omit<
-      SelectedChoicesForDecisionDependencies,
-      | "discardKeepScore"
-      | "rolesForCardId"
-      | "effectsForCardId"
-      | "selectedRunnerProgramInstallTrashOptionIds"
-      | "selectedRunnerForcedProgramTrashOptionIds"
-      | "selectedRunnerMemoryCheckpointTrashOptionIds"
-    > &
-    RunnerProgramPressureCompositionDependencies &
-    Omit<
-      RunnerVisibleCardDiscardCompositionDependencies,
-      "isVisibleIcebreakerProgram"
-    >;
+export type RunnerBaselineSupportCompositionDependencies = {
+  visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
+  hintForDefinitionId: (definitionId: number) => AiCardHint | undefined;
+} & Omit<
+  SelectedChoicesForDecisionDependencies,
+  | "discardKeepScore"
+  | "rolesForCardId"
+  | "effectsForCardId"
+  | "selectedRunnerProgramInstallTrashOptionIds"
+  | "selectedRunnerForcedProgramTrashOptionIds"
+  | "selectedRunnerMemoryCheckpointTrashOptionIds"
+> &
+  RunnerProgramInstallTrashContextDependencies &
+  Omit<
+    RunnerVisibleCardDiscardCompositionDependencies,
+    "isVisibleIcebreakerProgram"
+  >;
 
 export function createRunnerBaselineSupportComposition(
   dependencies: RunnerBaselineSupportCompositionDependencies,
 ) {
-  const {
-    runnerHasConditionalPaymentContinueDecision,
-    baselineShellTradersPlanIsVisible,
-  } = createRunnerBaselinePlanGuardContext({
-    delayedInstallAbilityForAction: dependencies.delayedInstallAbilityForAction,
-    runnerHasInstalledPrograms: dependencies.runnerHasInstalledPrograms,
-  });
-
   const { deckCapabilitiesForInput } = createDeckCapabilitiesContext();
-  const { runnerStrategicIntentForInput } =
-    createRunnerStrategicIntentContext();
   const isVisibleIcebreakerProgram = createVisibleIcebreakerProgramPredicate(
     dependencies.visibleBreakerRolesForAi,
   );
-  const { runnerRunOnlyActionAdjustedSemanticChoice } =
-    createRunnerRunOnlyActionContext({
-      compareAction: dependencies.compareAction,
-    });
-
   const {
     visibleCardPlayOrInstallCostForAi,
     runnerCardLooksLikeCreditPayout,
@@ -93,19 +68,10 @@ export function createRunnerBaselineSupportComposition(
     selectedRunnerProgramInstallTrashOptionIds,
     selectedRunnerForcedProgramTrashOptionIds,
     selectedRunnerMemoryCheckpointTrashOptionIds,
-    runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
     runnerProgramInstallTrashAssessmentForCard,
-    runnerProgramInstallDisplacementPenalty,
-    runnerProgramSacrificeExclusion,
-    runnerMuPressureInstallScoreComponent,
-    runnerMuPressureFundingScoreComponent,
-    runnerMuPressureInstallPriorityBonus,
-    runnerMuPressureFundingPriorityBonus,
-    runnerMuPressureActionEvidence,
-  } = createRunnerProgramPressureComposition({
+  } = createRunnerProgramInstallTrashContext({
     safeNonNegativeInteger: dependencies.safeNonNegativeInteger,
-    findVisibleCard: dependencies.findVisibleCard,
     visibleMemoryCost: dependencies.visibleMemoryCost,
     visibleCardsByInstanceId: dependencies.visibleCardsByInstanceId,
     visibleBreakerRoleCounts: dependencies.visibleBreakerRoleCounts,
@@ -115,8 +81,6 @@ export function createRunnerBaselineSupportComposition(
     isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
     visibleCounterValue: dependencies.visibleCounterValue,
     visibleInstallCost: dependencies.visibleInstallCost,
-    actionCreditCost: dependencies.actionCreditCost,
-    rolesForAction: dependencies.rolesForAction,
   });
 
   const selectedChoicesDependencies: SelectedChoicesForDecisionDependencies = {
@@ -150,28 +114,17 @@ export function createRunnerBaselineSupportComposition(
   }
 
   return {
-    runnerHasConditionalPaymentContinueDecision,
-    baselineShellTradersPlanIsVisible,
     selectedChoicesForDecision,
     discardKeepScore,
     deckCapabilitiesForInput,
     runnerStrategicIntentForInput,
     isVisibleIcebreakerProgram,
-    runnerRunOnlyActionAdjustedSemanticChoice,
     visibleCardPlayOrInstallCostForAi,
     runnerCardLooksLikeCreditPayout,
     runnerBadPublicityOrTraceTechCard,
     runnerCardAddressesVisibleBreakerNeed,
     visibleBreakerCardCanAddressIce,
-    runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
     runnerProgramInstallTrashAssessmentForCard,
-    runnerProgramInstallDisplacementPenalty,
-    runnerProgramSacrificeExclusion,
-    runnerMuPressureInstallScoreComponent,
-    runnerMuPressureFundingScoreComponent,
-    runnerMuPressureInstallPriorityBonus,
-    runnerMuPressureFundingPriorityBonus,
-    runnerMuPressureActionEvidence,
   };
 }

@@ -1,3 +1,5 @@
+import { RandomPurposeCode, type RandomPurpose } from "@netgrid/shared";
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -18,20 +20,20 @@ import {
   type CorpZoneChoiceHandlerHost,
 } from "./corp-zone-choice-handlers";
 
-const cncDefinitionId = "corp_negotiating_center" as CardDefinitionId;
-const downsizingDefinitionId = "corporate_downsizing" as CardDefinitionId;
-const aiCfoDefinitionId = "ai_cfo" as CardDefinitionId;
+const cncDefinitionId = 1738948723 as CardDefinitionId;
+const downsizingDefinitionId = 2996006827 as CardDefinitionId;
+const aiCfoDefinitionId = 3460737206 as CardDefinitionId;
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
-  title = id,
+  title = String(id),
   agendaPoints?: number,
 ): CardDefinition {
   return {
     id: id as CardDefinitionId,
     type,
-    title,
+    title: String(title),
     ...(agendaPoints === undefined ? {} : { agendaPoints }),
   } as CardDefinition;
 }
@@ -93,7 +95,7 @@ function makeHost(
     scoredKinds?: Record<string, string>;
     scoredDrawCounts?: Record<string, number>;
     hasImplementation?: Set<CardDefinitionId>;
-    shuffleInputs?: Array<{ ids: CardInstanceId[]; purpose: string }>;
+    shuffleInputs?: Array<{ ids: CardInstanceId[]; purpose: RandomPurpose }>;
     drawCalls?: number[];
   } = {},
 ): CorpZoneChoiceHandlerHost {
@@ -115,11 +117,11 @@ function makeHost(
       "HQ/Archives-Shuffle-Draw",
       2,
     ),
-    hq_agenda_1: definition("agenda_alpha", "agenda", "Agenda Alpha", 2),
-    hq_agenda_2: definition("agenda_beta", "agenda", "Agenda Beta", 3),
-    hq_operation: definition("operation_alpha", "operation", "Operation Alpha"),
-    rd_1: definition("rd_alpha", "operation", "R&D Alpha"),
-    archives_1: definition("archives_alpha", "operation", "Archives Alpha"),
+    hq_agenda_1: definition(3481987414, "agenda", "Agenda Alpha", 2),
+    hq_agenda_2: definition(2106644172, "agenda", "Agenda Beta", 3),
+    hq_operation: definition(3209985469, "operation", "Operation Alpha"),
+    rd_1: definition(422337080, "operation", "R&D Alpha"),
+    archives_1: definition(3135447945, "operation", "Archives Alpha"),
     ...input.definitions,
   };
   const allIds = [
@@ -132,7 +134,10 @@ function makeHost(
   const cardInstances: Record<string, CardInstance> = Object.fromEntries(
     allIds.map((cardId) => [
       cardId,
-      instance(cardId, definitions[cardId]?.id ?? (cardId as CardDefinitionId)),
+      instance(
+        cardId,
+        definitions[cardId]?.id ?? syntheticCardDefinitionId(cardId),
+      ),
     ]),
   );
   const legalAction = { side: "corp", payload: {} } as LegalAction;
@@ -157,7 +162,8 @@ function makeHost(
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     cards: {
       definitionFor: (cardId) =>
-        definitions[cardId] ?? definition(cardId, "operation"),
+        definitions[cardId] ??
+        definition(syntheticCardDefinitionId(cardId), "operation"),
       hasLifecycleEffect: (cardId, effectKind) =>
         effectKind === "show_hq_agendas_for_credits" &&
         definitions[cardId]?.id === cncDefinitionId &&
@@ -239,7 +245,7 @@ describe("corp zone choice handlers", () => {
       hiddenZoneAction: "corp_hq_agenda_reveal",
       revealedCount: 1,
       gainedCredits: 1,
-      publicRevealDefinitionIds: "agenda_alpha",
+      publicRevealDefinitionIds: String(3481987414),
     });
     expect(JSON.stringify(host.legalAction.payload)).not.toContain(
       "hq_agenda_2",
@@ -292,7 +298,7 @@ describe("corp zone choice handlers", () => {
   });
 
   it("starts and resolves Corporate Downsizing agenda reveal and R&D shuffle", () => {
-    const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: string }> = [];
+    const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: RandomPurpose }> = [];
     const host = makeHost({
       hq: ["hq_agenda_1", "hq_agenda_2"] as CardInstanceId[],
       rd: ["rd_1"] as CardInstanceId[],
@@ -322,8 +328,7 @@ describe("corp zone choice handlers", () => {
     expect(shuffleInputs).toEqual([
       {
         ids: ["rd_1", "hq_agenda_1", "hq_agenda_2"],
-        purpose:
-          "scored_agenda.hq_agenda_shuffle_credits.hq_agendas_into_rd.downsizing_source.8",
+        purpose: [RandomPurposeCode.AgendaHqShuffle, "downsizing_source", 8],
       },
     ]);
     expect(host.legalAction.payload).toMatchObject({
@@ -334,7 +339,7 @@ describe("corp zone choice handlers", () => {
       hiddenZoneOrderChanged: true,
       hiddenZoneChangesHq: true,
       hiddenZoneChangesRd: true,
-      shownCardDefinitionIds: "agenda_alpha,agenda_beta",
+      shownCardDefinitionIds: [3481987414, 2106644172].join(","),
       shownCount: 2,
       shuffledIntoRndCount: 2,
       combinedAgendaPoints: 5,
@@ -370,7 +375,7 @@ describe("corp zone choice handlers", () => {
   });
 
   it("rejects a forged Corporate Downsizing rate before credit or RNG mutation", () => {
-    const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: string }> = [];
+    const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: RandomPurpose }> = [];
     const host = makeHost({
       hq: ["hq_agenda_1"] as CardInstanceId[],
       rd: ["rd_1"] as CardInstanceId[],
@@ -397,7 +402,7 @@ describe("corp zone choice handlers", () => {
   });
 
   it("resolves Rescheduler with HQ count, shuffle callback, and draw callback", () => {
-    const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: string }> = [];
+    const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: RandomPurpose }> = [];
     const drawCalls: number[] = [];
     const host = makeHost({
       hq: ["hq_agenda_1", "hq_operation"] as CardInstanceId[],
@@ -415,7 +420,7 @@ describe("corp zone choice handlers", () => {
     expect(drawCalls).toEqual([2]);
     expect(shuffleInputs[0]).toEqual({
       ids: ["rd_1", "hq_agenda_1", "hq_operation"],
-      purpose: "v1917.rescheduler.hq_into_rd.rescheduler_source.8",
+      purpose: [RandomPurposeCode.ReschedulerShuffle, "rescheduler_source", 8],
     });
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "v1917_rescheduler_hq_shuffle_draw",
@@ -429,7 +434,7 @@ describe("corp zone choice handlers", () => {
   });
 
   it("resolves HQ/Archives-Shuffle-Draw with HQ/Archives counts and draw five", () => {
-    const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: string }> = [];
+    const shuffleInputs: Array<{ ids: CardInstanceId[]; purpose: RandomPurpose }> = [];
     const drawCalls: number[] = [];
     const host = makeHost({
       hq: ["hq_agenda_1"] as CardInstanceId[],
@@ -453,7 +458,7 @@ describe("corp zone choice handlers", () => {
     expect(drawCalls).toEqual([5]);
     expect(shuffleInputs[0]).toEqual({
       ids: ["rd_1", "hq_agenda_1", "archives_1"],
-      purpose: "scored_agenda.shuffle.hq_archives_into_rd.8",
+      purpose: [RandomPurposeCode.AgendaFullRecycle, 8],
     });
     expect(host.state.corp.archives).toEqual([]);
     expect(host.legalAction.payload).toMatchObject({

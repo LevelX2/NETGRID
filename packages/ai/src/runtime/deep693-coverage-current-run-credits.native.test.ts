@@ -48,10 +48,10 @@ function original(index = 98) {
   return input;
 }
 const install =
-    "runner.install_card.runner_onr_proteus_083_corrosion_1.runner_onr_proteus_083_corrosion_1",
-  root = "plan:runner.contest_remote:remote%3Aremote_1",
+    "rc.cvd.cvd",
+  root = "p1p4xezjcxov79rno40lq3f7rv",
   executor =
-    "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Arun%3Arunner.start_run.remote_1";
+    "peva6bp6lh8hz7bnk1xotgorx4";
 function pool(input: AiDecisionInputWithDeckCapabilities) {
   const display = input.playerView.own
     .rig!.flatMap((c) => c.counterDisplays ?? [])
@@ -114,7 +114,7 @@ it("preserves the native low-hand rejection after the old funding prefix", () =>
   expect(input.playerView.own.gripOrHq).toHaveLength(2);
   const result = selected(input);
   expect(result.actionId).toContain(
-    "runner.install_card.runner_onr_v1_040_loony-goon_1",
+    "rc.c1k1",
   );
   const parent = residentPlanPortfolioSnapshot(input)!.instances.find(
     (p) => p.instanceId === root,
@@ -135,7 +135,7 @@ it("does not refill a spent recurring pool during the current turn", () => {
   pool(input).amount = 0;
   const result = selected(input);
   expect(result.actionId).toContain(
-    "runner.play_event.runner_onr_v1_108_score_1",
+    "rh.c1z5",
   );
   expect(result.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
     root,
@@ -149,7 +149,7 @@ it("does not spend killer-only credits on the missing wall breaker", () => {
   pool(input).creditPool!.uses = ["using_killer_during_run"];
   const result = selected(input);
   expect(result.actionId).toContain(
-    "runner.play_event.runner_onr_v1_108_score_1",
+    "rh.c1z5",
   );
   expect(result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
     executor,

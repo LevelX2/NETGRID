@@ -31,9 +31,6 @@ import {
 import { createAiLiveRuntimeComposition } from "./runtime/ai-live-runtime-composition";
 import {
   cardDefinitionTypeForAi,
-  demoCardDefinitionForAi,
-  runnerCardMechanicsForAi,
-  runtimeCardDefinitionForAi,
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
 import { corpInstalledEconomyCreditAmount } from "./corp/economy/installed-economy-credit";
@@ -46,23 +43,12 @@ import {
   eventVersion as aiEventVersion,
   serverIdFromEvent as aiServerIdFromEvent,
   mergedPublicHistory as mergedAiPublicHistory,
-} from "./runtime/public-event-history";
+} from "./public-event-history";
 import { semanticRuntimeActionTypeIsReactive } from "./runtime/reactive-action";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
-import { corpVisibleRunnerHardwarePayoffEvidence } from "./runtime/runner-hardware-payoff-evidence";
-import { staleKnownHqRepeatRunPenalty } from "./runtime/runner-hq-repeat-run-score";
 import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
 import { runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason } from "./runtime/runner-known-ice-path-score";
-import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
 import { runnerMultiRunEventScoreValue } from "./runtime/runner-multi-run-event-score";
-import {
-  corpVisibleRunnerHardwareTrashTarget,
-  corpVisibleRunnerRigTrashTarget,
-} from "./runtime/runner-rig-trash-target";
-import {
-  rndFreshRepeatRunBoost,
-  staleKnownRndRepeatRunPenalty,
-} from "./runtime/runner-rnd-repeat-run-score";
 import {
   isRunnerEconomyRole,
   isRunnerPressureRole,
@@ -76,10 +62,7 @@ import {
 import { isSearchChoice } from "./runtime/search-choice-option";
 import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
-import {
-  scrubEvidence,
-  semanticRuntimeScoreFromComponents,
-} from "./runtime/semantic-runtime-score-components";
+import { scrubEvidence } from "./runtime/semantic-runtime-score-components";
 import { isRemoteServerTarget } from "./runtime/server-target";
 import { breakSubroutineIndexesForAction } from "./runtime/subroutine-indexes";
 import { corpVisibleCardStoredCredits } from "./runtime/visible-card-credit";
@@ -98,7 +81,7 @@ import {
 } from "./runtime/visible-card-lookup";
 import {
   definitionTypeForMetrics,
-  remoteRootTrashCostForMetrics,
+  remoteTrashCostForVisibleCard,
 } from "./simulation/card-metric-lookup";
 import {
   centralRunStreakWithoutValueForMetrics,
@@ -132,11 +115,8 @@ import {
 } from "./simulation/runner-setup-coverage-types";
 import { runnerSurvivalCounterContextForInput } from "./simulation/runner-survival-counter-context";
 import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontology-diagnostics";
-import { visibleRootIsKnownAgendaForMetrics } from "./simulation/visible-root-agenda-metrics";
-import {
-  classifyTagPunishPayoffFromOntology,
-  classifyTagSourceFromOntology,
-} from "./tag-punish-ontology-consumer";
+import { visibleRootIsKnownAgenda } from "./runtime/visible-root-agenda";
+import { classifyTagPunishPayoffFromOntology } from "./tag-punish-ontology-consumer";
 import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
@@ -194,51 +174,39 @@ export const aiLiveRuntimeDependencies = {
   runnerAdvancedRemoteContestContext,
   runnerSetupChosenFamilyForEntry,
   runnerStrategicBreakerTargetForMetrics,
-  visibleRootIsKnownAgenda: visibleRootIsKnownAgendaForMetrics,
+  visibleRootIsKnownAgenda,
   runRiskAssessment: assessRandomBreakOrDamageRiskForRunAction,
-  projectedCreditGainForAction: runnerProjectedCreditGainForAction,
   handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
   economyPosture: buildRunnerEconomyPosture,
   runTargets: evaluateRunnerRunTargets,
-  mechanicsForDefinition: runnerCardMechanicsForAi,
   actionTypeIsReactive: semanticRuntimeActionTypeIsReactive,
   evaluatePracticalRunnerRunTargets: evaluateRunnerRunTargets,
   runnerRunTargetPlausibleForMultiRun,
   runnerRunTargetHighPayoff,
   findVisibleCorpServerCard,
-  runtimeDefinition: runtimeCardDefinitionForAi,
-  demoDefinition: demoCardDefinitionForAi,
   evaluateKnownCentralPayoff: evaluateKnownCentralAccessPayoff,
   definitionType: definitionTypeForMetrics,
   definitionTypeForMetrics,
-  remoteRootTrashCostForMetrics,
+  remoteRootTrashCostForMetrics: remoteTrashCostForVisibleCard,
   canBreakerDefinitionBreakIce,
   runnerVisibleIceCreatesCoverageNeedForMetrics,
   runnerMissingBreakerRolesForMetrics,
   installedEconomyCreditAmount: corpInstalledEconomyCreditAmount,
   visibleCardStoredCredits: corpVisibleCardStoredCredits,
   visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
-  runnerRigTrashTarget: corpVisibleRunnerRigTrashTarget,
   runnerResourceTrashEvidence: corpVisibleRunnerResourceTrashEvidence,
   payoffProfileForDefinition: classifyTagPunishPayoffFromOntology,
-  tagSourceProfileForDefinition: classifyTagSourceFromOntology,
   runnerDamagePreventionEvidence: corpVisibleRunnerDamagePreventionEvidence,
-  runnerHardwareTrashTarget: corpVisibleRunnerHardwareTrashTarget,
-  runnerHardwarePayoffEvidence: corpVisibleRunnerHardwarePayoffEvidence,
   runnerSurvivalCounterContextForInput,
   applyTagPunishOntologyDiagnostics,
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
-  scoreFromComponents: semanticRuntimeScoreFromComponents,
   shouldAvoidRandomBreakOrDamageRisk: randomBreakOrDamageRiskShouldAvoidRun,
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
-  remoteRootTrashCost: remoteRootTrashCostForMetrics,
-  staleKnownRndRepeatRunPenalty,
-  rndFreshRepeatRunBoost,
-  staleKnownHqRepeatRunPenalty,
+  remoteRootTrashCost: remoteTrashCostForVisibleCard,
   publicHistory: mergedAiPublicHistory,
   eventVersion: aiEventVersion,
   serverIdFromEvent: aiServerIdFromEvent,
-  rootTrashCost: remoteRootTrashCostForMetrics,
+  rootTrashCost: remoteTrashCostForVisibleCard,
   targetServerId: semanticRuntimeServerId,
   randomBreakRecoveryAssessment: runnerRandomBreakRecoveryAssessment,
   findVisibleCard,

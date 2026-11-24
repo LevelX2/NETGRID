@@ -8,7 +8,7 @@ import {
 describe("score area UI helpers", () => {
   it("shows Superior Net Barriers as active only in the Corp scored area", () => {
     const corpLine = scoredAgendaEffectLineForScoreArea(
-      "onr_v1_219_superior-net-barriers",
+      431,
       "corp",
     );
 
@@ -18,7 +18,7 @@ describe("score area UI helpers", () => {
     });
     expect(
       scoredAgendaEffectLineForScoreArea(
-        "onr_v1_219_superior-net-barriers",
+        431,
         "runner",
       ),
     ).toBeNull();
@@ -26,7 +26,7 @@ describe("score area UI helpers", () => {
 
   it("shows Black Ice Quality Assurance as a +2 Black ICE effect only in the Corp scored area", () => {
     const corpLine = scoredAgendaEffectLineForScoreArea(
-      "onr_v1_191_black-ice-quality-assurance",
+      403,
       "corp",
     );
 
@@ -36,7 +36,7 @@ describe("score area UI helpers", () => {
     });
     expect(
       scoredAgendaEffectLineForScoreArea(
-        "onr_v1_191_black-ice-quality-assurance",
+        403,
         "runner",
       ),
     ).toBeNull();
@@ -44,7 +44,7 @@ describe("score area UI helpers", () => {
 
   it("shows Genetics-Visionary Acquisition as an active Research agenda difficulty effect", () => {
     const corpLine = scoredAgendaEffectLineForScoreArea(
-      "onr_v1_202_genetics-visionary-acquisition",
+      414,
       "corp",
     );
 
@@ -54,7 +54,7 @@ describe("score area UI helpers", () => {
     });
     expect(
       scoredAgendaEffectLineForScoreArea(
-        "onr_v1_202_genetics-visionary-acquisition",
+        414,
         "runner",
       ),
     ).toBeNull();
@@ -62,7 +62,7 @@ describe("score area UI helpers", () => {
 
   it("shows Encryption Breakthrough as an active Code Gate strength effect only in the Corp scored area", () => {
     const corpLine = scoredAgendaEffectLineForScoreArea(
-      "onr_v1_200_encryption-breakthrough",
+      412,
       "corp",
     );
 
@@ -72,7 +72,7 @@ describe("score area UI helpers", () => {
     });
     expect(
       scoredAgendaEffectLineForScoreArea(
-        "onr_v1_200_encryption-breakthrough",
+        412,
         "runner",
       ),
     ).toBeNull();
@@ -81,7 +81,7 @@ describe("score area UI helpers", () => {
   it("shows Security Net Optimization selected server in the Corp scored area", () => {
     const corpLine = scoredAgendaEffectLineForScoreArea(
       {
-        definitionId: "onr_v1_215_security-net-optimization",
+        definitionId: 427,
         selectedServerLabel: "Remote 1",
       },
       "corp",
@@ -98,7 +98,7 @@ describe("score area UI helpers", () => {
       {
         instanceId: "score-1",
         known: true,
-        definitionId: "onr_v1_202_genetics-visionary-acquisition",
+        definitionId: 414,
         type: "agenda" as const,
         subtypes: ["gray_ops"],
       },
@@ -111,7 +111,7 @@ describe("score area UI helpers", () => {
       researchAgendaDifficultyModifierLineForCard(
         {
           known: true,
-          definitionId: "onr_v1_189_artificial-security-directors",
+          definitionId: 401,
           type: "agenda",
           subtypes: ["research"],
         },
@@ -129,7 +129,7 @@ describe("score area UI helpers", () => {
       {
         instanceId: "score-1",
         known: true,
-        definitionId: "onr_v1_202_genetics-visionary-acquisition",
+        definitionId: 414,
         type: "agenda" as const,
         subtypes: ["gray_ops"],
       },
@@ -139,7 +139,7 @@ describe("score area UI helpers", () => {
       researchAgendaDifficultyModifierLineForCard(
         {
           known: false,
-          definitionId: "onr_v1_189_artificial-security-directors",
+          definitionId: 401,
           type: "agenda",
           subtypes: ["research"],
         },

@@ -13,7 +13,6 @@ export type RunnerCreditBankSignal = {
   rejectedActionIds?: string[];
   priorityClass: "P2" | "P4" | "P5" | "P6";
   currentStoredCredits: number;
-  portfolioStoredCredits: number;
   estimatedPayout: number;
   investment?: {
     desiredLiquidity: number;

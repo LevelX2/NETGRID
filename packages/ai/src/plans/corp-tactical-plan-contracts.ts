@@ -11,7 +11,7 @@ import type { CorpBluffDefenseNeed } from "./corp-bluff-defense-types";
 export type CorpAmbushSignal = {
   commitmentVersion: "corp_ambush_commitment_v1";
   ambushId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   sourceInstanceId: string;
   actionIds: string[];
   serverId: string;
@@ -78,14 +78,14 @@ export type CorpAmbushSignal = {
   recycleRoute?: {
     actionId: string;
     recyclerSourceInstanceId: string;
-    recyclerSourceDefinitionId: string;
+    recyclerSourceDefinitionId: number;
     targetCardInstanceId: string;
   };
   advancementSupportRoute?: {
     phase: "install" | "rez" | "trigger";
     actionId: string;
     supportSourceInstanceId: string;
-    supportSourceDefinitionId: string;
+    supportSourceDefinitionId: number;
     targetCardInstanceId: string;
     serverId: string;
     creditCost: number;

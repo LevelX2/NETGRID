@@ -53,7 +53,7 @@ export type RuntimeStrategyId = keyof typeof STRATEGY_RUNTIME_FAMILY_BY_ID;
 export function strategicFamilyForStrategyId(
   strategyId: string,
 ): StrategicIntentFamily {
-  return (
-    STRATEGY_RUNTIME_FAMILY_BY_ID[strategyId as RuntimeStrategyId] ?? "unknown"
-  );
+  return Object.hasOwn(STRATEGY_RUNTIME_FAMILY_BY_ID, strategyId)
+    ? STRATEGY_RUNTIME_FAMILY_BY_ID[strategyId as RuntimeStrategyId]
+    : "unknown";
 }

@@ -7,7 +7,7 @@ const endTheRunSubroutine = capabilityKey("end_the_run_subroutine");
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_020_digiconda"),
+    cardDefinitionId: cardDefinitionId(78),
     title: "Digiconda",
     side: "corp",
     cardType: "ice",

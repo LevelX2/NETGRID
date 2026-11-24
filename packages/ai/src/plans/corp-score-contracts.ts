@@ -38,7 +38,7 @@ export type CorpScoreFundingMilestone = Readonly<{
 }>;
 
 export type CorpScoreProjectSignal = {
-  /** Current route admission published by corp.score_agenda; evidence only explains it. */
+  /** Current route admission published by cr; evidence only explains it. */
   routeAssessment?:
     | "corp_terminal_agenda_defense"
     | "corp_opening_rush_engine_randomized"
@@ -57,6 +57,7 @@ export type CorpScoreProjectSignal = {
     | "corp_access_punishing_agenda_deception_score_install"
     | "corp_score_protection_assessment_unknown"
     | "corp_last_click_score_install_deferred"
+    | "corp_score_awaits_campaign_slot_release"
     | "corp_score_protection_funding_gap"
     | "corp_near_matchpoint_remote_maturity_required"
     | "corp_last_viable_deckout_matchpoint_install"
@@ -93,7 +94,7 @@ export type CorpScoreProjectSignal = {
     creditsBeforeScorePayout: number;
   };
   projectId: string;
-  agendaDefinitionId?: string;
+  agendaDefinitionId?: number;
   agendaPoints: number;
   agendaInstanceId?: string;
   serverId?: string;
@@ -105,7 +106,7 @@ export type CorpScoreProjectSignal = {
   protectionNeed?: CorpFundedRemoteAccessRiskNeed;
   terminalDefense?: CorpTerminalAgendaDefense;
   /**
-   * Current-state score-horizon evidence derived by corp.score_agenda from
+   * Current-state score-horizon evidence derived by cr from
    * state-bound Engine rez and post-rez run quotes. A downstream defense
    * support search may preserve this certificate, but must not replace it
    * with a second protection verdict.
@@ -127,7 +128,7 @@ export type CorpScoreProjectSignal = {
   fundingGap?: number;
   sameTurnFundingActionIds?: string[];
   /**
-   * Published by corp.score_agenda for its exact current credit objective.
+   * Published by cr for its exact current credit objective.
    * Support leaves may advance it and lower-priority siblings may preserve it,
    * but neither may derive a competing target or retain it after the parent is
    * invalidated.
@@ -143,7 +144,7 @@ export type CorpScoreProjectSignal = {
     runnerStealIsMatchpoint: boolean;
     realizedStrategySupportCount: number;
   };
-  /** Exact route selected by corp.score_agenda for an advancement choice. */
+  /** Exact route selected by cr for an advancement choice. */
   advancementCounterChoiceBinding?:
     | {
         kind: "move_advancement";
@@ -162,7 +163,7 @@ export type CorpScoreProjectSignal = {
     stateVersion: number;
   };
   /**
-   * Published only by corp.score_agenda from an Engine continuation quote.
+   * Published only by cr from an Engine continuation quote.
    * corp.defend_servers may preserve this request but must never reconstruct it.
    */
   continuationReserve?: {
@@ -178,7 +179,7 @@ export type CorpScoreProjectSignal = {
     needId: string;
     actionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
   };
   /**
    * Narrow, Engine-certified preparation state for an advanceable Corp asset
@@ -187,7 +188,7 @@ export type CorpScoreProjectSignal = {
    */
   counterBank?: {
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     serverId: string;
     advancementCounters: number;
     counterTarget: number;
@@ -196,6 +197,12 @@ export type CorpScoreProjectSignal = {
   /** Free preparation of this same admitted agenda installation, never a separate liquidation goal. */
   counterBankReplacement?: {
     installActionId: string;
+    stateVersion: number;
+  };
+  /** An exact current payout prefix can preserve the same next-turn score. */
+  campaignSlotRelease?: {
+    payoutActionId: string;
+    sourceCardInstanceId: string;
     stateVersion: number;
   };
   terminalScore: boolean;
@@ -207,3 +214,9 @@ export type CorpScoreProjectSignal = {
 };
 
 export type CorpScorePriorityClass = "P1" | "P2" | "P3" | "P4";
+
+export function corpScoreClosesBeforeMandatoryDraw(
+  project: CorpScoreProjectSignal,
+): boolean {
+  return project.feasible && project.sameTurnCloseout && project.terminalScore;
+}

@@ -8,7 +8,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_315_corprunners-shattered-remains",
+      527,
     ),
     title: "Corprunner's Shattered Remains",
     side: "corp",

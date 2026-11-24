@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -38,8 +39,8 @@ afterEach(() => releaseAiMatchRuntime(fixture.input.matchId!));
 describe("native P690 D115 run-event random-break hand buffer", () => {
   it("rejects the event's H2 route while preserving the basic H3 route", () => {
     const evaluations = hqEvaluations();
-    const event = evaluations.find((e) => e.actionId.includes("all-nighter"));
-    const basic = evaluations.find((e) => e.actionId === "runner.start_run.hq");
+    const event = evaluations.find((e) => referencesDefaultDeckCard(e.actionId, 288));
+    const basic = evaluations.find((e) => e.actionId === "rs.hq");
     expect(event).toMatchObject({
       pathPassability: "blocked_by_random_break_damage_hand_buffer",
       recommendation: "draw_for_damage_buffer",
@@ -74,14 +75,14 @@ describe("native P690 D115 run-event random-break hand buffer", () => {
     );
     const selected = chooseAiAction(value);
     expect(selected.selectionKind).toBe("direct");
-    expect(selected.actionId).not.toContain("all-nighter");
+    expect(referencesDefaultDeckCard(selected.actionId, 288)).toBe(false);
     expect(
       value.legalActions.some((a) => a.actionId === selected.actionId),
     ).toBe(true);
     expect(selected.fallbackUsed).toBe(false);
-    expect(selected.actionId).toBe("runner.draw_card");
+    expect(selected.actionId).toBe("r8");
     expect(selected.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:runner.defense_and_recovery:runner",
+      "p1gzjb6yfcv4zbzow512kexs33",
     );
     expect(selected.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: selected.actionId,
@@ -97,7 +98,7 @@ describe("native P690 D115 run-event random-break hand buffer", () => {
       instanceId: "own-hand-buffer-control",
     });
     const event = hqEvaluations(value).find((e) =>
-      e.actionId.includes("all-nighter"),
+      referencesDefaultDeckCard(e.actionId, 288),
     );
     expect(event).toMatchObject({
       pathPassability: "reachable",

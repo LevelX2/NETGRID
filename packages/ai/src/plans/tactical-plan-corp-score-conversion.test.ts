@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import {
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
@@ -38,7 +39,7 @@ describe("Corp same-turn score conversion", () => {
       const path = bestCorpSameTurnScoreConversionPath(input);
       expect(path).toMatchObject({
         agendaCardId: agenda.instanceId,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         agendaPoints: 2,
         sameTurnGuaranteed: true,
         creditsRequired: clicks === 3 ? 2 : 10,
@@ -147,7 +148,7 @@ describe("Corp same-turn score conversion", () => {
           placement: "root",
         }),
         action("replace-vapor", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
@@ -192,12 +193,12 @@ describe("Corp same-turn score conversion", () => {
       root: [counterBank("bank", 2)],
       actions: [
         action("replace-bank", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
         action("advance", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
     });
@@ -216,18 +217,18 @@ describe("Corp same-turn score conversion", () => {
       root: [counterBank("empty-bank", 0)],
       actions: [
         action("replace-empty-bank", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
         action("advance", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
     });
 
     expect(bestCorpSameTurnScoreConversionPath(input)).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       steps: [
         expect.objectContaining({
           kind: "install_score_target",
@@ -250,12 +251,12 @@ describe("Corp same-turn score conversion", () => {
       root: [card("ordinary-asset", "asset", { advancementCounters: 2 })],
       actions: [
         action("replace-ordinary-asset", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
         action("advance", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
     });
@@ -278,18 +279,18 @@ describe("Corp same-turn score conversion", () => {
       root: [counterBank("terminal-bank", 2)],
       actions: [
         action("terminal-replacement", "install_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         }),
         action("terminal-advance", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
       ],
     });
 
     expect(bestCorpSameTurnScoreConversionPath(input)).toMatchObject({
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       steps: [
         expect.objectContaining({
           kind: "install_score_target",
@@ -317,7 +318,7 @@ describe("Corp same-turn score conversion", () => {
       root: [agenda, source],
       actions: [
         action("advance-agenda", "advance_card", agenda.instanceId, {
-          serverId: "remote_1",
+          serverId: "r1",
         }),
         action("transfer", "activated_card_ability", source.instanceId, {
           scoreConversionCapability: "move_advancement",
@@ -587,7 +588,7 @@ describe("Corp same-turn score conversion", () => {
   it("counts a projected distinct-target operation as one counter on the agenda", () => {
     const agenda = card("agenda", "agenda", { advancementRequirement: 2 });
     const teamRestructuring = card("team", "operation", {
-      definitionId: "onr_v1_305_team-restructuring",
+      definitionId: 517,
       playCost: { kind: "fixed", credits: 1 },
     });
     const input = corpInput({
@@ -635,6 +636,33 @@ describe("Corp same-turn score conversion", () => {
     expect(
       path?.steps.find((step) => step.kind === "move_advancement"),
     ).toMatchObject({ actionId: "falsified", sourceCardId: "funded" });
+  });
+
+  it("does not spend one movement operation on two different counter sources", () => {
+    const agenda = card("agenda", "agenda", { advancementRequirement: 4 });
+    const sources = ["left", "right"].map((id) =>
+      card(id, "asset", { advancementCounters: 2 }),
+    );
+    const input = corpInput({
+      clicks: 3,
+      credits: 0,
+      hq: [agenda],
+      root: sources,
+      actions: [
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("one-move-operation", "play_operation", "falsified", {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: 3,
+          scoreConversionSourceMode: "chosen_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+    expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
   });
 
   it("executes the Counter Shell Team plus Falsified difficulty-four score line", () => {
@@ -887,7 +915,7 @@ describe("Corp same-turn score conversion", () => {
   it("takes a visible overadvance threshold only when it costs no extra step", () => {
     const agenda = card("agenda", "agenda", {
       advancementRequirement: 3,
-      definitionId: "onr_v1_214_project-babylon",
+      definitionId: 426,
       agendaPoints: 1,
       overadvanceThreshold: 2,
       overadvanceReward: "agenda_points",
@@ -923,7 +951,7 @@ describe("Corp same-turn score conversion", () => {
   it("keeps exact-fit when an overadvance threshold needs another action", () => {
     const agenda = card("agenda", "agenda", {
       advancementRequirement: 3,
-      definitionId: "onr_v1_214_project-babylon",
+      definitionId: 426,
       agendaPoints: 1,
       overadvanceThreshold: 2,
       overadvanceReward: "agenda_points",
@@ -948,7 +976,7 @@ describe("Corp same-turn score conversion", () => {
 
   it("uses an exact visible zero requirement instead of the printed agenda requirement", () => {
     const agenda = card("corporate-downsizing", "agenda", {
-      definitionId: "onr_v1_194_corporate-downsizing",
+      definitionId: 406,
       advancementRequirement: 0,
       advancementCounters: 0,
     });
@@ -995,7 +1023,7 @@ describe("Corp same-turn score conversion", () => {
 
   it("uses the printed agenda requirement when the visible runtime value is absent", () => {
     const agenda = card("printed-requirement-fallback", "agenda", {
-      definitionId: "onr_v1_194_corporate-downsizing",
+      definitionId: 406,
       advancementCounters: 3,
     });
     const input = corpInput({
@@ -1033,7 +1061,7 @@ describe("Corp same-turn score conversion", () => {
 
   it("does not replace an invalid visible requirement with the printed value", () => {
     const agenda = card("invalid-current-requirement", "agenda", {
-      definitionId: "onr_v1_194_corporate-downsizing",
+      definitionId: 406,
       advancementRequirement: Number.NaN,
       advancementCounters: 0,
     });
@@ -1128,7 +1156,7 @@ function corpInput(params: {
         { id: "rd", label: "R&D", ice: [], root: [] },
         { id: "archives", label: "Archives", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [],
           root: params.root ?? [],
@@ -1168,7 +1196,7 @@ function card(
 
 function counterBank(instanceId: string, advancementCounters: number) {
   return card(instanceId, "asset", {
-    definitionId: "synthetic-counter-bank",
+    definitionId: syntheticCardDefinitionId("synthetic-counter-bank"),
     advancementCounters,
     rezzed: true,
     counterBankPreparationQuote: {
@@ -1176,7 +1204,7 @@ function counterBank(instanceId: string, advancementCounters: number) {
       context: "corp_counter_bank_preparation",
       sourceCardId: instanceId,
       expiresAtStateVersion: 1,
-      location: { kind: "installed_root", serverId: "remote_1" },
+      location: { kind: "installed_root", serverId: "r1" },
       advancementCounters,
       advanceableBeforeRez: true,
       activatedAbilitiesRequireRez: true,

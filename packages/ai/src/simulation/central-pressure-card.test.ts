@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it, vi } from "vitest";
 import { centralPressureTargetsForCard } from "./central-pressure-card";
 
@@ -13,12 +14,12 @@ describe("centralPressureTargetsForCard", () => {
   it("matches multiaccess roles by bounded role terms", () => {
     cardRoleMock.roles = ["interface_multiaccess"];
     expect(
-      centralPressureTargetsForCard("onr_v1_024_expert-schedule-analyzer"),
+      centralPressureTargetsForCard(236),
     ).toEqual(["hq", "rd"]);
 
     cardRoleMock.roles = ["multiaccessory_noise"];
     expect(
-      centralPressureTargetsForCard("onr_v1_024_expert-schedule-analyzer"),
+      centralPressureTargetsForCard(236),
     ).toEqual([]);
   });
 
@@ -28,7 +29,7 @@ describe("centralPressureTargetsForCard", () => {
       "support_hq_pressure",
       "archives_pressure",
     ];
-    expect(centralPressureTargetsForCard("test-pressure-card")).toEqual([
+    expect(centralPressureTargetsForCard(syntheticCardDefinitionId("test-pressure-card"))).toEqual([
       "archives",
       "hq",
       "rd",
@@ -39,6 +40,6 @@ describe("centralPressureTargetsForCard", () => {
       "support_hq_pressureish_noise",
       "archives_pressureish_noise",
     ];
-    expect(centralPressureTargetsForCard("test-pressure-card")).toEqual([]);
+    expect(centralPressureTargetsForCard(syntheticCardDefinitionId("test-pressure-card"))).toEqual([]);
   });
 });

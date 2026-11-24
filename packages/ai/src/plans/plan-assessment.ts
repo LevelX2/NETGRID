@@ -392,8 +392,7 @@ export function compareValidatedPlanAssessments(
     PRIORITY_RANK[left.priorityValidation.effectiveClass] -
       PRIORITY_RANK[right.priorityValidation.effectiveClass] ||
     right.withinClassValue - left.withinClassValue ||
-    continuityValue(right.continuity) - continuityValue(left.continuity) ||
-    left.instanceId.localeCompare(right.instanceId)
+    continuityValue(right.continuity) - continuityValue(left.continuity)
   );
 }
 

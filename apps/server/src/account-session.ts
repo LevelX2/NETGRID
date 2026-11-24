@@ -1,13 +1,10 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
-import { mkdirSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import type { DatabaseSync } from "node:sqlite";
 import { envValue, LOCAL_DEFAULT_TOKEN_SALT } from "./internet-hardening";
 import {
-  configureSqliteConnection,
+  openSqliteAccountDatabase,
   runSqliteStorageOperation,
   runSqliteTransaction,
-  SqliteMatchStorage,
 } from "./storage-sqlite";
 
 export const ACCOUNT_SESSION_COOKIE_NAME = "ng_account_session";
@@ -412,15 +409,7 @@ export class SqliteAccountStorage implements AccountStorage {
   constructor(
     private readonly options: { dbPath: string; backupDir?: string },
   ) {
-    const dbPath = resolve(options.dbPath);
-    mkdirSync(dirname(dbPath), { recursive: true });
-    const schemaOwner = new SqliteMatchStorage({
-      dbPath,
-      backupDir: resolve(options.backupDir ?? join(dirname(dbPath), "backups")),
-    });
-    schemaOwner.close();
-    this.db = new DatabaseSync(dbPath);
-    configureSqliteConnection(this.db);
+    this.db = openSqliteAccountDatabase(options);
   }
 
   async saveAccount(account: AccountRecord): Promise<void> {

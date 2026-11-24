@@ -1,30 +1,16 @@
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
-import {
-  type AiDecisionInput,
-  type AiDecisionScoreComponent,
-  type LegalAction,
-  type VisibleCard,
-} from "@netgrid/shared";
+import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import { buildCorpIceDensityProfile } from "./corp-ice-density";
-import { RUNTIME_CARDS } from "../../ai-hints";
-import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
-import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
+import { corpScoreDefenseEffectSuitableIceDensity } from "./corp-score-defense-draw-density";
 import type { CorpFundedRemoteAccessRiskNeed } from "../corp-funded-score-protection";
 import type { CorpCentralDefenseAllocation } from "../../corp/defense/corp-central-defense-allocation";
 import type { CorpRestrictedRezPreparation } from "../corp-restricted-credit-reserve";
 import {
   assessCorpScoreProtection,
   compareExactProbabilities,
-  type CorpScoreProtectionIceInput,
 } from "../corp-score-protection-assessment";
 
-const CORP_SAFE_DRAW_CAPACITY_VALUE = 100;
-const CORP_LOW_HAND_VALUE = 450;
 const CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE = 250;
-const CORP_ADDITIONAL_DRAW_VALUE_PER_CARD = 400;
-const CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD = 100;
-const CORP_DRAW_OVERFLOW_PENALTY_PER_CARD = 100;
 const CORP_FULL_ACCESS_PROBABILITY = { numerator: 1, denominator: 1 } as const;
 
 export type CorpOptionalDrawCapacity = {
@@ -250,186 +236,6 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
   };
 }
 
-type CorpScoreDefenseEffectSuitableIceDensity = Readonly<{
-  confidence: "deck_snapshot" | "unknown";
-  remainingDeckCount: number;
-  remainingSuitableIceCount?: number;
-  remainingSuitableIceDensity?: number;
-  suitableDefinitionIds: readonly string[];
-  evidence: readonly string[];
-}>;
-
-type DecisionInputWithOptionalDeckSnapshot = AiDecisionInput & {
-  ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
-};
-
-function corpScoreDefenseEffectSuitableIceDensity(
-  input: AiDecisionInput,
-  need: CorpFundedRemoteAccessRiskNeed,
-): CorpScoreDefenseEffectSuitableIceDensity {
-  const remainingDeckCount = input.playerView.own.stackOrRdCount;
-  const snapshot = (input as DecisionInputWithOptionalDeckSnapshot)
-    .ownDeckSnapshot;
-  if (
-    snapshot?.side !== "corp" ||
-    !positiveSafeInteger(remainingDeckCount) ||
-    need.baseline.knowledge !== "known" ||
-    !Array.isArray(input.playerView.opponent.rig)
-  ) {
-    return unknownScoreDefenseDensity(
-      remainingDeckCount,
-      "missing_or_invalid_deck_snapshot",
-    );
-  }
-  const selectedIceInstanceIds = new Set(
-    need.baseline.knowledge === "known"
-      ? need.baseline.selectedRezCosts.map((cost) => cost.iceInstanceId)
-      : [],
-  );
-  const currentServer = input.playerView.servers.find(
-    (server) => server.id === need.targetServerId,
-  );
-  const currentFundedIce: CorpScoreProtectionIceInput[] = (
-    currentServer?.ice ?? []
-  ).map((card) => ({
-    instanceId: card.instanceId,
-    known: card.known,
-    ...(card.definitionId ? { definitionId: card.definitionId } : {}),
-    rezzed: card.rezzed === true || selectedIceInstanceIds.has(card.instanceId),
-    ...(card.strength !== undefined ? { strength: card.strength } : {}),
-    ...(card.subtypes !== undefined ? { subtypes: card.subtypes } : {}),
-    ...(card.effectiveRunQuote
-      ? { effectiveRunQuote: card.effectiveRunQuote }
-      : {}),
-  }));
-  const outsideByDefinitionId = visibleCorpCardsOutsideRdByDefinition(input);
-  let remainingSuitableIceCount = 0;
-  const suitableDefinitionIds: string[] = [];
-  for (const entry of snapshot.cards) {
-    if (!nonNegativeSafeInteger(entry.quantity)) {
-      return unknownScoreDefenseDensity(
-        remainingDeckCount,
-        "invalid_deck_snapshot_quantity",
-      );
-    }
-    const remainingCopies = Math.max(
-      0,
-      entry.quantity - (outsideByDefinitionId.get(entry.cardId) ?? 0),
-    );
-    if (remainingCopies === 0) continue;
-    const resolvedDefinitionId = resolvedEngineDefinitionId(entry.cardId);
-    if (!resolvedDefinitionId) continue;
-    const definition = CARD_DEFINITIONS_BY_ID[resolvedDefinitionId];
-    if (definition?.type !== "ice") continue;
-    const after = assessCorpScoreProtection({
-      serverIce: [
-        ...currentFundedIce,
-        {
-          instanceId: `deck-effect-projection:${entry.cardId}`,
-          known: true,
-          definitionId: resolvedDefinitionId,
-          rezzed: true,
-          ...(definition.strength !== undefined
-            ? { strength: definition.strength }
-            : {}),
-          ...(definition.subtypes !== undefined
-            ? { subtypes: definition.subtypes }
-            : {}),
-        },
-      ],
-      runnerRig: input.playerView.opponent.rig,
-      runnerCredits: input.playerView.opponent.credits,
-      maximumRunnerAccessSuccessProbability:
-        need.objective.maximumRunnerAccessSuccessProbability,
-    });
-    if (
-      after.knowledge !== "known" ||
-      compareExactProbabilities(
-        after.runnerAccessSuccessProbability,
-        need.baseline.protection.runnerAccessSuccessProbability,
-      ) !== -1
-    ) {
-      continue;
-    }
-    remainingSuitableIceCount += remainingCopies;
-    suitableDefinitionIds.push(entry.cardId);
-  }
-  const boundedSuitableIceCount = Math.min(
-    remainingDeckCount,
-    remainingSuitableIceCount,
-  );
-  const density = boundedSuitableIceCount / remainingDeckCount;
-  const uniqueSuitableDefinitionIds = [
-    ...new Set(suitableDefinitionIds),
-  ].sort();
-  return {
-    confidence: "deck_snapshot",
-    remainingDeckCount,
-    remainingSuitableIceCount: boundedSuitableIceCount,
-    remainingSuitableIceDensity: density,
-    suitableDefinitionIds: uniqueSuitableDefinitionIds,
-    evidence: [
-      "score_defense_effect_density_confidence:deck_snapshot",
-      `score_defense_effect_density_basis:${
-        need.baseline.knowledge === "known"
-          ? "exact_access_probability_reduction"
-          : "known_end_the_run_ice_under_subset_unknown"
-      }`,
-      `remaining_deck_count:${remainingDeckCount}`,
-      `remaining_score_defense_effect_suitable_ice_count:${boundedSuitableIceCount}`,
-      `remaining_score_defense_effect_suitable_ice_density:${density.toFixed(4)}`,
-      `remaining_score_defense_effect_suitable_ice_definitions:${uniqueSuitableDefinitionIds.join(",") || "none"}`,
-      "score_defense_effect_density_uses_printed_rez_cost:false",
-    ],
-  };
-}
-
-function unknownScoreDefenseDensity(
-  remainingDeckCount: number,
-  reason: string,
-): CorpScoreDefenseEffectSuitableIceDensity {
-  return {
-    confidence: "unknown",
-    remainingDeckCount,
-    suitableDefinitionIds: [],
-    evidence: [
-      "score_defense_effect_density_confidence:unknown",
-      `score_defense_effect_density_unknown_reason:${reason}`,
-    ],
-  };
-}
-
-function resolvedEngineDefinitionId(definitionId: string): string | undefined {
-  if (CARD_DEFINITIONS_BY_ID[definitionId]) return definitionId;
-  const engineCardId = RUNTIME_CARDS[definitionId]?.engineCardId;
-  return engineCardId && CARD_DEFINITIONS_BY_ID[engineCardId]
-    ? engineCardId
-    : undefined;
-}
-
-function visibleCorpCardsOutsideRdByDefinition(
-  input: AiDecisionInput,
-): Map<string, number> {
-  const visibleCards: VisibleCard[] = [
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.own.heapOrArchives,
-    ...input.playerView.own.scoreArea,
-    ...input.playerView.servers.flatMap((server) => [
-      ...server.ice,
-      ...server.root,
-    ]),
-  ].filter((card) => card.known !== false);
-  const uniqueCards = new Map(
-    visibleCards.map((card) => [card.instanceId, card]),
-  );
-  const counts = new Map<string, number>();
-  for (const card of uniqueCards.values()) {
-    if (!card.definitionId) continue;
-    counts.set(card.definitionId, (counts.get(card.definitionId) ?? 0) + 1);
-  }
-  return counts;
-}
-
 function exactLegalActionDrawCount(action: LegalAction): number | undefined {
   for (const key of ["drawCardsAmount", "drawAmount", "drawCount"] as const) {
     const value = action.payload?.[key];
@@ -495,141 +301,23 @@ export function corpOptionalDrawCapacity(
   action: LegalAction,
 ): CorpOptionalDrawCapacity {
   const handCount = input.playerView.own.gripOrHq.length;
-  const maxHandSize = Math.max(
-    0,
-    Math.floor(input.playerView.own.maxHandSize ?? 5),
-  );
+  const maxHandSize = input.playerView.own.maxHandSize;
   const projectedDrawCount = corpProjectedDrawCount(action);
   const freeSlotsBefore = Math.max(0, maxHandSize - handCount);
-  const freeSlotsAfter =
-    maxHandSize - handCount - projectedDrawHandDelta(action);
+  const netHandDelta =
+    projectedDrawCount > 0 ? projectedDrawHandDelta(action) : undefined;
+  const freeSlotsAfter = maxHandSize - handCount - (netHandDelta ?? 0);
   return {
-    eligible: maxHandSize > 2 && projectedDrawCount > 0 && freeSlotsAfter >= 0,
+    eligible:
+      nonNegativeSafeInteger(maxHandSize) &&
+      maxHandSize > 2 &&
+      netHandDelta !== undefined &&
+      freeSlotsAfter >= 0,
     handCount,
     maxHandSize,
     projectedDrawCount,
     freeSlotsBefore,
     freeSlotsAfter,
-  };
-}
-
-export function corpQuantitativeDrawScoreComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-): AiDecisionScoreComponent[] {
-  const projectedDrawCount = corpProjectedDrawCount(action);
-  if (projectedDrawCount <= 0) return [];
-  const handCount = input.playerView.own.gripOrHq.length;
-  const maxHandSize = Math.max(
-    0,
-    Math.floor(input.playerView.own.maxHandSize ?? 5),
-  );
-  const overflowCount = Math.max(
-    0,
-    handCount + projectedDrawHandDelta(action) - maxHandSize,
-  );
-  const evidence = [
-    `projected_draw_count:${projectedDrawCount}`,
-    `hand_count:${handCount}`,
-    `max_hand_size:${maxHandSize}`,
-    `projected_overflow_count:${overflowCount}`,
-    `rd_count:${input.playerView.own.stackOrRdCount}`,
-  ].join("|");
-  return [
-    {
-      key: "corp_quantitative_draw_yield",
-      label: "Quantitativer Kartenziehertrag",
-      value:
-        Math.max(0, projectedDrawCount - 1) *
-          CORP_ADDITIONAL_DRAW_VALUE_PER_CARD +
-        Math.max(0, projectedDrawCount - 1) *
-          CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD,
-      reason: [
-        evidence,
-        "single_draw_value_owned_by_contextual_draw_components:true",
-        `multi_draw_action_efficiency:${Math.max(0, projectedDrawCount - 1) * CORP_MULTI_DRAW_ACTION_EFFICIENCY_PER_EXTRA_CARD}`,
-      ].join("|"),
-    },
-    ...(overflowCount > 0
-      ? [
-          {
-            key: "corp_draw_overflow_penalty",
-            label: "Projizierter Handüberlauf",
-            value:
-              -Math.min(6, overflowCount) * CORP_DRAW_OVERFLOW_PENALTY_PER_CARD,
-            reason: evidence,
-          },
-        ]
-      : []),
-  ];
-}
-
-export function corpOptionalDrawScoreComponents(
-  input: AiDecisionInput,
-  action: LegalAction,
-  boardTriage?: CorpBoardTriage,
-): AiDecisionScoreComponent[] {
-  const capacity = corpOptionalDrawCapacity(input, action);
-  if (
-    !capacity.eligible ||
-    corpOptionalDrawWouldDelayProtectedScoreRemote(boardTriage)
-  ) {
-    return [];
-  }
-  const evidence = corpOptionalDrawCapacityEvidence(capacity);
-  const components: AiDecisionScoreComponent[] = [
-    {
-      key: "corp_safe_draw_capacity",
-      label: "Sichere Draw-Kapazität",
-      value: CORP_SAFE_DRAW_CAPACITY_VALUE,
-      reason: evidence.join("|"),
-    },
-  ];
-  if (capacity.freeSlotsAfter >= 1) {
-    components.push({
-      key: "corp_low_hand",
-      label: "Handkarten-Bedarf",
-      value: CORP_LOW_HAND_VALUE,
-      reason: evidence.join("|"),
-    });
-  }
-  const defensiveDraw = corpMissingConcreteDefenseDrawComponent(
-    input,
-    action,
-    capacity,
-  );
-  if (defensiveDraw) components.push(defensiveDraw);
-  return components;
-}
-
-function corpOptionalDrawWouldDelayProtectedScoreRemote(
-  boardTriage: CorpBoardTriage | undefined,
-): boolean {
-  if (boardTriage?.primary !== "protect_score_remote") return false;
-  if (boardTriage.severity !== "high" && boardTriage.severity !== "critical") {
-    return false;
-  }
-  return boardTriage.scoreRemoteServerId?.startsWith("remote_") === true;
-}
-
-export function corpMissingConcreteDefenseDrawComponent(
-  input: AiDecisionInput,
-  action: LegalAction,
-  capacity = corpOptionalDrawCapacity(input, action),
-  centralAllocation?: CorpCentralDefenseAllocation,
-): AiDecisionScoreComponent | undefined {
-  const need = corpMissingConcreteDefenseDrawNeed(
-    input,
-    action,
-    capacity,
-    centralAllocation,
-  );
-  if (!need) return undefined;
-  return {
-    key: "corp_missing_concrete_defense_draw",
-    label: "Fehlende zentrale ICE-Verteidigung",
-    value: CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE,
-    reason: need.evidence.join("|"),
   };
 }
 
@@ -873,20 +561,14 @@ function corpMissingConcreteCentralDefenseTarget(
 }
 
 export function corpProjectedDrawCount(action: LegalAction): number {
-  for (const key of ["drawCardsAmount", "drawAmount", "drawCount"] as const) {
-    const value = action.payload?.[key];
-    if (typeof value === "number" && Number.isFinite(value) && value > 0) {
-      return Math.max(1, Math.floor(value));
-    }
-  }
-  return action.type === "draw_card" ? 1 : 0;
+  return exactLegalActionDrawCount(action) ?? 0;
 }
 
-function projectedDrawHandDelta(action: LegalAction): number {
+function projectedDrawHandDelta(action: LegalAction): number | undefined {
   // Reuse the action projection's source consumption and zone-transition facts.
   // Gross draws still govern deck consumption; only net hand growth needs slots.
   const [candidate] = buildActionSemanticCandidates({ legalActions: [action] });
-  return candidate!.economyProjection!.netHandDelta!;
+  return candidate?.economyProjection?.netHandDelta;
 }
 
 function corpOptionalDrawCapacityEvidence(

@@ -40,7 +40,7 @@ describe("central information admission after an observed free stop", () => {
       const serverId =
         transition === "decline" || transition === "hosted" ? "hq" : "rd";
       const target = evaluateRunnerRunTargets({ input }).find(
-        (e) => e.actionId === `runner.start_run.${serverId}`,
+        (e) => e.actionId === `rs.${serverId}`,
       )!;
       expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toContain(
         "free_stop_already_observed",
@@ -76,7 +76,7 @@ describe("central information admission after an observed free stop", () => {
       const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
       const serverId = game === 3 ? "hq" : "rd";
       const target = evaluateRunnerRunTargets({ input }).find(
-        (e) => e.actionId === `runner.start_run.${serverId}`,
+        (e) => e.actionId === `rs.${serverId}`,
       )!;
       expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toContain(
         "free_stop_already_observed",
@@ -105,6 +105,26 @@ describe("central information admission after an observed free stop", () => {
       });
     },
   );
+  it("does not attach an observed HQ stop to the R&D action id", () => {
+    const input = buildAiDecisionInputDto(fixture().input);
+    const targets = evaluateRunnerRunTargets({ input });
+    const hq = targets.find(
+      (target) => target.actionId === "rs.hq",
+    )!;
+    const rd = targets.find(
+      (target) => target.actionId === "rs.rd",
+    )!;
+    expect(runnerRepeatedFreeStopProbeEvidence(input, hq)).toContain(
+      "free_stop_already_observed",
+    );
+    expect(
+      runnerRepeatedFreeStopProbeEvidence(input, {
+        ...hq,
+        actionId: rd.actionId,
+      }),
+    ).toBeUndefined();
+  });
+
   it("does not treat a power-counter change as credit banking", () => {
     const cp = JSON.parse(
       readFileSync(
@@ -117,13 +137,13 @@ describe("central information admission after an observed free stop", () => {
     );
     for (const list of [cp.input.eventTail, cp.input.playerView.publicEvents]) {
       const p = list.find(
-        (e: { eventId: string }) => e.eventId === "evt_117",
+        (e: { eventId: number }) => e.eventId === 118,
       ).publicPayload;
       p.resolvedEffects[0].counterType = "power";
     }
     const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.hq",
+      (e) => e.actionId === "rs.hq",
     )!;
     expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toBeUndefined();
   });
@@ -144,12 +164,12 @@ describe("central information admission after an observed free stop", () => {
         cp.input.playerView.publicEvents,
       ]) {
         const p = list.find(
-          (e: { eventId: string }) => e.eventId === "evt_144",
+          (e: { eventId: number }) => e.eventId === 145,
         ).publicPayload;
         if (condition === "unquoted_event") delete p.resolvedEffects;
         else
           p.resolvedEffects.push({
-            effectId: "mixed-draw",
+            effectId: p.resolvedEffects.length,
             visibility: "public",
             kind: "draw_cards",
             side: "runner",
@@ -158,7 +178,7 @@ describe("central information admission after an observed free stop", () => {
       }
       const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
       const target = evaluateRunnerRunTargets({ input }).find(
-        (e) => e.actionId === "runner.start_run.rd",
+        (e) => e.actionId === "rs.rd",
       )!;
       expect(
         runnerRepeatedFreeStopProbeEvidence(input, target),
@@ -169,13 +189,13 @@ describe("central information admission after an observed free stop", () => {
     const cp = fixture();
     for (const list of [cp.input.eventTail, cp.input.playerView.publicEvents]) {
       const event = list.find(
-        (e: { eventId: string }) => e.eventId === "evt_33",
+        (e: { eventId: number }) => e.eventId === 34,
       );
       event.publicPayload.unapprovedHiddenIceIdentity = "must-not-cross";
     }
     const input = buildAiDecisionInputDto(cp.input);
     for (const list of [input.eventTail, input.playerView.publicEvents]) {
-      const event = list.find((e) => e.eventId === "evt_33")!;
+      const event = list.find((e) => e.eventId === 34)!;
       expect(event.publicPayload).toMatchObject({
         result: "ended",
         encounterContinue: true,
@@ -198,24 +218,24 @@ describe("central information admission after an observed free stop", () => {
     (condition) => {
       const input: AiDecisionInput = fixture().input;
       const target = evaluateRunnerRunTargets({ input }).find(
-        (e) => e.actionId === "runner.start_run.hq",
+        (e) => e.actionId === "rs.hq",
       )!;
       if (condition === "next_turn") input.playerView.turnSerial!++;
       if (condition === "paid_defense" || condition === "untyped_outcome") {
         for (const events of [input.eventTail, input.playerView.publicEvents]) {
           if (condition === "paid_defense")
             events.find(
-              (e) => e.eventId === "evt_32",
+              (e) => e.eventId === 33,
             )!.publicPayload.rezCostPaid = 1;
           else
-            delete events.find((e) => e.eventId === "evt_33")!.publicPayload
+            delete events.find((e) => e.eventId === 34)!.publicPayload
               .result;
         }
       }
       if (condition === "new_installation")
         input.eventTail.push({
           ...input.eventTail.at(-1)!,
-          eventId: "new-rig-install",
+          eventId: 35,
           stateVersionBefore: 33,
           stateVersionAfter: 34,
           publicPayload: { actor: "runner", actionType: "install_card" },

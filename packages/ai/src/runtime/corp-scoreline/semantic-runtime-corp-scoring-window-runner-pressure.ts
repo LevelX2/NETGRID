@@ -1,6 +1,7 @@
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
-import { RUNTIME_CARDS } from "../../ai-hints";
+import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import {
   assessEngineCertifiedPostRezIcePath,
@@ -10,7 +11,6 @@ import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-
 import { semanticRuntimeCorpObservedRemoteReachability } from "../semantic-runtime-corp-remote-reachability";
 import { visibleRunnerExposureCreditValue } from "../visible-runner-action-economy";
 import type { CorpServerLike } from "./semantic-runtime-corp-scoring-window-contracts";
-import { SCORING_WINDOW_AI_HINTS_BY_CARD } from "./semantic-runtime-corp-scoring-window-card-data";
 import { visibleRunnerHeapBreakerPreparations } from "../corp-public-heap-breaker-preparation";
 
 function scoringWindowVisibleCardText(card: VisibleCard): string {
@@ -25,7 +25,7 @@ function scoringWindowVisibleCardText(card: VisibleCard): string {
       : undefined;
   const demoText =
     card.definitionId !== undefined
-      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.rulesText
+      ? planningCardFactsByDefinitionId(card.definitionId)?.rulesText
       : undefined;
   return [
     card.title,
@@ -50,12 +50,12 @@ export function scoringWindowVisibleCardTextTokens(
 export function scoringWindowAccessAssessment(
   input: AiDecisionInput,
   server: CorpServerLike | undefined,
-  extraRunnerCredits = 0,
+  runnerCreditActions = 0,
 ): ReturnType<typeof scoringWindowAccessAssessmentForMode> {
   return scoringWindowAccessAssessmentForMode(
     input,
     server,
-    extraRunnerCredits,
+    runnerCreditActions,
     "current_state",
   );
 }
@@ -63,14 +63,14 @@ export function scoringWindowAccessAssessment(
 export function scoringWindowPostRezProtectionAssessment(
   input: AiDecisionInput,
   server: CorpServerLike | undefined,
-  extraRunnerCredits = 0,
+  runnerCreditActions = 0,
   corpRezCredits = input.playerView.own.credits,
   corpRezCreditReserve = 0,
 ): ReturnType<typeof scoringWindowAccessAssessmentForMode> {
   return scoringWindowAccessAssessmentForMode(
     input,
     server,
-    extraRunnerCredits,
+    runnerCreditActions,
     "engine_post_rez",
     corpRezCredits,
     corpRezCreditReserve,
@@ -80,7 +80,7 @@ export function scoringWindowPostRezProtectionAssessment(
 function scoringWindowAccessAssessmentForMode(
   input: AiDecisionInput,
   server: CorpServerLike | undefined,
-  extraRunnerCredits: number,
+  runnerCreditActions: number,
   mode: "current_state" | "engine_post_rez",
   corpRezCredits = 0,
   corpRezCreditReserve = 0,
@@ -92,22 +92,19 @@ function scoringWindowAccessAssessmentForMode(
   unmodeledIceCount: number;
   visibleRunnerIcebreakerCount: number;
   visibleRunnerContestCredits: number;
+  runnerGeneralCreditsAfterPath: number;
   visibleBreakCost?: number;
   evidence: string[];
 } {
   const visibleRunnerBaseContestCredits = input.playerView.opponent.credits;
-  const visibleRunnerExtraCredits = Math.max(0, Math.floor(extraRunnerCredits));
-  const visibleRunnerPreRunCreditBonus =
-    visibleRunnerExtraCredits > 0
-      ? visibleRunnerPreRunCreditBurstBonus(
-          input.playerView.opponent.rig ?? [],
-          visibleRunnerExtraCredits,
-        )
-      : 0;
+  const visibleRunnerExtraCredits = visibleRunnerExposureCreditValue(
+    input,
+    runnerCreditActions,
+  );
+  const visibleRunnerIncomeAboveBasic =
+    visibleRunnerExtraCredits - runnerCreditActions;
   const visibleRunnerGeneralContestCredits =
-    visibleRunnerBaseContestCredits +
-    visibleRunnerExtraCredits +
-    visibleRunnerPreRunCreditBonus;
+    visibleRunnerBaseContestCredits + visibleRunnerExtraCredits;
   const runnerPathCandidates = visibleRunnerBreakerPathCandidates(
     input,
     visibleRunnerGeneralContestCredits,
@@ -126,6 +123,7 @@ function scoringWindowAccessAssessmentForMode(
     ).reduce((sum, amount) => sum + amount, 0);
   const visibleRunnerIcebreakerCount =
     baseRunnerPathCandidate.visibleIcebreakerCount;
+  const traceContext = visibleIcePathTraceContext(input);
   const postRezProjection =
     mode === "engine_post_rez" && server
       ? financedScoringProtectionPostRezIce(
@@ -135,7 +133,7 @@ function scoringWindowAccessAssessmentForMode(
             corpRezCredits,
             corpRezCreditReserve,
           },
-          (financedIceInstanceIds) => {
+          (financedIceInstanceIds, creditsAfterRez) => {
             const evaluatedPaths = runnerPathCandidates.map((candidate) => ({
               ...candidate,
               assessment: assessEngineCertifiedPostRezIcePath(
@@ -146,6 +144,8 @@ function scoringWindowAccessAssessmentForMode(
                 candidate.rig,
                 candidate.creditBudget,
                 [...server.root],
+                creditsAfterRez,
+                traceContext,
               ),
             }));
             const runnerBestPath = evaluatedPaths.reduce((best, candidate) =>
@@ -176,12 +176,13 @@ function scoringWindowAccessAssessmentForMode(
       unmodeledIceCount: 0,
       visibleRunnerIcebreakerCount,
       visibleRunnerContestCredits,
+      runnerGeneralCreditsAfterPath: visibleRunnerGeneralContestCredits,
       visibleBreakCost: 0,
       evidence: [
         "remote_access:unprotected",
         `visible_runner_base_contest_credits:${visibleRunnerBaseContestCredits}`,
         `visible_runner_extra_exposure_credits:${visibleRunnerExtraCredits}`,
-        `visible_runner_pre_run_credit_take_bonus:${visibleRunnerPreRunCreditBonus}`,
+        `visible_runner_income_above_basic_credits:${visibleRunnerIncomeAboveBasic}`,
       ],
     };
   }
@@ -197,12 +198,16 @@ function scoringWindowAccessAssessmentForMode(
             candidate.rig,
             candidate.creditBudget,
             [...server.root],
+            postRezProjection?.creditsAfterRez ?? 0,
+            traceContext,
           )
         : assessKnownRezzedIcePath(
             [...server.ice],
             candidate.rig,
             candidate.creditBudget,
             [...server.root],
+            input.playerView.own.credits,
+            traceContext,
           ),
   }));
   const selectedRunnerPath = evaluatedRunnerPaths.reduce((best, candidate) =>
@@ -249,6 +254,7 @@ function scoringWindowAccessAssessmentForMode(
     unmodeledIceCount,
     visibleRunnerIcebreakerCount: effectiveVisibleRunnerIcebreakerCount,
     visibleRunnerContestCredits,
+    runnerGeneralCreditsAfterPath: assessment.creditsAfterPath,
     ...(assessment.visibleBreakCost !== undefined
       ? {
           visibleBreakCost:
@@ -282,75 +288,11 @@ function scoringWindowAccessAssessmentForMode(
         : []),
       `visible_runner_base_contest_credits:${visibleRunnerBaseContestCredits}`,
       `visible_runner_extra_exposure_credits:${visibleRunnerExtraCredits}`,
-      `visible_runner_pre_run_credit_take_bonus:${visibleRunnerPreRunCreditBonus}`,
+      `visible_runner_income_above_basic_credits:${visibleRunnerIncomeAboveBasic}`,
       ...(postRezProjection?.evidence ?? []),
       ...(observedReachability?.evidence ?? []),
     ],
   };
-}
-
-function visibleRunnerPreRunCreditBurstBonus(
-  rig: readonly VisibleCard[],
-  availableCreditActions: number,
-): number {
-  let remainingActions = Math.max(0, Math.floor(availableCreditActions));
-  if (remainingActions <= 0) return 0;
-  const takeAmounts = rig
-    .map(visibleRunnerPreRunCreditTakeAmount)
-    .filter((amount) => amount > 1)
-    .sort((left, right) => right - left);
-  let bonus = 0;
-  for (const amount of takeAmounts) {
-    if (remainingActions <= 0) break;
-    bonus += amount - 1;
-    remainingActions -= 1;
-  }
-  return bonus;
-}
-
-function visibleRunnerPreRunCreditTakeAmount(card: VisibleCard): number {
-  if (card.known === false) return 0;
-  const storedCredits = visibleRunnerStoredCreditCounterAmount(card);
-  if (storedCredits <= 1) return 0;
-  const tokens = scoringWindowVisibleCardTextTokens(card);
-  const tokenSet = new Set(tokens);
-  const hasCreditToken =
-    tokenSet.has("credit") ||
-    tokenSet.has("credits") ||
-    tokenSet.has("bit") ||
-    tokenSet.has("bits");
-  const hasTakeAll =
-    tokensIncludePhrase(tokens, ["take", "all"]) ||
-    tokensIncludePhrase(tokens, ["take", "all", "the"]) ||
-    tokensIncludePhrase(tokens, ["nimm", "alle"]) ||
-    tokensIncludePhrase(tokens, ["nehme", "alle"]);
-  return hasCreditToken && hasTakeAll ? storedCredits : 0;
-}
-
-function visibleRunnerStoredCreditCounterAmount(card: VisibleCard): number {
-  const counterAmount = Object.entries(card.counters ?? {}).reduce(
-    (sum, [key, value]) =>
-      visibleRunnerStoredCreditCounterKey(key) && typeof value === "number"
-        ? sum + Math.max(0, Math.floor(value))
-        : sum,
-    0,
-  );
-  const displayAmount = (card.counterDisplays ?? []).reduce((sum, display) => {
-    if (!visibleRunnerStoredCreditCounterKey(display.counterType)) return sum;
-    if (display.creditPool !== undefined) return sum;
-    return sum + Math.max(0, Math.floor(display.amount));
-  }, 0);
-  return Math.max(counterAmount, displayAmount);
-}
-
-function visibleRunnerStoredCreditCounterKey(key: string | undefined): boolean {
-  return (
-    key === "bit" ||
-    key === "bits" ||
-    key === "credit" ||
-    key === "credits" ||
-    key === "stored_credit"
-  );
 }
 
 function visibleRunnerInstalledIcebreakerCount(
@@ -467,7 +409,7 @@ function visibleRunnerHasPaidDelayedInstallSource(
 ): boolean {
   return rig.some((card) => {
     if (card.known === false || !card.definitionId) return false;
-    const hint = SCORING_WINDOW_AI_HINTS_BY_CARD.get(card.definitionId);
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     return (
       hint?.roles?.includes("delayed_install") === true &&
       hint.effects?.some(
@@ -618,10 +560,12 @@ function financedScoringProtectionPostRezIce(
   },
   assessSubset: (
     financedIceInstanceIds: ReadonlySet<string>,
+    creditsAfterRez: number,
   ) => ScoringProtectionSubsetAssessment,
 ): {
   financedIceInstanceIds: ReadonlySet<string>;
   unmodeledIceInstanceIds: ReadonlySet<string>;
+  creditsAfterRez: number;
   evidence: string[];
 } {
   const validBudget =
@@ -658,7 +602,12 @@ function financedScoringProtectionPostRezIce(
         unmodeledIceInstanceIds.add(ice.instanceId);
       }
     }
-    return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+    return {
+      financedIceInstanceIds,
+      unmodeledIceInstanceIds,
+      creditsAfterRez: 0,
+      evidence,
+    };
   }
   const candidates: Array<{ ice: VisibleCard; rezCredits: number }> = [];
   // Candidate order is outermost to innermost. Exact subset comparison keeps
@@ -708,7 +657,12 @@ function financedScoringProtectionPostRezIce(
       `corp_post_rez_budget:candidate_count:${candidates.length}`,
       "corp_post_rez_budget:financed_ice_count:0",
     );
-    return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+    return {
+      financedIceInstanceIds,
+      unmodeledIceInstanceIds,
+      creditsAfterRez: budget.corpRezCredits,
+      evidence,
+    };
   }
   let evaluatedSubsetCount = 0;
   let best: ScoringProtectionSubset | undefined;
@@ -728,7 +682,10 @@ function financedScoringProtectionPostRezIce(
     const subset: ScoringProtectionSubset = {
       selectedIds,
       totalRezCredits,
-      assessment: assessSubset(selectedIds),
+      assessment: assessSubset(
+        selectedIds,
+        budget.corpRezCredits - totalRezCredits,
+      ),
     };
     evaluatedSubsetCount += 1;
     if (!best || scoringProtectionSubsetIsBetter(subset, best)) best = subset;
@@ -755,7 +712,12 @@ function financedScoringProtectionPostRezIce(
     `corp_post_rez_budget:financed_ice_count:${financedIceInstanceIds.size}`,
     `corp_post_rez_budget:remaining:${availableCredits - (best?.totalRezCredits ?? 0)}`,
   );
-  return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+  return {
+    financedIceInstanceIds,
+    unmodeledIceInstanceIds,
+    creditsAfterRez: budget.corpRezCredits - (best?.totalRezCredits ?? 0),
+    evidence,
+  };
 }
 
 type ScoringProtectionSubsetAssessment = Readonly<{

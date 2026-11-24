@@ -1,4 +1,7 @@
+import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { runnerRunProjectionPreservesNormalAccess } from "../../actions/run-action-projection";
+import { runnerVisibleArchivesWinningRun } from "../../runtime/runner-archives-score";
 import type {
   PlanMaterialization,
   PlanModule,
@@ -10,11 +13,15 @@ import {
   runnerTacticalAssessment as assessment,
   domain,
   exactRunnerParentSupportResourceGaps,
+  runnerTacticalAvailableCandidates,
   runnerTacticalProposal as proposal,
   state,
 } from "../../plans/runner-tactical-module-support";
 import { RunnerPressureSignal } from "../../plans/runner-tactical-plan-contracts";
-import type { RunnerRunTargetEvaluation } from "../../run-analysis/runner-run-target-types";
+import type {
+  RunActionProjection,
+  RunnerRunTargetEvaluation,
+} from "../../run-analysis/runner-run-target-types";
 type PressureState = {
   kind: "central_pressure";
   signal: RunnerPressureSignal;
@@ -70,7 +77,7 @@ export function centralPressureModule(): PlanModule {
           "runner.pressure_central",
           signal.pressureId,
           { kind: "central_pressure", signal } satisfies PressureState,
-          signal.priorityClass,
+          centralPressurePriority(signal),
           signal.strategyLineIds,
           { kind: "server", id: signal.serverId },
           (signal.supportNeedId !== undefined ||
@@ -100,27 +107,48 @@ export function centralPressureModule(): PlanModule {
         current.signal.marginalValue > 0 &&
         candidates.length > 0;
       const preventionNeed = current.signal.selfTagPreventionNeed;
-      const resourceGaps = preventionNeed &&
+      const resourceGaps =
+        preventionNeed &&
         preventionNeed.stateVersion === context.input.playerView.stateVersion &&
         preventionNeed.parentPlanInstanceId === instance.instanceId
-        ? [{ needId: preventionNeed.needId, capability: "defense.tag_prevention",
-            minimum: 1, available: 0, deadline: "current_turn" as const }]
-        : exactRunnerParentSupportResourceGaps(
-        context,
-        instance,
-        current.signal.supportNeedId,
-        routeExists,
-      );
+          ? [
+              {
+                needId: preventionNeed.needId,
+                capability: "defense.tag_prevention",
+                minimum: 1,
+                available: 0,
+                deadline: "current_turn" as const,
+              },
+            ]
+          : exactRunnerParentSupportResourceGaps(
+              context,
+              instance,
+              current.signal.supportNeedId,
+              routeExists,
+            );
+      const priority = centralPressurePriority(current.signal);
+      const winningArchivesProof =
+        priority === "P1" &&
+        routeExists &&
+        domain(context).runTargetEvaluations?.some(
+          (target) =>
+            candidates.some(
+              ({ candidate }) => candidate.actionId === target.actionId,
+            ) &&
+            runnerVisibleArchivesWinningRun(context.input, target),
+        );
       const result = assessment(
         instance,
-        current.signal.priorityClass,
+        priority,
         routeExists,
         current.signal.marginalValue,
         portfolio.executorInstanceId,
         undefined,
-        current.signal.routePreparation === "targeted_bypass"
-          ? "belief_supported"
-          : "visible_state_forced",
+        winningArchivesProof
+          ? "rules_proven"
+          : current.signal.routePreparation === "targeted_bypass"
+            ? "belief_supported"
+            : "visible_state_forced",
         resourceGaps,
       );
       if (!routeExists && current.signal.supportNeedId) {
@@ -205,7 +233,7 @@ export function centralPressureModule(): PlanModule {
             current.signal.routePreparation === "targeted_bypass"
               ? `Execute the preflighted targeted bypass route on ${current.signal.serverId}.`
               : current.signal.routePreparation === "targeted_ice_trash"
-                ? `Remove the preflighted rezzed ICE target from ${current.signal.serverId}.`
+                ? targetedIcePreparationPurpose(current.signal)
                 : current.signal.routePreparation ===
                     "convert_accumulated_pressure"
                   ? "Convert the accumulated multi-central pressure into its current action-denial payoff."
@@ -236,10 +264,52 @@ export function centralPressureModule(): PlanModule {
   };
 }
 
+function targetedIcePreparationPurpose(signal: RunnerPressureSignal): string {
+  const targetState = signal.targetedIceTrashCommitment?.targetIceState;
+  switch (targetState) {
+    case "rezzed":
+    case "unrezzed":
+      return `Remove the preflighted ${targetState} ICE target from ${signal.serverId}.`;
+    case "rez_or_trash":
+      return `Make the Corp rez or trash the preflighted ICE target on ${signal.serverId}.`;
+    default:
+      return `Prepare ICE disruption on ${signal.serverId}.`;
+  }
+}
+
+function centralPressurePriority(
+  signal: RunnerPressureSignal,
+): RunnerPressureSignal["priorityClass"] {
+  if (
+    signal.routePreparation === "targeted_bypass" &&
+    (signal.priorityClass === "P2" || signal.priorityClass === "P3")
+  ) {
+    return "P4";
+  }
+  return signal.priorityClass;
+}
+
+/** Describes the selected action's actual replacement in the current view. */
+export function runnerCentralPressureRunTracePurpose(
+  input: AiDecisionInput,
+  projection: RunActionProjection,
+): string | undefined {
+  if (
+    projection.targetServerId !== "hq" ||
+    (projection.accessReplacement !== "corp_lose_credits" &&
+      projection.accessReplacement !== "runner_spend_corp_lose_credits") ||
+    runnerRunProjectionPreservesNormalAccess(input, projection)
+  ) {
+    return undefined;
+  }
+  return "Execute credit-denial pressure on hq.";
+}
+
 function pressureCandidates(
   context: PlanSchedulerContext,
   signal: RunnerPressureSignal,
 ): PlanMaterialization["candidates"] {
+  const availableCandidates = runnerTacticalAvailableCandidates(context);
   if (
     signal.routePreparation === "develop_payoff" ||
     signal.routePreparation === "convert_accumulated_pressure" ||
@@ -247,15 +317,19 @@ function pressureCandidates(
     signal.routePreparation === "targeted_ice_trash"
   ) {
     const preparationActionIds = new Set(signal.preparationActionIds ?? []);
-    return context.actionCandidates
+    return availableCandidates
       .filter((candidate) => preparationActionIds.has(candidate.actionId))
       .map((candidate) => ({
         candidate,
         stepValue: signal.marginalValue,
       }));
   }
-  return runnerCentralPressureRunCandidates(context.input, context.actionCandidates,
-    signal, domain(context).runTargetEvaluations);
+  return runnerCentralPressureRunCandidates(
+    context.input,
+    availableCandidates,
+    signal,
+    domain(context).runTargetEvaluations,
+  );
 }
 
 /** The same admitted route values serve materialization and preparation. A
@@ -269,10 +343,14 @@ export function runnerCentralPressureRunCandidates(
   const exactDifferentialPayoffActionIds = new Set(
     signal.runActionDifferentialPayoffIds ?? [],
   );
+  const boundRunActionIds =
+    signal.runActionIds === undefined
+      ? undefined
+      : new Set(signal.runActionIds);
   const runCandidates = actionCandidates.filter(
     (candidate) =>
-      (signal.runActionIds?.length
-        ? signal.runActionIds.includes(candidate.actionId)
+      (boundRunActionIds
+        ? boundRunActionIds.has(candidate.actionId)
         : (candidate.semanticActionType === "run.start" &&
             candidate.runProjectionSummary?.serverId === signal.serverId) ||
           (candidate.semanticActionType === "play.runner_event" &&
@@ -288,53 +366,47 @@ export function runnerCentralPressureRunCandidates(
   const directRunAvailable = runCandidates.some(
     (candidate) => candidate.semanticActionType === "run.start",
   );
-  return runCandidates
-    .filter(
-      (candidate) =>
-        candidate.semanticActionType !== "play.runner_event" ||
-        !directRunAvailable ||
-        exactDifferentialPayoffActionIds.has(candidate.actionId) ||
-        runnerCardRunHasVisibleDifferentialPayoff(
-          input,
-          candidate,
-          signal.serverId,
-          runTargets,
-        ),
+  return runCandidates.flatMap((candidate) => {
+    const event = candidate.semanticActionType === "play.runner_event";
+    const differentialPayoff =
+      event &&
+      directRunAvailable &&
+      runnerCardRunHasVisibleDifferentialPayoff(
+        input,
+        candidate,
+        signal.serverId,
+        runTargets,
+      );
+    if (
+      event &&
+      directRunAvailable &&
+      !differentialPayoff &&
+      !exactDifferentialPayoffActionIds.has(candidate.actionId)
     )
-    .map((candidate) => ({
-      candidate,
-      stepValue:
-        signal.marginalValue +
-        runnerCardRunRoutePreference(
-          input,
-          candidate,
-          signal.serverId,
-          directRunAvailable,
-          runTargets,
-        ) +
-        (signal.runActionValues?.[candidate.actionId] ?? 0),
-    }));
+      return [];
+    return [
+      {
+        candidate,
+        stepValue:
+          signal.marginalValue +
+          runnerCardRunRoutePreference(
+            candidate,
+            event,
+            !directRunAvailable || differentialPayoff,
+          ) +
+          (signal.runActionValues?.[candidate.actionId] ?? 0),
+      },
+    ];
+  });
 }
 
 function runnerCardRunRoutePreference(
-  input: PlanSchedulerContext["input"],
   candidate: ActionSemanticCandidate,
-  serverId: RunnerPressureSignal["serverId"],
-  directRunAvailable: boolean,
-  runTargetEvaluations?: readonly RunnerRunTargetEvaluation[],
+  event: boolean,
+  preferable: boolean,
 ): number {
-  if (candidate.semanticActionType !== "play.runner_event") return 0;
-  if (
-    !directRunAvailable ||
-    runnerCardRunHasVisibleDifferentialPayoff(
-      input,
-      candidate,
-      serverId,
-      runTargetEvaluations,
-    )
-  ) {
-    return 5;
-  }
+  if (!event) return 0;
+  if (preferable) return 5;
   const knownCreditCost =
     candidate.costProfile.costKnownStatus === "known" &&
     Number.isSafeInteger(candidate.costProfile.creditCost) &&

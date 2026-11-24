@@ -89,7 +89,7 @@ it("admits the native G5/D170 Lucidrine remote contest through the live DTO", ()
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("runner.contest_remote");
   expect(d.actionId).toBe(
-    "runner.play_event.runner_onr_v1_098_lucidrine-booster-drug_1.remote_1.runner_onr_v1_098_lucidrine-booster-drug_1.onr_v1_098_lucidrine-booster-drug:abilities_on_play_make_run",
+    "rh.c1wx.r1.c1wx.394",
   );
   const route = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === d.actionId,
@@ -106,17 +106,17 @@ it.each([true, false])(
     if (!terminal) input.playerView.opponent.agendaPoints = 0;
     const { d, pf } = decide(input);
     if (terminal) {
-      expect(d.actionId).toBe("runner.start_run.remote_1");
+      expect(d.actionId).toBe("rs.r1");
       expect(pf.selectedPlan?.moduleId).toBe("runner.contest_remote");
     } else {
-      expect(d.actionId).toBe("runner.gain_credit");
+      expect(d.actionId).toBe("rb");
       expect(pf.selectedPlan?.moduleId).toBe("runner.defense_and_recovery");
       expect(pf.selectedPlan?.evidenceCodes).toContain(
         "runner_damage_locked_hand_reaction_reserve",
       );
     }
     const route = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.actionId === "runner.start_run.remote_1",
+      (t) => t.actionId === "rs.r1",
     )!;
     expect(route.pathPassability).toBe("reachable");
     expect(route.prerunReserveQuote).toMatchObject({
@@ -136,10 +136,10 @@ it("keeps the native G6/D186 real sentry gap when no Boon is installed", () => {
   const { input } = native("g6d186");
   bindPublicBoardStealQuoteCompanion(input);
   const { d, pf } = decide(input);
-  expect(d.actionId).toBe("runner.draw_card");
+  expect(d.actionId).toBe("r8");
   expect(pf.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   const route = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(route.pathPassability).toBe("blocked_missing_coverage");
 });
@@ -156,7 +156,7 @@ it("retains mature development cashout as an executable ordinary-priority candid
     signal: {
       priorityClass: "P4",
       actionIds: [
-        "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+        "r1.c29d.c29d.activated.441",
       ],
       evidenceCodes: expect.arrayContaining([
         "runner_credit_bank_cashout_for_mature_development_funding",
@@ -164,20 +164,30 @@ it("retains mature development cashout as an executable ordinary-priority candid
     },
   });
 });
-it("keeps G23/D288 bank cashout but binds it to the newly admitted exact run", () => {
+it("keeps both Broker balances when changing the funded remote would leave a safer R&D route", () => {
   const { input } = native("g23d288");
   const { d, pf } = decide(input);
-  expect(d.actionId).toContain(
-    "broker_1.activated.onr_v1_154_broker:withdraw_credits",
+  expect(d.actionId).toBe("rs.rd");
+  expect(pf.selectedPlan?.moduleId).toBe("runner.pressure_central");
+  const brokerWithdrawals = new Set(
+    input.legalActions
+      .filter((action) => action.payload?.cardImplementationAbilityId === 441)
+      .map((action) => action.actionId),
   );
-  expect(pf.selectedPlan?.moduleId).toBe("runner.credit_bank");
   expect(
-    pf.selectedPlan?.evidenceCodes.some((x) =>
-      x.startsWith("runner_credit_bank_bound_run_action:"),
+    d.decisionDebug?.actionAlternatives?.filter((entry) =>
+      brokerWithdrawals.has(entry.actionId),
     ),
-  ).toBe(true);
+  ).toEqual([
+    expect.objectContaining({ whyNot: expect.arrayContaining([
+      expect.stringContaining("runner_credit_bank_hold_spending_budget_funded"),
+    ]) }),
+    expect.objectContaining({ whyNot: expect.arrayContaining([
+      expect.stringContaining("runner_credit_bank_hold_spending_budget_funded"),
+    ]) }),
+  ]);
   const route = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "rs.r1",
   )!;
   expect(route.pathPassability).toBe("reachable");
   expect(route.routeQuote?.conditionalReasons).toContain(
@@ -219,7 +229,7 @@ it("executes the actual G5 run through current Engine actions without restoring 
 it("allowlists the Engine's unresolved state without synthesizing numeric strength", () => {
   const cp = load("g5d170"),
     card = cp.input.playerView.own.rig.find(
-      (c: { definitionId: string }) => c.definitionId === "onr_v1_002_ai-boon",
+      (c: { definitionId: number }) => c.definitionId === 214,
     );
   card.randomRunStrengthState.secret = "discard-me";
   const input = buildAiDecisionInputDto(cp.input),
@@ -237,11 +247,11 @@ it("preserves the actual seeded Engine strength after the first native run actio
   state = apply(
     state,
     "runner",
-    "runner.play_event.runner_onr_v1_098_lucidrine-booster-drug_1.remote_1.runner_onr_v1_098_lucidrine-booster-drug_1.onr_v1_098_lucidrine-booster-drug:abilities_on_play_make_run",
+    "rh.c1wx.r1.c1wx.394",
   );
   const view = getPlayerView(state, "runner"),
     original = view.own.rig!.find(
-      (c) => c.definitionId === "onr_v1_002_ai-boon",
+      (c) => c.definitionId === 214,
     )!;
   expect(original.randomRunStrengthState?.status).toBe("resolved");
   const dto = buildAiDecisionInputDto({
@@ -257,7 +267,7 @@ it("preserves the actual seeded Engine strength after the first native run actio
 it("strips an unknown card's random-state data without exposing or validating it", () => {
   const cp = load("g5d170"),
     card = cp.input.playerView.own.rig.find(
-      (c: { definitionId: string }) => c.definitionId === "onr_v1_002_ai-boon",
+      (c: { definitionId: number }) => c.definitionId === 214,
     );
   card.known = false;
   card.randomRunStrengthState = { status: "secret", secret: "hidden" };
@@ -277,8 +287,8 @@ it.each([
   (status, actualStrength, currentStrengthAdjustment, strength) => {
     const cp = load("g5d170"),
       card = cp.input.playerView.own.rig.find(
-        (c: { definitionId: string }) =>
-          c.definitionId === "onr_v1_002_ai-boon",
+        (c: { definitionId: number }) =>
+          c.definitionId === 214,
       );
     card.randomRunStrengthState = {
       status,
@@ -297,13 +307,13 @@ it("continues native G32 Shock with the exact legal Boon pump instead of accepti
   const { d, pf } = decide(input);
   expect(pf.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   expect(d.actionId).toBe(
-    "runner.pump_breaker.runner_onr_v1_002_ai-boon_2.runner_onr_v1_002_ai-boon_2.runner_onr_v1_002_ai-boon_2.corp_onr_v1_268_shock-r_1.onr_v1_002_ai-boon:icebreaker_abilities_increase_strength",
+    "rj.c1bm.c1bm.c1bm.c2yt.277",
   );
 });
 it("quotes a hypothetical pumped resolved breaker without mutating its current public state", () => {
   const { input } = native("g32d305");
   const boon = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_v1_002_ai-boon",
+    (c) => c.definitionId === 214,
   )!;
   const before = structuredClone(boon);
   const ice = input.playerView.run!.encounteredIce!;
@@ -342,7 +352,7 @@ it("executes the native G32 pump, break and remaining run through the current En
         state = apply(state, "corp", corp[0]!.actionId);
       } else {
         const originalRezId =
-          "corp.rez_ice.corp_onr_v1_279_wall-of-static_2.corp_onr_v1_279_wall-of-static_2";
+          "cq.c31a.c31a";
         expect(corp).toHaveLength(2);
         expect(corp.filter((a) => a.type === "decline_rez")).toHaveLength(1);
         expect(corp.find((a) => a.actionId === originalRezId)?.type).toBe(
@@ -365,7 +375,7 @@ it("executes the native G32 pump, break and remaining run through the current En
 it("preserves signed public adjustments, including a negative visible strength", () => {
   const cp = load("g32d305"),
     card = cp.input.playerView.own.rig.find(
-      (c: { definitionId: string }) => c.definitionId === "onr_v1_002_ai-boon",
+      (c: { definitionId: number }) => c.definitionId === 214,
     );
   card.randomRunStrengthState = {
     status: "resolved",
@@ -382,7 +392,7 @@ it("preserves signed public adjustments, including a negative visible strength",
 it("pays the full pump deficit from an already resolved negative strength", () => {
   const { input } = native("g32d305");
   const boon = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_v1_002_ai-boon",
+    (c) => c.definitionId === 214,
   )!;
   boon.randomRunStrengthState = {
     status: "resolved",
@@ -412,7 +422,7 @@ it("preserves only the public opponent Rig random-strength fact in the Corp DTO"
     legalActions: getLegalActions(state, "corp"),
   });
   const source = view.opponent.rig!.find(
-    (c) => c.definitionId === "onr_v1_002_ai-boon",
+    (c) => c.definitionId === 214,
   )!;
   expect(
     dto.playerView.opponent.rig!.find(
@@ -424,7 +434,7 @@ it("preserves only the public opponent Rig random-strength fact in the Corp DTO"
 it("rejects an inconsistent original resolved fact before deriving the hypothetical pump", () => {
   const { input } = native("g32d305");
   const boon = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_v1_002_ai-boon",
+    (c) => c.definitionId === 214,
   )!;
   boon.randomRunStrengthState = {
     status: "resolved",

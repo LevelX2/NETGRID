@@ -23,6 +23,7 @@ function action(
   return {
     side: "runner",
     actionType,
+    ...(actionType === "start_run" ? { runnerRunStarted: true } : {}),
     ...(targetServerId ? { targetServerId } : {}),
   } as unknown as AiSimulationSummary["actionSequence"][number];
 }

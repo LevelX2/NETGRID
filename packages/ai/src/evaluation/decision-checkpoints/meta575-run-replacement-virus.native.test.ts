@@ -83,7 +83,7 @@ describe("pairing 575 successful-run replacement before broken-ICE counters", ()
       const before = JSON.stringify(input);
       const decision = chooseAiAction(input);
       expect(JSON.stringify(input)).toBe(before);
-      expect(decision.actionId).toBe("runner.resolve_choice");
+      expect(decision.actionId).toBe("rn");
       expect(decision.fallbackUsed).toBe(false);
       expect(decision.timeoutUsed).toBe(false);
       const portfolio = residentPlanPortfolioSnapshot(input)!;
@@ -140,7 +140,7 @@ describe("pairing 575 successful-run replacement before broken-ICE counters", ()
     const { positive } = fixture();
     restoreLive(positive);
     const decision = chooseAiAction(positive.input);
-    expect(decision.actionId).toBe("runner.resolve_choice");
+    expect(decision.actionId).toBe("rn");
     expect(decision.selectedChoices?.selectedOptionIds).toHaveLength(1);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
@@ -172,7 +172,7 @@ describe("pairing 575 successful-run replacement before broken-ICE counters", ()
     const version = input.playerView.stateVersion;
     const result: Extract<PlanSchedulerResult, { lane: "engine_window" }> = {
       lane: "engine_window",
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       origin: {
         rootPlanInstanceId: `run:${run.runId}`,
         leafPlanInstanceId: "rules.window_resolution",
@@ -187,7 +187,7 @@ describe("pairing 575 successful-run replacement before broken-ICE counters", ()
         { stage: "window", code: "engine_window_single_legal_resolution" },
       ],
     };
-    if (variant === "different_run") run.runId = "another_run";
+    if (variant === "different_run") run.runId = input.playerView.stateVersion + 1;
     if (variant === "missing_run_position") delete run.position;
     if (variant === "different_executor")
       previous.executorInstanceId = previous.rootForegroundInstanceId!;

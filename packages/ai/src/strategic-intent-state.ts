@@ -202,6 +202,27 @@ const DEFAULT_MIN_COMMITMENT_DECISIONS = 2;
 export function buildStrategicIntentState(
   params: BuildStrategicIntentStateParams,
 ): StrategicIntentState {
+  const previous = params.previousState;
+  if (
+    !Number.isSafeInteger(params.stateVersion) ||
+    params.stateVersion < 0 ||
+    (previous !== undefined &&
+      (previous.side !== params.side ||
+        previous.schemaVersion !== STRATEGIC_INTENT_STATE_SCHEMA_VERSION ||
+        !Number.isSafeInteger(previous.stateVersion) ||
+        previous.stateVersion < 0 ||
+        previous.stateVersion > params.stateVersion))
+  ) {
+    throw new PlanResolutionFailure("invalid_plan_identity", {
+      side: params.side,
+      stateVersion: params.stateVersion,
+      timingPoint: "strategic_intent_reconciliation",
+      legalActionTypes: [],
+      owner: "priority_policy",
+      removalCondition:
+        "Reconcile strategic intent only from a prior or current state of the same side.",
+    });
+  }
   const revalidation = requireCurrentStrategicIntentRevalidation(params);
   const candidatePrimaryStrategy = selectPrimaryStrategy(params);
   const commitmentSelection = committedPrimaryStrategy(
@@ -240,7 +261,8 @@ export function buildStrategicIntentState(
     commitmentSelection.selectionAuthorityEvidence,
   );
   const commitment = commitmentFor(
-    params.previousState,
+    previous,
+    params.stateVersion,
     primaryStrategy,
     transition,
   );
@@ -971,6 +993,7 @@ function transitionFor(
 
 function commitmentFor(
   previous: StrategicIntentState | undefined,
+  stateVersion: number,
   primary: StrategicLineState,
   transition: StrategicIntentTransition,
 ): StrategicCommitmentState {
@@ -979,7 +1002,9 @@ function commitmentFor(
       ? previous.commitment.decisionsCommitted
       : 0;
   const decisionsCommitted =
-    transition.status === "continued" ? previousCommitment + 1 : 1;
+    transition.status === "continued"
+      ? previousCommitment + (previous?.stateVersion === stateVersion ? 0 : 1)
+      : 1;
   return {
     strategyId: primary.strategyId,
     decisionsCommitted,

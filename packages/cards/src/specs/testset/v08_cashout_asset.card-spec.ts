@@ -3,7 +3,7 @@ import { cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("v08_cashout_asset"),
+    cardDefinitionId: cardDefinitionId(610),
     title: "Cashout Asset",
     side: "corp",
     cardType: "asset",

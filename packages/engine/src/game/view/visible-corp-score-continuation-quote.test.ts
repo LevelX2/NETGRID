@@ -1,15 +1,44 @@
 import type { CardInstance, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
-import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
+import { addCorpActionDebt } from "../turn/turn-basic-execution";
+import {
+  visibleCorpFutureFlexibleClicks,
+  visibleCorpScoreContinuationQuote,
+} from "./visible-corp-score-continuation-quote";
 
 describe("visible Corp score continuation quote", () => {
+  it("carries known debt and expires one-turn action grants before the second turn", () => {
+    const state = createGame({
+      seed: "corp-campaign-clicks",
+      setupMode: "completed",
+    });
+    const source = state.cardInstances[state.corp.identity]!;
+    state.actionEconomy = {
+      ...state.actionEconomy,
+      futureGrants: [
+        {
+          side: "corp",
+          sourceCardInstanceId: source.instanceId,
+          sourceDefinitionId: source.definitionId,
+          amountPerTurn: 1,
+          remainingTurns: 1,
+        },
+      ],
+    };
+    addCorpActionDebt(state, {
+      amount: 5,
+      reason: "fixture",
+      source: source.instanceId,
+    });
+    expect(visibleCorpFutureFlexibleClicks(state)).toEqual([0, 2]);
+  });
   it("uses effective scored-agenda points for terminal certification", () => {
     const state = createGame({
       seed: "effective-terminal-score",
       setupMode: "completed",
     });
-    const remoteId = "remote_1" as const;
+    const remoteId = "r1" as const;
     state.corp.servers.push({
       id: remoteId,
       label: "Remote 1",
@@ -49,7 +78,7 @@ function agenda(
 ): CardInstance {
   return {
     instanceId,
-    definitionId: "simple_agenda",
+    definitionId: 588,
     owner: "corp" as const,
     controller: "corp" as const,
     zone,

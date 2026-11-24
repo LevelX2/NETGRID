@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -6,9 +7,7 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import { runnerRemoteCoveragePaymentNeed } from "./remote-contest-payment-need";
 import { type RunnerCorePlanDomain } from "../../plans/runner-core-plan-contracts";
 import { type RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
-import type { RunnerRunFundingSupport } from "../../plans/runner-funding-service-contract";
 import { ActiveRunnerRunRoot } from "../../plans/runner-run-origin-contract";
-import { runnerCardRunHasVisibleDifferentialPayoff } from "../../plans/runner-run-payoff";
 import {
   INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET,
   runnerInformationProbeCanUseQuotedPath,
@@ -16,7 +15,6 @@ import {
 } from "../../plans/runner-run-purpose";
 import {
   type RunnerPlanDomain,
-  type RunnerRemoteContestSignal,
 } from "../../plans/runner-tactical-plan-contracts";
 import {
   bestRunTargetsByServer,
@@ -69,18 +67,16 @@ import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-d
 import { runnerCoverageGapIsTerminalRemoteThreat } from "../rig-coverage/coverage-support";
 import {
   runnerCriticalDamageContestBlocked,
-  runnerRemoteRepeatedFreeStopEvidence,
   runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn,
   runnerTerminalRemoteContestIsDirectlyMandatory,
 } from "./remote-contest-admission";
 import { terminalRandomBreakRescueForRun } from "./remote-contest-random-break-rescue";
-type RunnerRemoteContestSignalDraft = Omit<
-  RunnerRemoteContestSignal,
-  "runActionAssessments"
-> & {
-  preferredRunActionIds?: string[];
-  runActionDeferralEvidenceCode?: string;
-};
+import {
+  bindRunnerRemoteRunActionAssessments,
+  runnerIrrecoverableRandomBreakScoreThreatContest,
+  runnerRemoteProbeCanConvertNow,
+  type RunnerRemoteContestSignalDraft,
+} from "./remote-contest-route-assessment";
 
 function runnerTargetedIceTrashRemotePreparationSignals(
   input: AiDecisionInput,
@@ -240,7 +236,7 @@ function runnerSameTurnAccessRemotePreparationSignals(
   const target = [...runTargets]
     .filter(
       (evaluation) =>
-        evaluation.targetServerId.startsWith("remote_") &&
+        isRemoteServerId(evaluation.targetServerId) &&
         admittedParents.some(
           (parent) =>
             parent.serverId === evaluation.targetServerId &&
@@ -319,7 +315,6 @@ function runnerSameTurnAccessRemotePreparationSignals(
       exactRoute.candidate.actionId,
       target,
       {
-        economy,
         candidates,
         minimumHandBuffer: runnerDefenseHandBufferFacts(
           input,
@@ -369,7 +364,7 @@ function runnerRemoteInformationPreparationSignals(
         (evaluation) => evaluation.targetServerId === server.id,
       )?.knownAccessState;
       return (
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.root.some((card) => card.known === false) &&
         (accessState === undefined ||
           accessState === "unknown" ||
@@ -509,59 +504,6 @@ function runnerRemoteInformationPreparationSignals(
   });
 }
 
-function runnerIrrecoverableRandomBreakScoreThreatContest(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  evaluation: RunnerRunTargetEvaluation,
-): boolean {
-  const randomBreakRisk = evaluation.randomBreakOrDamageRiskAssessment;
-  if (
-    evaluation.targetKind !== "remote" ||
-    evaluation.scoreThreat !== true ||
-    evaluation.pathPassability !==
-      "blocked_by_random_break_damage_hand_buffer" ||
-    randomBreakRisk?.blockedByHandBuffer !== true ||
-    randomBreakRisk.stableCoverageAvailable === true ||
-    randomBreakRisk.currentHandCount > 0
-  ) {
-    return false;
-  }
-  const recoveryRouteAvailable = candidates.some(
-    (candidate) =>
-      candidate.semanticActionType === "draw.card" ||
-      candidate.actionTacticSignals.some(
-        (signal) =>
-          signal === "search.breaker" ||
-          signal === "search.program" ||
-          signal === "install.breaker",
-      ),
-  );
-  return !recoveryRouteAvailable;
-}
-
-function runnerRemoteProbeCanConvertNow(
-  input: AiDecisionInput,
-  economy: RunnerEconomyPosture,
-  evaluation: RunnerRunTargetEvaluation,
-): boolean {
-  if (
-    evaluation.unrezzedIceRiskUnderfunded === true &&
-    evaluation.creditsAfterRun <= 0
-  ) {
-    return false;
-  }
-  return (
-    evaluation.accessTargetKind === "remote" &&
-    evaluation.runCommitment === "probe_only" &&
-    evaluation.pathPassability === "reachable" &&
-    evaluation.score > 0 &&
-    evaluation.creditsAfterRun >= 0 &&
-    (evaluation.pathCost === 0 ||
-      evaluation.creditsAfterRun >= economy.minimumCreditFloor ||
-      (evaluation.scoreThreat && input.playerView.opponent.credits <= 1))
-  );
-}
-
 function runnerMatchpointRemoteFocusSignals(
   input: AiDecisionInput,
   runTargets: readonly RunnerRunTargetEvaluation[],
@@ -605,220 +547,6 @@ function runnerMatchpointRemoteFocusSignals(
       },
     ];
   });
-}
-
-function bindRunnerRemoteRunActionAssessments(
-  input: AiDecisionInput,
-  economy: RunnerEconomyPosture,
-  signal: RunnerRemoteContestSignalDraft,
-  runTargets: readonly RunnerRunTargetEvaluation[],
-  candidates: readonly ActionSemanticCandidate[],
-): RunnerRemoteContestSignal {
-  const currentActionIds = new Set(
-    candidates.map((candidate) => candidate.actionId),
-  );
-  const evaluations = runTargets.filter(
-    (evaluation) =>
-      evaluation.targetKind === "remote" &&
-      evaluation.targetServerId === signal.serverId &&
-      currentActionIds.has(evaluation.actionId),
-  );
-  const duplicateActionIds = evaluations
-    .map((evaluation) => evaluation.actionId)
-    .filter(
-      (actionId, index, actionIds) => actionIds.indexOf(actionId) !== index,
-    );
-  if (duplicateActionIds.length > 0) {
-    throw new PlanResolutionFailure("missing_plan_module_coverage", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [...new Set(duplicateActionIds)],
-      owner: "plan_module",
-      removalCondition:
-        "Each exact same-server Runner run action must have exactly one run-target evaluation before the Remote plan can classify it.",
-    });
-  }
-  const preferredActionIds = new Set(signal.preferredRunActionIds ?? []);
-  const evaluatedRunActionAssessments = evaluations.map((evaluation) => {
-    const actionCandidate = candidates.find(
-      (candidate) => candidate.actionId === evaluation.actionId,
-    );
-    const directlyAvailableBasicRun = candidates.some(
-      (candidate) =>
-        candidate.semanticActionType === "run.start" &&
-        candidate.runProjectionSummary?.serverId === signal.serverId,
-    );
-    const lacksDifferentialPayoff =
-      directlyAvailableBasicRun &&
-      actionCandidate?.semanticActionType === "play.runner_event" &&
-      !runnerCardRunHasVisibleDifferentialPayoff(
-        input,
-        actionCandidate,
-        signal.serverId,
-        evaluations,
-      );
-    const fundingSupport = runnerRunFundingSupport(
-      input,
-      economy,
-      evaluation,
-      runTargets,
-      candidates,
-    );
-    const directRunCanConvertNow = runnerRunTargetCanConvertNow(
-      input,
-      economy,
-      evaluation,
-      candidates,
-    );
-    const productiveProbeCanConvertNow = runnerRemoteProbeCanConvertNow(
-      input,
-      economy,
-      evaluation,
-    );
-    const irrecoverableScoreThreatContest =
-      signal.evidenceCode ===
-        `runner_irrecoverable_random_break_damage_score_threat_contest:${evaluation.targetServerId}` ||
-      runnerIrrecoverableRandomBreakScoreThreatContest(
-        input,
-        candidates,
-        evaluation,
-      );
-    const terminalRemoteContestIsDirectlyMandatory =
-      runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
-    const directRunRouteReady =
-      evaluation.prerunReserveQuote?.status !== "blocked" &&
-      (evaluation.recommendation === "run_now" ||
-        evaluation.recommendation === "run_if_free" ||
-        productiveProbeCanConvertNow ||
-        directRunCanConvertNow);
-    const specialRouteMembership =
-      signal.constrainedActionCapacity === true ||
-      signal.evidenceCode === "visible_known_agenda_remote";
-    const repeatedFreeStopEvidence = runnerRemoteRepeatedFreeStopEvidence(
-      input,
-      evaluation,
-    );
-    const executable =
-      repeatedFreeStopEvidence === undefined &&
-      signal.runActionDeferralEvidenceCode === undefined &&
-      signal.routePreparation === undefined &&
-      signal.reachable &&
-      signal.marginalValue > 0 &&
-      !lacksDifferentialPayoff &&
-      evaluation.prerunReserveQuote?.status !== "blocked" &&
-      (terminalRemoteContestIsDirectlyMandatory ||
-        (specialRouteMembership
-          ? preferredActionIds.has(evaluation.actionId)
-          : irrecoverableScoreThreatContest ||
-            (evaluation.pathPassability === "reachable" &&
-              evaluation.score > 0 &&
-              fundingSupport === undefined &&
-              directRunRouteReady)));
-    const evidenceCodes = executable
-      ? [
-          `runner_remote_run_variant_executable:${signal.serverId}:${evaluation.actionId}`,
-          ...evaluation.evidence,
-        ]
-      : [
-          repeatedFreeStopEvidence ??
-            (lacksDifferentialPayoff
-              ? "runner_remote_card_run_has_no_visible_differential_payoff_over_basic_run"
-              : (signal.runActionDeferralEvidenceCode ??
-                runnerRemoteRunVariantNonproductiveEvidence(
-                  signal,
-                  evaluation,
-                  fundingSupport,
-                  preferredActionIds,
-                ))),
-          ...evaluation.evidence,
-        ];
-    const opportunityQuote = evaluation.consumableRunOpportunityQuote;
-    return [
-      evaluation.actionId,
-      {
-        verdict: executable
-          ? ("executable" as const)
-          : ("explicitly_nonproductive" as const),
-        stepValue: executable ? signal.marginalValue + evaluation.score : 0,
-        evidenceCodes,
-        routeDiagnostic: {
-          rawRouteScore: opportunityQuote?.rawRouteScore ?? evaluation.score,
-          opportunityCost: opportunityQuote?.opportunityCost ?? 0,
-          effectiveRouteScore: evaluation.score,
-        },
-      },
-    ];
-  });
-  const releaseRunLockAssessments =
-    signal.routePreparation === "release_run_lock"
-      ? candidates
-          .filter((candidate) => preferredActionIds.has(candidate.actionId))
-          .map((candidate) => [
-            candidate.actionId,
-            {
-              verdict: signal.reachable
-                ? ("executable" as const)
-                : ("explicitly_nonproductive" as const),
-              stepValue: signal.reachable ? signal.marginalValue : 0,
-              evidenceCodes: [
-                signal.reachable
-                  ? `runner_remote_run_lock_release_executable:${signal.serverId}:${candidate.actionId}`
-                  : `runner_remote_run_lock_release_blocked:${signal.serverId}:${candidate.actionId}`,
-              ],
-            },
-          ])
-      : [];
-  const runActionAssessments = Object.fromEntries([
-    ...evaluatedRunActionAssessments,
-    ...releaseRunLockAssessments,
-  ]);
-  const {
-    preferredRunActionIds: _preferredRunActionIds,
-    runActionDeferralEvidenceCode: _runActionDeferralEvidenceCode,
-    ...normalized
-  } = signal;
-  return {
-    ...normalized,
-    runActionAssessments,
-  };
-}
-
-function runnerRemoteRunVariantNonproductiveEvidence(
-  signal: RunnerRemoteContestSignalDraft,
-  evaluation: RunnerRunTargetEvaluation,
-  fundingSupport: RunnerRunFundingSupport | undefined,
-  preferredActionIds: ReadonlySet<string>,
-): string {
-  if (evaluation.prerunReserveQuote?.status === "blocked") {
-    return `runner_remote_run_variant_prerun_reserve_blocked:${signal.serverId}`;
-  }
-  if (signal.routePreparation) {
-    return `runner_remote_run_deferred_to_bound_preparation:${signal.serverId}:${signal.routePreparation}`;
-  }
-  if (
-    signal.constrainedActionCapacity &&
-    !preferredActionIds.has(evaluation.actionId)
-  ) {
-    return `runner_remote_run_not_bound_to_restricted_capacity:${signal.serverId}`;
-  }
-  if (signal.supportNeedId || fundingSupport) {
-    return `runner_remote_run_deferred_to_bound_funding_support:${signal.serverId}:${signal.supportNeedId ?? fundingSupport!.needId}`;
-  }
-  if (evaluation.knownAccessState === "known_no_current_payoff") {
-    return `runner_remote_run_known_no_current_payoff:${signal.serverId}:${evaluation.recommendation}`;
-  }
-  if (evaluation.pathPassability !== "reachable") {
-    return `runner_remote_run_route_blocked:${signal.serverId}:${evaluation.pathPassability}`;
-  }
-  if (evaluation.score <= 0) {
-    return `runner_remote_run_below_material_value:${signal.serverId}:${evaluation.score}:${evaluation.recommendation}`;
-  }
-  if (!signal.reachable) {
-    return `runner_remote_run_plan_not_executable:${signal.serverId}:${signal.evidenceCode}`;
-  }
-  return `runner_remote_run_not_currently_convertible:${signal.serverId}:${evaluation.recommendation}`;
 }
 
 export function runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
@@ -897,7 +625,7 @@ export function buildRunnerRemoteContestSignals({
     // later draft, including its exact funding/coverage and risk bindings.
     ...runnerMatchpointRemoteFocusSignals(input, runTargets, coverageGaps),
     ...runLockReleaseRoutes.flatMap((route) => {
-      if (!route.serverId.startsWith("remote_")) return [];
+      if (!isRemoteServerId(route.serverId)) return [];
       return [
         {
           contestId: `remote:${route.serverId}`,
@@ -1223,7 +951,7 @@ export function buildRunnerRemoteContestSignals({
         server.id,
       );
       if (
-        !server.id.startsWith("remote_") ||
+        !isRemoteServerId(server.id) ||
         !knownAgenda ||
         knownAgendaRunEvaluations.length === 0
       ) {
@@ -1260,7 +988,7 @@ export function buildRunnerRemoteContestSignals({
     }),
     ...constrainedRunCandidates.flatMap(
       ({ candidate, serverId, marginalValue, evidenceCode }) => {
-        if (!serverId.startsWith("remote_")) return [];
+        if (!isRemoteServerId(serverId)) return [];
         return [
           {
             contestId: `remote:${serverId}`,

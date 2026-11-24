@@ -1,10 +1,34 @@
 import {
+  isRandomPurpose,
+  isRandomHistory,
+  type RandomPurpose,
+  type RandomDrawRecord,
+  type RandomDomain,
+} from "@netgrid/shared";
+import {
   type CardInstanceId,
   type CorpDrawContinuation,
   type GameState,
 } from "@netgrid/shared";
 import { applyCorpDrawReplacementAfterDraw } from "../choices/strategic-planning-group-draw-choice";
 import { mustInstance } from "./card-server-lookup";
+
+// The engine owns the cloned history while an action resolves. The scope is
+// discarded before the result goes back to callers that can mutate GameState.
+const actionRandomPrefixes = new WeakMap<RandomDrawRecord[], number>();
+
+export function withActionRandomHistory<T>(
+  state: GameState,
+  perform: () => T,
+): T {
+  const records = state.randomDrawRecords;
+  actionRandomPrefixes.set(records, -1);
+  try {
+    return perform();
+  } finally {
+    actionRandomPrefixes.delete(records);
+  }
+}
 
 export function mustArrayValue<T>(
   values: T[],
@@ -68,7 +92,7 @@ export function drawCorpCards(
   }
   if (drawnCardIds.length === 0) return;
   state.pendingCorpDraw = {
-    transactionId: `corp_draw_${state.stateVersion + 1}_${drawnCardIds[0]}`,
+    transactionId: state.stateVersion + 1,
     baseDrawCount: drawnCardIds.length,
     replacementDrawCount: 0,
     drawnCardIds,
@@ -118,35 +142,56 @@ export function addSetAsideCorpCardsToHq(
 
 export function randomHqAccess(state: GameState): CardInstanceId | undefined {
   if (state.corp.hq.length === 0) return undefined;
-  const value = nextRandom(state, "hq_random_access");
+  const value = nextRandom(state, [9]);
   const index = Math.floor(value * state.corp.hq.length);
   return state.corp.hq[index];
 }
 
-export function nextRandom(state: GameState, purpose: string): number {
+export function nextRandom(state: GameState, purpose: RandomPurpose): number {
   assertRandomCursor(state.randomCounter, state.randomDrawRecords);
   assertRandomPurpose(purpose);
-  const value = deterministicNumber(
-    `${state.seed}:${purpose}:${state.randomCounter}`,
-  );
-  state.randomDrawRecords.push({
-    counter: state.randomCounter,
+  const record = createRandomDraw(
+    state.seed,
     purpose,
-    value,
-  });
+    state.randomCounter,
+    "engine",
+  );
+  appendRandomRecord(state.randomDrawRecords, record);
   state.randomCounter += 1;
-  return value;
+  return record.value;
 }
 
 export function rollDeterministicDie(
   state: GameState,
-  purpose: string,
+  purpose: RandomPurpose,
 ): number {
-  const scopedPurpose = /^v\d+\.die\./.test(purpose)
-    ? purpose
-    : `v190.die.${purpose}`;
-  const value = nextRandom(state, scopedPurpose);
+  const value = nextRandom(state, purpose);
   return Math.floor(value * 6) + 1;
+}
+
+export function createRandomDraw(
+  seed: string,
+  purpose: RandomPurpose,
+  counter: number,
+  domain: RandomDomain,
+): RandomDrawRecord {
+  if (!isRandomPurpose(purpose, domain))
+    throw new Error("Der Zufallszweck passt nicht zur RNG-Domäne.");
+  if (
+    !Number.isSafeInteger(counter) ||
+    counter < 0 ||
+    counter >= Number.MAX_SAFE_INTEGER
+  )
+    throw new Error("Der Zufallszähler ist ungültig.");
+  const seedContext =
+    domain === "engine"
+      ? [seed, purpose, counter]
+      : [seed, 1, purpose, counter];
+  return {
+    counter,
+    purpose: structuredClone(purpose),
+    value: deterministicNumber(JSON.stringify(seedContext)),
+  };
 }
 
 export function deterministicNumber(input: string): number {
@@ -169,17 +214,17 @@ export function deterministicNumber(input: string): number {
 export function shuffleIds(
   ids: CardInstanceId[],
   seed: string,
-  purpose: string,
+  purpose: RandomPurpose,
   random: { counter: number; records: GameState["randomDrawRecords"] },
 ): CardInstanceId[] {
   assertRandomCursor(random.counter, random.records);
   assertRandomPurpose(purpose);
   const shuffled = ids.slice();
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const value = deterministicNumber(`${seed}:${purpose}:${random.counter}`);
-    random.records.push({ counter: random.counter, purpose, value });
+    const record = createRandomDraw(seed, purpose, random.counter, "engine");
+    appendRandomRecord(random.records, record);
     random.counter += 1;
-    const swapIndex = Math.floor(value * (index + 1));
+    const swapIndex = Math.floor(record.value * (index + 1));
     const current = mustArrayValue(shuffled, index, "Shuffle index missing.");
     shuffled[index] = mustArrayValue(
       shuffled,
@@ -194,7 +239,7 @@ export function shuffleIds(
 export function shuffleStateIds(
   state: GameState,
   ids: CardInstanceId[],
-  purpose: string,
+  purpose: RandomPurpose,
 ): CardInstanceId[] {
   const random = {
     counter: state.randomCounter,
@@ -207,7 +252,7 @@ export function shuffleStateIds(
 
 export function recordRandomMarkers(
   seed: string,
-  purpose: string,
+  purpose: RandomPurpose,
   amount: number,
   random: { counter: number; records: GameState["randomDrawRecords"] },
 ): void {
@@ -216,14 +261,14 @@ export function recordRandomMarkers(
   if (!Number.isSafeInteger(amount) || amount < 0)
     throw new Error("Die Anzahl der Zufallsmarker ist ungültig.");
   for (let index = 0; index < amount; index += 1) {
-    const value = deterministicNumber(`${seed}:${purpose}:${random.counter}`);
-    random.records.push({ counter: random.counter, purpose, value });
+    const record = createRandomDraw(seed, purpose, random.counter, "engine");
+    appendRandomRecord(random.records, record);
     random.counter += 1;
   }
 }
 
-function assertRandomPurpose(purpose: string): void {
-  if (typeof purpose !== "string" || purpose.trim().length === 0)
+function assertRandomPurpose(purpose: RandomPurpose): void {
+  if (!isRandomPurpose(purpose, "engine"))
     throw new Error("Der Zufallszweck fehlt.");
 }
 
@@ -239,25 +284,25 @@ function assertRandomCursor(
     records.length !== counter
   )
     throw new Error("Der Zufallszustand ist nicht replay-konsistent.");
-  records.forEach((record, index) => {
-    if (
-      !record ||
-      typeof record !== "object" ||
-      record.counter !== index ||
-      !Number.isSafeInteger(record.counter) ||
-      typeof record.purpose !== "string" ||
-      record.purpose.trim().length === 0 ||
-      !Number.isFinite(record.value) ||
-      record.value < 0 ||
-      record.value >= 1
-    )
-      throw new Error("Der Zufallsverlauf ist nicht replay-konsistent.");
-  });
+  if (actionRandomPrefixes.get(records) === counter) return;
+  if (!isRandomHistory(counter, records, "engine"))
+    throw new Error("Der Zufallsverlauf ist nicht replay-konsistent.");
+  if (actionRandomPrefixes.has(records))
+    actionRandomPrefixes.set(records, counter);
+}
+
+function appendRandomRecord(
+  records: RandomDrawRecord[],
+  record: RandomDrawRecord,
+): void {
+  records.push(record);
+  if (actionRandomPrefixes.has(records))
+    actionRandomPrefixes.set(records, records.length);
 }
 
 export function recordStateRandomMarkers(
   state: GameState,
-  purpose: string,
+  purpose: RandomPurpose,
   amount: number,
 ): void {
   const random = {

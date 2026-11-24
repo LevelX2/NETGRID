@@ -1,3 +1,4 @@
+import { isMatchEventId } from "@netgrid/shared";
 import type {
   EngineResult,
   EngineRandomizedIceInstallSelectionCommand,
@@ -72,6 +73,13 @@ export function buildReplayEvents(
   });
   const errors: string[] = [];
   for (const event of eventLog) {
+    if (
+      !isMatchEventId(event.eventId) ||
+      event.eventId !== event.stateVersionAfter + 1
+    ) {
+      errors.push(`Invalid match event ID at state version ${event.stateVersionAfter}.`);
+      break;
+    }
     if (event.type === "game_created") continue;
     try {
       sanitizeEventPayloadForSurface(event.publicPayload, "replay_public");

@@ -19,7 +19,7 @@ describe("match ECFE3CE runner decision checkpoints", () => {
       checkpoint.expectation = {
         runTargets: [
           {
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             pathCost: 8,
             creditsAfterRun: 2,
             pathPassability: "reachable",
@@ -49,7 +49,7 @@ function mutateFixture(
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {
   const result = runAiDecisionCheckpoint(checkpoint);
   const remote = evaluateRunnerRunTargets({ input: result.input }).filter(
-    (evaluation) => evaluation.targetServerId === "remote_1",
+    (evaluation) => evaluation.targetServerId === "r1",
   );
   expect(
     result.ok,

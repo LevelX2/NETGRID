@@ -154,10 +154,10 @@ describe("funding routes", () => {
       candidates: [
         liquidCandidate("basic-credit", 1, { repeatable: true }),
         liquidCandidate("bbs-credit", 2, {
-          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          sourceDefinitionId: 521,
         }),
         liquidCandidate("corporate-coup-credit", 3, {
-          sourceDefinitionId: "onr_v1_193_corporate-coup",
+          sourceDefinitionId: 405,
         }),
       ],
       remainingClicks: 3,
@@ -232,7 +232,7 @@ describe("funding routes", () => {
           earliestOwnTurnOffset: 1,
           reliability: "contingent",
           requiredCurrentActionId: "broker-load",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
         },
       ],
     });
@@ -248,6 +248,44 @@ describe("funding routes", () => {
     expect(creditDemandHardBlockerIsResolved(demand, result.bestRoute)).toBe(
       false,
     );
+  });
+
+  it("cannot use tomorrow's gains to pay a current funding action", () => {
+    const demand = createRunnerCreditDemand({
+      demandId: "future-credit-timing",
+      purpose: "breaker_for_current_plan",
+      priority: "acute_hard_plan_blocker",
+      hardness: "hard",
+      deadline: "start_of_next_own_turn",
+      currentCredits: 1,
+      targetCredits: 6,
+    });
+    const paidAction = liquidCandidate("current-paid", 4, { creditCost: 2 });
+    const tomorrow = {
+      projectionId: "tomorrow",
+      netLiquidCreditGain: 3,
+      clickCost: 0,
+      earliestOwnTurnOffset: 1 as const,
+      reliability: "guaranteed" as const,
+    };
+    expect(
+      searchFundingRoutes({
+        demand,
+        candidates: [paidAction],
+        remainingClicks: 1,
+        futureProjections: [tomorrow],
+      }).bestRoute.status,
+    ).toBe("uncovered");
+
+    const result = searchFundingRoutes({
+      demand,
+      candidates: [paidAction, liquidCandidate("today", 1)],
+      remainingClicks: 2,
+      futureProjections: [tomorrow],
+    });
+    expect(result.bestRoute.steps.map((step) => step.ownTurnOffset)).toEqual([
+      0, 0, 1,
+    ]);
   });
 
   it("allows a guaranteed route to cover a hard blocker", () => {
@@ -376,7 +414,7 @@ function liquidCandidate(
     maxCurrentTurnUses?: number;
     reliability?: "guaranteed" | "conditional" | "unknown";
     repeatable?: boolean;
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: number;
   } = {},
 ): FundingActionCandidate {
   const creditCost = options.creditCost ?? 0;
@@ -409,7 +447,7 @@ function storedCreditCandidate(
   return {
     actionId,
     actionType: "activated_card_ability",
-    sourceDefinitionId: "onr_v1_154_broker",
+    sourceDefinitionId: 366,
     economyProjection: projection({
       kind: "stored_credit_build",
       timing: "setup",

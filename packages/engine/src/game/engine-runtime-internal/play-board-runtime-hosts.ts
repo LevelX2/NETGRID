@@ -695,7 +695,8 @@ export function createPlayBoardRuntimeHosts(
           deps.runnerLastTurnInstalledResourceIds(state),
         isConcealedRunnerResource: (cardId) =>
           isConcealedRunnerResource(state, cardId),
-        hiddenRunnerResourceSlotId,
+        hiddenRunnerResourceSlotId: (cardId) =>
+          hiddenRunnerResourceSlotId(state, cardId),
       },
       economy: {
         gainCorpCredits: (amount) => credits(state, "corp", amount),
@@ -857,7 +858,8 @@ export function createPlayBoardRuntimeHosts(
           resolveHiddenRunnerResourceSlot(state, slotId),
         isConcealedRunnerResource: (cardId) =>
           isConcealedRunnerResource(state, cardId),
-        hiddenRunnerResourceSlotId,
+        hiddenRunnerResourceSlotId: (cardId) =>
+          hiddenRunnerResourceSlotId(state, cardId),
         trashInstalledCardToHeap: (cardId, legalAction) =>
           deps.trashRunnerInstalledCardToHeap(state, cardId, legalAction),
       },

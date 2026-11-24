@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -29,6 +30,23 @@ describe("Corp HQ retain payment choice", () => {
     );
 
     expect(selected).toEqual(["card_high"]);
+  });
+
+  it("selects the exact best affordable group from a large pre-cleanup HQ", () => {
+    const cards = Array.from({ length: 24 }, (_, index) =>
+      card(String(index), String(index)),
+    );
+    const input = corpInput(cards, 29);
+    const choice = input.playerView.pendingChoice!;
+    const selected = selectedCorpHqRetainPaymentOptionIds(
+      input,
+      choice,
+      choice.options,
+      (_input, candidate) => ({ total: Number(candidate.instanceId) }),
+    );
+    expect(selected).toEqual(
+      Array.from({ length: 12 }, (_, index) => "card_" + (23 - index)),
+    );
   });
 
   it("keeps all valuable cards when credits cover both payment and reserve", () => {
@@ -116,7 +134,7 @@ function corpInput(cards: VisibleCard[], credits: number): AiDecisionInput {
 function card(instanceId: string, title: string): VisibleCard {
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     title,
     known: true,
   };
@@ -149,28 +167,35 @@ function retain(input: AiDecisionInput) {
   expect(JSON.stringify(input)).toBe(before);
   return selected!;
 }
+function retainedDefinitionIds(input: AiDecisionInput) {
+  const { own, pendingChoice } = input.playerView;
+  return retain(input).map((id) => {
+    const option = pendingChoice!.options.find((candidate) => candidate.id === id);
+    const card = own.gripOrHq.find((candidate) => candidate.instanceId === option?.value);
+    return card?.definitionId;
+  });
+}
 describe("terminal open Archives retention (SP-686)", () => {
   it("pays only for the one agenda needed to remove terminal exposure", () => {
     const input = nativeRetain();
-    expect(retain(input)).toHaveLength(1);
-    expect(retain(input)[0]).toMatch(/corporate-coup|political-coup/);
+    const retained = retainedDefinitionIds(input);
+    expect(retained).toHaveLength(1);
+    expect([405, 421]).toContain(retained[0]);
   });
   it("prefers the safe same-cost set over high-value ICE", () => {
     const input = nativeRetain();
     input.playerView.own.credits = 7;
     input.playerView.pendingChoice!.maxSelections = 3;
-    expect(retain(input)).toHaveLength(1);
-    expect(retain(input)[0]).toMatch(/corporate-coup|political-coup/);
+    const retained = retainedDefinitionIds(input);
+    expect(retained).toHaveLength(1);
+    expect([405, 421]).toContain(retained[0]);
   });
   it("pays for two cards only when one cannot remove terminal exposure", () => {
     const input = nativeRetain();
     input.playerView.opponent.agendaPoints = 5;
     input.playerView.own.credits = 4;
     input.playerView.pendingChoice!.maxSelections = 2;
-    expect(retain(input)).toHaveLength(2);
-    expect(
-      retain(input).every((id) => /corporate-coup|political-coup/.test(id)),
-    ).toBe(true);
+    expect(retainedDefinitionIds(input).sort()).toEqual([405, 421]);
   });
   it("keeps the reserve when no payable set can remove terminal exposure", () => {
     const input = nativeRetain();

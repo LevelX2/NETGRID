@@ -7,6 +7,7 @@ import {
   validateGameState,
 } from "@netgrid/engine";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import type { PlayerAction } from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
@@ -41,6 +42,7 @@ it("keeps the Stack-bound Rent-I-Con target through the real source and target E
   );
   let state = read("meta592-r3-g29-engine").state,
     current = input;
+  const commands: PlayerAction[] = [];
   const root = cp.runtime.residentPlanPortfolio.rootForegroundInstanceId;
   for (const n of [0, 1]) {
     const before = JSON.stringify(current),
@@ -61,8 +63,8 @@ it("keeps the Stack-bound Rent-I-Con target through the real source and target E
         current.playerView.pendingChoice!.options.find(
           (o: any) => o.id === selectedOptionIds?.[0],
         )?.card?.definitionId,
-      ).toBe("onr_classic_031_rent-i-con");
-    const result = applyAction(state, {
+      ).toBe(35);
+    const command: PlayerAction = {
       matchId: state.matchId,
       side: "runner",
       actionId: decision.actionId,
@@ -70,9 +72,11 @@ it("keeps the Stack-bound Rent-I-Con target through the real source and target E
       ...(decision.selectedChoices
         ? { selectedChoices: decision.selectedChoices }
         : {}),
-    });
+    };
+    const result = applyAction(state, command);
     if (!result.ok) throw Error(JSON.stringify(result.error));
     state = result.state;
+    commands.push(structuredClone(command));
     current = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",
       ownDeckSnapshot: input.ownDeckSnapshot,
@@ -81,16 +85,22 @@ it("keeps the Stack-bound Rent-I-Con target through the real source and target E
   }
   expect(
     getPlayerView(state, "runner").own.rig?.some(
-      (c) => c.definitionId === "onr_classic_031_rent-i-con",
+      (c) => c.definitionId === 35,
     ),
   ).toBe(true);
   expect(
     getPlayerView(state, "runner").own.rig?.some(
-      (c) => c.definitionId === "onr_v1_011_cloak",
+      (c) => c.definitionId === 223,
     ),
   ).toBe(false);
   expect(validateGameState(state).ok).toBe(true);
-  expect(hashGameState(state)).toBe("fnv1a:a78ed387");
+  let replayed = read("meta592-r3-g29-engine").state;
+  for (const command of commands) {
+    const result = applyAction(replayed, command);
+    if (!result.ok) throw Error(JSON.stringify(result.error));
+    replayed = result.state;
+  }
+  expect(hashGameState(state)).toBe(hashGameState(replayed));
 });
 it.each([
   "wrong_source",
@@ -101,6 +111,9 @@ it.each([
   "missing_target",
   "duplicate_binding",
   "missing_state",
+  "missing_search_action",
+  "missing_search_version",
+  "invalid_search_version",
   "wrong_root",
   "unavailable_heap_target",
 ])("rejects an unbound source choice: %s", (variant) => {
@@ -124,6 +137,9 @@ it.each([
   if (variant === "duplicate_binding")
     state.gap.directSearchChoiceBindings.push(structuredClone(binding));
   if (variant === "missing_state") delete executor.moduleState;
+  if (variant === "missing_search_action") delete state.selectedSearchActionId;
+  if (variant === "missing_search_version") delete state.selectedSearchStateVersion;
+  if (variant === "invalid_search_version") state.selectedSearchStateVersion = Number.NaN;
   if (variant === "wrong_root") portfolio.rootForegroundInstanceId = "other";
   if (variant === "unavailable_heap_target")
     binding.targetCardInstanceId = "absent-program";

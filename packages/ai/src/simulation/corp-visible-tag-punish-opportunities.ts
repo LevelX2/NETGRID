@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  CorpPunishRouteQuote,
+  LegalAction,
+} from "@netgrid/shared";
 
 import type {
   CorpPunishKind,
@@ -9,7 +13,7 @@ export type CorpVisibleTagPunishOpportunity = {
   action: LegalAction;
   kind: CorpPunishKind;
   category: CorpVisibleTagPayoffCategory;
-  cardId: string | undefined;
+  cardId: number | undefined;
 };
 
 export type CorpVisibleTagPunishOpportunityContextDependencies = {
@@ -25,7 +29,7 @@ export type CorpVisibleTagPunishOpportunityContextDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string;
+  ) => number | undefined;
 };
 
 export function createCorpVisibleTagPunishOpportunityContext(
@@ -64,4 +68,22 @@ export function createCorpVisibleTagPunishOpportunityContext(
   }
 
   return { corpVisibleTagPunishOpportunities };
+}
+
+export function visibleCurrentPunishDamageQuote(
+  input: AiDecisionInput,
+  opportunity: CorpVisibleTagPunishOpportunity,
+): CorpPunishRouteQuote | undefined {
+  const view = input.playerView;
+  const handCount = view.opponent.handCount;
+  return view.corpPunishRouteQuoteSet?.routes.find(
+    (route) =>
+      route.complete &&
+      route.stateVersion === view.stateVersion &&
+      route.timingPoint === view.timingPoint &&
+      route.steps.length === 1 &&
+      route.steps[0]?.currentLegalAction?.actionId ===
+        opportunity.action.actionId &&
+      route.damageEnvelope.runnerHandCount === handCount,
+  );
 }

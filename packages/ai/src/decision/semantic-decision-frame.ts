@@ -1,6 +1,6 @@
 import type { AiDecisionInput, Side } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
+import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-diagnostic";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import type {

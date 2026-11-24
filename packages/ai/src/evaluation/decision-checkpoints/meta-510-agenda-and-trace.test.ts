@@ -6,7 +6,7 @@ import {
   getPlayerView,
   hashGameState,
 } from "@netgrid/engine";
-import type { GameState } from "@netgrid/shared";
+import type { GameState, LegalAction } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -72,11 +72,11 @@ it.each(["g13d70", "g22d65", "g29d120", "g38d80"])(
       .find(
         (c: { instanceId: string; effectiveRunQuote?: unknown }) =>
           c.effectiveRunQuote &&
-          input.playerView.pendingChoice.source.includes(c.instanceId),
+          input.eventTail.at(-1)?.publicPayload.traceSourceCardInstanceId === c.instanceId,
       )!;
     expect(source.rezzed).toBe(true);
     expect(source.effectivePostRezRunQuote).toBeUndefined();
-    expect(decision.actionId).toBe("corp.resolve_choice");
+    expect(decision.actionId).toBe("cn");
     expect(decision.selectedChoices).toEqual({
       choiceId: input.playerView.pendingChoice.choiceId,
       selectedOptionIds: input.playerView.pendingChoice.options.map(
@@ -84,10 +84,16 @@ it.each(["g13d70", "g22d65", "g29d120", "g38d80"])(
       ),
     });
     expect(decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     const before = load(key + "-engine") as GameState;
     expect(hashGameState(before)).toBe(cp.stateHash);
+    const completion = getPlayerView(before, "corp").publicEvents.at(-1)!;
+    expect(input.eventTail.at(-1)?.publicPayload).toMatchObject({
+      traceId: completion.publicPayload.traceId,
+      traceSuccessful: true,
+    });
+    expect(completion.publicPayload.traceSuccessful).toBe(true);
     const run = () => {
       expect(decision.selectedChoices).toBeDefined();
       const result = applyAction(structuredClone(before), {
@@ -122,6 +128,8 @@ it.each([
   "subroutine",
   "unknown_rez",
   "event",
+  "trace_id",
+  "trace_outcome",
   "choice_state",
   "action_state",
   "option_binding",
@@ -131,10 +139,11 @@ it.each([
   (kind) => {
     const { input } = native("g13d70");
     const choice = input.playerView.pendingChoice;
+    const payload = input.eventTail.at(-1).publicPayload;
     const source = input.playerView.servers
       .flatMap((s: { ice: any[] }) => s.ice)
       .find((c: { instanceId: string }) =>
-        choice.source.includes(c.instanceId),
+        payload.traceSourceCardInstanceId === c.instanceId,
       )!;
     const current = source.effectiveRunQuote;
     // Even a complete hypothetical quote is not authority for an actually rezzed source.
@@ -142,7 +151,7 @@ it.each([
       .input.playerView.servers.flatMap((s: { ice: any[] }) => s.ice)
       .find(
         (c: { instanceId: string }) =>
-          c.instanceId === "corp_onr_v1_228_cinderella_1",
+          c.instanceId === "c2px",
       );
     const hypothetical = structuredClone(derezzed.effectivePostRezRunQuote);
     hypothetical.cardId = source.instanceId;
@@ -158,10 +167,14 @@ it.each([
       current.subroutines[0].traceSuccessEffect = { type: "none" };
     if (kind === "amount") current.subroutines[0].traceSuccessEffect.amount = 0;
     if (kind === "subroutine")
-      choice.source = choice.source.replace(".0.trace", ".9.trace");
+      payload.traceSourceSubroutineIndex = 9;
     if (kind === "unknown_rez") delete source.rezzed;
     if (kind === "event")
       input.eventTail.at(-1).publicPayload.traceStep = "corp_bid";
+    if (kind === "trace_id")
+      payload.traceId++;
+    if (kind === "trace_outcome")
+      input.eventTail.at(-1).publicPayload.traceSuccessful = false;
     if (kind === "choice_state") choice.stateVersion--;
     if (kind === "action_state") input.legalActions[0].expiresAtStateVersion--;
     if (kind === "option_binding")
@@ -177,13 +190,13 @@ it.each([
 
 it("removes imaginary protection and selects the existing funded advance at g7d343", () => {
   const key = "g7d343";
-  const { cp, decision } = assertOwnedDecision(key, "corp.score_agenda");
+  const { cp, input, decision } = assertOwnedDecision(key, "corp.score_agenda");
   const before = load(key + "-before").decision;
   expect(before.decisionDebug.planFirstDecision.selectedPlan.moduleId).toBe(
     "corp.score_agenda",
   );
   expect(decision.actionId).not.toBe(before.actionId);
-  expect(decision.actionId).toMatch(/^corp\.advance_card\./);
+  expect(input.legalActions.find((action: LegalAction) => action.actionId === decision.actionId)?.type).toBe("advance_card");
   const state = load(key + "-engine") as GameState;
   expect(hashGameState(state)).toBe(cp.stateHash);
   expect(
@@ -201,9 +214,13 @@ it("removes imaginary protection and selects the existing funded advance at g7d3
 });
 
 it("preserves the separately owned deckout-flood action at g11d307", () => {
-  const { decision } = assertOwnedDecision("g11d307", "corp.score_agenda");
-  expect(decision.actionId).toBe(
-    "corp.install_card.corp_onr_v1_188_ai-chief-financial-officer_1.new_remote.corp_onr_v1_188_ai-chief-financial-officer_1",
+  const { input, decision } = assertOwnedDecision("g11d307", "corp.score_agenda");
+  const state = load("g11d307-engine") as GameState;
+  const selected = input.legalActions.find((action: LegalAction) => action.actionId === decision.actionId);
+  expect(selected).toMatchObject({ type: "install_card", payload: { serverId: "new_remote" } });
+  expect(state.cardInstances[selected!.source]?.definitionId).toBe(400);
+  expect(decision.decisionDebug?.planFirstDecision?.selectedPlan?.dedupeKey).toBe(
+    `agenda:${selected!.source}:new_remote`,
   );
   expect(decision.evidence).toContain(
     "plan_assessment_evidence:corp_deckout_agenda_flood_score_install:new_remote",
@@ -229,7 +246,7 @@ it("preserves the separately owned deckout-flood action at g11d307", () => {
         firstActionId: load("g11d307-before").decision.actionId,
         evidenceCodes: expect.arrayContaining([
           "agenda_line_family:pure_rush",
-          "root_plan_instance:plan:corp.score_agenda:agenda%3Acorp_onr_v1_204_ice-transmutation_3%3Anew_remote",
+          "root_plan_instance:pcn8y4ue3kd70r09402sanhrln",
         ]),
       }),
     ]),
@@ -237,9 +254,9 @@ it("preserves the separately owned deckout-flood action at g11d307", () => {
 });
 
 it("keeps a genuinely funded same-turn advancement and score project", () => {
-  const { decision } = assertOwnedDecision("g30d334", "corp.score_agenda");
+  const { input, decision } = assertOwnedDecision("g30d334", "corp.score_agenda");
   expect(decision.actionId).toBe(load("g30d334-before").decision.actionId);
-  expect(decision.actionId).toMatch(/^corp\.advance_card\./);
+  expect(input.legalActions.find((action: LegalAction) => action.actionId === decision.actionId)?.type).toBe("advance_card");
   let state = load("g30d334-engine") as GameState;
   for (const row of load("funded-score-finite-control").rows) {
     expect(hashGameState(state)).toBe(row.beforeHash);
@@ -288,9 +305,9 @@ it.each([
     expect(getPlayerView(state, "runner").own.agendaPoints).toBe(6);
     expect(getPlayerView(state, "corp").own.agendaPoints).toBe(0);
     expect(state.corp.hq).toContain(
-      "corp_onr_v1_191_black-ice-quality-assurance_2",
+      "c2hq",
     );
-    expect(state.corp.servers.some((s) => s.id === "remote_2")).toBe(false);
+    expect(state.corp.servers.some((s) => s.id === "r2")).toBe(false);
     expect(state.winner).toBeNull();
   },
 );

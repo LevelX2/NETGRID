@@ -1,6 +1,10 @@
 import type { GuaranteeLevel } from "../../plans/plan-assessment";
+import { compactCampaignId, type CampaignIdentity } from "../../plans/compact-plan-identity";
 
-export const PUNISH_PAYOFF_CAMPAIGN_ID = "corp-punish:engine-certified-payoff";
+export const PUNISH_PAYOFF_CAMPAIGN_ID = compactCampaignId({
+  ownerModuleId: "corp.punish_campaign",
+  objectiveKey: "engine-certified-payoff",
+});
 
 export type CorpPunishDrawNeed = Readonly<{
   needId: string;
@@ -19,6 +23,7 @@ export type CorpPunishDrawNeed = Readonly<{
 
 export type CorpPunishCampaignSignal = {
   campaignId: string;
+  identity: CampaignIdentity;
   phase:
     | "prepare"
     | "watch_window"
@@ -28,7 +33,7 @@ export type CorpPunishCampaignSignal = {
     | "tag"
     | "damage"
     | "kill";
-  sourceDefinitionIds: string[];
+  sourceDefinitionIds: number[];
   actionIds?: string[];
   initiatingSemanticActionType?: string;
   feasible: boolean;
@@ -58,7 +63,7 @@ export type CorpPunishCampaignSignal = {
     currentHeadActionId?: string;
     traceBidBinding?: {
       sourceCardInstanceId: string;
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       quotedAtStateVersion: number;
       amount: number;
     };

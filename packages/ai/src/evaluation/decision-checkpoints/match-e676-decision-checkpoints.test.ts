@@ -16,7 +16,7 @@ describe("match e676 exact decision checkpoints", () => {
       [
         "plan_module:corp.economy",
         "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_score_protection_required:remote_1",
+        "plan_assessment_evidence:corp_score_protection_required:r1",
       ],
     ],
     [
@@ -41,7 +41,7 @@ describe("match e676 exact decision checkpoints", () => {
       acceptableActions: [
         {
           actionId:
-            "corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.rd.corp_onr_v1_243_fetch-4-0-1_2.2",
+            "cc.c2ta.rd.c2ta.2",
         },
       ],
       forbiddenActions: [{ type: "rez_card", sourceDefinitionId: CHESTER_MIX }],
@@ -49,7 +49,7 @@ describe("match e676 exact decision checkpoints", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["allocate_server_defense"],
         requiredAssessmentEvidence: [
-          "corp_score_material_capacity_release:rd:corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.rd.corp_onr_v1_243_fetch-4-0-1_2.2",
+          "corp_score_material_capacity_release:rd:cc.c2ta.rd.c2ta.2",
         ],
       },
     };
@@ -99,11 +99,10 @@ describe("match e676 exact decision checkpoints", () => {
   it("does not force Chester Mix without a same-fort ICE opportunity", () => {
     const noHqIce = mutateFixture(chesterBeforeHqIceJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
-      const movedIce = state.corp.hq.filter((cardId) =>
-        HQ_ICE_DEFINITION_IDS.has(
-          state.cardInstances[cardId]?.definitionId ?? "",
-        ),
-      );
+      const movedIce = state.corp.hq.filter((cardId) => {
+        const definitionId = state.cardInstances[cardId]?.definitionId;
+        return definitionId !== undefined && HQ_ICE_DEFINITION_IDS.has(definitionId);
+      });
       if (movedIce.length === 0) {
         throw new Error("Missing HQ ICE counterprobe cards");
       }
@@ -154,15 +153,15 @@ describe("match e676 exact decision checkpoints", () => {
   });
 });
 
-const TYCHO_EXTENSION = "onr_v1_220_tycho-extension";
-const CHESTER_MIX = "onr_v1_352_chester-mix";
-const NIGHT_SHIFT = "onr_v1_295_night-shift";
-const PROJECT_CONSULTANTS = "onr_v1_300_project-consultants";
+const TYCHO_EXTENSION = 432;
+const CHESTER_MIX = 564;
+const NIGHT_SHIFT = 507;
+const PROJECT_CONSULTANTS = 512;
 const HQ_ICE_DEFINITION_IDS = new Set([
-  "onr_v1_243_fetch-4-0-1",
-  "onr_v1_247_haunting-inquisition",
-  "onr_v1_254_liche",
-  "onr_v1_278_wall-of-ice",
+  455,
+  459,
+  466,
+  490,
 ]);
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

@@ -43,7 +43,7 @@ describe("ReplayAcceptanceHarness", () => {
     );
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
     expect(renderReplayAcceptanceHarnessMarkdown(report)).toContain(
-      "Abnahme unvollstaendig",
+      "Die Abnahme ist unvollständig.",
     );
     expect(renderReplayAcceptanceHarnessMarkdown(report)).toContain(
       "challenger_action_why_not:known_no_current_payoff",
@@ -61,6 +61,9 @@ describe("ReplayAcceptanceHarness", () => {
     );
 
     expect(report.status).toBe("blocked");
+    expect(report.conclusions).toContain(
+      "Die Abnahme ist durch eine fehlgeschlagene Pflichtprüfung blockiert.",
+    );
   });
 
   it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 1.5])(
@@ -154,8 +157,7 @@ function caseEntry(
     split,
     source: {
       matchId: `match-${caseId}`,
-      traceId: `trace-${caseId}`,
-      eventId: `event-${caseId}`,
+      eventId: 1,
       mode: "human_corp_vs_runner_ai",
       status: "finished",
       stateVersion: 13,
@@ -194,7 +196,7 @@ function caseEntry(
     },
     reproducibility: {
       stateVersion: 13,
-      eventId: `event-${caseId}`,
+      eventId: 1,
       decisionIndex: 2,
       requiresLocalRuntimeState: true,
       legalActionReconstructionRequired: true,

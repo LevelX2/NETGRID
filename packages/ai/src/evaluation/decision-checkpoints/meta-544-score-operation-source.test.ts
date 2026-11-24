@@ -25,10 +25,10 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const SYS = "onr_v1_304_systematic-layoffs";
-const RETREAT = "onr_v1_195_corporate-retreat";
-const MARINE = "onr_v1_206_marine-arcology";
-const OVERTIME = "onr_v1_297_overtime-incentives";
+const SYS = 516;
+const RETREAT = 407;
+const MARINE = 418;
+const OVERTIME = 509;
 afterEach(resetResidentPlanPortfolioMemory);
 
 function native(game: number, decision: number) {
@@ -85,10 +85,10 @@ function decide(cp: ReturnType<typeof native>) {
 }
 it.each([
   [11, 60, RETREAT],
-  [16, 201, "onr_proteus_007_project-venice"],
+  [16, 201, 65],
   [22, 197, RETREAT],
-  [35, 170, "onr_proteus_007_project-venice"],
-  [40, 214, "onr_proteus_007_project-venice"],
+  [35, 170, 65],
+  [40, 214, 65],
 ] as const)(
   "does not score the four-counter agenda with one duplicated operation in native G%i D%i",
   (game, decision, definitionId) => {
@@ -123,7 +123,7 @@ it("retains the fully quoted cheaper Marine closeout and Zurich's real one-opera
   restore(cp);
   const { action } = decide(cp);
   expect(action.type).toBe("advance_card");
-  expect(action.source).toBe("corp_onr_v1_206_marine-arcology_1");
+  expect(action.source).toBe("c2l1");
   const paths = corpSameTurnScoreConversionPaths(cp.input);
   const resident = paths.find((p) => p.agendaCardId === action.source)!;
   expect(resident).toMatchObject({ clicksRequired: 3, creditsRequired: 3 });
@@ -136,7 +136,7 @@ it("retains the fully quoted cheaper Marine closeout and Zurich's real one-opera
   // Zurich remains realizable with one operation, but costs six. The complete
   // resident quote must not receive another advancement suffix.
   const path = paths.find(
-    (p) => p.agendaCardId === "corp_onr_proteus_008_project-zurich_1",
+    (p) => p.agendaCardId === "cet",
   )!;
   expect(path).toMatchObject({ clicksRequired: 3, creditsRequired: 6 });
   expect(path.steps.map((s) => s.kind)).toEqual([
@@ -154,15 +154,15 @@ it("preserves that choice across the actual consecutive Corp decision inputs", (
     cp = native(11, 60);
   restore(previous);
   const end = chooseAiAction(previous.input);
-  expect(end.actionId).toBe("corp.end_turn");
+  expect(end.actionId).toBe("c9");
   const { action } = decide(cp);
   expect(action.type).toBe("advance_card");
-  expect(action.source).toBe("corp_onr_v1_206_marine-arcology_1");
+  expect(action.source).toBe("c2l1");
 });
 it("keeps the genuine current acceleration when two remaining actions need it", () => {
   const cp = native(11, 61);
   const marine = corpSameTurnScoreConversionPaths(cp.input).find(
-    (p) => p.agendaCardId === "corp_onr_v1_206_marine-arcology_1",
+    (p) => p.agendaCardId === "c2l1",
   )!;
   expect(marine).toMatchObject({ clicksRequired: 2, creditsRequired: 6 });
   expect(marine.steps.map((s) => s.kind)).toEqual([
@@ -171,19 +171,19 @@ it("keeps the genuine current acceleration when two remaining actions need it", 
     "score_ready",
   ]);
   restore(cp);
-  expect(decide(cp).action.source).toBe("corp_onr_v1_304_systematic-layoffs_1");
+  expect(decide(cp).action.source).toBe("c36t");
 });
 it("retains the funded eleven-credit terminal-defense reserve in native G40", () => {
   const cp = native(40, 214);
   const marine = corpSameTurnScoreConversionPaths(cp.input).find(
-    (p) => p.agendaCardId === "corp_onr_v1_206_marine-arcology_1",
+    (p) => p.agendaCardId === "c2l1",
   )!;
   expect(marine.creditsRequired).toBe(3);
   expect(cp.input.playerView.own.credits - marine.creditsRequired).toBe(11);
   restore(cp);
   const { action } = decide(cp);
   expect(action.type).toBe("advance_card");
-  expect(action.source).toBe("corp_onr_v1_206_marine-arcology_1");
+  expect(action.source).toBe("c2l1");
 });
 
 const corpDeck = {
@@ -237,7 +237,7 @@ function engineFixture(
     .withCorpHqSize(0)
     .withCorpCredits(credits)
     .withCorpCardInHq(RETREAT);
-  if (resident) builder.withCorpRemoteRoot("remote_1", MARINE);
+  if (resident) builder.withCorpRemoteRoot("r1", MARINE);
   if (overtime) builder.withCorpCardInHq(OVERTIME);
   const sources = state.corp.rd
     .filter((id) => state.cardInstances[id]!.definitionId === SYS)

@@ -6,6 +6,7 @@ import {
 } from "node:http";
 import { networkInterfaces } from "node:os";
 import { HttpConnectionDrain } from "./http-connection-drain";
+import { AiDecisionWorkerPool } from "./ai-decision-worker-pool";
 import { timingSafeEqual } from "node:crypto";
 import { WebSocket, WebSocketServer } from "ws";
 import { isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
@@ -14,12 +15,17 @@ import type {
   ApiAccountActivePublicMatchIds,
   ApiMatchCardPool,
   ApiUserErrorPayload,
+  MatchActionSubmission,
+  MatchEventId,
+  PlayerView,
 } from "@netgrid/shared";
 import {
   isApiUserErrorCode,
+  isMatchOfferId,
   runtimeProfileFromEnvironment,
   testCardsEnabledFromEnvironment,
 } from "@netgrid/shared";
+import { buildMatchPlayerOffer } from "@netgrid/engine";
 import {
   createConnectionAuditLoggerFromEnv,
   noopConnectionAuditLogger,
@@ -130,6 +136,8 @@ const MAINTENANCE_DECISION_ANALYSIS_ROUTE =
   /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/decisions\/(\d+)$/;
 const MAINTENANCE_AI_TRACE_INDEX_ROUTE =
   /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)$/;
+const MAINTENANCE_AI_TRACE_DETAIL_ROUTE =
+  /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)\/decisions\/([1-9]\d*)$/;
 const CARD_IMAGE_MAINTENANCE_JOB_ROUTE =
   /^\/api\/storage\/maintenance\/card-images\/jobs\/([^/]+)$/;
 
@@ -158,19 +166,15 @@ type ClientWsMessage =
     }
   | {
       type: "submit_action";
-      payload: {
-        matchId: string;
-        side: Side;
-        actionId: string;
-        clientKnownStateVersion: number;
-        idempotencyKey: string;
-        selectedTargets?: Record<string, string>;
-        selectedChoices?: Record<string, unknown>;
-      };
+      payload: MatchActionSubmission;
     }
   | {
       type: "request_undo";
-      payload: { targetEventId: string; reason?: string };
+      payload: {
+        targetEventId: MatchEventId;
+        clientKnownMatchVersion: number;
+        reason?: string;
+      };
     }
   | { type: "accept_undo"; payload: { undoRequestId: string } }
   | { type: "decline_undo"; payload: { undoRequestId: string } }
@@ -416,6 +420,7 @@ export class NetgridRealtimeServer {
           side: context.side,
           sessionToken: context.sessionToken,
           targetEventId: message.payload.targetEventId,
+          clientKnownMatchVersion: message.payload.clientKnownMatchVersion,
           ...(message.payload.reason ? { reason: message.payload.reason } : {}),
         }),
       );
@@ -536,12 +541,13 @@ export class NetgridRealtimeServer {
     context: WsContext,
     payload: Extract<ClientWsMessage, { type: "submit_action" }>["payload"],
   ): Promise<void> {
-    const result = await this.service.submitAction({
+    const result = await this.service.submitActionOffer({
       matchId: context.matchId,
       side: context.side,
       sessionToken: context.sessionToken,
       actionId: payload.actionId,
       clientKnownStateVersion: payload.clientKnownStateVersion,
+      clientKnownMatchVersion: payload.clientKnownMatchVersion,
       idempotencyKey: payload.idempotencyKey,
       ...(payload.selectedTargets
         ? { selectedTargets: payload.selectedTargets }
@@ -716,23 +722,7 @@ export class NetgridRealtimeServer {
       false,
     );
     if ("error" in disconnected) return;
-    if (isLobbyPayload(disconnected)) {
-      await this.sendOpponentBootstrap(
-        context.matchId,
-        opposite(context.side),
-        { side: context.side, connected: false },
-      );
-      return;
-    }
-    if (isTerminalSidePayload(disconnected)) {
-      await this.sendOpponentBootstrap(
-        context.matchId,
-        opposite(context.side),
-        { side: context.side, connected: false },
-      );
-      return;
-    }
-    this.sendOpponentStatus(context.matchId, opposite(context.side), {
+    await this.sendOpponentBootstrap(context.matchId, opposite(context.side), {
       side: context.side,
       connected: false,
     });
@@ -781,17 +771,6 @@ export class NetgridRealtimeServer {
   private broadcastPayload(payload: ServicePayload): void {
     const connection = this.connection(payload.matchId, payload.side);
     sendBootstrap(connection?.socket, payload);
-  }
-
-  private sendOpponentStatus(
-    matchId: string,
-    side: Side,
-    status: SidePayload["opponentStatus"],
-  ): void {
-    send(this.connection(matchId, side)?.socket, {
-      type: "opponent_status",
-      payload: status,
-    });
   }
 
   private async sendOpponentBootstrap(
@@ -1013,8 +992,17 @@ export async function startNetgridServer(
     accountStatistics?: AccountMatchStatisticsService;
   } = {},
 ): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
+  const deploymentConfig = loadDeploymentConfig();
+  const service = options.service ?? defaultService(deploymentConfig);
+  try {
+    await service.warmUpAiWorker();
+  } catch (error) {
+    service.closeStorage();
+    throw error;
+  }
   const accountDecks = options.accountDecks ?? createConfiguredAccountDecks();
-  const handle = createNetgridHttpServer(options.service, {
+  const handle = createNetgridHttpServer(service, {
+    deploymentConfig,
     accountAuth: options.accountAuth ?? createConfiguredAccountAuth(),
     accountDecks,
     accountMatchStartPreferences:
@@ -2875,13 +2863,21 @@ async function routeHttp(
     }
 
     const maintenanceAiTraceDetailRoute =
-      /^\/api\/storage\/maintenance\/ai-decision-traces\/([^/]+)$/.exec(
-        url.pathname,
-      );
+      MAINTENANCE_AI_TRACE_DETAIL_ROUTE.exec(url.pathname);
     if (maintenanceAiTraceDetailRoute && request.method === "GET") {
-      const traceId = decodeURIComponent(
+      const matchId = decodeURIComponent(
         maintenanceAiTraceDetailRoute[1] ?? "",
       );
+      const decisionIndex = Number(maintenanceAiTraceDetailRoute[2]);
+      if (!Number.isSafeInteger(decisionIndex)) {
+        sendJson(response, 400, {
+          error: {
+            code: "invalid_decision_index",
+            message: "Die KI-Entscheidungsnummer ist ungültig.",
+          },
+        });
+        return;
+      }
       if (
         !checkRateLimit(
           response,
@@ -2889,12 +2885,14 @@ async function routeHttp(
           "token_probe",
           request,
           deploymentConfig,
-          `storage-maintenance-ai-trace-detail:${traceId}`,
+          `storage-maintenance-ai-trace-detail:${matchId}`,
         )
       )
         return;
-      const trace =
-        await service.storageMaintenanceAiDecisionTraceDetail(traceId);
+      const trace = await service.storageMaintenanceAiDecisionTraceDetail(
+        matchId,
+        decisionIndex,
+      );
       if (!trace) {
         sendJson(response, 404, {
           error: {
@@ -2979,7 +2977,10 @@ async function routeHttp(
       if (probeText !== null) {
         if (probeText.length > 16384) {
           sendJson(response, 400, {
-            error: { code: "engine_probe_request_invalid", message: "Die Gegenprobe ist zu groß." },
+            error: {
+              code: "engine_probe_request_invalid",
+              message: "Die Gegenprobe ist zu groß.",
+            },
           });
           return;
         }
@@ -3489,7 +3490,7 @@ async function routeHttp(
             bindingSource: "authenticated_create",
           });
         }
-        sendJson(response, 201, created);
+        sendJson(response, 201, localeNeutralServiceResult(created));
       } catch (error) {
         if (error instanceof UpdateAdmissionError) throw error;
         sendJson(response, 400, {
@@ -3936,7 +3937,7 @@ async function routeHttp(
           response,
           result.ok && result.newMatch ? 201 : result.ok ? 200 : 409,
           result.ok && result.newMatch
-            ? result.newMatch
+            ? localeNeutralServiceResult(result.newMatch)
             : localeNeutralServiceResult(result),
         );
         return;
@@ -4073,7 +4074,7 @@ async function routeHttp(
         if (advanced.ok) {
           sendJson(response, 200, {
             ok: true,
-            requesterPayload: advanced.requesterPayload,
+            requesterPayload: localeNeutralServiceResult(advanced.requesterPayload),
             ...(advanced.publicEvent
               ? { publicEvent: advanced.publicEvent }
               : {}),
@@ -4256,6 +4257,7 @@ function defaultService(
     publicWebBaseUrl: deploymentConfig.webBaseUrl,
     publicServerBaseUrl: deploymentConfig.serverBaseUrl,
     allowHiddenInfoUndo: deploymentConfig.profile === "local",
+    aiDecisionWorkers: new AiDecisionWorkerPool(2),
   });
 }
 
@@ -4489,63 +4491,12 @@ function sendBootstrap(
   }
   send(socket, {
     type: "state_update",
-    payload: {
-      matchStatus: payload.matchStatus,
-      matchVersion: payload.matchVersion,
-      playerView: payload.playerView,
-      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
-      pendingUndo: payload.pendingUndo ?? null,
-    },
+    payload: { ...payload, playerView: buildMatchPlayerOffer(payload.playerView) },
   });
-  send(socket, {
-    type: "legal_actions",
-    payload: {
-      stateVersion: payload.playerView.stateVersion,
-      legalActions: payload.legalActions,
-    },
-  });
-  send(socket, {
-    type: "choice_request",
-    payload: { choice: payload.pendingChoice ?? null },
-  });
-  send(socket, {
-    type: "event_log_update",
-    payload: { events: payload.eventTail },
-  });
-  send(socket, { type: "opponent_status", payload: payload.opponentStatus });
-  send(socket, {
-    type: "ai_turn",
-    payload: payload.aiTurnPresentation ?? null,
-  });
-  if (payload.pendingUndo)
-    send(socket, { type: "undo_request", payload: payload.pendingUndo });
-  if (payload.winner && payload.finalStateHash)
-    send(socket, {
-      type: "match_finished",
-      payload: {
-        matchStatus: payload.matchStatus,
-        winner: payload.winner,
-        finalStateHash: payload.finalStateHash,
-        ...(payload.resultSummary
-          ? { resultSummary: payload.resultSummary }
-          : {}),
-      },
-    });
 }
 
 function isLobbyPayload(payload: ServicePayload): payload is LobbyPayload {
   return !("playerView" in payload);
-}
-
-function isTerminalSidePayload(
-  payload: ServicePayload,
-): payload is SidePayload {
-  return (
-    "playerView" in payload &&
-    (payload.matchStatus === "finished" ||
-      payload.matchStatus === "forfeited") &&
-    Boolean(payload.winner)
-  );
 }
 
 function send(socket: WebSocket | undefined, message: ServerWsMessage): void {
@@ -4559,17 +4510,25 @@ function sendUserError(
     code: string;
     diagnosticCode?: string;
     currentStateVersion?: number;
-    playerView?: ApiUserErrorPayload["playerView"];
   },
 ): void {
-  send(socket, { type: "error", payload: apiUserErrorPayload(error) });
+  send(socket, {
+    type: "error",
+    payload: apiUserErrorPayload({
+      code: error.code,
+      ...(error.diagnosticCode ? { diagnosticCode: error.diagnosticCode } : {}),
+      ...(typeof error.currentStateVersion === "number"
+        ? { currentStateVersion: error.currentStateVersion }
+        : {}),
+    }),
+  });
 }
 
 function apiUserErrorPayload(error: {
   code: string;
   diagnosticCode?: string;
   currentStateVersion?: number;
-  playerView?: ApiUserErrorPayload["playerView"];
+  playerView?: PlayerView;
 }): ApiUserErrorPayload {
   return {
     code: isApiUserErrorCode(error.code)
@@ -4579,21 +4538,29 @@ function apiUserErrorPayload(error: {
     ...(typeof error.currentStateVersion === "number"
       ? { currentStateVersion: error.currentStateVersion }
       : {}),
-    ...(error.playerView ? { playerView: error.playerView } : {}),
+    ...(error.playerView
+      ? { playerView: buildMatchPlayerOffer(error.playerView) }
+      : {}),
   };
 }
 
 function localeNeutralServiceResult<T>(result: T): T | Record<string, unknown> {
-  if (!result || typeof result !== "object" || !("error" in result))
+  if (!result || typeof result !== "object")
     return result;
-  const record = result as Record<string, unknown>;
+  const { opponentPayload: _opponentPayload, ...record } =
+    result as Record<string, unknown>;
+  if (record.playerView)
+    record.playerView = buildMatchPlayerOffer(record.playerView as PlayerView);
+  for (const key of ["actorPayload", "requesterPayload", "payload"] as const) {
+    if (record[key]) record[key] = localeNeutralServiceResult(record[key]);
+  }
   const error = record.error;
-  if (!error || typeof error !== "object" || !("code" in error)) return result;
+  if (!error || typeof error !== "object" || !("code" in error)) return record;
   const errorRecord = error as {
     code: unknown;
     diagnosticCode?: string;
     currentStateVersion?: number;
-    playerView?: ApiUserErrorPayload["playerView"];
+    playerView?: PlayerView;
   };
   if (typeof errorRecord.code !== "string") return result;
   return {
@@ -4606,7 +4573,9 @@ function localeNeutralServiceResult<T>(result: T): T | Record<string, unknown> {
       ...(typeof errorRecord.currentStateVersion === "number"
         ? { currentStateVersion: errorRecord.currentStateVersion }
         : {}),
-      ...(errorRecord.playerView ? { playerView: errorRecord.playerView } : {}),
+      ...(!record.payload && errorRecord.playerView
+        ? { playerView: errorRecord.playerView }
+        : {}),
     }),
   };
 }
@@ -4614,13 +4583,46 @@ function localeNeutralServiceResult<T>(result: T): T | Record<string, unknown> {
 function parseWsMessage(raw: string): ClientWsMessage | null {
   try {
     const parsed = JSON.parse(raw) as ClientWsMessage;
-    return typeof parsed?.type === "string" &&
-      typeof parsed.payload === "object"
-      ? parsed
-      : null;
+    if (
+      typeof parsed?.type !== "string" ||
+      !isMessageRecord(parsed.payload)
+    ) return null;
+    if (parsed.type === "submit_action" && !isMatchActionSubmission(parsed.payload))
+      return null;
+    return parsed;
   } catch {
     return null;
   }
+}
+
+function isMessageRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isMatchActionSubmission(value: Record<string, unknown>): boolean {
+  const choice = value.selectedChoices;
+  return (
+    typeof value.matchId === "string" &&
+    (value.side === "corp" || value.side === "runner") &&
+    isMatchOfferId(value.actionId) &&
+    typeof value.clientKnownStateVersion === "number" &&
+    Number.isSafeInteger(value.clientKnownStateVersion) &&
+    value.clientKnownStateVersion >= 0 &&
+    typeof value.clientKnownMatchVersion === "number" &&
+    Number.isSafeInteger(value.clientKnownMatchVersion) &&
+    value.clientKnownMatchVersion >= 0 &&
+    typeof value.idempotencyKey === "string" &&
+    value.idempotencyKey.length > 0 &&
+    (value.selectedTargets === undefined ||
+      (isMessageRecord(value.selectedTargets) &&
+        Object.values(value.selectedTargets).every((target) => typeof target === "string"))) &&
+    (choice === undefined ||
+      (isMessageRecord(choice) &&
+        Object.keys(choice).length === 2 &&
+        isMatchOfferId(choice.choiceId) &&
+        Array.isArray(choice.selectedOptionIds) &&
+        choice.selectedOptionIds.every(isMatchOfferId)))
+  );
 }
 
 function checkRateLimit(
@@ -5013,13 +5015,13 @@ function accountDeckInputFromBody(value: unknown): AccountDeckDraftInput {
   if (!value || typeof value !== "object")
     throw new AccountDeckError("account_deck_input_invalid");
   const body = value as Record<string, unknown>;
-  if (body.side !== "runner" && body.side !== "corp")
+  if ((body.side !== "runner" && body.side !== "corp") ||
+      typeof body.identityCardId !== "number" || !Array.isArray(body.cards))
     throw new AccountDeckError("account_deck_input_invalid");
   return {
     name: typeof body.name === "string" ? body.name : "",
     side: body.side,
-    identityCardId:
-      typeof body.identityCardId === "string" ? body.identityCardId : "",
+    identityCardId: body.identityCardId,
     cardPoolSnapshotId:
       typeof body.cardPoolSnapshotId === "string"
         ? body.cardPoolSnapshotId
@@ -5032,19 +5034,12 @@ function accountDeckInputFromBody(value: unknown): AccountDeckDraftInput {
     ...(typeof body.formatProfileVersion === "string"
       ? { formatProfileVersion: body.formatProfileVersion }
       : {}),
-    cards: Array.isArray(body.cards)
-      ? body.cards.map((entry) => {
-          const card =
-            entry && typeof entry === "object"
-              ? (entry as Record<string, unknown>)
-              : {};
-          return {
-            cardId: typeof card.cardId === "string" ? card.cardId : "",
-            quantity:
-              typeof card.quantity === "number" ? card.quantity : Number.NaN,
-          };
-        })
-      : [],
+    cards: body.cards.map((entry) => {
+      const card = entry && typeof entry === "object" ? (entry as Record<string, unknown>) : {};
+      if (typeof card.cardId !== "number" || typeof card.quantity !== "number")
+        throw new AccountDeckError("account_deck_input_invalid");
+      return { cardId: card.cardId, quantity: card.quantity };
+    }),
     ...(typeof body.notes === "string" ? { notes: body.notes } : {}),
     ...(body.tableLayout && typeof body.tableLayout === "object"
       ? {

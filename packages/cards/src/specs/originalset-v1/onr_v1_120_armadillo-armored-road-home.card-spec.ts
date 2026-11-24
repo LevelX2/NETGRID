@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_120_armadillo-armored-road-home",
+      332,
     ),
     title: "“Armadillo” Armored Road Home",
     side: "runner",

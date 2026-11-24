@@ -1,3 +1,6 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import type { MatchEventId } from "@netgrid/shared";
+import { visibleRunnerPathTraceContext } from "./run-analysis/trace-rules-profile-planning";
 import {
   hasRiskyUniversalPressure,
   runnerCreditReservePhase,
@@ -5,7 +8,7 @@ import {
 } from "./run-analysis/runner-visible-economy-facts";
 import { runnerPostRunSelfTagHandSafety } from "./run-analysis/runner-self-tag-safety";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import { runnerTargetHasTerminalContestThreat } from "./runtime/runner-terminal-contest-threat";
 import { archivesIsKnownWithoutAgenda } from "./runtime/visible-server-agenda-facts";
 import {
@@ -89,6 +92,7 @@ import {
   type RunnerRunTargetRecommendation,
 } from "./run-analysis/runner-run-target-types";
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
+import { compareRunnerCentralAccessRoutes } from "./run-analysis/runner-central-access-comparison";
 import { quoteRunnerRunRiskReserve } from "./run-analysis/runner-run-risk-reserve";
 import { quoteRunnerConsumableRunOpportunity } from "./run-analysis/runner-consumable-run-opportunity";
 import {
@@ -261,8 +265,7 @@ export function assessRunnerRunAfterAccessPreparation(params: {
       !(
         preparation.type === "install_card" &&
         consumedCard?.definitionId !== undefined &&
-        cardSpecPlanningCardByDefinitionId(consumedCard.definitionId)?.planning
-          .engine.tagPreventionSources?.length
+        planningCardByDefinitionId(consumedCard.definitionId)?.engine.tagPreventionSources?.length
       )) ||
     !consumedCard ||
     preparation.expiresAtStateVersion !== params.input.playerView.stateVersion
@@ -459,19 +462,54 @@ export function evaluateRunnerRunTargets(
     params.beliefState ?? reconstructBeliefState(params.input);
   const unrezzedIceRiskModel =
     beliefState.runnerOpponentModel?.unrezzedIceRiskModel ?? [];
-  return projections
-    .map((projection) =>
-      evaluateRunnerRunTarget(
-        params,
+  const evaluated = projections.flatMap((projection) => {
+    const target = evaluateRunnerRunTarget(
+      params,
+      projection,
+      economyPosture,
+      unrezzedIceRiskModel,
+    );
+    return target ? [{ projection, target }] : [];
+  });
+  const comparisons = compareRunnerCentralAccessRoutes(
+    params.input,
+    economyPosture,
+    evaluated.map(({ target }) => target),
+  );
+  const boundReserves = new Map(
+    comparisons.map(
+      ({ preferred, protectedReserve }) =>
+        [
+          JSON.stringify([preferred.actionId, preferred.targetServerId]),
+          protectedReserve,
+        ] as const,
+    ),
+  );
+  return evaluated
+    .map(({ projection, target }) => {
+      const centralPostRunReserve = boundReserves.get(
+        JSON.stringify([target.actionId, target.targetServerId]),
+      );
+      if (
+        centralPostRunReserve === undefined ||
+        target.recommendation !== "gain_credits_first" ||
+        target.fundingNeed.reason !== "post_run_floor_gap"
+      ) {
+        return target;
+      }
+      const comparedTarget = evaluateRunnerRunTarget(
+        { ...params, centralPostRunReserve },
         projection,
         economyPosture,
         unrezzedIceRiskModel,
-      ),
-    )
-    .filter(
-      (evaluation): evaluation is RunnerRunTargetEvaluation =>
-        evaluation !== undefined,
-    )
+      );
+      // A reserve comparison cannot enable a different, conditional path.
+      return comparedTarget?.routeQuote?.reachability === "guaranteed_access" &&
+        comparedTarget.routeQuote.effects.length === 0 &&
+        (comparedTarget.routeQuote.conditionalRiskReasons?.length ?? 0) === 0
+        ? comparedTarget
+        : target;
+    })
     .sort(compareRunnerRunTargets);
 }
 
@@ -491,7 +529,10 @@ function compareRunnerRunTargets(
 export { projectRunnerRunActions } from "./actions/run-action-projection";
 
 function evaluateRunnerRunTarget(
-  params: EvaluateRunnerRunTargetsParams & { quotedRunnerGripCount?: number },
+  params: EvaluateRunnerRunTargetsParams & {
+    quotedRunnerGripCount?: number;
+    centralPostRunReserve?: number;
+  },
   projection: InternalRunActionProjection,
   economyPosture: RunnerEconomyPosture,
   unrezzedIceRiskModel: RunnerOpponentModel["unrezzedIceRiskModel"],
@@ -557,15 +598,13 @@ function evaluateRunnerRunTarget(
       server?.root ?? [],
       params.input.playerView.opponent.credits,
       {
-        ...(params.input.playerView.traceRulesProfile
-          ? { traceRulesProfile: params.input.playerView.traceRulesProfile }
-          : {}),
+        ...visibleRunnerPathTraceContext(params.input),
         quoteNextEncounterDamageForHandBudget: true,
         requireCoreDamageProtection:
           targetKind !== "remote" ||
           !runnerTargetHasTerminalContestThreat(params.input, targetServerId),
         visibleRemoteServerCount: params.input.playerView.servers.filter(
-          (candidate) => candidate.id.startsWith("remote_"),
+          (candidate) => isRemoteServerId(candidate.id),
         ).length,
         additionalPassedIceCount: bypassedFirstIce ? 1 : 0,
         allowRandomBreakAttempts,
@@ -584,12 +623,6 @@ function evaluateRunnerRunTarget(
           0,
           params.input.playerView.own.clicks - actionClickCost,
         ),
-        ...(params.input.playerView.own.runnerTraceSupportQuote
-          ? {
-              runnerTraceSupportQuote:
-                params.input.playerView.own.runnerTraceSupportQuote,
-            }
-          : {}),
         ...(stealthCreditsBlocked ? { excludeStealthTraceCredits: true } : {}),
         ...(projection.runTraceLinkBonus !== undefined
           ? { runTraceLinkBonus: projection.runTraceLinkBonus }
@@ -1040,11 +1073,50 @@ function evaluateRunnerRunTarget(
     pathPassability = "blocked_by_visible_damage_hand_buffer";
   }
   const unrezzedIceRiskUnderfunded = prerunReserveQuote.creditGap > 0;
+  const outerIce = visibleServerIce.at(-1);
+  const remoteBypassHasGuaranteedPath =
+    accessTargetKind === "remote" &&
+    accessPayoff === "unknown" &&
+    payoff.knownAccessState === "unknown" &&
+    effectiveAccessPayoffContestable === true &&
+    bypassedFirstIce &&
+    pathPassability === "reachable" &&
+    routeQuote.reachability === "guaranteed_access" &&
+    routeQuote.fundingGap === 0 &&
+    routeQuote.effects.length === 0 &&
+    prerunReserveQuote.status !== "blocked" &&
+    economyPosture.creditReservePolicy.remoteScoreThreat !== "urgent";
+  const emergencyReserve = economyPosture.creditReservePolicy.emergencyReserve;
+  const fundedRezzedBypass =
+    outerIce?.known === true &&
+    outerIce.rezzed === true &&
+    creditsAfterRun >= emergencyReserve;
+  // Funding would use the only click that can take this quoted access.
+  const lastClickBypassReserve =
+    remoteBypassHasGuaranteedPath &&
+    fundedRezzedBypass &&
+    actionClickCost > 0 &&
+    params.input.playerView.own.clicks === actionClickCost &&
+    creditsAfterRun < economyPosture.minimumCreditFloor
+      ? emergencyReserve
+      : undefined;
+  const guaranteedRemoteBypassAccess =
+    remoteBypassHasGuaranteedPath &&
+    (lastClickBypassReserve !== undefined ||
+      (creditsAfterRun >= economyPosture.minimumCreditFloor &&
+        (fundedRezzedBypass ||
+          (outerIce?.known === false &&
+            outerIce.rezzed === false &&
+            corpCanRezUnknownIce))));
+  const boundPostRunReserve =
+    lastClickBypassReserve ?? params.centralPostRunReserve;
   const targetFundingNeed = runnerRunTargetFundingNeed({
     routeQuote,
     creditsAfterRun,
     economyPosture,
+    ...(boundPostRunReserve !== undefined ? { boundPostRunReserve } : {}),
     consumeCurrentGoalReserve:
+      guaranteedRemoteBypassAccess ||
       (scoreThreat &&
         economyPosture.creditReservePolicy.remoteScoreThreat === "urgent" &&
         creditsAfterRun >= economyPosture.minimumCreditFloor) ||
@@ -1094,6 +1166,7 @@ function evaluateRunnerRunTarget(
   const rawRouteScore = scoreRunTargetEvaluation({
     targetKind: accessTargetKind,
     accessPayoff,
+    guaranteedRemoteBypassAccess,
     knownAccessState: payoff.knownAccessState,
     pathPassability,
     creditsAfterRun,
@@ -1151,6 +1224,9 @@ function evaluateRunnerRunTarget(
     accessNoveltyRatio: payoff.accessNoveltyRatio,
     multiaccessAvailable,
     pathPassability,
+    ...(path.missingCoverage?.length
+      ? { missingCoverage: path.missingCoverage }
+      : {}),
     pathCost: routeQuote.guaranteedKnownCost,
     ...(futureClicksLost > 0 ? { futureClicksLost } : {}),
     routeQuote,
@@ -1220,6 +1296,12 @@ function evaluateRunnerRunTarget(
       `path_cost:${routeQuote.guaranteedKnownCost}`,
       `visible_break_cost:${path.visibleBreakCost ?? 0}`,
       ...routeQuote.evidence,
+      ...(params.centralPostRunReserve !== undefined
+        ? ["runner_central_same_access_uses_compared_reserve"]
+        : []),
+      ...(lastClickBypassReserve !== undefined
+        ? ["runner_last_click_rezzed_bypass_uses_access_budget"]
+        : []),
       `run_action_credit_cost:${actionCreditCost}`,
       `run_action_grip_cost:${runActionGripCost}`,
       `grip_after_run_action:${projectedGripAfterRunAction}`,
@@ -1787,12 +1869,17 @@ function accessReplacementPayoffForTarget(
     const fort = input.playerView.servers.find(
       (server) => server.id === projection.targetServerId,
     );
+    const sourceCard = input.playerView.own.gripOrHq.find(
+      (card) =>
+        card.instanceId === projection.action.source &&
+        card.definitionId === projection.sourceCardId,
+    );
     const rezzedIceCount = payload?.runnerFortIceTrashRezzedIceCount;
     const tags = payload?.runnerFortIceTrashTagsAdded;
     if (
       !fort ||
       fort.id !== targetServerId ||
-      !projection.sourceCardId ||
+      !sourceCard?.definitionId ||
       projection.action.expiresAtStateVersion !==
         input.playerView.stateVersion ||
       payload?.runnerFortIceTrashQuoteSchemaVersion !==
@@ -1872,7 +1959,7 @@ function accessReplacementPayoffForTarget(
             fortIceTrashObjective: {
               kind: projection.accessReplacement,
               actionId: projection.actionId,
-              sourceCardInstanceId: projection.sourceCardId,
+              sourceCardInstanceId: sourceCard.instanceId,
               serverId: fort.id,
               observedAtStateVersion: input.playerView.stateVersion,
               tagsAdded: tags,
@@ -2025,7 +2112,7 @@ function rdPrivateLookHasNoProvenStateInvalidation(
 }
 
 function aiVisibleEvents(input: AiDecisionInput): PublicGameEvent[] {
-  const byId = new Map<string, PublicGameEvent>();
+  const byId = new Map<MatchEventId, PublicGameEvent>();
   for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
     const previous = byId.get(event.eventId);
     if (!previous || previous.stateVersionAfter <= event.stateVersionAfter) {
@@ -2035,7 +2122,7 @@ function aiVisibleEvents(input: AiDecisionInput): PublicGameEvent[] {
   return [...byId.values()].sort(
     (left, right) =>
       left.stateVersionBefore - right.stateVersionBefore ||
-      left.eventId.localeCompare(right.eventId),
+      left.eventId - right.eventId,
   );
 }
 
@@ -2045,7 +2132,7 @@ function isRunnerRdPrivateLook(event: PublicGameEvent): boolean {
     event.publicPayload.hiddenZoneAction === "p3_33_private_look" &&
     event.publicPayload.privateLookZone === "rd" &&
     (Array.isArray(event.publicPayload.knownRndDefinitionIds) ||
-      typeof event.publicPayload.knownRndTopDefinitionId === "string")
+      typeof event.publicPayload.knownRndTopDefinitionId === "number")
   );
 }
 
@@ -2504,18 +2591,19 @@ function runnerRunTargetFundingNeed(params: {
   creditsAfterRun: number;
   economyPosture: RunnerEconomyPosture;
   consumeCurrentGoalReserve: boolean;
+  boundPostRunReserve?: number;
 }): RunnerRunTargetFundingNeed {
   const routeFundingGap = Math.max(0, params.routeQuote.fundingGap ?? 0);
   const liquidCreditsSpent =
     params.creditsAfterRun <
     params.economyPosture.creditReservePolicy.currentCredits;
-  const protectedLiquidReserve = params.consumeCurrentGoalReserve
-    ? params.economyPosture.minimumCreditFloor
-    : liquidCreditsSpent
-      ? params.economyPosture.creditReservePolicy.phase === "opening"
-        ? params.economyPosture.minimumCreditFloor
-        : params.economyPosture.desiredCreditReserve
-      : params.economyPosture.minimumCreditFloor;
+  const protectedLiquidReserve =
+    params.boundPostRunReserve ??
+    (params.consumeCurrentGoalReserve ||
+    !liquidCreditsSpent ||
+    params.economyPosture.creditReservePolicy.phase === "opening"
+      ? params.economyPosture.minimumCreditFloor
+      : params.economyPosture.desiredCreditReserve);
   const postRunFloorGap = Math.max(
     0,
     protectedLiquidReserve - params.creditsAfterRun,
@@ -2536,6 +2624,7 @@ function runnerRunTargetFundingNeed(params: {
 function scoreRunTargetEvaluation(params: {
   targetKind: RunnerRunTargetKind;
   accessPayoff: RunnerAccessPayoff;
+  guaranteedRemoteBypassAccess: boolean;
   knownAccessState: RunnerKnownAccessState;
   pathPassability: RunnerPathPassability;
   creditsAfterRun: number;
@@ -2553,7 +2642,11 @@ function scoreRunTargetEvaluation(params: {
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;
 }): number {
-  const payoffScore = scoreForPayoff(params.accessPayoff);
+  // Use the fresh-access value for a certified first look at the Remote.
+  // The root contents and the card's opportunity cost are evaluated separately.
+  const payoffScore = scoreForPayoff(
+    params.guaranteedRemoteBypassAccess ? "fresh" : params.accessPayoff,
+  );
   const pathPenalty =
     params.pathPassability === "reachable"
       ? 0
@@ -2761,8 +2854,8 @@ function installedRunPayoffForTarget(
   for (const card of input.playerView.own.rig ?? []) {
     if (card.known === false) continue;
     if (!card.definitionId) continue;
-    const abilities = cardSpecPlanningCardByDefinitionId(card.definitionId)
-      ?.planning.engine.abilities;
+    const abilities = planningCardByDefinitionId(card.definitionId)
+      ?.engine.abilities;
     // A card whose only mechanics start their own activated runs grants no
     // passive payoff to this different route. Its own effect is evaluated
     // through that exact LegalAction's run projection instead.
@@ -3058,7 +3151,7 @@ function runnerEmergencyReserve(input: AiDecisionInput): number {
 function remoteHasScoreThreat(
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): boolean {
-  if (!server?.id.startsWith("remote_")) return false;
+  if (!isRemoteServerId(server?.id)) return false;
   return server.root.some(
     (card) =>
       card.type === "agenda" ||
@@ -3072,7 +3165,7 @@ function targetKindForServerId(
   if (serverId === "hq") return "hq";
   if (serverId === "rd") return "rd";
   if (serverId === "archives") return "archives";
-  if (serverId.startsWith("remote_")) return "remote";
+  if (isRemoteServerId(serverId)) return "remote";
   return undefined;
 }
 

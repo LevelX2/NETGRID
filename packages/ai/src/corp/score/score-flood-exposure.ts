@@ -1,4 +1,8 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { isRemoteServerId } from "@netgrid/shared";
+import {
+  planningCardByDefinitionId,
+  planningCardFactsByDefinitionId,
+} from "@netgrid/cards/planning";
 import {
   quoteAgendaDefinitionSelfStealCreditCost,
   visibleRunnerNextTurnPreparationCreditGain,
@@ -8,7 +12,8 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { actionClickCost, actionCreditCost } from "../../runtime/action-cost";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { corpGuaranteedOnPlayAdvancementCountersPerTarget } from "../../runtime/corp-canonical-card-facts";
 import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
@@ -27,11 +32,11 @@ function isPlainStealableAgenda(
   card: VisibleCard,
 ): boolean {
   if (!visibleCardIsAgenda(input, card) || !card.definitionId) return false;
-  const spec = cardSpecPlanningCardByDefinitionId(card.definitionId);
+  const spec = planningCardByDefinitionId(card.definitionId);
   return (
     spec !== undefined &&
-    !spec.planning.engine.selfStealCosts?.length &&
-    !spec.planning.engine.accessEffects?.some(
+    !spec.engine.selfStealCosts?.length &&
+    !spec.engine.accessEffects?.some(
       (effect) =>
         effect.kind === "on_access" && effect.sourceZones.includes("installed"),
     )
@@ -61,7 +66,7 @@ export function corpForcedAgendaDiscardHasSaferTerminalAlternative(
     preparationClicks === 0 ||
     view.servers.some(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.root.some((card) => !card.known || card.type === "agenda"),
     )
   )
@@ -87,7 +92,8 @@ export function corpForcedAgendaDiscardHasSaferTerminalAlternative(
   const runnerCredits =
     view.opponent.credits +
     visibleRunnerNextTurnPreparationCreditGain(runnerRig, preparationClicks);
-  const runnerPublicPreparedBreakers = visibleRunnerHeapBreakerPreparations(input);
+  const runnerPublicPreparedBreakers =
+    visibleRunnerHeapBreakerPreparations(input);
   const centralQuotes = (["hq", "rd"] as const).map((targetServerId) => {
     const server = view.servers.find((entry) => entry.id === targetServerId);
     if (!server) return undefined;
@@ -133,8 +139,17 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
   const view = input.playerView;
   // The Engine already reserves one run in this public next-turn click budget.
   const otherRunSlots = view.runnerNextTurnCreditClicks;
+  const install = input.legalActions.find(
+    (action) => action.actionId === installActionId,
+  );
   if (
+    input.side !== "corp" ||
     !serverId ||
+    !actionMatchesCurrentDecision(input, install) ||
+    install.type !== "install_card" ||
+    install.source !== agenda.instanceId ||
+    install.payload?.serverId !== serverId ||
+    install.payload?.placement !== "root" ||
     !isFiniteNonNegativeInteger(otherRunSlots) ||
     otherRunSlots === 0 ||
     !visibleCardIsAgenda(input, agenda) ||
@@ -156,8 +171,9 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
     .flatMap((server) => {
       if (
         server.id === serverId ||
-        !server.id.startsWith("remote_") ||
+        !isRemoteServerId(server.id) ||
         server.ice.length !== 0 ||
+        server.statuses?.some((status) => status.kind === "run_prohibited") ||
         server.root.length !== 1
       )
         return [];
@@ -179,7 +195,7 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
     paidRemoteCompletesFloodExposure(
       input,
       agenda,
-      installActionId,
+      install,
       serverId,
       pointsAfterNewAgenda,
       otherRunSlots - 1,
@@ -190,27 +206,17 @@ export function corpFloodInstallCreatesCombinedTerminalExposure(
 function paidRemoteCompletesFloodExposure(
   input: AiDecisionInput,
   agenda: VisibleCard,
-  installActionId: string,
+  install: LegalAction,
   targetServerId: string,
   pointsAfterNewAgenda: number,
   runnerPreparationClicks: number,
 ): boolean {
   const view = input.playerView;
   const publicRig = view.opponent.rig;
-  const install = input.legalActions.find(
-    (action) => action.actionId === installActionId,
-  );
   if (
     !publicRig ||
-    !install ||
-    install.type !== "install_card" ||
-    install.source !== agenda.instanceId ||
-    install.payload?.serverId !== targetServerId ||
-    install.payload?.placement !== "root" ||
-    install.expiresAtStateVersion !== view.stateVersion ||
-    install.costs.reduce((total, cost) => total + (cost.clicks ?? 0), 0) !==
-      1 ||
-    install.costs.some((cost) => (cost.credits ?? 0) !== 0)
+    actionClickCost(install) !== 1 ||
+    actionCreditCost(install) !== 0
   )
     return false;
   const remainingCorpClicks = view.own.clicks - 1;
@@ -231,7 +237,7 @@ function paidRemoteCompletesFloodExposure(
     const existing = server.root[0];
     if (
       server.id === targetServerId ||
-      !server.id.startsWith("remote_") ||
+      !isRemoteServerId(server.id) ||
       server.statuses?.some((status) => status.kind === "run_prohibited") ||
       server.root.length !== 1 ||
       !existing ||
@@ -295,10 +301,10 @@ function certifiedBareStealCredits(
   installedServerId: string,
 ): number | undefined {
   if (!agenda.definitionId) return undefined;
-  const spec = cardSpecPlanningCardByDefinitionId(agenda.definitionId);
+  const spec = planningCardByDefinitionId(agenda.definitionId);
   if (!spec) return undefined;
   const effects =
-    spec.planning.engine.accessEffects?.filter(
+    spec.engine.accessEffects?.filter(
       (effect) =>
         effect.kind === "on_access" &&
         effect.sourceZones.includes("installed") &&
@@ -360,7 +366,7 @@ function hasOnlyCertifiedRunStops(
   const rez = ice.effectiveRezCostQuote;
   // The shared Defense solver quotes both subtype modes from this exact
   // Engine price binding and the same canonical subroutines.
-  const subroutines = CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines;
+  const subroutines = planningCardFactsByDefinitionId(ice.definitionId)?.subroutines;
   return (
     !ice.rezzed &&
     post?.complete === false &&
@@ -384,8 +390,8 @@ function fundedUnchangedRemoteCredits(
     return undefined;
   const affordable = input.legalActions.filter(
     (action) =>
-      action.costs.reduce((total, cost) => total + (cost.clicks ?? 0), 0) <=
-      remainingClicks,
+      actionMatchesCurrentDecision(input, action) &&
+      actionClickCost(action) <= remainingClicks,
   );
   const basicCredit = (action: LegalAction) =>
     action.type === "gain_credit" &&

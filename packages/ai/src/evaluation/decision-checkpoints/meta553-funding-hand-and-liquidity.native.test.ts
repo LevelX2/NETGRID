@@ -1,3 +1,4 @@
+import { applyPostSetupDeckOrder, type PostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -51,6 +52,7 @@ function fixture() {
       runnerDeckSnapshot: DeckSnapshot;
       corpDeckSnapshot: DeckSnapshot;
       prefixActions: RecordedAction[];
+      setupArrangement: PostSetupDeckOrder;
       originalContinuation: RecordedAction[];
     };
   };
@@ -125,12 +127,12 @@ describe("native equivalent funding and independent finite liquidity", () => {
     const f = capture("cruising"),
       { action, plan } = decide(f);
     expect(action.type).toBe("play_event");
-    expect(action.actionId).toContain("cruising-for-netwatch");
+    expect(visibleSourceDefinitionsByInstanceId(f.input.playerView)[action.source]).toBe(161);
     expect(plan.rootPlanInstanceId).toBe(
-      "plan:runner.pressure_central:central%3Ard",
+      "pa90fufw9vc5bkshp96ztlryxl",
     );
     expect(plan.leafExecutorInstanceId).toBe(
-      "plan:runner.economy:run-support%3Acentral%3Ard",
+      "p39qe95vble7jgc7bznje9d27l",
     );
   });
   it.each(["wait33", "wait33late", "wait34"])(
@@ -139,9 +141,14 @@ describe("native equivalent funding and independent finite liquidity", () => {
       const { action, plan } = decide(capture(key));
       expect(action.type).toBe("gain_credit");
       expect(plan.selectedPlan?.moduleId).toBe("runner.economy");
-      expect(plan.leafExecutorInstanceId).toContain(
-        "economy-liquidity-development",
-      );
+      expect(
+        plan?.portfolio.find(
+          (instance) => instance.instanceId === plan.leafExecutorInstanceId,
+        ),
+      ).toMatchObject({
+        moduleId: "runner.economy",
+        dedupeKey: expect.stringContaining("economy-liquidity-development"),
+      });
     },
   );
   it("keeps an immediately secured public empty-RD terminal wait ahead of P6 liquidity", () => {
@@ -156,7 +163,7 @@ describe("native equivalent funding and independent finite liquidity", () => {
       cs = candidates(f.input),
       request = {
         demandId: "native:two-credit-run-gap",
-        sourcePlanId: "plan:runner.pressure_central:central%3Ard",
+        sourcePlanId: "pa90fufw9vc5bkshp96ztlryxl",
         purpose: "current_run" as const,
         priority: "current_foreground_plan" as const,
         hardness: "hard" as const,
@@ -165,13 +172,13 @@ describe("native equivalent funding and independent finite liquidity", () => {
         remainingClicks: 2,
         requiredEndTurnHandBuffer: 3,
         paymentWindowTarget: evaluateRunnerRunTargets({ input: f.input }).find(
-          (t) => t.actionId === "runner.start_run.rd",
+          (t) => t.actionId === "rs.rd",
         )!,
       };
     const positive = runnerExactFundingRouteContract(f.input, cs, request);
     expect(positive.routeAssessment.status).toBe("covered_guaranteed");
     expect(positive.routeAssessment.totalClickCost).toBe(2);
-    expect(positive.routeActionIds[0]).toContain("cruising-for-netwatch");
+    expect(cs.find((c) => c.actionId === positive.routeActionIds[0])?.sourceDefinitionId).toBe(161);
     const negative = runnerExactFundingRouteContract(f.input, cs, {
       ...request,
       remainingClicks: 1,
@@ -179,7 +186,7 @@ describe("native equivalent funding and independent finite liquidity", () => {
     expect(negative.routeActionIds).toEqual([]);
     expect(negative.routeAssessment.status).toBe("uncovered");
   });
-  it("uses the exact native engine prefix and survives the same subsequently revealed Net4", () => {
+  it("replays the authored scene and survives the subsequently revealed Net4", () => {
     const f = fixture(),
       g = f.game4,
       n = capture("cruising"),
@@ -213,7 +220,10 @@ describe("native equivalent funding and independent finite liquidity", () => {
       runnerDeckMetadata: g.runnerDeckSnapshot.publicMetadata!,
       corpDeckMetadata: g.corpDeckSnapshot.publicMetadata!,
     });
-    for (const a of g.prefixActions) state = advance(state, a);
+    for (const [index, action] of g.prefixActions.entries()) {
+      state = advance(state, action);
+      if (index === 1) applyPostSetupDeckOrder(state, g.setupArrangement);
+    }
     expect(hashState(state)).toBe(n.stateHash);
     const original = structuredClone(state),
       { action } = decide(n);

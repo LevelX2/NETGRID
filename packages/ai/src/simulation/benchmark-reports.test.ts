@@ -40,8 +40,24 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("# AI Deck Doctrine Quality Benchmark Report");
     expect(report).toContain("| nakedAgendaInstalls |");
     expect(report).toContain("## Safety Delta");
+    expect(report).toContain("runtimeFailureDelta");
     expect(report).toContain(`Gate: ${gate.accepted ? "PASS" : "FAIL"}`);
     expect(gate.thresholds.maxCandidateIllegalActions).toBe(0);
+    const runtimeFailure = {
+      ...benchmark.candidateRun.summaries[0]!,
+      terminationKind: "runtime_failure" as const,
+      replayOk: true,
+    };
+    expect(
+      evaluateDoctrineQualityGate({
+        ...benchmark,
+        baselineRun: { ...benchmark.baselineRun, summaries: [runtimeFailure] },
+        candidateRun: {
+          ...benchmark.candidateRun,
+          summaries: [runtimeFailure],
+        },
+      }).hardFailures,
+    ).toContain("candidate_runtime_failures:1");
     expect(JSON.stringify({ gate, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
@@ -110,6 +126,16 @@ describe("benchmark report formatting", () => {
       comparisonProfiles: ["random_legal_bot", "current_candidate"],
     });
     const report = formatMatchProgressionBenchmarkSuiteReport(suite);
+    const suiteRows = report.split("\n");
+    const tableIndex = suiteRows.findIndex((row) =>
+      row.startsWith("| Slot | Type | Use |"),
+    );
+    expect(tableIndex).toBeGreaterThanOrEqual(0);
+    const [tableHeader, tableSeparator, metricRow] =
+      suiteRows.slice(tableIndex);
+    expect(tableHeader!.split("|")).toHaveLength(77);
+    expect(tableSeparator!.split("|")).toHaveLength(77);
+    expect(metricRow!.split("|")).toHaveLength(77);
     const slots = listMatchProgressionBenchmarkDeckSlots();
     const smoke = suite.slots.find(
       (slot) => slot.slotId === "safety_smoke_demo_008",
@@ -293,7 +319,7 @@ describe("benchmark report formatting", () => {
       actionSequence: [
         selfplayAction("runner", 1, "start_run", {
           selectedActionId: "run-remote-a",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           planKind: "runner.contest_remote",
           evidence: ["known_no_current_payoff"],
         }),
@@ -303,7 +329,7 @@ describe("benchmark report formatting", () => {
         }),
         selfplayAction("runner", 3, "start_run", {
           selectedActionId: "run-remote-b",
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           planKind: "runner.contest_remote",
           evidence: ["known_no_current_payoff"],
           runnerRunPenalizedAsKnownNoAccess: true,
@@ -496,10 +522,6 @@ describe("benchmark report formatting", () => {
     expect(result.aggregate.runnerAgendaSteals).toBeGreaterThanOrEqual(0);
     expect(result.aggregate.corpFlatlines).toBeGreaterThanOrEqual(0);
     expect(result.aggregate.scoreWindowMissed).toBeGreaterThanOrEqual(0);
-    expect(result.aggregate.unsafeScoreChosen).toBeGreaterThanOrEqual(0);
-    expect(
-      result.aggregate.passiveActionWithScoreLineAvailable,
-    ).toBeGreaterThanOrEqual(0);
     expect(
       Object.values(result.aggregate.actionLimitClusters).reduce(
         (sum, count) => sum + count,
@@ -517,8 +539,6 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("| allRedactionSafe | 1 |");
     expect(report).toContain("| averageGameLength |");
     expect(report).toContain("| scoreWindowMissed |");
-    expect(report).toContain("| unsafeScoreChosen |");
-    expect(report).toContain("| passiveActionWithScoreLineAvailable |");
     expect(report).toContain("## Action Type Dominance");
     expect(report).toContain("- Status:");
     expect(report).toContain(
@@ -792,6 +812,14 @@ describe("benchmark report formatting", () => {
       threshold: 0.7,
     });
 
+    const justAboveCutoff = buildSelfplayActionTypeDominanceReport([dominant], {
+      minDecisions: 4,
+      threshold: 0.8332,
+    });
+    expect(justAboveCutoff.bySide.runner).toMatchObject({
+      topShare: 0.833,
+      status: "dominance_review_required",
+    });
     expect(complete.status).toBe("complete");
     expect(complete.bySide.runner.topShare).toBe(0.25);
     expect(review.status).toBe("dominance_review_required");
@@ -949,7 +977,7 @@ describe("benchmark report formatting", () => {
           reasonCode: "corp.semantic.basic_economy_draw",
           evidence: ["activeFundingNeed:false"],
           corpCreditsBelowCheapestRelevantRez: true,
-          corpScoreTerminalWindowScoreLegal: true,
+          scoreActionsAvailable: 1,
         }),
       ],
       errors: [],
@@ -965,7 +993,7 @@ describe("benchmark report formatting", () => {
           selectedActionId: "corp-no-need-gain",
           reasonCode: "corp.semantic.basic_economy_draw",
           evidence: ["activeFundingNeed:false"],
-          corpScoreTerminalWindowScoreLegal: true,
+          scoreActionsAvailable: 1,
         }),
       ],
     };

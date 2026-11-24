@@ -40,7 +40,7 @@ function act(state: GameState, matches: (a: LegalAction) => boolean) {
   return result.state;
 }
 function prepare(
-  innerToOuter = ["onr_v1_258_neural-blade", "onr_v1_268_shock-r"],
+  innerToOuter = [470, 480],
 ) {
   const sourceIds = innerToOuter;
   let state = createGameAfterSetup({
@@ -49,9 +49,9 @@ function prepare(
       ...ORIGINALSET_DEFAULT_DECKS.runner,
       cards: [
         ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter(
-          (c) => c.id !== "onr_v1_039_krash",
+          (c) => c.id !== 251,
         ),
-        { id: "onr_v1_039_krash", quantity: 1 },
+        { id: 251, quantity: 1 },
       ],
     },
     corpDeck: {
@@ -69,7 +69,7 @@ function prepare(
   while (state.activeSide === "corp" && state.pendingChoice)
     state = act(state, (a) => a.type === "resolve_choice");
   expect(state.activeSide).toBe("runner");
-  installRunnerProgramForTest(state, "onr_v1_039_krash");
+  installRunnerProgramForTest(state, 251);
   for (const id of innerToOuter) {
     const ice = state.cardInstances[putCorpIceOnServer(state, "hq", id)]!;
     ice.rezzed = true;
@@ -117,9 +117,9 @@ it("prices the complete damage-free source and next-ICE breaks using fresh Engin
 
 it("consumes the restriction after a benign next encounter before pricing deeper ICE", () => {
   const state = prepare([
-    "onr_v1_237_data-wall",
-    "onr_v1_225_canis-major",
-    "onr_v1_268_shock-r",
+    449,
+    437,
+    480,
   ]);
   const view = getPlayerView(state, "runner");
   const path = assessKnownRezzedIcePath(
@@ -165,11 +165,16 @@ it("keeps the Engine lock through the next damage window and replays the fully p
   paid = advanceToInner(paid);
   for (let i = 0; i < 4; i++)
     paid = act(paid, (a) => a.type === "pump_breaker");
+  const damageRoutine = getPlayerView(paid, "runner").servers
+    .flatMap((server) => server.ice)
+    .find((ice) => ice.instanceId === paid.run?.encounteredIceId)
+    ?.effectiveRunQuote?.subroutines.find((routine) => routine.type === "do_damage");
+  expect(damageRoutine).toBeDefined();
   paid = act(
     paid,
-    (a) =>
-      a.type === "break_subroutine" &&
-      String(a.payload?.subroutineId).includes("damage"),
+    (action) =>
+      action.type === "break_subroutine" &&
+      action.payload?.subroutineId === damageRoutine!.id,
   );
   paid = advanceToAccess(paid);
   expect(paid.runner.credits).toBe(0);

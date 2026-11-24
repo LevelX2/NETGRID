@@ -36,7 +36,7 @@ it("leaves competing draw events with their development owner before search setu
   ).toBe(true);
   expect(result.fallbackUsed).toBe(false);
   const portfolio = residentPlanPortfolioSnapshot(input)!;
-  const drawId = "runner_onr_proteus_103_cruising-for-netwatch_1";
+  const drawId = "czt";
   expect(
     portfolio.instances.some(
       (entry) =>
@@ -90,7 +90,7 @@ it("keeps the admitted search phase on its exact search route when draw events c
       directSearchChoiceBindings: expect.arrayContaining([
         expect.objectContaining({
           actionId: search.actionId,
-          targetDefinitionId: expect.any(String),
+            targetDefinitionId: expect.any(Number),
         }),
       ]),
     },

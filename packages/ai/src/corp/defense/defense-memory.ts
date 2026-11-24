@@ -1,4 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -92,19 +93,24 @@ export function bindSelectedCorpDefenseHqHold(
   );
   if (!selectedSignal) return;
   const cadence = moduleState.hqHoldCadence;
-  const selectedAction = input.legalActions.find(
-    (action) => action.actionId === result.route.head.actionId,
+  const matchingActions = input.legalActions.filter(
+    (action) =>
+      action.actionId === result.route.head.actionId &&
+      actionMatchesCurrentDecision(input, action) &&
+      action.type === "install_card" &&
+      action.payload?.placement === "ice" &&
+      action.payload.serverId === "rd" &&
+      action.source.length > 0 &&
+      action.source === action.payload.cardId,
   );
+  const selectedAction =
+    matchingActions.length === 1 ? matchingActions[0] : undefined;
   const exactBinding =
     cadence?.status === "available" &&
     cadence.receiptId === moduleState.centralAllocation.hqHold.receiptId &&
     cadence.turnKey === turnKey(input) &&
     cadence.factsStateVersion === input.playerView.stateVersion &&
-    selectedAction?.type === "install_card" &&
-    selectedAction.payload?.placement === "ice" &&
-    selectedAction.payload.serverId === "rd" &&
-    typeof selectedAction.payload.cardId === "string" &&
-    selectedAction.payload.cardId.length > 0;
+    selectedAction !== undefined;
   if (!exactBinding) {
     throw new PlanResolutionFailure("invalid_plan_identity", {
       side: input.side,
@@ -127,7 +133,7 @@ export function bindSelectedCorpDefenseHqHold(
   };
   moduleState.hqHoldSelection = {
     selectedActionId: result.route.head.actionId,
-    sourceCardInstanceId: selectedAction.payload!.cardId as string,
+    sourceCardInstanceId: selectedAction.source,
     selectedAtStateVersion: input.playerView.stateVersion,
     targetServerId: "rd",
   };

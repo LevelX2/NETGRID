@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 import type { GameState } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import { deterministicOnPlayResourcePayload } from "./card-implementation-runtime-shared";
-const definition = CARD_DEFINITIONS_BY_ID["onr_v1_101_mit-west-tier"]!;
+const definition = CARD_DEFINITIONS_BY_ID[313]!;
 it.each([
   [1, 0, 0, 0, -1, 0],
   [1, 0, 2, 2, 1, -2],

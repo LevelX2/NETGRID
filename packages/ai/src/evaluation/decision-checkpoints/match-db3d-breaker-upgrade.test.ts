@@ -68,7 +68,7 @@ function capture(index: number) {
   // Explicit current-rule companion; the historical fixture stays unchanged.
   fixture.input = withCurrentPrintedLockCompanion(fixture.input);
   // No public steal surcharge or known agenda in this companion.
-  bindSyntheticAgendaStealQuotes(fixture.input, "remote_1", 0, {});
+  bindSyntheticAgendaStealQuotes(fixture.input, "r1", 0, {});
   return fixture;
 }
 afterEach(() => resetResidentPlanPortfolioMemory());
@@ -85,7 +85,7 @@ it.each([
 ])("quotes only an executable, worthwhile preparation: %s", (variant) => {
   const { input } = capture(163);
   const target = evaluateRunnerRunTargets({ input }).find(
-    (e) => e.actionId === "runner.start_run.remote_1",
+    (e) => e.actionId === "rs.r1",
   )!;
   if (variant === "short_cash") input.playerView.own.credits = 13;
   if (variant === "last_click") input.playerView.own.clicks = 1;
@@ -101,7 +101,7 @@ it.each([
     );
   if (variant === "hidden_definition") {
     const unknown = input.playerView.servers
-      .find((s) => s.id === "remote_1")!
+      .find((s) => s.id === "r1")!
       .ice.find((c) => !c.known)!;
     expect(unknown.definitionId).toBeUndefined();
     // An opaque identity changes no visible quote or source binding.
@@ -164,14 +164,17 @@ it("installs the exact cheaper breaker under the remote parent at db3d/163", () 
     (a) => a.actionId === decision.actionId,
   )!;
   expect(action.type).toBe("install_card");
-  expect(action.source).toContain("loony-goon");
+  expect(
+    input.playerView.own.gripOrHq.find((card) => card.instanceId === action.source)
+      ?.definitionId,
+  ).toBe(252);
   expect(action.payload?.runnerProgramTrashBeforeInstall).not.toBe(true);
   expect(decision.reasonCode).toBe("plan_first.runner.rig_and_coverage");
   expect(decision.fallbackUsed).toBe(false);
   const debug = decision.decisionDebug!.planFirstDecision!;
   expect(debug.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
   expect(debug.selectedPlan?.parentInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(debug.selectedStep?.planInstanceId).toBe(debug.leafExecutorInstanceId);
   expect(JSON.stringify(debug)).toContain(
@@ -182,14 +185,14 @@ it("installs the exact cheaper breaker under the remote parent at db3d/163", () 
 it("revalidates the installed cheaper breaker and starts the remote only with the unknown-ICE reserve funded", () => {
   const snapshot = capture(163).input.ownDeckSnapshot!;
   const corpCards = [
-    "onr_v1_238_data-wall-2-0",
-    "onr_v1_268_shock-r",
-    "onr_proteus_015_colonel-failure",
-    "onr_v1_355_crystal-palace-station-grid",
-    "onr_v1_358_dr-dreff",
-    "onr_v1_199_employee-empowerment",
-    "onr_v1_205_main-office-relocation",
-    "onr_proteus_008_project-zurich",
+    450,
+    480,
+    73,
+    567,
+    570,
+    411,
+    417,
+    66,
   ];
   let state = createGameAfterSetup({
     seed: "remote-breaker-preparation",
@@ -218,13 +221,13 @@ it("revalidates the installed cheaper breaker and starts the remote only with th
       (a) => a.type === "resolve_choice",
       state.pendingChoice.options[0]!.id,
     );
-  installRunnerProgramForTest(state, "onr_v1_039_krash");
-  moveRunnerCardToGrip(state, "onr_v1_040_loony-goon");
-  const agenda = putCorpRootInRemote(state, "onr_v1_199_employee-empowerment");
+  installRunnerProgramForTest(state, 251);
+  moveRunnerCardToGrip(state, 252);
+  const agenda = putCorpRootInRemote(state, 411);
   state.cardInstances[agenda]!.advancementCounters = 1;
   for (const id of [
-    "onr_v1_355_crystal-palace-station-grid",
-    "onr_v1_358_dr-dreff",
+    567,
+    570,
   ]) {
     const card = state.cardInstances[putCorpRootInRemote(state, id)]!;
     card.rezzed = true;
@@ -232,15 +235,15 @@ it("revalidates the installed cheaper breaker and starts the remote only with th
   }
   for (const id of corpCards.slice(0, 3)) {
     const card =
-      state.cardInstances[putCorpIceOnServer(state, "remote_1", id)]!;
-    card.rezzed = !id.includes("colonel");
+      state.cardInstances[putCorpIceOnServer(state, "r1", id)]!;
+    card.rezzed = id !== 73;
     card.faceup = card.rezzed;
   }
   state.runner.credits = 14;
   state.runner.clicks = 2;
   state.corp.credits = 45;
-  scoreCorpAgendaForTest(state, "onr_v1_205_main-office-relocation");
-  scoreCorpAgendaForTest(state, "onr_proteus_008_project-zurich");
+  scoreCorpAgendaForTest(state, 417);
+  scoreCorpAgendaForTest(state, 66);
   const initial = structuredClone(state);
   const eventStart = state.eventLog.length;
   const inputForState = () =>
@@ -253,14 +256,14 @@ it("revalidates the installed cheaper breaker and starts the remote only with th
     });
   const input = inputForState();
   const decision = chooseRunnerAction(input);
-  expect(
-    input.legalActions.find((a) => a.actionId === decision.actionId)?.source,
-  ).toContain("loony-goon");
+  const selected = input.legalActions.find((a) => a.actionId === decision.actionId);
+  expect(selected?.type).toBe("install_card");
+  expect(state.cardInstances[selected!.source!]?.definitionId).toBe(252);
   state = applyMatching(state, (a) => a.actionId === decision.actionId);
   expect(state.runner.credits).toBe(10);
   expect(state.runner.clicks).toBe(1);
   const nextInput = inputForState();
-  const remote = nextInput.playerView.servers.find((s) => s.id === "remote_1")!;
+  const remote = nextInput.playerView.servers.find((s) => s.id === "r1")!;
   const path = assessKnownRezzedIcePath(
     remote.ice,
     nextInput.playerView.own.rig!,
@@ -270,12 +273,12 @@ it("revalidates the installed cheaper breaker and starts the remote only with th
   );
   expect(path.visibleBreakCost).toBe(10);
   const reserve = evaluateRunnerRunTargets({ input: nextInput }).find(
-    (target) => target.actionId === "runner.start_run.remote_1",
+    (target) => target.actionId === "rs.r1",
   )!.prerunReserveQuote!;
   expect(reserve.status).toBe("blocked");
   expect(reserve.creditGap).toBeGreaterThan(0);
   expect(chooseRunnerAction(nextInput).actionId).not.toBe(
-    "runner.start_run.remote_1",
+    "rs.r1",
   );
   const preparationReplay = replayEvents(
     initial,
@@ -295,10 +298,10 @@ it("revalidates the installed cheaper breaker and starts the remote only with th
     (a) => a.actionId === next.actionId,
   )!;
   expect(runAction.type).toBe("start_run");
-  expect(runAction.payload?.serverId).toBe("remote_1");
+  expect(runAction.payload?.serverId).toBe("r1");
   expect(next.fallbackUsed).toBe(false);
   state = applyMatching(state, (a) => a.actionId === next.actionId);
-  expect(state.run?.attackedServerId).toBe("remote_1");
+  expect(state.run?.attackedServerId).toBe("r1");
   const replay = replayEvents(
     fundedInitial,
     state.eventLog.slice(fundedEventStart),

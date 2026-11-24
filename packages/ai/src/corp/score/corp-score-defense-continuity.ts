@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
@@ -16,7 +17,7 @@ export type CorpResidentScoreDefenseBinding = Readonly<{
  * A concrete, empty remote with an Engine-quoted ICE interaction is never a
  * blank scoring target. The exact score-protection probability model may
  * deliberately leave conditional, damaging, taxing, or encounter-disrupting
- * subroutines unquantified, but corp.score_agenda must still preserve the
+ * subroutines unquantified, but cr must still preserve the
  * strictly better server topology instead of opening an empty sibling remote.
  *
  * This is intentionally a reuse/dominance fact, not a claim that the remote
@@ -29,7 +30,7 @@ export function corpRemoteHasEngineQuotedReusableScoreFriction(
 ): boolean {
   const server = input.playerView.servers.find(
     (candidate) =>
-      candidate.id === serverId && candidate.id.startsWith("remote_"),
+      candidate.id === serverId && isRemoteServerId(candidate.id),
   );
   if (!server || server.root.length > 0 || server.ice.length === 0) {
     return false;
@@ -62,7 +63,7 @@ export function corpRemoteHasEngineQuotedFundableScoreFriction(
   const server = input.playerView.servers.find(
     (candidate) =>
       candidate.id === serverId &&
-      candidate.id.startsWith("remote_") &&
+      isRemoteServerId(candidate.id) &&
       candidate.root.length === 0,
   );
   if (!server) return false;
@@ -123,8 +124,8 @@ export function corpResidentScoreDefenseBinding(
   visibleCardIsAgenda: CorpVisibleAgendaPredicate,
 ): CorpResidentScoreDefenseBinding | undefined {
   const commitment = previous?.turnPlanCommitment;
-  const committedRootPlanInstanceId =
-    commitment?.phases[commitment.cursor.phaseIndex]?.root.planInstanceId;
+  const currentPhase = commitment?.phases[commitment.cursor.phaseIndex];
+  const committedRootPlanInstanceId = currentPhase?.root.planInstanceId;
   const executorScoreAncestor = (() => {
     if (!previous?.executorInstanceId) return undefined;
     const visited = new Set<string>();
@@ -196,22 +197,29 @@ export function corpResidentScoreDefenseBinding(
         )
       : undefined;
   const lease = previous?.turnPlanExecutionLease;
-  const currentNode =
-    commitment?.phases[commitment.cursor.phaseIndex]?.nodes[
-      commitment.cursor.nodeIndex
-    ];
+  const currentNode = commitment
+    ? currentPhase?.nodes[commitment.cursor.nodeIndex]
+    : undefined;
   const stagedIceInstanceId = currentNode?.invocation.sourceCardInstanceId;
   const exactImmediateStagingServers =
     stagedIceInstanceId === undefined
       ? []
-      : input.playerView.servers.filter((server) =>
-          server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
+      : input.playerView.servers.filter(
+          (server) =>
+            isRemoteServerId(server.id) &&
+            (residentScoreServerId === "new_remote" ||
+              server.id === residentScoreServerId) &&
+            server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
         );
   const exactImmediateStagingReceipt =
     root !== undefined &&
     lease !== undefined &&
     commitment !== undefined &&
+    committedRootPlanInstanceId === root.instanceId &&
     lease.commitmentId === commitment.commitmentId &&
+    currentPhase?.phaseId === lease.phaseId &&
+    currentNode?.nodeId === lease.nodeId &&
+    currentNode?.invocation.routeKey === lease.routeKey &&
     lease.actionType === "install_card" &&
     lease.stateIdentity.stateVersion + 1 === input.playerView.stateVersion &&
     currentNode?.invocation.semanticActionType === "install.card" &&
@@ -221,7 +229,7 @@ export function corpResidentScoreDefenseBinding(
     typeof recentScoreStagingSignal?.sourceCardInstanceId === "string"
       ? input.playerView.servers.filter(
           (server) =>
-            server.id.startsWith("remote_") &&
+            isRemoteServerId(server.id) &&
             (residentScoreServerId === "new_remote" ||
               server.id === residentScoreServerId) &&
             server.ice.some(
@@ -234,12 +242,12 @@ export function corpResidentScoreDefenseBinding(
   const residentScoreStagingReceipt =
     residentScoreAgendaCardInstanceId !== undefined &&
     (residentScoreServerId === "new_remote" ||
-      residentScoreServerId?.startsWith("remote_") === true) &&
+      isRemoteServerId(residentScoreServerId) === true) &&
     typeof recentScoreStagingSignal?.sourceCardInstanceId === "string" &&
     residentScoreStagingServers.length === 1;
   const residentConcreteScoreServers =
     residentScoreAgendaCardInstanceId !== undefined &&
-    residentScoreServerId?.startsWith("remote_") === true
+    isRemoteServerId(residentScoreServerId) === true
       ? input.playerView.servers.filter(
           (server) =>
             server.id === residentScoreServerId && server.ice.length > 0,

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import {
   CorpRemoteOccupancyClaim,
@@ -27,7 +28,10 @@ export function buildCorpScoringRemoteProjectSignals(
     remoteDoctrine?: RemoteDoctrineProfile;
     scoreProjects: readonly ScoreConsumer[];
     remoteOccupancyClaims?: readonly CorpRemoteOccupancyClaim[];
-    maturityByServerId: ReadonlyMap<string, CorpRemoteMaturityAssessment>;
+    assessMaturityForServer: (
+      serverId: string,
+      targetBand: RemoteDoctrineProfile["protectionTarget"],
+    ) => CorpRemoteMaturityAssessment | undefined;
   }>,
 ): CorpRemoteProjectSignal[] {
   const doctrine =
@@ -35,6 +39,7 @@ export function buildCorpScoringRemoteProjectSignals(
     (params.input as AiDecisionInputWithDeckCapabilities)
       .ownRemoteDoctrineProfile;
   if (
+    !doctrine ||
     !remoteDoctrineAllowsResidentScoreRemote(doctrine, params.scoreProjects)
   ) {
     return [];
@@ -71,7 +76,7 @@ export function buildCorpScoringRemoteProjectSignals(
         serverId !== undefined &&
         serverId !== "new_remote" &&
         params.input.playerView.servers.some(
-          (server) => server.id === serverId && serverId.startsWith("remote_"),
+          (server) => server.id === serverId && isRemoteServerId(serverId),
         ),
     )
     .sort()[0];
@@ -93,7 +98,7 @@ export function buildCorpScoringRemoteProjectSignals(
     (previousSignal?.target.targetBindingRevision ?? 0) +
     (bindingChanged ? 1 : 0);
   const maturity =
-    params.maturityByServerId.get(targetServerId) ??
+    params.assessMaturityForServer(targetServerId, doctrine.protectionTarget) ??
     ({
       knowledge: "unknown",
       observedAtStateVersion: params.input.playerView.stateVersion,
@@ -129,7 +134,7 @@ export function buildCorpScoringRemoteProjectSignals(
     params.input,
     params.previous,
     previousSignal,
-    doctrine!.investmentBudget.backgroundActionsPerTurn,
+    doctrine.investmentBudget.backgroundActionsPerTurn,
   );
   const need = remoteNeed({
     phase,
@@ -144,16 +149,16 @@ export function buildCorpScoringRemoteProjectSignals(
     {
       projectId: STRATEGIC_SCORE_REMOTE_PROJECT_ID,
       purpose: "scoring_remote",
-      purposes: [...doctrine!.purposes],
+      purposes: [...doctrine.purposes],
       target: {
         status: targetStatus,
         serverId: targetServerId,
         targetBindingRevision,
       },
       serverId: targetServerId,
-      protectionTarget: doctrine!.protectionTarget,
-      buildTiming: doctrine!.buildTiming,
-      targetRecoveryTurns: doctrine!.investmentBudget.targetRecoveryTurns,
+      protectionTarget: doctrine.protectionTarget,
+      buildTiming: doctrine.buildTiming,
+      targetRecoveryTurns: doctrine.investmentBudget.targetRecoveryTurns,
       phase,
       maturity,
       ...(need ? { need } : {}),
@@ -345,7 +350,7 @@ function preferredReusableRemote(
   return input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         remoteHasEngineCertifiedVisibleAgendaTarget(input, server.id) &&
         !claimed.has(server.id) &&
         !scoreTargets.has(server.id),
@@ -442,7 +447,7 @@ function reboundServerAfterNewRemoteIceInstall(
     return undefined;
   return input.playerView.servers.find(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       server.id === receipt.event.publicPayload?.serverId &&
       server.ice.some(
         (ice: VisibleCard) => ice.instanceId === signal.sourceCardInstanceId,

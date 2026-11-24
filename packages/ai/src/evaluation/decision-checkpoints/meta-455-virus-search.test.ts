@@ -70,7 +70,7 @@ it.each([0, 1, 2])(
 it.each(["unfunded", "hand_answer_payable", "no_memory", "full_hand"] as const)(
   "does not promote a staged search with %s",
   (constraint) => {
-    const input = structuredClone(
+    const input = structuredClone<unknown>(
       searchCheckpoint.input,
     ) as AiDecisionInputWithDeckCapabilities;
     const action = input.legalActions.find(
@@ -92,8 +92,8 @@ it.each(["unfunded", "hand_answer_payable", "no_memory", "full_hand"] as const)(
         {
           actionId: action.actionId,
           sourceCardInstanceId: action.source!,
-          sourceDefinitionId: "onr_v1_177_the-short-circuit",
-          targetDefinitionId: "onr_proteus_095_skeleton-passkeys",
+          sourceDefinitionId: 389,
+          targetDefinitionId: 153,
         },
       ],
     };
@@ -135,8 +135,10 @@ it("retains an affordable bound search despite an unaffordable breaker in hand",
   expect(decision.actionId).toBe(search.actionId);
   expect(decision.fallbackUsed).toBe(false);
   expect(
-    decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("runner.rig_and_coverage");
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("runner.rig_and_coverage");
   expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
     actionId: search.actionId,
     stateVersion: 59,

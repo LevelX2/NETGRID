@@ -30,9 +30,9 @@ it("SP-287 preserves five credits by declining a future-only rez at the actual D
     fallbackUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
         leafExecutorInstanceId:
-          "plan:corp.defend_servers:server-defense-portfolio",
+          "penw02zfrkklof54c2nuye5att",
         route: { actionId: decline.actionId },
       },
     },

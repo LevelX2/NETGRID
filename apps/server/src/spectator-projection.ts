@@ -1,4 +1,4 @@
-import type { GameState, PublicGameEvent } from "@netgrid/shared";
+import type { GameState, MatchEventId, PublicGameEvent } from "@netgrid/shared";
 import type { StoredMatch } from "./multiplayer";
 
 export const SPECTATOR_PROJECTION_V1_SCHEMA = "SpectatorProjectionV1" as const;
@@ -66,7 +66,7 @@ export type PublicInstalledSlotV1 =
     };
 
 export type SpectatorEventV1 = {
-  eventId: string;
+  eventId: MatchEventId;
   type: string;
   stateVersionBefore: number;
   stateVersionAfter: number;

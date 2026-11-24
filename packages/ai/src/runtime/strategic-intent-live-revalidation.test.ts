@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -44,7 +45,7 @@ describe("live strategic-intent revalidation", () => {
     const event = {
       ...setupEvent({
         publicPayload: {
-          cardDefinitionId: "must-not-cross-the-sensor-boundary",
+          cardDefinitionId: syntheticCardDefinitionId("must-not-cross-the-sensor-boundary"),
         },
       }),
       privatePayload: {
@@ -94,7 +95,7 @@ function setupEvent(overrides?: {
   publicPayload?: Partial<Record<string, unknown> & { actor?: Side }>;
 }): PublicGameEvent {
   return {
-    eventId: "evt_setup",
+    eventId: (overrides?.stateVersionAfter ?? 2) + 1,
     type: overrides?.type ?? "resolve_choice",
     stateVersionBefore: 1,
     stateVersionAfter: overrides?.stateVersionAfter ?? 2,

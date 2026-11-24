@@ -5,7 +5,7 @@ const installProgram = capabilityKey("install_program_from_stack_or_trash");
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_110_sneak-preview"),
+    cardDefinitionId: cardDefinitionId(322),
     title: "Sneak Preview",
     side: "runner",
     cardType: "event",

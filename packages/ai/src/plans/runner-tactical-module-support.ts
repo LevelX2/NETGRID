@@ -93,19 +93,26 @@ export function runnerTacticalAssessment(
   guarantee: GuaranteeLevel = "visible_state_forced",
   resourceGaps: readonly ResourceGap[] = [],
 ): PlanAssessment {
+  const terminalEvidence =
+    priorityClass === "P1" && guarantee === "rules_proven"
+      ? instance.evidenceRefs[0]?.code
+      : undefined;
   const claim: PriorityClaim =
     priorityClass === "P1"
       ? {
           requestedClass: "P1",
           reasonCode: "terminal_win",
           horizon: "current_turn",
-          witness: {
-            kind: "terminal_path",
-            evidenceCode:
-              instance.evidenceRefs[0]?.code ?? "rules_proven_terminal_path",
-            guarantee: "rules_proven",
-            ...(instance.target ? { target: instance.target } : {}),
-          },
+          ...(terminalEvidence
+            ? {
+                witness: {
+                  kind: "terminal_path",
+                  evidenceCode: terminalEvidence,
+                  guarantee,
+                  ...(instance.target ? { target: instance.target } : {}),
+                },
+              }
+            : {}),
         }
       : priorityClass === "P2"
         ? {
@@ -172,16 +179,16 @@ export function runnerTacticalAssessment(
         : resourceGaps.length > 0
           ? resourceGaps.length + 1
           : 0,
-      opponentCanReact: priorityClass !== "P3",
+      opponentCanReact: !terminalEvidence && priorityClass !== "P3",
       confidence: guarantee,
     },
     resourceGaps: resourceGaps.map((gap) => ({ ...gap })),
     expectedOutcome: {
-      outcomeKind: "tactical_progress",
+      outcomeKind: terminalEvidence ? "terminal_win" : "tactical_progress",
       minimumValue: routeExists || resourceGaps.length > 0 ? value : 0,
       expectedValue: routeExists || resourceGaps.length > 0 ? value : 0,
       maximumValue: routeExists || resourceGaps.length > 0 ? value : 0,
-      terminal: false,
+      terminal: terminalEvidence !== undefined && routeExists,
       guarantee,
     },
     continuity: {
@@ -210,11 +217,11 @@ export function runnerTacticalPlanDomain<T>(context: PlanSchedulerContext): T {
       })
     | undefined;
   if (
-    value?.terminalWins &&
-    value.centralPressure &&
-    value.remoteContests &&
-    value.developments &&
-    value.runWindows
+    Array.isArray(value?.terminalWins) &&
+    Array.isArray(value.centralPressure) &&
+    Array.isArray(value.remoteContests) &&
+    Array.isArray(value.developments) &&
+    Array.isArray(value.runWindows)
   )
     return value;
   throw new PlanResolutionFailure("missing_plan_module_coverage", {
@@ -283,6 +290,17 @@ export function exactRunnerParentSupportResourceGaps(
       deadline: "current_turn",
     },
   ];
+}
+
+export function runnerTacticalAvailableCandidates(
+  context: PlanSchedulerContext,
+) {
+  return context.actionCandidates.filter(
+    (candidate) =>
+      !context.actionDispositions?.some(
+        (disposition) => disposition.actionId === candidate.actionId,
+      ),
+  );
 }
 
 export function domain(context: PlanSchedulerContext): RunnerPlanDomain {

@@ -1,5 +1,8 @@
 import type { CandidatePathBinding } from "./candidate-path-binding";
-import type { LegalActionWitness } from "./legalaction-witness";
+import {
+  legalActionWitnessIsRedactionSafe,
+  type LegalActionWitness,
+} from "./legalaction-witness";
 import { targetRefIsCompleteOrIrrelevant, type TargetRef } from "./target-ref";
 
 export type WitnessOpportunityProjectionStatus = "projected" | "blocked";
@@ -42,7 +45,7 @@ export function buildWitnessOpportunityProjection(
       : {}),
     ...(input.binding.actionId ? { actionId: input.binding.actionId } : {}),
     targetRef: input.targetRef,
-    ...(input.legalActionWitness
+    ...(blockers.length === 0 && input.legalActionWitness
       ? { legalActionWitness: input.legalActionWitness }
       : {}),
     candidatePathBindingFromWitness:
@@ -65,11 +68,38 @@ function projectionBlockers(
   const blockers = new Set<string>();
   if (!input.binding.actionId)
     blockers.add("legalaction_witness_missing_real_action_id");
-  if (!input.legalActionWitness) blockers.add("legalaction_witness_missing");
+  const { binding, targetRef, legalActionWitness: witness } = input;
+  if (!witness) {
+    blockers.add("legalaction_witness_missing");
+  } else {
+    if (
+      witness.actionId !== binding.actionId ||
+      witness.side !== binding.side ||
+      witness.stateVersion !== binding.stateVersion ||
+      witness.timingProfile.expiresAtStateVersion !== binding.stateVersion ||
+      witness.actionType !== binding.actionType
+    ) {
+      blockers.add("legalaction_witness_binding_mismatch");
+    }
+    if (
+      witness.targetRef.identity !== targetRef.identity ||
+      targetRef.identity !== binding.targetIdentity ||
+      !targetRefIsCompleteOrIrrelevant(witness.targetRef)
+    ) {
+      blockers.add("legalaction_witness_target_mismatch");
+    }
+    if (
+      witness.blockers.length > 0 ||
+      witness.redactionPolicy === "hidden_blocked" ||
+      !legalActionWitnessIsRedactionSafe(witness)
+    )
+      blockers.add("legalaction_witness_blocked");
+  }
   if (!targetRefIsCompleteOrIrrelevant(input.targetRef)) {
     blockers.add(input.targetRef.blocker ?? "targetref_not_complete");
   }
   if (input.binding.proofStatus !== "bound") {
+    blockers.add("candidate_path_binding_blocked");
     for (const blocker of input.binding.blockers) {
       blockers.add(`binding:${blocker}`);
     }

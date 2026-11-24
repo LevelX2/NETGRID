@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -14,7 +15,7 @@ import { creditGainPublicPayload } from "../economy/credit-gain";
 type HiddenZoneNonSearchDiceLoopRuntimeDeps = RuntimeDeps & {
   credits: typeof import("../state/economy-mutation").credits;
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
-  rollDeterministicDie: (state: GameState, purpose: string) => number;
+  rollDeterministicDie: (state: GameState, purpose: RandomPurpose) => number;
   runnerEventLongtailForDefinition: (
     definition: CardDefinition,
   ) => CardRunnerEventLongtailImplementation | undefined;
@@ -71,7 +72,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
     const randomDiceLoop = requireRandomDiceLoopImplementation(implementation);
     const dieRoll = typedDeps.rollDeterministicDie(
       state,
-      `v1921.die.${sourceDefinitionId}.dice_loop.initial`,
+      [21, sourceDefinitionId],
     );
     const choiceOpened = randomDiceLoop.choiceOn.includes(
       dieRoll as (typeof randomDiceLoop.choiceOn)[number],
@@ -169,7 +170,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       const creditText = creditTextForPrompt(gainedCredits);
       const diceText = diePromptText(setAsideDice);
       return {
-        id: `gain_${gainedCredits}_set_aside_${setAsideDice}`,
+        id: String(gainedCredits + 1),
         label: `${gainedCredits} ${creditText} nehmen, ${setAsideDice} ${diceText} beiseitelegen`,
         publicLabel: "Playful-AI-Aufteilung",
         value: gainedCredits,
@@ -236,15 +237,11 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       (candidate) => candidate.id === selectedOptionId,
     );
     if (!option) throw new Error("Playful-AI-Auswahl ist ungültig.");
-    if (option.id === "take_credits")
-      return { gainedCredits: dieRoll, setAsideDice: 0 };
-    if (option.id === "set_aside")
-      return { gainedCredits: 0, setAsideDice: dieRoll };
-    const match = /^gain_(\d+)_set_aside_(\d+)$/.exec(option.id);
-    if (!match) throw new Error("Playful-AI-Auswahl ist ungültig.");
-    const gainedCredits = Number(match[1]);
-    const setAsideDice = Number(match[2]);
+    const gainedCredits = option.value;
+    const setAsideDice = option.metadata?.secondaryAmount;
     if (
+      typeof gainedCredits !== "number" ||
+      typeof setAsideDice !== "number" ||
       !Number.isInteger(gainedCredits) ||
       !Number.isInteger(setAsideDice) ||
       gainedCredits < 0 ||
@@ -285,7 +282,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       remainingDice -= 1;
       const nextRoll = typedDeps.rollDeterministicDie(
         state,
-        `v1921.die.${sourceDefinitionId}.dice_loop.followup.${state.stateVersion + 1}.${nextRollIndex}`,
+        [22, sourceDefinitionId, state.stateVersion + 1, nextRollIndex],
       );
       nextRollIndex += 1;
       rolledDice.push(nextRoll);

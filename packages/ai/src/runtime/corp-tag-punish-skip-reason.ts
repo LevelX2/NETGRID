@@ -1,4 +1,6 @@
 import type { AiDecision, LegalAction } from "@netgrid/shared";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
+import { centralServerId, isRemoteServerTarget } from "./server-target";
 
 import type { CorpTagPunishSkipReason } from "./corp-tag-punish-types";
 
@@ -9,7 +11,7 @@ export function corpTagPunishSkipReason(
   const reason = decision.reasonCode;
   const reasonParts = structuredReasonParts(reason);
   if (
-    action.type === "gain_credit" ||
+    actionProvidesCredits(action) ||
     reasonParts.has("recover_economy") ||
     reasonParts.has("economy")
   )
@@ -19,6 +21,11 @@ export function corpTagPunishSkipReason(
     (action.type === "install_card" && action.payload?.placement === "ice") ||
     reasonParts.has("protect")
   ) {
+    const serverId = action.payload?.serverId;
+    if (typeof serverId === "string") {
+      if (isRemoteServerTarget(serverId)) return "remote_protection";
+      if (centralServerId(serverId)) return "central_protection";
+    }
     if (reasonParts.has("remote") || reasonParts.has("scoring"))
       return "remote_protection";
     if (

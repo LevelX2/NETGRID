@@ -1,5 +1,5 @@
 import type { PublicGameEvent } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
@@ -96,13 +96,13 @@ function isRecordedEventRunOrigin(event: PublicGameEvent): boolean {
   // deliberately not reconstructed from a card-wide run hint.
   if (
     payload.actor !== "runner" ||
-    typeof payload.cardDefinitionId !== "string"
+    typeof payload.cardDefinitionId !== "number"
   )
     return false;
-  const card = cardSpecPlanningCardByDefinitionId(payload.cardDefinitionId);
-  if (card?.definition.side !== "runner" || card.definition.type !== "event")
+  const card = planningCardByDefinitionId(payload.cardDefinitionId);
+  if (card?.side !== "runner" || card.cardType !== "event")
     return false;
-  const onPlay = card.planning.engine.abilities?.filter(
+  const onPlay = card.engine.abilities?.filter(
     (ability) => ability.kind === "on_play",
   );
   if (onPlay?.length !== 1 || onPlay[0]!.effects.length !== 1) return false;
@@ -150,9 +150,19 @@ function serverIdForLabel(value: unknown): string | undefined {
     return "archives";
   }
   const remoteMatch = /^(?:remote|server)\s*(\d+)$/.exec(normalized);
-  return remoteMatch ? `remote_${remoteMatch[1]}` : undefined;
+  return remoteMatch ? `r${remoteMatch[1]}` : undefined;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function publishOpenTraceBid(checkpoint: AiDecisionCheckpointV1): void {
+  const state = checkpoint.engine.testOnlyGameState;
+  const trace = state.trace;
+  if (trace?.status !== "runner_bid" || trace.traceValue === undefined)
+    throw new Error("Expected the fixture's open Runner bid with Corp strength");
+  state.traceRulesProfile = "modern_open";
+  trace.traceRulesProfile = "modern_open";
+  trace.bidsRevealed = true;
 }

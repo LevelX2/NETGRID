@@ -18,7 +18,7 @@ describe("data fort reclamation sequence routing", () => {
     ).toBe(true);
     expect(
       isHqToNewRemoteInstallRezRezChoiceSource(
-        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:8",
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:r1:10:8",
       ),
     ).toBe(true);
     expect(

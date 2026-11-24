@@ -19,7 +19,7 @@ function capture() {
 describe("meta 411 conditional next-encounter full break", () => {
   it("prices the complete known alternative at its target rather than forcing the source break", () => {
     const { input } = capture(),
-      ice = input.playerView.servers.find((s) => s.id === "remote_1")!.ice;
+      ice = input.playerView.servers.find((s) => s.id === "r1")!.ice;
     const path = assessKnownRezzedIcePath(ice, input.playerView.own.rig!, 8);
     expect(path).toMatchObject({
       canReachAccess: true,
@@ -30,7 +30,7 @@ describe("meta 411 conditional next-encounter full break", () => {
   });
   it("does not charge or project damage again after a fully paid target break", () => {
     const { input } = capture(),
-      ice = input.playerView.servers.find((s) => s.id === "remote_1")!.ice;
+      ice = input.playerView.servers.find((s) => s.id === "r1")!.ice;
     const path = assessKnownRezzedIcePath(ice, input.playerView.own.rig!, 2);
     expect(path).toMatchObject({ canReachAccess: true, creditsAfterPath: 0 });
     expect(
@@ -51,7 +51,7 @@ describe("meta 411 conditional next-encounter full break", () => {
     "does not invent a full break across %s",
     (kind) => {
       const { input } = capture(),
-        ice = input.playerView.servers.find((s) => s.id === "remote_1")!.ice;
+        ice = input.playerView.servers.find((s) => s.id === "r1")!.ice;
       if (kind === "unknown") {
         ice[0]!.known = false;
         delete ice[0]!.definitionId;
@@ -69,7 +69,7 @@ describe("meta 411 conditional next-encounter full break", () => {
   );
   it("retains the cheaper source-break alternative when full target break is more expensive", () => {
     const { input } = capture(),
-      ice = input.playerView.servers.find((s) => s.id === "remote_1")!.ice;
+      ice = input.playerView.servers.find((s) => s.id === "r1")!.ice;
     ice[0]!.effectiveRunQuote!.subroutines = [
       ice[0]!.effectiveRunQuote!.subroutines[1]!,
       ...Array.from({ length: 20 }, (_, i) => ({
@@ -90,7 +90,7 @@ describe("meta 411 conditional next-encounter full break", () => {
       runtime,
     );
     const result = chooseAiAction(input, { runnerTurnPlannerMode: "cutover" });
-    expect(result.actionId).toBe("runner.start_run.remote_1");
+    expect(result.actionId).toBe("rs.r1");
     expect(result.fallbackUsed).toBe(false);
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,
@@ -103,10 +103,10 @@ describe("meta 411 conditional next-encounter full break", () => {
   });
   it("keeps the best deferred continuation inside each breaker survival branch", () => {
     const { input } = capture();
-    const ice = input.playerView.servers.find((s) => s.id === "remote_1")!.ice;
+    const ice = input.playerView.servers.find((s) => s.id === "r1")!.ice;
     const breaker = {
       instanceId: "branch-breaker",
-      definitionId: "onr_v1_005_bartmoss-memorial-icebreaker",
+      definitionId: 217,
       type: "program" as const,
       known: true,
       strength: 5,

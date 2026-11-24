@@ -1,11 +1,15 @@
-import { accessTargetExpiryMatchesCurrentInput } from "./access-target-expiry";
+import {
+  accessTargetExpiryMatchesCurrentInput,
+  currentPaidAccessEffect,
+} from "./access-target-expiry";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import {
-  PendingChoice,
-  PendingChoiceOptions,
+  exactCurrentChoiceAction,
+  type PendingChoice,
+  type PendingChoiceOptions,
   unresolvedChoiceFailure,
 } from "../../runtime/plan-bound-choice-contract";
 export function selectedCorpAccessPaymentOptionsFromAmbushPlan(
@@ -26,7 +30,6 @@ export function selectedCorpAccessPaymentOptionsFromAmbushPlan(
   const pay = selectableOptions.find(
     (option) => option.id === "pay" && option.value === "pay",
   );
-  const requirement = action.choiceRequirements?.[0];
   if (
     portfolio?.side !== "corp" ||
     portfolio.stateVersion !== input.playerView.stateVersion ||
@@ -38,26 +41,17 @@ export function selectedCorpAccessPaymentOptionsFromAmbushPlan(
     binding.choiceId !== choice.choiceId ||
     binding.choiceSource !== choice.source ||
     binding.observedAtStateVersion !== input.playerView.stateVersion ||
-    choice.stateVersion !== input.playerView.stateVersion ||
-    choice.side !== "corp" ||
-    action.side !== "corp" ||
-    action.type !== "resolve_choice" ||
-    action.source !== "game_rule" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.timingPoint !== input.playerView.timingPoint ||
-    action.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1 ||
-    requirement.optionIds.length !== 2 ||
+    input.side !== "corp" ||
+    exactCurrentChoiceAction(input, choice) !== action ||
+    choice.minSelections !== 1 ||
+    choice.maxSelections !== 1 ||
+    choice.options.length !== 2 ||
     selectableOptions.length !== 2 ||
-    !selectableOptions.every((option) =>
-      requirement.optionIds.includes(option.id),
-    ) ||
     pay?.metadata?.creditCost !== binding.creditCost ||
     pay.metadata.accessPaymentNoOpCertified !== binding.noOpCertified ||
     choice.sourceCardDefinitionId !== moduleState.signal.sourceDefinitionId ||
     choice.sourceCardInstanceId !== moduleState.signal.sourceInstanceId ||
+    !currentPaidAccessEffect(choice, binding.creditCost) ||
     (binding.targetExpiry !== undefined &&
       (binding.noOpCertified ||
         binding.selectedOptionIds[0] !== "decline" ||
@@ -91,14 +85,15 @@ export function selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan(
     | { kind?: unknown; signal?: CorpAmbushSignal }
     | undefined;
   const binding = moduleState?.signal?.accessProgramBounceChoiceBinding;
-  const requirement = action.choiceRequirements?.[0];
   const optionIds = selectableOptions.map((option) => option.id);
   const selectedCardIds = binding?.selectedOptionIds.flatMap((optionId) => {
     const option = selectableOptions.find((entry) => entry.id === optionId);
     return typeof option?.value === "string" ? [option.value] : [];
   });
   const exactBinding =
+    input.side === "corp" &&
     portfolio?.side === "corp" &&
+    portfolio.stateVersion === input.playerView.stateVersion &&
     executor?.moduleId === "corp.ambush_and_bluff" &&
     executor.executionState === "executor" &&
     moduleState?.kind === "ambush" &&
@@ -112,21 +107,10 @@ export function selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan(
       (cardId, index) => cardId === binding.targetProgramInstanceIds[index],
     ) &&
     choice.side === "corp" &&
-    choice.stateVersion === input.playerView.stateVersion &&
     choice.visibility === "hidden_info_barrier" &&
     choice.minSelections === 0 &&
     binding.selectedOptionIds.length <= choice.maxSelections &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId)) &&
+    exactCurrentChoiceAction(input, choice) === action &&
     binding.selectedOptionIds.every((optionId) => optionIds.includes(optionId));
   if (!exactBinding) {
     throw unresolvedChoiceFailure(
@@ -153,13 +137,13 @@ export function selectedCorpAccessInstalledTrashOptionIdsFromResidentAmbushPlan(
     | { kind?: unknown; signal?: CorpAmbushSignal }
     | undefined;
   const binding = moduleState?.signal?.accessInstalledTrashChoiceBinding;
-  const requirement = action.choiceRequirements?.[0];
   const optionIds = selectableOptions.map((option) => option.id);
   const selectedCardIds = binding?.selectedOptionIds.flatMap((optionId) => {
     const option = selectableOptions.find((entry) => entry.id === optionId);
     return typeof option?.value === "string" ? [option.value] : [];
   });
   const exactBinding =
+    input.side === "corp" &&
     portfolio?.side === "corp" &&
     portfolio.stateVersion === input.playerView.stateVersion &&
     executor?.moduleId === "corp.ambush_and_bluff" &&
@@ -195,7 +179,6 @@ export function selectedCorpAccessInstalledTrashOptionIdsFromResidentAmbushPlan(
       (cardId, index) => cardId === binding.targetCardInstanceIds[index],
     ) &&
     choice.side === "corp" &&
-    choice.stateVersion === input.playerView.stateVersion &&
     choice.visibility === "public" &&
     choice.minSelections > 0 &&
     choice.minSelections === choice.maxSelections &&
@@ -205,17 +188,7 @@ export function selectedCorpAccessInstalledTrashOptionIdsFromResidentAmbushPlan(
     binding.selectedOptionIds.length === choice.maxSelections &&
     new Set(binding.selectedOptionIds).size ===
       binding.selectedOptionIds.length &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId)) &&
+    exactCurrentChoiceAction(input, choice) === action &&
     binding.selectedOptionIds.every((optionId) => optionIds.includes(optionId));
   if (!exactBinding) {
     throw unresolvedChoiceFailure(

@@ -73,9 +73,9 @@ describe("plan-first Engine-restricted run contract", () => {
   it("declines an optional restricted run when every target lacks current marginal value", () => {
     resetResidentPlanPortfolioMemory();
     const archivesRun = optionalRestrictedRun("archives");
-    const remoteRun = optionalRestrictedRun("remote_1");
+    const remoteRun = optionalRestrictedRun("r1");
     const decline = legalAction(
-      "runner.trigger_ability.decline_optional_bonus_run",
+      "rx.decline_optional_bonus_run",
       "runner",
       "trigger_ability",
       "Decline optional bonus run",
@@ -94,7 +94,7 @@ describe("plan-first Engine-restricted run contract", () => {
       score: 160,
     };
     const unaffordableRemote = {
-      ...safeRuntimeRunTarget(remoteRun.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(remoteRun.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_no_current_payoff" as const,
@@ -123,7 +123,7 @@ describe("plan-first Engine-restricted run contract", () => {
   it("prefers the cost-free restricted run over a click-costing run to the same server", () => {
     resetResidentPlanPortfolioMemory();
     const ordinaryRun = legalAction(
-      "runner.start_run.archives",
+      "rs.archives",
       "runner",
       "start_run",
       "Run Archives",
@@ -134,7 +134,7 @@ describe("plan-first Engine-restricted run contract", () => {
       },
     );
     const restrictedRun = legalAction(
-      "runner.start_run.archives.restricted",
+      "rs.archives.restricted",
       "runner",
       "start_run",
       "Restricted run Archives",
@@ -178,9 +178,9 @@ describe("plan-first Engine-restricted run contract", () => {
   it("keeps Wilson's exact run-only actions owned by the restricted run window", () => {
     resetResidentPlanPortfolioMemory();
     const runHq = wilsonRun("hq");
-    const runRemote = wilsonRun("remote_1");
+    const runRemote = wilsonRun("r1");
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -197,11 +197,11 @@ describe("plan-first Engine-restricted run contract", () => {
     ];
     input.playerView.own.rig = [
       visibleCard(
-        "runner_onr_v1_187_wilson-weeflerunner-apprentice_1",
+        "c2gp",
         "runner",
         "resource",
         {
-          definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+          definitionId: 399,
           title: "Wilson, Weeflerunner Apprentice",
         },
       ),
@@ -209,7 +209,7 @@ describe("plan-first Engine-restricted run contract", () => {
     input.playerView.opponent.deckCount = 10;
     const productiveHq = safeRuntimeRunTarget(runHq.actionId, "hq");
     const noPayoffRemote = {
-      ...safeRuntimeRunTarget(runRemote.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(runRemote.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_no_current_payoff" as const,
@@ -249,7 +249,7 @@ describe("plan-first Engine-restricted run contract", () => {
           parentInstanceId: "rules.restricted_action_sequence",
           moduleState: expect.objectContaining({
             signal: expect.objectContaining({
-              serverId: "remote_1",
+              serverId: "r1",
               actionAssessments: {
                 [runRemote.actionId]: expect.objectContaining({
                   admissible: false,
@@ -265,15 +265,15 @@ describe("plan-first Engine-restricted run contract", () => {
   it("ends the turn when the only ordinary Remote run is explicitly nonproductive", () => {
     resetResidentPlanPortfolioMemory();
     const runRemote = legalAction(
-      "runner.start_run.remote_1",
+      "rs.r1",
       "runner",
       "start_run",
       "Run remote 1",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      { payload: { serverId: "r1" } },
     );
     const end = legalAction(
-      "runner.end_turn",
+      "r9",
       "runner",
       "end_turn",
       "End turn",
@@ -289,7 +289,7 @@ describe("plan-first Engine-restricted run contract", () => {
     ];
     input.playerView.opponent.deckCount = 10;
     const noPayoffRemote = {
-      ...safeRuntimeRunTarget(runRemote.actionId, "remote_1"),
+      ...safeRuntimeRunTarget(runRemote.actionId, "r1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       knownAccessState: "known_no_current_payoff" as const,
@@ -318,10 +318,10 @@ describe("plan-first Engine-restricted run contract", () => {
   });
 });
 
-function wilsonRun(serverId: "hq" | "remote_1"): LegalAction {
-  const sourceId = "runner_onr_v1_187_wilson-weeflerunner-apprentice_1";
+function wilsonRun(serverId: "hq" | "r1"): LegalAction {
+  const sourceId = "c2gp";
   return legalAction(
-    `runner.start_run.${sourceId}.${serverId}.${sourceId}.gain_run_only_action`,
+    `rs.${sourceId}.${serverId}.${sourceId}.gain_run_only_action`,
     "runner",
     "start_run",
     `Wilson run on ${serverId}`,
@@ -333,7 +333,7 @@ function wilsonRun(serverId: "hq" | "remote_1"): LegalAction {
         abilityFamily: "run-access",
         abilityId: "gain_run_only_action",
         effectKind: "gain_credits",
-        sourceDefinitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+        sourceDefinitionId: 399,
         gainActionsAmount: 1,
         actionCapacityTiming: "immediate",
         actionCapacityRestriction: "run_only",
@@ -353,7 +353,7 @@ function wilsonRun(serverId: "hq" | "remote_1"): LegalAction {
 
 function restrictedRun(serverId: "archives" | "rd"): LegalAction {
   return legalAction(
-    `runner.start_run.${serverId}.restricted`,
+    `rs.${serverId}.restricted`,
     "runner",
     "start_run",
     `Restricted run ${serverId}`,
@@ -371,9 +371,9 @@ function restrictedRun(serverId: "archives" | "rd"): LegalAction {
   );
 }
 
-function optionalRestrictedRun(serverId: "archives" | "remote_1"): LegalAction {
+function optionalRestrictedRun(serverId: "archives" | "r1"): LegalAction {
   return legalAction(
-    `runner.start_run.${serverId}.optional_restricted`,
+    `rs.${serverId}.optional_restricted`,
     "runner",
     "start_run",
     `Optional restricted run ${serverId}`,
@@ -404,6 +404,11 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     buildRunnerEconomyPosture: () => ({
       minimumCreditFloor: 3,
       desiredCreditReserve: 5,
+      creditReservePolicy: {
+        emergencyReserve: 0,
+        contestReserve: 0,
+        remoteScoreThreat: "none",
+      },
       fundingNeed: true,
       evidence: ["test_visible_funding_need"],
     }),

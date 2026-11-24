@@ -35,7 +35,7 @@ describe("card support evidence projections", () => {
   });
 
   it("derives CardSpec support only from bound registry and scenario evidence", () => {
-    const cardId = "onr_v1_154_broker";
+    const cardId = 366;
     const entry = deriveCardSpecSupportEntry(
       cardId,
       "originalset-v1",
@@ -79,7 +79,7 @@ describe("card support evidence projections", () => {
   });
 
   it("fails closed for missing, mismatched or absent CardSpec support evidence", () => {
-    const cardId = "onr_v1_154_broker";
+    const cardId = 366;
     const evidence = {
       cardDefinitionId: cardId,
       validationStatus: "valid" as const,
@@ -104,7 +104,7 @@ describe("card support evidence projections", () => {
         deriveCardSpecSupportEntry(
           cardId,
           "originalset-v1",
-          { ...evidence, cardDefinitionId: "wrong" },
+          { ...evidence, cardDefinitionId: 921 },
           new Set([cardId]),
         ),
       "mismatched_registry_evidence",
@@ -127,7 +127,7 @@ describe("card support evidence projections", () => {
     expect(
       resolveCatalogSetName(
         {
-          cardId: "onr_v1_154_broker",
+          cardId: 366,
           setId: "originalset-v1",
           setName: "stale legacy name",
         },
@@ -138,10 +138,10 @@ describe("card support evidence projections", () => {
 
   it("keeps ineligible publication catalog-visible without inferring an editorial block", () => {
     const entry = deriveCardSpecSupportEntry(
-      "experimental_card",
+      922,
       "experimental_set",
       {
-        cardDefinitionId: "experimental_card",
+        cardDefinitionId: 922,
         validationStatus: "valid",
         runtimeProjectionStatus: "playable_mvp",
         planningProjectionStatus: "available",
@@ -160,7 +160,7 @@ describe("card support evidence projections", () => {
 function expectCardSpecSupportFailure(
   run: () => unknown,
   code: CardSpecSupportError["code"],
-  cardDefinitionId: string,
+  cardDefinitionId: number,
 ): void {
   try {
     run();

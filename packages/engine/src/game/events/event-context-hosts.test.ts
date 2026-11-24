@@ -41,7 +41,7 @@ function state(): GameState {
     cardInstances: {
       [BREAKER_ID]: {
         id: BREAKER_ID,
-        definitionId: "onr_v1_015_codeslinger",
+        definitionId: 227,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "rig", section: "programs" },

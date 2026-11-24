@@ -1,4 +1,5 @@
-import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import type { AiDecisionInput, MatchEventId, PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import runnerCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-known-trap-unsafe-remote-run.json";
 import corpCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-exposed-trap-cowboy-recycle.json";
@@ -18,7 +19,7 @@ import {
 
 describe("known exposed Corp card decision checkpoints", () => {
   it("known TRAP prevents an unsafe Remote run", () => {
-    const serverId = runnerCheckpoint.serverId as `remote_${number}`;
+    const serverId = runnerCheckpoint.serverId as `r${number}`;
     const input = aiInput("runner", []);
     input.playerView.own.gripOrHq = Array.from(
       { length: runnerCheckpoint.runnerHandCount },
@@ -55,7 +56,7 @@ describe("known exposed Corp card decision checkpoints", () => {
   });
 
   it("exposed weak TRAP is returned through Cowboy's exact legal action", () => {
-    const serverId = corpCheckpoint.serverId as `remote_${number}`;
+    const serverId = corpCheckpoint.serverId as `r${number}`;
     const trap = visibleCard(corpCheckpoint.cardInstanceId, "corp", "asset", {
       definitionId: corpCheckpoint.cardDefinitionId,
       advancementCounters: 0,
@@ -124,9 +125,9 @@ describe("known exposed Corp card decision checkpoints", () => {
 });
 
 function exposeEvent(
-  eventId: string,
+  eventId: MatchEventId,
   serverId: string,
-  definitionId: string,
+  definitionId: number,
 ): PublicGameEvent {
   return {
     eventId,
@@ -156,7 +157,7 @@ function residentAmbush(
   return {
     instances: [
       {
-        instanceId: `plan:corp.ambush_and_bluff:${cardInstanceId}`,
+        instanceId: planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: cardInstanceId }),
         moduleId: "corp.ambush_and_bluff",
         viability: "ready",
         moduleState: {

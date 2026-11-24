@@ -34,9 +34,14 @@ it("counts the actual public heap return before certifying the last-click cleanu
   const action = recoveryAction();
   expect(decision.actionId).toBe(action.actionId);
   const plan = decision.decisionDebug!.planFirstDecision!;
-  expect(plan.rootPlanInstanceId).toContain(
-    "plan:runner.develop_board_and_hand:recovery",
-  );
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan.rootPlanInstanceId,
+    ),
+  ).toMatchObject({
+    moduleId: "runner.develop_board_and_hand",
+    dedupeKey: expect.stringContaining("recovery"),
+  });
   expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
   expect(plan.route).toMatchObject({
     actionId: action.actionId,

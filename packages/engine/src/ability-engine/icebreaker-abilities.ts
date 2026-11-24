@@ -5,6 +5,7 @@
  */
 import type {
   AbilityDefinition,
+  CanonicalCapabilityId,
   CardDefinition,
   CardDefinitionId,
   CardInstanceId,
@@ -43,7 +44,8 @@ export type RuntimeIcebreakerSpecialEffect =
   | { kind: "run_end_trash_source_if_used" }
   | { kind: "set_next_sentry_free_break_after_fully_breaking_wall" };
 
-export type RuntimeIcebreakerAbility = AbilityDefinition & {
+export type RuntimeIcebreakerAbility = Omit<AbilityDefinition, "id"> & {
+  id: CanonicalCapabilityId;
   iceSubtypes?: readonly string[];
   iceDefinitionIds?: readonly CardDefinitionId[];
   selectedIceSubtypeFromBreaker?: true;

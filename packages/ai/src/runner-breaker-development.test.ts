@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   BreakerCapability,
@@ -29,7 +30,6 @@ describe("assessRunnerBreakerDevelopment", () => {
       minimumCoverageComplete: true,
       architecture: "universal_single",
       optionalBreakerIds: [],
-      searchableOptionalBreakerIds: [],
       primaryBreakerNeed: false,
     });
   });
@@ -50,8 +50,7 @@ describe("assessRunnerBreakerDevelopment", () => {
     expect(assessment).toMatchObject({
       minimumCoverageComplete: true,
       architecture: "hybrid",
-      optionalBreakerIds: ["efficient-wall-breaker"],
-      searchableOptionalBreakerIds: ["efficient-wall-breaker"],
+      optionalBreakerIds: [syntheticCardDefinitionId("efficient-wall-breaker")],
       primaryBreakerNeed: false,
     });
   });
@@ -68,8 +67,8 @@ describe("assessRunnerBreakerDevelopment", () => {
       ]),
     );
 
-    expect(assessment.optionalBreakerIds).toEqual(["efficient-wall-breaker"]);
-    expect(assessment.searchableOptionalBreakerIds).toEqual([]);
+    expect(assessment.optionalBreakerIds).toEqual([syntheticCardDefinitionId("efficient-wall-breaker")]);
+    expect(assessment.evidence).toContain("breaker_optional_searchable:none");
   });
 
   it("treats a universal breaker as an optional upgrade after a specialist suite works", () => {
@@ -84,8 +83,7 @@ describe("assessRunnerBreakerDevelopment", () => {
     expect(assessment).toMatchObject({
       minimumCoverageComplete: true,
       architecture: "hybrid",
-      optionalBreakerIds: ["late-universal"],
-      searchableOptionalBreakerIds: ["late-universal"],
+      optionalBreakerIds: [syntheticCardDefinitionId("late-universal")],
       primaryBreakerNeed: false,
     });
   });
@@ -147,20 +145,20 @@ function coverageState(coverage: BreakerCoverageKind): CoverageState {
     searchableNow: true,
     drawOnly: false,
     missing: false,
-    bestKnownCards: ["krash"],
+    bestKnownCards: [syntheticCardDefinitionId("krash")],
     blockers: [],
   };
 }
 
 function breaker(
-  cardId: string,
+  label: string,
   coverage: BreakerCoverageKind[],
   locations: BreakerCapability["locations"],
   confidence: BreakerCapability["confidence"] = "high",
 ): BreakerCapability {
   return {
-    cardId,
-    title: cardId,
+    cardId: syntheticCardDefinitionId(label),
+    title: label,
     coverage,
     risks: [],
     restrictions: [],

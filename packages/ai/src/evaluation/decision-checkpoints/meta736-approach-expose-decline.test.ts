@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -9,11 +10,11 @@ import {
   restoreResidentPlanPortfolioMemorySnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 
-const rootId = "plan:runner.pressure_central:central%3Ard";
-const windowId = "plan:runner.convert_run_window:run%3Arun_164";
-const newTarget = "corp_onr_v1_278_wall-of-ice_1";
-const oldTarget = "corp_onr_v1_268_shock-r_1";
-const sourceId = "runner_onr_v1_065_smarteye_1";
+const rootId = "pa90fufw9vc5bkshp96ztlryxl";
+const windowId = "p9nnw6hsp6x6kr30mahq94ljx1";
+const newTarget = "c311";
+const oldTarget = "c2yt";
+const sourceId = "c1pl";
 
 const checkpoints = {
   88: "cp-meta-736-r3-g24-d088.json",
@@ -66,7 +67,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     });
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: rootId,
-      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${newTarget}`,
+      leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.expose_information", dedupeKey: `ice:${newTarget}` }),
       executionOrigin: { rootPlanInstanceId: rootId, stateVersion: 170 },
     });
     expect(selected.fallbackUsed).toBe(false);
@@ -82,7 +83,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     expect(declined?.publicPayload.serverId).toBeUndefined();
     restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
     const selected = chooseAiAction(input);
-    const target = "corp_onr_v1_238_data-wall-2-0_2";
+    const target = "c2s6";
     const expose = input.legalActions.find(
       (action) => action.payload?.approachIceExposeDecision === "expose",
     );
@@ -93,7 +94,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     expect(selected.actionId).toBe(expose?.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: rootId,
-      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${target}`,
+      leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.expose_information", dedupeKey: `ice:${target}` }),
       executionOrigin: { rootPlanInstanceId: rootId, stateVersion: 173 },
     });
     expect(selected.fallbackUsed).toBe(false);
@@ -115,7 +116,7 @@ describe("SP-469: a later approach window after a declined exposure", () => {
     (defect) => {
       const { input, portfolio } = loadCheckpoint();
       if (defect === "lease") delete portfolio.turnPlanExecutionLease;
-      if (defect === "run") input.playerView.run!.runId = "different-run";
+      if (defect === "run") input.playerView.run!.runId = input.playerView.stateVersion + 1;
       if (defect === "server") {
         const encounter = input.eventTail.find(
           (event) => event.stateVersionBefore === 168,
@@ -145,9 +146,9 @@ describe("SP-469: a later approach window after a declined exposure", () => {
 });
 
 describe("SP-469: nonterminal encounter and automatic movement", () => {
-  const runParent = "plan:runner.convert_run_window:run%3Arun_166";
-  const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
-  const target = "corp_onr_v1_222_ball-and-chain_1";
+  const runParent = "p9nnwk7sa6vc2ozjzl0irm1w5j";
+  const pressureRoot = "pa7nez1ioecg7mf06q1uwqq57o";
+  const target = "c2ol";
   beforeEach(resetResidentPlanPortfolioMemory);
 
   it("lets Smarteye expose the next ICE under the same run parent", () => {
@@ -170,7 +171,7 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
       },
     ]);
     expect(input.observedTurnPlanAction).toMatchObject({
-      actionId: "runner.continue_run",
+      actionId: "r5",
       source: "game_rule",
       stateVersionBefore: 171,
       stateVersionAfter: 172,
@@ -184,7 +185,7 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
     expect(selected.actionId).toBe(expose?.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: pressureRoot,
-      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${target}`,
+      leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.expose_information", dedupeKey: `ice:${target}` }),
       executionOrigin: { rootPlanInstanceId: pressureRoot, stateVersion: 172 },
     });
     expect(selected.fallbackUsed).toBe(false);
@@ -204,7 +205,7 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
         (event) => event.stateVersionBefore === 171,
       )!;
       if (defect === "lease") delete portfolio.turnPlanExecutionLease;
-      if (defect === "run") input.playerView.run!.runId = "other-run";
+      if (defect === "run") input.playerView.run!.runId = input.playerView.stateVersion + 1;
       if (defect === "server") movement.publicPayload.serverId = "rd";
       if (defect === "gap") input.eventTail = input.eventTail.filter(
         (event) => event !== movement,
@@ -219,9 +220,9 @@ describe("SP-469: nonterminal encounter and automatic movement", () => {
 });
 
 describe("SP-469: an initial expose child directly under the pressure root", () => {
-  const pressureRoot = "plan:runner.pressure_central:central%3Ahq";
-  const runParent = "plan:runner.convert_run_window:run%3Arun_83";
-  const target = "corp_onr_v1_237_data-wall_3";
+  const pressureRoot = "pa7nez1ioecg7mf06q1uwqq57o";
+  const runParent = "p8kyvvo2wpum48feskb3wkarmj";
+  const target = "c2rz";
   beforeEach(resetResidentPlanPortfolioMemory);
 
   it("moves the next exact ICE window under the resident same-run parent", () => {
@@ -235,7 +236,7 @@ describe("SP-469: an initial expose child directly under the pressure root", () 
       .toMatchObject({
         moduleId: "runner.convert_run_window",
         parentInstanceId: pressureRoot,
-        target: { kind: "window", id: "run:run_83" },
+        target: { kind: "window", id: "run:83" },
       });
     restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
     const selected = chooseAiAction(input);
@@ -246,7 +247,7 @@ describe("SP-469: an initial expose child directly under the pressure root", () 
     expect(selected.actionId).toBe(decline?.actionId);
     expect(selected.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: pressureRoot,
-      leafExecutorInstanceId: `plan:runner.expose_information:ice%3A${target}`,
+      leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.expose_information", dedupeKey: `ice:${target}` }),
       selectedStep: { parentInstanceId: runParent },
     });
     expect(selected.fallbackUsed).toBe(false);
@@ -262,7 +263,7 @@ describe("SP-469: an initial expose child directly under the pressure root", () 
           (instance) => instance.instanceId !== runParent,
         );
       } else {
-        input.playerView.run!.runId = "different-run";
+        input.playerView.run!.runId = input.playerView.stateVersion + 1;
       }
       restoreResidentPlanPortfolioMemorySnapshot(input, portfolio);
       expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);

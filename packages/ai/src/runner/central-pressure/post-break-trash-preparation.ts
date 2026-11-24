@@ -1,17 +1,23 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { RunnerPressureSignal } from "../../plans/runner-tactical-plan-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
 type Source = {
   sourceCardInstanceId: string;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   installed: boolean;
 };
 type Target = { targetIceInstanceId: string; trashCredits: number };
 type Quote = { sources: Source[]; targets: Target[] };
+export type DeferredPostBreakTrashRun = {
+  actionId: string;
+  minimumCreditsAfterPath: number;
+};
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -45,8 +51,7 @@ function currentQuote(
     q.schemaVersion !== "runner-post-break-trash-quote-v1" ||
     q.stateVersion !== input.playerView.stateVersion ||
     q.actionId !== action.actionId ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.timingPoint !== input.playerView.timingPoint ||
+    !actionMatchesCurrentDecision(input, action) ||
     q.serverId !== action.payload?.serverId ||
     !Array.isArray(q.sources) ||
     !Array.isArray(q.targets) ||
@@ -54,7 +59,7 @@ function currentQuote(
       (s: unknown): s is Source =>
         isRecord(s) &&
         typeof s.sourceCardInstanceId === "string" &&
-        typeof s.sourceDefinitionId === "string" &&
+        typeof s.sourceDefinitionId === "number" &&
         typeof s.installed === "boolean",
     ) ||
     !q.targets.every(
@@ -70,14 +75,14 @@ function currentQuote(
   return { sources: q.sources, targets: q.targets };
 }
 
-/** A preparation phase of an admitted central run, priced over the remaining
- * same-turn accesses. Only a fully quoted all-ETR path proves all subroutines
- * will be broken; partial mitigation never promises the post-pass ability. */
+/** Price the removal over the remaining same-turn accesses. Only a fully
+ * quoted all-ETR path proves the post-pass ability can be used. */
 export function runnerPostBreakTrashPreparationSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   signals: readonly RunnerPressureSignal[],
   previous?: ResidentPlanPortfolio,
+  deferredRuns?: ReadonlyMap<string, DeferredPostBreakTrashRun>,
 ): RunnerPressureSignal[] {
   const view = input.playerView;
   if (
@@ -88,6 +93,7 @@ export function runnerPostBreakTrashPreparationSignals(
     return [];
   return signals.flatMap((signal) => {
     if (signal.marginalValue <= 0 || signal.routePreparation) return [];
+    const deferredRun = deferredRuns?.get(signal.pressureId);
     const server = view.servers.find((s) => s.id === signal.serverId);
     if (!server || server.ice.length !== 1) return [];
     const ice = server.ice[0]!;
@@ -103,7 +109,8 @@ export function runnerPostBreakTrashPreparationSignals(
       (a) =>
         a.type === "start_run" &&
         a.payload?.serverId === server.id &&
-        signal.runActionIds?.includes(a.actionId) &&
+        (signal.runActionIds?.includes(a.actionId) ||
+          a.actionId === deferredRun?.actionId) &&
         a.costs.reduce((n, c) => n + (c.clicks ?? 0), 0) === 1,
     );
     if (!run) return [];
@@ -112,6 +119,18 @@ export function runnerPostBreakTrashPreparationSignals(
       (t) => t.targetIceInstanceId === ice.instanceId,
     );
     if (!quote || !target) return [];
+    const minimumCreditsAfterPath = deferredRun?.minimumCreditsAfterPath ?? 0;
+    let approvedSignal = signal;
+    if (!signal.reachable && deferredRun?.actionId === run.actionId) {
+      approvedSignal = {
+        ...signal,
+        purpose: "access",
+        reachable: true,
+        runActionIds: [run.actionId],
+        runActionExclusions: {},
+      };
+      delete approvedSignal.supportNeedId;
+    }
     const priorState = previous?.instances.find(
       (instance) =>
         instance.moduleId === "runner.pressure_central" &&
@@ -119,7 +138,9 @@ export function runnerPostBreakTrashPreparationSignals(
     )?.moduleState as
       | { kind: "central_pressure"; signal: RunnerPressureSignal }
       | undefined;
-    const commitment = priorState?.signal.postBreakTrashCommitment;
+    const commitment = priorState?.kind === "central_pressure"
+      ? priorState.signal.postBreakTrashCommitment
+      : undefined;
     if (
       commitment &&
       commitment.serverId === server.id &&
@@ -143,10 +164,11 @@ export function runnerPostBreakTrashPreparationSignals(
         view.own.credits - startCredits - target.trashCredits,
         server.root,
         view.opponent.credits,
+        visibleRunnerPathTraceContext(input),
       );
       if (
         path.canReachAccess &&
-        path.creditsAfterPath >= 0 &&
+        path.creditsAfterPath >= minimumCreditsAfterPath &&
         (path.unavoidableVisibleIceHazardCount ?? 0) === 0
       ) {
         // Installation already changed the board. A higher-priority hand or
@@ -154,8 +176,8 @@ export function runnerPostBreakTrashPreparationSignals(
         // goal. Reachability and priority still come from the current owner.
         return [
           {
-            ...signal,
-            ...(signal.reachable
+            ...approvedSignal,
+            ...(approvedSignal.reachable
               ? {
                   evidenceCode:
                     "runner_post_break_trash_installed_goal_revalidated",
@@ -170,7 +192,7 @@ export function runnerPostBreakTrashPreparationSignals(
         ];
       }
     }
-    if (!signal.reachable) return [];
+    if (!approvedSignal.reachable) return [];
     const routes = quote.sources
       .flatMap((source) => {
         const card = (
@@ -186,8 +208,9 @@ export function runnerPostBreakTrashPreparationSignals(
           : input.legalActions.find(
               (a) =>
                 a.type === "install_card" &&
+                actionMatchesCurrentDecision(input, a) &&
                 a.source === card.instanceId &&
-                !a.actionId.includes("trash_before") &&
+                a.payload?.runnerProgramTrashBeforeInstall !== true &&
                 !a.choiceRequirements?.length &&
                 candidates.some((c) => c.actionId === a.actionId),
             );
@@ -211,12 +234,13 @@ export function runnerPostBreakTrashPreparationSignals(
             target.trashCredits,
           server.root,
           view.opponent.credits,
+          visibleRunnerPathTraceContext(input),
         );
         if (
           !path.canReachAccess ||
           (path.unavoidableVisibleIceHazardCount ?? 0) !== 0 ||
           path.visibleBreakCost === undefined ||
-          path.creditsAfterPath < 0
+          path.creditsAfterPath < minimumCreditsAfterPath
         )
           return [];
         const savings =
@@ -238,7 +262,7 @@ export function runnerPostBreakTrashPreparationSignals(
     if (!best) return [];
     return [
       {
-        ...signal,
+        ...approvedSignal,
         evidenceCode: `runner_post_break_trash_same_turn_savings:${best.savings}`,
         postBreakTrashCommitment: {
           sourceCardInstanceId: best.source.sourceCardInstanceId,

@@ -60,7 +60,7 @@ export function cybertechThinkTankBoostCandidates(
         implementation?.corpUtility?.kind !== "meat_damage_boost" ||
         Math.floor(instance.advancementCounters ?? 0) <= 0 ||
         sourceText.includes(cardId) ||
-        sourceText.includes(instance.definitionId)
+        sourceText.split(/[:.]/).includes(String(instance.definitionId))
       )
         continue;
       candidates.push({
@@ -124,7 +124,7 @@ export function collectRuntimeDamagePreventionCandidates(
     );
     if (preventAmount > 0) {
       candidates.push({
-        candidateId: `run_damage_prevent_${sanitizeId(runPool.sourceDefinitionId)}_${preventAmount}`,
+        candidateId: `run_damage_prevent_${runPool.sourceDefinitionId}_${preventAmount}`,
         eventId: event.eventId,
         kind: "prevent",
         controller: "runner",

@@ -1,12 +1,12 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 
 describe("HQ access triggers preserve their actual information target (SP-615)", () => {
-  const source = cardSpecPlanningCards().find(
-    (card) => card.definition.id === "onr_classic_032_schematics-search-engine",
+  const source = listPlanningCardsWithFacts().find(
+    (card) => card.facts.id === 36,
   )!;
 
   it.each(["canonical", "renamed"])(
@@ -16,9 +16,9 @@ describe("HQ access triggers preserve their actual information target (SP-615)",
       delete mechanical.planningAnnotations;
       const hint = deriveCardSpecAiHint({
         ...source,
-        definition: identity === "canonical" ? source.definition : {
-          ...source.definition,
-          id: "onr_v1_183_technician-lover",
+        facts: identity === "canonical" ? source.facts : {
+          ...source.facts,
+          id: 395,
           title: "Unrelated title",
         },
         planning: mechanical,
@@ -38,7 +38,7 @@ describe("HQ access triggers preserve their actual information target (SP-615)",
   );
 
   it("publishes only the actual expose effect in the runtime artifact", () => {
-    const hint = AI_HINTS_BY_CARD.get(source.definition.id)!;
+    const hint = AI_HINTS_BY_CARD.get(source.facts.id)!;
     expect(hint.effects?.some((effect) => effect.kind === "hq_info")).toBe(false);
     expect(hint.functionSignals).toContain("info.expose_installed_card");
   });
@@ -47,7 +47,7 @@ describe("HQ access triggers preserve their actual information target (SP-615)",
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "real-mechanics-information-projection",
       side: "runner",
-      cards: [{ cardId: source.definition.id, quantity: 2 }],
+      cards: [{ cardId: source.facts.id, quantity: 2 }],
     });
     expect(profile.functionSignalCounts["info.expose_installed_card"]).toBe(2);
     expect(profile.functionSignalCounts["access.hq_full_reveal"]).toBeUndefined();

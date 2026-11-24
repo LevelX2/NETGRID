@@ -6,6 +6,7 @@ import {
 } from "@netgrid/engine";
 import {
   DEMO_DECKS,
+  type CardDefinitionId,
   type DeckDefinition,
   type GameState,
   type LegalAction,
@@ -19,14 +20,19 @@ import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
-const DATAPOOL = "onr_v1_287_datapool-by-zetatech";
-const VOUCHER = "onr_v1_293_netwatch-credit-voucher";
-const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
+const DATAPOOL = 499;
+const VOUCHER = 505;
+const SCORCHED_EARTH = 514;
+const URBAN_RENEWAL = 519;
+const WILSON = 399;
 const CORP_DECK = withCards(
   DEMO_DECKS.demo_corp_001,
   "tag-amplifier-quote-corp",
   [DATAPOOL, VOUCHER, SCORCHED_EARTH],
 );
+const DAMAGE_DECK = withCards(CORP_DECK, "sacrifice-quote-corp", [
+  URBAN_RENEWAL,
+]);
 
 describe("direct additional-tag punish routes", () => {
   it("binds Datapool as an executable additional-tag route under the existing punish owner", () => {
@@ -72,10 +78,10 @@ describe("direct additional-tag punish routes", () => {
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+        "pp3zys3mvrb02r0muk2126s52",
       selectedStep: {
         parentInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
       },
     });
   });
@@ -137,10 +143,10 @@ describe("direct additional-tag punish routes", () => {
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+        "pp3zys3mvrb02r0muk2126s52",
       selectedStep: {
         parentInstanceId:
-          "plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+          "pp3zys3mvrb02r0muk2126s52",
       },
     });
     if (!decision.actionId) throw new Error("Missing selected Voucher action.");
@@ -181,11 +187,126 @@ describe("direct additional-tag punish routes", () => {
       effectiveClass: "P1",
     });
   });
+
+  it.each([
+    { grip: 3, credits: 9, terminal: true },
+    { grip: 4, credits: 9, terminal: false },
+    { grip: 3, credits: 8, terminal: false },
+  ])(
+    "uses the Engine minimum after one public sacrifice with $grip Grip and $credits credits",
+    ({ grip, credits, terminal }) => {
+      let state = applyMandatoryDraw(
+        createGameAfterSetup({
+          seed: "sacrifice-quote-campaign",
+          agendaPointsToWin: 7,
+          corpDeck: DAMAGE_DECK,
+          runnerDeck: withCards(
+            DEMO_DECKS.demo_runner_001,
+            "sacrifice-quote-runner",
+            [WILSON],
+          ),
+        }),
+      );
+      RealEngineFixtureBuilder.forState(state)
+        .withCorpHqSize(0)
+        .withCorpCardInHq(SCORCHED_EARTH)
+        .withCorpCardInHq(URBAN_RENEWAL)
+        .withCorpCredits(credits)
+        .withRunnerTags(1)
+        .withRunnerResourceInstalled(WILSON)
+        .withRunnerGripSize(grip);
+      state.corp.clicks = 2;
+      const input = decisionInput(state, DAMAGE_DECK);
+      const quoted = withDecisionLocalCorpPunishRouteQuotes(input, (request) =>
+        quoteCorpPunishRoute(state, request),
+      );
+      expect(
+        quoted.playerView.corpPunishRouteQuoteSet?.routes.filter(
+          (route) => route.complete && route.steps.length === 2,
+        ),
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            totalActionCredits: 9,
+            damageEnvelope: expect.objectContaining({
+              effectiveDamage: { minimum: 4, maximum: 9 },
+              visiblePrevention: expect.objectContaining({
+                maximumPreventableDamage: 5,
+              }),
+            }),
+          }),
+        ]),
+      );
+      const decision = chooseCorpAction(quoted, {
+        persistTacticalPlanMemory: false,
+      });
+      expect(decision.fallbackUsed).toBe(false);
+      if (!terminal) {
+        expect(
+          decision.decisionDebug?.planFirstDecision?.priority?.effectiveClass,
+        ).not.toBe("P1");
+        return;
+      }
+      expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+        rootPlanInstanceId:
+          "pp3zys3mvrb02r0muk2126s52",
+        priority: { effectiveClass: "P1" },
+        route: {
+          actionId: decision.actionId,
+          stateVersion: state.stateVersion,
+        },
+      });
+      const first = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: decision.actionId!,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      if (!first.ok) throw new Error(first.error.message);
+      const pending = first.state.pendingChoice!;
+      const prevent = pending.options.find(
+        (option) => option.metadata?.optionKind === "prevent_damage",
+      )!;
+      const choice = getLegalActions(first.state, "runner").find(
+        (action) => action.type === "resolve_choice",
+      )!;
+      const prevented = applyAction(first.state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: choice.actionId,
+        clientKnownStateVersion: first.state.stateVersion,
+        selectedChoices: {
+          choiceId: pending.choiceId,
+          selectedOptionIds: [prevent.id],
+        },
+      });
+      if (!prevented.ok) throw new Error(prevented.error.message);
+      state = prevented.state;
+      expect(state.runner.rig.resources).toEqual([]);
+      const followup = chooseCorpAction(decisionInput(state, DAMAGE_DECK), {
+        quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+        persistTacticalPlanMemory: false,
+      });
+      expect(followup.decisionDebug?.planFirstDecision).toMatchObject({
+        rootPlanInstanceId:
+          "pp3zys3mvrb02r0muk2126s52",
+        priority: { effectiveClass: "P1" },
+      });
+      const resolved = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: followup.actionId!,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      if (!resolved.ok) throw new Error(resolved.error.message);
+      expect(resolved.state.winner).toBe("corp");
+    },
+  );
 });
 
 function tagAmplifierState(
   seed: string,
-  amplifierDefinitionId: string,
+  amplifierDefinitionId: number,
   corpCredits: number,
 ): GameState {
   const setupState = createGameAfterSetup({
@@ -204,17 +325,17 @@ function tagAmplifierState(
   return state;
 }
 
-function decisionInput(state: GameState) {
+function decisionInput(state: GameState, deck = CORP_DECK) {
   return buildAiDecisionInput(state, "corp", {
     decisionId: `tag-amplifier-quote:${state.matchId}:${state.stateVersion}`,
     profileId: "tag-amplifier-quote-corp",
-    ownDeckSnapshot: snapshot(CORP_DECK),
+    ownDeckSnapshot: snapshot(deck),
   });
 }
 
 function routeFor(
   input: ReturnType<typeof decisionInput>,
-  definitionId: string,
+  definitionId: number,
 ) {
   return input.playerView.corpPunishRouteQuoteSet?.routes.find(
     (route) => route.steps[0]?.sourceCardDefinitionId === definitionId,
@@ -224,7 +345,7 @@ function routeFor(
 function playOperation(
   actions: readonly LegalAction[],
   input: ReturnType<typeof decisionInput>,
-  definitionId: string,
+  definitionId: number,
 ): LegalAction {
   const instanceId = input.playerView.own.gripOrHq.find(
     (card) => card.definitionId === definitionId,
@@ -256,7 +377,7 @@ function applyMandatoryDraw(state: GameState): GameState {
 function withCards(
   base: DeckDefinition,
   id: string,
-  additions: readonly string[],
+  additions: readonly CardDefinitionId[],
 ): DeckDefinition {
   return {
     ...base,

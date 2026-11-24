@@ -1,9 +1,12 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { chooseRunnerAction } from "./index";
 import type { AiDeckStrategyProfile } from "./deck-doctrine-strategy";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import type { SemanticRuntimeChoice } from "./runtime/semantic-runtime-types";
 import {
   CURRENT_RULES_BASELINE,
+  isCanonicalCapabilityId,
+  ORIGINALSET_DEFAULT_DECKS,
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type AiDifficulty,
@@ -102,10 +105,10 @@ export function runnerWallCoverageInput(
     server("rd"),
     server("archives"),
     server(
-      "remote_1",
+      "r1",
       [
         withEffectiveRunQuote(
-          visibleCard("simple_barrier_ice", "corp", "ice", {
+          visibleCard(589, "corp", "ice", {
             title: "Simple Barrier ICE",
             rezzed: true,
             strength: 3,
@@ -117,20 +120,20 @@ export function runnerWallCoverageInput(
               {
                 id: "simple_barrier_ice-end-the-run",
                 type: "end_the_run",
-                sourceDefinitionId: "simple_barrier_ice",
+                sourceDefinitionId: 589,
                 sourceTitle: "Simple Barrier ICE",
               },
             ],
           },
         ),
       ],
-      [visibleCard("simple_agenda", "corp", "agenda")],
+      [visibleCard(588, "corp", "agenda")],
     ),
   ];
   attachOwnDeckSnapshot(input, {
     deckSnapshotId: "runner-wall-coverage-fixture",
     side: "runner",
-    cards: [{ cardId: "onr_v1_047_pile-driver", quantity: 1 }],
+    cards: [{ cardId: 259, quantity: 1 }],
   });
   return input;
 }
@@ -243,7 +246,7 @@ export function bindSyntheticAgendaInstallQuotes(
 export function identityCard(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
-    definitionId: `${side}-identity`,
+    definitionId: ORIGINALSET_DEFAULT_DECKS[side].identity,
     title: `${side} identity`,
     owner: side,
     controller: side,
@@ -253,7 +256,7 @@ export function identityCard(side: Side): VisibleCard {
 }
 
 export function visibleCard(
-  instanceId: string,
+  source: number | string,
   side: Side,
   type: NonNullable<VisibleCard["type"]>,
   overrides: Omit<
@@ -261,9 +264,10 @@ export function visibleCard(
     "instanceId" | "owner" | "controller" | "type" | "known"
   > = {},
 ): VisibleCard {
+  const instanceId = String(source);
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: typeof source === "number" ? source : syntheticCardDefinitionId(source),
     title: instanceId,
     owner: side,
     controller: side,
@@ -296,13 +300,20 @@ export function legalAction(
     source?: LegalAction["source"];
     payload?: LegalAction["payload"];
     visibility?: LegalAction["visibility"];
+    subroutineIndexes?: LegalAction["subroutineIndexes"];
+    payOrEndRunSubroutineIndexes?: LegalAction["payOrEndRunSubroutineIndexes"];
+    payOrTrashProgramSubroutineIndexes?: LegalAction["payOrTrashProgramSubroutineIndexes"];
+    encounterSubroutineIds?: LegalAction["encounterSubroutineIds"];
+    encounterRemainingSubroutineIds?: LegalAction["encounterRemainingSubroutineIds"];
   } = {},
 ): LegalAction {
   const source =
     options.source ?? (type === "end_turn" ? "game_rule" : "basic_action");
+  const abilityId = options.payload?.cardImplementationAbilityId;
   const canonicalAbilityId =
-    typeof options.payload?.cardImplementationAbilityId === "string"
-      ? options.payload.cardImplementationAbilityId
+    options.payload?.cardImplementationCapabilityBindingKind === "card_spec_capability_key" &&
+    isCanonicalCapabilityId(abilityId)
+      ? abilityId
       : undefined;
   const action: LegalAction = {
     actionId,
@@ -333,6 +344,11 @@ export function legalAction(
       : {}),
   };
   if (options.payload) action.payload = options.payload;
+  if (options.subroutineIndexes) action.subroutineIndexes = options.subroutineIndexes;
+  if (options.payOrEndRunSubroutineIndexes) action.payOrEndRunSubroutineIndexes = options.payOrEndRunSubroutineIndexes;
+  if (options.payOrTrashProgramSubroutineIndexes) action.payOrTrashProgramSubroutineIndexes = options.payOrTrashProgramSubroutineIndexes;
+  if (options.encounterSubroutineIds) action.encounterSubroutineIds = options.encounterSubroutineIds;
+  if (options.encounterRemainingSubroutineIds) action.encounterRemainingSubroutineIds = options.encounterRemainingSubroutineIds;
   return action;
 }
 
@@ -472,7 +488,7 @@ export function runtimeRunnerStrategyProfile(): AiDeckStrategyProfile {
         runtimeBlockers: [],
         anchorEvidence: [
           {
-            cardId: "onr_v1_081_custodial-position",
+            cardId: 293,
             quantity: 2,
             source: "derivedStrategyAnchor",
             strategyId: "runner.rnd_pressure",
@@ -505,16 +521,16 @@ export function tacticalDebugItems(
 }
 
 export function rdAccessEvent(
-  eventId: string,
+  eventLabel: string,
   stateVersionBefore: number,
-  cardDefinitionId: string,
+  cardDefinitionId: number,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type: "access_card",
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${eventLabel}`,
     visibilityClass: "public",
     publicPayload: {
       actor: "runner",
@@ -526,18 +542,55 @@ export function rdAccessEvent(
 }
 
 export function publicEvent(
-  eventId: string,
+  eventLabel: string,
   actionType: string,
   stateVersionBefore: number,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId,
+    eventId: stateVersionBefore + 2,
     type: actionType,
     stateVersionBefore,
     stateVersionAfter: stateVersionBefore + 1,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${eventLabel}`,
     visibilityClass: "public",
     publicPayload,
+  };
+}
+
+/** Complete the reserve contract for test callers that stub economy posture. */
+export function completeRunnerEconomyFixturePolicy(
+  posture: import("./run-analysis/runner-run-target-types").RunnerEconomyPosture,
+  credits: number,
+): import("./run-analysis/runner-run-target-types").RunnerEconomyPosture {
+  const { minimumCreditFloor, desiredCreditReserve } = posture;
+  const reserve = posture.creditReservePolicy as
+    | Partial<typeof posture.creditReservePolicy>
+    | undefined;
+  if (reserve?.emergencyReserve !== undefined) return posture;
+  return {
+    ...posture,
+    creditReservePolicy: {
+      schemaVersion: 1,
+      phase: "opening",
+      currentCredits: credits,
+      liquidCredits: credits,
+      convertibleBankCredits: 0,
+      economyTurnCreditCeiling: desiredCreditReserve,
+      minimumCreditFloor,
+      breakerUseReserve: 0,
+      contestReserve: 0,
+      developmentReserve: 0,
+      emergencyReserve: minimumCreditFloor,
+      desiredCreditReserve,
+      remoteScoreThreat: "none",
+      canContestIfFunded: false,
+      belowReserveNow: credits < desiredCreditReserve,
+      spendingWouldDropBelowReserve: false,
+      reserveDrivers: [],
+      reserveOverrides: [],
+      evidence: ["synthetic_test_reserve_policy"],
+      ...reserve,
+    },
   };
 }

@@ -2,11 +2,12 @@ import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/eng
 import type {
   AiDecisionInput,
   CardDefinitionId,
+  TraceId,
   TraceRulesProfile,
 } from "@netgrid/shared";
 
 export type LatestTraceContext = {
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   traceLimit?: number;
   traceValue?: number;
   runnerLink?: number;
@@ -29,13 +30,14 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
   const visibleRunnerEstimate = visibleRunnerTraceEstimateAtCorpBid(input);
   const visibleRunnerLink = visibleRunnerEstimate.runnerLink;
   const visibleTrace = input.playerView.trace;
-  const eventTrace = latestTraceContextFromEventTail(input, visibleRunnerLink);
   if (visibleTrace) {
-    const matchingEventTrace =
-      eventTrace.sourceDefinitionId === undefined ||
-      eventTrace.sourceDefinitionId === visibleTrace.sourceDefinitionId
-        ? eventTrace
-        : {};
+    const matchingEventTrace = visibleTrace.bidsRevealed
+      ? latestTraceContextFromEventTail(
+          input,
+          visibleRunnerLink,
+          visibleTrace.traceId,
+        )
+      : {};
     const corpBid = visibleTrace.corpBid ?? matchingEventTrace.corpBid;
     const traceValue =
       visibleTrace.corpStrength ?? matchingEventTrace.traceValue ?? corpBid;
@@ -66,7 +68,10 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
     };
   }
   return {
-    ...eventTrace,
+    ...latestTraceContextFromEventTail(input, visibleRunnerLink),
+    ...(input.playerView.traceRulesProfile
+      ? { traceRulesProfile: input.playerView.traceRulesProfile }
+      : {}),
     runnerMaximumPreRevealStrength:
       visibleRunnerEstimate.maximumPreRevealStrength,
   };
@@ -75,9 +80,18 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
 function latestTraceContextFromEventTail(
   input: AiDecisionInput,
   visibleRunnerLink: number,
+  requiredTraceId?: TraceId,
 ): LatestTraceContext {
   for (const event of input.eventTail.slice().reverse()) {
+    if (
+      event.stateVersionAfter > input.playerView.stateVersion ||
+      (requiredTraceId !== undefined &&
+        event.publicPayload.traceId !== requiredTraceId)
+    )
+      continue;
     const traceLimit = event.publicPayload.traceLimit;
+    const effectiveTraceLimit = event.publicPayload.effectiveTraceLimit;
+    const profile = event.publicPayload.traceRulesProfile;
     const traceValue = event.publicPayload.traceValue;
     const runnerLink = event.publicPayload.runnerLink;
     const corpBid = event.publicPayload.corpBid;
@@ -87,6 +101,7 @@ function latestTraceContextFromEventTail(
     const sourceDefinitionId = event.publicPayload.sourceDefinitionId;
     if (
       typeof traceLimit === "number" ||
+      typeof effectiveTraceLimit === "number" ||
       typeof traceValue === "number" ||
       typeof runnerLink === "number" ||
       typeof corpBid === "number" ||
@@ -95,11 +110,19 @@ function latestTraceContextFromEventTail(
       typeof postBidTraceLinkBonus === "number"
     ) {
       return {
-        ...(typeof sourceDefinitionId === "string" &&
-        sourceDefinitionId.length > 0
+        ...(typeof sourceDefinitionId === "number" &&
+        sourceDefinitionId > 0
           ? { sourceDefinitionId }
           : {}),
         ...(typeof traceLimit === "number" ? { traceLimit } : {}),
+        ...(typeof effectiveTraceLimit === "number"
+          ? { effectiveTraceLimit }
+          : {}),
+        ...(profile === "modern_open" ||
+        profile === "classic_blind" ||
+        profile === "classic_blind_corp_ties"
+          ? { traceRulesProfile: profile }
+          : {}),
         ...(typeof traceValue === "number" ? { traceValue } : {}),
         ...(typeof runnerLink === "number"
           ? { runnerLink }
@@ -142,11 +165,11 @@ export function visibleRunnerTraceEstimateAtCorpBid(
   const paymentCapacity = Math.max(
     0,
     Math.floor(
-      input.playerView.trace?.visibleOpponentBidCapacity ??
-        (input.side === "runner"
-          ? runnerCredits +
-            (input.playerView.own.runnerTraceSupportQuote?.traceCreditPool ?? 0)
-          : runnerCredits),
+      input.side === "corp"
+        ? (input.playerView.trace?.visibleOpponentBidCapacity ?? runnerCredits)
+        : runnerCredits +
+            (input.playerView.own.runnerTraceSupportQuote?.traceCreditPool ??
+              0),
     ),
   );
 

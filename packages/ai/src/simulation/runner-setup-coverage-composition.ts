@@ -18,13 +18,13 @@ export type RunnerSetupCoverageCompositionDependencies = {
     cardId: string,
   ) => Pick<VisibleCard, "definitionId"> | undefined;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
 };
 
 export function createRunnerSetupCoverageComposition(
   dependencies: RunnerSetupCoverageCompositionDependencies,
 ) {
-  const { runnerRunKnownPathCost, runnerHasKnownUnaffordableLegalRun } =
+  const { runnerHasKnownUnaffordableLegalRun } =
     createRunnerKnownPathCostContext({
       assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
     });
@@ -47,7 +47,6 @@ export function createRunnerSetupCoverageComposition(
   });
 
   return {
-    runnerRunKnownPathCost,
     runnerHasKnownUnaffordableLegalRun,
     runnerVisibleMissingBreakerCoverage,
     runnerMissingCoverageTypesForInput,

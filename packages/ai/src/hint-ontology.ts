@@ -941,6 +941,7 @@ export function validateAiHintActionCapabilitySemantics(
   semantics: unknown,
 ): AiHintOntologyValidationResult {
   const issues: AiHintOntologyIssue[] = [];
+  validateHiddenInfoRisk(semantics, "$.actionCapabilitySemantics", issues);
   validateActionCapabilitySemanticsValue(
     semantics,
     "$.actionCapabilitySemantics",
@@ -1103,7 +1104,7 @@ function validateActionCapacityProfiles(
       issues,
       true,
     );
-    validateOptionalNumber(profile.amount, `${profilePath}.amount`, issues);
+    validateOptionalNonNegativeInteger(profile.amount, `${profilePath}.amount`, issues);
     if (
       profile.amountKind === "fixed" &&
       (typeof profile.amount !== "number" || profile.amount <= 0)
@@ -1349,7 +1350,7 @@ function validateCostProfile(
     "counters",
     "agendaPoints",
   ]) {
-    validateOptionalNumber(costProfile[key], `${path}.${key}`, issues);
+    validateOptionalNonNegativeInteger(costProfile[key], `${path}.${key}`, issues);
   }
   validateOptionalKnown(
     costProfile.reserveRisk,
@@ -1636,7 +1637,7 @@ function validateTargetProfiles(
 
 function isTargetProfileV1(targetProfile: Record<string, unknown>): boolean {
   return (
-    targetProfile.schemaVersion === "target-profile-v1" ||
+    targetProfile.schemaVersion !== undefined ||
     targetProfile.kind !== undefined ||
     targetProfile.targetType !== undefined ||
     targetProfile.preferences !== undefined ||
@@ -1860,9 +1861,30 @@ function validateActionCapabilitySemanticsValue(
       addIssue(issues, "error", "invalid_shape", entryPath, "Expected object.");
       return;
     }
+    const unknownKeys = Object.keys(entry).filter(
+      (key) =>
+        ![
+          "capabilityKey",
+          "costProfile",
+          "effects",
+          "functionSignals",
+          "conditions",
+          "targetProfiles",
+          "strategySupportPairs",
+        ].includes(key),
+    );
+    if (unknownKeys.length > 0)
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        entryPath,
+        "Unknown fields: " + unknownKeys.join(", ") + ".",
+      );
     if (
       typeof entry.capabilityKey !== "string" ||
-      entry.capabilityKey.length === 0
+      entry.capabilityKey.trim().length === 0 ||
+      entry.capabilityKey !== entry.capabilityKey.trim()
     ) {
       addIssue(
         issues,
@@ -2074,8 +2096,7 @@ function validateOptionalKnown<const T extends readonly string[]>(
   issues: AiHintOntologyIssue[],
 ): void {
   if (value === undefined) return;
-  const knownValueSet = new Set(knownValues);
-  if (typeof value !== "string" || !knownValueSet.has(value)) {
+  if (typeof value !== "string" || !knownValues.includes(value)) {
     addIssue(
       issues,
       "error",
@@ -2084,6 +2105,16 @@ function validateOptionalKnown<const T extends readonly string[]>(
       `Unknown value: ${String(value)}.`,
     );
   }
+}
+
+function validateOptionalNonNegativeInteger(
+  value: unknown,
+  path: string,
+  issues: AiHintOntologyIssue[],
+): void {
+  if (value === undefined) return;
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0)
+    addIssue(issues, "error", "invalid_shape", path, "Expected a non-negative safe integer.");
 }
 
 function validateOptionalNumber(

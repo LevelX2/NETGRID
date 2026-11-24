@@ -32,16 +32,16 @@ it("resolves the real Deadeye window with the converted agenda in the complete l
     planningStateIdentity: buildPlanningStateIdentity(dto),
   };
   const decision = chooseAiAction(enriched);
-  expect(decision.actionId).toBe("corp.resolve_choice");
+  expect(decision.actionId).toBe("cn");
   expect(decision.selectedChoices).toEqual({
     choiceId: "trash_installed_program_42",
-    selectedOptionIds: ["card_runner_onr_v1_014_codecracker_1"],
+    selectedOptionIds: ["card_c1e9"],
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     stateVersion: 42,
     lane: "plan",
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
   });
 });
 

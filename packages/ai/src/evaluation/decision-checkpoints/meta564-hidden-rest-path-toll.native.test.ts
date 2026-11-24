@@ -57,7 +57,7 @@ it("continues the harmless remaining routine without spending the pass-fee reser
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.selectedPlan!.moduleId).toBe("runner.convert_run_window");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ard",
+    "pa90fufw9vc5bkshp96ztlryxl",
   );
   expect(plan.route).toMatchObject({
     actionId: continuation.actionId,
@@ -85,7 +85,7 @@ it("rejects the unaffordable Rasmin suffix and pumps the funded hosted breaker",
   );
   expect(action).toMatchObject({
     type: "pump_breaker",
-    payload: { breakerId: "runner_onr_v1_039_krash_1" },
+    payload: { breakerId: "c1jt" },
     expiresAtStateVersion: 301,
   });
   expect(decision.fallbackUsed).toBe(false);
@@ -93,7 +93,7 @@ it("rejects the unaffordable Rasmin suffix and pumps the funded hosted breaker",
   const plan = decision.decisionDebug!.planFirstDecision!;
   expect(plan.selectedPlan!.moduleId).toBe("runner.convert_run_window");
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.pressure_central:central%3Ard",
+    "pa90fufw9vc5bkshp96ztlryxl",
   );
   expect(plan.route).toMatchObject({
     actionId: action.actionId,

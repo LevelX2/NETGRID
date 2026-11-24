@@ -1,3 +1,5 @@
+import type { RandomPurposeCode } from "@netgrid/shared";
+import { isRemoteServerId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
@@ -162,7 +164,7 @@ export function addTurnBoundExtraActionGrant(
     targetCardInstanceId?: CardInstanceId;
     revealToCorpOnly?: boolean;
     dieRoll?: number;
-    randomPurpose?: string;
+    randomPurpose?: RandomPurposeCode;
   },
 ): void {
   const economy = ensureActionEconomy(state);
@@ -284,7 +286,7 @@ function actionMatchesRestrictedGrant(
     return (
       legalAction.type === "start_run" &&
       typeof legalAction.payload?.serverId === "string" &&
-      legalAction.payload.serverId.startsWith("remote_")
+      isRemoteServerId(legalAction.payload.serverId)
     );
   }
   if (grant.restriction === "play_or_install_card") {
@@ -560,5 +562,5 @@ export function resolveForcedActionNotPossible(
 }
 
 function publicCardTitle(definitionId: CardDefinitionId): string {
-  return CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId;
+  return CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? String(definitionId);
 }

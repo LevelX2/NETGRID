@@ -42,13 +42,24 @@ it.each([
   expect(action?.type).toBe(type);
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_2",
+    "p1p4x83h7yolw2hjtvi0ud06dm",
   );
   if (index === 356) {
     expect(action?.payload?.subroutineIndex).toBe(2);
     const core =
       input.playerView.run!.encounteredIce!.effectiveRunQuote!.subroutines[0]!;
+    expect(core.damageType).toBe("core");
     expect(isAcceptableNonlethalDamageSubroutine(input, core)).toBe(false);
+    expect(
+      isAcceptableNonlethalDamageSubroutine(input, { ...core, id: "z" }),
+    ).toBe(false);
+    expect(
+      isAcceptableNonlethalDamageSubroutine(input, {
+        ...core,
+        id: "core_damage",
+        damageType: "net",
+      }),
+    ).toBe(true);
     expect(isAcceptableNonlethalDamageSubroutine(input, core, 0)).toBe(true);
     input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.slice(0, 1);
     expect(isAcceptableNonlethalDamageSubroutine(input, core, 0)).toBe(false);
@@ -75,10 +86,10 @@ it("preserves the same accepted damage budget in the movement phase", () => {
     cp.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.continue_run");
+  expect(decision.actionId).toBe("r5");
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_2",
+    "p1p4x83h7yolw2hjtvi0ud06dm",
   );
 });
 
@@ -145,7 +156,7 @@ it("keeps ordinary reserve, lethal damage and unfunded future ICE blocked", () =
       assessKnownRezzedIcePath,
       knownIcePathReason: (path) => JSON.stringify(path),
     });
-  const server = input.playerView.servers.find((s) => s.id === "remote_2")!;
+  const server = input.playerView.servers.find((s) => s.id === "r2")!;
   // The historical Archives no longer create an acute default reserve.
   // A genuinely required four-card ordinary reserve still blocks the path.
   expect(assess(input, server, 10, []).blocksPump).toBe(false);

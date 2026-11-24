@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -44,8 +45,8 @@ describe("meta 461 current-turn pump survives the future path projection", () =>
         fallbackUsed: false,
         decisionDebug: {
           planFirstDecision: {
-            rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-            leafExecutorInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run!.runId}`,
+            rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+            leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${input.playerView.run!.runId}` }),
             route: {
               actionId: pump.actionId,
               stateVersion: input.playerView.stateVersion,
@@ -70,7 +71,7 @@ import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 it("preserves the paid turn strength without charging inner Code Gates again", () => {
   const input = fixture(320);
   const breaker = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_classic_030_psychic-friend",
+    (c) => c.definitionId === 34,
   )!;
   const ice = input.playerView.run!.encounteredIce!;
   const rig = runnerRigAfterPumpAndEncounter(
@@ -81,7 +82,7 @@ it("preserves the paid turn strength without charging inner Code Gates again", (
     3,
   );
   const inner = input.playerView.servers
-    .find((s) => s.id === "remote_1")!
+    .find((s) => s.id === "r1")!
     .ice.slice(0, 2);
   const path = assessKnownRezzedIcePath(inner, rig, 2);
   expect(path.canReachAccess).toBe(true);
@@ -93,7 +94,7 @@ it("preserves the paid turn strength without charging inner Code Gates again", (
 it("retains the boundary strength and adds only the new persistent pump", () => {
   const input = fixture(320);
   const breaker = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_classic_030_psychic-friend",
+    (c) => c.definitionId === 34,
   )!;
   breaker.strength = 5;
   breaker.strengthAfterEncounter = 2;
@@ -112,7 +113,7 @@ it("retains the boundary strength and adds only the new persistent pump", () => 
 it("does not retain either an old or a projected encounter-only pump", () => {
   const input = fixture(320);
   const breaker = input.playerView.own.rig!.find(
-    (c) => c.definitionId === "onr_classic_028_matador",
+    (c) => c.definitionId === 32,
   )!;
   breaker.strength = 5;
   breaker.strengthAfterEncounter = 0;

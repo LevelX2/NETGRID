@@ -1,3 +1,4 @@
+import { deckSnapshotCardCountsForTest } from "../../deck-snapshot.test-support";
 import { afterEach, expect, it } from "vitest";
 import {
   ORIGINALSET_DEFAULT_DECKS,
@@ -27,9 +28,9 @@ import { assessCorpEconomyAssetPayback } from "../../corp/economy/economy-asset-
 afterEach(() => resetResidentPlanPortfolioMemory());
 
 it.each([
-  [1, "data-wall"],
-  [4, "wall-of-static"],
-  [6, "data-wall"],
+  [1, 449],
+  [4, 491],
+  [6, 449],
 ] as const)(
   "compares pure ETR choices against %s remaining runner credits",
   (credits, expected) => {
@@ -41,13 +42,13 @@ it.each([
     const option = input.playerView.pendingChoice!.options.find(
       (o) => o.id === selectedOptionId(decision),
     )!;
-    expect(String(option.value)).toContain(expected);
+    expect(state.cardInstances[String(option.value)]?.definitionId).toBe(expected);
     expect(decision.fallbackUsed).toBe(false);
     expect(
       decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toBe("plan:corp.defend_servers:server-defense-portfolio");
+    ).toBe("penw02zfrkklof54c2nuye5att");
     expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     state = applyMatching(
       state,
@@ -91,9 +92,10 @@ it.each(["missing", "stale", "foreign_run", "malformed"])(
 );
 
 it("does not turn an explicitly unmodeled option into a proven access block", () => {
-  const input = corpInput(choiceState(4));
+  const state = choiceState(4);
+  const input = corpInput(state);
   const option = input.playerView.pendingChoice!.options.find((o) =>
-    String(o.value).includes("wall-of-static"),
+    state.cardInstances[String(o.value)]?.definitionId === 491,
   )!;
   const quote = JSON.parse(
     option.metadata!.temporaryEncounterBreakQuoteJson as string,
@@ -104,22 +106,23 @@ it("does not turn an explicitly unmodeled option into a proven access block", ()
     reason: "visible_runner_break_projection_unknown",
   });
   const decision = chooseCorpAction(input);
-  expect(selectedOptionId(decision)).toContain("data-wall");
+  expect(selectedIceDefinition(state, decision)).toBe(449);
 });
 
 it("does not spend more solely to make an unthreatened fort harder", () => {
-  const input = corpInput(choiceState(4));
+  const state = choiceState(4);
+  const input = corpInput(state);
   const remote = input.playerView.servers.find(
-    (server) => server.id === "remote_1",
+    (server) => server.id === "r1",
   )!;
   remote.root = remote.root.filter((card) => card.type !== "agenda");
-  expect(selectedOptionId(chooseCorpAction(input))).toContain("data-wall");
+  expect(selectedIceDefinition(state, chooseCorpAction(input))).toBe(449);
 });
 
 it("includes current run-only credits in the visible break response", () => {
   const state = choiceState(4, 2);
   const decision = chooseCorpAction(corpInput(state));
-  expect(selectedOptionId(decision)).toContain("data-wall");
+  expect(selectedIceDefinition(state, decision)).toBe(449);
 });
 
 it("ends a real temporary Asp encounter against the full four-credit runner trace response", () => {
@@ -127,10 +130,10 @@ it("ends a real temporary Asp encounter against the full four-credit runner trac
   const initial = structuredClone(state);
   const eventStart = state.eventLog.length;
   const decision = chooseCorpAction(corpInput(state));
-  expect(selectedOptionId(decision)).toContain("asp");
+  expect(selectedIceDefinition(state, decision)).toBe(433);
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
+    leafExecutorInstanceId: "penw02zfrkklof54c2nuye5att",
   });
   state = applyMatching(
     state,
@@ -175,7 +178,7 @@ it("already values a BBS pool more highly behind effective protection", () => {
   const payback = (input: ReturnType<typeof corpInput>) =>
     assessCorpEconomyAssetPayback({
       input,
-      serverId: "remote_1",
+      serverId: "r1",
       cadence: "finite_pool",
       baselineHorizonTurns: 3,
       finitePoolCredits: 16,
@@ -186,7 +189,7 @@ it("already values a BBS pool more highly behind effective protection", () => {
     });
   const ice =
     state.cardInstances[
-      putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static")
+      putCorpIceOnServer(state, "r1", 491)
     ]!;
   ice.rezzed = true;
   ice.faceup = true;
@@ -195,7 +198,10 @@ it("already values a BBS pool more highly behind effective protection", () => {
   expect(openQuote.protectionState).toBe("unprotected");
   expect(openQuote.projectedCredits).toBe(4);
   expect(protectedQuote.protectionState).toBe("protected_not_contestable");
-  expect(protectedQuote.projectedCredits).toBe(8);
+  expect(protectedQuote).toMatchObject({
+    projectedPayoutsByTurn: [2, 3, 3],
+    projectedCredits: 16,
+  });
   expect(protectedQuote.projectedNetCredits).toBeGreaterThan(
     openQuote.projectedNetCredits,
   );
@@ -219,7 +225,7 @@ it.each([true, false])(
     const initial = structuredClone(state);
     const eventStart = state.eventLog.length;
     const bbsActions = getLegalActions(state, "corp").filter((a) =>
-      a.source?.includes("bbs-whispering-campaign"),
+      a.source !== undefined && state.cardInstances[a.source]?.definitionId === 521,
     );
     expect(bbsActions).toEqual(
       expect.arrayContaining([
@@ -261,9 +267,7 @@ function corpInput(state: GameState) {
     ownDeckSnapshot: {
       deckSnapshotId: "dreff-budget-test",
       side: "corp",
-      cards: Object.values(state.cardInstances)
-        .filter((c) => c.owner === "corp")
-        .map((c) => ({ cardId: c.definitionId, quantity: 1 })),
+      cards: deckSnapshotCardCountsForTest(state, "corp"),
     },
     decisionId: `${state.matchId}:${state.stateVersion}:corp`,
     actionNumber: state.stateVersion,
@@ -279,6 +283,16 @@ function selectedOptionId(
   return ids[0];
 }
 
+function selectedIceDefinition(
+  state: GameState,
+  decision: ReturnType<typeof chooseCorpAction>,
+) {
+  const selected = state.pendingChoice?.options.find(
+    (option) => option.id === selectedOptionId(decision),
+  );
+  return state.cardInstances[String(selected?.value)]?.definitionId;
+}
+
 function choiceState(
   credits: number,
   badPublicity = 0,
@@ -288,13 +302,13 @@ function choiceState(
 ): GameState {
   const corpCards = [
     ...(trace
-      ? ["onr_v1_221_asp", "onr_v1_243_fetch-4-0-1"]
-      : ["onr_v1_237_data-wall", "onr_v1_279_wall-of-static"]),
-    "onr_v1_358_dr-dreff",
-    "onr_v1_199_employee-empowerment",
-    "onr_proteus_008_project-zurich",
-    "onr_v1_205_main-office-relocation",
-    "onr_v1_309_bbs-whispering-campaign",
+      ? [433, 455]
+      : [449, 491]),
+    570,
+    411,
+    66,
+    417,
+    521,
   ];
   let state = createGameAfterSetup({
     seed: "dreff-visible-budget",
@@ -312,12 +326,12 @@ function choiceState(
       ...ORIGINALSET_DEFAULT_DECKS.runner,
       cards: [
         {
-          id: trace ? "onr_v1_040_loony-goon" : "onr_v1_039_krash",
+          id: trace ? 252 : 251,
           quantity: 1,
         },
         ...ORIGINALSET_DEFAULT_DECKS.runner.cards.filter(
           (c) =>
-            c.id !== (trace ? "onr_v1_040_loony-goon" : "onr_v1_039_krash"),
+            c.id !== (trace ? 252 : 251),
         ),
       ],
     },
@@ -329,19 +343,19 @@ function choiceState(
     state.cardInstances[id]!.zone = { side: "corp", zone: "rd" };
   }
   const dreff =
-    state.cardInstances[putCorpRootInRemote(state, "onr_v1_358_dr-dreff")]!;
+    state.cardInstances[putCorpRootInRemote(state, 570)]!;
   dreff.faceup = true;
   dreff.rezzed = true;
   state.cardInstances[
-    putCorpRootInRemote(state, "onr_v1_199_employee-empowerment")
+    putCorpRootInRemote(state, 411)
   ]!.advancementCounters = 1;
   if (scoring) {
-    scoreCorpAgendaForTest(state, "onr_proteus_008_project-zurich");
+    scoreCorpAgendaForTest(state, 66);
     if (terminal)
-      scoreCorpAgendaForTest(state, "onr_v1_205_main-office-relocation");
+      scoreCorpAgendaForTest(state, 417);
     const bbsId = putCorpRootInRemote(
       state,
-      "onr_v1_309_bbs-whispering-campaign",
+      521,
     );
     state = applyMatching(
       state,
@@ -351,7 +365,7 @@ function choiceState(
   for (const id of corpCards.slice(0, 2)) moveCorpCardToHq(state, id);
   installRunnerProgramForTest(
     state,
-    trace ? "onr_v1_040_loony-goon" : "onr_v1_039_krash",
+    trace ? 252 : 251,
   );
   state.runner.credits = credits;
   state.corp.credits = 10;
@@ -365,7 +379,7 @@ function choiceState(
   state.corp.badPublicity = badPublicity;
   state = applyMatching(
     state,
-    (a) => a.type === "start_run" && a.payload?.serverId === "remote_1",
+    (a) => a.type === "start_run" && a.payload?.serverId === "r1",
   );
   for (let step = 0; !state.pendingChoice && step < 10; step++)
     state = applyMatching(

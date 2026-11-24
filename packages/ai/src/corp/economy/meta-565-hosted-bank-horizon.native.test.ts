@@ -41,7 +41,7 @@ it("bounds an unsafe-to-carry investment to the currently quoted complete cycle"
     centralAllocation: undefined,
     scoreProjects: [],
     remoteProjects: [],
-  }).get("corp_onr_v1_318_department-of-truth-enhancement_1")!.development!;
+  }).get("c39x")!.development!;
   expect(investment.hostedCreditBankInvestment).toMatchObject({
     additionalLoadExecutions: 1,
     canCarryAcrossTurn: false,

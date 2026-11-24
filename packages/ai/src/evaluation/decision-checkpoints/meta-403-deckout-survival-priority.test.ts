@@ -44,7 +44,7 @@ describe("meta 403 last executable deckout score window", () => {
       const { input, result, action, plan } = decide(undefined, json);
       expect(action.type).toBe("advance_card");
       expect(action.payload?.cardId).toBe(
-        "corp_onr_v1_200_encryption-breakthrough_2",
+        "c2jq",
       );
       expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
       expect(plan?.selectedPlan?.moduleId).toBe("corp.score_agenda");
@@ -55,7 +55,7 @@ describe("meta 403 last executable deckout score window", () => {
   it("installs the winning agenda before reserve funding consumes its required advancement clicks", () => {
     const { input, result, action, plan } = decide();
     expect(action.type).toBe("install_card");
-    expect(action.payload?.serverId).toBe("remote_1");
+    expect(action.payload?.serverId).toBe("r1");
     expect(action.expiresAtStateVersion).toBe(input.playerView.stateVersion);
     expect(
       action.payload
@@ -91,7 +91,7 @@ describe("meta 403 last executable deckout score window", () => {
         const score = residentPlanPortfolioSnapshot(input)!.instances.find(
           (instance) =>
             instance.moduleId === "corp.score_agenda" &&
-            instance.dedupeKey.endsWith(":remote_1"),
+            instance.dedupeKey.endsWith(":r1"),
         )!;
         expect(score.moduleState).toMatchObject({
           signal: {

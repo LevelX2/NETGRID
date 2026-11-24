@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -15,11 +16,15 @@ import {
 } from "./scored-agenda-abilities";
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"] = "agenda",
-  title = id,
+  title = String(id),
 ): CardDefinition {
-  return { id: id as CardDefinitionId, type, title } as CardDefinition;
+  return {
+    id: id as CardDefinitionId,
+    type,
+    title: String(title),
+  } as CardDefinition;
 }
 
 function instance(
@@ -58,9 +63,9 @@ type HostInput = {
 
 function makeHost(input: HostInput = {}) {
   const definitions: Record<string, CardDefinition> = {
-    ai_cfo: definition("ai_cfo", "agenda", "HQ/Archives-Shuffle-Draw"),
-    retreat: definition("retreat", "agenda", "Corporate Retreat"),
-    boon: definition("onr_v1_192_corporate-boon", "agenda", "Corporate Boon"),
+    ai_cfo: definition(3460737206, "agenda", "HQ/Archives-Shuffle-Draw"),
+    retreat: definition(1235160096, "agenda", "Corporate Retreat"),
+    boon: definition(404, "agenda", "Corporate Boon"),
     ...input.definitions,
   };
   const scoreArea =
@@ -68,7 +73,10 @@ function makeHost(input: HostInput = {}) {
   const cardInstances: Record<string, CardInstance> = Object.fromEntries(
     scoreArea.map((cardId) => [
       cardId,
-      instance(cardId, definitions[cardId]?.id ?? (cardId as CardDefinitionId)),
+      instance(
+        cardId,
+        definitions[cardId]?.id ?? syntheticCardDefinitionId(cardId),
+      ),
     ]),
   );
   const state = {
@@ -143,7 +151,7 @@ function makeHost(input: HostInput = {}) {
             type: "activated_card_ability",
             abilityRef: {
               sourceCardInstanceId: cardId,
-              sourceAbilityId: "test_card:a1",
+              sourceAbilityId: 272,
             },
           } as LegalAction);
         }
@@ -156,7 +164,7 @@ function makeHost(input: HostInput = {}) {
             type: "activated_card_ability",
             abilityRef: {
               sourceCardInstanceId: cardId,
-              sourceAbilityId: "test_card:a1",
+              sourceAbilityId: 272,
             },
           } as LegalAction);
         }
@@ -181,12 +189,12 @@ describe("scored agenda activated abilities", () => {
       archives: ["archives_1"] as CardInstanceId[],
       rd: ["rd_1", "rd_2"] as CardInstanceId[],
       implementations: {
-        ai_cfo: {
+        3460737206: {
           kind: "shuffle_hq_archives_into_rd_then_draw",
           drawCount: 5,
           visibility: "hidden_info_barrier",
         },
-        retreat: {
+        1235160096: {
           kind: "scored_agenda_credit_until_install_or_rez",
           counterType: "mark",
           gainAmount: 2,
@@ -239,7 +247,7 @@ describe("scored agenda activated abilities", () => {
     const { host } = makeHost({
       legalAction: action,
       implementations: {
-        retreat: {
+        1235160096: {
           kind: "scored_agenda_credit_until_install_or_rez",
           counterType: "mark",
           gainAmount: 2,
@@ -267,7 +275,7 @@ describe("scored agenda activated abilities", () => {
     const { host, calls } = makeHost({
       legalAction: action,
       implementations: {
-        ai_cfo: {
+        3460737206: {
           kind: "shuffle_hq_archives_into_rd_then_draw",
           drawCount: 5,
           visibility: "hidden_info_barrier",
@@ -314,11 +322,7 @@ describe("scored agenda activated abilities", () => {
       legalAction: action,
       scoreArea: ["netwatch" as CardInstanceId],
       definitions: {
-        netwatch: definition(
-          "onr_v1_207_netwatch-operations-office",
-          "agenda",
-          "Netwatch Operations Office",
-        ),
+        netwatch: definition(419, "agenda", "Netwatch Operations Office"),
       },
     });
 
@@ -329,11 +333,7 @@ describe("scored agenda activated abilities", () => {
     const { host, calls } = makeHost({
       scoreArea: ["netwatch" as CardInstanceId],
       definitions: {
-        netwatch: definition(
-          "onr_v1_207_netwatch-operations-office",
-          "agenda",
-          "Netwatch Operations Office",
-        ),
+        netwatch: definition(419, "agenda", "Netwatch Operations Office"),
       },
     });
 

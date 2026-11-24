@@ -1,3 +1,4 @@
+/** An aggregate pressure signal. Payment paths consume the typed run budget. */
 export function visibleRunnerRunCreditPool(
   rig: readonly {
     known: boolean;

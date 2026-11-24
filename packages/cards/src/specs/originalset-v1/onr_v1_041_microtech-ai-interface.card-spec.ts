@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_041_microtech-ai-interface"),
+    cardDefinitionId: cardDefinitionId(253),
     title: "Microtech AI Interface",
     side: "runner",
     cardType: "program",

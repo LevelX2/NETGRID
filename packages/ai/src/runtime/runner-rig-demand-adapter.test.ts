@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type { DeckCapabilityProfile } from "../deck-capabilities";
@@ -18,9 +19,9 @@ import {
 
 describe("runner rig-demand coverage adapter", () => {
   it.each([
-    ["onr_v1_123_bodyweight-data-creche", 1, false],
-    ["onr_classic_047_little-black-box", 1, false],
-    ["onr_proteus_134_cortical-cybermodem", 4, true],
+    [335, 1, false],
+    [51, 1, false],
+    [192, 4, true],
   ] as const)(
     "uses net memory after replacing the installed deck with %s",
     (definitionId, capacity, admitted) => {
@@ -30,7 +31,7 @@ describe("runner rig-demand coverage adapter", () => {
         memoryLimitBonus: capacity,
       });
       const decoder = visibleCard("decoder", {
-        definitionId: "test-decoder",
+        definitionId: syntheticCardDefinitionId("test-decoder"),
         type: "program",
         memoryCost: 2,
       });
@@ -42,7 +43,7 @@ describe("runner rig-demand coverage adapter", () => {
       });
       input.playerView.own.rig = [
         visibleCard("installed-deck", {
-          definitionId: "onr_v1_123_bodyweight-data-creche",
+          definitionId: 335,
           type: "hardware",
           memoryLimitBonus: 1,
         }),
@@ -73,13 +74,13 @@ describe("runner rig-demand coverage adapter", () => {
   );
   it("binds an exact memory-support install to the existing coverage owner", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
     });
     const decoder = visibleCard("decoder", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       title: "Decoder",
       type: "program",
       memoryCost: 2,
@@ -166,7 +167,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("does not turn doctrine or hand pressure into unbound memory demand", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
@@ -176,7 +177,7 @@ describe("runner rig-demand coverage adapter", () => {
         memoryChip,
         ...[1, 2, 3, 4].map((index) =>
           visibleCard(`filler-${index}`, {
-            definitionId: `filler-${index}`,
+            definitionId: syntheticCardDefinitionId("filler-" + index),
             type: "event",
           }),
         ),
@@ -218,20 +219,20 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("uses hand pressure only after comparing the best cleanup alternative", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
     });
     const decoder = visibleCard("decoder", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       title: "Decoder",
       type: "program",
       memoryCost: 2,
     });
     const fillers = [1, 2, 3].map((index) =>
       visibleCard(`filler-${index}`, {
-        definitionId: `filler-${index}`,
+        definitionId: syntheticCardDefinitionId("filler-" + index),
         type: "event",
       }),
     );
@@ -275,13 +276,13 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("values a legal protected install when it is the only way to avoid losing bound rig material", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
     });
     const decoder = visibleCard("decoder", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       title: "Decoder",
       type: "program",
       memoryCost: 2,
@@ -328,7 +329,7 @@ describe("runner rig-demand coverage adapter", () => {
     });
     const incomplete = deckCapabilities();
     incomplete.runner!.breakerInventory[0] = {
-      cardId: "unknown-decoder",
+      cardId: syntheticCardDefinitionId("unknown-decoder"),
       title: "Unknown Decoder",
       coverage: ["code_gate"],
       breakCost: 1,
@@ -356,12 +357,12 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("values restricted run credits only for a compatible bound breaker line", () => {
     const corolla = visibleCard("corolla", {
-      definitionId: "onr_v1_124_corolla-speed-chip",
+      definitionId: 336,
       title: "Corolla Speed Chip",
       type: "hardware",
     });
     const killer = visibleCard("killer", {
-      definitionId: "test-killer",
+      definitionId: syntheticCardDefinitionId("test-killer"),
       title: "Killer",
       type: "program",
       subtypes: ["icebreaker", "killer"],
@@ -377,7 +378,7 @@ describe("runner rig-demand coverage adapter", () => {
       input: killerInput,
       strategicIntent: strategicIntent(),
       deckCapabilities: deckCapabilities({
-        cardId: "test-killer",
+        cardId: syntheticCardDefinitionId("test-killer"),
         coverage: "sentry",
         memoryCost: 1,
       }),
@@ -396,7 +397,7 @@ describe("runner rig-demand coverage adapter", () => {
     expect(corollaDemand).toMatchObject({
       ownerModuleId: "runner.develop_board_and_hand",
       sourceKind: "admission_checked_development",
-      sourcePlanInstanceId: "plan:runner.develop_board_and_hand:card%3Acorolla",
+      sourcePlanInstanceId: "pdum14c647e1adjkclr9orxekd",
       sourceNeedId: "sentry",
       horizon: "next_rig_milestone",
       guarantee: "forecast",
@@ -407,7 +408,7 @@ describe("runner rig-demand coverage adapter", () => {
         input: killerInput,
         strategicIntent: strategicIntent(),
         deckCapabilities: deckCapabilities({
-          cardId: "test-killer",
+          cardId: syntheticCardDefinitionId("test-killer"),
           coverage: "sentry",
           memoryCost: 1,
         }),
@@ -458,11 +459,11 @@ describe("runner rig-demand coverage adapter", () => {
     "binds general recurring breaker credits to a real parent, including noisy=%s",
     (noisy) => {
       const source = visibleCard("general-pool", {
-        definitionId: "onr_classic_048_omnitech-spinal-tap-cybermodem",
+        definitionId: 52,
         type: "hardware",
       });
       const decoder = visibleCard("decoder", {
-        definitionId: "test-decoder",
+        definitionId: syntheticCardDefinitionId("test-decoder"),
         type: "program",
         subtypes: ["icebreaker", "decoder", ...(noisy ? ["noisy"] : [])],
         memoryCost: 2,
@@ -478,7 +479,7 @@ describe("runner rig-demand coverage adapter", () => {
           input,
           strategicIntent: strategicIntent(),
           deckCapabilities: deckCapabilities({
-            cardId: "test-decoder",
+            cardId: syntheticCardDefinitionId("test-decoder"),
             coverage: "code_gate",
             memoryCost: 2,
             noisy,
@@ -506,7 +507,7 @@ describe("runner rig-demand coverage adapter", () => {
               input,
               strategicIntent: strategicIntent(),
               deckCapabilities: deckCapabilities({
-                cardId: "test-decoder",
+                cardId: syntheticCardDefinitionId("test-decoder"),
                 coverage: "code_gate",
                 memoryCost: 2,
                 noisy,
@@ -524,13 +525,13 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("binds non-noisy recurring credits only to a compatible breaker line", () => {
     const vewy = visibleCard("vewy", {
-      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      definitionId: 283,
       title: "Vewy Vewy Quiet",
       type: "program",
       memoryCost: 1,
     });
     const decoder = visibleCard("decoder", {
-      definitionId: "test-decoder",
+      definitionId: syntheticCardDefinitionId("test-decoder"),
       title: "Decoder",
       type: "program",
       subtypes: ["icebreaker", "decoder"],
@@ -565,7 +566,7 @@ describe("runner rig-demand coverage adapter", () => {
       input,
       strategicIntent: strategicIntent(),
       deckCapabilities: deckCapabilities({
-        cardId: "test-decoder",
+        cardId: syntheticCardDefinitionId("test-decoder"),
         coverage: "code_gate",
         memoryCost: 2,
         noisy: true,
@@ -582,7 +583,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("includes visible additive run-credit programs in the next MU milestone", () => {
     const memoryChip = visibleCard("memory-chip", {
-      definitionId: "onr_v1_146_zetatech-mem-chip",
+      definitionId: 358,
       title: "Zetatech Mem Chip",
       type: "hardware",
       memoryLimitBonus: 2,
@@ -590,7 +591,7 @@ describe("runner rig-demand coverage adapter", () => {
     const supportPrograms = ["support-a", "support-b", "support-c"].map(
       (instanceId) =>
         visibleCard(instanceId, {
-          definitionId: "onr_v1_071_vewy-vewy-quiet",
+          definitionId: 283,
           title: "Vewy Vewy Quiet",
           type: "program",
           memoryCost: 1,
@@ -603,7 +604,7 @@ describe("runner rig-demand coverage adapter", () => {
       memoryLimit: 4,
     });
     const capabilities = deckCapabilities({
-      cardId: "test-decoder",
+      cardId: syntheticCardDefinitionId("test-decoder"),
       coverage: "code_gate",
       memoryCost: 2,
       location: "in_deck",
@@ -648,7 +649,7 @@ describe("runner rig-demand coverage adapter", () => {
 
   it("retains restricted run credits without preempting acquisition of the breaker parent", () => {
     const vewy = visibleCard("vewy", {
-      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      definitionId: 283,
       title: "Vewy Vewy Quiet",
       type: "program",
       memoryCost: 1,
@@ -660,7 +661,7 @@ describe("runner rig-demand coverage adapter", () => {
       memoryLimit: 4,
     });
     const capabilities = deckCapabilities({
-      cardId: "test-decoder",
+      cardId: syntheticCardDefinitionId("test-decoder"),
       coverage: "code_gate",
       memoryCost: 2,
       location: "in_deck",
@@ -750,13 +751,13 @@ function gap(
 
 function deckCapabilities(
   breaker: {
-    cardId: string;
+    cardId: number;
     coverage: "code_gate" | "sentry";
     memoryCost: number;
     noisy?: boolean;
     location?: "in_hand" | "in_deck";
   } = {
-    cardId: "test-decoder",
+    cardId: syntheticCardDefinitionId("test-decoder"),
     coverage: "code_gate",
     memoryCost: 2,
   },
@@ -837,11 +838,11 @@ function coverageState(coverage: string, installed: boolean, inHand = false) {
   };
 }
 
-function roles(definitionId: string): readonly string[] {
-  if (definitionId === "onr_v1_146_zetatech-mem-chip") {
+function roles(definitionId: number): readonly string[] {
+  if (definitionId === 358) {
     return ["memory", "memory_support"];
   }
-  if (definitionId === "test-decoder") return ["breaker_code_gate"];
-  if (definitionId === "test-killer") return ["breaker_killer"];
+  if (definitionId === syntheticCardDefinitionId("test-decoder")) return ["breaker_code_gate"];
+  if (definitionId === syntheticCardDefinitionId("test-killer")) return ["breaker_killer"];
   return [];
 }

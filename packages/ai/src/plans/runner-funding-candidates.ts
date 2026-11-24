@@ -13,11 +13,12 @@ export function runnerFundingRouteCandidateIsMaterializable(
     candidate.economyProjection?.kind === "immediate_liquid" &&
     candidate.economyProjection.timing === "immediate" &&
     candidate.economyProjection.creditRestriction === "general" &&
+    candidate.economyProjection.reliability === "guaranteed" &&
     candidate.economyProjection.storedCreditsAdded === undefined &&
     candidate.economyProjection.storedCreditsTaken === undefined &&
     candidate.economyProjection.payoutMode !== "all_available" &&
     typeof candidate.economyProjection.netLiquidCreditGain === "number" &&
-    Number.isFinite(candidate.economyProjection.netLiquidCreditGain) &&
+    Number.isSafeInteger(candidate.economyProjection.netLiquidCreditGain) &&
     candidate.economyProjection.netLiquidCreditGain > 0
   );
 }
@@ -40,7 +41,6 @@ export function runnerTurnLiquidityCandidateIsMaterializable(
         projection.cardsConsumed === 1 &&
         projection.netHandDelta === -1)) &&
     projection.payoutMode === "fixed" &&
-    projection.reliability === "guaranteed" &&
     ((projection.source === "basic_action_contract" &&
       projection.confidence === "medium") ||
       (projection.source === "legal_action_payload" &&

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PublicGameEvent, ResolvedGameEffect } from "@netgrid/shared";
+import type { PublicGameEvent, PublicResolvedGameEffect } from "@netgrid/shared";
 
 import { publicEventsAfter, resourceEffectSounds } from "./local-action-sounds";
 
@@ -123,7 +123,7 @@ describe("confirmed resource effect sounds", () => {
     const old = event("play_event", [effect("gain_credits", 9)]);
     const next = {
       ...event("play_operation", [effect("draw_cards", 2)]),
-      eventId: "evt_3",
+      eventId: 4,
     };
     const events = [old, next];
     expect(
@@ -133,17 +133,16 @@ describe("confirmed resource effect sounds", () => {
       publicEventsAfter(events, next.eventId).flatMap(resourceEffectSounds),
     ).toEqual([]);
     expect(
-      publicEventsAfter(events, "evicted_event").flatMap(resourceEffectSounds),
+      publicEventsAfter(events, 1).flatMap(resourceEffectSounds),
     ).toEqual([]);
   });
 });
 
 function effect(
-  kind: ResolvedGameEffect["kind"],
+  kind: PublicResolvedGameEffect["kind"],
   amount?: number,
-): ResolvedGameEffect {
+): Omit<PublicResolvedGameEffect, "effectId"> {
   return {
-    effectId: `test.${kind}`,
     kind,
     ...(amount !== undefined ? { amount } : {}),
     visibility: "public",
@@ -152,17 +151,24 @@ function effect(
 
 function event(
   type: string,
-  resolvedEffects?: ResolvedGameEffect[],
+  resolvedEffects?: Array<Omit<PublicResolvedGameEffect, "effectId">>,
 ): PublicGameEvent {
   return {
-    eventId: "evt_2",
+    eventId: 3,
     type,
     stateVersionBefore: 1,
     stateVersionAfter: 2,
     stateHashAfter: "fnv1a:test",
     publicPayload: {
       actionType: type,
-      ...(resolvedEffects ? { resolvedEffects } : {}),
+      ...(resolvedEffects
+        ? {
+            resolvedEffects: resolvedEffects.map((effect, effectId) => ({
+              ...effect,
+              effectId,
+            })),
+          }
+        : {}),
     },
   };
 }

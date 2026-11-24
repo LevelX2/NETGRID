@@ -16,6 +16,7 @@ import type {
 
 import { corpHostedBankTurnPlanningQuote } from "../corp/economy/hosted-credit-bank-turn-planning";
 import { corpDefensePlanningSignals } from "../corp/defense/defense-plan-module";
+import { planBoundStartRunRedirectSelection } from "../corp/defense/start-run-redirect-choice";
 import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
 import { currentCorpCreditObligation } from "./corp-credit-obligation";
 import { scoreMilestoneBoundary } from "../corp/score/score-milestone-boundary";
@@ -38,6 +39,7 @@ import {
   type CorpTurnPlanningCoverageReport,
 } from "./corp-turn-planning-coverage";
 import { planInstanceIdForProposal } from "./plan-instance";
+import { comparePlanIdentities } from "./compact-plan-identity";
 import type { PlanModuleId, PlanTargetRef } from "./plan-kernel-types";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import {
@@ -214,7 +216,8 @@ export function prepareCorpTurnPlanner(params: {
           compareValidatedPlanAssessments(
             left.route.assessment,
             right.route.assessment,
-          ) || left.head.candidateId.localeCompare(right.head.candidateId),
+          ) || comparePlanIdentities(left.route.instance, right.route.instance) ||
+          left.head.candidateId.localeCompare(right.head.candidateId),
       )
       .reduce((records, record) => {
         const key = [
@@ -815,9 +818,8 @@ function dispositionsForUnmaterializedSpecializedLines(params: {
             (!signal.sourceInstanceId ||
               candidate.sourceCardInstanceId === signal.sourceInstanceId) &&
             (!signal.sourceDefinitionIds ||
-              signal.sourceDefinitionIds.includes(
-                candidate.sourceDefinitionId ?? "",
-              )),
+              (candidate.sourceDefinitionId !== undefined &&
+                signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId))),
         )
         .map((candidate) => candidate.actionId);
     for (const actionId of actionIds) {
@@ -921,7 +923,7 @@ function includeSpecializedCurrentRoutes(params: {
 
   return routes.sort(
     (left, right) =>
-      left.instance.instanceId.localeCompare(right.instance.instanceId) ||
+      comparePlanIdentities(left.instance, right.instance) ||
       left.candidate.actionId.localeCompare(right.candidate.actionId),
   );
 }
@@ -1067,6 +1069,9 @@ function headsForRoute(params: {
       moduleId: params.route.instance.moduleId,
       rootPlanInstanceId,
       rootPlanModuleId,
+      rootPlanDedupeKey: params.portfolio.instances.find(
+        (instance) => instance.instanceId === rootPlanInstanceId,
+      )!.dedupeKey,
       executorPlanInstanceId: params.route.instance.instanceId,
       ...(params.route.instance.parentInstanceId
         ? {
@@ -1368,7 +1373,7 @@ export function currentTurnPlanningInvocationVariants(params: {
       ...(params.candidate.sourceCardInstanceId
         ? { sourceCardInstanceId: params.candidate.sourceCardInstanceId }
         : {}),
-      ...(params.candidate.abilityId &&
+      ...(typeof params.candidate.abilityId === "number" &&
       params.candidate.abilityBindingMethod === "canonical_capability_id"
         ? {
             sourceAbilityBinding: {
@@ -1822,9 +1827,8 @@ function boundaryForCandidate(
     });
   }
   if (
-    head?.rootPlanInstanceId.startsWith(
-      "plan:corp.economy:economy-visible-liquidity-development%3A",
-    ) &&
+    head?.rootPlanModuleId === "corp.economy" &&
+    head.rootPlanDedupeKey?.startsWith("economy-visible-liquidity-development:") &&
     candidate.semanticActionType === "economy.gain_credit" &&
     candidate.sourceKind === "basic_action"
   ) {
@@ -2507,6 +2511,13 @@ function planBoundCorpDefenseChoices(
         }>;
       }
     | undefined;
+  if (
+    input.playerView.pendingChoice?.source.startsWith(
+      "corp.start_of_run_redirect:",
+    )
+  ) {
+    return planBoundStartRunRedirectSelection(input, action, moduleState);
+  }
   const trashSignal = moduleState?.signals?.find(
     (s) =>
       s.kind === "generic" &&

@@ -180,7 +180,7 @@ function selfStealCostApplies(
 
 /** Canonical self-cost for an already identified agenda; no hidden instance data. */
 export function quoteAgendaDefinitionSelfStealCreditCost(
-  definitionId: string,
+  definitionId: number,
   serverId: string,
 ): number | undefined {
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
@@ -188,7 +188,7 @@ export function quoteAgendaDefinitionSelfStealCreditCost(
   const accessZone: CardAccessZone | undefined =
     serverId === "hq" || serverId === "rd" || serverId === "archives"
       ? serverId
-      : /^remote_\d+$/.test(serverId)
+      : /^r\d+$/.test(serverId)
         ? "installed"
         : undefined;
   if (!accessZone) return undefined;
@@ -269,9 +269,8 @@ export function quoteStealCostForKnownAgenda(
       accessZone,
     ),
   ].sort((a, b) =>
-    `${a.sourceDefinitionId}:${a.sourceCardInstanceId ?? ""}`.localeCompare(
-      `${b.sourceDefinitionId}:${b.sourceCardInstanceId ?? ""}`,
-    ),
+    a.sourceDefinitionId - b.sourceDefinitionId ||
+    (a.sourceCardInstanceId ?? "").localeCompare(b.sourceCardInstanceId ?? ""),
   );
   return stealCostQuoteFromModifiers(modifiers);
 }
@@ -308,9 +307,8 @@ export function quoteStealCostForAccessedAgenda(
   );
   const self = currentAccessSelfStealCostsForAgenda(state, agendaDefinition);
   const modifiers = [...active, ...persisted, ...self].sort((a, b) =>
-    `${a.sourceDefinitionId}:${a.sourceCardInstanceId ?? ""}`.localeCompare(
-      `${b.sourceDefinitionId}:${b.sourceCardInstanceId ?? ""}`,
-    ),
+    a.sourceDefinitionId - b.sourceDefinitionId ||
+    (a.sourceCardInstanceId ?? "").localeCompare(b.sourceCardInstanceId ?? ""),
   );
   return stealCostQuoteFromModifiers(modifiers);
 }

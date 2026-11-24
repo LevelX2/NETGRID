@@ -18,71 +18,36 @@ export function DamageImpactOverlay({
   const t = useTranslations("Actions.damage");
   if (!cue) return null;
   const preventedDamage = cue.amount === 0 && !cue.flatline;
-  const survivableDamage = cue.runnerGripBefore;
-  const overkillDamage =
-    cue.flatline && survivableDamage !== undefined
-      ? Math.max(0, cue.amount - survivableDamage)
-      : 0;
   const damageType = t(`type.${cue.damageType}`);
-  const title = preventedDamage
-    ? t("preventedTitle", { type: damageType })
-    : cue.flatline
-      ? t("flatline")
-      : t("impactTitle", { type: damageType });
+  const title = cue.flatline
+    ? t("flatline")
+    : preventedDamage
+      ? t("preventedTitle", { type: damageType })
+      : t("impactTitle", { amount: cue.amount, type: damageType });
+  const source = cue.flatline
+    ? t("damageSummary", {
+        amount: cue.amount,
+        type: damageType,
+        source: cue.sourceLabel,
+      })
+    : t(preventedDamage ? "preventedSource" : "impactSource", {
+        source: cue.sourceLabel,
+      });
   const gripLabel =
     cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined
       ? t("gripTransition", {
-          before: damageImpactGripValue(
-            cue.runnerGripBefore,
-            cue.runnerMaxHandSizeAfter,
-          ),
-          after: damageImpactGripValue(
-            cue.runnerGripAfter,
-            cue.runnerMaxHandSizeAfter,
-          ),
+          before: cue.runnerGripBefore,
+          after: cue.runnerGripAfter,
         })
       : cue.runnerGripAfter !== undefined
-        ? t("gripNow", {
-            value: damageImpactGripValue(
-              cue.runnerGripAfter,
-              cue.runnerMaxHandSizeAfter,
-            ),
-          })
-        : t("gripPool");
-  const summary = preventedDamage
-    ? t("preventedSummary", { type: damageType, source: cue.sourceLabel })
-    : cue.flatline && cue.runnerGripBefore !== undefined
-      ? overkillDamage > 0
-        ? t("flatlineOverkillSummary", {
-            amount: cue.amount,
-            type: damageType,
-            source: cue.sourceLabel,
-            overkill: overkillDamage,
-          })
-        : t("flatlineSummary", {
-            amount: cue.amount,
-            type: damageType,
-            source: cue.sourceLabel,
-          })
-      : t("damageSummary", {
-          amount: cue.amount,
-          type: damageType,
-          source: cue.sourceLabel,
-        });
-  const thresholdLabel =
-    !preventedDamage && cue.runnerGripBefore !== undefined
-      ? cue.flatline
-        ? t("zeroAfter", { amount: cue.runnerGripBefore })
-        : t("survives", { amount: cue.runnerGripBefore })
-      : null;
-  const overkillLabel =
-    overkillDamage > 0 ? t("overkill", { amount: overkillDamage }) : null;
+        ? t("gripNow", { value: cue.runnerGripAfter })
+        : null;
   const coreDetail =
     cue.damageType === "core"
       ? [
           cue.coreDamageAfter !== undefined
             ? t("coreDamageValue", { value: cue.coreDamageAfter })
-            : t("type.core"),
+            : null,
           cue.runnerMaxHandSizeAfter !== undefined
             ? t("handLimit", { value: cue.runnerMaxHandSizeAfter })
             : null,
@@ -99,36 +64,20 @@ export function DamageImpactOverlay({
     >
       <div className="damageImpactHeader">
         <div>
-          <strong>{title}</strong>
-          <span>{summary}</span>
+          <h2>{title}</h2>
+          <p>{source}</p>
         </div>
         <WindowEventIcon kind={`${cue.damageType}-damage`} side="runner" />
       </div>
-      {!preventedDamage ? (
-        <DamageImpactMeter cue={cue} ariaLabel={gripLabel} />
+      {!preventedDamage || gripLabel || coreDetail ? (
+        <div className="damageImpactGrip">
+          {gripLabel ? <strong>{gripLabel}</strong> : null}
+          {!preventedDamage ? <DamageImpactMeter cue={cue} /> : null}
+          {coreDetail ? <small>{coreDetail}</small> : null}
+        </div>
       ) : null}
-      <div className="damageImpactStats">
-        {preventedDamage &&
-        cue.runnerGripBefore === undefined &&
-        cue.runnerGripAfter === undefined ? null : (
-          <span>{gripLabel}</span>
-        )}
-        <span>
-          {preventedDamage
-            ? `0 ${damageType}`
-            : t("damageAmount", { amount: cue.amount })}
-        </span>
-        {preventedDamage ? <span>{t("prevented")}</span> : null}
-        {thresholdLabel ? <span>{thresholdLabel}</span> : null}
-        {overkillLabel ? <span>{overkillLabel}</span> : null}
-        {coreDetail ? <span>{coreDetail}</span> : null}
-      </div>
       <div className="damageImpactFooter">
-        {queued > 0 ? (
-          <small>{t("queued", { count: queued })}</small>
-        ) : (
-          <span aria-hidden="true" />
-        )}
+        {queued > 0 ? <small>{t("queued", { count: queued })}</small> : null}
         <button
           className="button damageImpactDismiss"
           onClick={onDismiss}
@@ -136,17 +85,10 @@ export function DamageImpactOverlay({
           title={t("confirmWindow")}
           type="button"
         >
-          <Check size={14} />
+          <Check size={14} aria-hidden="true" />
           {t("continue")}
         </button>
       </div>
     </aside>
   );
-}
-
-function damageImpactGripValue(
-  count: number,
-  maxHandSize: number | undefined,
-): string {
-  return maxHandSize !== undefined ? `${count}/${maxHandSize}` : `${count}`;
 }

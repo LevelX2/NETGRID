@@ -339,13 +339,21 @@ $serverReadyLanBefore = if ($serverPortListeningBefore) { Test-Endpoint -Url $se
 $serverReadyLocalBefore = if ($serverPortListeningBefore) { Test-Endpoint -Url $localServerUrl } else { $false }
 $activeServerMode = if ($serverReadyLocalBefore) { Get-NetgridServerRuntimeMode -Url $localServerUrl } else { $null }
 $serverModeMismatch = $serverReadyLocalBefore -and $activeServerMode -ne $serverMode
+$checkoutBuild = Get-NetgridCheckoutBuildIdentity -ProjectRoot $projectRoot
+$activeServerBuild = if ($serverReadyLocalBefore) { Get-NetgridServerBuildIdentity -Url $localServerUrl } else { $null }
+$serverCheckoutMismatch = $serverReadyLocalBefore -and $activeServerBuild -cne $checkoutBuild
+if ($serverCheckoutMismatch -and -not $RestartServer) {
+  if (-not (Request-NetgridStartupRestart "Der laufende Server gehört zu einem anderen oder nicht erkennbaren Quellstand als dieser Checkout.`n`nMit OK werden Server und Webclient neu gestartet. Laufende Verbindungen werden dabei getrennt.")) { exit 0 }
+  $RestartServer = $true
+  $RestartWeb = $true
+}
 $browserConnectionReady = $serverReadyLanBefore -and (Test-NetgridBrowserConnection -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl)
 if ($serverReadyLanBefore -and -not $browserConnectionReady -and -not $RestartServer) {
   if (-not (Request-NetgridStartupRestart "Die Netzwerkadresse hat sich geändert oder ist im laufenden Server nicht korrekt freigegeben.`n`nMit OK werden Server und Webclient jetzt neu gestartet und NETGRID anschließend geöffnet. Laufende Verbindungen werden dabei getrennt.")) { exit 0 }
   $RestartServer = $true
   $RestartWeb = $true
 }
-Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore activeMode=$activeServerMode requestedMode=$serverMode modeMismatch=$serverModeMismatch maintenanceRequested=$maintenanceRequested"
+Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore activeMode=$activeServerMode requestedMode=$serverMode modeMismatch=$serverModeMismatch checkoutBuild=$checkoutBuild activeBuild=$activeServerBuild checkoutMismatch=$serverCheckoutMismatch maintenanceRequested=$maintenanceRequested"
 
 if ($RestartServer -or $serverModeMismatch) {
   Stop-PortListeners -Ports @(8787)
@@ -363,37 +371,43 @@ if (-not $serverReadyLanBefore) {
   Start-NetgridProcess -Command $serverCommand -LogPath $serverLog -Environment $serverEnvironment
 }
 
+$serverReady = Wait-Endpoint -Url $serverUrl
+$serverBuild = if ($serverReady) { Get-NetgridServerBuildIdentity -Url $serverUrl }
+
 $webPortListeningBefore = Test-NetgridLocalPortListener -Port 3100
 $webReadyLanBefore = if ($webPortListeningBefore) { Test-Endpoint -Url $webUrl } else { $false }
 $webReadyLocalBefore = if ($webPortListeningBefore) { Test-Endpoint -Url $localWebUrl } else { $false }
 Write-LauncherLog "Web precheck lan=$webReadyLanBefore local=$webReadyLocalBefore"
 
-if ($webReadyLanBefore -and -not $RestartWeb -and -not (Test-NetgridWebServerBinding -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl)) {
-  if (-not (Request-NetgridStartupRestart "Der Webclient verwendet eine veraltete Serveradresse.`n`nMit OK wird der Webclient jetzt neu gestartet und NETGRID anschließend geöffnet.")) { exit 0 }
-  $RestartWeb = $true
+if ($serverBuild -and $webReadyLanBefore -and -not $RestartWeb) {
+  $webStatusBefore = Get-NetgridWebStartupStatus -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl
+  if (-not $webStatusBefore.BindingMatches) {
+    if (-not (Request-NetgridStartupRestart "Der Webclient verwendet eine veraltete Serveradresse.`n`nMit OK wird der Webclient jetzt neu gestartet und NETGRID anschließend geöffnet.")) { exit 0 }
+    $RestartWeb = $true
+  } elseif ($webStatusBefore.BuildIdentity -cne $serverBuild) {
+    Write-LauncherLog "Restarting web for build change web=$($webStatusBefore.BuildIdentity) server=$serverBuild"
+    $RestartWeb = $true
+  }
 }
 
-if ($RestartWeb) {
-  Stop-PortListeners -Ports @(3100)
-  $webReadyLanBefore = $false
-  $webReadyLocalBefore = $false
-}
-
-if (-not $webReadyLanBefore) {
+if ($serverBuild -and ($RestartWeb -or -not $webReadyLanBefore)) {
   Stop-PortListeners -Ports @(3100)
   Write-LauncherLog "Starting web command"
   Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/web exec next dev --webpack --hostname 0.0.0.0 --port 3100" -LogPath $webLog -Environment $webEnvironment
 }
 
-$serverReady = Wait-Endpoint -Url $serverUrl
-$webReady = Wait-Endpoint -Url $webUrl
-$targetWebReady = Wait-Endpoint -Url $targetWebUrl -Seconds 10
-Write-LauncherLog "Postcheck serverReady=$serverReady webReady=$webReady targetWebReady=$targetWebReady targetWebUrl=$targetWebUrl"
+$webReady = $serverBuild -and (Wait-Endpoint -Url $webUrl)
+$targetWebReady = $webReady -and (Wait-Endpoint -Url $targetWebUrl -Seconds 10)
+$webStatusAfter = if ($targetWebReady) {
+  Get-NetgridWebStartupStatus -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl
+}
+$browserReady = $targetWebReady -and $webStatusAfter.BindingMatches -and
+  (Test-NetgridBrowserConnection -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl)
+$serverBuildAfter = if ($browserReady) { Get-NetgridServerBuildIdentity -Url $serverUrl }
+$buildsMatch = $serverBuildAfter -and $serverBuildAfter -ceq $webStatusAfter.BuildIdentity -and $serverBuildAfter -ceq $checkoutBuild
+Write-LauncherLog "Postcheck serverReady=$serverReady webReady=$webReady targetWebReady=$targetWebReady browserReady=$browserReady buildsMatch=$buildsMatch serverBuild=$serverBuildAfter webBuild=$($webStatusAfter.BuildIdentity) targetWebUrl=$targetWebUrl"
 
-$browserReady = $serverReady -and $targetWebReady -and
-  (Test-NetgridBrowserConnection -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl) -and
-  (Test-NetgridWebServerBinding -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl)
-if ($serverReady -and $webReady -and $targetWebReady -and $browserReady) {
+if ($browserReady -and $buildsMatch) {
   Write-LauncherLog "Launcher success opening $targetOpenUrl"
   Start-Process $targetOpenUrl
   exit 0
@@ -404,6 +418,15 @@ $localWebStillRunning = Test-Endpoint -Url $localWebUrl
 $hint = ""
 if ($serverReady -and $targetWebReady -and -not $browserReady) {
   $hint += "`nBrowser-Verbindung ungültig: Serverfreigabe und Webclient müssen dieselbe aktuelle Netzwerkadresse verwenden. Prüfe die Startkonfiguration (startup_browser_connection_invalid)."
+}
+if (($serverReady -and -not $serverBuild) -or ($browserReady -and -not $serverBuildAfter)) {
+  $hint += "`nDer Server meldet keine gültige Buildkennung unter /health. Prüfe den laufenden NETGRID-Server (startup_server_build_unavailable)."
+} elseif ($serverBuildAfter -and $serverBuildAfter -cne $checkoutBuild) {
+  $hint += "`nDer Server ($serverBuildAfter) entspricht nicht dem aktuellen Checkout ($checkoutBuild). Starte NETGRID erneut mit -RestartServer (startup_checkout_build_mismatch)."
+} elseif ($browserReady -and -not $webStatusAfter.BuildIdentity) {
+  $hint += "`nDer Webclient liefert keine Buildkennung. Prüfe den gestarteten Webclient (startup_web_build_unavailable)."
+} elseif ($browserReady -and -not $buildsMatch) {
+  $hint += "`nServer ($serverBuildAfter) und Webclient ($($webStatusAfter.BuildIdentity)) melden unterschiedliche Builds. Starte NETGRID erneut mit -RestartServer (startup_build_mismatch)."
 }
 if (-not $serverReady -and $localServerStillRunning) {
   $hint += "`nHinweis Server: Es laeuft bereits eine lokale Instanz auf 127.0.0.1:8787. Bitte diese beenden und das Icon erneut starten."

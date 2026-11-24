@@ -1,7 +1,8 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 export type DeckEditorSide = "runner" | "corp";
 
 export type DeckEditorCardEntry = {
-  cardId: string;
+  cardId: CardDefinitionId;
   quantity: number;
 };
 
@@ -58,7 +59,7 @@ export const DECK_AGENDA_RULES_BY_PROFILE: Record<string, DeckAgendaRule> = {
 export function deckAgendaStatusForEditor(
   deck: DeckEditorDeckForAgenda | null,
   detailsById: Record<string, DeckEditorCardDetailForAgenda | undefined>,
-  cardLookup: ReadonlyMap<string, { type: string }> = new Map(),
+  cardLookup: ReadonlyMap<CardDefinitionId, { type: string }> = new Map(),
 ): DeckAgendaStatus | null {
   if (!deck || deck.side !== "corp") return null;
   const rule =

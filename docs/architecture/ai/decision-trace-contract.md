@@ -1,7 +1,7 @@
 # KI-Entscheidungslog-Vertrag
 
 Status: aktueller Architekturvertrag.  
-Stand: 2026-09-10
+Stand: 2026-11-15
 
 Dieser Vertrag beschreibt, wie NETGRID KI-Entscheidungen lokal nachvollziehbar macht, ohne die bestehenden Engine-, Replay-, Hidden-Info- und Observability-Grenzen aufzuweichen. Er gibt keine Karten frei und ändert keine Regelentscheidung.
 
@@ -14,6 +14,8 @@ Das Log ist Diagnosematerial. Es ist kein Teil von `AIInput`, FullState, Engine-
 ## Bestehende Grenzen
 
 - `packages/shared/src/index.ts` definiert `AiDecisionDebug`, `AI_DECISION_DEBUG_SCHEMA_VERSION` und `sanitizeAiDecisionDebug`.
+- `packages/ai/src/runtime/plan-first-decision-debug.ts` erstellt die
+  Diagnoseprojektion des ausgewählten Plans aus dem Entscheidungsframe.
 - `apps/server/src/multiplayer.ts` projiziert `aiDecisionDebug` bereits nur sanitisiert und perspektivabhängig in Replay-Daten.
 - Der [Controllervertrag](controller-contract.md) grenzt KI-Inputs und normale
   Spielerkanäle ab.
@@ -72,7 +74,7 @@ Die Datenbank speichert strukturierte Spalten und JSON. Sie speichert kein HTML,
 
 Empfohlene Spalten:
 
-- `traceId`;
+- `decisionIndex` als positive, matchlokale Entscheidungsnummer;
 - `matchId`;
 - `matchVersion`;
 - `stateVersion`;
@@ -91,11 +93,24 @@ Empfohlene Spalten:
 
 `traceJson` enthält nur das versionierte Schema. Anzeige-ViewModels werden serverseitig daraus abgeleitet. HTML entsteht erst im Webclient oder in der lokalen Maintenance-Ansicht.
 
+Wartungsdetails verwenden die Adresse
+`/api/storage/maintenance/ai-decision-traces/matches/{matchId}/decisions/{decisionIndex}`.
+Der Diagnosecode eines fehlgeschlagenen KI-Versuchs steht in
+`traceJson.attempt.diagnosticCode`.
+
 Die Entscheidungskette nutzt denselben Persistenzvertrag. Bei
 `aiTraceMode: summary` enthält `traceJson.decisionChain` die kompakte
 `traceLevel: summary`-Projektion; bei `aiTraceMode: detailed` enthält derselbe
 Schlüssel die vollständige sanitizierte `AiDecisionChainDebug` mit
 `traceLevel: detailed`. Es gibt dafür keine weitere Tabelle oder Logdatei.
+
+Bei Runner-Zentraldruck nennt die Detailspur den Effekt der konkret gewählten
+Run-Aktion. Ein Credit-Entzug, der den HQ-Zugriff ersetzt, wird als Entzug
+beschrieben. Bedingte Ersetzungen werden nach der aktuellen sichtbaren
+Bedingung ausgewiesen. Gezielte ICE-Vorbereitung beschreibt den tatsächlich
+gebundenen Rez-Zustand oder die gebundene Rez-/Trash-Wahl. Diese Texte
+ändern die Aktions- und Choice-Bindungen nicht.
+
 Die genaue Feldabgrenzung liefern `AiDecisionChainDebug` und
 `sanitizeAiDecisionChainDebug` in [shared](../../../packages/shared/src/index.ts);
 der Decision-Episode-Vertrag unten erläutert ihre fachliche Bedeutung.
@@ -106,7 +121,7 @@ Die Metaebene ist die Standardansicht pro Entscheidung. Sie muss ohne Drilldown 
 
 Erlaubte Meta-Felder:
 
-- `traceId`, `matchId`, `matchVersion`, `stateVersion`, `turn`, `side`;
+- `decisionIndex`, `matchId`, `matchVersion`, `stateVersion`, `turn`, `side`;
 - `schemaVersion`, `aiLevel`, `profileId`, `planId`, `planKind`, `selectedActionType`;
 - gewählte `actionId`, sofern diese aus LegalActions stammt;
 - `score`, `confidence`, `fallbackUsed`, `timeoutUsed`, `timeBudgetMs`;
@@ -220,6 +235,11 @@ sein. Quelle, Entscheidungsindex und Lease-StateVersion gehören zum Nachweis.
 Ein Commitment wird nicht pauschal entfernt, um eine gewünschte Wahl zu
 erzwingen. Der vollständige Originalseed bleibt die Kontrolle der normalen
 Runtime-Fortschreibung.
+
+Das optionale Feld `planPortfolio` enthält taktische Plankategorien und
+Schritte für gespeicherte Regressionsevidenz. Der produktive Planablauf
+bindet seine Planinstanzen über `residentPlanPortfolio`. Die beiden Felder
+werden beim Checkpoint-Restore mit ihren jeweiligen Typverträgen geladen.
 
 ### Kompakter Checkpoint-Input
 

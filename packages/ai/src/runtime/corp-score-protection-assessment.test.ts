@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
@@ -61,8 +62,8 @@ describe("assessCorpScoreProtection", () => {
   it("keeps access at 1 through Pocket VR and Hunter", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [
-        ice("pocket", "onr_v1_260_pocket-virtual-reality"),
-        ice("hunter", "onr_v1_249_hunter"),
+        ice("pocket", 472),
+        ice("hunter", 461),
       ],
       runnerRig: [],
       runnerCredits: 0,
@@ -79,7 +80,7 @@ describe("assessCorpScoreProtection", () => {
 
   it("conservatively keeps access at 1 through known non-ETR encounter disruption", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("shock-r", "onr_v1_268_shock-r")],
+      serverIce: [ice("shock-r", 480)],
       runnerRig: [],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -93,8 +94,8 @@ describe("assessCorpScoreProtection", () => {
   });
 
   it.each([
-    ["Filter", "onr_v1_244_filter"],
-    ["Data Wall 2.0", "onr_v1_238_data-wall-2-0"],
+    ["Filter", 456],
+    ["Data Wall 2.0", 450],
   ])(
     "requires one successful Blink check against %s",
     (_title, definitionId) => {
@@ -135,10 +136,10 @@ describe("assessCorpScoreProtection", () => {
     (credits, access, remaining) => {
       const assessment = assessCorpScoreProtection({
         serverIce: [
-          ice("inner", "onr_v1_270_sleeper"),
-          ice("outer", "onr_v1_268_shock-r"),
+          ice("inner", 482),
+          ice("outer", 480),
         ],
-        runnerRig: [runnerProgram("krash", "onr_v1_039_krash")],
+        runnerRig: [runnerProgram("krash", 251)],
         runnerCredits: credits,
         maximumRunnerAccessSuccessProbability: QUARTER,
       });
@@ -156,10 +157,10 @@ describe("assessCorpScoreProtection", () => {
   it("blocks staged Worm access when outer Shock prevents the next hard ETR break", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [
-        ice("inner", "onr_v1_278_wall-of-ice"),
-        ice("outer", "onr_v1_268_shock-r"),
+        ice("inner", 490),
+        ice("outer", 480),
       ],
-      runnerRig: [runnerProgram("worm", "onr_v1_074_worm")],
+      runnerRig: [runnerProgram("worm", 286)],
       runnerCredits: 40,
       maximumRunnerAccessSuccessProbability: QUARTER,
     });
@@ -175,11 +176,11 @@ describe("assessCorpScoreProtection", () => {
     (rezzed) => {
       const assessment = assessCorpScoreProtection({
         serverIce: [
-          ice("inner", "onr_v1_270_sleeper"),
-          { ...ice("middle", "onr_v1_249_hunter"), rezzed },
-          ice("outer", "onr_v1_268_shock-r"),
+          ice("inner", 482),
+          { ...ice("middle", 461), rezzed },
+          ice("outer", 480),
         ],
-        runnerRig: [runnerProgram("krash", "onr_v1_039_krash")],
+        runnerRig: [runnerProgram("krash", 251)],
         runnerCredits: 4,
         maximumRunnerAccessSuccessProbability: QUARTER,
       });
@@ -196,11 +197,11 @@ describe("assessCorpScoreProtection", () => {
   it("relays a new lock through a locked Shock without inventing a break", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [
-        ice("inner", "onr_v1_270_sleeper"),
-        ice("middle", "onr_v1_268_shock-r"),
-        ice("outer", "onr_v1_268_shock-r"),
+        ice("inner", 482),
+        ice("middle", 480),
+        ice("outer", 480),
       ],
-      runnerRig: [runnerProgram("krash", "onr_v1_039_krash")],
+      runnerRig: [runnerProgram("krash", 251)],
       runnerCredits: 4,
       maximumRunnerAccessSuccessProbability: QUARTER,
     });
@@ -213,8 +214,8 @@ describe("assessCorpScoreProtection", () => {
   it("multiplies two necessary Blink successes to exactly 1/4", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [
-        ice("filter", "onr_v1_244_filter"),
-        ice("data-wall", "onr_v1_238_data-wall-2-0"),
+        ice("filter", 456),
+        ice("data-wall", 450),
       ],
       runnerRig: [blink()],
       runnerCredits: 0,
@@ -231,7 +232,7 @@ describe("assessCorpScoreProtection", () => {
 
   it("combines two independent Blink instances against one ETR to exactly 3/4", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("data-wall", "onr_v1_238_data-wall-2-0")],
+      serverIce: [ice("data-wall", 450)],
       runnerRig: [blink("blink-1"), blink("blink-2")],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -260,8 +261,8 @@ describe("assessCorpScoreProtection", () => {
   it("compounds the combined two-Blink probability across two independent ETRs", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [
-        ice("filter", "onr_v1_244_filter"),
-        ice("data-wall", "onr_v1_238_data-wall-2-0"),
+        ice("filter", 456),
+        ice("data-wall", 450),
       ],
       runnerRig: [blink("blink-1"), blink("blink-2")],
       runnerCredits: 0,
@@ -278,13 +279,13 @@ describe("assessCorpScoreProtection", () => {
 
   it("uses a stable free matching breaker instead of Blink", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("data-wall", "onr_v1_238_data-wall-2-0")],
+      serverIce: [ice("data-wall", 450)],
       runnerRig: [
         blink("blink-1"),
         blink("blink-2"),
         runnerProgram(
           "stable-wall-breaker",
-          "onr_v1_037_japanese-water-torture",
+          249,
         ),
       ],
       runnerCredits: 0,
@@ -302,7 +303,7 @@ describe("assessCorpScoreProtection", () => {
 
   it("returns access probability 0 for an unbroken ETR barrier", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("data-wall", "onr_v1_238_data-wall-2-0")],
+      serverIce: [ice("data-wall", 450)],
       runnerRig: [],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -317,12 +318,12 @@ describe("assessCorpScoreProtection", () => {
   });
 
   it("projects static hypothetical ICE only with explicit matching facts", () => {
-    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_244_filter"]!;
+    const definition = planningCardFactsByDefinitionId(456)!;
     const assessment = assessCorpScoreProtection({
       serverIce: [
         {
           instanceId: "projected-filter",
-          definitionId: "onr_v1_244_filter",
+          definitionId: 456,
           known: true,
           rezzed: true,
           strength: definition.strength!,
@@ -346,7 +347,7 @@ describe("assessCorpScoreProtection", () => {
       serverIce: [
         {
           instanceId: "projected-filter",
-          definitionId: "onr_v1_244_filter",
+          definitionId: 456,
           known: true,
           rezzed: true,
         },
@@ -365,7 +366,7 @@ describe("assessCorpScoreProtection", () => {
 
   it("uses the parent-provided threshold instead of a hardcoded cutoff", () => {
     const common = {
-      serverIce: [ice("filter", "onr_v1_244_filter")],
+      serverIce: [ice("filter", 456)],
       runnerRig: [blink()],
       runnerCredits: 0,
     };
@@ -412,7 +413,7 @@ describe("assessCorpScoreProtection", () => {
 
   it("fails closed for an unknown installed Runner card", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("data-wall", "onr_v1_238_data-wall-2-0")],
+      serverIce: [ice("data-wall", 450)],
       runnerRig: [
         {
           instanceId: "unknown-program",
@@ -434,7 +435,7 @@ describe("assessCorpScoreProtection", () => {
 
   it("ignores an inactive concealed Runner resource", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("filter", "onr_v1_244_filter")],
+      serverIce: [ice("filter", 456)],
       runnerRig: [
         {
           instanceId: "unknown-resource",
@@ -460,7 +461,7 @@ describe("assessCorpScoreProtection", () => {
 
   it("models two visible independent random breakers instead of treating them as unknown", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("data-wall", "onr_v1_238_data-wall-2-0")],
+      serverIce: [ice("data-wall", 450)],
       runnerRig: [blink("blink-1"), blink("blink-2")],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -478,12 +479,12 @@ describe("assessCorpScoreProtection", () => {
     (credits) => {
       const assessment = assessCorpScoreProtection({
         serverIce: [
-          ice("inner-wall", "onr_v1_263_reinforced-wall"),
-          ice("outer-wall", "onr_v1_263_reinforced-wall"),
+          ice("inner-wall", 475),
+          ice("outer-wall", 475),
         ],
         runnerRig: [
-          runnerProgram("worm", "onr_classic_027_early-worm"),
-          runnerProgram("rent", "onr_classic_031_rent-i-con"),
+          runnerProgram("worm", 31),
+          runnerProgram("rent", 35),
         ],
         runnerCredits: credits,
         maximumRunnerAccessSuccessProbability: QUARTER,
@@ -505,13 +506,13 @@ describe("assessCorpScoreProtection", () => {
 
   it("does not use a general-credit dominance proof for restricted pools", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("wall", "onr_v1_263_reinforced-wall")],
+      serverIce: [ice("wall", 475)],
       runnerRig: [
-        runnerProgram("worm", "onr_classic_027_early-worm"),
-        runnerProgram("rent", "onr_classic_031_rent-i-con"),
+        runnerProgram("worm", 31),
+        runnerProgram("rent", 35),
         recurringCreditPool(
           "cloak",
-          "onr_v1_011_cloak",
+          223,
           "using_icebreaker_during_run_non_noisy",
         ),
       ],
@@ -526,10 +527,10 @@ describe("assessCorpScoreProtection", () => {
 
   it("fails closed when mixed breakers can preserve strength for later encounters", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("endless-corridor", "onr_v1_239_endless-corridor")],
+      serverIce: [ice("endless-corridor", 451)],
       runnerRig: [
-        runnerProgram("decoder-1", "onr_classic_030_psychic-friend"),
-        runnerProgram("decoder-2", "onr_classic_030_psychic-friend"),
+        runnerProgram("decoder-1", 34),
+        runnerProgram("decoder-2", 34),
       ],
       runnerCredits: 8,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -547,7 +548,7 @@ describe("assessCorpScoreProtection", () => {
       "unknown definition",
       {
         ...blink(),
-        definitionId: "missing-definition",
+        definitionId: syntheticCardDefinitionId("missing-definition"),
       },
     ],
     [
@@ -573,7 +574,7 @@ describe("assessCorpScoreProtection", () => {
     ],
   ])("fails closed for a Runner rig card with %s", (_label, badCard) => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("data-wall", "onr_v1_238_data-wall-2-0")],
+      serverIce: [ice("data-wall", 450)],
       runnerRig: [badCard as VisibleCard],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -589,7 +590,7 @@ describe("assessCorpScoreProtection", () => {
   it("fails closed for duplicate Runner rig and ICE instance identities", () => {
     expect(
       assessCorpScoreProtection({
-        serverIce: [ice("wall", "onr_v1_238_data-wall-2-0")],
+        serverIce: [ice("wall", 450)],
         runnerRig: [blink("duplicate"), blink("duplicate")],
         runnerCredits: 0,
         maximumRunnerAccessSuccessProbability: QUARTER,
@@ -601,8 +602,8 @@ describe("assessCorpScoreProtection", () => {
     expect(
       assessCorpScoreProtection({
         serverIce: [
-          ice("duplicate", "onr_v1_244_filter"),
-          ice("duplicate", "onr_v1_238_data-wall-2-0"),
+          ice("duplicate", 456),
+          ice("duplicate", 450),
         ],
         runnerRig: [],
         runnerCredits: 0,
@@ -624,7 +625,7 @@ describe("assessCorpScoreProtection", () => {
     [
       "definition",
       {
-        iceDefinitionId: "onr_v1_244_filter",
+        iceDefinitionId: 456,
       },
     ],
     [
@@ -636,7 +637,7 @@ describe("assessCorpScoreProtection", () => {
   ])(
     "fails closed when an effective quote has an invalid %s binding",
     (_label, override) => {
-      const card = ice("wall", "onr_v1_238_data-wall-2-0");
+      const card = ice("wall", 450);
       const assessment = assessCorpScoreProtection({
         serverIce: [
           {
@@ -661,7 +662,7 @@ describe("assessCorpScoreProtection", () => {
   );
 
   it("uses effective quote strength for break affordability", () => {
-    const card = ice("wall", "onr_v1_238_data-wall-2-0");
+    const card = ice("wall", 450);
     const assessment = assessCorpScoreProtection({
       serverIce: [
         {
@@ -675,7 +676,7 @@ describe("assessCorpScoreProtection", () => {
       runnerRig: [
         runnerProgram(
           "stable-wall-breaker",
-          "onr_v1_037_japanese-water-torture",
+          249,
         ),
       ],
       runnerCredits: 0,
@@ -690,7 +691,7 @@ describe("assessCorpScoreProtection", () => {
   });
 
   it("charges the effective per-subroutine break surcharge", () => {
-    const card = ice("wall", "onr_v1_238_data-wall-2-0");
+    const card = ice("wall", 450);
     const assessment = assessCorpScoreProtection({
       serverIce: [
         {
@@ -704,7 +705,7 @@ describe("assessCorpScoreProtection", () => {
       runnerRig: [
         runnerProgram(
           "stable-wall-breaker",
-          "onr_v1_037_japanese-water-torture",
+          249,
         ),
       ],
       runnerCredits: 0,
@@ -720,12 +721,12 @@ describe("assessCorpScoreProtection", () => {
 
   it("uses a matching visible non-noisy credit pool for the compatible breaker", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("filter", "onr_v1_244_filter")],
+      serverIce: [ice("filter", 456)],
       runnerRig: [
-        runnerProgram("decoder", "simple_decoder"),
+        runnerProgram("decoder", 591),
         recurringCreditPool(
           "cloak",
-          "onr_v1_011_cloak",
+          223,
           "using_icebreaker_during_run_non_noisy",
         ),
       ],
@@ -746,7 +747,7 @@ describe("assessCorpScoreProtection", () => {
     (horizon) => {
       const pool = recurringCreditPool(
         "cloak",
-        "onr_v1_011_cloak",
+        223,
         "using_icebreaker_during_run_non_noisy",
       );
       pool.counterDisplays![0]!.amount = 0;
@@ -759,8 +760,8 @@ describe("assessCorpScoreProtection", () => {
         },
       };
       const assessment = assessCorpScoreProtection({
-        serverIce: [ice("filter", "onr_v1_244_filter")],
-        runnerRig: [runnerProgram("decoder", "simple_decoder"), pool],
+        serverIce: [ice("filter", 456)],
+        runnerRig: [runnerProgram("decoder", 591), pool],
         runnerCredits: 0,
         runnerCreditPoolHorizon: horizon,
         maximumRunnerAccessSuccessProbability: QUARTER,
@@ -771,10 +772,10 @@ describe("assessCorpScoreProtection", () => {
       });
       const twoLayers = assessCorpScoreProtection({
         serverIce: [
-          ice("outer", "onr_v1_244_filter"),
-          ice("inner", "onr_v1_244_filter"),
+          ice("outer", 456),
+          ice("inner", 456),
         ],
-        runnerRig: [runnerProgram("decoder", "simple_decoder"), pool],
+        runnerRig: [runnerProgram("decoder", 591), pool],
         runnerCredits: 0,
         runnerCreditPoolHorizon: horizon,
         maximumRunnerAccessSuccessProbability: QUARTER,
@@ -789,12 +790,12 @@ describe("assessCorpScoreProtection", () => {
 
   it("does not spend a killer-only credit pool through a non-killer breaker", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("filter", "onr_v1_244_filter")],
+      serverIce: [ice("filter", 456)],
       runnerRig: [
-        runnerProgram("decoder", "simple_decoder"),
+        runnerProgram("decoder", 591),
         recurringCreditPool(
           "killer-bank",
-          "onr_v1_011_cloak",
+          223,
           "using_killer_during_run",
         ),
       ],
@@ -812,14 +813,14 @@ describe("assessCorpScoreProtection", () => {
   it("consumes a visible recurring breaker credit across consecutive ICE", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [
-        ice("outer-filter", "onr_v1_244_filter"),
-        ice("inner-filter", "onr_v1_244_filter"),
+        ice("outer-filter", 456),
+        ice("inner-filter", 456),
       ],
       runnerRig: [
-        runnerProgram("decoder", "simple_decoder"),
+        runnerProgram("decoder", 591),
         recurringCreditPool(
           "cloak",
-          "onr_v1_011_cloak",
+          223,
           "using_icebreaker_during_run_non_noisy",
         ),
       ],
@@ -836,11 +837,11 @@ describe("assessCorpScoreProtection", () => {
 
   it("ignores restricted breaker credits when no visible icebreaker can spend them", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("filter", "onr_v1_244_filter")],
+      serverIce: [ice("filter", 456)],
       runnerRig: [
         recurringCreditPool(
           "cloak",
-          "onr_v1_011_cloak",
+          223,
           "using_icebreaker_during_run_non_noisy",
         ),
       ],
@@ -856,7 +857,7 @@ describe("assessCorpScoreProtection", () => {
   });
 
   it("uses encounter strength for Clown instead of charging the printed pump cost", () => {
-    const card = ice("wall", "onr_v1_238_data-wall-2-0");
+    const card = ice("wall", 450);
     const input = {
       serverIce: [
         {
@@ -865,8 +866,8 @@ describe("assessCorpScoreProtection", () => {
         },
       ],
       runnerRig: [
-        runnerProgram("breaker", "onr_v1_037_japanese-water-torture"),
-        runnerProgram("clown", "onr_v1_012_clown"),
+        runnerProgram("breaker", 249),
+        runnerProgram("clown", 224),
       ],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -897,9 +898,9 @@ describe("assessCorpScoreProtection", () => {
   });
 
   it("fails closed when encounter strength is not quoted for a visible modifier", () => {
-    const clownDefinition = CARD_DEFINITIONS_BY_ID["onr_v1_012_clown"]!;
+    const clownDefinition = planningCardFactsByDefinitionId(224)!;
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("wall", "onr_v1_238_data-wall-2-0")],
+      serverIce: [ice("wall", 450)],
       runnerRig: [
         {
           instanceId: "clown",
@@ -924,8 +925,8 @@ describe("assessCorpScoreProtection", () => {
 
   it("keeps a relevant random-strength Sentry breaker unsupported", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("sentry", "onr_v1_223_banpei")],
-      runnerRig: [runnerProgram("ai-boon", "onr_v1_002_ai-boon")],
+      serverIce: [ice("sentry", 435)],
+      runnerRig: [runnerProgram("ai-boon", 214)],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
     });
@@ -938,7 +939,7 @@ describe("assessCorpScoreProtection", () => {
   });
 
   it("fails closed for a trace with missing success effect", () => {
-    const hunter = ice("hunter", "onr_v1_249_hunter");
+    const hunter = ice("hunter", 461);
     const quote = effectiveQuote(hunter);
     const assessment = assessCorpScoreProtection({
       serverIce: [
@@ -968,7 +969,7 @@ describe("assessCorpScoreProtection", () => {
 
   it("fails closed when catalog mechanics contradict a nominal no-op trace effect", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("cinderella", "onr_v1_228_cinderella")],
+      serverIce: [ice("cinderella", 440)],
       runnerRig: [],
       runnerCredits: 0,
       maximumRunnerAccessSuccessProbability: QUARTER,
@@ -983,7 +984,7 @@ describe("assessCorpScoreProtection", () => {
 
   it("counts a public Shell-counter breaker after its mandatory next-turn removal", () => {
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("filter", "onr_v1_244_filter")],
+      serverIce: [ice("filter", 456)],
       runnerRig: [shellTraders()],
       runnerSetAside: [preparedRentICon()],
       runnerMemoryUsed: 0,
@@ -1014,15 +1015,15 @@ describe("assessCorpScoreProtection", () => {
     "accounts for hosted prepared Cyfermaster and %i credit clicks",
     (preparation) => {
       const prepared = {
-        ...runnerProgram("cyfer", "onr_v1_016_cyfermaster"),
+        ...runnerProgram("cyfer", 228),
         memoryCost: 1,
         counters: { shell: 1 },
       } as VisibleCard;
       const assessment = assessCorpScoreProtection({
-        serverIce: [ice("puzzle", "onr_classic_013_puzzle")],
+        serverIce: [ice("puzzle", 17)],
         runnerRig: [
           shellTraders(),
-          { ...runnerProgram("afreet", "onr_v1_001_afreet"), memoryCost: 1 },
+          { ...runnerProgram("afreet", 213), memoryCost: 1 },
         ],
         runnerSetAside: [prepared],
         runnerMemoryUsed: 4,
@@ -1059,7 +1060,7 @@ describe("assessCorpScoreProtection", () => {
       expected,
     ) => {
       const assessment = assessCorpScoreProtection({
-        serverIce: [ice("filter", "onr_v1_244_filter")],
+        serverIce: [ice("filter", 456)],
         runnerRig: [shellTraders()],
         runnerSetAside: [{ ...preparedRentICon(), ...cardPatch }],
         runnerMemoryUsed,
@@ -1088,8 +1089,8 @@ describe("assessCorpScoreProtection", () => {
   );
 });
 
-function ice(instanceId: string, definitionId: string): VisibleCard {
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+function ice(instanceId: string, definitionId: number): VisibleCard {
+  const definition = planningCardFactsByDefinitionId(definitionId);
   if (!definition) throw new Error(`Missing test card ${definitionId}`);
   return {
     instanceId,
@@ -1105,11 +1106,11 @@ function ice(instanceId: string, definitionId: string): VisibleCard {
 }
 
 function blink(instanceId = "blink"): VisibleCard {
-  return runnerProgram(instanceId, "onr_v1_007_blink");
+  return runnerProgram(instanceId, 219);
 }
 
-function runnerProgram(instanceId: string, definitionId: string): VisibleCard {
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+function runnerProgram(instanceId: string, definitionId: number): VisibleCard {
+  const definition = planningCardFactsByDefinitionId(definitionId);
   if (!definition) throw new Error(`Missing test card ${definitionId}`);
   return {
     instanceId,
@@ -1124,7 +1125,7 @@ function runnerProgram(instanceId: string, definitionId: string): VisibleCard {
 }
 
 function shellTraders(): VisibleCard {
-  const definition = CARD_DEFINITIONS_BY_ID["onr_v1_176_the-shell-traders"];
+  const definition = planningCardFactsByDefinitionId(388);
   if (!definition) throw new Error("Missing The Shell Traders definition");
   return {
     instanceId: "shell-traders",
@@ -1140,9 +1141,9 @@ function shellTraders(): VisibleCard {
 function preparedRentICon(): VisibleCard {
   const card = runnerProgram(
     "prepared-rent-i-con",
-    "onr_classic_031_rent-i-con",
+    35,
   );
-  const definition = CARD_DEFINITIONS_BY_ID["onr_classic_031_rent-i-con"]!;
+  const definition = planningCardFactsByDefinitionId(35)!;
   return {
     ...card,
     memoryCost: definition.memoryCost,
@@ -1152,10 +1153,10 @@ function preparedRentICon(): VisibleCard {
 
 function recurringCreditPool(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   use: "using_icebreaker_during_run_non_noisy" | "using_killer_during_run",
 ): VisibleCard {
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const definition = planningCardFactsByDefinitionId(definitionId);
   if (!definition) throw new Error(`Missing test card ${definitionId}`);
   return {
     instanceId,
@@ -1183,7 +1184,7 @@ function recurringCreditPool(
 
 function effectiveQuote(card: VisibleCard) {
   if (!card.definitionId) throw new Error("Missing ICE definition id");
-  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+  const definition = planningCardFactsByDefinitionId(card.definitionId);
   if (!definition || definition.type !== "ice") {
     throw new Error(`Missing ICE definition ${card.definitionId}`);
   }
@@ -1198,13 +1199,13 @@ function effectiveQuote(card: VisibleCard) {
 }
 
 describe("irrelevant unresolved random breaker strength", () => {
-  it.each(["onr_v1_002_ai-boon", "onr_proteus_087_forwards-legacy"])(
+  it.each([214, 145])(
     "certifies a Wall/Gate path independently of %s strength",
     (definitionId) => {
       const assessment = assessCorpScoreProtection({
         serverIce: [
-          ice("wall", "onr_v1_279_wall-of-static"),
-          ice("gate", "onr_v1_261_quandary"),
+          ice("wall", 491),
+          ice("gate", 473),
         ],
         runnerRig: [runnerProgram("random", definitionId)],
         runnerCredits: 20,
@@ -1222,13 +1223,13 @@ describe("irrelevant unresolved random breaker strength", () => {
     (credits) => {
       const assessment = assessCorpScoreProtection({
         serverIce: [
-          ice("wall", "onr_v1_279_wall-of-static"),
-          ice("gate", "onr_v1_261_quandary"),
+          ice("wall", 491),
+          ice("gate", 473),
         ],
         runnerRig: [
-          runnerProgram("boon", "onr_v1_002_ai-boon"),
-          runnerProgram("dwarf", "onr_v1_021_dwarf"),
-          runnerProgram("cyfer", "onr_v1_016_cyfermaster"),
+          runnerProgram("boon", 214),
+          runnerProgram("dwarf", 233),
+          runnerProgram("cyfer", 228),
         ],
         runnerCredits: credits,
         maximumRunnerAccessSuccessProbability: QUARTER,
@@ -1245,7 +1246,7 @@ describe("irrelevant unresolved random breaker strength", () => {
   it("keeps an unknown ICE path unknown", () => {
     const assessment = assessCorpScoreProtection({
       serverIce: [{ instanceId: "unknown", known: false, rezzed: true }],
-      runnerRig: [runnerProgram("boon", "onr_v1_002_ai-boon")],
+      runnerRig: [runnerProgram("boon", 214)],
       runnerCredits: 20,
       maximumRunnerAccessSuccessProbability: QUARTER,
     });
@@ -1253,12 +1254,12 @@ describe("irrelevant unresolved random breaker strength", () => {
   });
   it("does not require a future random roll for an irrelevant publicly prepared breaker", () => {
     const staged = {
-      ...runnerProgram("boon", "onr_v1_002_ai-boon"),
+      ...runnerProgram("boon", 214),
       memoryCost: 1,
       counters: { shell: 1 },
     };
     const assessment = assessCorpScoreProtection({
-      serverIce: [ice("wall", "onr_v1_279_wall-of-static")],
+      serverIce: [ice("wall", 491)],
       runnerRig: [shellTraders()],
       runnerSetAside: [staged],
       runnerMemoryUsed: 0,
@@ -1275,9 +1276,9 @@ describe("irrelevant unresolved random breaker strength", () => {
 });
 
 it("shares the irrelevant-strength proof with a single-subroutine certificate", () => {
-  const wall = ice("wall", "onr_v1_279_wall-of-static");
+  const wall = ice("wall", 491);
   wall.effectiveRunQuote = effectiveQuote(wall);
-  const boon = runnerProgram("boon", "onr_v1_002_ai-boon");
+  const boon = runnerProgram("boon", 214);
   expect(
     corpVisibleSingleSubroutineIsUnbreakable({
       ice: wall,
@@ -1288,7 +1289,7 @@ it("shares the irrelevant-strength proof with a single-subroutine certificate", 
   expect(
     corpVisibleSingleSubroutineIsUnbreakable({
       ice: wall,
-      runnerRig: [boon, runnerProgram("dwarf", "onr_v1_021_dwarf")],
+      runnerRig: [boon, runnerProgram("dwarf", 233)],
       runnerCredits: 1,
     }),
   ).toBe(false);

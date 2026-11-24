@@ -2,9 +2,10 @@ import { readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { format } from "prettier";
+import type { CardDefinitionId } from "@netgrid/shared";
 
 type HintRecord = {
-  cardId: string;
+  cardId: CardDefinitionId;
   hint: unknown;
 };
 
@@ -41,7 +42,7 @@ for (const goldenPath of goldenPaths) {
       }
       return { cardId: generated.cardId, hint: generated.hint };
     })
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+    .sort((left, right) => left.cardId - right.cardId);
   if (cards.length !== reviewed.cards.length) {
     throw new Error(`${goldenPath}: reviewed partition size changed`);
   }

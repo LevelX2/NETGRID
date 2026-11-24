@@ -1,3 +1,4 @@
+import type { ActionAbilityIdentity } from "./action-semantic-candidate-types";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
 
 export type SemanticActionSignature = {
@@ -5,8 +6,8 @@ export type SemanticActionSignature = {
   actionType: string;
   semanticActionType: string;
   sourceKind: string;
-  sourceDefinitionId?: string;
-  abilityId?: string;
+  sourceDefinitionId?: number;
+  abilityId?: ActionAbilityIdentity;
   targetIdentity: string;
   costClass: string;
   timingClass: string;
@@ -19,8 +20,8 @@ export type SemanticActionSignatureInput = {
   actionType: string;
   semanticActionType?: string;
   sourceKind?: string;
-  sourceDefinitionId?: string;
-  abilityId?: string;
+  sourceDefinitionId?: number;
+  abilityId?: ActionAbilityIdentity;
   targetIdentity?: string;
   costClass?: string;
   timingClass?: string;
@@ -46,9 +47,18 @@ export function semanticActionSignatureFromCandidate(
   candidate: ActionSemanticCandidate,
 ): SemanticActionSignature {
   const serverId = candidate.runProjectionSummary?.serverId;
-  const choiceOptionId = candidate.targetContext?.selectedTargets.find(
+  const targetContext = candidate.targetContext;
+  const selectedTargets = targetContext?.selectedTargets ?? [];
+  const choiceOptions = selectedTargets.filter(
     (target) => target.targetKind === "choice",
-  )?.targetId;
+  );
+  const choiceOptionId =
+    choiceOptions.length === 1 ? choiceOptions[0]?.targetId : undefined;
+  const selectedIdentity =
+    selectedTargets.length > 1
+      ? "selected_targets:" +
+        JSON.stringify(selectedTargets.map(({ targetId }) => targetId))
+      : selectedTargets[0]?.targetId;
   return buildSemanticActionSignature({
     actionType: candidate.actionType,
     semanticActionType: candidate.semanticActionType,
@@ -58,16 +68,18 @@ export function semanticActionSignatureFromCandidate(
       : {}),
     ...(candidate.abilityId ? { abilityId: candidate.abilityId } : {}),
     targetIdentity:
-      candidate.targetContext === undefined
+      targetContext === undefined
         ? "none"
-        : candidate.targetContext.hiddenInfoPolicy === "hidden_info_blocked"
+        : targetContext.hiddenInfoPolicy === "hidden_info_blocked"
           ? "unknown_hidden_blocked"
-          : (candidate.targetContext.selectedTargets[0]?.targetId ??
-            "target_context_unresolved"),
+          : (selectedIdentity ?? "target_context_unresolved"),
     costClass: costClassFromCandidate(candidate),
     timingClass: timingClassFromCandidate(candidate),
     ...(serverId ? { serverId } : {}),
-    ...(choiceOptionId ? { choiceOptionId } : {}),
+    ...(choiceOptionId &&
+    targetContext?.hiddenInfoPolicy !== "hidden_info_blocked"
+      ? { choiceOptionId }
+      : {}),
   });
 }
 
@@ -124,9 +136,9 @@ function sanitizeSignatureInput(
   > {
   if (!signatureInputIsRedactionSafe(input)) {
     return {
-      actionType: input.actionType,
-      semanticActionType: input.semanticActionType ?? "unknown",
-      sourceKind: input.sourceKind ?? "unknown",
+      actionType: redactedSignatureLabel(input.actionType),
+      semanticActionType: redactedSignatureLabel(input.semanticActionType),
+      sourceKind: redactedSignatureLabel(input.sourceKind),
       targetIdentity: "unknown_hidden_blocked",
       costClass: "hidden_blocked",
       timingClass: "hidden_blocked",
@@ -146,6 +158,12 @@ function sanitizeSignatureInput(
     ...(input.serverId ? { serverId: input.serverId } : {}),
     ...(input.choiceOptionId ? { choiceOptionId: input.choiceOptionId } : {}),
   };
+}
+
+function redactedSignatureLabel(label: string | undefined): string {
+  return label !== undefined && !signatureInputContainsHiddenInfoMarker(label)
+    ? label
+    : "unknown";
 }
 
 function costClassFromCandidate(candidate: ActionSemanticCandidate): string {

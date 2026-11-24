@@ -1,10 +1,15 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import {
+  parseRunIdToken,
+  parseTraceIdToken,
   type CardDefinition,
   type CardInstanceId,
   type CorpServer,
   type GameState,
   type LegalAction,
   type PlayerAction,
+  type RunId,
+  type TraceId,
   type ServerId,
   type SubroutineDefinition,
 } from "@netgrid/shared";
@@ -15,30 +20,31 @@ import {
   resolveRunDurationMarkerSubroutine,
 } from "./encounter-resolution";
 import { credits } from "../state/economy-mutation";
+import { effectiveIceRunSubroutines } from "./effective-ice-run-subroutines";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type DeflectorTarget = NonNullable<SubroutineDefinition["deflectorTarget"]>;
 type SourceMetadata = {
   sourceCardId?: CardInstanceId;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   iceId?: CardInstanceId;
   subroutineId: string;
 };
 type ClassicDeflectorChoiceContext = {
-  runId: string;
+  runId: RunId;
   sourceIceId: CardInstanceId;
   subroutineIndex: number;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   subroutineId: string;
   target: DeflectorTarget;
   cost: number;
   autoBreakIfNoTarget: boolean;
 };
 type TrashProgramChoiceContext = {
-  runId: string;
+  continuationId: RunId | TraceId;
   sourceIceId: CardInstanceId;
   subroutineIndex: number;
-  sourceDefinitionId: string;
+  sourceDefinitionId: number;
   subroutineId: string;
   subroutineType:
     | "initiate_trace"
@@ -112,7 +118,7 @@ export type EncounterPrintedNonTraceEffectResult = {
   handled: boolean;
   suspended?: boolean;
   sourceCardId?: CardInstanceId | undefined;
-  sourceDefinitionId?: string | undefined;
+  sourceDefinitionId?: number | undefined;
   iceId?: CardInstanceId | undefined;
   subroutineId?: string | undefined;
   runShouldEnd?: boolean;
@@ -629,7 +635,7 @@ function startClassicDeflectorChoice(
 export function applyClassicDeflectorRedirect(
   host: EncounterPrintedNonTraceHost,
   input: {
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     targetServerId: Exclude<ServerId, "new_remote">;
     legalAction?: LegalAction | undefined;
     paidCredits: number;
@@ -773,15 +779,22 @@ function parseClassicDeflectorChoiceSource(
     throw new Error("Deflector-Choice-Quelle ist ungueltig.");
   const subroutineIndex = Number(indexRaw);
   const cost = Number(costRaw ?? "0");
+  const runId = parseRunIdToken(decodeURIComponent(encodedRunId));
+  if (runId === undefined) throw new Error("Deflector-Runbindung ist ungültig.");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    decodeURIComponent(encodedSourceDefinitionId),
+  );
+  if (sourceDefinitionId === undefined)
+    throw new Error("Deflector-Quelldefinition ist ungültig.");
   if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
     throw new Error("Deflector-Subroutine-Index ist ungueltig.");
   if (!Number.isInteger(cost) || cost < 0)
     throw new Error("Deflector-Kosten sind ungueltig.");
   return {
-    runId: decodeURIComponent(encodedRunId),
+    runId,
     sourceIceId: decodeURIComponent(encodedSourceIceId) as CardInstanceId,
     subroutineIndex,
-    sourceDefinitionId: decodeURIComponent(encodedSourceDefinitionId),
+    sourceDefinitionId,
     subroutineId: decodeURIComponent(encodedSubroutineId),
     target: targetRaw,
     cost,
@@ -907,14 +920,14 @@ export function resolveTrashProgramChoice(
   if (context.continuation === "encounter") {
     const run = mustRun(host.state);
     if (
-      run.runId !== context.runId ||
+      run.runId !== context.continuationId ||
       run.encounteredIceId !== context.sourceIceId
     )
       throw new Error(
         "Die Programmtrash-Choice passt nicht mehr zum Encounter.",
       );
   } else if (
-    host.state.trace?.traceId !== context.runId ||
+    host.state.trace?.traceId !== context.continuationId ||
     host.state.trace.sourceCardInstanceId !== context.sourceIceId
   ) {
     throw new Error("Die Programmtrash-Choice passt nicht mehr zum Trace.");
@@ -937,7 +950,11 @@ export function resolveTrashProgramChoice(
   const sourceDefinition = host.cards.definitionFor(context.sourceIceId);
   if (sourceDefinition.id !== context.sourceDefinitionId)
     throw new Error("Die Programmtrash-Choice-Quelle passt nicht mehr.");
-  const subroutine = sourceDefinition.subroutines?.find(
+  const subroutine = effectiveIceRunSubroutines(
+    host.state,
+    context.sourceIceId,
+    sourceDefinition,
+  ).find(
     (candidate) =>
       candidate.id === context.subroutineId &&
       candidate.type === context.subroutineType,
@@ -1051,7 +1068,7 @@ function startTrashProgramChoice(
     choiceId,
     side: "corp",
     source: trashProgramChoiceSource({
-      runId: continuationId,
+      continuationId,
       sourceIceId,
       subroutineIndex: input.subroutineIndex,
       sourceDefinitionId: input.definition.id,
@@ -1086,7 +1103,7 @@ function startTrashProgramChoice(
 function trashProgramChoiceSource(context: TrashProgramChoiceContext): string {
   return [
     TRASH_PROGRAM_CHOICE_SOURCE_PREFIX,
-    encodeURIComponent(context.runId),
+    encodeURIComponent(context.continuationId),
     encodeURIComponent(context.sourceIceId),
     context.subroutineIndex,
     encodeURIComponent(context.sourceDefinitionId),
@@ -1101,14 +1118,19 @@ function parseTrashProgramChoiceSource(
 ): TrashProgramChoiceContext {
   const [
     prefix,
-    runId,
+    continuationIdToken,
     sourceIceId,
     index,
-    sourceDefinitionId,
+    sourceDefinitionIdToken,
     subroutineId,
     subroutineType,
     continuation,
   ] = source.split(":");
+  const sourceDefinitionId = parseCardDefinitionIdToken(
+    decodeURIComponent(sourceDefinitionIdToken ?? ""),
+  );
+  if (sourceDefinitionId === undefined)
+    throw new Error("Programmtrash-Quelldefinition ist ungültig.");
   if (prefix !== TRASH_PROGRAM_CHOICE_SOURCE_PREFIX)
     throw new Error("Programmtrash-Choice-Quelle ist ungültig.");
   const subroutineIndex = Number(index);
@@ -1131,11 +1153,16 @@ function parseTrashProgramChoiceSource(
     | "initiate_trace"
     | "trash_installed_program"
     | "trash_installed_program_unless_runner_pays";
+  const decoded = decodeURIComponent(continuationIdToken ?? "");
+  const continuationId =
+    continuation === "encounter" ? parseRunIdToken(decoded) : parseTraceIdToken(decoded);
+  if (continuationId === undefined)
+    throw new Error("Programmtrash-Fortsetzungsbindung ist ungültig.");
   return {
-    runId: decodeURIComponent(runId ?? ""),
+    continuationId,
     sourceIceId: decodeURIComponent(sourceIceId ?? "") as CardInstanceId,
     subroutineIndex,
-    sourceDefinitionId: decodeURIComponent(sourceDefinitionId ?? ""),
+    sourceDefinitionId,
     subroutineId: decodeURIComponent(subroutineId ?? ""),
     subroutineType: parsedSubroutineType,
     continuation,

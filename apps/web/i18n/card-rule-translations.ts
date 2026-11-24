@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import { isAppLocale, type AppLocale } from "./locale";
 
 import classicDe from "./card-rule-translations/classic.de.json";
@@ -51,7 +52,7 @@ export function cardRuleTranslationCoverage(): Readonly<
 }
 
 function translatedRulesText(
-  definitionId: string,
+  definitionId: CardDefinitionId,
   locale: CardRuleTranslationLocale,
 ): string | undefined {
   return CARD_RULE_TRANSLATION_CATALOGS[locale][definitionId];
@@ -63,7 +64,7 @@ export function tooltipCardRulesText({
   locale,
   translateToSelectedLanguage,
 }: {
-  definitionId: string | null | undefined;
+  definitionId: CardDefinitionId | null | undefined;
   englishRulesText: string;
   locale: unknown;
   translateToSelectedLanguage: boolean;

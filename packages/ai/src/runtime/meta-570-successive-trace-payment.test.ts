@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -36,6 +37,8 @@ it("retains the contest owner through rez, two mandatory traces and the selected
   ).toBe(true);
   let state: GameState = saved.state;
   const initial = state;
+  if (!initial.run) throw new Error("Missing the native run at the checkpoint.");
+  const runExecutor = planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${initial.run.runId}` });
   const actions: string[] = [];
   const bids: string[][] = [];
   let support = 0;
@@ -67,8 +70,8 @@ it("retains the contest owner through rez, two mandatory traces and the selected
       expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
         stateVersion: 182,
         pendingRunnerCostPenaltySupportOrigin: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-          executorInstanceId: "plan:runner.convert_run_window:run%3Arun_173",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+          executorInstanceId: runExecutor,
           originalActionId: a.actionId,
           selectedAtStateVersion: 182,
         },
@@ -77,8 +80,8 @@ it("retains the contest owner through rez, two mandatory traces and the selected
       support++;
       expect(d.decisionDebug?.planFirstDecision?.executionOrigin).toMatchObject(
         {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-          leafPlanInstanceId: "plan:runner.convert_run_window:run%3Arun_173",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+          leafPlanInstanceId: runExecutor,
         },
       );
     }
@@ -108,7 +111,7 @@ it("retains the contest owner through rez, two mandatory traces and the selected
   expect(getPlayerView(state, "runner").own.tags).toBe(0);
   expect(
     getPlayerView(state, "runner").own.rig?.some(
-      (c) => c.definitionId === "onr_proteus_133_chiba-bank-account",
+      (c) => c.definitionId === 191,
     ),
   ).toBe(false);
   expect(actions).toContain("access_card");
@@ -134,7 +137,7 @@ it.each(["gap", "wrong_server", "wrong_run", "foreign_executor"] as const)(
       input.eventTail.find(
         (e: any) => e.stateVersionBefore === 181,
       ).publicPayload.serverId = "rd";
-    if (boundary === "wrong_run") input.playerView.run.runId = "different_run";
+    if (boundary === "wrong_run") input.playerView.run.runId += 1;
     if (boundary === "foreign_executor")
       p.instances.find(
         (x: any) => x.instanceId === p.executorInstanceId,
@@ -203,7 +206,7 @@ it.each([
   if (boundary === "missing_completion")
     delete event.publicPayload.traceSuccessful;
   if (boundary === "wrong_trace")
-    event.publicPayload.traceId = "foreign_run.ice.trace";
+    event.publicPayload.traceSourceRunId = 1;
   if (boundary === "wrong_choice")
     event.publicPayload.choiceId = "foreign_choice";
   if (boundary === "wrong_step") event.publicPayload.traceStep = "corp_bid";

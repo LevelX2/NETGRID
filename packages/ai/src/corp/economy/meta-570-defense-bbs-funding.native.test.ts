@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -45,7 +46,7 @@ it("funds the native next-runner HQ reserve through free setup without delaying 
   };
   expect(Object.values(saved.validation).every(Boolean)).toBe(true);
   let current = structuredClone(saved.engineState);
-  const parent = "plan:corp.defend_servers:server-defense-portfolio";
+  const parent = "penw02zfrkklof54c2nuye5att";
   for (const [index, type] of [
     "install_card",
     "rez_card",
@@ -74,7 +75,7 @@ it("funds the native next-runner HQ reserve through free setup without delaying 
     expect(JSON.stringify(input)).toBe(before);
     expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
     expect(action.type).toBe(type);
-    expect(action.source).toContain("bbs-whispering-campaign");
+    expect(referencesDefaultDeckCard(action.source, 521)).toBe(true);
     if (index < 3)
       expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
         rootPlanInstanceId: parent,
@@ -141,14 +142,19 @@ it.each([
       .map((i) => (i.moduleState as EconomyState).signal);
     const signal = structuredClone(
       signals.find(
-        (s) => s.kind === "parent_funding" && s.freeRezPayoutPreparation,
+        (s) =>
+          s.kind === "parent_funding" &&
+          s.fundingRouteAssessment?.freeRezPayoutPreparation,
       ),
     ) as CorpEconomyParentFundingSignal;
-    expect(signal.freeRezPayoutPreparation).toBeDefined();
+    expect(
+      signal.fundingRouteAssessment?.freeRezPayoutPreparation,
+    ).toBeDefined();
     const campaigns = signals.filter(
       (s): s is CorpEconomyDevelopmentSignal => s.kind === "develop_campaign",
     );
-    const head = signal.freeRezPayoutPreparation!.actionId;
+    const head =
+      signal.fundingRouteAssessment!.freeRezPayoutPreparation!.actionId;
     if (change === "two_clicks") input.playerView.own.clicks = 2;
     if (change === "near_target") {
       signal.gap = 1;
@@ -173,7 +179,8 @@ it.each([
         input,
         candidates,
         signal,
-        signal.freeRezPayoutPreparation!.basicFundingActionId,
+        signal.fundingRouteAssessment!.freeRezPayoutPreparation!
+          .basicFundingActionId,
         campaigns,
       ),
     ).toBeUndefined();

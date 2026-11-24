@@ -1,10 +1,17 @@
-import { type LegalAction } from "@netgrid/shared";
+import type { LegalAction } from "@netgrid/shared";
 
 export function corpInstalledEconomyCreditAmount(action: LegalAction): number {
-  const payloadAmount = Math.max(
-    Number(action.payload?.gainCreditsAmount ?? 0),
-    Number(action.payload?.cardImplementationCreditAmount ?? 0),
-  );
-  if (Number.isFinite(payloadAmount) && payloadAmount > 0) return payloadAmount;
-  return 0;
+  const { gainCreditsAmount, cardImplementationCreditAmount } =
+    action.payload ?? {};
+  const presentAmounts = [
+    gainCreditsAmount,
+    cardImplementationCreditAmount,
+  ].filter((amount) => amount !== undefined);
+  const [amount] = presentAmounts;
+  return typeof amount === "number" &&
+    Number.isSafeInteger(amount) &&
+    amount > 0 &&
+    presentAmounts.every((quoted) => quoted === amount)
+    ? amount
+    : 0;
 }

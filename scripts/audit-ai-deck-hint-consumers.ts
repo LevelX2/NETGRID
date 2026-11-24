@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import type { CardDefinitionId } from "@netgrid/shared";
 
 import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../packages/ai/src/ai-hints";
 import { buildActionSemanticCandidates } from "../packages/ai/src/action-semantic-candidate";
@@ -17,7 +18,7 @@ type JsonRecord = Record<string, unknown>;
 
 type Finding = {
   kind: string;
-  cardId?: string;
+  cardId?: CardDefinitionId;
   [key: string]: unknown;
 };
 
@@ -25,12 +26,9 @@ const FIELD_CONSUMER_CONTRACTS: Readonly<Record<string, readonly string[]>> = {
   actionCapacityProfiles: [
     "action-card-semantic-profiles",
     "legal-action-capacity-contract",
-    "action-capacity-runtime-scoring",
+    "action-capacity-route",
   ],
-  actionStrategySupportPairs: [
-    "action-card-semantic-profiles",
-    "strategic-action-fit",
-  ],
+  actionStrategySupportPairs: ["action-card-semantic-profiles"],
   actionTacticSignals: [
     "action-card-semantic-profiles",
     "semantic-runtime-scoring",
@@ -324,7 +322,7 @@ process.stdout.write(serialized);
 if (blockingFindings.length > 0) process.exitCode = 1;
 
 function inspectImplementationContract(
-  cardId: string,
+  cardId: CardDefinitionId,
   hint: JsonRecord | undefined,
   implementation: JsonRecord | undefined,
   findings: Finding[],

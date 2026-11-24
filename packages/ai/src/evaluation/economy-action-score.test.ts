@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type {
@@ -28,10 +29,10 @@ describe("common economy action score", () => {
     const reserve = demand("reserve", "phase_reserve", 8);
     const basic = candidate("basic", 1);
     const bbs = candidate("bbs", 2, {
-      sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      sourceDefinitionId: 521,
     });
     const coup = candidate("coup", 3, {
-      sourceDefinitionId: "onr_v1_193_corporate-coup",
+      sourceDefinitionId: 405,
     });
 
     expect(
@@ -89,15 +90,15 @@ describe("common economy action score", () => {
       kind: "stored_credit_build",
       timing: "setup",
       storedCreditsAdded: 3,
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
     });
     const cashout = candidate("broker-cashout", 6, {
       payoutMode: "all_available",
-      sourceDefinitionId: "onr_v1_154_broker",
+      sourceDefinitionId: 366,
       effectTargets: ["economy.bank_cashout_all"],
     });
     const coup = candidate("coup", 3, {
-      sourceDefinitionId: "onr_v1_193_corporate-coup",
+      sourceDefinitionId: 405,
     });
 
     expect(
@@ -134,10 +135,10 @@ describe("common economy action score", () => {
   it("marks +1 and +2 pure payouts dominated by a comparable +3 payout", () => {
     const basic = candidate("basic", 1);
     const bbs = candidate("bbs", 2, {
-      sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      sourceDefinitionId: 521,
     });
     const coup = candidate("coup", 3, {
-      sourceDefinitionId: "onr_v1_193_corporate-coup",
+      sourceDefinitionId: 405,
     });
 
     expect(dominatedEconomyActionIds([basic, bbs, coup])).toEqual(
@@ -152,11 +153,11 @@ describe("common economy action score", () => {
 
   it("classifies a finite source pool from action semantics instead of card id", () => {
     const finite = candidate("generic-finite-pool", 2, {
-      sourceDefinitionId: "unseen-future-card",
+      sourceDefinitionId: syntheticCardDefinitionId("unseen-future-card"),
       sourcePool: "finite",
     });
     const ordinary = candidate("ordinary-payout", 2, {
-      sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      sourceDefinitionId: 521,
     });
 
     expect(economyActionMode(finite)).toBe("fixed_pool_payout");
@@ -176,6 +177,23 @@ describe("common economy action score", () => {
       dominatedActionId: "pure",
       creditAdvantage: 1,
     });
+  });
+
+  it("does not use conditional receipts to fund an immediate demand or dominate another route", () => {
+    const demandEntry = demand("acute", "acute_hard_plan_blocker", 3);
+    const uncertain = candidate("conditional", 3, {
+      reliability: "conditional",
+    });
+
+    expect(
+      scoreEconomyAction(uncertain, [demandEntry]).demandId,
+    ).toBeUndefined();
+    expect(
+      compareEconomyActionDominance(
+        uncertain,
+        candidate("other-conditional", 2, { reliability: "conditional" }),
+      ),
+    ).toBeUndefined();
   });
 
   it("does not claim dominance when net hand effects differ", () => {
@@ -212,7 +230,7 @@ function candidate(
   actionId: string,
   gain: number,
   overrides: Partial<ActionEconomyProjection> & {
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: number;
     effectTargets?: string[];
   } = {},
 ): ActionSemanticCandidate {

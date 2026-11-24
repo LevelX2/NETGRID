@@ -16,7 +16,7 @@
     "lint": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "build": "node ../../scripts/generate-card-spec-import-index.mjs --check && tsc -p tsconfig.json --noEmit"
+    "build": "node ../../scripts/generate-card-spec-import-index.mjs --check && node --import tsx ../../scripts/generate-card-capability-ids.mjs --check && tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@netgrid/shared": "workspace:*"

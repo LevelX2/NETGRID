@@ -12,10 +12,10 @@ import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
 describe("plan instance identity and orthogonal states", () => {
   it("instantiates a proposal without persisted priority or active lifecycle", () => {
     const proposal = readyRunnerProposal();
-    const instance = instantiatePlanProposal(proposal, 12.9);
+    const instance = instantiatePlanProposal(proposal, 12);
 
     expect(instance).toMatchObject({
-      instanceId: "plan:runner.economy:neutral_credit",
+      instanceId: "p3y8akwutpkfukc2ikuk2ue9vw",
       dedupeKey: "neutral_credit",
       moduleId: "runner.economy",
       moduleVersion: "1",
@@ -30,6 +30,39 @@ describe("plan instance identity and orthogonal states", () => {
     expect(instance.evidenceRefs).toEqual([
       { code: "credits_below_floor", source: "visible_state" },
     ]);
+  });
+
+  it("rejects invalid Engine state versions and retention bounds", () => {
+    const proposal = readyRunnerProposal();
+    expect(() => instantiatePlanProposal(proposal, 12.9)).toThrowError(
+      expect.objectContaining({
+        code: "invalid_plan_identity",
+        context: expect.objectContaining({
+          removalCondition: expect.stringContaining(
+            "invalid_state_version_order",
+          ),
+        }),
+      }),
+    );
+    expect(() =>
+      instantiatePlanProposal(
+        {
+          ...proposal,
+          retentionPolicy: {
+            ...proposal.retentionPolicy,
+            blockedStateVersionTtl: Number.NaN,
+          },
+        },
+        12,
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "invalid_plan_identity",
+        context: expect.objectContaining({
+          removalCondition: expect.stringContaining("invalid_retention_policy"),
+        }),
+      }),
+    );
   });
 
   it("rejects duplicate proposals instead of silently recreating a plan", () => {
@@ -72,8 +105,41 @@ describe("plan instance identity and orthogonal states", () => {
     );
   });
 
+  it("rejects a restored identity bound to another objective", () => {
+    const first = instantiatePlanProposal(readyRunnerProposal(), 12);
+    const second = instantiatePlanProposal(
+      {
+        ...readyRunnerProposal(),
+        dedupeKey: "different-credit-objective",
+      },
+      12,
+    );
+    expect(() =>
+      assertValidPlanInstance({ ...first, instanceId: second.instanceId }),
+    ).toThrowError(expect.objectContaining({ code: "invalid_plan_identity" }));
+    expect(() =>
+      assertValidPlanInstance(JSON.parse(JSON.stringify(first))),
+    ).not.toThrow();
+  });
+
+  it("reports a missing persisted dedupe key as a structured identity failure", () => {
+    const malformed = { ...instantiatePlanProposal(readyRunnerProposal(), 12) };
+    Reflect.deleteProperty(malformed, "dedupeKey");
+    expect(() => assertValidPlanInstance(malformed)).toThrowError(
+      expect.objectContaining({ code: "invalid_plan_identity" }),
+    );
+  });
+
+  it("rejects a partial lifecycle instead of accepting a canonical reference alone", () => {
+    const malformed = { ...instantiatePlanProposal(readyRunnerProposal(), 12) };
+    Reflect.deleteProperty(malformed, "progress");
+    expect(() => assertValidPlanInstance(malformed)).toThrowError(
+      expect.objectContaining({ code: "invalid_plan_identity" }),
+    );
+  });
+
   it("persists an exact parent need edge and rejects an orphan need edge", () => {
-    const parentInstanceId = "plan:corp.score_agenda:general";
+    const parentInstanceId = "pa1d7j8c33k25iup8n8nyo9r2g";
     const proposal: PlanProposal = {
       ...readyRunnerProposal(),
       parentInstanceId,

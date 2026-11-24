@@ -8,7 +8,10 @@ import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { corpDefenseSignalReservesActionWindow } from "../defense/corp-funded-continuation-window";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { uniqueBy } from "../../runtime/collection";
-import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-draw-action-facts";
+import {
+  corpCandidatePreservesVoluntaryDrawHorizon,
+  exactCurrentBasicCorpDrawCandidate,
+} from "../../runtime/corp-draw-action-facts";
 import { turnKey } from "../../runtime/runtime-identifiers";
 import { corpHostedBankCycleDevelopment } from "./hosted-credit-bank-cycle";
 import { corpHostedBankInvestments } from "./hosted-credit-bank-investment";
@@ -27,8 +30,10 @@ import {
   corpImmediateOperationThresholdPreparations,
   corpOptionalActionCapacityConversions,
   corpRequiredEconomyNeeds,
+  corpReservedCampaignNextTurnClicks,
   corpVisibleCardEconomyWithdrawals,
 } from "./economy-signals";
+import { compareCorpScoreProtectionDrawWithCurrentPool } from "./score-funding-before-draw";
 
 export function corpEconomyFundingActionIds(
   input: AiDecisionInput,
@@ -79,6 +84,25 @@ export function buildCorpEconomySignals({
   currentTurnKey: string;
   deferredLastClickScoreProject: CorpScoreProjectSignal | undefined;
 }): CorpCorePlanDomain["economyNeeds"] {
+  const basicDraw = candidates.find((candidate) =>
+    exactCurrentBasicCorpDrawCandidate(input, candidate),
+  );
+  const comparedDraws =
+    basicDraw && input.playerView.own.gripOrHq.length >= 4
+      ? defenseNeeds.flatMap((need) =>
+          need.kind === "score_protection_draw" &&
+          need.delegatedPriorityClass === "P4" &&
+          need.actionId === basicDraw.actionId
+            ? [need]
+            : [],
+        )
+      : [];
+  const comparedDrawsByFundingNeed = new Map(
+    comparedDraws.map((need) => [
+      `score-support:${need.parentProjectId}`,
+      need,
+    ]),
+  );
   const requiredEconomyNeeds = corpRequiredEconomyNeeds(
     input,
     scoreProjects,
@@ -89,13 +113,17 @@ export function buildCorpEconomySignals({
     immediateFundingActionIds,
     terminalFundingActionIds,
     candidates,
+    new Set(comparedDraws.map((need) => need.defenseId)),
+  );
+  const undisputedRequiredNeeds = requiredEconomyNeeds.filter(
+    (need) => !comparedDrawsByFundingNeed.has(need.needId),
   );
   const operationThresholdPreparations =
     corpImmediateOperationThresholdPreparations(input, candidates);
   const bankInvestments = corpHostedBankInvestments(
     input,
     candidates,
-    requiredEconomyNeeds,
+    undisputedRequiredNeeds,
     {
       centralAllocation: centralDefenseAllocation,
       scoreProjects,
@@ -157,7 +185,18 @@ export function buildCorpEconomySignals({
       ...(turnLiquidityDevelopment ? [turnLiquidityDevelopment] : []),
       ...operationThresholdPreparations,
       ...corpImmediateOperationEconomyConversions(input, candidates),
-      ...corpVisibleCardEconomyWithdrawals(input, candidates).filter(
+      ...corpVisibleCardEconomyWithdrawals(input, candidates, {
+        slotReleaseActionIds: new Set(
+          scoreProjects.flatMap((project) =>
+            project.campaignSlotRelease?.stateVersion ===
+            input.playerView.stateVersion
+              ? [project.campaignSlotRelease.payoutActionId]
+              : [],
+          ),
+        ),
+        reservedNextTurnClicks:
+          corpReservedCampaignNextTurnClicks(scoreProjects),
+      }).filter(
         (signal) =>
           bankInvestments.get(signal.sourceInstanceId)?.shouldCashout !==
             false ||
@@ -169,7 +208,12 @@ export function buildCorpEconomySignals({
           }),
       ),
       ...corpOptionalActionCapacityConversions(input, candidates),
-      ...corpEconomyDevelopmentCampaigns(input, candidates, scoreProjects),
+      ...corpEconomyDevelopmentCampaigns(
+        input,
+        candidates,
+        scoreProjects,
+        remoteProjects,
+      ),
       ...corpHostedBankCycleDevelopment(input, candidates).filter(
         (signal) => !bankInvestments.has(signal.sourceInstanceId),
       ),
@@ -177,7 +221,7 @@ export function buildCorpEconomySignals({
         ? corpHostedBankRestTurnDevelopment({
             input,
             candidates,
-            requiredNeeds: requiredEconomyNeeds,
+            requiredNeeds: undisputedRequiredNeeds,
             scoreProjects,
             defenseNeeds,
             remoteProjects,
@@ -194,67 +238,78 @@ export function buildCorpEconomySignals({
     (signal) => signal.needId,
   );
   const economyNeeds: CorpCorePlanDomain["economyNeeds"] =
-    unboundEconomyNeeds.map((signal) => {
-      if (signal.kind === "parent_funding" && signal.restrictedCreditFunding)
-        return signal;
-      if (
-        signal.kind === "develop_campaign" ||
-        signal.kind === "convert_immediate_operation" ||
-        signal.kind === "convert_visible_card_payout" ||
-        signal.kind === "prepare_immediate_operation" ||
-        signal.kind === "develop_liquidity" ||
-        signal.kind === "resolve_start_rez_choice" ||
-        signal.kind === "resolve_optional_action_capacity_offer"
-      )
-        return signal;
-      const fundingRouteAssessment = assessCorpEconomyFundingRoute(
-        {
-          input,
-          actionCandidates: candidates,
-          turnKey: turnKey(input),
-        },
-        signal,
-        unboundEconomyNeeds.filter(
-          (s): s is import("./economy-types").CorpEconomyDevelopmentSignal =>
-            s.kind === "develop_campaign",
-        ),
-        {
-          ...(centralDefenseAllocation ? { centralDefenseAllocation } : {}),
-          scoreProjects,
-          remoteProjects,
-          ambushes,
-          punishCampaigns,
-        },
-      );
-      return {
-        ...signal,
-        actionIds: [
-          ...(fundingRouteAssessment.headActionId
-            ? [fundingRouteAssessment.headActionId]
-            : []),
-          ...(signal.kind === "parent_funding"
-            ? (signal.restrictedCreditPreparations ?? []).map(
-                (preparation) => preparation.actionId,
-              )
-            : []),
-        ],
-        fundingRouteAssessment,
-        ...(signal.kind === "parent_funding" &&
-        fundingRouteAssessment.freeRezPayoutPreparation
-          ? {
-              freeRezPayoutPreparation:
-                fundingRouteAssessment.freeRezPayoutPreparation,
-            }
-          : {}),
-        ...(signal.kind === "parent_funding" &&
-        fundingRouteAssessment.hostedCreditBankCycle
-          ? {
-              hostedCreditBankCycle:
-                fundingRouteAssessment.hostedCreditBankCycle,
-            }
-          : {}),
-      };
-    });
+    unboundEconomyNeeds.flatMap<CorpCorePlanDomain["economyNeeds"][number]>(
+      (signal) => {
+        if (signal.kind === "parent_funding" && signal.restrictedCreditFunding)
+          return [signal];
+        if (
+          signal.kind === "develop_campaign" ||
+          signal.kind === "convert_immediate_operation" ||
+          signal.kind === "convert_visible_card_payout" ||
+          signal.kind === "prepare_immediate_operation" ||
+          signal.kind === "develop_liquidity" ||
+          signal.kind === "resolve_start_rez_choice" ||
+          signal.kind === "resolve_optional_action_capacity_offer"
+        )
+          return [signal];
+        const fundingRouteAssessment = assessCorpEconomyFundingRoute(
+          {
+            input,
+            actionCandidates: candidates,
+            turnKey: turnKey(input),
+          },
+          signal,
+          unboundEconomyNeeds.filter(
+            (s): s is import("./economy-types").CorpEconomyDevelopmentSignal =>
+              s.kind === "develop_campaign",
+          ),
+          {
+            ...(centralDefenseAllocation ? { centralDefenseAllocation } : {}),
+            scoreProjects,
+            remoteProjects,
+            ambushes,
+            punishCampaigns,
+          },
+        );
+        const competingDraw = comparedDrawsByFundingNeed.get(signal.needId);
+        if (competingDraw) {
+          const project = scoreProjects.find(
+            (p) => p.projectId === competingDraw.parentProjectId,
+          );
+          if (!project) return [];
+          const deferral = compareCorpScoreProtectionDrawWithCurrentPool({
+            input,
+            project,
+            draw: competingDraw,
+            route: fundingRouteAssessment,
+            economyOffers: unboundEconomyNeeds,
+          });
+          // Keep the draw eligible when the current funding comparison cannot
+          // establish a competing payout.
+          if (!deferral) return [];
+          fundingRouteAssessment.scoreProtectionDrawDeferral = deferral;
+          fundingRouteAssessment.evidence.push(
+            `corp_current_finite_pool_payout_before_draw:${deferral.projectedCurrentCredits}`,
+          );
+        }
+        return [
+          {
+            ...signal,
+            actionIds: [
+              ...(fundingRouteAssessment.headActionId
+                ? [fundingRouteAssessment.headActionId]
+                : []),
+              ...(signal.kind === "parent_funding"
+                ? (signal.restrictedCreditPreparations ?? []).map(
+                    (preparation) => preparation.actionId,
+                  )
+                : []),
+            ],
+            fundingRouteAssessment,
+          },
+        ];
+      },
+    );
   const previousExecutor = previous?.instances.find(
     (instance) => instance.instanceId === previous.executorInstanceId,
   );

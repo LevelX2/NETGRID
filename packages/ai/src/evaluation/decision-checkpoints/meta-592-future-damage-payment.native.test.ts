@@ -3,6 +3,7 @@ import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { buildPlanningStateIdentity } from "../../plans/turn-planning-contracts";
 import { restoreAiRuntimeCheckpoint } from "./runtime-checkpoint";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import { runnerFutureEncounterDamageJackOutAssessment } from "../../runner-damage-threat-assessment";
@@ -52,7 +53,7 @@ it.each([
   const { input } = capture(),
     pool = input.playerView.own.rig[0],
     breaker = input.playerView.own.rig[1],
-    ice = input.playerView.servers.find((s: any) => s.id === "remote_1").ice[0];
+    ice = input.playerView.servers.find((s: any) => s.id === "r1").ice[0];
   if (kind === "spent_pool") {
     pool.counters.bit = 0;
     pool.counterDisplays[0].amount = 0;
@@ -101,6 +102,7 @@ it("continues under the existing owner and wins through seven actual Engine step
                     : origin.corpDeck,
               });
       if (input.playerView.turnSerial !== turn) break;
+      input.planningStateIdentity = buildPlanningStateIdentity(input);
       const before = JSON.stringify(input),
         z = chooseAiAction(input),
         a = getLegalActions(state, side).find((a) => a.actionId === z.actionId);
@@ -133,13 +135,13 @@ it("continues under the existing owner and wins through seven actual Engine step
     });
   }
   expect(proofs[0].steps[0]).toMatchObject({
-    action: "runner.continue_run",
+    action: "r5",
     owner: "runner.convert_run_window",
   });
   expect(proofs[0].steps).toHaveLength(7);
   expect(proofs.map((p) => p.winner)).toEqual(["runner", "runner"]);
   expect(proofs.map((p) => p.points)).toEqual([8, 8]);
   expect(proofs.map((p) => p.credits)).toEqual([1, 1]);
-  expect(proofs[0].hash).toBe("fnv1a:a443d243");
+  expect(proofs[0].hash).toBe("fnv1a:a4425d7f");
   expect(proofs[1].hash).toBe(proofs[0].hash);
 });

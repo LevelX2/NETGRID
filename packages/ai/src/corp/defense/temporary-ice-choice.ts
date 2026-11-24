@@ -1,9 +1,41 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
-type Option = NonNullable<
+type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
->["options"][number];
+>;
+type Option = PendingChoice["options"][number];
+
+export function currentDelayedSuccessChoice(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+) {
+  const source =
+    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:([^:]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceCardId = source?.[1];
+  const serverId = source?.[2];
+  const { stateVersion } = input.playerView;
+  const options = selectableChoiceOptions(choice.options);
+  if (
+    input.side !== "corp" ||
+    !sourceCardId ||
+    !serverId ||
+    source?.[3] !== String(stateVersion) ||
+    input.playerView.run?.attackedServerId !== serverId ||
+    choice.kind !== "select_option" ||
+    choice.visibility !== "hidden_info_barrier" ||
+    choice.minSelections !== 1 ||
+    choice.maxSelections !== 1 ||
+    exactCurrentChoiceAction(input, choice) !== action
+  )
+    return undefined;
+  return { sourceCardId, serverId, options };
+}
 
 /** The caller sorted legal effect-bearing choices by their Engine cost.
  * null is a proved absence of current defense value, not missing information.
@@ -82,7 +114,7 @@ export function preferUnbreakableEquivalentTemporaryIce(
           .filter((a) => a.type === "resolve_choice")
           .map((a) => a.actionId),
         owner: "plan_module",
-        planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        planInstanceId: "penw02zfrkklof54c2nuye5att",
         removalCondition:
           "Provide the current Engine temporary-encounter break quote bound to this option, run, fort and StateVersion.",
       });

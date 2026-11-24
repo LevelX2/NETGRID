@@ -4,7 +4,11 @@ import { CARD_DEFINITIONS_BY_ID } from "@netgrid/engine";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-dreff-future-only.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
+import { resolvePlanBoundCorpDelayedSuccessChoice } from "../../corp/defense/defense-choice-continuation";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
@@ -43,7 +47,7 @@ it("SP-287 binds decline instead of consuming a future-only HQ ICE after success
   });
   const decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "corp.resolve_choice",
+    actionId: "cn",
     fallbackUsed: false,
     selectedChoices: {
       choiceId: choice.choiceId,
@@ -51,9 +55,9 @@ it("SP-287 binds decline instead of consuming a future-only HQ ICE after success
     },
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
         leafExecutorInstanceId:
-          "plan:corp.defend_servers:server-defense-portfolio",
+          "penw02zfrkklof54c2nuye5att",
       },
     },
   });
@@ -66,14 +70,14 @@ it("fails closed on missing current effect facts instead of silently declining",
   expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
 });
 
-it.each<{ definitionId: string; types: SubroutineType[]; useIce: boolean }>([
+it.each<{ definitionId: number; types: SubroutineType[]; useIce: boolean }>([
   {
-    definitionId: "onr_proteus_016_coyote",
+    definitionId: 74,
     types: ["set_run_future_strength_bonus"],
     useIce: false,
   },
   {
-    definitionId: "onr_v1_223_banpei",
+    definitionId: 435,
     types: ["trash_installed_program", "end_the_run"],
     useIce: true,
   },
@@ -114,13 +118,45 @@ it.each<{ definitionId: string; types: SubroutineType[]; useIce: boolean }>([
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
           leafExecutorInstanceId:
-            "plan:corp.defend_servers:server-defense-portfolio",
+            "penw02zfrkklof54c2nuye5att",
         },
       },
     });
     expect(choice).toEqual(choiceBefore);
+  },
+);
+
+it.each(["wrong_timing", "disabled_decline"] as const)(
+  "rejects %s in the Defense continuation before payload binding",
+  (invalidContract) => {
+    const input = fixture();
+    const previous = residentPlanPortfolioSnapshot(input);
+    expect(previous).toBeDefined();
+    if (invalidContract === "wrong_timing") {
+      input.legalActions[0]!.timingPoint = "corp_action.main";
+    } else {
+      input.playerView.pendingChoice!.options.find(
+        (option) => option.id === "decline",
+      )!.selectable = false;
+    }
+    expect(() =>
+      resolvePlanBoundCorpDelayedSuccessChoice(
+        { input, actionCandidates: [], turnKey: "unused" },
+        previous,
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        code: "window_origin_missing",
+        context: expect.objectContaining({
+          owner: "continuation",
+          removalCondition: expect.stringContaining(
+            invalidContract === "wrong_timing" ? "Failed=choice_contract" : "Failed=decline",
+          ),
+        }),
+      }),
+    );
   },
 );
 

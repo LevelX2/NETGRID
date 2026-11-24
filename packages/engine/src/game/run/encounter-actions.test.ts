@@ -22,7 +22,7 @@ import {
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -40,7 +40,7 @@ function instance(
 
 function iceDefinition(options: Partial<CardDefinition> = {}): CardDefinition {
   return {
-    id: "test_sentry_ice",
+    id: 1886536465,
     title: "Test Sentry",
     side: "corp",
     type: "ice",
@@ -53,7 +53,7 @@ function iceDefinition(options: Partial<CardDefinition> = {}): CardDefinition {
 
 function makeState(
   options: {
-    breakerDefinitionId?: string;
+    breakerDefinitionId?: number;
     ice?: CardDefinition;
     runnerCredits?: number;
     encounteredIceId?: CardInstanceId | undefined;
@@ -104,18 +104,15 @@ function makeState(
       ],
     },
     cardInstances: {
-      [breakerId]: instance(
-        breakerId,
-        options.breakerDefinitionId ?? "simple_killer",
-      ),
-      [iceId]: instance(iceId, "test_sentry_ice", {
+      [breakerId]: instance(breakerId, options.breakerDefinitionId ?? 598),
+      [iceId]: instance(iceId, 1886536465, {
         owner: "corp",
         controller: "corp",
         zone: { side: "corp", zone: "serverIce", serverId: "rd" },
       }),
     },
     run: {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       phase: options.runPhase ?? "encounter_ice",
       position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -232,7 +229,7 @@ describe("runner encounter action generation", () => {
           { id: "lock", type: "set_next_encounter_no_break_subroutines" },
         ],
       });
-      const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+      const state = makeState({ breakerDefinitionId: 251, ice });
       state.run!.fatalDamageActiveForEncounter = active;
       state.run!.fatalDamageAmountForEncounter = 3;
       state.run!.brokenSubroutineIndexes = broken;
@@ -246,7 +243,7 @@ describe("runner encounter action generation", () => {
     },
   );
   it.each(
-    ["onr_v1_039_krash", "onr_v1_007_blink"].flatMap((breakerDefinitionId) =>
+    [251, 219].flatMap((breakerDefinitionId) =>
       [0, 1, undefined].map((amount) => ({ breakerDefinitionId, amount })),
     ),
   )(
@@ -291,35 +288,34 @@ describe("runner encounter action generation", () => {
     },
   );
 
-  it.each([
-    "onr_classic_033_superglue",
-    "onr_proteus_106_disgruntled-ice-technician",
-    "onr_v1_046_pattels-virus",
-  ])("retains full-break value from %s", (definitionId) => {
-    const ice = iceDefinition({
-      strength: 0,
-      subroutines: [
-        { id: "damage", type: "do_damage", damageType: "net", amount: 0 },
-      ],
-    });
-    const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
-    state.runner.rig.programs.push("support" as CardInstanceId);
-    state.cardInstances.support = instance("support", definitionId);
-    const definitions = definitionsFor(state, ice);
-    definitions[definitionId] = CARD_DEFINITIONS_BY_ID[definitionId]!;
-    const host = hostFor(state, definitions);
-    expect(
-      buildRunnerEncounterActions(host).legalActions.every(
-        (a) => a.payload?.breakSubroutinePurpose === undefined,
-      ),
-    ).toBe(true);
-  });
+  it.each([37, 164, 258])(
+    "retains full-break value from %s",
+    (definitionId) => {
+      const ice = iceDefinition({
+        strength: 0,
+        subroutines: [
+          { id: "damage", type: "do_damage", damageType: "net", amount: 0 },
+        ],
+      });
+      const state = makeState({ breakerDefinitionId: 251, ice });
+      state.runner.rig.programs.push("support" as CardInstanceId);
+      state.cardInstances.support = instance("support", definitionId);
+      const definitions = definitionsFor(state, ice);
+      definitions[definitionId] = CARD_DEFINITIONS_BY_ID[definitionId]!;
+      const host = hostFor(state, definitions);
+      expect(
+        buildRunnerEncounterActions(host).legalActions.every(
+          (a) => a.payload?.breakSubroutinePurpose === undefined,
+        ),
+      ).toBe(true);
+    },
+  );
 
   it.each([0, 1])(
     "uses the current derived damage with %i outer ICE",
     (outerCount) => {
-      const ice = proteusTestCardDefinition("onr_proteus_021_dog-pile");
-      const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+      const ice = proteusTestCardDefinition(79);
+      const state = makeState({ breakerDefinitionId: 251, ice });
       state.cardInstances.ice_1!.definitionId = ice.id;
       if (outerCount) {
         state.cardInstances.outer = instance("outer", ice.id, {
@@ -400,7 +396,7 @@ describe("runner encounter action generation", () => {
     ]);
     const pump = result.legalActions[0]!;
     expect(pump.actionId).toBe(
-      "runner.pump_breaker.breaker_1.breaker_1.breaker_1.ice_1.simple_killer:simple_killer_pump",
+      "rj.breaker_1.breaker_1.breaker_1.ice_1.701",
     );
     expect(pump.payload).toMatchObject({
       cardId: "breaker_1",
@@ -409,7 +405,7 @@ describe("runner encounter action generation", () => {
       pumpStrengthAmount: 1,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityKey: "simple_killer_pump",
-      cardImplementationAbilityId: "simple_killer:simple_killer_pump",
+      cardImplementationAbilityId: 701,
     });
     expect(pump.payload).not.toHaveProperty("cardImplementationAbilityIndex");
     expect(pump.payload).not.toHaveProperty(
@@ -417,11 +413,11 @@ describe("runner encounter action generation", () => {
     );
     expect(pump.abilityRef).toEqual({
       sourceCardInstanceId: "breaker_1",
-      sourceAbilityId: "simple_killer:simple_killer_pump",
+      sourceAbilityId: 701,
     });
     const breaker = result.legalActions[1]!;
     expect(breaker.actionId).toBe(
-      "runner.break_subroutine.breaker_1.breaker_1.breaker_1.ice_1.0.test_sentry_etr.simple_killer:simple_killer_break_sentry",
+      "r3.breaker_1.breaker_1.breaker_1.ice_1.0.test_sentry_etr.700",
     );
     expect(breaker.costs).toEqual([{ credits: 1 }]);
     expect(breaker.payload).toMatchObject({
@@ -430,24 +426,18 @@ describe("runner encounter action generation", () => {
       iceId: "ice_1",
       subroutineIndex: 0,
       subroutineId: "test_sentry_etr",
-      targetIceDefinitionId: "test_sentry_ice",
+      targetIceDefinitionId: 1886536465,
       targetIceTitle: "Test Sentry",
       breakSubroutineBaseCost: 1,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityKey: "simple_killer_break_sentry",
-      cardImplementationAbilityId: "simple_killer:simple_killer_break_sentry",
+      cardImplementationAbilityId: 700,
     });
     expect(breaker.abilityRef).toEqual({
       sourceCardInstanceId: "breaker_1",
-      sourceAbilityId: "simple_killer:simple_killer_break_sentry",
+      sourceAbilityId: 700,
     });
-    expect(result.legalActions[2]!.payload).toMatchObject({
-      encounterContinue: true,
-      sourceDefinitionId: "test_sentry_ice",
-      unbrokenSubroutineCount: 1,
-      encounterWillEndRun: true,
-      encounterSubroutineIds: "test_sentry_etr",
-    });
+    expect(result.legalActions[2]!).toMatchObject({encounterSubroutineIds: ["test_sentry_etr"], payload: { encounterContinue: true, sourceDefinitionId: 1886536465, unbrokenSubroutineCount: 1, encounterWillEndRun: true }});
     expect(state).toEqual(before);
   });
 
@@ -470,16 +460,11 @@ describe("runner encounter action generation", () => {
     );
 
     expect(continueRun?.label).toBe("Subroutinen auslösen (Run endet)");
-    expect(continueRun?.payload).toMatchObject({
-      encounterContinue: true,
-      encounterWillEndRun: true,
-      encounterSourceWillTrashAtEndOfTurn: true,
-      encounterSubroutineIds: "test_sentry_etr_and_delayed_self_trash",
-    });
+    expect(continueRun).toMatchObject({encounterSubroutineIds: ["test_sentry_etr_and_delayed_self_trash"], payload: { encounterContinue: true, encounterWillEndRun: true, encounterSourceWillTrashAtEndOfTurn: true }});
   });
 
   it("does not offer break or pump actions for an ineligible breaker", () => {
-    const state = makeState({ breakerDefinitionId: "simple_decoder" });
+    const state = makeState({ breakerDefinitionId: 591 });
     const ice = iceDefinition();
 
     const result = buildRunnerEncounterActions(
@@ -494,7 +479,7 @@ describe("runner encounter action generation", () => {
   it("builds Proteus PRO004 simple icebreaker pump and break LegalActions from real Proteus definitions", () => {
     const cases = [
       {
-        definitionId: "onr_proteus_079_big-frackin-gun",
+        definitionId: 137,
         title: "Big Frackin' Gun",
         iceSubtype: "sentry",
         offSubtype: "wall",
@@ -505,7 +490,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_081_boring-bit",
+        definitionId: 139,
         title: "Boring Bit",
         iceSubtype: "wall",
         offSubtype: "sentry",
@@ -515,7 +500,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_083_corrosion",
+        definitionId: 141,
         title: "Corrosion",
         iceSubtype: "wall",
         offSubtype: "sentry",
@@ -525,7 +510,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_093_redecorator",
+        definitionId: 151,
         title: "Redecorator",
         iceSubtype: "sentry",
         offSubtype: "wall",
@@ -536,7 +521,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 1,
       },
       {
-        definitionId: "onr_proteus_095_skeleton-passkeys",
+        definitionId: 153,
         title: "Skeleton Passkeys",
         iceSubtype: "code_gate",
         offSubtype: "wall",
@@ -546,7 +531,7 @@ describe("runner encounter action generation", () => {
         pumpAmount: 4,
       },
       {
-        definitionId: "onr_proteus_100_wrecking-ball",
+        definitionId: 158,
         title: "Wrecking Ball",
         iceSubtype: "wall",
         offSubtype: "sentry",
@@ -566,7 +551,7 @@ describe("runner encounter action generation", () => {
         testCase.definitionId,
       );
       const matchingIce = iceDefinition({
-        id: "test_sentry_ice",
+        id: 1886536465,
         title: `Test ${testCase.iceSubtype}`,
         subtypes: [testCase.iceSubtype],
         strength: 0,
@@ -588,7 +573,7 @@ describe("runner encounter action generation", () => {
 
       expect(
         result.legalActions.find((action) => action.type === "pump_breaker"),
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toMatchObject({
         costs: [{ credits: testCase.pumpCost }],
         payload: {
@@ -599,7 +584,7 @@ describe("runner encounter action generation", () => {
       });
       expect(
         result.legalActions.find((action) => action.type === "pump_breaker"),
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toMatchObject({
         label: `${testCase.title}: Stärke +${testCase.pumpAmount}`,
       });
@@ -610,14 +595,14 @@ describe("runner encounter action generation", () => {
         ? result.legalActions.find(
             (action) =>
               action.type === "break_subroutine" &&
-              action.payload?.subroutineIndexes === breakIndexes,
+              action.subroutineIndexes?.join(",") === breakIndexes,
           )
         : result.legalActions.find(
             (action) =>
               action.type === "break_subroutine" &&
               action.payload?.subroutineIndex === 0,
           );
-      expect(breakAction, testCase.definitionId).toMatchObject({
+      expect(breakAction, String(testCase.definitionId)).toMatchObject({
         costs: [{ credits: testCase.breakCost }],
         payload: {
           breakerId: "breaker_1",
@@ -626,10 +611,10 @@ describe("runner encounter action generation", () => {
           ...(breakIndexes ? { multiBreakSubroutines: true } : {}),
         },
       });
-      expect(breakAction?.label, testCase.definitionId).toContain(
+      expect(breakAction?.label, String(testCase.definitionId)).toContain(
         testCase.title,
       );
-      expect(breakAction?.label, testCase.definitionId).not.toContain(
+      expect(breakAction?.label, String(testCase.definitionId)).not.toContain(
         "Pile Driver",
       );
 
@@ -638,7 +623,7 @@ describe("runner encounter action generation", () => {
         runnerCredits: 20,
       });
       const offTypeIce = iceDefinition({
-        id: "test_sentry_ice",
+        id: 1886536465,
         title: `Test ${testCase.offSubtype}`,
         subtypes: [testCase.offSubtype],
         strength: 0,
@@ -653,19 +638,17 @@ describe("runner encounter action generation", () => {
         offTypeResult.legalActions.some(
           (action) => action.type === "break_subroutine",
         ),
-        testCase.definitionId,
+        String(testCase.definitionId),
       ).toBe(false);
     }
   });
 
   it("emits one canonical multi-break action per equivalent subroutine effect multiset", () => {
     const state = makeState({
-      breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+      breakerDefinitionId: 137,
       runnerCredits: 20,
     });
-    const breakerDefinition = proteusTestCardDefinition(
-      "onr_proteus_079_big-frackin-gun",
-    );
+    const breakerDefinition = proteusTestCardDefinition(137);
     const matchingIce = iceDefinition({
       subroutines: Array.from({ length: 16 }, (_unused, index) => ({
         id: `paid_end_the_run_${index + 1}`,
@@ -684,18 +667,16 @@ describe("runner encounter action generation", () => {
     );
 
     expect(
-      breakActions.map((action) => action.payload?.subroutineIndexes),
-    ).toEqual(["0", "0,1", "0,1,2", "0,1,2,3", "0,1,2,3,4"]);
+      breakActions.map((action) => action.subroutineIndexes),
+    ).toEqual([[0], [0,1], [0,1,2], [0,1,2,3], [0,1,2,3,4]]);
   });
 
   it("preserves multi-break choices with different subroutine effects", () => {
     const state = makeState({
-      breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+      breakerDefinitionId: 137,
       runnerCredits: 20,
     });
-    const breakerDefinition = proteusTestCardDefinition(
-      "onr_proteus_079_big-frackin-gun",
-    );
+    const breakerDefinition = proteusTestCardDefinition(137);
     const matchingIce = iceDefinition({
       subroutines: [
         { id: "end", type: "end_the_run" },
@@ -716,13 +697,13 @@ describe("runner encounter action generation", () => {
 
     expect(breakActions).toHaveLength(7);
     expect(
-      breakActions.map((action) => action.payload?.subroutineIndexes),
-    ).toEqual(expect.arrayContaining(["0,1", "0,2", "1,2", "0,1,2"]));
+      breakActions.map((action) => action.subroutineIndexes),
+    ).toEqual(expect.arrayContaining([[0,1], [0,2], [1,2], [0,1,2]]));
   });
 
   it("offers paid and unpaid continue actions for pay-or-end-run subroutines", () => {
     const state = makeState({
-      breakerDefinitionId: "simple_decoder",
+      breakerDefinitionId: 591,
       ice: iceDefinition({
         subroutines: [
           {
@@ -755,12 +736,7 @@ describe("runner encounter action generation", () => {
       "Subroutinen auslösen (Runner zahlt 2 Credit)",
     );
     expect(result.legalActions[0]!.costs).toEqual([{ credits: 2 }]);
-    expect(result.legalActions[0]!.payload).toMatchObject({
-      encounterContinue: true,
-      encounterWillEndRun: false,
-      payOrEndRunSubroutineIndexes: "0",
-      payOrEndRunSubroutinePayment: 2,
-    });
+    expect(result.legalActions[0]!).toMatchObject({payOrEndRunSubroutineIndexes: [0], payload: { encounterContinue: true, encounterWillEndRun: false, payOrEndRunSubroutinePayment: 2 }});
     expect(result.legalActions[1]!.payload).toMatchObject({
       encounterContinue: true,
       encounterWillEndRun: true,
@@ -797,15 +773,9 @@ describe("runner encounter action generation", () => {
     expect(continueActions).toHaveLength(2);
     expect(continueActions[0]).toMatchObject({
       costs: [{ credits: 1 }],
-      payload: {
-        encounterSubroutineIds: "first_pay_or_end",
-        payOrEndRunSubroutineIndexes: "0",
-        payOrEndRunSubroutinePayment: 1,
-      },
+      payload: {payOrEndRunSubroutinePayment: 1}, encounterSubroutineIds: ["first_pay_or_end"], payOrEndRunSubroutineIndexes: [0],
     });
-    expect(continueActions[1]?.payload).toMatchObject({
-      encounterSubroutineIds: "first_pay_or_end",
-    });
+    expect(continueActions[1]).toMatchObject({encounterSubroutineIds: ["first_pay_or_end"]});
   });
 
   it("resolves earlier deterministic subroutines before offering payment", () => {
@@ -831,9 +801,9 @@ describe("runner encounter action generation", () => {
     expect(continueActions).toHaveLength(1);
     expect(continueActions[0]).toMatchObject({
       costs: [],
-      payload: { encounterSubroutineIds: "gain_credit" },
+      payload: {}, encounterSubroutineIds: ["gain_credit"],
     });
-    expect(continueActions[0]?.payload).not.toHaveProperty(
+    expect(continueActions[0]).not.toHaveProperty(
       "payOrEndRunSubroutineIndexes",
     );
   });
@@ -860,13 +830,13 @@ describe("runner encounter action generation", () => {
       "jack_out",
       "continue_run",
     ]);
-    expect(result.legalActions[0]!.actionId).toBe("runner.jack_out");
+    expect(result.legalActions[0]!.actionId).toBe("rd");
     expect(result.legalActions[0]!.costs).toEqual([{ credits: 2 }]);
     expect(result.legalActions[0]!.payload).toMatchObject({
       v1922CorpIceAbility: "jack_out_tax_after_passed_rezzed_ice",
       jackOutAdditionalCost: 2,
-      sourceDefinitionId: "test_sentry_ice",
+      sourceDefinitionId: 1886536465,
     });
-    expect(result.legalActions[1]!.actionId).toBe("runner.continue_run");
+    expect(result.legalActions[1]!.actionId).toBe("r5");
   });
 });

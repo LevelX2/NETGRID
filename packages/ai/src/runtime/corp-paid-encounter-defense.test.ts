@@ -13,8 +13,8 @@ import { buildAiDecisionInputDto } from "../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { selectAiDecisionSideForState } from "./ai-decision-input";
 
-const RIDDLER = "onr_proteus_034_riddler";
-const ICEBERG = "onr_proteus_027_iceberg";
+const RIDDLER = 92;
+const ICEBERG = 85;
 
 function fixture(definitionId = RIDDLER, corpCredits = 6) {
   let state = createGameAfterSetup({
@@ -23,13 +23,13 @@ function fixture(definitionId = RIDDLER, corpCredits = 6) {
       id: "paid_encounter_defense_fixture",
       name: "Paid encounter defense",
       side: "corp",
-      identity: "corp_identity_001",
+      identity: 3,
       cards: [
         { id: RIDDLER, quantity: 3 },
         { id: ICEBERG, quantity: 3 },
-        { id: "onr_classic_003_unlisted-research-lab", quantity: 3 },
-        { id: "onr_classic_004_theorem-proof", quantity: 2 },
-        { id: "onr_classic_018_reclamation-project", quantity: 10 },
+        { id: 7, quantity: 3 },
+        { id: 8, quantity: 2 },
+        { id: 22, quantity: 10 },
       ],
     },
   });
@@ -106,7 +106,7 @@ function choose(state: GameState) {
 function installDecoder(
   state: GameState,
   strengthModifier: number,
-  definitionId = "simple_decoder",
+  definitionId = 591,
 ) {
   const instanceId = "paid_test_decoder";
   state.cardInstances[instanceId] = {
@@ -144,9 +144,9 @@ describe("paid encounter defense through normal Engine and plan ownership", () =
         decisionDebug: {
           planFirstDecision: {
             rootPlanInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
             leafExecutorInstanceId:
-              "plan:corp.defend_servers:server-defense-portfolio",
+              "penw02zfrkklof54c2nuye5att",
             route: { actionId: activation.actionId },
           },
         },
@@ -248,7 +248,7 @@ describe("paid encounter defense through normal Engine and plan ownership", () =
 
   it("keeps a choice-dependent breaker unresolved instead of claiming no eligible breaker [legacy_compare]", () => {
     const state = fixture();
-    installDecoder(state, 2, "onr_proteus_088_fubar");
+    installDecoder(state, 2, 146);
     const exchange = input(state).playerView.servers.find(
       (server) => server.id === "hq",
     )!.ice[0]!.currentEncounterDefenseQuotes![0]!.exchange;

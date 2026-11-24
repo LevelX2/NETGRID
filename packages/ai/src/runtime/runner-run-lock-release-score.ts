@@ -1,3 +1,5 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { visibleRunnerPathTraceContext } from "../run-analysis/trace-rules-profile-planning";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -12,6 +14,10 @@ import {
   type RunnerTerminalContestThreat,
 } from "./runner-terminal-contest-threat";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
+import { mergedPublicHistory } from "../public-event-history";
+import { actionClickCost, actionCreditCost } from "./action-cost";
+import { serverBlocksStealthBitPayments } from "./server-target";
 
 type FollowUp = {
   serverId: string;
@@ -84,17 +90,20 @@ export function runnerRunLockReleaseProjection(
   preferredServerIds: readonly string[] = [],
 ): RunnerRunLockReleaseProjection | undefined {
   if (input.side !== "runner") return undefined;
-  if (action && !isRunLockReleaseAction(action)) return undefined;
-  const creditCost = action
-    ? action.costs.reduce(
-        (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
-        0,
-      )
+  const currentOffer =
+    action &&
+    input.legalActions.find((offer) => offer.actionId === action.actionId);
+  if (
+    action &&
+    (!actionMatchesCurrentDecision(input, currentOffer) ||
+      !isRunLockReleaseAction(currentOffer))
+  )
+    return undefined;
+  const creditCost = currentOffer
+    ? actionCreditCost(currentOffer)
     : visibleRunnerRunLockCreditCost(input);
   if (creditCost <= 0) return undefined;
-  const clickCost = action
-    ? action.costs.reduce((sum, cost) => sum + Math.max(0, cost.clicks ?? 0), 0)
-    : 1;
+  const clickCost = currentOffer ? actionClickCost(currentOffer) : 1;
   const clicksAfterRelease = input.playerView.own.clicks - clickCost;
   const terminalThreat = runnerTerminalContestThreat(input);
   const creditsAfterRelease = Math.max(
@@ -145,7 +154,7 @@ export function runnerRunLockReleaseProjection(
 
 function visibleRunnerRunLockCreditCost(input: AiDecisionInput): number {
   const currentTurnSerial = input.playerView.turnSerial;
-  for (const event of [...input.eventTail].reverse()) {
+  for (const event of [...mergedPublicHistory(input)].reverse()) {
     if (
       currentTurnSerial !== undefined &&
       event.turnSerial !== undefined &&
@@ -166,7 +175,12 @@ export function runnerSpeculativeRunLockReleaseScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  if (!isRunLockReleaseAction(action)) return undefined;
+  if (
+    input.side !== "runner" ||
+    !isRunLockReleaseAction(action) ||
+    !actionMatchesCurrentDecision(input, action)
+  )
+    return undefined;
   if (runnerRunLockReleaseScoreComponent(input, action)) return undefined;
   return {
     key: "runner_speculative_run_lock_release",
@@ -213,24 +227,32 @@ function plausibleFollowUpRun(
   );
   const reserveRequirement = terminalThreat ? 0 : 4;
   const candidates = input.playerView.servers
+    .filter(
+      (server) =>
+        !server.statuses?.some((status) => status.kind === "run_prohibited"),
+    )
     .filter((server) =>
       terminalThreat && terminalThreat.remoteServerIds.length > 0
         ? terminalThreat.remoteServerIds.includes(server.id)
         : serverHasContestPayoff(input, server.id),
     )
     .flatMap((server) => {
+      const excludeStealthCredits = serverBlocksStealthBitPayments(server);
       const path = assessKnownRezzedIcePath(
         server.ice,
         input.playerView.own.rig ?? [],
         runnerRunPathCreditBudgetWithVisiblePools(
           creditsAfterRelease,
           input.playerView.own.rig ?? [],
+          { excludeStealthCredits },
         ),
         server.root,
         input.playerView.opponent.credits,
         {
+          ...visibleRunnerPathTraceContext(input),
+          excludeStealthTraceCredits: excludeStealthCredits,
           visibleRemoteServerCount: input.playerView.servers.filter((entry) =>
-            entry.id.startsWith("remote_"),
+            isRemoteServerId(entry.id),
           ).length,
           visibleCorpCredits: input.playerView.opponent.credits,
         },
@@ -295,7 +317,7 @@ function serverHasContestPayoff(
 ): boolean {
   if (serverId === "hq") return input.playerView.opponent.handCount > 0;
   if (serverId === "rd") return input.playerView.opponent.deckCount > 0;
-  if (!serverId.startsWith("remote_")) return false;
+  if (!isRemoteServerId(serverId)) return false;
   const server = input.playerView.servers.find(
     (entry) => entry.id === serverId,
   );

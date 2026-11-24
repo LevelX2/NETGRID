@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -13,7 +14,7 @@ import {
 } from "./hidden-zone-runtime-deps";
 
 const sourceCardId = "source" as CardInstanceId;
-const sourceDefinitionId = "source_def" as CardDefinitionId;
+const sourceDefinitionId = 2523707740 as CardDefinitionId;
 
 function card(
   id: string,
@@ -21,7 +22,7 @@ function card(
   title = id,
 ): CardDefinition {
   return {
-    id: id as CardDefinitionId,
+    id: syntheticCardDefinitionId(id),
     title,
     type,
   } as CardDefinition;
@@ -95,11 +96,11 @@ function host(
   const searchTargetHost = (gameState: GameState) => ({
     state: gameState,
     constants: {
-      topStackTakeMatchingSourceId: "aujourd" as CardDefinitionId,
-      randomStackProgramInstallSourceId: "mystery" as CardDefinitionId,
-      stackProgramFreeInstallSourceId: "smc" as CardDefinitionId,
-      stackSearchGripSourceId: "short_circuit" as CardDefinitionId,
-      temporaryProgramInstallSourceId: "sneak_preview" as CardDefinitionId,
+      topStackTakeMatchingSourceId: 1920362069 as CardDefinitionId,
+      randomStackProgramInstallSourceId: 834252614 as CardDefinitionId,
+      stackProgramFreeInstallSourceId: 3946508298 as CardDefinitionId,
+      stackSearchGripSourceId: 1905531649 as CardDefinitionId,
+      temporaryProgramInstallSourceId: 2781849020 as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId: CardInstanceId) =>
@@ -293,7 +294,7 @@ describe("hidden-zone card implementation runtime deps", () => {
       "p3_37_search_trash_to_grip_11",
     );
     expect(gameState.pendingChoice?.source).toBe(
-      "p3_37.search_trash_to_grip:source:source_def:program:11",
+      "p3_37.search_trash_to_grip:source:2523707740:program:11",
     );
     expect(result.publicPayload).toMatchObject({
       hiddenZoneAction: "p3_37_search_trash_to_grip",

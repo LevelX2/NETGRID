@@ -25,7 +25,7 @@ type ReconstructedDecisionCapture = {
 
 describe("pairing 329 delegated Airport Locker coverage checkpoint", () => {
   it("keeps the central-pressure root and exact coverage child through the Engine choice", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       delegatedCoverageJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -40,20 +40,18 @@ describe("pairing 329 delegated Airport Locker coverage checkpoint", () => {
     );
 
     expect(decision).toMatchObject({
-      actionId: "runner.resolve_choice",
+      actionId: "rn",
       reasonCode: "plan_first.engine_window",
       fallbackUsed: false,
       selectedChoices: {
         choiceId: "p3_38_search_stack_install_239",
-        selectedOptionIds: ["card_runner_onr_classic_031_rent-i-con_2"],
+        selectedOptionIds: ["card_c7u"],
       },
     });
     expect(portfolio).toMatchObject({
       stateVersion: 239,
-      rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ard",
-      executorInstanceId: expect.stringContaining(
-        "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
-      ),
+      rootForegroundInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+      executorInstanceId: executor?.instanceId,
     });
     expect(executor).toMatchObject({
       moduleId: "runner.rig_and_coverage",
@@ -66,8 +64,8 @@ describe("pairing 329 delegated Airport Locker coverage checkpoint", () => {
           requesterPlanInstanceId: portfolio?.rootForegroundInstanceId,
           directSearchChoiceBindings: [
             expect.objectContaining({
-              targetCardInstanceId: "runner_onr_classic_031_rent-i-con_2",
-              targetDefinitionId: "onr_classic_031_rent-i-con",
+              targetCardInstanceId: "c7u",
+              targetDefinitionId: 35,
             }),
           ],
         },

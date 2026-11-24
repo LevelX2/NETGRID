@@ -19,7 +19,6 @@ describe("match 7BFE exact decision checkpoints", () => {
     ["CP-7BFE-02a staged five-credit score campaign", cp02aJson],
     ["CP-7BFE-02b parent-bound score protection follow-up", cp02bJson],
     ["CP-7BFE-03 strategy-aware discard", cp03Json],
-    ["CP-7BFE-04 zero-effect Closed Accounts", cp04Json],
     [
       "CP-7BFE-05 directly protects pressured R&D instead of agenda-free HQ",
       cp05Json,
@@ -37,7 +36,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_309_bbs-whispering-campaign_2.new_remote.corp_onr_v1_309_bbs-whispering-campaign_2",
+              "cc.c37y.new_remote.c37y",
           },
         ],
       };
@@ -47,7 +46,7 @@ describe("match 7BFE exact decision checkpoints", () => {
     expect(corpSameTurnScoreConversionPaths(result.input)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          agendaCardId: "corp_onr_v1_196_corporate-war_3",
+          agendaCardId: "c2iv",
           sameTurnGuaranteed: true,
           creditsRequired: 6,
           clicksRequired: 3,
@@ -58,7 +57,7 @@ describe("match 7BFE exact decision checkpoints", () => {
       residentPlanPortfolioSnapshot(result.input)!.instances.find(
         (plan) =>
           plan.instanceId ===
-          "plan:corp.score_agenda:agenda%3Acorp_onr_v1_196_corporate-war_3%3Aremote_1",
+          "pxhwbcrlnqy0l5pghzb2u8n91",
       )?.moduleState,
     ).toMatchObject({
       signal: {
@@ -77,12 +76,33 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_196_corporate-war",
+            sourceDefinitionId: 408,
           },
         ],
       };
     });
     expectCheckpointToPass(checkpoint);
+  });
+
+  it("stages ICE for the scoring remote when Closed Accounts would remove zero credits", () => {
+    const checkpoint = fixture(cp04Json);
+    expect(checkpoint.engine.testOnlyGameState.runner.credits).toBe(0);
+    checkpoint.expectation = {
+      ...checkpoint.expectation,
+      acceptableActions: [{
+        type: "install_card",
+        sourceDefinitionId: 491,
+        targetServerId: "new_remote",
+      }],
+      planExecution: {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["improve_remote_protection_path"],
+      },
+    };
+    const result = expectCheckpointToPass(checkpoint);
+    expect(result.decision?.evidence?.some((code) =>
+      code.startsWith("plan_assessment_evidence:corp_layered_remote_ice_staging:"),
+    )).toBe(true);
   });
 
   it("executes the currently quoted Closed Accounts payoff before background remote staging", () => {
@@ -92,7 +112,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             type: "play_operation",
-            sourceDefinitionId: "onr_v1_285_closed-accounts",
+            sourceDefinitionId: 497,
           },
         ],
         planExecution: {
@@ -123,7 +143,7 @@ describe("match 7BFE exact decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_244_filter_1.rd.corp_onr_v1_244_filter_1.4",
+              "cc.c2th.rd.c2th.4",
           },
         ],
         planExecution: {
@@ -156,7 +176,7 @@ describe("match 7BFE exact decision checkpoints", () => {
       state.runner.tags = 2;
       fixture.expectation = {
         discardChoice: {
-          mustRetainDefinitionIds: ["onr_v1_327_i-got-a-rock"],
+          mustRetainDefinitionIds: [539],
         },
       };
     });

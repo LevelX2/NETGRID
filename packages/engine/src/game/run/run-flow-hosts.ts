@@ -15,6 +15,7 @@ import type {
   TraceSuccessEffect,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
+import { effectiveIceRunSubroutines } from "./effective-ice-run-subroutines";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { credits } from "../state/economy-mutation";
 import {
@@ -803,7 +804,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       finishRun: (successful, legalAction) =>
         host.callbacks.finishRun(state, successful, legalAction),
-      quoteIceRezCost: (iceId) => host.payment.rezCostForCard(state, iceId),
       resetBreakerStrength: () => host.ice.resetBreakerStrength(state),
       rollDie: (purpose) => host.rng.rollDie(state, purpose),
       spendCredits: (side, amount) =>
@@ -899,7 +899,9 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           throw new Error(
             "Trace-Programmtrash-Quelle passt nicht zur Trace-Definition.",
           );
-        const subroutine = definition.subroutines?.[trace.subroutineIndex];
+        const subroutine = effectiveIceRunSubroutines(
+          state, trace.sourceCardInstanceId, definition,
+        )[trace.subroutineIndex];
         if (!subroutine)
           throw new Error(
             "Trace-Programmtrash-Subroutine ist nicht mehr vorhanden.",
@@ -1072,6 +1074,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             damageType: "core",
             amount,
             source: `run_end:${sourceDefinitionId}`,
+            randomSource: ["c", sourceDefinitionId],
           }),
       },
       tags: {

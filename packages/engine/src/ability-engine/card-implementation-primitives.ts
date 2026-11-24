@@ -1,4 +1,5 @@
 import type {
+  CanonicalCapabilityId,
   CardDefinitionId,
   CardInstanceId,
   LegalAction,
@@ -42,7 +43,7 @@ export type CardImplementationEffectKind =
 
 type PrimitivePayload = NonNullable<LegalAction["payload"]>;
 
-const CARD_SPEC_DEFINITION_IDS = new Set<string>(
+const CARD_SPEC_DEFINITION_IDS = new Set<CardDefinitionId>(
   cardSpecRuntimeDefinitionIds(),
 );
 
@@ -63,7 +64,7 @@ export class CardImplementationPrimitiveIdentityError extends Error {
 export type CardImplementationPrimitiveIdentity =
   | {
       authority: "card_spec_capability_key";
-      abilityId: string;
+      abilityId: CanonicalCapabilityId;
       abilityKey: string;
     }
   | {

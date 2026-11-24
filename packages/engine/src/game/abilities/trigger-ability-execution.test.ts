@@ -25,18 +25,14 @@ describe("trigger ability execution", () => {
     const sourceCardId = "lockjaw" as CardInstanceId;
     const targetCardId = "breaker" as CardInstanceId;
     state.runner.rig.programs = [sourceCardId, targetCardId];
-    state.cardInstances[sourceCardId] = instance(
-      sourceCardId,
-      "onr_proteus_091_lockjaw",
-      "runner",
-    );
+    state.cardInstances[sourceCardId] = instance(sourceCardId, 149, "runner");
     state.cardInstances[targetCardId] = instance(
       targetCardId,
-      "simple_code_gate_breaker",
+      258120186,
       "runner",
     );
     state.run = {
-      runId: "run_lockjaw",
+      runId: 425334,
       attackedServerId: "rd",
       phase: "encounter_ice",
       remainderStrengthBonusByBreaker: {},
@@ -44,9 +40,9 @@ describe("trigger ability execution", () => {
     state.pendingPreventableTrashCostContinuation = {
       kind: "runner_run_strength_boost",
       sourceCardId,
-      sourceDefinitionId: "onr_proteus_091_lockjaw",
+      sourceDefinitionId: 149,
       targetCardId,
-      runId: "run_lockjaw",
+      runId: 425334,
       amount: 2,
     };
     const action = triggerAction(state, "runner", {});
@@ -93,7 +89,7 @@ describe("trigger ability execution", () => {
     state.runner.rig.resources.push(sourceCardId);
     state.cardInstances[sourceCardId] = instance(
       sourceCardId,
-      "code_viral_cache_definition",
+      1756968242,
       "runner",
     );
     state.corp.clicks = 3;
@@ -107,7 +103,7 @@ describe("trigger ability execution", () => {
 
     state.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -135,8 +131,8 @@ describe("trigger ability execution", () => {
       corpAbility: "trash_installed_runner_resource_source",
       abilityKind: "corp_trash_installed_runner_resource",
       cardId: sourceCardId,
-      trashedCardDefinitionId: "code_viral_cache_definition",
-      sourceDefinitionId: "code_viral_cache_definition",
+      trashedCardDefinitionId: 1756968242,
+      sourceDefinitionId: 1756968242,
       trashCostPaid: 5,
       corpCreditsAfter: 1,
     });
@@ -174,7 +170,7 @@ describe("trigger ability execution", () => {
     state.corp.clicks = 3;
     state.corpTemporaryInstallRezCredits = {
       sourceCardInstanceId: "contract",
-      sourceDefinitionId: "onr_proteus_059_government-contract",
+      sourceDefinitionId: 117,
       remaining: 3,
       usableFor: "corp_install_or_rez",
       returnUnusedAtTurnEnd: true,
@@ -213,11 +209,7 @@ describe("trigger ability execution", () => {
     state.timingPoint = "runner_action.main";
     const sourceCardId = "bodyweight_1" as CardInstanceId;
     state.runner.rig.hardware.push(sourceCardId);
-    state.cardInstances[sourceCardId] = instance(
-      sourceCardId,
-      "onr_v1_123_bodyweight-data-creche",
-      "runner",
-    );
+    state.cardInstances[sourceCardId] = instance(sourceCardId, 335, "runner");
     state.runnerTurnFlags = {
       ...(state.runnerTurnFlags ?? {}),
       successfulRunExtraRunPending: true,
@@ -234,7 +226,7 @@ describe("trigger ability execution", () => {
       {
         runnerAbility: "decline_successful_run_extra_run",
         cardId: sourceCardId,
-        sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
+        sourceDefinitionId: 335,
         successfulRunExtraRunDecision: "decline",
       },
     );
@@ -473,7 +465,7 @@ function testHost(
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
 ): CardInstance {
   return {
@@ -498,7 +490,7 @@ function definitionFor(
   if (!card) throw new Error(`CardInstance fehlt: ${cardId}`);
   return {
     id: card.definitionId,
-    title: card.definitionId,
+    title: String(card.definitionId),
     side: card.owner,
     type: card.owner === "corp" ? "asset" : "resource",
   } as CardDefinition;

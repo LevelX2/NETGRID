@@ -1,20 +1,21 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { expect, it } from "vitest";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 
-const SYD = "onr_proteus_076_syd-meyer-superstores";
-const BOOT = "onr_proteus_058_executive-boot-camp";
-const LISA = "onr_proteus_063_lisa-blight";
-function entry(id: string) {
-  const found = cardSpecPlanningCards().find((c) => c.definition.id === id)!;
+const SYD = 134;
+const BOOT = 116;
+const LISA = 121;
+function entry(id: CardDefinitionId) {
+  const found = listPlanningCardsWithFacts().find((c) => c.facts.id === id)!;
   const { planningAnnotations: _annotations, ...planning } = structuredClone(
     found.planning,
   );
   return { ...found, planning };
 }
-function mechanical(id: string) {
+function mechanical(id: CardDefinitionId) {
   return deriveCardSpecAiHint(entry(id));
 }
 

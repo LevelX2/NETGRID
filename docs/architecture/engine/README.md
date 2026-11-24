@@ -50,6 +50,24 @@ Archives-Karten erhalten weder Identität noch Quote; Corp-Views erhalten
 diese Runner-Kostenquote ebenfalls nicht. Virtuelle Archives-Roots verleihen
 entsorgten Karten keine installierten Fähigkeiten.
 
+## Zufallsnachweise
+
+`RandomDrawRecord.purpose` ist ein Tupel aus dem festen numerischen Code in
+`shared/random-purpose.ts` und dessen typisierten Argumenten. Karteninstanzen,
+Runs, Subroutinenherkunft und Auswahlindizes binden den konkreten Aufruf.
+Private Auswahlquotes verwenden einen festen 32-Bit-Fingerprint und behalten
+ihre vollständige Revalidierungsgrundlage im privaten Receipt. Öffentliche
+Ereignisse und Replays veröffentlichen nur den Zweckcode.
+
+Die Engine leitet den Zufallswert deterministisch aus der JSON-Serialisierung
+von `[seed, purpose, counter]` ab. Der getrennte KI-Zufallsstrom verwendet
+`[seed, 1, purpose, counter]`. Beide Verläufe verlangen lückenlose Zähler,
+gültige Tupel ihrer Domäne und endliche Werte im halboffenen Intervall `[0, 1)`.
+Shuffle, Markerdraws, Würfel und zufällige Auswahl verwenden denselben
+zentralen Producer in `game/state/draw-random.ts`. Schaden zieht erst nach den
+Replacement- und Prevention-Fenstern und enthält seine typisierte Quelle im
+Zufallszweck.
+
 ## Pflegeprinzip
 
 Neue Dokumente gehören nur dauerhaft in diesen Ordner, wenn sie einen aktuellen Engine-Architektur- oder Strukturvertrag beschreiben, der nicht sinnvoll in eines der bestehenden Dokumente integriert werden kann.

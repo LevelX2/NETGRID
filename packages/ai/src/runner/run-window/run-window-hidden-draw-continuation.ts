@@ -1,3 +1,4 @@
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
   type EngineWindowResolution,
@@ -28,15 +29,11 @@ export function resolvePlanBoundRunnerHiddenDrawChoice(
   const choiceActions = context.input.legalActions.filter(
     (action) => action.type === "resolve_choice",
   );
-  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
-  const [requirement] = action?.choiceRequirements ?? [];
-  const optionIds = choice?.options.map((option) => option.id) ?? [];
+  const action = exactCurrentChoiceAction(context.input, choice);
   const exactBinding =
     choice !== undefined &&
-    choice.side === "runner" &&
     choice.kind === "select_option" &&
     choice.visibility === "hidden_info_barrier" &&
-    choice.stateVersion === context.input.playerView.stateVersion &&
     choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
     choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
     choice.minSelections === 1 &&
@@ -45,7 +42,7 @@ export function resolvePlanBoundRunnerHiddenDrawChoice(
       context.input.playerView.stateVersion &&
     continuation.originActionId.length > 0 &&
     continuation.sourceCardInstanceId.length > 0 &&
-    continuation.sourceCardDefinitionId.length > 0 &&
+    continuation.sourceCardDefinitionId > 0 &&
     continuation.drawnCardInstanceIds.length > 0 &&
     new Set(continuation.drawnCardInstanceIds).size ===
       continuation.drawnCardInstanceIds.length &&
@@ -59,17 +56,7 @@ export function resolvePlanBoundRunnerHiddenDrawChoice(
     previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
     previous.executorInstanceId === origin.executorInstanceId &&
     root !== undefined &&
-    executor !== undefined &&
-    action !== undefined &&
-    action.side === "runner" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === 1 &&
-    requirement.maxSelections === 1 &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    executor !== undefined;
   if (!exactBinding || !action || !previous || !origin) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: context.input.side,

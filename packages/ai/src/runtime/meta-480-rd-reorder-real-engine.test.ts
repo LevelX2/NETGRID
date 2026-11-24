@@ -1,10 +1,11 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
-import type { DeckDefinition } from "@netgrid/shared";
+import type { CardDefinitionId, DeckDefinition } from "@netgrid/shared";
 import { metaTenStandardDecks as catalog } from "../evaluation/meta-ten-standard-decks.test-support";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
@@ -15,7 +16,7 @@ import { selectedForcedChoiceOptionIds } from "./select-card-choice-option";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
-function reorderWindow(definitions: string[]) {
+function reorderWindow(definitions: readonly CardDefinitionId[]) {
   const runner = catalog.decks.find(
     (d) =>
       d.standardDeckId === "standard_runner_rent_i_con_shellspiel_2026_07_17",
@@ -41,7 +42,7 @@ function reorderWindow(definitions: string[]) {
   state.corp.clicks = 1;
   const builder = RealEngineFixtureBuilder.forState(state)
     .withCorpCredits(10)
-    .withCorpCardInHq("onr_v1_298_planning-consultants");
+    .withCorpCardInHq(510);
   const top = definitions.map((definition) => {
     builder.withCorpCardInHq(definition);
     const id = state.corp.hq.find(
@@ -54,7 +55,8 @@ function reorderWindow(definitions: string[]) {
   state.corp.rd.unshift(...top);
   const operation = getLegalActions(state, "corp").find(
     (a) =>
-      a.type === "play_operation" && a.source?.includes("planning-consultants"),
+      a.type === "play_operation" &&
+      state.cardInstances[a.source]?.definitionId === 510,
   )!;
   const result = applyAction(state, {
     matchId: state.matchId,
@@ -77,18 +79,18 @@ function reorderWindow(definitions: string[]) {
 }
 
 const exposedTycho = [
-  "onr_v1_220_tycho-extension",
-  "onr_v1_288_day-shift",
-  "onr_v1_232_crystal-wall",
-  "onr_v1_277_virizz",
-  "onr_v1_226_canis-minor",
+  432,
+  500,
+  444,
+  489,
+  438,
 ];
 const exposedTwoAgendas = [
-  "onr_v1_214_project-babylon",
-  "onr_v1_220_tycho-extension",
-  "onr_v1_277_virizz",
-  "onr_v1_261_quandary",
-  "onr_v1_252_keeper",
+  426,
+  432,
+  489,
+  473,
+  464,
 ];
 
 it.each([[exposedTycho], [exposedTwoAgendas]])(
@@ -97,7 +99,7 @@ it.each([[exposedTycho], [exposedTwoAgendas]])(
     const { state, input } = reorderWindow(definitions);
     expect(input.playerView.pendingChoice?.selectionOrdering).toBe("ordered");
     const decision = chooseAiAction(input);
-    const owner = `plan:corp.hand_and_agenda_management:${encodeURIComponent(`rd-reorder:${input.playerView.pendingChoice!.choiceId}:${input.playerView.stateVersion}`)}`;
+    const owner = planInstanceIdForProposal({ moduleId: "corp.hand_and_agenda_management", dedupeKey: `rd-reorder:${input.playerView.pendingChoice!.choiceId}:${input.playerView.stateVersion}` });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       selectedPlan: { moduleId: "corp.hand_and_agenda_management" },
       rootPlanInstanceId: owner,

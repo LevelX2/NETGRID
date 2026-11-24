@@ -13,7 +13,7 @@
   },
   "cards": [
     {
-      "catalogCardId": "catalog_preview_operation_001",
+      "catalogCardId": 1,
       "sourceCardId": "catalog_preview_operation_001",
       "engineCardId": null,
       "title": "Catalog Preview Operation",
@@ -49,7 +49,7 @@
       "implementationManifest": null
     },
     {
-      "catalogCardId": "catalog_preview_resource_001",
+      "catalogCardId": 2,
       "sourceCardId": "catalog_preview_resource_001",
       "engineCardId": null,
       "title": "Catalog Preview Resource",
@@ -87,9 +87,9 @@
       "implementationManifest": null
     },
     {
-      "catalogCardId": "corp_identity_001",
+      "catalogCardId": 3,
       "sourceCardId": "corp_identity_001",
-      "engineCardId": "corp_identity_001",
+      "engineCardId": 3,
       "title": "Corp Identity",
       "side": "corp",
       "type": "identity",
@@ -130,9 +130,9 @@
       }
     },
     {
-      "catalogCardId": "efficient_fracter",
+      "catalogCardId": 4,
       "sourceCardId": "efficient_fracter",
-      "engineCardId": "efficient_fracter",
+      "engineCardId": 4,
       "title": "Efficient Fracter",
       "side": "runner",
       "type": "program",
@@ -173,9 +173,9 @@
       }
     },
     {
-      "catalogCardId": "runner_identity_001",
+      "catalogCardId": 587,
       "sourceCardId": "runner_identity_001",
-      "engineCardId": "runner_identity_001",
+      "engineCardId": 587,
       "title": "Runner Identity",
       "side": "runner",
       "type": "identity",
@@ -216,9 +216,9 @@
       }
     },
     {
-      "catalogCardId": "simple_agenda",
+      "catalogCardId": 588,
       "sourceCardId": "simple_agenda",
-      "engineCardId": "simple_agenda",
+      "engineCardId": 588,
       "title": "Simple Agenda",
       "side": "corp",
       "type": "agenda",
@@ -259,9 +259,9 @@
       }
     },
     {
-      "catalogCardId": "simple_barrier_ice",
+      "catalogCardId": 589,
       "sourceCardId": "simple_barrier_ice",
-      "engineCardId": "simple_barrier_ice",
+      "engineCardId": 589,
       "title": "Simple Barrier ICE",
       "side": "corp",
       "type": "ice",
@@ -302,9 +302,9 @@
       }
     },
     {
-      "catalogCardId": "simple_code_gate_ice",
+      "catalogCardId": 590,
       "sourceCardId": "simple_code_gate_ice",
-      "engineCardId": "simple_code_gate_ice",
+      "engineCardId": 590,
       "title": "Simple Code Gate ICE",
       "side": "corp",
       "type": "ice",
@@ -345,9 +345,9 @@
       }
     },
     {
-      "catalogCardId": "simple_decoder",
+      "catalogCardId": 591,
       "sourceCardId": "simple_decoder",
-      "engineCardId": "simple_decoder",
+      "engineCardId": 591,
       "title": "Simple Decoder",
       "side": "runner",
       "type": "program",
@@ -388,9 +388,9 @@
       }
     },
     {
-      "catalogCardId": "simple_draw_event",
+      "catalogCardId": 592,
       "sourceCardId": "simple_draw_event",
-      "engineCardId": "simple_draw_event",
+      "engineCardId": 592,
       "title": "Simple Draw Event",
       "side": "runner",
       "type": "event",
@@ -431,9 +431,9 @@
       }
     },
     {
-      "catalogCardId": "simple_draw_operation",
+      "catalogCardId": 593,
       "sourceCardId": "simple_draw_operation",
-      "engineCardId": "simple_draw_operation",
+      "engineCardId": 593,
       "title": "Simple Draw Operation",
       "side": "corp",
       "type": "operation",
@@ -474,9 +474,9 @@
       }
     },
     {
-      "catalogCardId": "simple_economy_asset",
+      "catalogCardId": 594,
       "sourceCardId": "simple_economy_asset",
-      "engineCardId": "simple_economy_asset",
+      "engineCardId": 594,
       "title": "Simple Economy Asset",
       "side": "corp",
       "type": "asset",
@@ -517,9 +517,9 @@
       }
     },
     {
-      "catalogCardId": "simple_economy_event",
+      "catalogCardId": 595,
       "sourceCardId": "simple_economy_event",
-      "engineCardId": "simple_economy_event",
+      "engineCardId": 595,
       "title": "Simple Economy Event",
       "side": "runner",
       "type": "event",
@@ -560,9 +560,9 @@
       }
     },
     {
-      "catalogCardId": "simple_economy_operation",
+      "catalogCardId": 596,
       "sourceCardId": "simple_economy_operation",
-      "engineCardId": "simple_economy_operation",
+      "engineCardId": 596,
       "title": "Simple Economy Operation",
       "side": "corp",
       "type": "operation",
@@ -603,9 +603,9 @@
       }
     },
     {
-      "catalogCardId": "simple_fracter",
+      "catalogCardId": 597,
       "sourceCardId": "simple_fracter",
-      "engineCardId": "simple_fracter",
+      "engineCardId": 597,
       "title": "Simple Fracter",
       "side": "runner",
       "type": "program",
@@ -646,9 +646,9 @@
       }
     },
     {
-      "catalogCardId": "simple_killer",
+      "catalogCardId": 598,
       "sourceCardId": "simple_killer",
-      "engineCardId": "simple_killer",
+      "engineCardId": 598,
       "title": "Simple Killer",
       "side": "runner",
       "type": "program",
@@ -689,9 +689,9 @@
       }
     },
     {
-      "catalogCardId": "simple_priority_agenda",
+      "catalogCardId": 599,
       "sourceCardId": "simple_priority_agenda",
-      "engineCardId": "simple_priority_agenda",
+      "engineCardId": 599,
       "title": "Simple Priority Agenda",
       "side": "corp",
       "type": "agenda",
@@ -732,9 +732,9 @@
       }
     },
     {
-      "catalogCardId": "simple_run_event",
+      "catalogCardId": 600,
       "sourceCardId": "simple_run_event",
-      "engineCardId": "simple_run_event",
+      "engineCardId": 600,
       "title": "Simple Run Event",
       "side": "runner",
       "type": "event",
@@ -775,9 +775,9 @@
       }
     },
     {
-      "catalogCardId": "simple_sentry_ice",
+      "catalogCardId": 601,
       "sourceCardId": "simple_sentry_ice",
-      "engineCardId": "simple_sentry_ice",
+      "engineCardId": 601,
       "title": "Simple Sentry ICE",
       "side": "corp",
       "type": "ice",
@@ -818,9 +818,9 @@
       }
     },
     {
-      "catalogCardId": "simple_setup_hardware",
+      "catalogCardId": 602,
       "sourceCardId": "simple_setup_hardware",
-      "engineCardId": "simple_setup_hardware",
+      "engineCardId": 602,
       "title": "Simple Setup Hardware",
       "side": "runner",
       "type": "hardware",
@@ -861,9 +861,9 @@
       }
     },
     {
-      "catalogCardId": "simple_tag_ice",
+      "catalogCardId": 603,
       "sourceCardId": "simple_tag_ice",
-      "engineCardId": "simple_tag_ice",
+      "engineCardId": 603,
       "title": "Simple Tag ICE",
       "side": "corp",
       "type": "ice",
@@ -904,9 +904,9 @@
       }
     },
     {
-      "catalogCardId": "simple_tag_punishment_operation",
+      "catalogCardId": 604,
       "sourceCardId": "simple_tag_punishment_operation",
-      "engineCardId": "simple_tag_punishment_operation",
+      "engineCardId": 604,
       "title": "Simple Tag Punishment Operation",
       "side": "corp",
       "type": "operation",
@@ -947,9 +947,9 @@
       }
     },
     {
-      "catalogCardId": "simple_taxing_barrier_ice",
+      "catalogCardId": 605,
       "sourceCardId": "simple_taxing_barrier_ice",
-      "engineCardId": "simple_taxing_barrier_ice",
+      "engineCardId": 605,
       "title": "Simple Taxing Barrier ICE",
       "side": "corp",
       "type": "ice",
@@ -990,9 +990,9 @@
       }
     },
     {
-      "catalogCardId": "simple_upgrade",
+      "catalogCardId": 606,
       "sourceCardId": "simple_upgrade",
-      "engineCardId": "simple_upgrade",
+      "engineCardId": 606,
       "title": "Simple Upgrade",
       "side": "corp",
       "type": "upgrade",

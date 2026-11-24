@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -24,7 +25,7 @@ type ReconstructedDecisionCapture = {
 
 describe("selfplay cycle 184 decision checkpoints", () => {
   it("jacks out before unknown central access with an empty grip under critical damage pressure", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       emptyGripRdJackOutJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -35,16 +36,16 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.jack_out",
+      actionId: "rd",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-          leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_39",
+          rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+          leafExecutorInstanceId: "p8l9o3a4wu64kq0q8ujn2ck7ze",
           selectedStep: {
-            planInstanceId: "plan:runner.convert_run_window:run%3Arun_39",
-            parentInstanceId: "plan:runner.pressure_central:central%3Ard",
+            planInstanceId: "p8l9o3a4wu64kq0q8ujn2ck7ze",
+            parentInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
           },
           route: {
             actionType: "jack_out",
@@ -63,7 +64,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("does not treat a guaranteed draw-tax tag as defensive hand buffering under confirmed damage pressure", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       confirmedDamageTaxedDrawJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -74,15 +75,15 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.gain_credit",
+      actionId: "rb",
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.economy:runner-portfolio-credit-reserve",
+            "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           leafExecutorInstanceId:
-            "plan:runner.economy:runner-portfolio-credit-reserve",
+            "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           route: {
             actionType: "gain_credit",
             capabilityId: "gain_general_liquid_credits",
@@ -98,7 +99,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("builds hand buffer before a nonterminal risky remote contest under critical damage pressure", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       criticalDamageRemoteContestJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -109,23 +110,23 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-          leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+          rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+          leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
           route: {
             actionType: "draw_card",
             capabilityId: "build_required_hand_buffer",
           },
           portfolio: expect.arrayContaining([
             expect.objectContaining({
-              instanceId: "plan:runner.contest_remote:remote%3Aremote_4",
+              instanceId: "p1p4yckp6i4g3ary7tvf4z4aeg",
               viability: "blocked",
               evidenceCodes: expect.arrayContaining([
-                "runner_critical_damage_remote_contest_requires_hand_buffer:remote_4",
+                "runner_critical_damage_remote_contest_requires_hand_buffer:r4",
               ]),
             }),
           ]),
@@ -135,7 +136,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("builds hand buffer before a nonterminal risky central run with unrezzed ice under confirmed damage pressure", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       confirmedDamageUnrezzedRdJson,
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -146,20 +147,20 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.draw_card",
+      actionId: "r8",
       reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-          leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+          rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+          leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
           route: {
             actionType: "draw_card",
             capabilityId: "build_required_hand_buffer",
           },
           portfolio: expect.arrayContaining([
             expect.objectContaining({
-              instanceId: "plan:runner.pressure_central:central%3Ard",
+              instanceId: "pa90fufw9vc5bkshp96ztlryxl",
               viability: "blocked",
               evidenceCodes: expect.arrayContaining([
                 "runner_confirmed_damage_central_pressure_requires_hand_buffer:rd",
@@ -172,7 +173,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("keeps the terminal contest owner for survivable known access damage below the normal hand floor", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       terminalRemoteNonlethalDamageJson,
     ) as ReconstructedDecisionCapture;
     const input = capture.input;
@@ -188,7 +189,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     input.playerView.own.agendaPoints = 0;
     input.playerView.opponent.agendaPoints = 6;
     const remote = input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!;
     remote.ice = [];
     remote.root = [
@@ -199,7 +200,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
       },
     ];
     const observedAccess: PublicGameEvent = {
-      eventId: "known-access-before-terminal-contest",
+      eventId: input.playerView.stateVersion - 1 + 1,
       type: "access_card",
       stateVersionBefore: input.playerView.stateVersion - 2,
       stateVersionAfter: input.playerView.stateVersion - 1,
@@ -208,9 +209,9 @@ describe("selfplay cycle 184 decision checkpoints", () => {
       publicPayload: {
         actor: "runner",
         actionType: "access_card",
-        serverId: "remote_1",
+        serverId: "r1",
         accessedCardPositionKey: "root:0",
-        cardDefinitionId: "onr_proteus_004_fetal-ai",
+        cardDefinitionId: 62,
         damageResolved: true,
         damageType: "net",
         damageAmount: 2,
@@ -218,14 +219,14 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     };
     const confirmedDamage: PublicGameEvent = {
       ...observedAccess,
-      eventId: "confirmed-damage-before-terminal-contest",
+      eventId: observedAccess.eventId + 1,
       type: "play_operation",
       publicPayload: {
         actor: "corp",
         damageResolved: true,
         damageType: "meat",
         damageAmount: 2,
-        sourceDefinitionId: "onr_v1_301_punitive-counterstrike",
+        sourceDefinitionId: 513,
       },
     };
     input.eventTail = [...input.eventTail, observedAccess, confirmedDamage];
@@ -242,23 +243,23 @@ describe("selfplay cycle 184 decision checkpoints", () => {
       capture.runtime,
     );
     const target = evaluateRunnerRunTargets({ input }).find(
-      (target) => target.targetServerId === "remote_1",
+      (target) => target.targetServerId === "r1",
     );
     expect(target?.pathPassability, target?.evidence.join("\n")).toBe(
       "blocked_by_visible_damage_hand_buffer",
     );
     const decision = chooseAiAction(input as AiDecisionInput);
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.remote_1",
+      actionId: "rs.r1",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafExecutorInstanceId:
-            "plan:runner.contest_remote:remote%3Aremote_1",
+            "p1p4xezjcxov79rno40lq3f7rv",
           selectedStep: {
-            planInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+            planInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           },
           route: { actionType: "start_run", capabilityId: "contest_remote" },
         },
@@ -272,19 +273,19 @@ describe("selfplay cycle 184 decision checkpoints", () => {
   });
 
   it("contests a terminal remote when the visible damage only violates the normal hand floor", () => {
-    const capture = structuredClone(
+    const capture = structuredClone<unknown>(
       terminalRemoteNonlethalDamageJson,
     ) as ReconstructedDecisionCapture;
     // The historical Nerve Labyrinth also had an unbreakable ETR. Use a
     // canonical damage-only final ICE so this test isolates the floor waiver.
     const server = capture.input.playerView.servers.find(
-      (s) => s.id === "remote_1",
+      (s) => s.id === "r1",
     )!;
     const ice = server.ice[0]!;
     server.ice = [
       {
         ...ice,
-        definitionId: "onr_v1_234_data-darts",
+        definitionId: 446,
         title: "Data Darts",
         rulesText:
           "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
@@ -293,25 +294,25 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         rezCost: 5,
         effectiveRunQuote: {
           iceInstanceId: ice.instanceId,
-          iceDefinitionId: "onr_v1_234_data-darts",
+          iceDefinitionId: 446,
           // The quoted +1 strength makes pump plus break cost three while
           // only two credits are available. This isolates accepting damage,
           // rather than relying on damage already paid away by MS-todon.
           effectiveStrength: 4,
           subroutines: [
             {
-              id: "printed_subroutines_damage_net",
+              id: "0",
               type: "do_damage",
               damageType: "net",
               amount: 3,
-              sourceDefinitionId: "onr_v1_234_data-darts",
+              sourceDefinitionId: 446,
               sourceTitle: "Data Darts",
               unbrokenRunEffect: { causesDamageOrProgramTrash: true },
             },
             {
-              id: "printed_subroutines_prohibit_break_next_ice",
+              id: "1",
               type: "set_next_encounter_no_break_subroutines",
-              sourceDefinitionId: "onr_v1_234_data-darts",
+              sourceDefinitionId: 446,
               sourceTitle: "Data Darts",
             },
           ],
@@ -321,7 +322,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     bindPublicBoardStealQuoteCompanion(capture.input);
     expect(
       evaluateRunnerRunTargets({ input: capture.input }).find(
-        (target) => target.actionId === "runner.start_run.remote_1",
+        (target) => target.actionId === "rs.r1",
       )?.pathPassability,
     ).toBe("blocked_by_visible_damage_hand_buffer");
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
@@ -332,14 +333,14 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
     expect(decision).toMatchObject({
-      actionId: "runner.start_run.remote_1",
+      actionId: "rs.r1",
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafExecutorInstanceId:
-            "plan:runner.contest_remote:remote%3Aremote_1",
+            "p1p4xezjcxov79rno40lq3f7rv",
           route: {
             actionType: "start_run",
             capabilityId: "contest_remote",
@@ -358,15 +359,15 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     continuation.playerView.timingPoint = "run.jack_out_window";
     continuation.playerView.own.clicks -= 1;
     continuation.playerView.run = {
-      runId: "selfplay-184-terminal-remote-continuation",
-      attackedServerId: "remote_1",
+      runId: continuation.playerView.stateVersion,
+      attackedServerId: "r1",
       phase: "movement",
-      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      position: { kind: "ice", serverId: "r1", iceIndex: 0 },
       successful: false,
     };
     continuation.legalActions = [
       {
-        actionId: "runner.continue_run",
+        actionId: "r5",
         side: "runner",
         type: "continue_run",
         label: "Run fortsetzen",
@@ -376,10 +377,10 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         targetRequirements: [],
         visibility: "private_to_actor",
         expiresAtStateVersion: continuation.playerView.stateVersion,
-        payload: { serverId: "remote_1" },
+        payload: { serverId: "r1" },
       },
       {
-        actionId: "runner.jack_out",
+        actionId: "rd",
         side: "runner",
         type: "jack_out",
         label: "Jack-out",
@@ -397,19 +398,19 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     );
 
     expect(continuationDecision).toMatchObject({
-      actionId: "runner.continue_run",
+      actionId: "r5",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           leafExecutorInstanceId:
-            "plan:runner.convert_run_window:run%3Aselfplay-184-terminal-remote-continuation",
+            planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${continuation.playerView.run.runId}` }),
           selectedStep: {
-            parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+            parentInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
           },
           route: {
-            actionId: "runner.continue_run",
+            actionId: "r5",
             actionType: "continue_run",
           },
         },
@@ -439,7 +440,7 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     expect(turnSerial).toBeDefined();
     const failedRunEvents: NonNullable<AiDecisionInput["eventTail"]> = [
       {
-        eventId: "evt_selfplay_184_terminal_run_started",
+        eventId: capture.input.playerView.stateVersion + 1 + 1,
         type: "start_run",
         stateVersionBefore: capture.input.playerView.stateVersion,
         stateVersionAfter: capture.input.playerView.stateVersion + 1,
@@ -449,11 +450,11 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         publicPayload: {
           actor: "runner",
           actionType: "start_run",
-          serverId: "remote_1",
+          serverId: "r1",
         },
       },
       {
-        eventId: "evt_selfplay_184_terminal_run_ended",
+        eventId: capture.input.playerView.stateVersion + 2 + 1,
         type: "continue_run",
         stateVersionBefore: capture.input.playerView.stateVersion + 1,
         stateVersionAfter: capture.input.playerView.stateVersion + 2,
@@ -481,17 +482,17 @@ describe("selfplay cycle 184 decision checkpoints", () => {
       repeatAfterFailedPath as AiDecisionInput,
     );
 
-    expect(repeatDecision.actionId).not.toBe("runner.start_run.remote_1");
+    expect(repeatDecision.actionId).not.toBe("rs.r1");
     expect(
       repeatDecision.decisionDebug?.planFirstDecision?.dispositions,
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          actionId: "runner.start_run.remote_1",
+          actionId: "rs.r1",
           disposition: "explicitly_nonproductive",
           ownerModuleId: "runner.contest_remote",
           evidenceCode:
-            "runner_terminal_remote_contest_repeat_blocked_after_failed_path:remote_1",
+            "runner_terminal_remote_contest_repeat_blocked_after_failed_path:r1",
         }),
       ]),
     );

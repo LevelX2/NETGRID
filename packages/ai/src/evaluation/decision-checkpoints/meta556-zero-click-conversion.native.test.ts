@@ -51,7 +51,7 @@ describe("pairing 556 zero-click accumulated-pressure conversion", () => {
       expect(result.timeoutUsed).toBe(false);
       expect(pf?.selectedPlan?.moduleId).toBe("runner.pressure_central");
       expect(pf?.rootPlanInstanceId).toBe(
-        "plan:runner.pressure_central:central%3Aarchives",
+        "p22f66p721g9dgs7gsawwpf6hs",
       );
       expect(pf?.leafExecutorInstanceId).toBe(pf?.rootPlanInstanceId);
       expect(pf?.route).toMatchObject({

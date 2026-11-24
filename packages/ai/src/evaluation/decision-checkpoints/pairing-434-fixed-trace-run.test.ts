@@ -25,7 +25,7 @@ it("funds the central parent when even the base trace prevents access", () => {
     runtime,
   );
   const target = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   );
   expect(target).toMatchObject({
     pathPassability: "blocked_unpayable",
@@ -37,7 +37,7 @@ it("funds the central parent when even the base trace prevents access", () => {
     },
   });
   const decision = chooseAiAction(input);
-  expect(decision.actionId).not.toBe("runner.start_run.hq");
+  expect(decision.actionId).not.toBe("rs.hq");
   expect(decision.fallbackUsed).toBe(false);
   expect(input.legalActions.some((a) => a.actionId === decision.actionId)).toBe(
     true,
@@ -46,7 +46,7 @@ it("funds the central parent when even the base trace prevents access", () => {
     decision.decisionDebug?.planFirstDecision?.dispositions,
   ).toContainEqual(
     expect.objectContaining({
-      actionId: "runner.start_run.hq",
+      actionId: "rs.hq",
       ownerModuleId: "runner.pressure_central",
       disposition: "explicitly_nonproductive",
     }),
@@ -62,7 +62,7 @@ it.each([
     const { input } = checkpoint();
     input.playerView.own.credits = credits;
     const target = evaluateRunnerRunTargets({ input }).find(
-      (t) => t.actionId === "runner.start_run.hq",
+      (t) => t.actionId === "rs.hq",
     );
     expect(target?.routeQuote?.reachability).toBe(reachability);
     expect(target?.routeQuote?.noAccessReason).toBeUndefined();

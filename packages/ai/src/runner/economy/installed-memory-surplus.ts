@@ -1,5 +1,5 @@
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
+import type { AiDecisionInput, CardDefinitionId, VisibleCard } from "@netgrid/shared";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
 export type InstalledMemorySurplusQuote = Readonly<{
@@ -39,8 +39,8 @@ export function installedMemorySurplusQuote(
   )
     return undefined;
 
-  const canonical = cardSpecPlanningCardByDefinitionId(card.definitionId);
-  const engine = canonical?.planning.engine;
+  const canonical = planningCardByDefinitionId(card.definitionId);
+  const engine = canonical?.engine;
   const modifier = engine?.modifiers?.[0];
   // Additional abilities, hooks or modifiers retain their own value. A role
   // annotation such as build_rig does not add an effect to a pure MU provider.
@@ -60,23 +60,23 @@ export function installedMemorySurplusQuote(
   )
     return undefined;
 
-  const programs = new Map<string, { quantity: number; memory: number }>();
-  const seen = new Set<string>();
+  const programs = new Map<CardDefinitionId, { quantity: number; memory: number }>();
+  const seen = new Set<CardDefinitionId>();
   let wholeOwnDeckProgramMemory = 0;
   for (const entry of deck.cards) {
-    const definition = cardSpecPlanningCardByDefinitionId(entry.cardId);
+    const definition = planningCardByDefinitionId(entry.cardId);
     if (
       !definition ||
-      definition.definition.side !== "runner" ||
+      definition.side !== "runner" ||
       seen.has(entry.cardId) ||
       !Number.isSafeInteger(entry.quantity) ||
       entry.quantity <= 0
     )
       return undefined;
     seen.add(entry.cardId);
-    if (definition.definition.type !== "program") continue;
+    if (definition.cardType !== "program") continue;
     const memory =
-      definition.planning.engine.characteristics.numeric.memoryCost;
+      definition.engine.characteristics.numeric.memoryCost;
     if (!Number.isSafeInteger(memory) || memory! < 0) return undefined;
     programs.set(entry.cardId, { quantity: entry.quantity, memory: memory! });
     wholeOwnDeckProgramMemory += entry.quantity * memory!;
@@ -86,7 +86,7 @@ export function installedMemorySurplusQuote(
     !Number.isSafeInteger(wholeOwnDeckProgramMemory)
   )
     return undefined;
-  const installedCounts = new Map<string, number>();
+  const installedCounts = new Map<CardDefinitionId, number>();
   for (const program of rig.filter((entry) => entry.type === "program")) {
     const bound = program.definitionId
       ? programs.get(program.definitionId)

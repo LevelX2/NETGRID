@@ -8,7 +8,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 describe("selfplay 176 Runner subtype coverage decision checkpoint", () => {
   it("retains affordable Fetch avoidance instead of buying an unnecessary wall change", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(subtypeCoverageJson) as AiDecisionCheckpointV1,
+      structuredClone(subtypeCoverageJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
@@ -16,7 +16,7 @@ describe("selfplay 176 Runner subtype coverage decision checkpoint", () => {
     // credit to make its three-credit trace response unaffordable, then
     // mistook the missing avoidance cost for an improved prepared path.
     const hq = evaluateRunnerRunTargets({ input: result.input! }).find(
-      (target) => target.actionId === "runner.start_run.hq",
+      (target) => target.actionId === "rs.hq",
     )!;
     expect(hq.routeQuote?.preRunPreparation).toBeUndefined();
     expect(hq.routeQuote?.knownCost).toBe(3);

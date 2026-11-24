@@ -14,6 +14,9 @@ Utilitybereich, erhält dabei aber deren Nachkommastellen. Ein gebundener
 Kostenvergleich darf seinen nachgeordneten Gleichstandsvorteil nicht durch
 Rundung vor Headbildung, Value Claim und Restzugsuche verlieren. Ganze
 Kosten, Ressourcen und LegalAction-Bindungen bleiben unverändert.
+Die Bewertung addiert den Aufwand der zertifizierten Pflichtablage zum
+Entwicklungswert derselben Aktion. Wertezitate und Diagnose verwenden
+dieselbe Berechnung.
 
 Die Typblöcke erläutern Konzepte; sie sind keine kopierte API-Spezifikation.
 Für reale Feldnamen, Pflichtfelder und Signaturen gelten die folgenden Quellen.
@@ -508,6 +511,14 @@ Action-Capacity-Tokens, Reservierungen, einmal-pro-Zug-Nutzungen, relevante
 öffentliche Eventflags, Claims, bereits realisierte Objective-Komponenten
 und Beobachtungsstatus. Board und Credits allein reichen nicht zur
 Zyklenkennung.
+
+Die zertifizierte Einzelprojektion und die Restzugsuche verwenden dieselbe
+Berechnung für liquide Credits. Ein garantierter unmittelbarer Nettoertrag
+enthält die Aktionskosten bereits. Zahlungsfenster mit einer exakt gebundenen
+abweichenden Liquidbelastung projizieren den tatsächlich fälligen Anteil.
+Kapazitätsgrants mit derselben Token-ID sind nur bei identischen erlaubten
+Aktionstypen und gleichem Ablaufpunkt addierbar. Die Restzugsuche bindet den
+Ablaufpunkt in der Token-ID.
 
 Ein exakt gequoteter Netto-Handzuwachs wird unabhängig von einem liquiden
 Credit-Ertrag projiziert. Das gilt auch für den normalen Basisdraw und reine
@@ -1672,6 +1683,13 @@ Tags und LegalActions neu gebunden. Der Pool wird weder zu allgemeinem
 Einkommen noch in derselben hypothetischen Linie mehrfach ausgegeben.
 Paarung634 D305 sichert die native legale Tagentfernung bei null freien
 Credits ab, die zuvor als unterfinanziert aus dem einzigen Defensepfad fiel.
+
+Für ein bezahltes `play_event` im aktuellen Runner-Hauptfenster gilt dieselbe
+Zahlgrenze mit dem eigenen Poolzweck `play_events`. Der gebundene Kopf
+reserviert nur den nach dem Prep-Guthaben offenen Betrag. Die Engine wickelt
+die Zahlung und den Karteneffekt ab. Paarung 865 D74 (zwei Klicks und
+anschließender Draw) und Paarung 866 D101 (Decksuche mit anschließender
+Choice) belegen dieselbe Zahlung unter zwei verschiedenen Plan-Ownern.
 
 Unmittelbare eigene Zonenwechsel zählen auch ohne Einkommen: Ein aktuell
 gebundener Grip-zu-Set-aside-Schritt verbraucht genau seine Zielhandkarte.

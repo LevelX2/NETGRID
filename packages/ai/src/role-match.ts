@@ -26,10 +26,7 @@ function roleSegmentMatchesNeedle(segment: string, needle: string): boolean {
     return tokens[0] === prefix && tokens.length > 1;
   }
   const needleTokens = underscoreTokens(needle);
-  if (needleTokens.length <= 1) {
-    const tokenSet = new Set(tokens);
-    return tokenSet.has(needle);
-  }
+  if (needleTokens.length <= 1) return tokens.includes(needle);
   return tokens.some(
     (token, index) =>
       token === needleTokens[0] &&

@@ -1,10 +1,13 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
-import { runnerObservedFreeStopEventId } from "../../run-analysis/runner-free-stop-observation";
+import {
+  runnerHasCurrentBasicProbeAction,
+  runnerObservedFreeStopEventId,
+} from "../../run-analysis/runner-free-stop-observation";
 import {
   mergedPublicHistory,
   serverIdFromEvent,
-} from "../../runtime/public-event-history";
+} from "../../public-event-history";
 import { runnerCoverageGapIsTerminalRemoteThreat } from "../rig-coverage/coverage-support";
 import {
   runnerDamageThreatAssessment,
@@ -16,9 +19,6 @@ export function runnerRemoteRepeatedFreeStopEvidence(
   input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
 ): string | undefined {
-  const action = input.legalActions.find(
-    (a) => a.actionId === evaluation.actionId,
-  );
   if (
     evaluation.accessTargetKind !== "remote" ||
     evaluation.runCommitment !== "probe_only" ||
@@ -26,8 +26,11 @@ export function runnerRemoteRepeatedFreeStopEvidence(
     evaluation.accessPayoff !== "trash_affordable" ||
     evaluation.scoreThreat ||
     runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) ||
-    action?.type !== "start_run" ||
-    action.source !== "basic_action"
+    !runnerHasCurrentBasicProbeAction(
+      input,
+      evaluation.actionId,
+      evaluation.targetServerId,
+    )
   )
     return undefined;
   const stoppedEventId = runnerObservedFreeStopEventId(

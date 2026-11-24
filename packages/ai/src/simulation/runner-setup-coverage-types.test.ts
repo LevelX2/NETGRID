@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   runnerCoverageRecoveryActionForMetrics,
+  runnerHasKnownBlockedPathByCoverage,
   runnerCoverageSearchActionForMetrics,
   runnerMissingCoverageTypesForInput,
 } from "./runner-setup-coverage-types";
@@ -12,6 +13,31 @@ describe("runner coverage action metrics", () => {
     expect(searchForRoles(["research_noise"])).toBe(false);
     expect(recoveryForRoles(["trash_recovery"])).toBe(true);
     expect(recoveryForRoles(["recoveryish_noise"])).toBe(false);
+  });
+
+  it("counts a missing breaker and excludes a block caused only by credits", () => {
+    const inputWithFort = {
+      ...input(),
+      playerView: {
+        ...input().playerView,
+        own: { credits: 1, rig: [] },
+        opponent: { credits: 4 },
+        traceRulesProfile: "modern_open",
+        servers: [{ id: "rd", ice: [], root: [] }],
+      },
+    } as unknown as AiDecisionInput;
+    function hasCoverageBlock(knownPathBlockedByMissingCoverage: boolean) {
+      return runnerHasKnownBlockedPathByCoverage(inputWithFort, {
+        rolesForCardId: () => [],
+        assessKnownRezzedIcePath: () =>
+          ({
+            blocked: true,
+            knownPathBlockedByMissingCoverage,
+          }) as never,
+      });
+    }
+    expect(hasCoverageBlock(false)).toBe(false);
+    expect(hasCoverageBlock(true)).toBe(true);
   });
 
   it("matches special subroutine coverage needs by bounded terms", () => {
@@ -54,7 +80,7 @@ function missingCoverageForSubroutineType(type: string) {
             ice: [
               {
                 known: true,
-                definitionId: "synthetic_ice",
+                definitionId: 9101,
                 effectiveRunQuote: {
                   subroutines: [{ type }],
                 },

@@ -1,13 +1,16 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import type { CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { corpFundedDefenseContinuationWindow } from "../defense/corp-funded-continuation-window";
 import { corpIceInstallHasCurrentCompleteRezQuote } from "../defense/corp-defense-domain-signals";
-import type {
-  AiDecisionInput,
-  CorpHostedCreditBankCycleQuote,
+import {
+  isCanonicalCapabilityId,
+  type AiDecisionInput,
+  type CorpHostedCreditBankCycleQuote,
 } from "@netgrid/shared";
 import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type {
@@ -64,15 +67,13 @@ export function currentCorpHostedBankCycleQuotes(
       !q ||
       q.schemaVersion !== "corp-hosted-credit-bank-cycle-quote-v1" ||
       input.side !== "corp" ||
-      action.side !== "corp" ||
-      action.timingPoint !== "corp_action.main" ||
+      !actionMatchesCurrentDecision(input, action) ||
       input.playerView.timingPoint !== "corp_action.main" ||
       input.playerView.run ||
       !numbers?.every((n) => Number.isSafeInteger(n) && n >= 0) ||
       q.actionId !== action.actionId ||
       q.sourceCardInstanceId !== action.source ||
       q.stateVersion !== input.playerView.stateVersion ||
-      action.expiresAtStateVersion !== q.stateVersion ||
       q.currentCredits !== input.playerView.own.credits ||
       q.currentClicks !== input.playerView.own.clicks ||
       q.currentClicks < 2 ||
@@ -90,14 +91,14 @@ export function currentCorpHostedBankCycleQuotes(
       q.extraLiquidCredits !==
         q.netLiquidCreditGain - q.baselineLiquidCreditGain ||
       q.extraLiquidCredits <= 0 ||
-      !card ||
+      card?.known !== true ||
       card.owner !== "corp" ||
       card.controller !== "corp" ||
       card.definitionId !== q.sourceDefinitionId ||
-      !server?.id.startsWith("remote_") ||
+      !isRemoteServerId(server?.id) ||
       q.currentHostedCredits !== (card.counters?.bit ?? 0) ||
-      typeof q.loadAbilityId !== "string" ||
-      typeof q.cashoutAbilityId !== "string" ||
+      !isCanonicalCapabilityId(q.loadAbilityId) ||
+      !isCanonicalCapabilityId(q.cashoutAbilityId) ||
       q.loadAbilityId === q.cashoutAbilityId ||
       (q.headKind === "rez"
         ? card.rezzed ||
@@ -163,7 +164,7 @@ function admitsIncrementalInstallFunding(
     !context ||
     !reserve ||
     signal.parentPlanInstanceId !==
-      "plan:corp.defend_servers:server-defense-portfolio" ||
+      "penw02zfrkklof54c2nuye5att" ||
     signal.immediateDefenseConversion !== true ||
     reserve.targetCredits !== input.playerView.own.credits + signal.gap ||
     reserve.targetCredits <= q.currentCredits + q.baselineLiquidCreditGain ||
@@ -172,7 +173,7 @@ function admitsIncrementalInstallFunding(
     input.playerView.own.gripOrHq.some((c) => c.known && c.type === "agenda") ||
     input.playerView.servers.some(
       (s) =>
-        s.id.startsWith("remote_") &&
+        isRemoteServerId(s.id) &&
         s.root.some((c) => c.known && c.type === "agenda"),
     ) ||
     context.ambushes.some((p) => p.actionIds.length > 0) ||
@@ -190,7 +191,7 @@ function admitsIncrementalInstallFunding(
       a.payload.serverId === reserve.serverId &&
       signal.parentNeedId ===
         "install:" + reserve.serverId + ":" + a.actionId &&
-      a.expiresAtStateVersion === input.playerView.stateVersion,
+      actionMatchesCurrentDecision(input, a),
   );
   if (
     !install ||
@@ -238,13 +239,12 @@ export function corpHostedBankCycleForParentFunding(
   fundingContext?: CorpHostedBankFundingWindowContext,
 ): CorpHostedCreditBankCycleQuote | undefined {
   const scoreFunding =
-    signal.parentPlanInstanceId?.startsWith("plan:corp.score_agenda:") ===
-      true &&
+    signal.parentPlanModuleId === "corp.score_agenda" &&
     signal.scoreFundingMilestone?.deadline === "multi_turn" &&
     signal.gap >= input.playerView.own.clicks;
   const installedDefenseFunding =
     signal.parentPlanInstanceId ===
-      "plan:corp.defend_servers:server-defense-portfolio" &&
+      "penw02zfrkklof54c2nuye5att" &&
     signal.incrementalDefenseReserve !== undefined &&
     signal.incrementalDefenseReserve.targetCredits ===
       input.playerView.own.credits + signal.gap &&

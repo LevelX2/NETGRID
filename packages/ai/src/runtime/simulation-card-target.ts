@@ -1,8 +1,10 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { isRemoteServerId } from "@netgrid/shared";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type CardInstanceId,
   type GameState,
   type LegalAction,
+  type PlayerView,
   type VisibleCard,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
@@ -18,7 +20,7 @@ export function cardTargetTypeForInstance(
   const definitionId = state.cardInstances[cardId]?.definitionId;
   if (!definitionId) return "unknown";
   const type =
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type ??
+    planningCardFactsByDefinitionId(definitionId)?.type ??
     RUNTIME_CARDS[definitionId]?.type;
   return progressionCardTargetType(type);
 }
@@ -42,7 +44,7 @@ export function advancedAgendaStealSourceForAction(
         return undefined;
       if (
         instance.zone.zone === "serverRoot" &&
-        instance.zone.serverId.startsWith("remote_")
+        isRemoteServerId(instance.zone.serverId)
       )
         return "remote" as const;
       if (
@@ -64,31 +66,27 @@ export function advancedAgendaStealSourceForAction(
 }
 
 export function remoteHasNearFinalAgenda(
-  state: GameState,
+  view: Pick<PlayerView, "servers">,
   serverId: string,
 ): boolean {
-  const server = state.corp.servers.find(
-    (candidate) => candidate.id === serverId,
+  const server = view.servers.find((candidate) => candidate.id === serverId);
+  return (
+    server?.root.some(
+      (card) =>
+        card.known === true &&
+        card.type === "agenda" &&
+        card.advancementRequirement !== undefined &&
+        card.advancementRequirement - (card.advancementCounters ?? 0) <= 2,
+    ) === true
   );
-  if (!server) return false;
-  return server.root.some((cardId) => {
-    const instance = state.cardInstances[cardId];
-    if (!instance) return false;
-    if (cardTargetTypeForInstance(state, cardId) !== "agenda") return false;
-    const requirement =
-      CARD_DEFINITIONS_BY_ID[instance.definitionId]?.advancementRequirement ??
-      RUNTIME_CARDS[instance.definitionId]?.numeric.advancementRequirement ??
-      0;
-    return Math.max(0, requirement - instance.advancementCounters) <= 2;
-  });
 }
 
 export function rezCostForDefinitionId(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number {
   if (!definitionId) return 0;
   return (
-    CARD_DEFINITIONS_BY_ID[definitionId]?.rezCost ??
+    planningCardFactsByDefinitionId(definitionId)?.rezCost ??
     RUNTIME_CARDS[definitionId]?.numeric.rezCost ??
     0
   );
@@ -97,7 +95,7 @@ export function rezCostForDefinitionId(
 export function sourceDefinitionIdForSimulationAction(
   action: LegalAction,
   findVisibleCard: (instanceId: string) => VisibleCard | undefined,
-): string | undefined {
+): number | undefined {
   if (action.source === "basic_action" || action.source === "game_rule")
     return undefined;
   return findVisibleCard(action.source)?.definitionId;

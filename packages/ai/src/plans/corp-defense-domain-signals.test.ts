@@ -92,10 +92,10 @@ describe("corp defense domain signals", () => {
       ...action.payload,
       serverId: "new_remote",
       postInstallRezQuoteTargetServerId: "new_remote",
-      postInstallRezQuoteProjectedServerId: "remote_2",
+      postInstallRezQuoteProjectedServerId: "r2",
       postInstallEffectiveRunQuoteJson: JSON.stringify({
         iceInstanceId: "candidate-ice",
-        iceDefinitionId: "onr_v1_237_data-wall",
+        iceDefinitionId: 449,
         effectiveStrength: 0,
         subroutines: [{ id: "sub-1", type: "end_the_run" }],
       }),
@@ -145,7 +145,7 @@ describe("corp defense domain signals", () => {
     const signal = corpQualitativeIceStagingSignal(
       input,
       candidate,
-      "remote_1",
+      "r1",
       undefined,
       facts,
       { kind: "score", parentProjectId: "score-project-1" },
@@ -153,9 +153,9 @@ describe("corp defense domain signals", () => {
 
     expect(signal).toMatchObject({
       kind: "generic",
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "install_defense_support",
-      sourceDefinitionIds: ["onr_v1_237_data-wall"],
+      sourceDefinitionIds: [449],
     });
     expect(signal?.evidenceCode).toContain(
       "corp_layered_remote_ice_staging:score:score-project-1",
@@ -168,7 +168,7 @@ describe("corp defense domain signals", () => {
     input.playerView.servers[0]!.ice = [
       {
         instanceId: "hq-data-wall",
-        definitionId: "onr_v1_237_data-wall",
+        definitionId: 449,
         owner: "corp",
         side: "corp",
         known: true,
@@ -205,7 +205,7 @@ describe("corp defense domain signals", () => {
       corpQualitativeIceStagingSignal(
         input,
         candidate,
-        "remote_1",
+        "r1",
         centralAllocation,
         facts,
         { kind: "score", parentProjectId: "score-project-1" },
@@ -258,14 +258,14 @@ describe("corp defense domain signals", () => {
       corpQualitativeIceStagingSignal(
         input,
         candidate,
-        "remote_1",
+        "r1",
         centralAllocation,
         facts,
         { kind: "score", parentProjectId: "score-project-1" },
       ),
     ).toMatchObject({
       kind: "generic",
-      serverId: "remote_1",
+      serverId: "r1",
       phase: "install_defense_support",
     });
   });
@@ -277,7 +277,7 @@ describe("corp defense domain signals", () => {
       corpQualitativeIceStagingSignal(
         input,
         candidate,
-        "remote_1",
+        "r1",
         undefined,
         facts,
         { kind: "remote", parentProjectId: "remote-project-1" },
@@ -341,7 +341,7 @@ function qualitativeCentralRouteFixture(): {
   const stateVersion = 29;
   const source = {
     instanceId: "neural-blade",
-    definitionId: "onr_v1_258_neural-blade",
+    definitionId: 470,
     owner: "corp",
     side: "corp",
     known: true,
@@ -351,7 +351,7 @@ function qualitativeCentralRouteFixture(): {
     subtypes: ["sentry"],
     effectiveRunQuote: {
       iceInstanceId: "neural-blade",
-      iceDefinitionId: "onr_v1_258_neural-blade",
+      iceDefinitionId: 470,
       effectiveStrength: 4,
       subroutines: [
         {
@@ -371,6 +371,7 @@ function qualitativeCentralRouteFixture(): {
     actionId: "install-neural-blade-hq",
     side: "corp",
     type: "install_card",
+    timingPoint: "corp_action.main",
     source: source.instanceId,
     costs: [{ clicks: 1, credits: 1 }],
     targetRequirements: [],
@@ -395,9 +396,11 @@ function qualitativeCentralRouteFixture(): {
   return {
     action,
     input: {
+      side: "corp",
       legalActions: [action],
       playerView: {
         stateVersion,
+        timingPoint: "corp_action.main",
         turnSerial: 1,
         own: {
           credits: 5,
@@ -472,7 +475,7 @@ function layeredRemoteFixture(
   const stateVersion = 17;
   const source = {
     instanceId: "candidate-ice",
-    definitionId: "onr_v1_237_data-wall",
+    definitionId: 449,
     owner: "corp",
     side: "corp",
     known: true,
@@ -485,6 +488,7 @@ function layeredRemoteFixture(
     actionId: "install-candidate-ice",
     side: "corp",
     type: "install_card",
+    timingPoint: "corp_action.main",
     source: source.instanceId,
     costs: [{ clicks: 1, credits: 1 }],
     targetRequirements: [],
@@ -492,11 +496,11 @@ function layeredRemoteFixture(
     expiresAtStateVersion: stateVersion,
     payload: {
       placement: "ice",
-      serverId: "remote_1",
+      serverId: "r1",
       postInstallRezQuoteComplete: true,
       postInstallRezQuoteCardId: source.instanceId,
-      postInstallRezQuoteTargetServerId: "remote_1",
-      postInstallRezQuoteProjectedServerId: "remote_1",
+      postInstallRezQuoteTargetServerId: "r1",
+      postInstallRezQuoteProjectedServerId: "r1",
       postInstallRezQuoteExpiresAtStateVersion: stateVersion,
       postInstallRezQuoteFinalCredits: rezCredits,
       postInstallEffectiveRunQuoteJson: JSON.stringify({
@@ -508,9 +512,13 @@ function layeredRemoteFixture(
     },
   } as unknown as LegalAction;
   const input = {
+    side: "corp",
     legalActions: [action],
     playerView: {
       stateVersion,
+      timingPoint: "corp_action.main",
+      agendaPointsToWin: 7,
+      opponent: { agendaPoints: 0, credits: 5, rig: [] },
       own: {
         credits: corpCredits,
         clicks: 3,
@@ -522,7 +530,7 @@ function layeredRemoteFixture(
         { id: "rd", ice: [], root: [] },
         { id: "archives", ice: [], root: [] },
         {
-          id: "remote_1",
+          id: "r1",
           root: [],
           ice: Array.from({ length: existingUnrezzedLayers }, (_, index) => ({
             ...source,

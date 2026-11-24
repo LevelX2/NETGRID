@@ -22,7 +22,7 @@ describe("terminal central access preserves its quoted preparation", () => {
       ...buildAiDecisionInputDto(checkpoint.input),
     };
     const rd = evaluateRunnerRunTargets({ input }).find(
-      (target) => target.actionId === "runner.start_run.rd",
+      (target) => target.actionId === "rs.rd",
     )!;
     expect(rd.recommendation).toBe("gain_credits_first");
     expect(rd.routeQuote).toMatchObject({
@@ -48,13 +48,15 @@ describe("terminal central access preserves its quoted preparation", () => {
     );
     const decision = chooseAiAction(input);
     const plan = decision.decisionDebug?.planFirstDecision;
-    const root = "plan:runner.pressure_central:central%3Ard";
+    const root = "pa90fufw9vc5bkshp96ztlryxl";
     expect(decision.actionId).toBe(preparationAction.actionId);
     expect(decision.fallbackUsed).toBe(false);
     expect(plan?.rootPlanInstanceId).toBe(root);
-    expect(plan?.leafExecutorInstanceId).toMatch(
-      /^plan:runner\.rig_and_coverage:/,
-    );
+    expect(
+      plan?.portfolio.find(
+        (instance) => instance.instanceId === plan?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.rig_and_coverage");
     expect(plan?.selectedStep).toMatchObject({
       parentInstanceId: root,
       stepId: expect.stringMatching(/:prepare:breaker_code_gate$/),

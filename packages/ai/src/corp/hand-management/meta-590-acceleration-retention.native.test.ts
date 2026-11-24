@@ -65,14 +65,14 @@ it.each([
   );
   const d = chooseAiAction(input),
     root =
-      "plan:corp.hand_and_agenda_management:discard-window%3Adiscard_corp_221%3A221";
-  expect(d.actionId).toBe("corp.resolve_choice");
+      "p98g4boid5h2vyqyj8afjjorji";
+  expect(d.actionId).toBe("cn");
   expect(d.selectedChoices).toEqual({
     choiceId: "discard_corp_221",
     selectedOptionIds: [
       keep
-        ? "card_corp_onr_proteus_007_project-venice_1"
-        : "card_corp_onr_v1_297_overtime-incentives_1",
+        ? "card_cel"
+        : "card_c359",
     ],
   });
   expect(d.decisionDebug!.planFirstDecision!).toMatchObject({
@@ -83,7 +83,7 @@ it.each([
       phase: "discard_window",
     },
     selectedStep: { stepId: root + ":discard_window" },
-    route: { actionId: "corp.resolve_choice", stateVersion: 221 },
+    route: { actionId: "cn", stateVersion: 221 },
   });
   expect(d).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
   expect(JSON.stringify(input.playerView)).toBe(view);

@@ -680,9 +680,25 @@ StateVersions.
 
 ### 8.1 Identität und Retention
 
-Der Kernel bildet die technische Instanzidentität aus Modul, Modulversion und
-stabilem `dedupeKey`. Das Modul definiert, welche fachlichen Änderungen eine
-bestehende Instanz fortsetzen und welche eine neue Instanz verlangen.
+Der Kernel bildet die technische Instanzidentität aus dem seitengebundenen
+Modul und dem stabilen, normalisierten `dedupeKey`. Die Referenz ist `p`
+plus der Base36-Darstellung eines kanonischen, domaingetrennten 128-Bit-Hashs.
+Die Modulversion bestimmt weiterhin, ob ein residenter Vertrag ersetzt wird;
+sie verändert die fachliche Zielidentität nicht. Das Modul definiert, welche
+fachlichen Änderungen eine bestehende Instanz fortsetzen und welche eine
+neue Instanz verlangen.
+
+Das Portfolio behält Modul und Deduplizierungsschlüssel als eigene Daten und
+prüft die Referenz gegen beide Felder. Doppelte Referenzen und fehlende oder
+widersprüchliche Bindungen scheitern strukturiert. Kampagnen verwenden die
+getrennte Referenz `k` und ein eigenes typisiertes Tupel aus Owner und Ziel.
+Die Vergabe benötigt keinen veränderlichen globalen Katalog. Rediscovery,
+Retention-Ablauf und erneutes Öffnen liefern für dasselbe Ziel dieselbe
+Referenz. Parent, Need, Executor und Commitment führen diese Referenz im
+bereits match- und seitengebundenen Portfolio weiter. Aus ihren Zeichen
+werden keine Modul-, Ziel- oder Prioritätsregeln abgeleitet. Die Reihenfolge
+gleichwertiger Pläne verwendet ausdrücklich Modul und Deduplizierungsschlüssel.
+[Kanonische Vergabe](../../../packages/ai/src/plans/compact-plan-identity.ts)
 
 Jede Persistence Policy legt fest:
 
@@ -778,19 +794,27 @@ Die Runtime orchestriert folgende Schritte:
    Claimvalidierung und die zunächst gebundene Route zusammen. Dieses Ergebnis
    ist im normalen Planpfad Eingabe des TurnPlanners, noch nicht die endgültige
    ungeprüfte Action-Ausgabe.
-3. `buildCorpTurnPlannerShadow` beziehungsweise `buildRunnerTurnPlannerShadow`
-   enumeriert die aktuellen Modulrouten und vergleicht unterstützte Linien
-   im produktiven Modus `cutover`. Ein ausdrücklich gewähltes `legacy_compare`
-   ist ein separater Vergleichsmodus, kein automatischer Fehlerfallback.
-4. `resolveTurnPlannerCutover` revalidiert Commitment und aktuellen Step;
-   `applyTurnPlannerCutoverSelection` bindet die ausgewählte Route und ihren
-   Root-/Leaf-Pfad zurück an das Schedulerergebnis.
-5. Die Runtime bindet Folge-Choices und `PlanExecutionOrigin`, erzeugt die
-   Entscheidung und speichert den aktuellen Portfolio-/Commitmentstand.
+3. `prepareCorpTurnPlanner` beziehungsweise `prepareRunnerTurnPlanner`
+   bewertet das Portfolio mit der gebundenen Executorrolle erneut und
+   materialisiert die aktuellen Routen der einschlägigen Planmodule. Der
+   ausdrücklich gewählte Modus `legacy_compare` behält den Scheduler-Sieger und
+   stellt die Zugplanung zum Vergleich bereit.
+4. `resolvePreparedTurnPlannerCutover` revalidiert Commitment und aktuellen
+   Step. Die Runtime verwendet die aktuelle Bindung oder vergleicht die
+   unterstützten Restzuglinien. `applyTurnPlannerCutoverSelection` bindet die
+   ausgewählte Route und ihren Root-/Leaf-Pfad an das Schedulerergebnis zurück.
+5. Die Choice-Auflösung erhält das entscheidungslokale Portfolio als Eingabe.
+   Sobald Entscheidung, Folge-Choices, Origin und Lease vollständig gebunden
+   sind, speichert die Runtime das aktuelle Portfolio genau einmal. Ein
+   Bindungsfehler vor diesem Zeitpunkt lässt den residenten Snapshot intakt.
    Die Engine revalidiert und vollzieht die eingereichte Action.
 
 Die [Zug-/Kampagnendetails](turn-campaign-planner.md) definieren Suche,
 Prioritätspflichten, Informationsgrenzen, Rematerialisierung und Fortschreibung.
+Das Assessment des Schedulers arbeitet vor der Executor-Bindung. Die
+TurnPlanner-Vorbereitung verwendet das gebundene Portfolio. Wiederverwendung
+von Assessments oder daraus abgeleiteten Routen muss deshalb die
+Executorrolle, offene Needs, Support und aktuelle Dispositionen einbeziehen.
 Dieser Ablauf ist keine Aufforderung, eine zweite Scheduler-API einzuführen.
 
 ## 11. Planpriorisierung
@@ -1069,7 +1093,7 @@ Horizontdaten verwenden [CreditDemand](../../../packages/ai/src/plans/credit-dem
 und [FundingRoute](../../../packages/ai/src/plans/funding-route.ts).
 Projected-Ressourcen stehen im
 [ProjectedDecisionFrame](../../../packages/ai/src/plans/turn-projection.ts),
-harte Fortsetzungen in [PlanCommitment](../../../packages/ai/src/plans/plan-continuation.ts).
+harte Fortsetzungen im produktiven [TurnPlanCommitment](../../../packages/ai/src/plans/turn-plan-commitment.ts).
 Deadline und Verbindlichkeit bleiben am konkreten Bedarf; diese Erläuterung
 fordert keine neue generische Ledger- oder Liability-API.
 
@@ -1294,6 +1318,9 @@ eine belastbare Machbarkeitsprüfung. Die Engine führt trotzdem jede Aktion und
 jede Zwischenentscheidung einzeln aus; der Vertrag ist keine Transaktion.
 
 ### 15.1 Commitment-Vertrag
+
+Das `TurnPlanCommitment` trägt den ausführbaren Verlauf. Das folgende Schema
+beschreibt die fachlichen Bindungen unabhängig von der Datenstruktur.
 
 ```ts
 type PlanCommitment = {

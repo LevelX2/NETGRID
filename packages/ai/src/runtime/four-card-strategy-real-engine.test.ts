@@ -13,8 +13,8 @@ import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 beforeEach(() => resetResidentPlanPortfolioMemory());
-const BEL = "onr_proteus_054_bel-digmo-antibody",
-  MAN = "onr_proteus_050_manhunt";
+const BEL = 112,
+  MAN = 108;
 const entry = standardDeckCatalog.decks.find(
   (d) =>
     d.standardDeckId === "standard_proteus_corp_hidden_node_control_2026_05_25",
@@ -26,7 +26,7 @@ const deck = {
   identity: entry.identityCardId,
   cards: entry.cards.map((c) => ({ id: c.cardId, quantity: c.quantity })),
 };
-function initial(seed: string, definitionId: string) {
+function initial(seed: string, definitionId: number) {
   let s = createGameAfterSetup({ seed, corpDeck: deck });
   s = apply(
     s,

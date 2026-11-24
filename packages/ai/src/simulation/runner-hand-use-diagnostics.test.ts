@@ -7,22 +7,26 @@ import {
 } from "./runner-hand-use-diagnostics";
 
 describe("runner hand use diagnostics", () => {
-  it("matches discarded installable breaker roles by bounded prefixes", () => {
+  it("counts a resolved discard even when the card has no diagnostic roles", () => {
+    expect(discardDiagnosticsForRoles([])).toMatchObject({ runnerDiscardChoice: true });
+  });
+
+  it("matches discarded breaker roles by bounded prefixes", () => {
     expect(discardDiagnosticsForRoles(["breaker_fracter"])).toMatchObject({
       runnerDiscardChoice: true,
-      runnerDiscardedInstallableBreaker: true,
+      runnerDiscardedBreaker: true,
     });
     const substringNoise = discardDiagnosticsForRoles(["breakerish_fracter"]);
     expect(substringNoise).toMatchObject({ runnerDiscardChoice: true });
     expect(substringNoise).not.toHaveProperty(
-      "runnerDiscardedInstallableBreaker",
+      "runnerDiscardedBreaker",
     );
     const supportPrefix = discardDiagnosticsForRoles([
       "support_breaker_fracter",
     ]);
     expect(supportPrefix).toMatchObject({ runnerDiscardChoice: true });
     expect(supportPrefix).not.toHaveProperty(
-      "runnerDiscardedInstallableBreaker",
+      "runnerDiscardedBreaker",
     );
   });
 });
@@ -41,7 +45,7 @@ function dependencies(
     runnerDrawKindForSimulationAction: () => ({}),
     hasRunnerPlayableEconomyAction: () => false,
     hasRunnerInstallableBreakerAction: () => false,
-    hasRunnerRunnablePressureAction: () => false,
+    hasRunnerPlayablePressureCard: () => false,
     hasRunnerRemoteTrashAction: () => false,
     runnerDiscardChoiceRoles: () => discardRoles,
     isRunnerDuplicateInstall: () => false,
@@ -63,7 +67,10 @@ function dependencies(
 }
 
 function input(): AiDecisionInput {
-  return { side: "runner" } as AiDecisionInput;
+  return {
+    side: "runner",
+    playerView: { pendingChoice: { source: "discard_phase" } },
+  } as AiDecisionInput;
 }
 
 function action(): LegalAction {

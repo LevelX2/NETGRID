@@ -41,8 +41,8 @@ it("separates the original D375 discarded damage evidence from current active th
     input.playerView.servers
       .find((s: { id: string }) => s.id === "archives")
       .root.some(
-        (c: { definitionId: string }) =>
-          c.definitionId === "onr_v1_228_cinderella",
+        (c: { definitionId: number }) =>
+          c.definitionId === 440,
       ),
   ).toBe(true);
   expect(runnerDamageThreatAssessment(input)).toMatchObject({
@@ -63,7 +63,7 @@ it("removes the false active-damage barrier through the existing central plan an
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).not.toBe(true);
   const rd = plan.portfolio.find(
-    (p) => p.instanceId === "plan:runner.pressure_central:central%3Ard",
+    (p) => p.instanceId === "pa90fufw9vc5bkshp96ztlryxl",
   )!;
   expect(rd.evidenceCodes).not.toContain(
     "runner_confirmed_damage_central_pressure_requires_hand_buffer:rd",

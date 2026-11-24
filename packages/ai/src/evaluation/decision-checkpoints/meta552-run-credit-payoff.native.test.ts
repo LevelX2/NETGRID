@@ -111,12 +111,18 @@ describe("current-rule companions for captured run-credit differential payoff", 
       expect(d.actionId).not.toBe(f.observedActionId);
       const a = f.input.legalActions.find((a) => a.actionId === d.actionId)!;
       expect(a).toBeDefined();
-      expect(
-        a.actionId.includes("lucidrine") && a.payload?.serverId === "archives",
-      ).toBe(false);
+      expect(candidates(f.input).find((c) => c.actionId === a.actionId)?.sourceDefinitionId).not.toBe(310);
       const p = d.decisionDebug?.planFirstDecision;
-      expect(a.actionId).toBe("runner.start_run.archives");
-      expect(p?.selectedPlan?.moduleId).toBe("runner.pressure_central");
+      if (key === "g13") {
+        expect(a.type).toBe("draw_card");
+        expect(p?.selectedPlan).toMatchObject({
+          moduleId: "runner.develop_board_and_hand",
+          evidenceCodes: expect.arrayContaining(["runner_hand_rotation_status:known_rotation_target_available"]),
+        });
+      } else {
+        expect(a.actionId).toBe("rs.archives");
+        expect(p?.selectedPlan?.moduleId).toBe("runner.pressure_central");
+      }
       expect(p?.route).toMatchObject({
         actionId: a.actionId,
         stateVersion: f.input.playerView.stateVersion,
@@ -127,7 +133,7 @@ describe("current-rule companions for captured run-credit differential payoff", 
       expect(hash(f.input)).toBe(before);
     },
   );
-  it.each(["g31", "g24"])("retains actual paid-route funding in %s", (key) => {
+  it.each(["g31", "g24"])("distinguishes paid access from a paid information probe in %s", (key) => {
     const f = capture(key),
       event = candidates(f.input).find(
         (c) => c.actionId === f.observedActionId,
@@ -144,10 +150,25 @@ describe("current-rule companions for captured run-credit differential payoff", 
       f.runtime,
     );
     const d = chooseAiAction(f.input);
-    expect(d.actionId).toBe(f.observedActionId);
-    expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
-      "runner.pressure_central",
-    );
+    if (key === "g31") {
+      expect(d.actionId).toBe(f.observedActionId);
+      expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+        "runner.pressure_central",
+      );
+    } else {
+      expect(candidates(f.input).find((c) => c.actionId === d.actionId)?.sourceDefinitionId).toBe(257);
+      expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+        "runner.economy",
+      );
+      expect(d.decisionDebug?.actionAlternatives).toContainEqual(
+        expect.objectContaining({
+          actionId: f.observedActionId,
+          whyNot: expect.arrayContaining([
+            "runner_central_information_probe_known_path_not_admitted:hq",
+          ]),
+        }),
+      );
+    }
     expect(d.decisionDebug?.planFirstDecision?.route?.actionId).toBe(
       d.actionId,
     );

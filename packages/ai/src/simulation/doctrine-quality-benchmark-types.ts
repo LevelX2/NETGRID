@@ -19,6 +19,7 @@ export type AiDoctrineQualityBenchmarkResult = {
   safety: {
     illegalActionDelta: number;
     replayFailureDelta: number;
+    runtimeFailureDelta: number;
     timeoutRateDelta: number;
     fallbackRateDelta: number;
   };

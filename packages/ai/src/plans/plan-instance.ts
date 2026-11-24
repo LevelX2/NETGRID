@@ -1,4 +1,8 @@
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import {
+  compactPlanInstanceId,
+  normalizePlanIdentityToken,
+} from "./compact-plan-identity";
 import type {
   PlanEvidenceRef,
   PlanInstance,
@@ -15,16 +19,13 @@ export function planProposalKey(
 export function planInstanceIdForProposal(
   proposal: Pick<PlanProposal, "moduleId" | "dedupeKey">,
 ): string {
-  return `plan:${proposal.moduleId}:${encodeURIComponent(
-    normalizedIdentityToken(proposal.dedupeKey),
-  )}`;
+  return compactPlanInstanceId(proposal);
 }
 
 export function instantiatePlanProposal(
   proposal: PlanProposal,
   stateVersion: number,
 ): PlanInstance {
-  const normalizedVersion = nonNegativeInteger(stateVersion);
   const instance: PlanInstance = {
     instanceId: planInstanceIdForProposal(proposal),
     dedupeKey: normalizedIdentityToken(proposal.dedupeKey),
@@ -37,18 +38,7 @@ export function instantiatePlanProposal(
     portfolioRole: "unassigned",
     executionState: "idle",
     persistencePolicy: proposal.persistencePolicy,
-    retentionPolicy: {
-      ...proposal.retentionPolicy,
-      blockedStateVersionTtl: nonNegativeInteger(
-        proposal.retentionPolicy.blockedStateVersionTtl,
-      ),
-      dormantStateVersionTtl: nonNegativeInteger(
-        proposal.retentionPolicy.dormantStateVersionTtl,
-      ),
-      completedHistoryStateVersionTtl: nonNegativeInteger(
-        proposal.retentionPolicy.completedHistoryStateVersionTtl,
-      ),
-    },
+    retentionPolicy: { ...proposal.retentionPolicy },
     ...(proposal.target ? { target: { ...proposal.target } } : {}),
     ...(proposal.parentInstanceId
       ? { parentInstanceId: proposal.parentInstanceId }
@@ -79,8 +69,8 @@ export function instantiatePlanProposal(
       milestone: proposal.milestone,
       reasonCode: "plan_instance_created",
     },
-    createdAtStateVersion: normalizedVersion,
-    updatedAtStateVersion: normalizedVersion,
+    createdAtStateVersion: stateVersion,
+    updatedAtStateVersion: stateVersion,
     evidenceRefs: normalizeEvidenceRefs(proposal.evidenceRefs),
   };
   assertValidPlanInstance(instance);
@@ -92,11 +82,13 @@ export function deduplicatePlanProposals(
   stateVersion: number,
 ): PlanProposal[] {
   const byKey = new Map<string, PlanProposal>();
+  const instanceIds = new Set<string>();
   for (const proposal of [...proposals].sort((left, right) =>
     planProposalKey(left).localeCompare(planProposalKey(right)),
   )) {
     const key = planProposalKey(proposal);
-    if (byKey.has(key)) {
+    const instanceId = planInstanceIdForProposal(proposal);
+    if (byKey.has(key) || instanceIds.has(instanceId)) {
       throw new PlanResolutionFailure("invalid_plan_identity", {
         side: proposal.side,
         stateVersion,
@@ -105,10 +97,11 @@ export function deduplicatePlanProposals(
         owner: "plan_registry",
         removalCondition:
           "Make the module emit exactly one proposal for each stable dedupe key.",
-        planInstanceId: planInstanceIdForProposal(proposal),
+        planInstanceId: instanceId,
       });
     }
     byKey.set(key, proposal);
+    instanceIds.add(instanceId);
   }
   return [...byKey.values()];
 }
@@ -117,11 +110,56 @@ export function planInstanceStateIssues(
   instance: PlanInstance,
 ): PlanInstanceStateIssue[] {
   const issues: PlanInstanceStateIssue[] = [];
-  if (!instance.moduleId.startsWith(`${instance.side}.`)) {
+  if (
+    typeof instance.moduleVersion !== "string" ||
+    !["runner", "corp"].includes(instance.side) ||
+    !["dormant", "ready", "blocked", "completed", "abandoned"].includes(
+      instance.viability,
+    ) ||
+    !["foreground", "background", "response_candidate", "unassigned"].includes(
+      instance.portfolioRole,
+    ) ||
+    !["idle", "executor", "preempted"].includes(instance.executionState) ||
+    ![
+      "locked_sequence",
+      "sticky_goal",
+      "flexible_support",
+      "recurring_cadence",
+    ].includes(instance.persistencePolicy) ||
+    ![
+      instance.strategyLineIds,
+      instance.openNeedIds,
+      instance.resourceClaimIds,
+      instance.acceptedReservationIds,
+      instance.blockers,
+      instance.resumeConditions,
+      instance.completionConditions,
+      instance.abandonmentConditions,
+      instance.evidenceRefs,
+    ].every(Array.isArray) ||
+    !instance.progress ||
+    typeof instance.progress.status !== "string" ||
+    typeof instance.progress.value !== "number"
+  ) {
+    return ["incomplete_instance_state"];
+  }
+  if (
+    typeof instance.moduleId !== "string" ||
+    typeof instance.dedupeKey !== "string" ||
+    instance.instanceId !== planInstanceIdForProposal(instance)
+  ) {
+    issues.push("noncanonical_instance_id");
+  }
+  if (
+    typeof instance.moduleId !== "string" ||
+    !instance.moduleId.startsWith(`${instance.side}.`)
+  ) {
     issues.push("module_side_mismatch");
   }
-  if (!instance.dedupeKey.trim()) issues.push("blank_dedupe_key");
-  if (!instance.phase.trim()) issues.push("blank_phase");
+  if (typeof instance.dedupeKey !== "string" || !instance.dedupeKey.trim())
+    issues.push("blank_dedupe_key");
+  if (typeof instance.phase !== "string" || !instance.phase.trim())
+    issues.push("blank_phase");
   if (instance.parentNeedId !== undefined && !instance.parentNeedId.trim()) {
     issues.push("blank_parent_need_id");
   }
@@ -159,12 +197,26 @@ export function planInstanceStateIssues(
     issues.push("ready_plan_has_blocker");
   }
   if (
+    !nonNegativeSafeInteger(instance.createdAtStateVersion) ||
+    !nonNegativeSafeInteger(instance.updatedAtStateVersion) ||
     instance.createdAtStateVersion > instance.updatedAtStateVersion ||
     (instance.lastProductiveAtStateVersion !== undefined &&
-      (instance.lastProductiveAtStateVersion < instance.createdAtStateVersion ||
+      (!nonNegativeSafeInteger(instance.lastProductiveAtStateVersion) ||
+        instance.lastProductiveAtStateVersion <
+          instance.createdAtStateVersion ||
         instance.lastProductiveAtStateVersion > instance.updatedAtStateVersion))
   ) {
     issues.push("invalid_state_version_order");
+  }
+  if (
+    !instance.retentionPolicy ||
+    !nonNegativeSafeInteger(instance.retentionPolicy.blockedStateVersionTtl) ||
+    !nonNegativeSafeInteger(instance.retentionPolicy.dormantStateVersionTtl) ||
+    !nonNegativeSafeInteger(
+      instance.retentionPolicy.completedHistoryStateVersionTtl,
+    )
+  ) {
+    issues.push("invalid_retention_policy");
   }
   return issues;
 }
@@ -196,12 +248,11 @@ function uniqueSorted(values: readonly string[]): string[] {
 }
 
 function normalizedIdentityToken(value: string): string {
-  return value.trim().replace(/\s+/g, "_").slice(0, 160);
+  return normalizePlanIdentityToken(value);
 }
 
-function nonNegativeInteger(value: number): number {
-  if (!Number.isFinite(value)) return 0;
-  return Math.max(0, Math.floor(value));
+function nonNegativeSafeInteger(value: number): boolean {
+  return Number.isSafeInteger(value) && value >= 0;
 }
 
 function normalizeEvidenceRefs(

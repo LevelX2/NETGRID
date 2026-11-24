@@ -24,83 +24,83 @@ import {
 } from "./chronicle";
 
 const TEST_CARD_PRESENTATIONS = {
-  simple_agenda: { title: "Simple Agenda", type: "agenda" },
-  simple_barrier_ice: { title: "Simple Barrier ICE", type: "ice" },
-  simple_code_gate_ice: { title: "Simple Code Gate ICE", type: "ice" },
-  simple_decoder: { title: "Simple Decoder", type: "program" },
-  simple_economy_asset: { title: "Simple Economy Asset", type: "asset" },
-  simple_economy_operation: {
+  588: { title: "Simple Agenda", type: "agenda" },
+  589: { title: "Simple Barrier ICE", type: "ice" },
+  590: { title: "Simple Code Gate ICE", type: "ice" },
+  591: { title: "Simple Decoder", type: "program" },
+  594: { title: "Simple Economy Asset", type: "asset" },
+  596: {
     title: "Simple Economy Operation",
     type: "operation",
   },
-  simple_fracter: { title: "Simple Fracter", type: "program" },
-  simple_upgrade: { title: "Simple Upgrade", type: "upgrade" },
-  "onr_classic_031_rent-i-con": {
+  597: { title: "Simple Fracter", type: "program" },
+  606: { title: "Simple Upgrade", type: "upgrade" },
+  35: {
     title: "Rent-I-Con",
     type: "program",
   },
-  "onr_classic_038_gypsytm-schedule-analyzer": {
+  42: {
     title: "Gypsy™ Schedule Analyzer",
     type: "hardware",
   },
-  "onr_proteus_005_marked-accounts": {
+  63: {
     title: "Marked Accounts",
     type: "agenda",
   },
-  onr_proteus_050_manhunt: { title: "Manhunt", type: "operation" },
-  "onr_proteus_057_doppelganger-antibody": {
+  108: { title: "Manhunt", type: "operation" },
+  115: {
     title: "Doppelganger Antibody",
     type: "asset",
   },
-  "onr_proteus_068_pattel-antibody": {
+  126: {
     title: "Pattel Antibody",
     type: "asset",
   },
-  onr_proteus_090_highlighter: {
+  148: {
     title: "Highlighter",
     type: "program",
   },
-  "onr_v1_196_corporate-war": {
+  408: {
     title: "Corporate War",
     type: "agenda",
   },
-  "onr_v1_292_management-shake-up": {
+  504: {
     title: "Management Shake-Up",
     type: "operation",
   },
-  "onr_v1_304_systematic-layoffs": {
+  516: {
     title: "Systematic Layoffs",
     type: "operation",
   },
-  onr_v1_035_invisibility: {
+  247: {
     title: "Invisibility",
     type: "program",
   },
-  "onr_v1_040_loony-goon": {
+  252: {
     title: "Loony Goon",
     type: "program",
   },
-  onr_v1_039_krash: {
+  251: {
     title: "Krash",
     type: "program",
   },
-  "onr_v1_089_gideons-pawnshop": {
+  301: {
     title: "Gideon’s Pawnshop",
     type: "event",
   },
-  "onr_v1_114_temple-microcode-outlet": {
+  326: {
     title: "Temple Microcode Outlet",
     type: "event",
   },
-  "onr_v1_157_crash-everett-inventive-fixer": {
+  369: {
     title: "Crash Everett, Inventive Fixer",
     type: "resource",
   },
-  "onr_v1_165_junkyard-bbs": {
+  377: {
     title: "Junkyard BBS",
     type: "resource",
   },
-  "onr_proteus_111_ice-and-data-special-report": {
+  169: {
     title: "Ice and Data Special Report",
     type: "event",
   },
@@ -170,7 +170,7 @@ describe("formatChronicleEvent", () => {
       expect(serialized).not.toContain("fnv1a");
       expect(serialized).not.toContain("stateHashAfter");
       expect(serialized).not.toContain("stateVersionAfter");
-      expect(serialized).not.toContain("corp.play_operation");
+      expect(serialized).not.toContain("ci");
       expect(serialized).not.toContain("idempotencyKey");
     }
   });
@@ -259,7 +259,7 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("resolve_choice", {
       actor: "corp",
       choiceVisibility: "hidden_info_barrier",
-      sourceDefinitionId: "onr_classic_025_strategic-planning-group",
+      sourceDefinitionId: 29,
       drawReplacementSourceTitle: "Strategic Planning Group",
       strategicPlanningGroupChoiceResolved: true,
       strategicPlanningGroupBaseDrawCount: 1,
@@ -280,7 +280,7 @@ describe("formatChronicleEvent", () => {
       visibility: "public",
       title:
         "Du hast mit Strategic Planning Group eine zusätzliche Karte gezogen und eine der beiden gezogenen Karten unter R&D gelegt.",
-      cardDefinitionId: "onr_classic_025_strategic-planning-group",
+      cardDefinitionId: 29,
       cardTitle: "Strategic Planning Group",
     });
     expect(runnerItem.title).toBe(
@@ -362,9 +362,9 @@ describe("formatChronicleEvent", () => {
         hiddenZoneBarrier: true,
         hiddenZoneAction: "expose_installed_cards_single_fort",
         publicRevealKind: "expose",
-        sourceDefinitionId: "onr_proteus_111_ice-and-data-special-report",
+        sourceDefinitionId: 169,
         revealedCount: 2,
-        publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+        publicRevealDefinitionIds: "589,594",
         exposedServerLabels: "Remote 1 ICE 1,Remote 1 Root 1",
       }),
       "runner",
@@ -388,10 +388,10 @@ describe("formatChronicleEvent", () => {
         hiddenZoneBarrier: true,
         hiddenZoneAction: "multi_expose_installed_corp_cards",
         publicRevealKind: "expose",
-        sourceDefinitionId: "onr_v1_091_hunt-club-bbs",
+        sourceDefinitionId: 303,
         revealedCount: 3,
         publicRevealDefinitionIds:
-          "simple_barrier_ice,simple_economy_asset,simple_upgrade",
+          "589,594,606",
         exposedServerLabels: "HQ ICE 1,Remote 1 Root 1,R&D Root 1",
       }),
       "runner",
@@ -462,12 +462,12 @@ describe("formatChronicleEvent", () => {
         serverLabel: "R&D",
         ...(actionType === "play_event"
           ? {
-              cardDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+              cardDefinitionId: 310,
               title: "Lucidrine Booster Drug",
               runnerEventRun: true,
             }
           : {}),
-        sourceDefinitionId: "onr_v1_002_ai-boon",
+        sourceDefinitionId: 214,
         v1921RunnerProgramAbility: "run_start_random_strength_bonus",
         v1921DieRoll: 5,
         runStartRandomStrength: 5,
@@ -480,7 +480,7 @@ describe("formatChronicleEvent", () => {
       expect(item.title).toBe(
         "AI Boon würfelt eine 5 und hat für diesen Run Grundstärke 5.",
       );
-      expect(item.cardDefinitionId).toBe("onr_v1_002_ai-boon");
+      expect(item.cardDefinitionId).toBe(214);
       expect(item.chips).toEqual(
         expect.arrayContaining(["AI Boon", "Wurf 5", "Grundstärke 5"]),
       );
@@ -513,7 +513,7 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("play_event", {
       actor: "runner",
       aiReasonCode: "runner.plan.remote_contest",
-      cardDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+      cardDefinitionId: 164,
       title: "Disgruntled Ice Technician",
       label: "Disgruntled Ice Technician auf Remote 1",
       runnerEventRun: true,
@@ -540,7 +540,7 @@ describe("formatChronicleEvent", () => {
     const played = formatChronicleEvent(
       makeEvent("play_event", {
         actor: "runner",
-        cardDefinitionId: "onr_v1_111_social-engineering",
+        cardDefinitionId: 323,
         title: "Social Engineering",
       }),
       "runner",
@@ -549,13 +549,13 @@ describe("formatChronicleEvent", () => {
     const hiddenChoiceEvent = makeEvent("resolve_choice", {
       actor: "runner",
       aiReasonCode: "runner.social_engineering",
-      sourceDefinitionId: "onr_v1_111_social-engineering",
+      sourceDefinitionId: 323,
       hiddenZoneBarrier: true,
     });
     const hiddenChoice = formatChronicleEvent(hiddenChoiceEvent, "corp");
     const wrongGuessEvent = makeEvent("resolve_choice", {
       actor: "corp",
-      sourceDefinitionId: "onr_v1_111_social-engineering",
+      sourceDefinitionId: 323,
       hiddenZoneBarrier: true,
       amounts: {
         secretHiddenAmountRevealed: 3,
@@ -573,7 +573,7 @@ describe("formatChronicleEvent", () => {
     const correctGuess = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceDefinitionId: 323,
         hiddenZoneBarrier: true,
         amounts: {
           secretHiddenAmountRevealed: 3,
@@ -588,7 +588,7 @@ describe("formatChronicleEvent", () => {
     const noIceTarget = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        sourceDefinitionId: "onr_v1_111_social-engineering",
+        sourceDefinitionId: 323,
         hiddenZoneBarrier: true,
         amounts: {
           secretHiddenAmountRevealed: 2,
@@ -604,7 +604,7 @@ describe("formatChronicleEvent", () => {
     const targetChoiceEvent = makeEvent("resolve_choice", {
       actor: "runner",
       aiReasonCode: "runner.social_engineering",
-      sourceDefinitionId: "onr_v1_111_social-engineering",
+      sourceDefinitionId: 323,
       hiddenZoneBarrier: true,
       serverId: "hq",
       serverLabel: "HQ",
@@ -683,7 +683,7 @@ describe("formatChronicleEvent", () => {
       "Die Korp bekommt vor dem Auto-Pass die normale Rez-Gelegenheit.",
     );
     expect(targetChoice.category).toBe("run");
-    expect(targetChoice.cardDefinitionId).toBe("onr_v1_111_social-engineering");
+    expect(targetChoice.cardDefinitionId).toBe(323);
     expect(targetChoice.cardTitle).toBe("Social Engineering");
     expect(targetChoice.groupLabel).toBe("Run auf HQ");
     expect(targetChoice.chips).toEqual(
@@ -705,21 +705,21 @@ describe("formatChronicleEvent", () => {
       actor: "corp",
       choiceVisibility: "public",
       classicDeflector: true,
-      sourceDefinitionId: "onr_classic_010_entrapment",
+      sourceDefinitionId: 14,
       deflectedRun: true,
-      selectedServerId: "remote_1",
+      selectedServerId: "r1",
       selectedServerLabel: "Remote 1",
       redirectedToRezzedIce: true,
       paidCredits: 2,
       corpCreditsAfter: 3,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
           reason: "ice_subroutine",
-          sourceDefinitionId: "onr_classic_010_entrapment",
+          sourceDefinitionId: 14,
           sourceTitle: "Entrapment",
           subroutineIndex: 0,
           subroutineType: "deflect_run",
@@ -766,15 +766,15 @@ describe("formatChronicleEvent", () => {
         classicDeflector: true,
         deflectorChoiceOpened: true,
         deflectorCost: 2,
-        sourceDefinitionId: "onr_classic_015_vortex",
+        sourceDefinitionId: 19,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
             reason: "ice_subroutine",
-            sourceDefinitionId: "onr_classic_015_vortex",
+            sourceDefinitionId: 19,
             sourceTitle: "Vortex",
             subroutineIndex: 0,
             subroutineType: "deflect_run",
@@ -805,20 +805,20 @@ describe("formatChronicleEvent", () => {
       actor: "runner",
       actionType: "continue_run",
       classicDeflector: true,
-      sourceDefinitionId: "onr_classic_014_trapdoor",
+      sourceDefinitionId: 18,
       deflectedRun: true,
-      selectedServerId: "remote_1",
+      selectedServerId: "r1",
       selectedServerLabel: "Remote 1",
       redirectedToRezzedIce: true,
       paidCredits: 0,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
           reason: "ice_subroutine",
-          sourceDefinitionId: "onr_classic_014_trapdoor",
+          sourceDefinitionId: 18,
           sourceTitle: "Trapdoor",
           subroutineIndex: 0,
           subroutineType: "deflect_run",
@@ -830,7 +830,7 @@ describe("formatChronicleEvent", () => {
       actor: "runner",
       actionType: "continue_run",
       classicDeflector: true,
-      sourceDefinitionId: "onr_classic_009_dumpster",
+      sourceDefinitionId: 13,
       deflectedRun: true,
       selectedServerId: "archives",
       selectedServerLabel: "Archives",
@@ -838,12 +838,12 @@ describe("formatChronicleEvent", () => {
       paidCredits: 0,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
           reason: "ice_subroutine",
-          sourceDefinitionId: "onr_classic_009_dumpster",
+          sourceDefinitionId: 13,
           sourceTitle: "Dumpster",
           subroutineIndex: 0,
           subroutineType: "deflect_run",
@@ -894,12 +894,12 @@ describe("formatChronicleEvent", () => {
 
   it("distinguishes Entrapment redirects without rezzed ICE and declined payment", () => {
     const resolvedEffect = {
-      effectId: "subroutine_1",
+      effectId: 0,
       kind: "resolve_subroutine",
       visibility: "public",
       side: "runner",
       reason: "ice_subroutine",
-      sourceDefinitionId: "onr_classic_010_entrapment",
+      sourceDefinitionId: 14,
       sourceTitle: "Entrapment",
       subroutineIndex: 0,
       subroutineType: "deflect_run",
@@ -910,9 +910,9 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         choiceVisibility: "public",
         classicDeflector: true,
-        sourceDefinitionId: "onr_classic_010_entrapment",
+        sourceDefinitionId: 14,
         deflectedRun: true,
-        selectedServerId: "remote_1",
+        selectedServerId: "r1",
         selectedServerLabel: "Remote 1",
         redirectedToRezzedIce: false,
         paidCredits: 2,
@@ -925,7 +925,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         choiceVisibility: "public",
         classicDeflector: true,
-        sourceDefinitionId: "onr_classic_010_entrapment",
+        sourceDefinitionId: 14,
         deflectedRun: false,
         paidCredits: 0,
         resolvedEffects: [{ ...resolvedEffect, paidCredits: 0 }],
@@ -953,10 +953,10 @@ describe("formatChronicleEvent", () => {
       makeEvent("continue_run", {
         actor: "corp",
         corpPostPassIceAbility: "return_passed_ice_to_hq",
-        sourceDefinitionId: "onr_proteus_043_twisty-passages",
+        sourceDefinitionId: 101,
         sourceTitle: "Twisty Passages",
-        passedIceDefinitionId: "onr_proteus_043_twisty-passages",
-        returnedCardDefinitionId: "onr_proteus_043_twisty-passages",
+        passedIceDefinitionId: 101,
+        returnedCardDefinitionId: 101,
         serverLabel: "R&D",
         decision: "return_to_hq",
         returnedToHq: true,
@@ -968,9 +968,9 @@ describe("formatChronicleEvent", () => {
       makeEvent("continue_run", {
         actor: "corp",
         corpPostPassIceAbility: "return_passed_ice_to_hq",
-        sourceDefinitionId: "onr_proteus_043_twisty-passages",
+        sourceDefinitionId: 101,
         sourceTitle: "Twisty Passages",
-        passedIceDefinitionId: "onr_proteus_043_twisty-passages",
+        passedIceDefinitionId: 101,
         serverLabel: "R&D",
         decision: "pay",
         paymentAmount: 1,
@@ -988,7 +988,7 @@ describe("formatChronicleEvent", () => {
     expect(returned.category).toBe("run");
     expect(returned.importance).toBe("important");
     expect(returned.visibility).toBe("public");
-    expect(returned.cardDefinitionId).toBe("onr_proteus_043_twisty-passages");
+    expect(returned.cardDefinitionId).toBe(101);
     expect(returned.cardTitle).toBe("Twisty Passages");
     expect(returned.chips).toEqual(
       expect.arrayContaining(["Twisty Passages", "Post-Pass", "HQ", "R&D"]),
@@ -1008,7 +1008,7 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("rez_ice", {
       actor: "corp",
       runStartBypassAutoPassedIce: true,
-      runStartBypassPassedIceDefinitionId: "simple_code_gate_ice",
+      runStartBypassPassedIceDefinitionId: 590,
       passedIcePosition: 2,
       serverLabel: "R&D",
     });
@@ -1029,7 +1029,7 @@ describe("formatChronicleEvent", () => {
       importance: "important",
       visibility: "public",
       actor: "runner",
-      cardDefinitionId: "onr_v1_094_inside-job",
+      cardDefinitionId: 306,
       cardTitle: "Inside Job",
       groupLabel: "Run auf R&D",
     });
@@ -1070,22 +1070,22 @@ describe("formatChronicleEvent", () => {
     const alreadyRezzed = formatChronicleEffectItems(
       makeEvent("continue_run", {
         actor: "runner",
-        targetIceDefinitionId: "simple_barrier_ice",
+        targetIceDefinitionId: 589,
         serverLabel: "R&D",
         encounterTaxForFutureIce: 2,
         encounterTaxPaid: 2,
-        encounterTaxSource: "onr_v1_222_ball-and-chain",
+        encounterTaxSource: 434,
       }),
       "runner",
     )[0];
     const newlyRezzedWithoutCredits = formatChronicleEffectItems(
       makeEvent("rez_ice", {
         actor: "corp",
-        targetIceDefinitionId: "simple_code_gate_ice",
+        targetIceDefinitionId: 590,
         serverLabel: "R&D",
         encounterTaxForFutureIce: 2,
         encounterTaxPaid: 0,
-        encounterTaxSource: "onr_v1_222_ball-and-chain",
+        encounterTaxSource: 434,
         result: "ended",
       }),
       "corp",
@@ -1095,7 +1095,7 @@ describe("formatChronicleEvent", () => {
       category: "run",
       importance: "important",
       actor: "runner",
-      cardDefinitionId: "onr_v1_222_ball-and-chain",
+      cardDefinitionId: 434,
       cardTitle: "Ball and Chain",
       groupLabel: "Run auf R&D",
     });
@@ -1126,7 +1126,7 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("break_subroutine", {
         actor: "runner",
-        cardDefinitionId: "onr_v1_031_hammer",
+        cardDefinitionId: 243,
         title: "Hammer",
         targetIceTitle: "Wall of Static",
         subroutineIndex: 0,
@@ -1151,8 +1151,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("continue_run", {
         actor: "runner",
         postPassFutureStrengthAbility: "cancel_future_ice_strength_bonus",
-        sourceDefinitionId: "onr_proteus_016_coyote",
-        passedIceDefinitionId: "onr_proteus_016_coyote",
+        sourceDefinitionId: 74,
+        passedIceDefinitionId: 74,
         serverLabel: "R&D",
         decision: "pay",
         paymentAmount: 2,
@@ -1170,7 +1170,7 @@ describe("formatChronicleEvent", () => {
       "Der +1-Stärke-Bonus von Coyote für alle weiteren ICE in diesem Run wurde verhindert.",
     );
     expect(item).toMatchObject({
-      cardDefinitionId: "onr_proteus_016_coyote",
+      cardDefinitionId: 74,
       cardTitle: "Coyote",
       groupLabel: "Run auf R&D",
     });
@@ -1189,7 +1189,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         serverLabel: "R&D",
         v1922CorpIceAbility: "viral_15_jack_out_tax",
-        sourceDefinitionId: "onr_v1_276_viral-15",
+        sourceDefinitionId: 488,
         jackOutAdditionalCost: 1,
         runnerCreditsAfter: 4,
       }),
@@ -1200,7 +1200,7 @@ describe("formatChronicleEvent", () => {
     expect(item.description).toBe(
       "Viral 15: Jack-out bezahlt; auf R&D wurde keine Karte zugegriffen und kein Programm getrasht.",
     );
-    expect(item.cardDefinitionId).toBe("onr_v1_276_viral-15");
+    expect(item.cardDefinitionId).toBe(488);
     expect(item.chips).toEqual(
       expect.arrayContaining(["Viral 15", "1 Credit", "Rig geschützt"]),
     );
@@ -1210,7 +1210,7 @@ describe("formatChronicleEvent", () => {
     const opened = formatChronicleEvent(
       makeEvent("continue_run", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_276_viral-15",
+        sourceDefinitionId: 488,
         hiddenZoneBarrier: true,
         passIceTrashProgramPrompt: true,
         passIceTrashProgramCandidateCount: 2,
@@ -1220,10 +1220,10 @@ describe("formatChronicleEvent", () => {
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_276_viral-15",
+        sourceDefinitionId: 488,
         hiddenZoneAction: "v1922_viral_15_program_trash",
         programTrashCount: 1,
-        trashedCardDefinitionId: "onr_v1_039_krash",
+        trashedCardDefinitionId: 251,
       }),
       "corp",
     );
@@ -1259,9 +1259,9 @@ describe("formatChronicleEvent", () => {
       makeEvent("trigger_ability", {
         actor: "runner",
         label: "Startup Immolator: ICE trashen",
-        sourceDefinitionId: "onr_v1_068_startup-immolator",
-        targetIceDefinitionId: "simple_barrier_ice",
-        trashedCardDefinitionId: "simple_barrier_ice",
+        sourceDefinitionId: 280,
+        targetIceDefinitionId: 589,
+        trashedCardDefinitionId: 589,
         v1922RunnerProgramAbility: "startup_immolator_trash_ice",
         rezCostPaid: 3,
         trashedCount: 1,
@@ -1279,7 +1279,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("run");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("onr_v1_068_startup-immolator");
+    expect(item.cardDefinitionId).toBe(280);
     expect(item.chips).toEqual(
       expect.arrayContaining([
         "Startup Immolator",
@@ -1296,7 +1296,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         aiReasonCode: "successful_run_followup",
         label: "I Spy: Spy-Counter platzieren",
-        sourceDefinitionId: "onr_v1_032_i-spy",
+        sourceDefinitionId: 244,
         runnerUtilityAbility: "i_spy_put_spy_counter",
         counterType: "spy",
         addedCounterAmount: 1,
@@ -1313,7 +1313,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("run");
     expect(item.importance).toBe("important");
-    expect(item.cardDefinitionId).toBe("onr_v1_032_i-spy");
+    expect(item.cardDefinitionId).toBe(244);
     expect(item.cardTitle).toBe("I Spy");
     expect(item.groupLabel).toBe("Run auf HQ");
     expect(item.chips).toEqual(
@@ -1327,10 +1327,10 @@ describe("formatChronicleEvent", () => {
       makeEvent("rez_ice", {
         actor: "corp",
         label: "Olivia Salazar: Crystal Wall für 2 Credits rezzen",
-        cardDefinitionId: "onr_v1_232_crystal-wall",
+        cardDefinitionId: 444,
         title: "Crystal Wall",
         cardType: "ice",
-        oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+        oliviaSalazarRezSourceDefinitionId: 575,
         oliviaSalazarRezCostBase: 4,
         oliviaSalazarTemporaryDerez: true,
         rezCostPaid: 2,
@@ -1361,7 +1361,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("rez_ice", {
         actor: "corp",
         label: "Caryatid als code_gate rezzen",
-        cardDefinitionId: "onr_proteus_013_caryatid",
+        cardDefinitionId: 71,
         title: "Caryatid",
         cardType: "ice",
         baseRezCost: 7,
@@ -1390,7 +1390,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("activated_card_ability", {
         actor: "corp",
         label: "Political Coup: 3 Credits nehmen",
-        cardDefinitionId: "onr_v1_209_political-coup",
+        cardDefinitionId: 421,
         title: "Political Coup",
         cardImplementationAbility: "activated",
         gainedCredits: 3,
@@ -1398,13 +1398,13 @@ describe("formatChronicleEvent", () => {
         hostedCreditsAfter: 9,
         resolvedEffects: [
           {
-            effectId: "onr_v1_209_political-coup.effect.0.take_hosted_credits",
+            effectId: 0,
             kind: "take_hosted_credits",
             visibility: "public",
             side: "corp",
             amount: 3,
             remainingCounters: 9,
-            sourceDefinitionId: "onr_v1_209_political-coup",
+            sourceDefinitionId: 421,
             sourceTitle: "Political Coup",
             reason: "card_resolver",
           },
@@ -1503,9 +1503,9 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         label: "The Shell Traders: Shell-Counter entfernen",
         title: "The Shell Traders",
-        sourceDefinitionId: "onr_v1_176_the-shell-traders",
+        sourceDefinitionId: 388,
         abilityId: "remove_shell_counter",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         remainingCounters: 1,
       }),
       "runner",
@@ -1516,7 +1516,7 @@ describe("formatChronicleEvent", () => {
         label: "The Shell Traders: 1 Shell-Counter entfernen",
         title: "The Shell Traders",
         shellTradersAbility: "start_turn_remove_shell_counter",
-        targetCardDefinitionId: "simple_decoder",
+        targetCardDefinitionId: 591,
         remainingCounters: 0,
         installedFromSpecialZone: true,
       }),
@@ -1540,7 +1540,7 @@ describe("formatChronicleEvent", () => {
       gainedCredits: 2,
       runnerCreditsAfter: 12,
       corpRezzedIceThisTurnCount: 2,
-      sourceDefinitionId: "onr_v1_162_field-reporter-for-ice-and-data",
+      sourceDefinitionId: 374,
     });
     const item = formatChronicleEvent(event, "runner");
     const effects = formatChronicleEffectItems(event, "runner");
@@ -1554,7 +1554,7 @@ describe("formatChronicleEvent", () => {
     expect(effects[0]?.category).toBe("economy");
     expect(effects[0]?.importance).toBe("important");
     expect(effects[0]?.cardDefinitionId).toBe(
-      "onr_v1_162_field-reporter-for-ice-and-data",
+      374,
     );
     expect(effects[0]?.chips).toEqual(
       expect.arrayContaining(["Zugende", "+2 Credits", "2 ICE gerezzt"]),
@@ -1589,7 +1589,7 @@ describe("formatChronicleEvent", () => {
         revealKind: "expose",
         serverLabel: "HQ",
         title: "Simple Barrier ICE",
-        cardDefinitionId: "simple_barrier_ice",
+        cardDefinitionId: 589,
       }),
       "runner",
     );
@@ -1610,29 +1610,29 @@ describe("formatChronicleEvent", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "expose_installed_card_review",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "simple_upgrade",
-      cardDefinitionId: "simple_upgrade",
+      publicRevealDefinitionId: 606,
+      cardDefinitionId: 606,
       title: "Simple Upgrade",
-      sourceDefinitionId: "onr_v1_058_seeya",
+      sourceDefinitionId: 270,
       sourceTitle: "SeeYa",
-      exposedServerId: "remote_1",
+      exposedServerId: "r1",
       exposedServerLabel: "Remote 1",
       exposedArea: "root",
       exposedIndex: 0,
     });
     const sameCardInRemoteTwo = makeEvent("resolve_choice", {
       ...remoteOne.publicPayload,
-      eventId: "evt_expose_remote_2",
-      exposedServerId: "remote_2",
+      eventId: 100,
+      exposedServerId: "r2",
       exposedServerLabel: "Remote 2",
       exposedIndex: 1,
     });
     const iceInRemoteOne = makeEvent("resolve_choice", {
       ...remoteOne.publicPayload,
-      eventId: "evt_expose_remote_1_ice_2",
+      eventId: 101,
       title: "Simple Barrier ICE",
-      publicRevealDefinitionId: "simple_barrier_ice",
-      cardDefinitionId: "simple_barrier_ice",
+      publicRevealDefinitionId: 589,
+      cardDefinitionId: 589,
       exposedArea: "ice",
       exposedIndex: 1,
     });
@@ -1683,7 +1683,7 @@ describe("formatChronicleEvent", () => {
     "summarizes Mouse activation and resolved expose once for $label",
     ({ viewer, aiExplanation, expectedSubject }) => {
       const activation = makeEvent("activated_card_ability", {
-        eventId: "evt_mouse_activation",
+        eventId: 102,
         actor: "runner",
         label: "Mouse: installierte Korp-Karte exposen",
         actionCostClicks: 1,
@@ -1691,21 +1691,21 @@ describe("formatChronicleEvent", () => {
         turnActionOrdinalEnd: 3,
         hiddenZoneBarrier: true,
         hiddenZoneAction: "expose_installed_card_choice",
-        sourceDefinitionId: "onr_v1_042_mouse",
+        sourceDefinitionId: 254,
       });
       const result = makeEvent("resolve_choice", {
-        eventId: "evt_mouse_result",
+        eventId: 103,
         actor: "runner",
         ...(aiExplanation ? { aiExplanation } : {}),
         hiddenZoneBarrier: true,
         hiddenZoneAction: "expose_installed_card_review",
         publicRevealKind: "expose",
-        publicRevealDefinitionId: "onr_v1_190_bioweapons-engineering",
-        cardDefinitionId: "onr_v1_190_bioweapons-engineering",
+        publicRevealDefinitionId: 402,
+        cardDefinitionId: 402,
         title: "Bioweapons Engineering",
-        sourceDefinitionId: "onr_v1_042_mouse",
+        sourceDefinitionId: 254,
         sourceTitle: "Mouse",
-        exposedServerId: "remote_1",
+        exposedServerId: "r1",
         exposedServerLabel: "Remote 1",
         exposedArea: "root",
         exposedIndex: 0,
@@ -1729,7 +1729,7 @@ describe("formatChronicleEvent", () => {
       expect(visibleItems).toHaveLength(1);
       expect(visibleItems[0]).toMatchObject({
         title: `${expectedSubject} mit Mouse Bioweapons Engineering in Remote 1 · Root 1 vorübergehend offengelegt.`,
-        cardDefinitionId: "onr_v1_190_bioweapons-engineering",
+        cardDefinitionId: 402,
         cardTitle: "Bioweapons Engineering",
         actionUse: {
           label: "3",
@@ -1749,32 +1749,32 @@ describe("formatChronicleEvent", () => {
 
   it("keeps unresolved or unrelated single-expose activations visible", () => {
     const activation = makeEvent("activated_card_ability", {
-      eventId: "evt_mouse_unresolved",
+      eventId: 104,
       actor: "runner",
       actionCostClicks: 1,
       turnActionOrdinalStart: 2,
       turnActionOrdinalEnd: 2,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "expose_installed_card_choice",
-      sourceDefinitionId: "onr_v1_042_mouse",
+      sourceDefinitionId: 254,
     });
     const unrelatedSeeYaResult = makeEvent("resolve_choice", {
-      eventId: "evt_seeya_result",
+      eventId: 105,
       actor: "runner",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "expose_installed_card_review",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "simple_upgrade",
-      sourceDefinitionId: "onr_v1_058_seeya",
+      publicRevealDefinitionId: 606,
+      sourceDefinitionId: 270,
     });
     const batchExpose = makeEvent("resolve_choice", {
-      eventId: "evt_batch_expose",
+      eventId: 106,
       actor: "runner",
       hiddenZoneBarrier: true,
       hiddenZoneAction:
         "schematics_search_engine_expose_installed_cards_review",
       publicRevealKind: "expose",
-      sourceDefinitionId: "onr_v1_149_schematics-search-engine",
+      sourceDefinitionId: 11026,
     });
     const projectionPlan = chronicleEventProjectionPlan([
       activation,
@@ -1800,15 +1800,15 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         serverLabel: "HQ",
         title: "Simple Agenda",
-        cardDefinitionId: "simple_agenda",
+        cardDefinitionId: 588,
         hiddenZoneBarrier: true,
         hiddenZoneAction:
           "schematics_search_engine_expose_installed_cards_review",
         publicRevealKind: "expose",
-        sourceDefinitionId: "onr_classic_032_schematics-search-engine",
+        sourceDefinitionId: 36,
         sourceTitle: "Schematics Search Engine",
         revealedCount: 2,
-        publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+        publicRevealDefinitionIds: "589,594",
         publicRevealTitles: "Simple Barrier ICE||Simple Economy Asset",
         exposedServerLabels: "R&D ICE 1,Remote 1 Root 1",
       }),
@@ -1823,7 +1823,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("run");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("simple_agenda");
+    expect(item.cardDefinitionId).toBe(588);
     expect(item.chips).toEqual(
       expect.arrayContaining([
         "Zugriff",
@@ -1848,10 +1848,10 @@ describe("formatChronicleEvent", () => {
           hiddenZoneAction:
             "schematics_search_engine_expose_installed_cards_review",
           publicRevealKind: "expose",
-          sourceDefinitionId: "onr_classic_032_schematics-search-engine",
+          sourceDefinitionId: 36,
           sourceTitle: "Schematics Search Engine",
           revealedCount: 2,
-          publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+          publicRevealDefinitionIds: "589,594",
           publicRevealTitles: "Simple Barrier ICE||Simple Economy Asset",
           exposedServerLabels: "R&D ICE 1,Remote 1 Root 1",
         }),
@@ -1866,7 +1866,7 @@ describe("formatChronicleEvent", () => {
       );
       expect(item.category).toBe("run");
       expect(item.cardDefinitionId).toBe(
-        "onr_classic_032_schematics-search-engine",
+        36,
       );
       expect(item.chips).toEqual(
         expect.arrayContaining([
@@ -1886,7 +1886,7 @@ describe("formatChronicleEvent", () => {
         hiddenZoneBarrier: true,
         hiddenZoneAction:
           "schematics_search_engine_expose_installed_cards_finish",
-        sourceDefinitionId: "onr_classic_032_schematics-search-engine",
+        sourceDefinitionId: 36,
         sourceTitle: "Schematics Search Engine",
       }),
       "runner",
@@ -1899,7 +1899,7 @@ describe("formatChronicleEvent", () => {
     expect(item.category).toBe("hidden");
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe(
-      "onr_classic_032_schematics-search-engine",
+      36,
     );
     expect(item.chips).toEqual(
       expect.arrayContaining([
@@ -1916,13 +1916,13 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
-        sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+        sourceDefinitionId: 526,
         sourceTitle: "Corporate Negotiating Center",
         publicRevealKind: "reveal",
-        publicRevealDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+        publicRevealDefinitionIds: "588,415",
         publicRevealTitles: "Simple Agenda||Hostile Takeover",
         revealedAgendaDefinitionIds:
-          "simple_agenda,onr_v1_203_hostile-takeover",
+          "588,415",
         revealedCount: 2,
         gainedCredits: 2,
       }),
@@ -1938,7 +1938,7 @@ describe("formatChronicleEvent", () => {
     expect(item.category).toBe("agenda");
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe(
-      "onr_v1_314_corporate-negotiating-center",
+      526,
     );
     expect(item.chips).toEqual(
       expect.arrayContaining([
@@ -1957,12 +1957,12 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "corp_hq_agenda_reveal",
-        sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+        sourceDefinitionId: 526,
         sourceTitle: "Corporate Negotiating Center",
         publicRevealKind: "reveal",
-        publicRevealDefinitionIds: "simple_agenda",
+        publicRevealDefinitionIds: "588",
         publicRevealTitles: "Simple Agenda",
-        revealedAgendaDefinitionIds: "simple_agenda",
+        revealedAgendaDefinitionIds: "588",
         revealedCount: 1,
         gainedCredits: 1,
       }),
@@ -1994,7 +1994,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "corp_hq_agenda_reveal",
-        sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+        sourceDefinitionId: 526,
         sourceTitle: "Corporate Negotiating Center",
         publicRevealKind: "reveal",
         publicRevealDefinitionIds: "",
@@ -2027,12 +2027,12 @@ describe("formatChronicleEvent", () => {
       aiReasonCode: "corp.score_agenda",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
-      sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+      sourceDefinitionId: 406,
       sourceTitle: "Corporate Downsizing",
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+      publicRevealDefinitionIds: "588,415",
       publicRevealTitles: "Simple Agenda||Hostile Takeover",
-      shownCardDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+      shownCardDefinitionIds: "588,415",
       shownCount: 2,
       shuffledIntoRndCount: 2,
       combinedAgendaPoints: 5,
@@ -2069,7 +2069,7 @@ describe("formatChronicleEvent", () => {
       actor: "corp",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
-      sourceDefinitionId: "onr_v1_194_corporate-downsizing",
+      sourceDefinitionId: 406,
       sourceTitle: "Corporate Downsizing",
       publicRevealKind: "reveal",
       publicRevealDefinitionIds: "",
@@ -2104,9 +2104,9 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
+        sourceDefinitionId: 392,
         smithsPawnshopTriggered: true,
-        trashedCardDefinitionId: "onr_v1_028_force-shield",
+        trashedCardDefinitionId: 240,
         trashedCardTitle: "Force Shield",
         creditsGained: 2,
         gainedCredits: 2,
@@ -2164,7 +2164,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("trigger_ability", {
         actor: "runner",
         title: "Self-Modifying Code",
-        sourceDefinitionId: "onr_v1_059_self-modifying-code",
+        sourceDefinitionId: 271,
         label:
           "Self-Modifying Code: trashen und Programm aus Stack installieren",
       }),
@@ -2174,8 +2174,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         hiddenZoneAction: "self_modifying_code_install_program",
-        publicRevealDefinitionId: "simple_decoder",
-        installedProgramDefinitionId: "simple_decoder",
+        publicRevealDefinitionId: 591,
+        installedProgramDefinitionId: 591,
         searchDestination: "runner_rig",
         installed: true,
         shuffled: true,
@@ -2205,11 +2205,11 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         hiddenZoneAction: "p3_38_stack_or_trash_program_install",
-        sourceDefinitionId: "onr_v1_110_sneak-preview",
+        sourceDefinitionId: 322,
         sourceTitle: "Sneak Preview",
         searchReveal: "public",
         searchDestination: "install_program",
-        installedProgramDefinitionId: "onr_classic_031_rent-i-con",
+        installedProgramDefinitionId: 35,
         temporaryInstall: true,
         shuffled: true,
       }),
@@ -2220,7 +2220,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         hiddenZoneAction: "temporary_program_install_end_turn_return",
         returnedCount: 1,
-        returnedCardDefinitionIds: "onr_classic_031_rent-i-con",
+        returnedCardDefinitionIds: "35",
       }),
       "runner",
     );
@@ -2245,7 +2245,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("gain_credit", {
         actor: "runner",
         hiddenZoneAction: "v1911_short_circuit_search",
-        sourceDefinitionId: "onr_v1_177_the-short-circuit",
+        sourceDefinitionId: 389,
       }),
       "runner",
     );
@@ -2253,9 +2253,9 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         hiddenZoneAction: "v1911_short_circuit_search",
-        sourceDefinitionId: "onr_v1_177_the-short-circuit",
-        publicRevealDefinitionId: "simple_decoder",
-        cardDefinitionId: "simple_decoder",
+        sourceDefinitionId: 389,
+        publicRevealDefinitionId: 591,
+        cardDefinitionId: 591,
         searchDestination: "runner_grip",
         shuffled: true,
       }),
@@ -2291,8 +2291,8 @@ describe("formatChronicleEvent", () => {
         hiddenZoneBarrier: true,
         hiddenZoneAction: "p3_37_search_stack_to_grip",
         searchFilter: "program",
-        sourceDefinitionId: "onr_v1_177_the-short-circuit",
-        cardDefinitionId: "onr_v1_177_the-short-circuit",
+        sourceDefinitionId: 389,
+        cardDefinitionId: 389,
         abilityId: "p3_37_search_stack_to_grip",
         effectKind: "hidden_zone",
         aiReasonCode: "runner.semantic.coverage_search",
@@ -2314,11 +2314,11 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         hiddenZoneAction:
           "p3_38_look_top_stack_show_to_corp_then_install_matching",
-        sourceDefinitionId: "onr_v1_043_mystery-box",
+        sourceDefinitionId: 255,
         revealCount: 5,
-        revealedCardDefinitionIds: "simple_decoder,simple_fracter",
-        publicRevealDefinitionId: "simple_decoder",
-        installedProgramDefinitionId: "simple_decoder",
+        revealedCardDefinitionIds: "591,597",
+        publicRevealDefinitionId: 591,
+        installedProgramDefinitionId: 591,
         installed: true,
         installedProgramCount: 1,
         selfTrashed: true,
@@ -2337,7 +2337,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("run");
     expect(item.groupLabel).toBe("Run");
-    expect(item.cardDefinitionId).toBe("simple_decoder");
+    expect(item.cardDefinitionId).toBe(591);
     expect(item.chips).toEqual(
       expect.arrayContaining([
         "Runner",
@@ -2359,9 +2359,9 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         hiddenZoneAction:
           "p3_38_look_top_stack_show_to_corp_then_install_matching",
-        sourceDefinitionId: "onr_v1_043_mystery-box",
+        sourceDefinitionId: 255,
         revealCount: 5,
-        revealedCardDefinitionIds: "simple_barrier_ice,simple_economy_event",
+        revealedCardDefinitionIds: "589,595",
         revealedProgramCount: 0,
         programFound: false,
         installedProgramCount: 0,
@@ -2380,7 +2380,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("run");
     expect(item.groupLabel).toBe("Run");
-    expect(item.cardDefinitionId).toBe("onr_v1_043_mystery-box");
+    expect(item.cardDefinitionId).toBe(255);
     expect(item.chips).toEqual(
       expect.arrayContaining([
         "Korp",
@@ -2399,10 +2399,10 @@ describe("formatChronicleEvent", () => {
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+        sourceDefinitionId: 516,
         v1919OperationAbility: "add_advancement_counters",
-        targetCardDefinitionId: "onr_v1_196_corporate-war",
-        targetCardDefinitionIds: "onr_v1_196_corporate-war",
+        targetCardDefinitionId: 408,
+        targetCardDefinitionIds: "408",
         addedAdvancementCounters: 2,
         targetCount: 1,
         advancementCountersAfter: 2,
@@ -2427,7 +2427,7 @@ describe("formatChronicleEvent", () => {
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+        sourceDefinitionId: 516,
         v1919OperationAbility: "add_advancement_counters",
         addedAdvancementCounters: 2,
         targetCount: 1,
@@ -2456,9 +2456,9 @@ describe("formatChronicleEvent", () => {
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        sourceDefinitionId: "onr_v1_292_management-shake-up",
+        sourceDefinitionId: 504,
         v1919OperationAbility: "add_advancement_counters",
-        targetCardDefinitionIds: "onr_v1_196_corporate-war",
+        targetCardDefinitionIds: "408",
         addedAdvancementCounters: 3,
         targetCount: 2,
         publicTargetCount: 1,
@@ -2479,7 +2479,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         hiddenZoneAction: "self_modifying_code_install_program",
-        publicRevealDefinitionId: "simple_decoder",
+        publicRevealDefinitionId: 591,
         searchDestination: "runner_stack",
         installed: false,
         installBlockedReason: "insufficient_credits",
@@ -2491,7 +2491,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         hiddenZoneAction: "self_modifying_code_install_program",
-        publicRevealDefinitionId: "simple_decoder",
+        publicRevealDefinitionId: 591,
         searchDestination: "install_program",
         installDeferredForMemory: true,
         installed: false,
@@ -2503,10 +2503,10 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         hiddenZoneAction: "self_modifying_code_free_mu",
-        publicRevealDefinitionId: "simple_decoder",
-        installedProgramDefinitionId: "simple_decoder",
+        publicRevealDefinitionId: 591,
+        installedProgramDefinitionId: 591,
         trashedCount: 1,
-        trashedCardDefinitionIds: "simple_fracter",
+        trashedCardDefinitionIds: "597",
         installed: true,
       }),
       "runner",
@@ -2532,9 +2532,9 @@ describe("formatChronicleEvent", () => {
         aiReasonCode: "runner_program_install_memory_cleanup",
         abilityId: "runner_program_trash_before_install",
         effectKind: "install_card",
-        sourceDefinitionId: "onr_v1_040_loony-goon",
+        sourceDefinitionId: 252,
         targets: {
-          installedProgramDefinitionId: "onr_v1_040_loony-goon",
+          installedProgramDefinitionId: 252,
           installDeferredForMemory: true,
         },
       }),
@@ -2546,15 +2546,15 @@ describe("formatChronicleEvent", () => {
         aiReasonCode: "runner_program_install_memory_cleanup",
         abilityId: "runner_program_trash_before_install",
         effectKind: "install_card",
-        sourceDefinitionId: "onr_v1_040_loony-goon",
+        sourceDefinitionId: 252,
         amounts: {
           trashedCount: 1,
           memoryUsedAfter: 4,
           memoryLimitAfter: 4,
         },
         targets: {
-          installedProgramDefinitionId: "onr_v1_040_loony-goon",
-          trashedCardDefinitionIds: "onr_v1_035_invisibility",
+          installedProgramDefinitionId: 252,
+          trashedCardDefinitionIds: "247",
           installed: true,
         },
       }),
@@ -2571,7 +2571,7 @@ describe("formatChronicleEvent", () => {
     expect(item.description).toBe("MU nach Installation: 4/4.");
     expect(item.category).toBe("card");
     expect(item.importance).toBe("important");
-    expect(item.cardDefinitionId).toBe("onr_v1_040_loony-goon");
+    expect(item.cardDefinitionId).toBe(252);
     expect(item.cardTitle).toBe("Loony Goon");
     expect(item.chips).toEqual(
       expect.arrayContaining([
@@ -2613,7 +2613,7 @@ describe("formatChronicleEvent", () => {
         runnerMemoryDeficit: 1,
         memoryFreed: 1,
         trashedProgramCount: 1,
-        trashedCardDefinitionIds: "simple_decoder",
+        trashedCardDefinitionIds: "591",
         runnerMemoryUsedAfter: 4,
         runnerMemoryLimitAfter: 4,
       }),
@@ -2643,7 +2643,7 @@ describe("formatChronicleEvent", () => {
     const paid = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+        ambushDefinitionId: 115,
         ambushPaidCost: 2,
       }),
       "runner",
@@ -2651,7 +2651,7 @@ describe("formatChronicleEvent", () => {
     const declined = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+        ambushDefinitionId: 115,
         ambushPaidCost: 0,
         ambushPaymentDeclined: true,
       }),
@@ -2703,14 +2703,14 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "doppelganger_counter",
+            effectId: 0,
             kind: "counter_change",
             visibility: "hidden_info_barrier",
             side: "runner",
             counterType: "link_reduction_counter",
             addedCounterAmount: 1,
             remainingCounters: 1,
-            sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
+            sourceDefinitionId: 115,
             sourceTitle: "Doppelganger Antibody",
           },
         ],
@@ -2734,18 +2734,18 @@ describe("formatChronicleEvent", () => {
   it("shows access ambush counter effects in the chronicle", () => {
     const event = makeEvent("resolve_choice", {
       actor: "corp",
-      ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      ambushDefinitionId: 115,
       ambushPaidCost: 2,
       resolvedEffects: [
         {
-          effectId: "doppelganger_counter",
+          effectId: 0,
           kind: "counter_change",
           visibility: "hidden_info_barrier",
           side: "runner",
           counterType: "link_reduction_counter",
           addedCounterAmount: 1,
           remainingCounters: 1,
-          sourceDefinitionId: "onr_proteus_057_doppelganger-antibody",
+          sourceDefinitionId: 115,
           sourceTitle: "Doppelganger Antibody",
         },
       ],
@@ -2770,41 +2770,41 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("access_card", {
       actor: "runner",
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
-      ambushDefinitionId: "onr_v1_323_experimental-ai",
+      ambushDefinitionId: 535,
       advancementCounterCount: 1,
       targetTrashCount: 1,
       trashedCount: 1,
-      trashedCardDefinitionIds: "onr_v1_007_blink",
+      trashedCardDefinitionIds: "219",
       resolvedEffects: [
         {
-          effectId: "experimental_ai_trash",
+          effectId: 0,
           kind: "trash_card",
           visibility: "hidden_info_barrier",
           side: "runner",
           amount: 1,
           reason: "access_effect",
-          sourceDefinitionId: "onr_v1_323_experimental-ai",
+          sourceDefinitionId: 535,
           sourceTitle: "Experimental AI",
-          cardDefinitionId: "onr_v1_007_blink",
+          cardDefinitionId: 219,
         },
       ],
     });
     const unnamedTargetEvent = makeEvent("access_card", {
       actor: "runner",
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
-      ambushDefinitionId: "onr_v1_323_experimental-ai",
+      ambushDefinitionId: 535,
       advancementCounterCount: 1,
       targetTrashCount: 1,
       trashedCount: 1,
       resolvedEffects: [
         {
-          effectId: "experimental_ai_trash_unknown",
+          effectId: 0,
           kind: "trash_card",
           visibility: "hidden_info_barrier",
           side: "runner",
           amount: 1,
           reason: "access_effect",
-          sourceDefinitionId: "onr_v1_323_experimental-ai",
+          sourceDefinitionId: 535,
           sourceTitle: "Experimental AI",
         },
       ],
@@ -2826,7 +2826,7 @@ describe("formatChronicleEvent", () => {
         "1 Advancement-Counter",
       ]),
     );
-    expect(effects[0]?.cardDefinitionId).toBe("onr_v1_323_experimental-ai");
+    expect(effects[0]?.cardDefinitionId).toBe(535);
     expect(effects[0]?.title).not.toContain("verdeckte Karte");
     expect(unnamedEffects[0]?.title).toBe(
       "Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte 1 Programm.",
@@ -2839,7 +2839,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("play_event", {
         actor: "runner",
         title: "Playful AI",
-        cardDefinitionId: "onr_v1_104_playful-ai",
+        cardDefinitionId: 316,
         abilityId: "playful_ai_dice_loop",
         v1921DieRoll: 3,
         playfulAiChoiceOpened: true,
@@ -2850,7 +2850,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         title: "Playful AI",
-        sourceDefinitionId: "onr_v1_104_playful-ai",
+        sourceDefinitionId: 316,
         abilityId: "playful_ai_dice_loop",
         v1921DieRoll: 5,
         playfulAiDieRolls: [4, 5],
@@ -2894,8 +2894,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("play_event", {
         actor: "runner",
         title: "Playful AI",
-        cardDefinitionId: "onr_v1_104_playful-ai",
-        sourceDefinitionId: "onr_v1_104_playful-ai",
+        cardDefinitionId: 316,
+        sourceDefinitionId: 316,
         abilityId: "random_dice_loop",
         v1921RunnerEventAbility: "random_dice_loop",
         v1921DieRoll: 5,
@@ -2910,7 +2910,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         title: "Playful AI",
-        sourceDefinitionId: "onr_v1_104_playful-ai",
+        sourceDefinitionId: 316,
         abilityId: "random_dice_loop",
         v1921RunnerEventAbility: "random_dice_loop",
         v1921DieRoll: 5,
@@ -2955,7 +2955,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         title: "Playful AI",
-        sourceDefinitionId: "onr_v1_104_playful-ai",
+        sourceDefinitionId: 316,
         abilityId: "playful_ai_dice_loop",
         v1921DieRoll: 1,
         playfulAiDieRolls: [1],
@@ -2973,7 +2973,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         title: "Playful AI",
-        sourceDefinitionId: "onr_v1_104_playful-ai",
+        sourceDefinitionId: 316,
         abilityId: "playful_ai_dice_loop",
         playfulAiDieRolls: [],
         playfulAiGainedCredits: 3,
@@ -3002,8 +3002,8 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("play_event", {
         actor: "runner",
-        sourceDefinitionId: "onr_classic_037_finders-keepers",
-        cardDefinitionId: "onr_classic_037_finders-keepers",
+        sourceDefinitionId: 41,
+        cardDefinitionId: 41,
         v1921RunnerEventAbility: "three_dice_gain_credits",
         randomDiceLoopRolls: "2,5,6",
         randomDiceLoopRolledDice: 3,
@@ -3037,7 +3037,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("play_event", {
         actor: "runner",
         title: "Edited Shipping Manifests",
-        cardDefinitionId: "onr_v1_084_edited-shipping-manifests",
+        cardDefinitionId: 296,
         accessReplacement: "corp_lose_credits_runner_tag_corp_draw",
         creditLoss: 1,
         corpCreditsAfter: 7,
@@ -3075,7 +3075,7 @@ describe("formatChronicleEvent", () => {
   it("describes Weather-to-Finance Pipe identically for immediate and delayed successful runs", () => {
     const payload = {
       actor: "runner",
-      sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+      sourceDefinitionId: 330,
       sourceTitle: "Weather-to-Finance Pipe",
       serverId: "hq",
       accessReplacement: "corp_lose_credits",
@@ -3119,7 +3119,7 @@ describe("formatChronicleEvent", () => {
     const unresolved = formatChronicleEvent(
       makeEvent("play_event", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+        sourceDefinitionId: 330,
         sourceTitle: "Weather-to-Finance Pipe",
         serverId: "hq",
       }),
@@ -3128,7 +3128,7 @@ describe("formatChronicleEvent", () => {
     const failed = formatChronicleEvent(
       makeEvent("continue_run", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+        sourceDefinitionId: 330,
         sourceTitle: "Weather-to-Finance Pipe",
         serverId: "hq",
         runSuccessful: false,
@@ -3147,7 +3147,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("activated_card_ability", {
         actor: "runner",
         title: "Record Reconstructor",
-        sourceDefinitionId: "onr_v1_142_record-reconstructor",
+        sourceDefinitionId: 354,
         accessReplacement: "archives_faceup_to_rd",
         shuffledFaceUpArchivesCount: 4,
         movedCount: 2,
@@ -3158,7 +3158,7 @@ describe("formatChronicleEvent", () => {
     const protectedRun = formatChronicleEvent(
       makeEvent("continue_run", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_142_record-reconstructor",
+        sourceDefinitionId: 354,
         accessReplacement: "archives_faceup_to_rd",
         shuffledFaceUpArchivesCount: 3,
         movedCount: 2,
@@ -3194,20 +3194,20 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {
         actor: "runner",
-        sourceDefinitionId: "onr_classic_038_gypsytm-schedule-analyzer",
+        sourceDefinitionId: 42,
         sourceTitle: "Gypsy™ Schedule Analyzer",
         accessReplacement: "reveal_rd_until_agenda_store_in_hq",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
         publicRevealDefinitionIds:
-          "simple_economy_operation,simple_barrier_ice,simple_agenda",
+          "596,589,588",
         publicRevealTitles:
           "Simple Economy Operation||Simple Barrier ICE||Simple Agenda",
-        revealedAgendaDefinitionIds: "simple_agenda",
+        revealedAgendaDefinitionIds: "588",
         revealedCount: 3,
         revealedNonAgendaCount: 2,
         agendaStoredInHq: true,
-        storedAgendaDefinitionId: "simple_agenda",
+        storedAgendaDefinitionId: 588,
         shuffledIntoRdCount: 2,
       }),
       "runner",
@@ -3237,14 +3237,14 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
-        sourceDefinitionId: "onr_classic_038_gypsytm-schedule-analyzer",
+        sourceDefinitionId: 42,
         sourceTitle: "Gypsy™ Schedule Analyzer",
         accessReplacement: "reveal_rd_until_agenda_store_in_hq",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
-        publicRevealDefinitionIds: "simple_economy_operation,simple_agenda",
+        publicRevealDefinitionIds: "596,588",
         publicRevealTitles: "Simple Economy Operation||Simple Agenda",
-        revealedAgendaDefinitionIds: "simple_agenda",
+        revealedAgendaDefinitionIds: "588",
         revealedCount: 2,
         revealedNonAgendaCount: 1,
         agendaStoredInHq: false,
@@ -3272,12 +3272,12 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {
         actor: "runner",
-        sourceDefinitionId: "onr_classic_038_gypsytm-schedule-analyzer",
+        sourceDefinitionId: 42,
         accessReplacement: "reveal_rd_until_agenda_store_in_hq",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
         publicRevealDefinitionIds:
-          "simple_economy_operation,simple_barrier_ice",
+          "596,589",
         publicRevealTitles: "Simple Economy Operation||Simple Barrier ICE",
         revealedAgendaDefinitionIds: "",
         revealedCount: 2,
@@ -3313,7 +3313,7 @@ describe("formatChronicleEvent", () => {
       hiddenZoneAction: "p3_33_private_look",
       privateLookZone: "rd",
       privateLookCount: 1,
-      sourceDefinitionId: "onr_v1_183_technician-lover",
+      sourceDefinitionId: 395,
       sourceTitle: "Technician Lover",
       aiReasonCode: "runner_private_look",
     });
@@ -3323,7 +3323,7 @@ describe("formatChronicleEvent", () => {
       hiddenZoneAction: "p3_33_private_look",
       privateLookZone: "rd",
       privateLookCount: 1,
-      sourceDefinitionId: "onr_v1_183_technician-lover",
+      sourceDefinitionId: 395,
       sourceTitle: "Technician Lover",
       aiReasonCode: "runner_private_look",
     });
@@ -3349,7 +3349,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("gain_credit", {
         actor: "corp",
         title: "Schlaghund",
-        cardDefinitionId: "onr_v1_339_schlaghund",
+        cardDefinitionId: 551,
         v1921AssetAbility: "schlaghund_tag_damage",
         v1921DieRoll: 4,
         runnerTags: 6,
@@ -3379,8 +3379,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("continue_run", {
         actor: "runner",
         v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
-        sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
-        passedIceDefinitionId: "simple_barrier_ice",
+        sourceDefinitionId: 579,
+        passedIceDefinitionId: 589,
         serverLabel: "Remote 1",
         v1921DieRoll: 1,
         rioRunEnded: true,
@@ -3394,7 +3394,7 @@ describe("formatChronicleEvent", () => {
     expect(item.description).toBe(
       "Der Run endet durch Rio de Janeiro City Grid.",
     );
-    expect(item.cardDefinitionId).toBe("simple_barrier_ice");
+    expect(item.cardDefinitionId).toBe(589);
     expect(item.cardTitle).toBe("Simple Barrier ICE");
     expect(item.chips).toEqual(
       expect.arrayContaining(["Rio", "Remote 1", "Wurf 1", "Run endet"]),
@@ -3429,7 +3429,7 @@ describe("formatChronicleEvent", () => {
     expect(rewound.description).toBe(
       "Wurf 3: Runner wird um 3 gerezzte ICE zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE. Ziel ist ICE 2.",
     );
-    expect(rewound.cardDefinitionId).toBe("onr_v1_275_vacuum-link");
+    expect(rewound.cardDefinitionId).toBe(487);
     expect(rewound.cardTitle).toBe("Vacuum Link");
     expect(rewound.chips).toEqual(
       expect.arrayContaining([
@@ -3462,11 +3462,11 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: 4,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_v1_278_wall-of-ice",
+            sourceDefinitionId: 490,
             sourceTitle: "Wall of Ice",
             subroutineIndex: 0,
             subroutineType: "do_damage",
@@ -3475,11 +3475,11 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: 2,
           },
           {
-            effectId: "subroutine_2",
+            effectId: 1,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_v1_278_wall-of-ice",
+            sourceDefinitionId: 490,
             sourceTitle: "Wall of Ice",
             subroutineIndex: 1,
             subroutineType: "do_damage",
@@ -3488,11 +3488,11 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: 2,
           },
           {
-            effectId: "subroutine_3",
+            effectId: 2,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_v1_278_wall-of-ice",
+            sourceDefinitionId: 490,
             sourceTitle: "Wall of Ice",
             subroutineIndex: 2,
             subroutineType: "end_the_run",
@@ -3526,11 +3526,11 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_classic_007_brain-drain",
+            sourceDefinitionId: 11,
             sourceTitle: "Brain Drain",
             subroutineIndex: 0,
             subroutineType: "random_damage",
@@ -3551,11 +3551,11 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: 3,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_classic_007_brain-drain",
+            sourceDefinitionId: 11,
             sourceTitle: "Brain Drain",
             subroutineIndex: 0,
             subroutineType: "random_damage",
@@ -3599,7 +3599,7 @@ describe("formatChronicleEvent", () => {
     const preventedItems = formatChronicleEffectItems(
       makeEvent("resolve_choice", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_061_shield",
+        sourceDefinitionId: 273,
         title: "Shield",
         eventModificationDecision: "apply",
         eventModificationOutcome: "prevented",
@@ -3612,11 +3612,11 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: 0,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_proteus_012_bug-zapper",
+            sourceDefinitionId: 70,
             sourceTitle: "Bug Zapper",
             subroutineIndex: 0,
             subroutineType: "do_damage",
@@ -3625,11 +3625,11 @@ describe("formatChronicleEvent", () => {
             cardsTrashed: 0,
           },
           {
-            effectId: "subroutine_2",
+            effectId: 1,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_proteus_012_bug-zapper",
+            sourceDefinitionId: 70,
             sourceTitle: "Bug Zapper",
             subroutineIndex: 1,
             subroutineType: "end_the_run",
@@ -3662,7 +3662,7 @@ describe("formatChronicleEvent", () => {
     const partialItem = formatChronicleEffectItems(
       makeEvent("resolve_choice", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_061_shield",
+        sourceDefinitionId: 273,
         title: "Shield",
         eventModificationDecision: "apply",
         eventModificationOutcome: "partially_prevented",
@@ -3675,11 +3675,11 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: 1,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_proteus_012_bug-zapper",
+            sourceDefinitionId: 70,
             sourceTitle: "Bug Zapper",
             subroutineIndex: 0,
             subroutineType: "do_damage",
@@ -3708,24 +3708,24 @@ describe("formatChronicleEvent", () => {
         result: "ended",
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_v1_223_banpei",
+            sourceDefinitionId: 435,
             sourceTitle: "Banpei",
             subroutineIndex: 0,
             subroutineType: "trash_installed_program",
-            cardDefinitionId: "simple_decoder",
+            cardDefinitionId: 591,
             cardTitle: "Simple Decoder",
             cardsTrashed: 1,
           },
           {
-            effectId: "subroutine_2",
+            effectId: 1,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_v1_223_banpei",
+            sourceDefinitionId: 435,
             sourceTitle: "Banpei",
             subroutineIndex: 1,
             subroutineType: "end_the_run",
@@ -3761,11 +3761,11 @@ describe("formatChronicleEvent", () => {
         result: "ended",
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_v1_247_haunting-inquisition",
+            sourceDefinitionId: 459,
             sourceTitle: "Haunting Inquisition",
             subroutineIndex: 0,
             subroutineType: "set_runner_run_lock_actions",
@@ -3799,24 +3799,24 @@ describe("formatChronicleEvent", () => {
         encounterContinue: true,
         resolvedEffects: [
           {
-            effectId: "subroutine_1",
+            effectId: 0,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
             reason: "ice_subroutine",
-            sourceDefinitionId: "onr_v1_271_tko-2-0",
+            sourceDefinitionId: 483,
             sourceTitle: "TKO 2.0",
             subroutineIndex: 0,
             subroutineType: "set_runner_forgo_next_action",
             runnerForgoneActionOrdinal: 2,
           },
           {
-            effectId: "subroutine_2",
+            effectId: 1,
             kind: "resolve_subroutine",
             visibility: "public",
             side: "runner",
             reason: "ice_subroutine",
-            sourceDefinitionId: "onr_v1_271_tko-2-0",
+            sourceDefinitionId: 483,
             sourceTitle: "TKO 2.0",
             subroutineIndex: 1,
             subroutineType: "end_the_run",
@@ -3841,29 +3841,29 @@ describe("formatChronicleEvent", () => {
       encounterContinue: true,
       result: "ended",
       unbrokenSubroutineCount: 2,
-      trashedCardDefinitionId: "onr_v1_042_self-modifying-code",
+      trashedCardDefinitionId: 11027,
       trashedCardType: "program",
       trashedCount: 1,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
-          sourceDefinitionId: "onr_v1_223_banpei",
+          sourceDefinitionId: 435,
           sourceTitle: "Banpei",
           subroutineIndex: 0,
           subroutineType: "trash_installed_program",
-          cardDefinitionId: "onr_v1_042_self-modifying-code",
+          cardDefinitionId: 11027,
           cardTitle: "Self-Modifying Code",
           cardsTrashed: 1,
         },
         {
-          effectId: "subroutine_2",
+          effectId: 1,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
-          sourceDefinitionId: "onr_v1_223_banpei",
+          sourceDefinitionId: 435,
           sourceTitle: "Banpei",
           subroutineIndex: 1,
           subroutineType: "end_the_run",
@@ -3908,7 +3908,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         v1922RunnerEventAbility:
           "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
-        targetCardDefinitionId: "simple_barrier_ice",
+        targetCardDefinitionId: 589,
         targetServerLabel: "R&D",
         rezCostPaid: 3,
         trashedCount: 1,
@@ -3922,7 +3922,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("card");
     expect(item.importance).toBe("important");
-    expect(item.cardDefinitionId).toBe("simple_barrier_ice");
+    expect(item.cardDefinitionId).toBe(589);
     expect(item.chips).toEqual([
       "Runner",
       "Core Command",
@@ -3937,7 +3937,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "corp",
         v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
-        sourceDefinitionId: "onr_v1_113_synchronized-attack-on-hq",
+        sourceDefinitionId: 325,
         retainedCount: 2,
         discardedCount: 3,
         aiExplanation: "legal choice",
@@ -3970,7 +3970,7 @@ describe("formatChronicleEvent", () => {
     expect(aiChoice.category).toBe("hidden");
     expect(aiChoice.visibility).toBe("public");
     expect(aiChoice.cardDefinitionId).toBe(
-      "onr_v1_113_synchronized-attack-on-hq",
+      325,
     );
     expect(aiChoice.chips).toEqual([
       "Korp",
@@ -3995,7 +3995,7 @@ describe("formatChronicleEvent", () => {
       actor: "corp",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
-      sourceDefinitionId: "onr_classic_017_corporate-shuffle",
+      sourceDefinitionId: 21,
       movedCount: 1,
       aiExplanation: "legal choice",
     });
@@ -4016,11 +4016,11 @@ describe("formatChronicleEvent", () => {
       actor: "corp",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1922_corp_archives_to_hq",
-      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      sourceDefinitionId: 22,
       movedCount: 2,
       archivesRevealCount: 2,
       archivesRevealDefinitionIds:
-        "onr_v1_245_fire-wall,onr_v1_279_wall-of-static",
+        "457,491",
       archivesRevealTitles: "Fire Wall, Wall of Static",
       aiExplanation: "legal choice",
     });
@@ -4028,7 +4028,7 @@ describe("formatChronicleEvent", () => {
       actor: "corp",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1922_corp_archives_to_hq",
-      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      sourceDefinitionId: 22,
       movedCount: 0,
       archivesRevealCount: 0,
       archivesRevealDefinitionIds: "",
@@ -4041,7 +4041,7 @@ describe("formatChronicleEvent", () => {
         "Die Korp-KI hat mit Reclamation Project 2 ICE aus Archives gezeigt und nach HQ genommen.",
       description: "Gezeigt: Fire Wall und Wall of Static.",
       visibility: "public",
-      cardDefinitionId: "onr_classic_018_reclamation-project",
+      cardDefinitionId: 22,
     });
     expect(formatChronicleEvent(empty, "runner")).toMatchObject({
       title:
@@ -4071,9 +4071,9 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "successful_run_temporary_encounter",
-        sourceDefinitionId: "onr_v1_358_dr-dreff",
+        sourceDefinitionId: 570,
         publicRevealKind: "reveal",
-        publicRevealDefinitionId: "onr_v1_261_quandary",
+        publicRevealDefinitionId: 473,
         rezCostPaid: 1,
         delayedSuccessfulRun: true,
         aiExplanation: "legal choice",
@@ -4083,8 +4083,8 @@ describe("formatChronicleEvent", () => {
     const passed = formatChronicleEvent(
       makeEvent("continue_run", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_358_dr-dreff",
-        temporaryIceDefinitionId: "onr_v1_261_quandary",
+        sourceDefinitionId: 570,
+        temporaryIceDefinitionId: 473,
         temporaryEncounterTrashed: true,
         successfulRunFinalizedAfterIntervention: true,
       }),
@@ -4095,7 +4095,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "successful_run_intervention_declined",
-        sourceDefinitionId: "onr_v1_358_dr-dreff",
+        sourceDefinitionId: 570,
         delayedSuccessfulRun: false,
         aiExplanation: "legal choice",
       }),
@@ -4124,7 +4124,7 @@ describe("formatChronicleEvent", () => {
     const root = formatChronicleEvent(
       makeEvent("access_card", {
         actor: "runner",
-        cardDefinitionId: "onr_v1_358_dr-dreff",
+        cardDefinitionId: 570,
         title: "Dr. Dreff",
         serverLabel: "HQ",
         accessOrigin: "central_root",
@@ -4135,7 +4135,7 @@ describe("formatChronicleEvent", () => {
     const hq = formatChronicleEvent(
       makeEvent("access_card", {
         actor: "runner",
-        cardDefinitionId: "simple_economy_operation",
+        cardDefinitionId: 596,
         title: "Simple Economy Operation",
         serverLabel: "HQ",
         accessOrigin: "hq",
@@ -4169,7 +4169,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         v1922RunnerEventAbility: "force_rez_or_trash_ice",
         corpDecision: "rez_ice",
-        targetCardDefinitionId: "simple_barrier_ice",
+        targetCardDefinitionId: 589,
         targetServerLabel: "HQ",
         targetIcePositionLabel: "ICE 2 in HQ",
         rezCostPaid: 3,
@@ -4232,7 +4232,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "run_1.cockroach.successful_run.cockroach",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "corp",
@@ -4241,7 +4241,7 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 1,
             remainingCounters: 2,
             reason: "cockroach_successful_hq_run",
-            sourceDefinitionId: "onr_v1_013_cockroach",
+            sourceDefinitionId: 225,
             sourceTitle: "Cockroach",
           },
         ],
@@ -4252,7 +4252,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         abilityId: "broken_ice_virus_counter",
-        targetCardDefinitionId: "onr_v1_279_wall-of-static",
+        targetCardDefinitionId: 491,
         remainingCounters: 2,
       }),
       "runner",
@@ -4287,7 +4287,7 @@ describe("formatChronicleEvent", () => {
     expect(pattel.title).toBe(
       "Du hast 1 Virus-Counter mit Pattel's Virus auf Wall of Static gelegt.",
     );
-    expect(pattel.cardDefinitionId).toBe("onr_v1_279_wall-of-static");
+    expect(pattel.cardDefinitionId).toBe(491);
     expect(pattel.chips).toEqual(
       expect.arrayContaining(["Pattel's Virus", "+1 Virus", "2 auf ICE"]),
     );
@@ -4329,7 +4329,7 @@ describe("formatChronicleEvent", () => {
         runnerInstallNormalCreditsPaid: 1,
         runnerInstallHostedCreditsPaid: 1,
         runnerInstallPaymentSourceDefinitionIds:
-          "onr_v1_075_zetatech-software-installer",
+          "287",
       }),
       "runner",
       { cardTitle: "Hammer" },
@@ -4374,10 +4374,10 @@ describe("formatChronicleEvent", () => {
       makeEvent("install_card", {
         actor: "runner",
         title: "Artemis 2020",
-        cardDefinitionId: "onr_v1_122_artemis-2020",
+        cardDefinitionId: 334,
         zoneLabel: "Rig",
         deckUniqueReplacement: true,
-        trashedDeckDefinitionIds: "onr_v1_137_parraline-5750",
+        trashedDeckDefinitionIds: "349",
       }),
       "runner",
       { cardTitle: "Artemis 2020" },
@@ -4397,7 +4397,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         title: "Restrictive Net Zoning",
         zoneLabel: "Resource",
-        selectedServerId: "remote_1",
+        selectedServerId: "r1",
         selectedServerLabel: "Remote 1",
       }),
       "runner",
@@ -4417,8 +4417,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("score_agenda", {
         actor: "corp",
         title: "Security Net Optimization",
-        cardDefinitionId: "onr_v1_215_security-net-optimization",
-        selectedServerId: "remote_1",
+        cardDefinitionId: 427,
+        selectedServerId: "r1",
         selectedServerLabel: "Remote 1",
       }),
       "runner",
@@ -4436,7 +4436,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("score_agenda", {
         actor: "corp",
         title: "AI Chief Financial Officer",
-        cardDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+        cardDefinitionId: 400,
       }),
       "runner",
       { agendaPoints: 2, cardTitle: "KI-Finanzvorstand" },
@@ -4481,7 +4481,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "aardvark_rez_trash_worm",
-        publicRevealDefinitionId: "onr_v1_327_aardvark",
+        publicRevealDefinitionId: 11028,
       }),
       "runner",
     );
@@ -4507,7 +4507,7 @@ describe("formatChronicleEvent", () => {
     expect(aardvark.title).toBe(
       "Die Korp hat Aardvark gerezzt und Worm getrasht.",
     );
-    expect(aardvark.cardDefinitionId).toBe("onr_v1_327_aardvark");
+    expect(aardvark.cardDefinitionId).toBe(11028);
     expect(aardvark.chips).toEqual(
       expect.arrayContaining(["Aardvark", "Rez", "Worm Trash"]),
     );
@@ -4520,7 +4520,7 @@ describe("formatChronicleEvent", () => {
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v162_priority_requisition_free_rez",
         priorityRequisitionFreeRez: true,
-        priorityRequisitionTargetDefinitionId: "onr_v1_230_cortical-scanner",
+        priorityRequisitionTargetDefinitionId: 442,
         rezCostPaid: 0,
       }),
       "corp",
@@ -4532,7 +4532,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("onr_v1_230_cortical-scanner");
+    expect(item.cardDefinitionId).toBe(442);
     expect(item.chips).toEqual(
       expect.arrayContaining(["Priority Requisition", "Rez", "0 Credits"]),
     );
@@ -4597,11 +4597,11 @@ describe("formatChronicleEvent", () => {
       unbrokenSubroutineCount: 1,
       resolvedEffects: [
         {
-          effectId: "subroutine_1",
+          effectId: 0,
           kind: "resolve_subroutine",
           visibility: "public",
           side: "runner",
-          sourceDefinitionId: "onr_v1_274_tutor",
+          sourceDefinitionId: 486,
           sourceTitle: "Tutor",
           subroutineIndex: 0,
           subroutineType: "set_run_future_end_the_run_subroutine",
@@ -4625,7 +4625,7 @@ describe("formatChronicleEvent", () => {
         encounterContinue: true,
         encounterWillEndRun: true,
         unbrokenSubroutineCount: 2,
-        trashedCardDefinitionId: "simple_decoder",
+        trashedCardDefinitionId: 591,
         trashedCardType: "program",
         trashedCount: 1,
       }),
@@ -4652,7 +4652,7 @@ describe("formatChronicleEvent", () => {
         encounterContinue: true,
         encounterWillEndRun: false,
         unbrokenSubroutineCount: 0,
-        sourceDefinitionId: "onr_v1_238_data-wall-2-0",
+        sourceDefinitionId: 450,
       }),
       "runner",
     );
@@ -4687,7 +4687,7 @@ describe("formatChronicleEvent", () => {
         encounterContinue: true,
         encounterWillEndRun: false,
         unbrokenSubroutineCount: 0,
-        cardDefinitionId: "test_cortical_scrub",
+        cardDefinitionId: 11029,
         title: "Cortical Scrub",
       }),
       "runner",
@@ -4811,7 +4811,7 @@ describe("formatChronicleEvent", () => {
     expect(item.description).toBe(
       "Blink würfelt eine 5: Subroutine 1 auf Crystal Wall wurde gebrochen.",
     );
-    expect(item.cardDefinitionId).toBe("onr_v1_007_blink");
+    expect(item.cardDefinitionId).toBe(219);
     expect(item.cardTitle).toBe("Blink");
     expect(item.chips).toEqual(
       expect.arrayContaining(["Blink", "Wurf 5", "Gebrochen", "Crystal Wall"]),
@@ -4861,7 +4861,7 @@ describe("formatChronicleEvent", () => {
         aiReasonCode: "runner.encounter.break_etr",
         breakSubroutineBaseCost: 0,
         breakSubroutineCount: 2,
-        subroutineIndexes: "0,1",
+        subroutineIndexes: [0, 1],
         breakAllMatchingSubroutines: true,
         breakerEndsRunAfterBreak: true,
         targetIceTitle: "Banpei",
@@ -4933,16 +4933,16 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
       title: "Annual Reviews",
-      cardDefinitionId: "onr_v1_282_annual-reviews",
+      cardDefinitionId: 494,
       aiReasonCode: "corp.draw.operation",
       resolvedEffects: [
         {
-          effectId: "play_operation.effect.1",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
           amount: 3,
-          sourceDefinitionId: "onr_v1_282_annual-reviews",
+          sourceDefinitionId: 494,
           sourceTitle: "Annual Reviews",
           reason: "card_resolver",
         },
@@ -4967,12 +4967,12 @@ describe("formatChronicleEvent", () => {
       actor: "runner",
       resolvedEffects: [
         {
-          effectId: "corp.start.skivviss",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
           amount: 2,
-          sourceDefinitionId: "onr_v1_064_skivviss",
+          sourceDefinitionId: 276,
           sourceTitle: "Skivviss",
           reason: "start_of_turn",
         },
@@ -5005,15 +5005,15 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("play_event", {
       actor: "runner",
       title: "Livewire's Contacts",
-      cardDefinitionId: "onr_v1_097_livewires-contacts",
+      cardDefinitionId: 309,
       resolvedEffects: [
         {
-          effectId: "play_event.effect.1",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "runner",
           amount: 3,
-          sourceDefinitionId: "onr_v1_097_livewires-contacts",
+          sourceDefinitionId: 309,
           sourceTitle: "Livewire's Contacts",
           reason: "card_resolver",
         },
@@ -5039,7 +5039,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("play_event", {
         actor: "runner",
         title: "Do the 'Drine",
-        cardDefinitionId: "onr_classic_036_do-the-drine",
+        cardDefinitionId: 40,
         runnerEventAbility:
           "do_the_drine_unpreventable_core_damage_for_credits",
         xValue: 4,
@@ -5076,17 +5076,17 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
       title: "Closed Accounts",
-      cardDefinitionId: "onr_v1_285_closed-accounts",
+      cardDefinitionId: 497,
       creditsLost: 7,
       runnerCreditsAfter: 0,
       resolvedEffects: [
         {
-          effectId: "onr_v1_285_closed-accounts.effect.0.lose_credits",
+          effectId: 0,
           kind: "lose_credits",
           visibility: "public",
           side: "runner",
           amount: 7,
-          sourceDefinitionId: "onr_v1_285_closed-accounts",
+          sourceDefinitionId: 497,
           sourceTitle: "Closed Accounts",
           reason: "card_resolver",
         },
@@ -5112,18 +5112,18 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
       title: "Datapool® by Zetatech",
-      cardDefinitionId: "onr_v1_287_datapool-by-zetatech",
+      cardDefinitionId: 499,
       tagsAdded: 2,
       runnerTagsAfter: 3,
       resolvedEffects: [
         {
-          effectId: "onr_v1_287_datapool-by-zetatech.effect.0.add_tags",
+          effectId: 0,
           kind: "add_tags",
           visibility: "public",
           side: "runner",
           amount: 2,
           runnerTagsAfter: 3,
-          sourceDefinitionId: "onr_v1_287_datapool-by-zetatech",
+          sourceDefinitionId: 499,
           sourceTitle: "Datapool® by Zetatech",
           reason: "card_resolver",
         },
@@ -5153,30 +5153,30 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
       title: "Netwatch Credit Voucher",
-      cardDefinitionId: "onr_v1_293_netwatch-credit-voucher",
+      cardDefinitionId: 505,
       tagsAdded: 1,
       runnerTagsAfter: 2,
       gainedCredits: 1,
       corpCreditsAfter: 6,
       resolvedEffects: [
         {
-          effectId: "onr_v1_293_netwatch-credit-voucher.effect.0.add_tags",
+          effectId: 0,
           kind: "add_tags",
           visibility: "public",
           side: "runner",
           amount: 1,
           runnerTagsAfter: 2,
-          sourceDefinitionId: "onr_v1_293_netwatch-credit-voucher",
+          sourceDefinitionId: 505,
           sourceTitle: "Netwatch Credit Voucher",
           reason: "card_resolver",
         },
         {
-          effectId: "onr_v1_293_netwatch-credit-voucher.effect.1.gain_credits",
+          effectId: 1,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
           amount: 1,
-          sourceDefinitionId: "onr_v1_293_netwatch-credit-voucher",
+          sourceDefinitionId: 505,
           sourceTitle: "Netwatch Credit Voucher",
           reason: "card_resolver",
         },
@@ -5207,9 +5207,9 @@ describe("formatChronicleEvent", () => {
 
   it("merges tagged Corp Operation damage effects into the played card entry", () => {
     for (const [title, cardDefinitionId, amount] of [
-      ["Punitive Counterstrike", "onr_v1_301_punitive-counterstrike", 2],
-      ["Scorched Earth", "onr_v1_302_scorched-earth", 4],
-      ["Urban Renewal", "onr_v1_307_urban-renewal", 5],
+      ["Punitive Counterstrike", 513, 2],
+      ["Scorched Earth", 514, 4],
+      ["Urban Renewal", 519, 5],
     ] as const) {
       const event = makeEvent("play_operation", {
         actor: "corp",
@@ -5221,7 +5221,7 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.damage`,
+            effectId: 0,
             kind: "damage",
             visibility: "public",
             side: "runner",
@@ -5254,9 +5254,9 @@ describe("formatChronicleEvent", () => {
 
   it("merges tagged activated meat-damage abilities into the ability entry", () => {
     for (const [title, cardDefinitionId, amount] of [
-      ["Solo Squad", "onr_v1_342_solo-squad", 1],
-      ["On-Call Solo Team", "onr_v1_208_on-call-solo-team", 1],
-      ["Strike Force Kali", "onr_v1_217_strike-force-kali", 2],
+      ["Solo Squad", 554, 1],
+      ["On-Call Solo Team", 420, 1],
+      ["Strike Force Kali", 429, 2],
     ] as const) {
       const event = makeEvent("activated_card_ability", {
         actor: "corp",
@@ -5269,7 +5269,7 @@ describe("formatChronicleEvent", () => {
         cardsTrashed: amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.damage`,
+            effectId: 0,
             kind: "damage",
             visibility: "public",
             side: "runner",
@@ -5305,27 +5305,27 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
       title: "Day Shift",
-      cardDefinitionId: "onr_v1_288_day-shift",
+      cardDefinitionId: 500,
       drawnCards: 2,
       gainedCredits: 1,
       resolvedEffects: [
         {
-          effectId: "onr_v1_288_day-shift.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
           amount: 2,
-          sourceDefinitionId: "onr_v1_288_day-shift",
+          sourceDefinitionId: 500,
           sourceTitle: "Day Shift",
           reason: "card_resolver",
         },
         {
-          effectId: "onr_v1_288_day-shift.effect.1.gain_credits",
+          effectId: 1,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
           amount: 1,
-          sourceDefinitionId: "onr_v1_288_day-shift",
+          sourceDefinitionId: 500,
           sourceTitle: "Day Shift",
           reason: "card_resolver",
         },
@@ -5352,17 +5352,17 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
       title: "Overtime Incentives",
-      cardDefinitionId: "onr_v1_297_overtime-incentives",
+      cardDefinitionId: 509,
       aiReasonCode: "corp.operation.extra_actions",
       gainedActions: 2,
       resolvedEffects: [
         {
-          effectId: "onr_v1_297_overtime-incentives.effect.0.gain_actions",
+          effectId: 0,
           kind: "gain_actions",
           visibility: "public",
           side: "corp",
           amount: 2,
-          sourceDefinitionId: "onr_v1_297_overtime-incentives",
+          sourceDefinitionId: 509,
           sourceTitle: "Overtime Incentives",
           reason: "card_resolver",
         },
@@ -5386,27 +5386,27 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
       title: "Night Shift",
-      cardDefinitionId: "onr_v1_295_night-shift",
+      cardDefinitionId: 507,
       gainedCredits: 2,
       drawnCards: 1,
       resolvedEffects: [
         {
-          effectId: "onr_v1_295_night-shift.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
           amount: 2,
-          sourceDefinitionId: "onr_v1_295_night-shift",
+          sourceDefinitionId: 507,
           sourceTitle: "Night Shift",
           reason: "card_resolver",
         },
         {
-          effectId: "onr_v1_295_night-shift.effect.1.draw_cards",
+          effectId: 1,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
           amount: 1,
-          sourceDefinitionId: "onr_v1_295_night-shift",
+          sourceDefinitionId: 507,
           sourceTitle: "Night Shift",
           reason: "card_resolver",
         },
@@ -5431,16 +5431,16 @@ describe("formatChronicleEvent", () => {
   it("uses card resolver source titles when the play payload has no title", () => {
     const event = makeEvent("play_event", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_095_jack-n-joe",
+      cardDefinitionId: 307,
       drawnCount: 3,
       resolvedEffects: [
         {
-          effectId: "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
           amount: 3,
-          sourceDefinitionId: "onr_v1_095_jack-n-joe",
+          sourceDefinitionId: 307,
           sourceTitle: "Jack 'n' Joe",
           reason: "card_resolver",
         },
@@ -5464,7 +5464,7 @@ describe("formatChronicleEvent", () => {
   it("adds City Surveillance draw-tax details to card draw event chronicle entries", () => {
     const event = makeEvent("play_event", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_095_jack-n-joe",
+      cardDefinitionId: 307,
       drawnCount: 3,
       citySurveillanceSourceCount: 1,
       citySurveillanceCreditsPaid: 2,
@@ -5474,12 +5474,12 @@ describe("formatChronicleEvent", () => {
       runnerTagsAfter: 1,
       resolvedEffects: [
         {
-          effectId: "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
           amount: 3,
-          sourceDefinitionId: "onr_v1_095_jack-n-joe",
+          sourceDefinitionId: 307,
           sourceTitle: "Jack 'n' Joe",
           reason: "card_resolver",
         },
@@ -5511,7 +5511,7 @@ describe("formatChronicleEvent", () => {
   it("adds City Surveillance draw-tax details to other runner draw card events", () => {
     const event = makeEvent("play_event", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+      cardDefinitionId: 291,
       title: "Bodyweight™ Synthetic Blood",
       drawnCount: 5,
       citySurveillanceSourceCount: 1,
@@ -5522,12 +5522,12 @@ describe("formatChronicleEvent", () => {
       runnerTagsAfter: 0,
       resolvedEffects: [
         {
-          effectId: "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
           amount: 5,
-          sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+          sourceDefinitionId: 291,
           sourceTitle: "Bodyweight™ Synthetic Blood",
           reason: "card_resolver",
         },
@@ -5550,7 +5550,7 @@ describe("formatChronicleEvent", () => {
   it("formats the actual City Surveillance Bodyweight sequence without duplicates or source confusion", () => {
     const bodyweight = makeEvent("play_event", {
       actor: "runner",
-      cardDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+      cardDefinitionId: 291,
       title: "Bodyweight™ Synthetic Blood",
       drawCardsAmount: 5,
       drawnCount: 1,
@@ -5559,12 +5559,12 @@ describe("formatChronicleEvent", () => {
       drawTaxTagsAdded: 0,
       resolvedEffects: [
         {
-          effectId: "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
           amount: 1,
-          sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+          sourceDefinitionId: 291,
           sourceTitle: "Bodyweight™ Synthetic Blood",
           reason: "card_resolver",
         },
@@ -5573,7 +5573,7 @@ describe("formatChronicleEvent", () => {
     const paid = makeEvent("resolve_choice", {
       actor: "runner",
       aiReasonCode: "plan_first.engine_window",
-      sourceDefinitionId: "onr_v1_313_city-surveillance",
+      sourceDefinitionId: 525,
       drawTaxSourceCount: 1,
       drawTaxDecision: "pay",
       drawTaxCreditsPaid: 1,
@@ -5590,9 +5590,9 @@ describe("formatChronicleEvent", () => {
       originalAmount: 1,
       preventedTags: 1,
       finalAmount: 0,
-      sourceDefinitionId: "onr_v1_313_city-surveillance",
+      sourceDefinitionId: 525,
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_v1_161_fall-guy",
+      trashedCardDefinitionId: 373,
       drawTaxSourceCount: 1,
       drawTaxDecision: "tag",
       drawTaxCreditsPaid: 0,
@@ -5601,7 +5601,7 @@ describe("formatChronicleEvent", () => {
     const preventionOpened = makeEvent("resolve_choice", {
       actor: "runner",
       aiReasonCode: "plan_first.engine_window",
-      sourceDefinitionId: "onr_v1_313_city-surveillance",
+      sourceDefinitionId: 525,
       imminentEventType: "add_tag",
       eventModificationWindowOpened: true,
       candidateCount: 1,
@@ -5613,7 +5613,7 @@ describe("formatChronicleEvent", () => {
     const tagged = makeEvent("resolve_choice", {
       actor: "runner",
       aiReasonCode: "plan_first.engine_window",
-      sourceDefinitionId: "onr_v1_313_city-surveillance",
+      sourceDefinitionId: 525,
       tagsAdded: 1,
       runnerTagsAfter: 1,
       drawTaxSourceCount: 1,
@@ -5629,18 +5629,18 @@ describe("formatChronicleEvent", () => {
     expect(formatChronicleEffectItems(bodyweight, "corp")).toEqual([]);
     expect(formatChronicleEvent(paid, "corp")).toMatchObject({
       title: "Die Runner-KI hat 1 Credit für City Surveillance bezahlt.",
-      cardDefinitionId: "onr_v1_313_city-surveillance",
+      cardDefinitionId: 525,
       cardTitle: "City Surveillance",
     });
     expect(formatChronicleEffectItems(paid, "corp")).toEqual([]);
     expect(shouldSuppressChronicleEventItem(preventionOpened)).toBe(true);
     expect(formatChronicleEvent(prevented, "corp")).toMatchObject({
       title: "Die Runner-KI hat 1 Tag verhindert.",
-      cardDefinitionId: "onr_v1_161_fall-guy",
+      cardDefinitionId: 373,
     });
     expect(formatChronicleEvent(tagged, "corp")).toMatchObject({
       title: "Die Runner-KI hat durch City Surveillance 1 Tag erhalten.",
-      cardDefinitionId: "onr_v1_313_city-surveillance",
+      cardDefinitionId: 525,
       cardTitle: "City Surveillance",
     });
     expect(formatChronicleEffectItems(tagged, "corp")).toEqual([]);
@@ -5652,7 +5652,7 @@ describe("formatChronicleEvent", () => {
   it("names a lethal damage operation as the resulting flatline", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
-      cardDefinitionId: "onr_v1_302_scorched-earth",
+      cardDefinitionId: 514,
       title: "Scorched Earth",
       damageResolved: true,
       damageType: "meat",
@@ -5664,14 +5664,14 @@ describe("formatChronicleEvent", () => {
       gameEndReason: "flatline",
       resolvedEffects: [
         {
-          effectId: "onr_v1_302_scorched-earth.effect.0.damage",
+          effectId: 0,
           kind: "damage",
           visibility: "public",
           side: "runner",
           amount: 4,
           damageType: "meat",
           cardsTrashed: 0,
-          sourceDefinitionId: "onr_v1_302_scorched-earth",
+          sourceDefinitionId: 514,
           sourceTitle: "Scorched Earth",
           reason: "card_resolver",
         },
@@ -5691,18 +5691,18 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "runner",
       title: "Newsgroup Filter",
-      cardDefinitionId: "onr_v1_045_newsgroup-filter",
+      cardDefinitionId: 257,
       cardImplementationAbility: "activated",
       gainedCredits: 2,
       runnerCreditsAfter: 7,
       resolvedEffects: [
         {
-          effectId: "onr_v1_045_newsgroup-filter.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "runner",
           amount: 2,
-          sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+          sourceDefinitionId: 257,
           sourceTitle: "Newsgroup Filter",
           reason: "card_resolver",
         },
@@ -5726,17 +5726,17 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "corp",
       title: "ESA Contract",
-      cardDefinitionId: "onr_v1_321_esa-contract",
+      cardDefinitionId: 533,
       cardImplementationAbility: "activated",
       drawnCards: 2,
       resolvedEffects: [
         {
-          effectId: "onr_v1_321_esa-contract.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
           amount: 2,
-          sourceDefinitionId: "onr_v1_321_esa-contract",
+          sourceDefinitionId: 533,
           sourceTitle: "ESA Contract",
           reason: "card_resolver",
         },
@@ -5751,26 +5751,26 @@ describe("formatChronicleEvent", () => {
       "Die Korp hat ESA Contract genutzt und 2 Karten gezogen.",
     );
     expect(item.chips).toEqual(expect.arrayContaining(["Ability", "2 Karten"]));
-    expect(serialized).not.toContain("simple_agenda");
-    expect(serialized).not.toContain("simple_economy_operation");
+    expect(serialized).not.toContain(588);
+    expect(serialized).not.toContain(596);
     expect(effects).toEqual([]);
   });
 
   it("distinguishes Employee Empowerment optional start draw from its agenda action", () => {
     const optionalDraw = makeEvent("resolve_choice", {
       actor: "corp",
-      sourceDefinitionId: "onr_v1_199_employee-empowerment",
-      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      sourceDefinitionId: 411,
+      cardDefinitionId: 411,
       employeeEmpowermentStartDrawDecision: "draw",
       drawnCards: 1,
       resolvedEffects: [
         {
-          effectId: "corp.start.employee_empowerment.employee_1",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
           amount: 1,
-          sourceDefinitionId: "onr_v1_199_employee-empowerment",
+          sourceDefinitionId: 411,
           sourceTitle: "Employee Empowerment",
           reason: "start_of_turn",
         },
@@ -5778,24 +5778,24 @@ describe("formatChronicleEvent", () => {
     });
     const skip = makeEvent("resolve_choice", {
       actor: "corp",
-      sourceDefinitionId: "onr_v1_199_employee-empowerment",
-      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      sourceDefinitionId: 411,
+      cardDefinitionId: 411,
       employeeEmpowermentStartDrawDecision: "skip",
     });
     const action = makeEvent("activated_card_ability", {
       actor: "corp",
       title: "Employee Empowerment",
-      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      cardDefinitionId: 411,
       cardImplementationAbility: "activated",
       drawnCards: 2,
       resolvedEffects: [
         {
-          effectId: "onr_v1_199_employee-empowerment.effect.0.draw_cards",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
           amount: 2,
-          sourceDefinitionId: "onr_v1_199_employee-empowerment",
+          sourceDefinitionId: 411,
           sourceTitle: "Employee Empowerment",
           reason: "card_resolver",
         },
@@ -5818,9 +5818,9 @@ describe("formatChronicleEvent", () => {
 
   it("merges activated economy ability effects with card context", () => {
     for (const [title, cardDefinitionId, amount] of [
-      ["Marine Arcology", "onr_v1_206_marine-arcology", 3],
-      ["Political Overthrow", "onr_v1_210_political-overthrow", 3],
-      ["South African Mining Corp", "onr_v1_343_south-african-mining-corp", 6],
+      ["Marine Arcology", 418, 3],
+      ["Political Overthrow", 422, 3],
+      ["South African Mining Corp", 555, 6],
     ] as const) {
       const event = makeEvent("activated_card_ability", {
         actor: "corp",
@@ -5831,7 +5831,7 @@ describe("formatChronicleEvent", () => {
         corpCreditsAfter: 10 + amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.gain_credits`,
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "corp",
@@ -5860,7 +5860,7 @@ describe("formatChronicleEvent", () => {
   it("shows Too Many Doors as paid by both sides after reveal", () => {
     const event = makeEvent("resolve_choice", {
       actor: "runner",
-      sourceDefinitionId: "onr_v1_272_too-many-doors",
+      sourceDefinitionId: 484,
       secretSpendRevealed: true,
       secretSpendCorp: 1,
       secretSpendRunner: 2,
@@ -5891,7 +5891,7 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "runner",
       title: "Silicon Saloon Franchise",
-      cardDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+      cardDefinitionId: 391,
       cardImplementationAbility: "activated",
       gainedCredits: 1,
       runnerCreditsAfter: 6,
@@ -5899,22 +5899,22 @@ describe("formatChronicleEvent", () => {
       runnerGripAfter: 5,
       resolvedEffects: [
         {
-          effectId: "onr_v1_179_silicon-saloon-franchise.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "runner",
           amount: 1,
-          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          sourceDefinitionId: 391,
           sourceTitle: "Silicon Saloon Franchise",
           reason: "card_resolver",
         },
         {
-          effectId: "onr_v1_179_silicon-saloon-franchise.effect.1.draw_cards",
+          effectId: 1,
           kind: "draw_cards",
           visibility: "public",
           side: "runner",
           amount: 1,
-          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          sourceDefinitionId: 391,
           sourceTitle: "Silicon Saloon Franchise",
           reason: "card_resolver",
         },
@@ -5956,7 +5956,7 @@ describe("formatChronicleEvent", () => {
         "rez_ice",
         "corp",
         "BBS Whispering Campaign",
-        "onr_v1_309_bbs-whispering-campaign",
+        521,
         16,
         "Die Korp hat BBS Whispering Campaign gerezzt und 16 Credits auf die Karte gelegt.",
       ],
@@ -5964,7 +5964,7 @@ describe("formatChronicleEvent", () => {
         "rez_ice",
         "corp",
         "Rockerboy Promotion",
-        "onr_v1_337_rockerboy-promotion",
+        549,
         15,
         "Die Korp hat Rockerboy Promotion gerezzt und 15 Credits auf die Karte gelegt.",
       ],
@@ -5972,7 +5972,7 @@ describe("formatChronicleEvent", () => {
         "install_card",
         "runner",
         "Short-Term Contract",
-        "onr_v1_178_short-term-contract",
+        390,
         12,
         "Du hast Short-Term Contract im Rig installiert und 12 Credits auf die Karte gelegt.",
       ],
@@ -5980,7 +5980,7 @@ describe("formatChronicleEvent", () => {
         "score_agenda",
         "corp",
         "Corporate Coup",
-        "onr_v1_193_corporate-coup",
+        405,
         15,
         "Die Korp hat Corporate Coup gescored und 15 Credits auf die Karte gelegt.",
       ],
@@ -5988,7 +5988,7 @@ describe("formatChronicleEvent", () => {
         "score_agenda",
         "corp",
         "Political Coup",
-        "onr_v1_209_political-coup",
+        421,
         12,
         "Die Korp hat Political Coup gescored und 12 Credits auf die Karte gelegt.",
       ],
@@ -5996,7 +5996,7 @@ describe("formatChronicleEvent", () => {
         "rez_ice",
         "corp",
         "Braindance Campaign",
-        "onr_v1_311_braindance-campaign",
+        523,
         12,
         "Die Korp hat Braindance Campaign gerezzt und 12 Credits auf die Karte gelegt.",
       ],
@@ -6004,7 +6004,7 @@ describe("formatChronicleEvent", () => {
         "rez_ice",
         "corp",
         "Holovid Campaign",
-        "onr_v1_326_holovid-campaign",
+        538,
         12,
         "Die Korp hat Holovid Campaign gerezzt und 12 Credits auf die Karte gelegt.",
       ],
@@ -6012,7 +6012,7 @@ describe("formatChronicleEvent", () => {
         "score_agenda",
         "corp",
         "Detroit Police Contract",
-        "onr_v1_198_detroit-police-contract",
+        410,
         12,
         "Die Korp hat Detroit Police Contract gescored und 12 Credits auf die Karte gelegt.",
       ],
@@ -6025,7 +6025,7 @@ describe("formatChronicleEvent", () => {
         hostedCreditsAfter: amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.lifecycle.add_hosted_credits`,
+            effectId: 0,
             kind: "add_hosted_credits",
             visibility: "public",
             side: actor,
@@ -6056,16 +6056,16 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("rez_card", {
       actor: "corp",
       title: "Remote Facility",
-      cardDefinitionId: "onr_v1_335_remote-facility",
+      cardDefinitionId: 547,
       rezCostPaid: 5,
       resolvedEffects: [
         {
-          effectId: "onr_v1_335_remote-facility.on_rez.gain_actions",
+          effectId: 0,
           kind: "gain_actions",
           visibility: "public",
           side: "corp",
           amount: 1,
-          sourceDefinitionId: "onr_v1_335_remote-facility",
+          sourceDefinitionId: 547,
           sourceTitle: "Remote Facility",
           reason: "card_resolver",
         },
@@ -6091,8 +6091,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("rez_card", {
         actor: "corp",
         title: "Bel-Digmo Antibody",
-        cardDefinitionId: "onr_proteus_054_bel-digmo-antibody",
-        sourceDefinitionId: "onr_proteus_054_bel-digmo-antibody",
+        cardDefinitionId: 112,
+        sourceDefinitionId: 112,
         hiddenZoneBarrier: true,
         hiddenZoneAction: "shuffle_source_into_corp_rd",
         movedCardCount: 1,
@@ -6113,7 +6113,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("score_agenda", {
         actor: "corp",
         title: "Corporate War",
-        cardDefinitionId: "onr_v1_196_corporate-war",
+        cardDefinitionId: 408,
         corporateWarThresholdMet: true,
         onScoreGainCredits: 12,
         corpCreditsAfter: 24,
@@ -6125,7 +6125,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("score_agenda", {
         actor: "corp",
         title: "Corporate War",
-        cardDefinitionId: "onr_v1_196_corporate-war",
+        cardDefinitionId: 408,
         corporateWarThresholdMet: false,
         onScoreGainCredits: 0,
         onScoreLostAllCredits: true,
@@ -6158,16 +6158,16 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("score_agenda", {
       actor: "corp",
       title: "Hostile Takeover",
-      cardDefinitionId: "onr_v1_203_hostile-takeover",
+      cardDefinitionId: 415,
       resolvedEffects: [
         {
-          effectId: "onr_v1_203_hostile-takeover.score.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
           amount: 5,
           reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_203_hostile-takeover",
+          sourceDefinitionId: 415,
           sourceTitle: "Hostile Takeover",
         },
       ],
@@ -6198,7 +6198,7 @@ describe("formatChronicleEvent", () => {
       [
         "corp",
         "BBS Whispering Campaign",
-        "onr_v1_309_bbs-whispering-campaign",
+        521,
         2,
         14,
         "Die Korp hat BBS Whispering Campaign genutzt und 2 Credits von der Karte genommen.",
@@ -6206,7 +6206,7 @@ describe("formatChronicleEvent", () => {
       [
         "corp",
         "Rockerboy Promotion",
-        "onr_v1_337_rockerboy-promotion",
+        549,
         3,
         12,
         "Die Korp hat Rockerboy Promotion genutzt und 3 Credits von der Karte genommen.",
@@ -6214,7 +6214,7 @@ describe("formatChronicleEvent", () => {
       [
         "runner",
         "Short-Term Contract",
-        "onr_v1_178_short-term-contract",
+        390,
         2,
         10,
         "Du hast Short-Term Contract genutzt und 2 Credits von der Karte genommen.",
@@ -6222,7 +6222,7 @@ describe("formatChronicleEvent", () => {
       [
         "corp",
         "Corporate Coup",
-        "onr_v1_193_corporate-coup",
+        405,
         3,
         12,
         "Die Korp hat Corporate Coup genutzt und 3 Credits von der Karte genommen.",
@@ -6230,7 +6230,7 @@ describe("formatChronicleEvent", () => {
       [
         "corp",
         "Political Coup",
-        "onr_v1_209_political-coup",
+        421,
         3,
         9,
         "Die Korp hat Political Coup genutzt und 3 Credits von der Karte genommen.",
@@ -6238,7 +6238,7 @@ describe("formatChronicleEvent", () => {
       [
         "runner",
         "Broker",
-        "onr_v1_154_broker",
+        366,
         6,
         0,
         "Du hast Broker genutzt und 6 Credits von der Karte genommen.",
@@ -6246,7 +6246,7 @@ describe("formatChronicleEvent", () => {
       [
         "corp",
         "Department of Truth Enhancement",
-        "onr_v1_318_department-of-truth-enhancement",
+        530,
         6,
         0,
         "Die Korp hat Department of Truth Enhancement genutzt und 6 Credits von der Karte genommen.",
@@ -6262,7 +6262,7 @@ describe("formatChronicleEvent", () => {
         gainedCredits: amount,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.take_hosted_credits`,
+            effectId: 0,
             kind: "take_hosted_credits",
             visibility: "public",
             side: actor,
@@ -6296,18 +6296,18 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "runner",
       title: "Swiss Bank Account",
-      cardDefinitionId: "onr_proteus_152_swiss-bank-account",
+      cardDefinitionId: 210,
       cardImplementationAbility: "activated",
       cardImplementationAbilityTiming: "runner_cost_penalty_support",
-      costPenaltySupportWindowId: "runner_cost_penalty_support.217",
+      costPenaltySupportWindowId: 217,
       resolvedEffects: [
         {
-          effectId: "swiss-bank.effect.0.gain_credits",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "hidden_info_barrier",
           side: "runner",
           amount: 6,
-          sourceDefinitionId: "onr_proteus_152_swiss-bank-account",
+          sourceDefinitionId: 210,
           sourceTitle: "Swiss Bank Account",
           reason: "card_resolver",
         },
@@ -6327,20 +6327,20 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "corp",
       title: "Spinn Public Relations",
-      cardDefinitionId: "onr_v1_344_spinn-public-relations",
+      cardDefinitionId: 556,
       cardImplementationAbility: "activated",
       hostedCreditsAdded: 3,
       hostedCreditsAfter: 3,
       resolvedEffects: [
         {
           effectId:
-            "onr_v1_344_spinn-public-relations.effect.0.add_hosted_credits",
+            0,
           kind: "add_hosted_credits",
           visibility: "public",
           side: "corp",
           amount: 3,
           remainingCounters: 3,
-          sourceDefinitionId: "onr_v1_344_spinn-public-relations",
+          sourceDefinitionId: 556,
           sourceTitle: "Spinn Public Relations",
           reason: "card_resolver",
         },
@@ -6367,13 +6367,13 @@ describe("formatChronicleEvent", () => {
       [
         "runner",
         "Broker",
-        "onr_v1_154_broker",
+        366,
         "Du hast Broker genutzt und 3 Credits auf die Karte gelegt.",
       ],
       [
         "corp",
         "Department of Truth Enhancement",
-        "onr_v1_318_department-of-truth-enhancement",
+        530,
         "Die Korp hat Department of Truth Enhancement genutzt und 3 Credits auf die Karte gelegt.",
       ],
     ] as const) {
@@ -6386,7 +6386,7 @@ describe("formatChronicleEvent", () => {
         hostedCreditsAfter: 3,
         resolvedEffects: [
           {
-            effectId: `${cardDefinitionId}.effect.0.add_hosted_credits`,
+            effectId: 0,
             kind: "add_hosted_credits",
             visibility: "public",
             side: actor,
@@ -6415,7 +6415,7 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "runner",
       title: "Short-Term Contract",
-      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardDefinitionId: 390,
       cardImplementationAbility: "activated",
       hostedCreditsTaken: 1,
       hostedCreditsAfter: 0,
@@ -6424,24 +6424,24 @@ describe("formatChronicleEvent", () => {
       resolvedEffects: [
         {
           effectId:
-            "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+            0,
           kind: "take_hosted_credits",
           visibility: "public",
           side: "runner",
           amount: 1,
           remainingCounters: 0,
-          sourceDefinitionId: "onr_v1_178_short-term-contract",
+          sourceDefinitionId: 390,
           sourceTitle: "Short-Term Contract",
           reason: "card_resolver",
         },
         {
           effectId:
-            "onr_v1_178_short-term-contract.effect.1.trash_source_when_empty",
+            1,
           kind: "trash_source_when_empty",
           visibility: "public",
           side: "runner",
           amount: 1,
-          sourceDefinitionId: "onr_v1_178_short-term-contract",
+          sourceDefinitionId: 390,
           sourceTitle: "Short-Term Contract",
           reason: "card_resolver",
         },
@@ -6471,15 +6471,15 @@ describe("formatChronicleEvent", () => {
       makeEvent("install_card", {
         actor: "runner",
         title: "Loan from Chiba",
-        cardDefinitionId: "onr_v1_168_loan-from-chiba",
+        cardDefinitionId: 380,
         resolvedEffects: [
           {
-            effectId: "runner.install.loan_from_chiba.card_123",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "runner",
             amount: 12,
-            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            sourceDefinitionId: 380,
             sourceTitle: "Loan from Chiba",
             reason: "card_resolver",
           },
@@ -6493,7 +6493,7 @@ describe("formatChronicleEvent", () => {
       "Du hast 12 Credits durch Loan from Chiba erhalten.",
     );
     expect(items[0]?.category).toBe("economy");
-    expect(items[0]?.cardDefinitionId).toBe("onr_v1_168_loan-from-chiba");
+    expect(items[0]?.cardDefinitionId).toBe(380);
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["+12 Credits"]));
   });
 
@@ -6501,18 +6501,18 @@ describe("formatChronicleEvent", () => {
     const paidItems = formatChronicleEffectItems(
       makeEvent("end_turn", {
         actor: "runner",
-        cardDefinitionId: "onr_v1_168_loan-from-chiba",
+        cardDefinitionId: 380,
         title: "Loan from Chiba",
         resolvedEffects: [
           {
-            effectId: "loan.leave.pay",
+            effectId: 0,
             kind: "pay_credits_or_lose_game",
             visibility: "public",
             side: "runner",
             amount: 10,
             paidCredits: 10,
             gameLost: false,
-            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            sourceDefinitionId: 380,
             sourceTitle: "Loan from Chiba",
             reason: "source_left_play",
           },
@@ -6530,11 +6530,11 @@ describe("formatChronicleEvent", () => {
     const lostItems = formatChronicleEffectItems(
       makeEvent("end_turn", {
         actor: "runner",
-        cardDefinitionId: "onr_v1_168_loan-from-chiba",
+        cardDefinitionId: 380,
         title: "Loan from Chiba",
         resolvedEffects: [
           {
-            effectId: "loan.leave.lose",
+            effectId: 0,
             kind: "pay_credits_or_lose_game",
             visibility: "public",
             side: "runner",
@@ -6542,7 +6542,7 @@ describe("formatChronicleEvent", () => {
             paidCredits: 0,
             gameLost: true,
             winner: "corp",
-            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            sourceDefinitionId: 380,
             sourceTitle: "Loan from Chiba",
             reason: "source_left_play",
           },
@@ -6614,7 +6614,7 @@ describe("formatChronicleEvent", () => {
         agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
         delayedAgendaAccessScoreScheduled: true,
         delayedAgendaAccessSourceDefinitionId:
-          "onr_v1_351_bizarre-encryption-scheme",
+          563,
       }),
       "runner",
       {
@@ -6708,7 +6708,7 @@ describe("formatChronicleEvent", () => {
         searchDestination: "grip",
         searchShuffleAfter: true,
         selectedCount: 1,
-        cardDefinitionId: "onr_v1_036_jackhammer",
+        cardDefinitionId: 248,
         title: "Jackhammer",
       }),
       "runner",
@@ -6719,7 +6719,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("onr_v1_036_jackhammer");
+    expect(item.cardDefinitionId).toBe(248);
     expect(item.chips).toEqual([
       "Runner",
       "Stack",
@@ -6735,13 +6735,13 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "p3_37_search_stack_to_grip",
-        sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+        sourceDefinitionId: 326,
         selectedCount: 1,
         movedCardCount: 1,
         searchDestination: "runner_grip",
         publicRevealKind: "reveal",
-        publicRevealDefinitionId: "onr_v1_039_krash",
-        cardDefinitionId: "onr_v1_039_krash",
+        publicRevealDefinitionId: 251,
+        cardDefinitionId: 251,
         shuffled: true,
         aiReasonCode: "runner_stack_search_program",
       }),
@@ -6753,7 +6753,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("onr_v1_039_krash");
+    expect(item.cardDefinitionId).toBe(251);
     expect(item.chips).toEqual([
       "Runner",
       "KI",
@@ -6772,7 +6772,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "p3_37_search_stack_to_grip",
-        sourceDefinitionId: "onr_v1_105_mantis-fixer-at-large",
+        sourceDefinitionId: 11030,
         selectedCount: 1,
         movedCardCount: 1,
         searchDestination: "runner_grip",
@@ -6804,14 +6804,14 @@ describe("formatChronicleEvent", () => {
       actor: "runner",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_search_trash_to_grip",
-      sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+      sourceDefinitionId: 301,
       selectedCount: 1,
       movedCardCount: 1,
       searchedZone: "runner_heap",
       searchDestination: "runner_grip",
       publicRevealKind: "reveal",
-      publicRevealDefinitionId: "simple_decoder",
-      cardDefinitionId: "simple_decoder",
+      publicRevealDefinitionId: 591,
+      cardDefinitionId: 591,
       shufflePerformed: false,
       aiReasonCode: "runner_heap_search_card",
     });
@@ -6823,7 +6823,7 @@ describe("formatChronicleEvent", () => {
     expect(item.category).toBe("card");
     expect(item.importance).toBe("important");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("simple_decoder");
+    expect(item.cardDefinitionId).toBe(591);
     expect(item.cardTitle).toBe("Simple Decoder");
     expect(item.chips).toEqual([
       "Runner",
@@ -6843,9 +6843,9 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "p3_38_move_top_trash_to_grip",
-        sourceDefinitionId: "onr_v1_165_junkyard-bbs",
-        cardDefinitionId: "onr_v1_165_junkyard-bbs",
-        returnedCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+        sourceDefinitionId: 377,
+        cardDefinitionId: 377,
+        returnedCardDefinitionId: 369,
         returnedCount: 1,
         sourceZone: "heap",
         destinationZone: "grip",
@@ -6861,7 +6861,7 @@ describe("formatChronicleEvent", () => {
     expect(item.importance).toBe("important");
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe(
-      "onr_v1_157_crash-everett-inventive-fixer",
+      369,
     );
     expect(item.cardTitle).toBe("Crash Everett, Inventive Fixer");
     expect(item.chips).toEqual([
@@ -6879,11 +6879,11 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1911_aujourdoui_top5",
-        sourceDefinitionId: "onr_v1_151_aujourdoui",
+        sourceDefinitionId: 363,
         selectedCount: 2,
         publicRevealKind: "reveal",
-        publicRevealDefinitionId: "simple_decoder",
-        publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+        publicRevealDefinitionId: 591,
+        publicRevealDefinitionIds: "591,597",
         shuffled: true,
       }),
       "runner",
@@ -6894,7 +6894,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("simple_decoder");
+    expect(item.cardDefinitionId).toBe(591);
     expect(item.chips).toEqual([
       "Runner",
       "Aujourd'Oui",
@@ -6912,7 +6912,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1911_aujourdoui_top5",
-        sourceDefinitionId: "onr_v1_151_aujourdoui",
+        sourceDefinitionId: 363,
         selectedCount: 0,
         shuffled: true,
       }),
@@ -6943,7 +6943,7 @@ describe("formatChronicleEvent", () => {
         searchReveal: "hidden",
         searchDestination: "grip",
         selectedCount: 1,
-        cardDefinitionId: "onr_v1_036_jackhammer",
+        cardDefinitionId: 248,
         title: "Jackhammer",
       }),
       "corp",
@@ -6965,7 +6965,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         encounterContinue: true,
         traceStarted: true,
-        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceDefinitionId: 461,
         traceLimit: 4,
       }),
       "runner",
@@ -6976,7 +6976,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         aiReasonCode: "corp.trace.bid",
         traceStep: "corp_bid",
-        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceDefinitionId: 461,
         traceLimit: 4,
         corpBid: 2,
         traceValue: 6,
@@ -6988,7 +6988,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         traceStep: "runner_bid",
-        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceDefinitionId: 461,
         traceLimit: 4,
         corpBid: 2,
         traceValue: 6,
@@ -7005,7 +7005,7 @@ describe("formatChronicleEvent", () => {
       "Du hast mit Hunter einen Trace mit Limit 4 ausgelöst.",
     );
     expect(started.category).toBe("danger");
-    expect(started.cardDefinitionId).toBe("onr_v1_249_hunter");
+    expect(started.cardDefinitionId).toBe(461);
     expect(corpBid.title).toBe("Die Korp-KI hat im Trace 2 Credits geboten.");
     expect(corpBid.description).toBe("Trace-Wert: 6, Runner-Link: 0.");
     expect(corpBid.chips).toContain("Korp-Gebot 2");
@@ -7030,7 +7030,7 @@ describe("formatChronicleEvent", () => {
     const event = makeEvent("resolve_choice", {
       actor: "runner",
       traceStep: "runner_bid",
-      sourceDefinitionId: "onr_proteus_050_manhunt",
+      sourceDefinitionId: 108,
       corpBid: 0,
       traceValue: 6,
       runnerBid: 0,
@@ -7052,7 +7052,7 @@ describe("formatChronicleEvent", () => {
       id: `${event.eventId}:tag-gain`,
       title: "Du hast 6 Tags erhalten.",
       description: "Auslöser: Manhunt. Du hast jetzt 6 Tags.",
-      cardDefinitionId: "onr_proteus_050_manhunt",
+      cardDefinitionId: 108,
       cardTitle: "Manhunt",
       importance: "important",
       visibility: "public",
@@ -7073,11 +7073,11 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         traceStep: "base_link",
-        sourceDefinitionId: "onr_v1_284_chance-observation",
+        sourceDefinitionId: 496,
         corpBid: 1,
         traceValue: 6,
         baseLinkUsed: true,
-        traceBaseLinkSourceDefinitionId: "onr_v1_003_baedekers-net-map",
+        traceBaseLinkSourceDefinitionId: 215,
         traceBaseLinkCostPaid: 0,
         baseLinkValue: 1,
         runnerLink: 1,
@@ -7089,8 +7089,8 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         traceStep: "post_bid_link",
         eventModificationDecision: "apply",
-        sourceDefinitionId: "onr_v1_284_chance-observation",
-        postBidTraceLinkSourceDefinitionId: "onr_v1_003_baedekers-net-map",
+        sourceDefinitionId: 496,
+        postBidTraceLinkSourceDefinitionId: 215,
         postBidTraceLinkCostPaid: 1,
         postBidTraceLinkDelta: 1,
         postBidTraceLinkBonus: 1,
@@ -7108,7 +7108,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         traceStep: "post_bid_link",
-        sourceDefinitionId: "onr_v1_284_chance-observation",
+        sourceDefinitionId: 496,
         postBidTraceLinkBonus: 1,
         corpBid: 1,
         traceValue: 6,
@@ -7156,7 +7156,7 @@ describe("formatChronicleEvent", () => {
     const traceEvent = makeEvent("resolve_choice", {
       actor: "runner",
       traceStep: "runner_bid",
-      sourceDefinitionId: "onr_v1_228_cinderella",
+      sourceDefinitionId: 440,
       corpBid: 1,
       traceValue: 7,
       runnerBid: 0,
@@ -7164,7 +7164,7 @@ describe("formatChronicleEvent", () => {
       traceSuccessful: true,
       traceSuccessEffect: "hardware_trash_meat_damage_end_run",
       trashedCount: 1,
-      trashedCardDefinitionId: "onr_v1_028_force-shield",
+      trashedCardDefinitionId: 240,
       damageAmount: 2,
       damageType: "meat",
       damageCannotBePrevented: true,
@@ -7233,7 +7233,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         traceStep: "runner_bid",
-        sourceDefinitionId: "onr_v1_241_fang-2-0",
+        sourceDefinitionId: 453,
         corpBid: 6,
         traceValue: 11,
         runnerBid: 0,
@@ -7259,7 +7259,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "runner",
         v1919RunnerEventAbility: "arasaka_owns_you_flatline_replacement",
-        sourceDefinitionId: "onr_v1_078_arasaka-owns-you",
+        sourceDefinitionId: 290,
         originalAmount: 4,
         preventedAmount: 4,
         drawnCards: 4,
@@ -7291,11 +7291,11 @@ describe("formatChronicleEvent", () => {
       originalAmount: 1,
       preventedTags: 1,
       finalAmount: 0,
-      sourceDefinitionId: "onr_v1_161_fall-guy",
+      sourceDefinitionId: 373,
       sourceTrashed: true,
-      trashedCardDefinitionId: "onr_v1_161_fall-guy",
-      ambushDefinitionId: "onr_proteus_005_marked-accounts",
-      accessEffectSourceDefinitionId: "onr_proteus_005_marked-accounts",
+      trashedCardDefinitionId: 373,
+      ambushDefinitionId: 63,
+      accessEffectSourceDefinitionId: 63,
       accessedFromZone: "rd",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1917_access_ambush",
@@ -7312,7 +7312,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(runnerItem.category).toBe("danger");
     expect(runnerItem.importance).toBe("important");
-    expect(runnerItem.cardDefinitionId).toBe("onr_v1_161_fall-guy");
+    expect(runnerItem.cardDefinitionId).toBe(373);
     expect(runnerItem.chips).toEqual(
       expect.arrayContaining([
         "Tag verhindert",
@@ -7327,7 +7327,7 @@ describe("formatChronicleEvent", () => {
     const valuPak = formatChronicleEvent(
       makeEvent("play_event", {
         actor: "runner",
-        cardDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+        cardDefinitionId: 329,
         title: "Valu-Pak Software Bundle",
         v1922RunnerEventAbility: "program_install_action_bundle",
         gainedActions: 5,
@@ -7339,7 +7339,7 @@ describe("formatChronicleEvent", () => {
     const edgerunner = formatChronicleEvent(
       makeEvent("play_operation", {
         actor: "corp",
-        cardDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+        cardDefinitionId: 501,
         title: "Edgerunner, Inc., Temps",
         v1922CorpOperationAbility: "install_action_bundle",
         gainedActions: 3,
@@ -7350,11 +7350,11 @@ describe("formatChronicleEvent", () => {
     const securityPurge = formatChronicleEvent(
       makeEvent("score_agenda", {
         actor: "corp",
-        cardDefinitionId: "onr_v1_216_security-purge",
+        cardDefinitionId: 428,
         title: "Security Purge",
         agendaAbility: "agenda_purge",
         publicRevealDefinitionIds:
-          "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
+          "486,596,594",
         revealedCount: 3,
         revealedIceCount: 1,
         pendingTrashCount: 2,
@@ -7368,11 +7368,11 @@ describe("formatChronicleEvent", () => {
     const securityPurgeReview = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_216_security-purge",
+        sourceDefinitionId: 428,
         agendaAbility: "agenda_purge",
         hiddenZoneAction: "agenda_purge_runner_review_completed",
         publicRevealDefinitionIds:
-          "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
+          "486,596,594",
         revealedCount: 3,
         revealedIceCount: 1,
         pendingTrashCount: 2,
@@ -7386,7 +7386,7 @@ describe("formatChronicleEvent", () => {
     const securityPurgeResolve = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        sourceDefinitionId: "onr_v1_216_security-purge",
+        sourceDefinitionId: 428,
         agendaAbility: "agenda_purge",
         hiddenZoneAction: "agenda_purge_install_targets",
         revealedCount: 3,
@@ -7396,26 +7396,26 @@ describe("formatChronicleEvent", () => {
         agendaPurgeRunnerReviewResolved: true,
         agendaPurgeTargetChoiceResolved: true,
         publicRevealDefinitionIds:
-          "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
-        installedIceDefinitionIds: "onr_v1_274_tutor",
+          "486,596,594",
+        installedIceDefinitionIds: "486",
         installedIceServerLabels: "R&D",
-        trashedDefinitionIds: "simple_economy_operation,simple_economy_asset",
+        trashedDefinitionIds: "596,594",
       }),
       "runner",
     );
     const securityPurgeNoIce = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_216_security-purge",
+        sourceDefinitionId: 428,
         agendaAbility: "agenda_purge",
         hiddenZoneAction: "agenda_purge_runner_review_completed",
         publicRevealDefinitionIds:
-          "simple_economy_operation,simple_economy_asset",
+          "596,594",
         revealedCount: 2,
         revealedIceCount: 0,
         installedIceCount: 0,
         trashedCount: 2,
-        trashedDefinitionIds: "simple_economy_operation,simple_economy_asset",
+        trashedDefinitionIds: "596,594",
         agendaPurgeRunnerReviewResolved: true,
         agendaPurgeTargetChoiceOpened: false,
         agendaPurgeTargetChoiceResolved: true,
@@ -7425,7 +7425,7 @@ describe("formatChronicleEvent", () => {
     const shield = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_061_shield",
+        sourceDefinitionId: 273,
         title: "Shield",
         eventModificationDecision: "apply",
         preventedAmount: 2,
@@ -7436,7 +7436,7 @@ describe("formatChronicleEvent", () => {
     const boardwalk = formatChronicleEvent(
       makeEvent("gain_credit", {
         actor: "runner",
-        sourceDefinitionId: "onr_v1_008_boardwalk",
+        sourceDefinitionId: 220,
         title: "Boardwalk",
         v1921RunnerProgramAbility: "deterministic_die_probe",
         v1921DieRoll: 4,
@@ -7446,7 +7446,7 @@ describe("formatChronicleEvent", () => {
     const flak = formatChronicleEvent(
       makeEvent("break_subroutine", {
         actor: "runner",
-        cardDefinitionId: "onr_v1_027_flak",
+        cardDefinitionId: 239,
         title: "Flak",
       }),
       "runner",
@@ -7507,7 +7507,7 @@ describe("formatChronicleEvent", () => {
     const scoreItem = formatChronicleEvent(
       makeEvent("score_agenda", {
         actor: "corp",
-        cardDefinitionId: "onr_proteus_008_project-zurich",
+        cardDefinitionId: 66,
         title: "Project Zurich",
         agendaPoints: 2,
         projectZurichOveradvance: 4,
@@ -7520,13 +7520,13 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "corp.start.scored_agenda.credit.pro013_zurich",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "corp",
             amount: 2,
             reason: "start_of_turn",
-            sourceDefinitionId: "onr_proteus_008_project-zurich",
+            sourceDefinitionId: 66,
             sourceTitle: "Project Zurich",
           },
         ],
@@ -7735,45 +7735,45 @@ describe("formatChronicleEvent", () => {
     const events = [
       makeEvent("gain_credit", {
         actor: "corp",
-        eventId: "evt_1",
+        eventId: 2,
         actionCostClicks: 1,
         turnActionOrdinalStart: 1,
         turnActionOrdinalEnd: 1,
       }),
       makeEvent("gain_credit", {
         actor: "corp",
-        eventId: "evt_2",
+        eventId: 3,
         actionCostClicks: 1,
         turnActionOrdinalStart: 2,
         turnActionOrdinalEnd: 2,
       }),
       makeEvent("play_operation", {
         actor: "corp",
-        eventId: "evt_overtime",
+        eventId: 107,
         actionCostClicks: 1,
         turnActionOrdinalStart: 3,
         turnActionOrdinalEnd: 3,
-        cardDefinitionId: "onr_v1_297_overtime-incentives",
+        cardDefinitionId: 509,
         title: "Overtime Incentives",
       }),
       makeEvent("gain_credit", {
         actor: "corp",
-        eventId: "evt_extra_1",
+        eventId: 108,
         actionCostClicks: 1,
         turnActionOrdinalStart: 2,
         turnActionOrdinalEnd: 2,
       }),
       makeEvent("gain_credit", {
         actor: "corp",
-        eventId: "evt_extra_2",
+        eventId: 109,
         actionCostClicks: 1,
         turnActionOrdinalStart: 3,
         turnActionOrdinalEnd: 3,
       }),
     ];
     const actionUseByEventId = chronicleActionUseByEventId(events);
-    const firstExtraActionUse = actionUseByEventId.evt_extra_1;
-    const secondExtraActionUse = actionUseByEventId.evt_extra_2;
+    const firstExtraActionUse = actionUseByEventId[108];
+    const secondExtraActionUse = actionUseByEventId[109];
     expect(firstExtraActionUse).toBeDefined();
     expect(secondExtraActionUse).toBeDefined();
     const firstExtra = formatChronicleEvent(events[3]!, "runner", {
@@ -7783,7 +7783,7 @@ describe("formatChronicleEvent", () => {
       actionUse: secondExtraActionUse ?? null,
     });
 
-    expect(actionUseByEventId.evt_overtime).toMatchObject({
+    expect(actionUseByEventId[107]).toMatchObject({
       label: "3",
       title: "3. Aktion in diesem Zug",
     });
@@ -7826,60 +7826,60 @@ describe("formatChronicleEvent", () => {
     const events = [
       makeEvent("mandatory_draw", {
         actor: "corp",
-        eventId: "evt_corp_draw_1",
+        eventId: 110,
       }),
-      makeEvent("gain_credit", { actor: "corp", eventId: "evt_corp_credit_1" }),
-      makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_1" }),
+      makeEvent("gain_credit", { actor: "corp", eventId: 111 }),
+      makeEvent("end_turn", { actor: "corp", eventId: 112 }),
       makeEvent("resolve_choice", {
         actor: "corp",
-        eventId: "evt_corp_discard_1",
+        eventId: 113,
         discardResolved: true,
         hiddenZoneAction: "discard_phase",
       }),
-      makeEvent("draw_card", { actor: "runner", eventId: "evt_runner_draw_1" }),
+      makeEvent("draw_card", { actor: "runner", eventId: 114 }),
       makeEvent("play_event", {
         actor: "runner",
-        eventId: "evt_runner_forged",
-        cardDefinitionId: "onr_v1_086_forged-activation-orders",
+        eventId: 115,
+        cardDefinitionId: 298,
       }),
       makeEvent("resolve_choice", {
         actor: "corp",
-        eventId: "evt_corp_forged_response",
+        eventId: 116,
         v1922RunnerEventAbility: "force_rez_or_trash_ice",
       }),
-      makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_1" }),
+      makeEvent("end_turn", { actor: "runner", eventId: 117 }),
       makeEvent("resolve_choice", {
         actor: "runner",
-        eventId: "evt_runner_discard_1",
+        eventId: 118,
         discardResolved: true,
         hiddenZoneAction: "discard_phase",
       }),
       makeEvent("mandatory_draw", {
         actor: "corp",
-        eventId: "evt_corp_draw_2",
+        eventId: 119,
       }),
-      makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_2" }),
-      makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_2" }),
+      makeEvent("end_turn", { actor: "corp", eventId: 120 }),
+      makeEvent("end_turn", { actor: "runner", eventId: 121 }),
     ];
     const turnNumbers = chronicleTurnNumberByEventId(events);
     const turnSides = chronicleTurnSideByEventId(events);
 
     expect(turnNumbers).toMatchObject({
-      evt_corp_draw_1: 1,
-      evt_corp_end_1: 1,
-      evt_corp_discard_1: 1,
-      evt_runner_draw_1: 2,
-      evt_runner_forged: 2,
-      evt_corp_forged_response: 2,
-      evt_runner_end_1: 2,
-      evt_runner_discard_1: 2,
-      evt_corp_draw_2: 3,
-      evt_corp_end_2: 3,
-      evt_runner_end_2: 4,
+      110: 1,
+      112: 1,
+      113: 1,
+      114: 2,
+      115: 2,
+      116: 2,
+      117: 2,
+      118: 2,
+      119: 3,
+      120: 3,
+      121: 4,
     });
-    expect(turnSides.evt_corp_forged_response).toBe("runner");
+    expect(turnSides[116]).toBe("runner");
 
-    expect(turnSides.evt_runner_end_1).toBe("runner");
+    expect(turnSides[117]).toBe("runner");
   });
 
   it("groups start-turn effects carried by discard resolution under the next turn", () => {
@@ -7889,13 +7889,13 @@ describe("formatChronicleEvent", () => {
       hiddenZoneAction: "discard_phase",
       resolvedEffects: [
         {
-          effectId: "corp.start.skivviss",
+          effectId: 0,
           kind: "draw_cards",
           visibility: "public",
           side: "corp",
           amount: 3,
           reason: "start_of_turn",
-          sourceDefinitionId: "onr_v1_064_skivviss",
+          sourceDefinitionId: 276,
           sourceTitle: "Skivviss",
         },
       ],
@@ -7919,12 +7919,12 @@ describe("formatChronicleEvent", () => {
         result: "ended",
         resolvedEffects: [
           {
-            effectId: "tokyo-bonus",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "corp",
             amount: 2,
-            sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+            sourceDefinitionId: 583,
             sourceTitle: "Tokyo-Chiba Infighting",
             serverLabel: "Remote 1",
             reason: "unsuccessful_run",
@@ -7940,7 +7940,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(items[0]?.category).toBe("economy");
     expect(items[0]?.cardDefinitionId).toBe(
-      "onr_v1_371_tokyo-chiba-infighting",
+      583,
     );
     expect(items[0]?.cardTitle).toBe("Tokyo-Chiba Infighting");
     expect(items[0]?.chips).toContain("+2 Credits");
@@ -7952,25 +7952,25 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "quest-noop",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
             amount: 0,
             reason: "start_of_turn",
-            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceDefinitionId: 384,
             sourceTitle: "Quest for Cattekin",
             v1921DieRoll: 4,
             randomEffectOutcome: "no_effect",
           },
           {
-            effectId: "quest-core",
+            effectId: 1,
             kind: "damage",
             visibility: "public",
             side: "runner",
             amount: 1,
             reason: "start_of_turn",
-            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceDefinitionId: 384,
             sourceTitle: "Quest for Cattekin",
             v1921DieRoll: 1,
             randomEffectOutcome: "core_damage",
@@ -7978,13 +7978,13 @@ describe("formatChronicleEvent", () => {
             damageType: "core",
           },
           {
-            effectId: "quest-net",
+            effectId: 2,
             kind: "damage",
             visibility: "public",
             side: "runner",
             amount: 1,
             reason: "start_of_turn",
-            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceDefinitionId: 384,
             sourceTitle: "Quest for Cattekin",
             v1921DieRoll: 2,
             randomEffectOutcome: "net_damage",
@@ -7992,13 +7992,13 @@ describe("formatChronicleEvent", () => {
             damageType: "net",
           },
           {
-            effectId: "quest-action",
+            effectId: 3,
             kind: "gain_actions",
             visibility: "public",
             side: "runner",
             amount: 1,
             reason: "start_of_turn",
-            sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
+            sourceDefinitionId: 384,
             sourceTitle: "Quest for Cattekin",
             v1921DieRoll: 6,
             randomEffectOutcome: "permanent_action",
@@ -8028,14 +8028,14 @@ describe("formatChronicleEvent", () => {
   });
 
   it("shows Omnitech Spinal Tap start-turn die rolls and groups them under the Runner turn", () => {
-    const sourceDefinitionId = "onr_classic_048_omnitech-spinal-tap-cybermodem";
+    const sourceDefinitionId = 52;
     const sourceTitle = 'Omnitech "Spinal Tap" Cybermodem';
     const damageEvent = makeEvent("end_turn", {
       actor: "corp",
-      eventId: "evt_corp_end_spinal_damage",
+      eventId: 122,
       resolvedEffects: [
         {
-          effectId: "spinal.damage",
+          effectId: 0,
           kind: "damage",
           visibility: "public",
           side: "runner",
@@ -8052,10 +8052,10 @@ describe("formatChronicleEvent", () => {
     });
     const noEffectEvent = makeEvent("end_turn", {
       actor: "corp",
-      eventId: "evt_corp_end_spinal_no_effect",
+      eventId: 123,
       resolvedEffects: [
         {
-          effectId: "spinal.no_effect",
+          effectId: 0,
           kind: "counter_change",
           visibility: "public",
           side: "runner",
@@ -8109,13 +8109,13 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "region-rez",
+            effectId: 0,
             kind: "rez_card",
             visibility: "public",
             side: "corp",
-            cardDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+            cardDefinitionId: 583,
             cardTitle: "Tokyo-Chiba Infighting",
-            sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+            sourceDefinitionId: 583,
             sourceTitle: "Tokyo-Chiba Infighting",
             reason: "region_install",
           },
@@ -8137,13 +8137,13 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "install-rez",
+            effectId: 0,
             kind: "rez_card",
             visibility: "public",
             side: "corp",
-            cardDefinitionId: "onr_v1_356_namatoki-plaza",
+            cardDefinitionId: 11031,
             cardTitle: "Namatoki Plaza",
-            sourceDefinitionId: "onr_v1_356_namatoki-plaza",
+            sourceDefinitionId: 11031,
             sourceTitle: "Namatoki Plaza",
             reason: "install_rez",
           },
@@ -8166,14 +8166,14 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "region-replace-visible",
+            effectId: 0,
             kind: "trash_card",
             visibility: "public",
             side: "corp",
             reason: "region_limit",
-            cardDefinitionId: "onr_v1_355_crystal-palace-station-grid",
+            cardDefinitionId: 567,
             cardTitle: "Crystal Palace Station Grid",
-            sourceDefinitionId: "onr_v1_365_paris-city-grid",
+            sourceDefinitionId: 577,
             sourceTitle: "Paris City Grid",
             serverLabel: "Remote 1",
           },
@@ -8191,13 +8191,13 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "region-replace-hidden",
+            effectId: 0,
             kind: "trash_card",
             visibility: "public",
             side: "corp",
             reason: "region_limit",
             redactedKind: "installed_card",
-            sourceDefinitionId: "onr_v1_365_paris-city-grid",
+            sourceDefinitionId: 577,
             sourceTitle: "Paris City Grid",
             serverLabel: "Remote 1",
           },
@@ -8212,7 +8212,7 @@ describe("formatChronicleEvent", () => {
       "Crystal Palace Station Grid",
     );
     expect(JSON.stringify(hiddenItems)).not.toContain(
-      "onr_v1_355_crystal-palace-station-grid",
+      567,
     );
   });
 
@@ -8222,11 +8222,11 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "top-runners-trash",
+            effectId: 0,
             kind: "trash_source",
             visibility: "public",
             side: "runner",
-            sourceDefinitionId: "onr_v1_184_top-runners-conference",
+            sourceDefinitionId: 396,
             sourceTitle: "Top Runners' Conference",
             reason: "run_start",
           },
@@ -8247,13 +8247,13 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "region-replacement",
+            effectId: 0,
             kind: "trash_card",
             visibility: "hidden_info_barrier",
             side: "corp",
-            cardDefinitionId: "simple_agenda",
+            cardDefinitionId: 588,
             cardTitle: "Simple Agenda",
-            sourceDefinitionId: "secret_region_upgrade",
+            sourceDefinitionId: 11032,
             sourceTitle: "Secret Region Upgrade",
             redactedKind: "region_replacement",
           },
@@ -8266,13 +8266,13 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "runner-private-trash",
+            effectId: 0,
             kind: "trash_card",
             visibility: "private_to_side",
             side: "runner",
-            cardDefinitionId: "onr_v1_036_jackhammer",
+            cardDefinitionId: 248,
             cardTitle: "Jackhammer",
-            sourceDefinitionId: "runner_secret_source",
+            sourceDefinitionId: 11033,
             sourceTitle: "Runner Secret Source",
           },
         ],
@@ -8305,12 +8305,12 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.top_runners_conference.card_123",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "runner",
             amount: 2,
-            sourceDefinitionId: "onr_v1_184_top-runners-conference",
+            sourceDefinitionId: 396,
             sourceTitle: "Top Runners' Conference",
             reason: "start_of_turn",
           },
@@ -8325,7 +8325,7 @@ describe("formatChronicleEvent", () => {
     );
     expect(items[0]?.category).toBe("economy");
     expect(items[0]?.cardDefinitionId).toBe(
-      "onr_v1_184_top-runners-conference",
+      396,
     );
     expect(items[0]?.chips).toEqual(
       expect.arrayContaining(["+2 Credits", "Automatisch"]),
@@ -8338,32 +8338,32 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "corp.start.polymer.card_211",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "corp",
             amount: 1,
-            sourceDefinitionId: "onr_v1_211_polymer-breakthrough",
+            sourceDefinitionId: 423,
             sourceTitle: "Polymer Breakthrough",
             reason: "start_of_turn",
           },
           {
-            effectId: "corp.start.remote.card_335",
+            effectId: 1,
             kind: "gain_actions",
             visibility: "public",
             side: "corp",
             amount: 1,
-            sourceDefinitionId: "onr_v1_335_remote-facility",
+            sourceDefinitionId: 547,
             sourceTitle: "Remote Facility",
             reason: "start_of_turn",
           },
           {
-            effectId: "corp.start.subsidiary.card_218",
+            effectId: 2,
             kind: "gain_actions",
             visibility: "public",
             side: "corp",
             amount: 1,
-            sourceDefinitionId: "onr_v1_218_subsidiary-branch",
+            sourceDefinitionId: 430,
             sourceTitle: "Subsidiary Branch",
             reason: "start_of_turn",
           },
@@ -8385,17 +8385,17 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.floating.card_163",
+            effectId: 0,
             kind: "gain_credits",
             visibility: "public",
             side: "runner",
             amount: 1,
-            sourceDefinitionId: "onr_v1_163_floating-runner-bbs",
+            sourceDefinitionId: 375,
             sourceTitle: "Floating Runner BBS",
             reason: "start_of_turn",
           },
           {
-            effectId: "runner.start.rigged.card_174",
+            effectId: 1,
             kind: "take_hosted_credits",
             visibility: "public",
             side: "runner",
@@ -8403,7 +8403,7 @@ describe("formatChronicleEvent", () => {
             counterType: "bit",
             removedCounterAmount: 1,
             remainingCounters: 11,
-            sourceDefinitionId: "onr_v1_174_rigged-investments",
+            sourceDefinitionId: 386,
             sourceTitle: "Rigged Investments",
             reason: "start_of_turn",
           },
@@ -8432,13 +8432,13 @@ describe("formatChronicleEvent", () => {
       actor: "corp",
       resolvedEffects: [
         {
-          effectId: "runner.start.forced_action.viacox_1",
+          effectId: 0,
           kind: "gain_actions",
           visibility: "public",
           side: "runner",
           amount: 1,
           reason: "start_of_turn",
-          sourceDefinitionId: "onr_proteus_131_bargain-with-viacox",
+          sourceDefinitionId: 189,
           sourceTitle: "Bargain with Viacox",
           dieRoll: 6,
           restrictedActionFamily: "play_or_install_card",
@@ -8470,13 +8470,13 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.forced_action.viacox_1",
+            effectId: 0,
             kind: "gain_actions",
             visibility: "public",
             side: "runner",
             amount: 1,
             reason: "start_of_turn",
-            sourceDefinitionId: "onr_proteus_131_bargain-with-viacox",
+            sourceDefinitionId: 189,
             sourceTitle: "Bargain with Viacox",
             dieRoll: 5,
             restrictedActionFamily: "start_run_remote",
@@ -8505,7 +8505,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.recurring_credit.card_456",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -8513,7 +8513,7 @@ describe("formatChronicleEvent", () => {
             counterType: "recurring_credit",
             remainingCounters: 1,
             addedCounterAmount: 1,
-            sourceDefinitionId: "onr_v1_176_the-shell-traders",
+            sourceDefinitionId: 388,
             sourceTitle: "The Shell Traders",
             reason: "start_of_turn",
           },
@@ -8541,18 +8541,18 @@ describe("formatChronicleEvent", () => {
       actor: "runner",
       resolvedEffects: [
         {
-          effectId: "gain-technical-id-must-not-matter",
+          effectId: 0,
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
           amount: 1,
           reason: "installed_economy_start_of_corp_turn",
-          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceDefinitionId: 541,
           sourceCardInstanceId: "investment_firm_1",
           sourceTitle: "Investment Firm",
         },
         {
-          effectId: "counter-another-unrelated-technical-id",
+          effectId: 1,
           kind: "counter_change",
           visibility: "public",
           side: "corp",
@@ -8561,7 +8561,7 @@ describe("formatChronicleEvent", () => {
           counterType: "recurring_credit",
           removedCounterAmount: 1,
           remainingCounters: 1,
-          sourceDefinitionId: "onr_v1_329_investment-firm",
+          sourceDefinitionId: 541,
           sourceCardInstanceId: "investment_firm_1",
           sourceTitle: "Investment Firm",
         },
@@ -8588,7 +8588,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.shell_traders.shell_1.simple_fracter_1",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -8596,9 +8596,9 @@ describe("formatChronicleEvent", () => {
             counterType: "shell",
             removedCounterAmount: 1,
             remainingCounters: 1,
-            sourceDefinitionId: "onr_v1_176_the-shell-traders",
+            sourceDefinitionId: 388,
             sourceTitle: "The Shell Traders",
-            cardDefinitionId: "simple_fracter",
+            cardDefinitionId: 597,
             cardTitle: "Simple Fracter",
             reason: "start_of_turn",
           },
@@ -8611,7 +8611,7 @@ describe("formatChronicleEvent", () => {
       "Du hast 1 Shell-Counter von Simple Fracter entfernt.",
     );
     expect(items[0]?.groupLabel).toBe("Zug - Runner");
-    expect(items[0]?.cardDefinitionId).toBe("simple_fracter");
+    expect(items[0]?.cardDefinitionId).toBe(597);
     expect(items[0]?.cardTitle).toBe("Simple Fracter");
     expect(items[0]?.chips).toEqual(
       expect.arrayContaining([
@@ -8629,7 +8629,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "corp.start.braindance_campaign.card_311",
+            effectId: 0,
             kind: "take_hosted_credits",
             visibility: "public",
             side: "corp",
@@ -8637,7 +8637,7 @@ describe("formatChronicleEvent", () => {
             counterType: "bit",
             removedCounterAmount: 2,
             remainingCounters: 10,
-            sourceDefinitionId: "onr_v1_311_braindance-campaign",
+            sourceDefinitionId: 523,
             sourceTitle: "Braindance Campaign",
             reason: "start_of_turn",
           },
@@ -8669,7 +8669,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "corp.start.holovid_campaign.card_326",
+            effectId: 0,
             kind: "take_hosted_credits",
             visibility: "public",
             side: "corp",
@@ -8677,17 +8677,17 @@ describe("formatChronicleEvent", () => {
             counterType: "bit",
             removedCounterAmount: 1,
             remainingCounters: 0,
-            sourceDefinitionId: "onr_v1_326_holovid-campaign",
+            sourceDefinitionId: 538,
             sourceTitle: "Holovid Campaign",
             reason: "start_of_turn",
           },
           {
-            effectId: "corp.start.holovid_campaign.trash.card_326",
+            effectId: 1,
             kind: "trash_source_when_empty",
             visibility: "public",
             side: "corp",
             amount: 1,
-            sourceDefinitionId: "onr_v1_326_holovid-campaign",
+            sourceDefinitionId: 538,
             sourceTitle: "Holovid Campaign",
             reason: "start_of_turn",
           },
@@ -8707,14 +8707,14 @@ describe("formatChronicleEvent", () => {
     for (const [title, definitionId, amount, remaining, expectedTitle] of [
       [
         "Detroit Police Contract",
-        "onr_v1_198_detroit-police-contract",
+        410,
         2,
         10,
         "Detroit Police Contract gibt Korp 2 Credits von der Karte.",
       ],
       [
         "Spinn Public Relations",
-        "onr_v1_344_spinn-public-relations",
+        556,
         1,
         2,
         "Spinn Public Relations gibt Korp 1 Credit von der Karte.",
@@ -8725,7 +8725,7 @@ describe("formatChronicleEvent", () => {
           actor: "runner",
           resolvedEffects: [
             {
-              effectId: `${definitionId}.start.take_hosted_credits`,
+              effectId: 0,
               kind: "take_hosted_credits",
               visibility: "public",
               side: "corp",
@@ -8755,14 +8755,14 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "runner.start.bizarre_encryption.card_789",
+            effectId: 0,
             kind: "score_agenda",
             visibility: "public",
             side: "runner",
             amount: 2,
-            cardDefinitionId: "onr_v1_203_hostile-takeover",
+            cardDefinitionId: 415,
             cardTitle: "Hostile Takeover",
-            sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+            sourceDefinitionId: 563,
             sourceTitle: "Bizarre Encryption Scheme",
             reason: "start_of_turn",
           },
@@ -8786,7 +8786,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "bel_digmo.access.damage",
+            effectId: 0,
             kind: "damage",
             visibility: "hidden_info_barrier",
             side: "runner",
@@ -8794,7 +8794,7 @@ describe("formatChronicleEvent", () => {
             damageType: "net",
             cardsTrashed: 1,
             reason: "access_effect",
-            sourceDefinitionId: "onr_proteus_071_bel-digmo-antibody",
+            sourceDefinitionId: 11034,
             sourceTitle: "Bel-Digmo Antibody",
           },
         ],
@@ -8819,7 +8819,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("access_card", {
         actor: "runner",
         title: "Pattel Antibody",
-        cardDefinitionId: "onr_proteus_068_pattel-antibody",
+        cardDefinitionId: 126,
         serverLabel: "R&D",
         accessIndex: 0,
         baseAccessCount: 1,
@@ -8833,7 +8833,7 @@ describe("formatChronicleEvent", () => {
       makeEvent("access_card", {
         actor: "runner",
         title: "Bel-Digmo Antibody",
-        cardDefinitionId: "onr_proteus_071_bel-digmo-antibody",
+        cardDefinitionId: 11034,
         serverLabel: "R&D",
         accessIndex: 1,
         baseAccessCount: 1,
@@ -8884,7 +8884,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         resolvedEffects: [
           {
-            effectId: "run_rd.highlighter.successful_run.highlighter",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "corp",
@@ -8893,11 +8893,11 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 1,
             remainingCounters: 1,
             reason: "proteus_runner_virus_successful_run",
-            sourceDefinitionId: "onr_proteus_090_highlighter",
+            sourceDefinitionId: 148,
             sourceTitle: "Highlighter",
           },
           {
-            effectId: "run_rd.viral_pipeline.successful_run.socket_rd",
+            effectId: 1,
             kind: "counter_change",
             visibility: "public",
             side: "corp",
@@ -8906,12 +8906,12 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 1,
             remainingCounters: 1,
             reason: "proteus_runner_virus_successful_run",
-            sourceDefinitionId: "onr_proteus_099_viral-pipeline",
+            sourceDefinitionId: 157,
             sourceTitle: "Viral Pipeline",
             serverLabel: "R&D",
           },
           {
-            effectId: "run_rd.cascade.successful_run.cascade",
+            effectId: 2,
             kind: "counter_change",
             visibility: "public",
             side: "corp",
@@ -8920,7 +8920,7 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 1,
             remainingCounters: 1,
             reason: "proteus_runner_virus_successful_run",
-            sourceDefinitionId: "onr_v1_010_cascade",
+            sourceDefinitionId: 222,
             sourceTitle: "Cascade",
             serverLabel: "R&D",
           },
@@ -8945,10 +8945,10 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         targetCount: 2,
         targetCardDefinitionIds:
-          "onr_v1_005_bartmoss-memorial-icebreaker,onr_v1_074_worm",
+          "217,286",
         resolvedEffects: [
           {
-            effectId: "pattel.access.counters",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -8957,7 +8957,7 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 2,
             remainingCounters: 2,
             reason: "access_effect",
-            sourceDefinitionId: "onr_proteus_068_pattel-antibody",
+            sourceDefinitionId: 126,
             sourceTitle: "Pattel Antibody",
           },
         ],
@@ -8971,7 +8971,7 @@ describe("formatChronicleEvent", () => {
         targetCardDefinitionIds: "",
         resolvedEffects: [
           {
-            effectId: "pattel.access.no_counters",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -8980,7 +8980,7 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 0,
             remainingCounters: 0,
             reason: "access_effect",
-            sourceDefinitionId: "onr_proteus_068_pattel-antibody",
+            sourceDefinitionId: 126,
             sourceTitle: "Pattel Antibody",
           },
         ],
@@ -8993,14 +8993,14 @@ describe("formatChronicleEvent", () => {
         targetCount: 1,
         resolvedEffects: [
           {
-            effectId: "unbound.breaker.penalty",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
             amount: 1,
             counterType: "breaker_strength_penalty",
             addedCounterAmount: 1,
-            sourceDefinitionId: "onr_proteus_068_pattel-antibody",
+            sourceDefinitionId: 126,
             sourceTitle: "Pattel Antibody",
           },
         ],
@@ -9029,7 +9029,7 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         resolvedEffects: [
           {
-            effectId: "pattel.access.counters",
+            effectId: 0,
             kind: "counter_change",
             visibility: "public",
             side: "runner",
@@ -9038,7 +9038,7 @@ describe("formatChronicleEvent", () => {
             addedCounterAmount: 1,
             remainingCounters: 1,
             reason: "access_effect",
-            sourceDefinitionId: "onr_proteus_068_pattel-antibody",
+            sourceDefinitionId: 126,
             sourceTitle: "Pattel Antibody",
           },
         ],
@@ -9058,7 +9058,7 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
-        traceId: "trace_hidden",
+        traceId: 1,
         traceStep: "corp_bid",
         traceRulesProfile: "classic_blind",
         traceBidsRevealed: false,
@@ -9083,7 +9083,7 @@ function makeEvent(
       ? "corp"
       : "runner");
   const eventId =
-    typeof payload.eventId === "string" ? payload.eventId : `evt_${actionType}`;
+    typeof payload.eventId === "number" ? payload.eventId : 1;
   const payloadWithoutEventId = { ...payload };
   delete payloadWithoutEventId.eventId;
   return {
@@ -9118,11 +9118,11 @@ function realCorporateShuffleEvents(): [PublicGameEvent, PublicGameEvent] {
   if (!operationId) throw new Error("Corporate-Shuffle-Testquelle fehlt.");
   state.cardInstances[operationId] = {
     ...state.cardInstances[operationId]!,
-    definitionId: "onr_classic_017_corporate-shuffle",
+    definitionId: 21,
   };
   const spgId = "chronicle-real-spg" as CardInstanceId;
   state.corp.servers.push({
-    id: "remote_1",
+    id: "r1",
     kind: "remote",
     label: "Remote 1",
     ice: [],
@@ -9130,10 +9130,10 @@ function realCorporateShuffleEvents(): [PublicGameEvent, PublicGameEvent] {
   });
   state.cardInstances[spgId] = {
     instanceId: spgId,
-    definitionId: "onr_classic_025_strategic-planning-group",
+    definitionId: 29,
     owner: "corp",
     controller: "corp",
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     faceup: true,
     rezzed: true,
     advancementCounters: 0,
@@ -9189,10 +9189,10 @@ function realRunnerProgramTrashBeforeInstallEvents(): [
   if (runnerCardIds.length < 5)
     throw new Error("Runner-Programmkarten für den Chroniktest fehlen.");
   const installedDefinitionIds = [
-    "onr_v1_035_invisibility",
-    "onr_v1_035_invisibility",
-    "onr_v1_014_codecracker",
-    "onr_v1_006_black-dahlia",
+    247,
+    247,
+    226,
+    218,
   ];
   const installedIds = runnerCardIds.slice(0, 4);
   for (const [index, cardId] of installedIds.entries()) {
@@ -9213,7 +9213,7 @@ function realRunnerProgramTrashBeforeInstallEvents(): [
   state.runner.grip.unshift(loonyGoonId);
   state.cardInstances[loonyGoonId] = {
     ...state.cardInstances[loonyGoonId]!,
-    definitionId: "onr_v1_040_loony-goon",
+    definitionId: 252,
     zone: { side: "runner", zone: "grip" },
     faceup: false,
     rezzed: false,

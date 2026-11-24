@@ -7,6 +7,7 @@ import {
 } from "../../plans/plan-scheduler";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { currentEncounteredIceCard } from "../../runtime/current-encounter";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { visibleRunnerRunPathCreditBudgetForRig } from "../../visible-run-analysis";
 
 export function runnerPostBreakStealthLossChoiceBinding(
@@ -125,9 +126,7 @@ export function resolvePlanBoundRunnerPostBreakStealthLossChoice(
   const choiceActions = context.input.legalActions.filter(
     (action) => action.type === "resolve_choice",
   );
-  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
-  const [requirement] = action?.choiceRequirements ?? [];
-  const optionIds = choice.options.map((option) => option.id);
+  const action = exactCurrentChoiceAction(context.input, choice);
   const continuation = choice.continuation;
   const expectedSelections =
     continuation.sourceMode === "single_stealth_card"
@@ -156,16 +155,7 @@ export function resolvePlanBoundRunnerPostBreakStealthLossChoice(
     previous.executorInstanceId === origin.executorInstanceId &&
     root !== undefined &&
     executor !== undefined &&
-    action !== undefined &&
-    action.side === "runner" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    action !== undefined;
   if (!exactBinding || !action || !previous || !origin) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: context.input.side,
@@ -234,9 +224,7 @@ export function resolvePlanBoundRunnerBrokenIceVirusCounterChoice(
   const choiceActions = context.input.legalActions.filter(
     (action) => action.type === "resolve_choice",
   );
-  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
-  const [requirement] = action?.choiceRequirements ?? [];
-  const optionIds = choice.options.map((option) => option.id);
+  const action = exactCurrentChoiceAction(context.input, choice);
   const selectedOptionIds = planBoundRunnerBrokenIceVirusCounterOptions(
     context.input,
     choice,
@@ -269,16 +257,7 @@ export function resolvePlanBoundRunnerBrokenIceVirusCounterChoice(
     choice.maxSelections === choice.minSelections &&
     selectedOptionIds !== undefined &&
     selectedOptionIds.length === choice.minSelections &&
-    action !== undefined &&
-    action.side === "runner" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+    action !== undefined;
   if (
     !exactBinding ||
     !action ||
@@ -305,13 +284,7 @@ export function resolvePlanBoundRunnerBrokenIceVirusCounterChoice(
       ["turn_plan", previous?.turnPlanCommitment?.status === "active"],
       ["choice_state", exactChoiceState],
       ["selection", selectedOptionIds !== undefined],
-      ["action", action !== undefined],
-      ["action_source", action?.source === "game_rule"],
-      [
-        "action_state",
-        action?.expiresAtStateVersion === context.input.playerView.stateVersion,
-      ],
-      ["choice_requirement", requirement?.choiceId === choice.choiceId],
+      ["engine_choice_offer", action !== undefined],
     ]
       .filter(([, valid]) => !valid)
       .map(([name]) => name)
@@ -363,7 +336,7 @@ function planBoundRunnerBrokenIceVirusCounterOptions(
           (card) =>
             card.known &&
             card.rezzed === true &&
-            typeof card.definitionId === "string" &&
+            typeof card.definitionId === "number" &&
             (typeof card.effectiveRunQuote?.effectiveStrength === "number" ||
               typeof card.strength === "number"),
         )
@@ -384,6 +357,7 @@ function planBoundRunnerBrokenIceVirusCounterOptions(
     const candidates = choice.options
       .flatMap((option) => {
         if (
+          option.selectable === false ||
           option.metadata?.sourceCardInstanceId !== sourceId ||
           typeof option.metadata.targetCardInstanceId !== "string" ||
           option.value !== option.metadata.targetCardInstanceId

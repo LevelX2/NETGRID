@@ -1,7 +1,7 @@
 import type {
   DeckDoctrineV2Diagnostic,
   DeckDoctrineV2StrategyDiagnostic,
-} from "../deck-doctrine-strategy";
+} from "../deck-doctrine-diagnostic";
 import { synthesizeDoctrineTacticalGoals } from "../decision/doctrine-goal-synthesis";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";

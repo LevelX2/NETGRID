@@ -393,7 +393,7 @@ function quoteRunnerBreak(params: {
 function breakAbilityMatchesIce(
   ability: RuntimeIcebreakerAbility,
   iceSubtypes: readonly string[],
-  iceDefinitionId: string,
+  iceDefinitionId: number,
   selectedSubtype?: string,
 ): boolean {
   if (

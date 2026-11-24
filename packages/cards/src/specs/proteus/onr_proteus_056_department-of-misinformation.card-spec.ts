@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_proteus_056_department-of-misinformation",
+      114,
     ),
     title: "Department of Misinformation",
     side: "corp",

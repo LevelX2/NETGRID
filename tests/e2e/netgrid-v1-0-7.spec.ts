@@ -1,10 +1,18 @@
 import { expect, test } from "@playwright/test";
 import { stat } from "node:fs/promises";
 import path from "node:path";
+import aiDeckPool from "../../data/ai/ai-deck-pool-1.1.0.json" with { type: "json" };
+import deckSnapshots from "../../data/decks/deck-snapshots-0.8.json" with { type: "json" };
+import deckCatalog from "../../data/decks/standard-deck-catalog-1.0.0.json" with { type: "json" };
+import {
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+} from "../../packages/runtime-data/src/product-default-decks";
 import {
   BASE_URL,
   createHumanVsAiGame,
   createHumanVsHumanLobby,
+  createHumanVsHumanSeriesLobby,
   exerciseCardDisplayModes,
   expectActiveBoardBasics,
   expectNoCriticalLayoutOverflow,
@@ -22,6 +30,24 @@ import {
 } from "./helpers/leak-scan";
 import { VIEWPORTS } from "./helpers/viewports";
 
+function standardDeckName(snapshotId: string): string {
+  const deck = deckCatalog.decks.find(
+    (entry) => `standard_${entry.standardDeckId}_${entry.version}` === snapshotId,
+  );
+  if (!deck) throw new Error(`Missing browser test deck for ${snapshotId}`);
+  return deck.name;
+}
+
+const runnerDeckName = standardDeckName(PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID);
+const corpDeckName = standardDeckName(PRODUCT_DEFAULT_CORP_SNAPSHOT_ID);
+const fixedOriginalsetCorp = aiDeckPool.entries.find(
+  (entry) => entry.side === "corp" && entry.tags.includes("fixed_originalset"),
+);
+const fixedCorpDeckName = deckSnapshots.snapshots.find(
+  (snapshot) => snapshot.deckSnapshotId === fixedOriginalsetCorp?.snapshotId,
+)?.name;
+if (!fixedCorpDeckName) throw new Error("Missing fixed Corp browser test deck");
+
 test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
   test("Human-vs-KI Desktop prüft aktives Board, KI-Takt, Cue, Aktionen, Credits und Artefakte", async ({
     page,
@@ -31,6 +57,14 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await createHumanVsAiGame(page, "v1-0-7-ai-desktop");
 
     await expectActiveBoardBasics(page);
+    await page.locator(".matchDetailsToggle").click();
+    const details = page.locator("#match-details-strip");
+    await expect(details).toContainText("Eigenes Deck");
+    await expect(details).toContainText("KI-Deck");
+    const fields = details.locator(":scope > :not(.matchStripNotice)");
+    await expect(fields.filter({ hasText: runnerDeckName })).toBeVisible();
+    await expect(fields.filter({ hasText: fixedCorpDeckName! })).toBeVisible();
+    await page.locator(".matchDetailsToggle").click();
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await expect(page.getByTestId("server-run-action").first()).toHaveAttribute(
       "aria-label",
@@ -44,10 +78,28 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await page
       .getByRole("button", { name: "Zurück zum aktiven Spiel" })
       .click();
+    const creditBalance = page
+      .locator(".sideStatusPanel.side-runner")
+      .getByTestId("credit-badge")
+      .locator(".statValue");
+    const before = Number(await creditBalance.innerText());
     await page
       .locator('[data-testid="action-button"][data-action-type="gain_credit"]')
       .first()
       .click();
+    const change = page.getByTestId("opponent-cue").getByRole("img", {
+      name: `Runner, Kontostand von ${before} auf ${before + 1} Credits`,
+    });
+    await expect(change).toBeVisible();
+    await expect(page.getByTestId("opponent-cue")).toContainText(
+      "1 Credit erhalten",
+    );
+    await expect(page.getByTestId("opponent-cue")).toHaveAttribute(
+      "data-cue-display",
+      "floating",
+    );
+    await expect(change).toContainText("(+1)");
+    await expect(creditBalance).toHaveText(String(before + 1));
     await expect(page.getByTestId("action-availability")).toContainText(
       "noch 3",
     );
@@ -59,7 +111,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       page.getByRole("button", { name: "KI-Schritt" }),
     ).toBeEnabled();
     await page.getByRole("button", { name: "KI-Schritt" }).click();
-    await expect(page.getByTestId("opponent-cue")).toBeVisible();
+    await expect(
+      page.locator('[data-testid="opponent-cue"].actor-corp'),
+    ).toBeVisible();
 
     await exerciseCardDisplayModes(page);
     await expectNoCriticalLayoutOverflow(page);
@@ -88,6 +142,14 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
 
       await expectActiveBoardBasics(host.page);
       await expectActiveBoardBasics(joiner.page);
+      await host.page.locator(".matchDetailsToggle").click();
+      const details = host.page.locator("#match-details-strip");
+      await expect(details).toContainText("Eigenes Deck");
+      await expect(details).not.toContainText("KI-Deck");
+      const fields = details.locator(":scope > :not(.matchStripNotice)");
+      await expect(fields.filter({ hasText: runnerDeckName })).toBeVisible();
+      await expect(fields.filter({ hasText: corpDeckName })).toHaveCount(0);
+      await host.page.locator(".matchDetailsToggle").click();
       await expectNoDomOrLocalStorageLeaks(host.page);
       await expectNoDomOrLocalStorageLeaks(joiner.page);
       expectNoServerPayloadLeaks(hostFrames);
@@ -288,12 +350,78 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await expect(page.getByTestId("setup-screen")).toBeVisible();
   });
 
+  test("bestätigt das Verlassen einer laufenden Matchserie im Ergebnisfenster", async ({
+    page,
+    browser,
+  }) => {
+    await page.setViewportSize(VIEWPORTS.desktop);
+    const joiner = await newContextPage(browser, "desktop");
+    try {
+      const joinUrl = await createHumanVsHumanSeriesLobby(
+        page,
+        "leave-series-confirmation",
+      );
+      await joinHumanVsHumanLobby(joiner.page, joinUrl);
+      await readyAndWaitForActive(page, joiner.page);
+
+      await page.getByRole("button", { name: "Aufgeben", exact: true }).click();
+      await page
+        .getByRole("alertdialog", { name: "Spiel aufgeben?" })
+        .getByRole("button", { name: "Aufgeben", exact: true })
+        .click();
+
+      const result = page.getByRole("dialog");
+      const leaveSeries = result.getByRole("button", { name: "Serie verlassen" });
+      const confirmation = page.getByRole("alertdialog", {
+        name: "Matchserie verlassen?",
+      });
+      await expect(
+        result.getByRole("region", { name: "Spiel 1 von 2 · Matchpunkte" }),
+      ).toBeVisible();
+      await leaveSeries.click();
+      await expect(confirmation).toBeVisible();
+      const cancel = confirmation.getByRole("button", { name: "Abbrechen" });
+      await expect(cancel).toBeFocused();
+      await cancel.click();
+      await expect(confirmation).toBeHidden();
+      await expect(leaveSeries).toBeFocused();
+      await expect(
+        result.getByRole("region", { name: "Spiel 1 von 2 · Matchpunkte" }),
+      ).toBeVisible();
+
+      await leaveSeries.click();
+      await page.keyboard.press("Escape");
+      await expect(confirmation).toBeHidden();
+      await expect(leaveSeries).toBeFocused();
+
+      await page.reload();
+      await expect(
+        result.getByRole("button", { name: "Nächstes Serienspiel", exact: true }),
+      ).toBeVisible();
+      await leaveSeries.click();
+      await confirmation.getByRole("button", { name: "Serie verlassen" }).click();
+      await expect(page.getByTestId("setup-screen")).toBeVisible();
+      await expect(result).toBeHidden();
+      await page.reload();
+      await expect(page.getByTestId("setup-screen")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Fortsetzen", exact: true }),
+      ).toHaveCount(0);
+    } finally {
+      await joiner.context.close();
+    }
+  });
+
   test("Tablet-Viewport prüft Board, Run-Ziel, direkte Server-Run-Actions und Card Display", async ({
     page,
   }, testInfo) => {
     await page.setViewportSize(VIEWPORTS.tablet);
     await createHumanVsAiGame(page, "v1-0-7-tablet-board");
     await expectActiveBoardBasics(page);
+    const catalogTab = page.getByRole("button", { name: "Katalog öffnen" });
+    await catalogTab.hover();
+    await expect(catalogTab.getByRole("tooltip")).toBeVisible();
+    await expectNoCriticalLayoutOverflow(page);
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await exerciseCardDisplayModes(page);
     const runAction = page.getByTestId("server-run-action").first();
@@ -455,19 +583,19 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       deckVersion: "1.3.0-local",
       name: "E2E V1.3.0 Runner",
       side: "runner",
-      identityCardId: "runner_identity_001",
+      identityCardId: 587,
       cardPoolSnapshotId: "card-snapshot-0.8",
       cardPoolVersion: "private-local-onr-v1",
       formatProfileId: "netgrid_private_local_v1",
       formatProfileVersion: "1.3.0",
       cards: [
-        { cardId: "onr_v1_021_dwarf", quantity: 2 },
-        { cardId: "onr_v1_039_krash", quantity: 2 },
-        { cardId: "onr_v1_066_snowball", quantity: 2 },
-        { cardId: "onr_v1_074_worm", quantity: 2 },
-        { cardId: "onr_v1_081_custodial-position", quantity: 1 },
-        { cardId: "onr_v1_085_executive-wiretaps", quantity: 1 },
-        { cardId: "onr_v1_101_mit-west-tier", quantity: 2 },
+        { cardId: 233, quantity: 2 },
+        { cardId: 251, quantity: 2 },
+        { cardId: 278, quantity: 2 },
+        { cardId: 286, quantity: 2 },
+        { cardId: 293, quantity: 1 },
+        { cardId: 297, quantity: 1 },
+        { cardId: 313, quantity: 2 },
       ],
       createdAt: "2026-05-08T12:00:00.000Z",
       updatedAt: "2026-05-08T12:00:00.000Z",
@@ -487,7 +615,7 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
           ...legalDeck,
           deckId: "e2e_v130_invalid",
           cards: legalDeck.cards.map((entry) =>
-            entry.cardId === "onr_v1_021_dwarf"
+            entry.cardId === 233
               ? { ...entry, quantity: 4 }
               : entry,
           ),

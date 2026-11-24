@@ -6,6 +6,7 @@ import { APP_LOCALE_COOKIE_NAME, normalizeAppLocale } from "../i18n/locale";
 import { loadAppMessages } from "../i18n/messages";
 import { CardImageCollectionRevisionProvider } from "../features/cards/card-image-service";
 import { currentPersonalCardImageCollectionRevision } from "../server/card-image-runtime";
+import { NETGRID_BUILD_INFO } from "../lib/app-build-info";
 import { configuredServerHttp } from "../lib/server-endpoint";
 import "./globals.css";
 
@@ -32,7 +33,11 @@ export default async function RootLayout({
     await currentPersonalCardImageCollectionRevision();
 
   return (
-    <html lang={locale} data-netgrid-server-origin={configuredServerHttp()}>
+    <html
+      lang={locale}
+      data-netgrid-server-origin={configuredServerHttp()}
+      data-netgrid-build={`${NETGRID_BUILD_INFO.productVersion}/${NETGRID_BUILD_INFO.buildNumber}/${NETGRID_BUILD_INFO.commit}`}
+    >
       <body>
         <AppIntlProvider locale={locale} messages={messages}>
           <CardImageCollectionRevisionProvider

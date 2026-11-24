@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -8,8 +9,8 @@ import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-port
 afterEach(resetResidentPlanPortfolioMemory);
 
 it.each([
-  [166, "breaker_wall", "onr_proteus_100_wrecking-ball"],
-  [168, "breaker_sentry", "onr_proteus_080_black-widow"],
+  [166, "breaker_wall", 158],
+  [168, "breaker_sentry", 138],
 ] as const)(
   "does not pay another subtype switch at D%i for a central run blocked by its parent's hand floor",
   (decisionNumber, role, definitionId) => {
@@ -36,9 +37,10 @@ it.each([
       (action: { actionId: string }) => action.actionId === decision.actionId,
     );
     expect(selected).toMatchObject({ type: "install_card" });
-    expect(decision.actionId).toContain(definitionId);
+    const source = input.playerView.own.gripOrHq.find((card: { instanceId: string }) => card.instanceId === selected.source);
+    expect(source?.definitionId).toBe(definitionId);
     expect(selected.expiresAtStateVersion).toBe(decisionNumber - 1);
-    const root = `plan:runner.rig_and_coverage:coverage%3A${role}`;
+    const root = planInstanceIdForProposal({ moduleId: "runner.rig_and_coverage", dedupeKey: `coverage:${role}` });
     expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({
       rootPlanInstanceId: root,
       selectedPlan: { moduleId: "runner.rig_and_coverage", phase: "install_answer" },

@@ -1,3 +1,4 @@
+import { RandomPurposeCode, type RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -15,7 +16,7 @@ import {
 } from "./special-damage-abilities";
 
 function definition(
-  id: string,
+  id: number,
   title: string,
   type: CardDefinition["type"] = "asset",
 ): CardDefinition {
@@ -24,11 +25,11 @@ function definition(
 
 function instance(
   id: string,
-  definitionId: string,
+  definitionId: number,
   zone: CardInstance["zone"] = {
     side: "corp",
     zone: "serverRoot",
-    serverId: "remote_1",
+    serverId: "r1",
   },
 ): CardInstance {
   return {
@@ -54,9 +55,9 @@ function makeAction(payload: LegalAction["payload"]): LegalAction {
 
 function makeHost(legalAction?: LegalAction) {
   const definitions: Record<string, CardDefinition> = {
-    rock: definition("onr_v1_327_i-got-a-rock", "I Got a Rock"),
-    dog: definition("onr_v1_339_schlaghund", "Schlaghund"),
-    agenda: definition("agenda", "Agenda", "agenda"),
+    rock: definition(539, "I Got a Rock"),
+    dog: definition(551, "Schlaghund"),
+    agenda: definition(2974352677, "Agenda", "agenda"),
   };
   const cardInstances: Record<string, CardInstance> = {
     rock: instance("rock", definitions.rock!.id),
@@ -80,8 +81,12 @@ function makeHost(legalAction?: LegalAction) {
   const calls = {
     builtActions: [] as LegalAction[],
     spentAgendaPointCosts: [] as number[],
-    damages: [] as Array<{ type: string; amount: number; source: string }>,
-    rolls: [] as string[],
+    damages: [] as Array<{
+      type: string;
+      amount: number;
+      source: CardDefinitionId;
+    }>,
+    rolls: [] as RandomPurpose[],
     trashedCorp: [] as CardInstanceId[],
   };
   const host: CorpSpecialDamageAbilityHost = {
@@ -154,7 +159,7 @@ function makeHost(legalAction?: LegalAction) {
           paidPoints: requiredPoints,
           bonusPointsSpent: 0,
           spentAgendaIds: ["agenda" as CardInstanceId],
-          spentAgendaDefinitionIds: ["agenda" as CardDefinitionId],
+          spentAgendaDefinitionIds: [2974352677 as CardDefinitionId],
         };
       },
     },
@@ -287,13 +292,11 @@ describe("corp special damage abilities", () => {
 
     expect(result.handled).toBe(true);
     expect(calls.spentAgendaPointCosts).toEqual([3]);
-    expect(calls.damages).toEqual([
-      { type: "meat", amount: 15, source: "onr_v1_327_i-got-a-rock" },
-    ]);
+    expect(calls.damages).toEqual([{ type: "meat", amount: 15, source: 539 }]);
     expect(legalAction.payload).toMatchObject({
       agendaPointCost: 3,
       agendaPointCostPaid: 3,
-      spentAgendaDefinitionIds: "agenda",
+      spentAgendaDefinitionIds: "2974352677",
     });
     expect(legalAction.payload?.specialZoneReason).toBeUndefined();
   });
@@ -313,10 +316,8 @@ describe("corp special damage abilities", () => {
       dieRoll: 2,
       sourceTrashed: true,
     });
-    expect(calls.rolls).toEqual(["v1921.die.onr_v1_339_schlaghund.tag_damage"]);
-    expect(calls.damages).toEqual([
-      { type: "meat", amount: 10, source: "onr_v1_339_schlaghund" },
-    ]);
+    expect(calls.rolls).toEqual([[RandomPurposeCode.TagDamageDie, 551]]);
+    expect(calls.damages).toEqual([{ type: "meat", amount: 10, source: 551 }]);
     expect(calls.trashedCorp).toEqual(["dog"]);
     expect(legalAction.payload).toMatchObject({
       v1921DieRoll: 2,

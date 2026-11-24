@@ -11,11 +11,11 @@ describe("successful run outcome presentation", () => {
     (actionType) => {
       expect(
         successfulRunOutcomePresentationFromEvent(
-          event("evt_weather", actionType, 4),
+          event(100, actionType, 4),
         ),
       ).toEqual({
-        eventId: "evt_weather",
-        sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+        eventId: 100,
+        sourceDefinitionId: 330,
         sourceTitle: "Weather-to-Finance Pipe",
         headline: "Erfolgreicher HQ-Run",
         resultText: "Korp verliert 4 Credits. Kein Karten-Access auf HQ.",
@@ -28,19 +28,19 @@ describe("successful run outcome presentation", () => {
   it("uses the actual partial credit loss", () => {
     expect(
       successfulRunOutcomePresentationFromEvent(
-        event("evt_partial", "play_event", 1),
+        event(101, "play_event", 1),
       )?.resultText,
     ).toBe("Korp verliert 1 Credit. Kein Karten-Access auf HQ.");
   });
 
   it("rejects unresolved, failed and unrelated events", () => {
-    const unresolved = event("evt_unresolved", "play_event", 4);
+    const unresolved = event(102, "play_event", 4);
     delete unresolved.publicPayload.runSuccessful;
-    const failed = event("evt_failed", "continue_run", 4);
+    const failed = event(103, "continue_run", 4);
     failed.publicPayload.runSuccessful = false;
-    const unrelated = event("evt_other", "continue_run", 4);
+    const unrelated = event(104, "continue_run", 4);
     unrelated.publicPayload.sourceDefinitionId =
-      "onr_v1_084_edited-shipping-manifests";
+      296;
 
     expect(successfulRunOutcomePresentationFromEvent(unresolved)).toBeNull();
     expect(successfulRunOutcomePresentationFromEvent(failed)).toBeNull();
@@ -48,10 +48,10 @@ describe("successful run outcome presentation", () => {
   });
 
   it("retains the latest result until that local event is dismissed", () => {
-    const earlierPresentationEvent = event("evt_earlier", "play_event", 4);
-    const presentationEvent = event("evt_weather", "continue_run", 4);
+    const earlierPresentationEvent = event(105, "play_event", 4);
+    const presentationEvent = event(100, "continue_run", 4);
     const laterEvent: PublicGameEvent = {
-      ...event("evt_later", "gain_credit", 0),
+      ...event(106, "gain_credit", 0),
       publicPayload: { actionType: "gain_credit", actor: "runner" },
     };
 
@@ -60,18 +60,18 @@ describe("successful run outcome presentation", () => {
         [earlierPresentationEvent, presentationEvent, laterEvent],
         null,
       )?.eventId,
-    ).toBe("evt_weather");
+    ).toBe(100);
     expect(
       latestSuccessfulRunOutcomePresentation(
         [earlierPresentationEvent, presentationEvent, laterEvent],
-        "evt_weather",
+        100,
       ),
     ).toBeNull();
   });
 });
 
 function event(
-  eventId: string,
+  eventId: number,
   actionType: string,
   creditLoss: number,
 ): PublicGameEvent {
@@ -84,7 +84,7 @@ function event(
     publicPayload: {
       actionType,
       actor: "runner",
-      sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+      sourceDefinitionId: 330,
       sourceTitle: "Weather-to-Finance Pipe",
       serverId: "hq",
       accessReplacement: "corp_lose_credits",

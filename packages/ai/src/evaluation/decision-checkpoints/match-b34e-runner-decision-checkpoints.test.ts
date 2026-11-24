@@ -16,7 +16,7 @@ import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
-const PSYCHIC_FRIEND_ID = "runner_onr_classic_030_psychic-friend_1";
+const PSYCHIC_FRIEND_ID = "c7l";
 
 describe("match B34E runner decision checkpoints", () => {
   it.each([
@@ -86,7 +86,7 @@ describe("match B34E runner decision checkpoints", () => {
           acceptablePlanKinds: ["runner.convert_run_window"],
           acceptableCapabilities: ["convert_active_run_window"],
           requiredAssessmentEvidence: [
-            "runner_visible_encounter_requires_mitigation:onr_v1_276_viral-15",
+            "runner_visible_encounter_requires_mitigation:488",
           ],
         },
       };

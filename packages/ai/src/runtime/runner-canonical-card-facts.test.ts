@@ -23,9 +23,7 @@ import {
 
 describe("Runner canonical card facts", () => {
   it("derives the voluntary self-trash tradeoff from the complete lifecycle", () => {
-    expect(
-      runnerVoluntarySelfTrashLifecycleProfile("onr_classic_044_crash-space"),
-    ).toEqual({
+    expect(runnerVoluntarySelfTrashLifecycleProfile(48)).toEqual({
       capabilityKey: "trash_source_action",
       actionCost: 1,
       turnStartCreditGain: 1,
@@ -35,46 +33,43 @@ describe("Runner canonical card facts", () => {
   });
 
   it("recognizes only a complete run-start random-strength breaker", () => {
-    expect(
-      runnerRunStartRandomStrengthSourceProfile("onr_v1_002_ai-boon"),
-    ).toEqual({ sourceEffect: "random_run_strength", dieSides: 6 });
+    expect(runnerRunStartRandomStrengthSourceProfile(214)).toEqual({
+      sourceEffect: "random_run_strength",
+      dieSides: 6,
+    });
     expect(
       runnerRunStartRandomStrengthSourceProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          engine: {
-            characteristics: { strength: { kind: "random_die", dieSides: 6 } },
-            icebreakerAbilities: [],
-          },
+        side: "runner",
+        engine: {
+          characteristics: { strength: { kind: "random_die", dieSides: 6 } },
+          icebreakerAbilities: [],
         },
       } as never),
     ).toBeUndefined();
   });
 
   it("accepts run-start ordering only for a complete pure self-trash lifecycle", () => {
-    expect(
-      runnerRunStartTrashSourceProfile("onr_v1_184_top-runners-conference"),
-    ).toEqual({ sourceEffect: "trash_source" });
+    expect(runnerRunStartTrashSourceProfile(396)).toEqual({
+      sourceEffect: "trash_source",
+    });
     expect(
       runnerRunStartTrashSourceProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          engine: {
-            characteristics: { numeric: {} },
-            lifecycle: {
-              on_runner_run_start: [
-                {
-                  effects: [
-                    { kind: "trash_source" },
-                    {
-                      kind: "gain_credits",
-                      recipient: "controller",
-                      amount: 1,
-                    },
-                  ],
-                },
-              ],
-            },
+        side: "runner",
+        engine: {
+          characteristics: { numeric: {} },
+          lifecycle: {
+            on_runner_run_start: [
+              {
+                effects: [
+                  { kind: "trash_source" },
+                  {
+                    kind: "gain_credits",
+                    recipient: "controller",
+                    amount: 1,
+                  },
+                ],
+              },
+            ],
           },
         },
       } as never),
@@ -82,9 +77,7 @@ describe("Runner canonical card facts", () => {
   });
 
   it("projects no-run recurring economy from the canonical lifecycle", () => {
-    expect(
-      runnerNoRunRecurringEconomyProfile("onr_v1_184_top-runners-conference"),
-    ).toEqual({
+    expect(runnerNoRunRecurringEconomyProfile(396)).toEqual({
       installCost: 0,
       turnStartCredits: 2,
       earliestPayout: "start_of_runner_turn",
@@ -93,35 +86,31 @@ describe("Runner canonical card facts", () => {
   });
 
   it("does not infer the profile for unrelated Runner resources", () => {
-    expect(
-      runnerNoRunRecurringEconomyProfile("onr_v1_295_night-shift"),
-    ).toBeUndefined();
+    expect(runnerNoRunRecurringEconomyProfile(507)).toBeUndefined();
   });
 
   it("recognizes a differently named delayed investment from the generic canonical contract", () => {
     expect(
       runnerNoRunRecurringEconomyProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          planningAnnotations: {
-            card: [{ kind: "plan_role", role: "recover_economy" }],
-          },
-          engine: {
-            characteristics: { numeric: { installCost: 1 } },
-            lifecycle: {
-              start_of_runner_turn: [
-                {
-                  effects: [
-                    {
-                      kind: "gain_credits",
-                      recipient: "controller",
-                      amount: 3,
-                    },
-                  ],
-                },
-              ],
-              on_runner_run_start: [{ effects: [{ kind: "trash_source" }] }],
-            },
+        side: "runner",
+        planningAnnotations: {
+          card: [{ kind: "plan_role", role: "recover_economy" }],
+        },
+        engine: {
+          characteristics: { numeric: { installCost: 1 } },
+          lifecycle: {
+            start_of_runner_turn: [
+              {
+                effects: [
+                  {
+                    kind: "gain_credits",
+                    recipient: "controller",
+                    amount: 3,
+                  },
+                ],
+              },
+            ],
+            on_runner_run_start: [{ effects: [{ kind: "trash_source" }] }],
           },
         },
       } as never),
@@ -134,7 +123,7 @@ describe("Runner canonical card facts", () => {
   });
 
   it("derives the full debt consequence from Loan's canonical lifecycle", () => {
-    expect(runnerDebtFinancingProfile("onr_v1_168_loan-from-chiba")).toEqual({
+    expect(runnerDebtFinancingProfile(380)).toEqual({
       installCost: 0,
       installCreditGain: 12,
       startOfTurnCreditLoss: 1,
@@ -146,38 +135,36 @@ describe("Runner canonical card facts", () => {
   it("recognizes a differently named fixture through the generic exchange contract", () => {
     expect(
       runnerDebtFinancingProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          planningAnnotations: {
-            card: [{ kind: "strategic_exchange", exchange: "debt_financing" }],
-          },
-          engine: {
-            characteristics: { numeric: { installCost: 2 } },
-            lifecycle: {
-              on_install: [
-                { kind: "gain_credits", recipient: "controller", amount: 9 },
-              ],
-              start_of_runner_turn: [
-                {
-                  effects: [
-                    {
-                      kind: "lose_credits",
-                      recipient: "controller",
-                      amount: 2,
-                    },
-                  ],
-                },
-              ],
-              on_leave_play: [
-                {
-                  kind: "pay_credits_or_lose_game",
-                  payer: "controller",
-                  amount: 7,
-                  loseSide: "controller",
-                },
-              ],
-              end_of_runner_turn: [{ effects: [{ kind: "trash_source" }] }],
-            },
+        side: "runner",
+        planningAnnotations: {
+          card: [{ kind: "strategic_exchange", exchange: "debt_financing" }],
+        },
+        engine: {
+          characteristics: { numeric: { installCost: 2 } },
+          lifecycle: {
+            on_install: [
+              { kind: "gain_credits", recipient: "controller", amount: 9 },
+            ],
+            start_of_runner_turn: [
+              {
+                effects: [
+                  {
+                    kind: "lose_credits",
+                    recipient: "controller",
+                    amount: 2,
+                  },
+                ],
+              },
+            ],
+            on_leave_play: [
+              {
+                kind: "pay_credits_or_lose_game",
+                payer: "controller",
+                amount: 7,
+                loseSide: "controller",
+              },
+            ],
+            end_of_runner_turn: [{ effects: [{ kind: "trash_source" }] }],
           },
         },
       } as never),
@@ -193,18 +180,16 @@ describe("Runner canonical card facts", () => {
   it("fails closed when a required debt consequence is absent", () => {
     expect(
       runnerDebtFinancingProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          planningAnnotations: {
-            card: [{ kind: "strategic_exchange", exchange: "debt_financing" }],
-          },
-          engine: {
-            characteristics: { numeric: { installCost: 0 } },
-            lifecycle: {
-              on_install: [
-                { kind: "gain_credits", recipient: "controller", amount: 9 },
-              ],
-            },
+        side: "runner",
+        planningAnnotations: {
+          card: [{ kind: "strategic_exchange", exchange: "debt_financing" }],
+        },
+        engine: {
+          characteristics: { numeric: { installCost: 0 } },
+          lifecycle: {
+            on_install: [
+              { kind: "gain_credits", recipient: "controller", amount: 9 },
+            ],
           },
         },
       } as never),
@@ -212,13 +197,7 @@ describe("Runner canonical card facts", () => {
   });
 
   it("counts two installed debts as two net next-turn credit losses", () => {
-    expect(
-      runnerInstalledDebtFinancingLiability([
-        "onr_v1_168_loan-from-chiba",
-        "onr_v1_168_loan-from-chiba",
-        "onr_v1_295_night-shift",
-      ]),
-    ).toEqual({
+    expect(runnerInstalledDebtFinancingLiability([380, 380, 507])).toEqual({
       instanceCount: 2,
       nextTurnCreditLoss: 2,
       totalLeavePlayPayCost: 20,
@@ -226,33 +205,29 @@ describe("Runner canonical card facts", () => {
   });
 
   it("profiles a hosted-credit start trigger without identifying the card by name", () => {
-    expect(
-      runnerStartOfTurnCreditProfile("onr_v1_174_rigged-investments"),
-    ).toEqual({
+    expect(runnerStartOfTurnCreditProfile(386)).toEqual({
       orderClass: "credit_gain",
       amount: 1,
       sourceEffect: "take_hosted_credits",
     });
     expect(
       runnerStartOfTurnCreditProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          engine: {
-            lifecycle: {
-              start_of_runner_turn: [
-                {
-                  effects: [
-                    {
-                      kind: "take_hosted_credits",
-                      source: "source",
-                      recipient: "controller",
-                      amount: 2,
-                    },
-                    { kind: "trash_source_when_empty" },
-                  ],
-                },
-              ],
-            },
+        side: "runner",
+        engine: {
+          lifecycle: {
+            start_of_runner_turn: [
+              {
+                effects: [
+                  {
+                    kind: "take_hosted_credits",
+                    source: "source",
+                    recipient: "controller",
+                    amount: 2,
+                  },
+                  { kind: "trash_source_when_empty" },
+                ],
+              },
+            ],
           },
         },
       } as never),
@@ -264,11 +239,7 @@ describe("Runner canonical card facts", () => {
   });
 
   it("profiles a complete public Runner start-turn random table without identifying the card by name", () => {
-    expect(
-      runnerStartOfTurnRandomEffectProfile(
-        "onr_classic_048_omnitech-spinal-tap-cybermodem",
-      ),
-    ).toEqual({
+    expect(runnerStartOfTurnRandomEffectProfile(52)).toEqual({
       orderClass: "random_effect",
       dieFaces: 6,
       maximumDamage: 2,
@@ -277,29 +248,27 @@ describe("Runner canonical card facts", () => {
     });
     expect(
       runnerStartOfTurnRandomEffectProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          engine: {
-            runnerUtilityLongtail: {
-              kind: "start_turn_random_effect_table",
-              dieFaces: 6,
-              randomPurpose: "runner_start_turn_source",
-              outcomes: [
-                {
-                  roll: 1,
-                  kind: "unpreventable_damage",
-                  damageType: "net",
-                  amount: 1,
-                },
-                {
-                  roll: 6,
-                  kind: "trash_source_and_grant_persistent_extra_action",
-                  extraActions: 1,
-                },
-              ],
-              defaultOutcome: { kind: "no_effect" },
-              visibility: "public",
-            },
+        side: "runner",
+        engine: {
+          runnerUtilityLongtail: {
+            kind: "start_turn_random_effect_table",
+            dieFaces: 6,
+            randomPurpose: "runner_start_turn_source",
+            outcomes: [
+              {
+                roll: 1,
+                kind: "unpreventable_damage",
+                damageType: "net",
+                amount: 1,
+              },
+              {
+                roll: 6,
+                kind: "trash_source_and_grant_persistent_extra_action",
+                extraActions: 1,
+              },
+            ],
+            defaultOutcome: { kind: "no_effect" },
+            visibility: "public",
           },
         },
       } as never),
@@ -314,9 +283,7 @@ describe("Runner canonical card facts", () => {
 
   it("profiles an optional installed-card conversion from the complete canonical contract", () => {
     expect(
-      runnerStartOfTurnOptionalInstalledCardConversionProfile(
-        "onr_v1_180_smiths-pawnshop",
-      ),
+      runnerStartOfTurnOptionalInstalledCardConversionProfile(392),
     ).toEqual({
       orderClass: "optional_installed_card_conversion",
       gainCredits: 2,
@@ -324,14 +291,12 @@ describe("Runner canonical card facts", () => {
     });
     expect(
       runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          engine: {
-            uniqueDirectLongtail: {
-              kind: "start_turn_trash_for_credits",
-              gainCredits: 2,
-              visibility: "public",
-            },
+        side: "runner",
+        engine: {
+          uniqueDirectLongtail: {
+            kind: "start_turn_trash_for_credits",
+            gainCredits: 2,
+            visibility: "public",
           },
         },
       } as never),
@@ -345,14 +310,12 @@ describe("Runner canonical card facts", () => {
   it("fails closed for an incomplete optional installed-card conversion", () => {
     expect(
       runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          engine: {
-            uniqueDirectLongtail: {
-              kind: "start_turn_trash_for_credits",
-              gainCredits: 2,
-              visibility: "private",
-            },
+        side: "runner",
+        engine: {
+          uniqueDirectLongtail: {
+            kind: "start_turn_trash_for_credits",
+            gainCredits: 2,
+            visibility: "private",
           },
         },
       } as never),
@@ -360,23 +323,17 @@ describe("Runner canonical card facts", () => {
   });
 
   it("profiles a delayed-install countdown from the canonical hidden replacement contract", () => {
-    expect(
-      runnerStartOfTurnDelayedInstallCountdownProfile(
-        "onr_v1_176_the-shell-traders",
-      ),
-    ).toEqual({
+    expect(runnerStartOfTurnDelayedInstallCountdownProfile(388)).toEqual({
       orderClass: "delayed_install_countdown",
       sourceEffect: "remove_delayed_install_counter",
     });
     expect(
       runnerStartOfTurnDelayedInstallCountdownProfileFromPlanningCard({
-        planning: {
-          side: "runner",
-          engine: {
-            hiddenReplacementLongtail: {
-              kind: "delayed_install_with_counter_countdown",
-              visibility: "public",
-            },
+        side: "runner",
+        engine: {
+          hiddenReplacementLongtail: {
+            kind: "delayed_install_with_counter_countdown",
+            visibility: "public",
           },
         },
       } as never),

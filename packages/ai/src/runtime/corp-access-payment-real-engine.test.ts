@@ -55,8 +55,8 @@ function apply(s: GameState, side: Side, type: string, serverId = "hq") {
   return r.state;
 }
 function fixture(
-  program?: string,
-  source = "onr_proteus_068_pattel-antibody",
+  program?: number,
+  source = 126,
   zone = "hq",
 ) {
   let s = createGameAfterSetup({
@@ -95,7 +95,7 @@ function input(s: GameState) {
     },
   });
 }
-it.each([undefined, "onr_proteus_089_garbage-in"])(
+it.each([undefined, 147])(
   "declines paid breaker counters with no eligible target (%s), under the ambush owner",
   (program) => {
     const s = fixture(program),
@@ -109,7 +109,7 @@ it.each([undefined, "onr_proteus_089_garbage-in"])(
     ).toBe(true);
     expect(getPlayerView(s, "runner").pendingChoice).toBeUndefined();
     const d = chooseCorpAction(i);
-    expect(d.actionId).toBe("corp.resolve_choice");
+    expect(d.actionId).toBe("cn");
     expect(d.selectedChoices?.selectedOptionIds).toEqual(["decline"]);
     expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
       "corp.ambush_and_bluff",
@@ -140,7 +140,7 @@ it.each([undefined, "onr_proteus_089_garbage-in"])(
   },
 );
 it("preserves payment and real counter effect when an icebreaker is installed", () => {
-  const s = fixture("onr_proteus_095_skeleton-passkeys"),
+  const s = fixture(153),
     i = input(s),
     d = chooseCorpAction(i);
   expect(
@@ -164,7 +164,7 @@ it("preserves payment and real counter effect when an icebreaker is installed", 
   expect(r.state.corp.credits).toBe(7);
   expect(
     getPlayerView(r.state, "runner").own.rig?.find(
-      (c) => c.definitionId === "onr_proteus_095_skeleton-passkeys",
+      (c) => c.definitionId === 153,
     )?.counters?.pattel,
   ).toBe(1);
 });
@@ -191,7 +191,7 @@ it.each([
       altered.playerView.pendingChoice!.source += "-stale";
     if (changed === "sourceDefinition")
       altered.playerView.pendingChoice!.sourceCardDefinitionId =
-        "different-definition";
+        Number.MAX_SAFE_INTEGER;
     if (changed === "sourceInstance")
       altered.playerView.pendingChoice!.sourceCardInstanceId =
         "different-instance";
@@ -204,7 +204,7 @@ it.each([
   },
 );
 it("does not mistake a runner counter effect for an empty icebreaker effect", () => {
-  const s = fixture(undefined, "onr_proteus_057_doppelganger-antibody"),
+  const s = fixture(undefined, 115),
     d = chooseCorpAction(input(s));
   expect(d.selectedChoices?.selectedOptionIds).toEqual(["pay"]);
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
@@ -224,20 +224,20 @@ it("does not mistake a runner counter effect for an empty icebreaker effect", ()
 });
 it.each([
   {
-    source: "onr_proteus_057_doppelganger-antibody",
+    source: 115,
     program: undefined,
     selected: "pay",
     credits: 8,
   },
   {
-    source: "onr_proteus_068_pattel-antibody",
+    source: 126,
     program: undefined,
     selected: "decline",
     credits: 10,
   },
   {
-    source: "onr_proteus_068_pattel-antibody",
-    program: "onr_proteus_095_skeleton-passkeys",
+    source: 126,
+    program: 153,
     selected: "pay",
     credits: 7,
   },

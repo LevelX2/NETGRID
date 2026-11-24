@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
-import { applyAction, getLegalActions, hashGameState } from "@netgrid/engine";
+import { applyAction, getLegalActions, hashGameState, validateGameState } from "@netgrid/engine";
 import type { GameState } from "@netgrid/shared";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
@@ -19,9 +19,8 @@ function fixture() {
   expect(Object.values(f.checkpoint.validation).every((v) => v === true)).toBe(
     true,
   );
-  expect(
-    f.provenance.eachPrefixHashMatches && f.provenance.checkpointHashMatches,
-  ).toBe(true);
+  expect(validateGameState(f.state)).toEqual({ ok: true, errors: [] });
+  expect(hashGameState(f.state)).toBe(f.provenance.currentStateHash);
   expect(hashGameState(f.state)).toBe(f.checkpoint.stateHash);
   return f;
 }
@@ -71,14 +70,6 @@ it("emits the certificate for both native Rental zero-core breaks, keeping ETR a
 it("uses the actual Engine certificate at the restored native checkpoint and keeps the run owner", () => {
   const f = fixture(),
     actions = getLegalActions(f.state, "runner");
-  // Transfer only the new metadata from the real Engine producer. Captured
-  // costs, IDs, information projection and all nine bindings stay original.
-  for (const original of f.checkpoint.input.legalActions) {
-    const current = actions.find((a) => a.actionId === original.actionId)!;
-    if (current.payload?.breakSubroutinePurpose !== undefined)
-      original.payload.breakSubroutinePurpose =
-        current.payload.breakSubroutinePurpose;
-  }
   const input = {
     ...f.checkpoint.input,
     ...buildAiDecisionInputDto(f.checkpoint.input),

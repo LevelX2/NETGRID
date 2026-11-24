@@ -12,7 +12,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("MRGSG recurring draw-tax removal and reserve recovery", () => {
   it("keeps the run owner through trashing and opens a finite refill need afterwards", () => {
     const checkpoint = bindHistoricalRunEventCadence(
-      structuredClone(cp01Json) as AiDecisionCheckpointV1,
+      structuredClone(cp01Json) as unknown as AiDecisionCheckpointV1,
       ["CP-MRGSG-01"],
     );
     let state = checkpoint.engine.testOnlyGameState;
@@ -20,7 +20,7 @@ describe("MRGSG recurring draw-tax removal and reserve recovery", () => {
     state.runner.clicks = 3;
     // Isolate access and recovery from the opponent's optional ICE rez.
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!;
     for (const cardId of remote.ice.splice(0)) {
       state.corp.rd.push(cardId);
@@ -36,7 +36,7 @@ describe("MRGSG recurring draw-tax removal and reserve recovery", () => {
       ...event,
     }));
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "runner.start_run.remote_1" }],
+      acceptableActions: [{ actionId: "rs.r1" }],
       planExecution: {
         acceptablePlanKinds: ["runner.contest_remote"],
         acceptableCapabilities: ["contest_remote"],
@@ -90,10 +90,10 @@ describe("MRGSG recurring draw-tax removal and reserve recovery", () => {
     expect(state.runner.credits).toBe(8);
     expect(state.runner.clicks).toBe(2);
     expect(
-      state.corp.servers.find((server) => server.id === "remote_1")?.root ?? [],
+      state.corp.servers.find((server) => server.id === "r1")?.root ?? [],
     ).toEqual([]);
     expect(state.corp.archives).toContain(
-      "corp_onr_v1_313_city-surveillance_1",
+      "c38t",
     );
     const recoveryInput = nextInput(state, checkpoint);
     const recoveryDecision = chooseAiAction(recoveryInput);
@@ -119,13 +119,13 @@ describe("MRGSG recurring draw-tax removal and reserve recovery", () => {
           targetCredits: 10,
           currentCreditsAtRevalidation: 8,
           gap: 2,
-          routeActionIds: ["runner.gain_credit"],
+          routeActionIds: ["rb"],
         },
       },
     });
     expect(
       recoveryInput.legalActions.some(
-        (action) => action.actionId === "runner.gain_credit",
+        (action) => action.actionId === "rb",
       ),
     ).toBe(true);
   });

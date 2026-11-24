@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_369_singapore-city-grid"),
+    cardDefinitionId: cardDefinitionId(581),
     title: "Singapore City Grid",
     side: "corp",
     cardType: "upgrade",

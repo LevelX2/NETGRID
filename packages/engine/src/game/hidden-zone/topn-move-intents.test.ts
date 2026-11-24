@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinitionId,
   CardInstance,
@@ -11,7 +12,7 @@ import {
   type TopNSelectedCardMove,
 } from "./topn-move-intents";
 
-const sourceDefinitionId = "source_definition" as CardDefinitionId;
+const sourceDefinitionId = 462381168 as CardDefinitionId;
 
 function card(
   id: string,
@@ -19,7 +20,7 @@ function card(
 ): TopNSelectedCardMove {
   return {
     cardId: id as CardInstanceId,
-    definitionId: `${id}_definition` as CardDefinitionId,
+    definitionId: syntheticCardDefinitionId(`${id}_definition`),
     title: `${id} title`,
     type,
   };
@@ -28,7 +29,7 @@ function card(
 function instance(id: CardInstanceId): CardInstance {
   return {
     instanceId: id,
-    definitionId: `${id}_definition` as CardDefinitionId,
+    definitionId: syntheticCardDefinitionId(`${id}_definition`),
     owner: "runner",
     controller: "runner",
     zone: { side: "runner", zone: "stack" },
@@ -118,9 +119,9 @@ describe("hidden-zone top-N move intents", () => {
       shufflePerformed: true,
       shuffled: true,
       publicRevealKind: "reveal",
-      publicRevealDefinitionIds: "program_a_definition,program_b_definition",
+      publicRevealDefinitionIds: "3155259737,1991566114",
       publicRevealTitles: "program_a title||program_b title",
-      revealedCardDefinitionIds: "program_a_definition,program_b_definition",
+      revealedCardDefinitionIds: "3155259737,1991566114",
     });
   });
 

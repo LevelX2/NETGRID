@@ -1,13 +1,16 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import {
   type CardDefinition,
   type CardInstanceId,
   type ChoiceRequest,
   type CounterType,
   type DamageType,
+  type DamageRandomSource,
   type GameState,
   type ImminentEvent,
   type LegalAction,
   type SubroutineDefinition,
+  type TraceId,
   type TraceSuccessEffect,
   type ServerId,
 } from "@netgrid/shared";
@@ -21,6 +24,7 @@ import {
   appendResolvedSubroutineEffect,
   type DamageSummary,
 } from "./encounter-resolution";
+import { requireSubroutineProvenance } from "../../ability-engine/subroutine-provenance";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type CurrentTrace = NonNullable<GameState["trace"]>;
@@ -46,6 +50,7 @@ export type EncounterPrintedEffectHost = {
       damageType: DamageType;
       amount: number;
       source: string;
+      randomSource: DamageRandomSource;
     }) => ImminentEvent;
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
@@ -70,28 +75,28 @@ export type EncounterPrintedEffectHost = {
     rabbitTraceLimitReductionForIceTrace: () => number;
     resolveDamageImminentEvent: (event: ImminentEvent) => DamageSummary;
     resolveTraceHardwareWreckerSuccess: (
-      sourceDefinitionId: string,
+      sourceDefinitionId: number,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       damageAmount: number,
       legalAction: LegalAction,
     ) => { payload: Record<string, unknown>; suspended: boolean };
     resolveTraceTrashRunnerResourceSuccess: (
-      sourceDefinitionId: string,
+      sourceDefinitionId: number,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       targetCardId: CardInstanceId,
     ) => Record<string, unknown>;
     resolveTraceSuccessTrashProgramSubroutine: (
       trace: CurrentTrace,
       legalAction: LegalAction,
     ) => { suspended: boolean };
-    rollDie?: (purpose: string) => number;
+    rollDie?: (purpose: RandomPurpose) => number;
     setDamagePayload: (summary: DamageSummary) => void;
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
     traceBidChoice: (
       side: "corp" | "runner",
-      traceId: string,
+      traceId: TraceId,
       prompt: string,
       maxBid: number,
     ) => ChoiceRequest;
@@ -112,7 +117,7 @@ export type PrintedDamageResult = EncounterPrintedEffectResult & {
 };
 
 export type PrintedTraceStartResult = EncounterPrintedEffectResult & {
-  traceId?: string;
+  traceId?: TraceId;
   traceLimit?: number;
   corpBidMax?: number;
 };
@@ -221,6 +226,7 @@ export function resolvePrintedDamageSubroutine(
     damageType,
     amount: damageAmount,
     source: `subroutine:${definition.id}:${subroutine.id}`,
+    randomSource: ["s", run.runId, run.encounteredIceId!, requireSubroutineProvenance(subroutine)],
   });
   if (microtechApNetReduction && legalAction) {
     legalAction.payload = {
@@ -274,7 +280,7 @@ export function resolvePrintedDamageSubroutine(
 
 function runnerApNetDamageReducerSourceDefinitionId(
   host: EncounterPrintedEffectHost,
-): string | undefined {
+): number | undefined {
   return host.state.runner.rig.hardware
     .map((cardId) => host.callbacks.definitionFor(cardId))
     .find(
@@ -303,7 +309,7 @@ export function resolvePrintedRandomDamageSubroutine(
     throw new Error("Gedruckter Zufallsschaden unterstützt nur W6.");
   const dieRoll = rollDie(
     host,
-    `printed_random_damage.${run.runId}.${run.encounteredIceId}.${subroutineIndex}`,
+    [16, run.runId, run.encounteredIceId!, subroutineIndex],
   );
   const damageOnResults = subroutine.damageOnResults ?? [1];
   const damageApplies = damageOnResults.includes(dieRoll);
@@ -350,6 +356,7 @@ export function resolvePrintedRandomDamageSubroutine(
     damageType,
     amount: damageAmount,
     source: `subroutine:${definition.id}:${subroutine.id}:random_damage`,
+    randomSource: ["s", run.runId, run.encounteredIceId!, requireSubroutineProvenance(subroutine)],
   });
   if (
     legalAction &&
@@ -436,7 +443,7 @@ export function startTraceFromPrintedSubroutine(
   if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
     run.resolvedSubroutineIndexes.push(subroutineIndex);
   const sourceDefinition = host.callbacks.definitionFor(sourceCardInstanceId);
-  const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
+  const traceId = state.stateVersion + 1;
   const fortTraceBitPoolSource = host.callbacks.fortTraceBitPoolSource();
   const fortTraceBits = fortTraceBitPoolSource
     ? host.callbacks.cardCounter(fortTraceBitPoolSource.cardId, "bit")
@@ -464,6 +471,7 @@ export function startTraceFromPrintedSubroutine(
         );
   state.trace = {
     traceId,
+    sourceRunId: run.runId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinition.id,
     traceRulesProfile: rules.profile,
@@ -508,6 +516,7 @@ export function startTraceFromPrintedSubroutine(
       ...(legalAction.payload ?? {}),
       traceStarted: true,
       traceId,
+      traceSourceRunId: run.runId,
       sourceCardId: sourceCardInstanceId,
       sourceDefinitionId: sourceDefinition.id,
       traceLimit,
@@ -555,6 +564,9 @@ export function applyPrintedTraceSuccessFollowups(
 ): TraceSuccessFollowupResult {
   const { state } = host;
   const { trace, traceStep, legalAction } = options;
+  const runOrigin = trace.sourceRunId === undefined
+    ? {}
+    : { traceSourceRunId: trace.sourceRunId };
   const result = describeTraceResultFromTrace(trace, {
     runnerLinkFallback:
       options.runnerLinkFallback ?? host.callbacks.calculateRunnerLink(),
@@ -604,7 +616,7 @@ export function applyPrintedTraceSuccessFollowups(
   const hackerTrackerCountersAdded =
     host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
-    ? { amount: 0, sourceDefinitionIds: [] as string[] }
+    ? { amount: 0, sourceDefinitionIds: [] as CardDefinition["id"][] }
     : applyTraceAvoidRewards(host, trace);
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
@@ -647,6 +659,7 @@ export function applyPrintedTraceSuccessFollowups(
       damageType: "net",
       amount: damageAmount,
       source: `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
+      randomSource: ["c", trace.sourceDefinitionId, trace.sourceCardInstanceId],
     });
     if (options.deletePendingChoice) delete state.pendingChoice;
     temporaryTraceCreditReturnPayload =
@@ -656,6 +669,7 @@ export function applyPrintedTraceSuccessFollowups(
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         traceId: trace.traceId,
+        ...runOrigin,
         traceStep,
         sourceDefinitionId: trace.sourceDefinitionId,
         traceSuccessful: true,
@@ -708,6 +722,8 @@ export function applyPrintedTraceSuccessFollowups(
       trace.successEffect.type ===
         "end_run_trash_hardware_and_unpreventable_meat_damage"
     ) {
+      if (trace.sourceRunId !== state.run.runId || trace.subroutineIndex === undefined)
+        throw new Error("Trace-Hardware-Auswahl benötigt ihre genaue Encounter-Herkunft.");
       if (!state.winner && state.run)
         host.callbacks.finishRun(false, legalAction);
       const hardwareWrecker = host.callbacks.resolveTraceHardwareWreckerSuccess(
@@ -722,6 +738,9 @@ export function applyPrintedTraceSuccessFollowups(
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           traceId: trace.traceId,
+          ...runOrigin,
+          traceSourceCardInstanceId: trace.sourceCardInstanceId,
+          traceSourceSubroutineIndex: trace.subroutineIndex,
           traceStep,
           sourceDefinitionId: trace.sourceDefinitionId,
           traceSuccessful: true,
@@ -765,6 +784,7 @@ export function applyPrintedTraceSuccessFollowups(
   }
   const payload = {
     traceId: trace.traceId,
+    ...runOrigin,
     traceStep,
     traceLimit: trace.traceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,
@@ -793,7 +813,9 @@ export function applyPrintedTraceSuccessFollowups(
           gainedCredits: traceAvoidReward.amount,
           runnerCreditsAfter: state.runner.credits,
           traceAvoidRewardSourceDefinitionIds:
-            traceAvoidReward.sourceDefinitionIds.sort().join(","),
+            traceAvoidReward.sourceDefinitionIds
+              .sort((left, right) => left - right)
+              .join(","),
         }
       : {}),
     ...(runnerRunEnded
@@ -861,9 +883,9 @@ export function applyPrintedTraceSuccessFollowups(
 function applyTraceAvoidRewards(
   host: EncounterPrintedEffectHost,
   trace: CurrentTrace,
-): { amount: number; sourceDefinitionIds: string[] } {
+): { amount: number; sourceDefinitionIds: CardDefinition["id"][] } {
   let amount = 0;
-  const sourceDefinitionIds: string[] = [];
+  const sourceDefinitionIds: CardDefinition["id"][] = [];
   for (const reward of trace.traceAvoidRewardUsages ?? []) {
     if (!Number.isInteger(reward.amount) || reward.amount <= 0) continue;
     amount += reward.amount;
@@ -872,7 +894,7 @@ function applyTraceAvoidRewards(
   if (amount > 0)
     credits(host.state, "runner", amount, {
       kind: "trace_effect",
-      sourceDefinitionIds: sourceDefinitionIds as CardDefinition["id"][],
+      sourceDefinitionIds,
       reason: "trace_avoid_rewards",
     });
   return { amount, sourceDefinitionIds };
@@ -922,7 +944,7 @@ function mustRun(state: GameState): ActiveRun {
   return state.run;
 }
 
-function rollDie(host: EncounterPrintedEffectHost, purpose: string): number {
+function rollDie(host: EncounterPrintedEffectHost, purpose: RandomPurpose): number {
   const die = host.callbacks.rollDie?.(purpose) ?? 1;
   if (!Number.isInteger(die) || die < 1 || die > 6)
     throw new Error("Gedruckter Zufallsschaden hat einen ungültigen W6-Wurf.");

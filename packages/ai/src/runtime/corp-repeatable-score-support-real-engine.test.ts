@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import {
   applyAction,
   createGameAfterSetup,
@@ -20,8 +21,8 @@ import {
 import { corpSameTurnScoreConversionPaths } from "../plans/tactical-plan-corp-score-conversion";
 import { buildAiDecisionInput } from "./ai-decision-input";
 
-const SUPPORT = "onr_v1_312_chicago-branch",
-  AGENDA = "onr_v1_205_main-office-relocation";
+const SUPPORT = 524,
+  AGENDA = 417;
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,
   id: "repeatable-score-proof",
@@ -63,7 +64,7 @@ function fixture(credits = 28, clicks = 3) {
     .withCorpHqSize(0)
     .withCorpCredits(credits)
     .withCorpCardInHq(AGENDA)
-    .withCorpRemoteRoot("remote_1", SUPPORT);
+    .withCorpRemoteRoot("r1", SUPPORT);
   state.corp.clicks = clicks;
   return state;
 }
@@ -118,7 +119,7 @@ it("executes two native activations with one rez and exact choices under the sam
         s.root.includes(target!),
       )!;
       expect(portfolio.executorInstanceId).toBe(
-        executor!.replace("%3Anew_remote", `%3A${installedServer.id}`),
+        planInstanceIdForProposal({ moduleId: "corp.score_agenda", dedupeKey: `agenda:${target}:${installedServer.id}` }),
       );
       executor = portfolio.executorInstanceId;
     }
@@ -150,7 +151,7 @@ it("executes two native activations with one rez and exact choices under the sam
   expect(state.corp.credits).toBe(20);
   expect(state.corp.clicks).toBe(0);
   expect(
-    state.corp.servers.find((s) => s.id === "remote_1")!.root,
+    state.corp.servers.find((s) => s.id === "r1")!.root,
   ).toHaveLength(1);
 });
 
@@ -170,7 +171,7 @@ it("does not use the support after replacing its own root", () => {
   const input = inputFor(fixture());
   expect(
     corpSameTurnScoreConversionPaths(input).some(
-      (p) => p.targetServerId === "remote_1",
+      (p) => p.targetServerId === "r1",
     ),
   ).toBe(false);
 });

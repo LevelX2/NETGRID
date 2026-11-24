@@ -1,3 +1,4 @@
+import { isCardDefinitionId } from "@netgrid/shared";
 import {
   mkdir,
   readdir,
@@ -129,14 +130,14 @@ function normalizeDecks(decks: EditableDeck[]): EditableDeck[] {
       cards: deck.cards
         .filter(
           (entry) =>
-            typeof entry.cardId === "string" && Number.isFinite(entry.quantity),
+            isCardDefinitionId(entry.cardId) && Number.isFinite(entry.quantity),
         )
         .map((entry) => ({
           cardId: entry.cardId,
           quantity: Math.max(0, Math.floor(entry.quantity)),
         }))
         .filter((entry) => entry.quantity > 0)
-        .sort((left, right) => left.cardId.localeCompare(right.cardId)),
+        .sort((left, right) => left.cardId - right.cardId),
     });
   }
   return [...byId.values()].sort(
@@ -177,7 +178,7 @@ function isEditableDeck(value: unknown): value is EditableDeck {
     typeof deck.deckVersion === "string" &&
     typeof deck.name === "string" &&
     (deck.side === "runner" || deck.side === "corp") &&
-    typeof deck.identityCardId === "string" &&
+    isCardDefinitionId(deck.identityCardId) &&
     typeof deck.cardPoolSnapshotId === "string" &&
     typeof deck.formatProfileId === "string" &&
     Array.isArray(deck.cards) &&

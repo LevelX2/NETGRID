@@ -1,5 +1,6 @@
 import {
   DEFAULT_TRACE_RULES_PROFILE,
+  type CardDefinitionId,
   type GameState,
   type StateHash,
 } from "@netgrid/shared";
@@ -14,7 +15,7 @@ export function hashStateSnapshot(state: GameState): StateHash {
   return hashStateSnapshotWithRulesContext(state, rulesContext.fingerprint);
 }
 
-const activeCardSpecDefinitionIds = new Set<string>(
+const activeCardSpecDefinitionIds = new Set<CardDefinitionId>(
   cardSpecRuntimeDefinitionIds(),
 );
 
@@ -29,7 +30,7 @@ export class StateHashCardPoolError extends Error {
   }
 }
 
-export function matchCardSpecDefinitionIdsForState(state: GameState): string[] {
+export function matchCardSpecDefinitionIdsForState(state: GameState): CardDefinitionId[] {
   if (
     state.cardInstances === null ||
     typeof state.cardInstances !== "object" ||
@@ -44,7 +45,7 @@ export function matchCardSpecDefinitionIdsForState(state: GameState): string[] {
           activeCardSpecDefinitionIds.has(definitionId),
         ),
     ),
-  ].sort();
+  ].sort((left, right) => left - right);
 }
 
 export function hashStateSnapshotWithRulesContext(

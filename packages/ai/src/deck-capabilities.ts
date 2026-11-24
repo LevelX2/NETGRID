@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -7,7 +8,7 @@ import type {
 } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
-import { rolesMatch } from "./runtime/role-match";
+import { rolesMatch } from "./role-match";
 import {
   estimateBreakerCostProfileFromOntology,
   getStructuredBreakerProfileForCard,
@@ -20,7 +21,7 @@ import type { AiHintActionPlanOwnerBinding } from "./action-plan-owner-contracts
 import { runnerEffectsProvideMultiaccess } from "./runner-canonical-hint-semantics";
 import { exactBankCashOutPayout } from "./actions/action-economy-projection";
 import { icebreakerAbilitiesForDefinition } from "@netgrid/engine";
-import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 
 export const DECK_CAPABILITY_PROFILE_SCHEMA_VERSION =
   "deck-capability-profile-v1" as const;
@@ -46,7 +47,7 @@ export type CapabilityCardStatus =
   | "unavailable";
 
 export type BreakerCapability = {
-  cardId: string;
+  cardId: CardDefinitionId;
   title: string;
   coverage: BreakerCoverageKind[];
   installCost?: number;
@@ -71,14 +72,14 @@ export type CoverageState = {
   searchableNow: boolean;
   drawOnly: boolean;
   missing: boolean;
-  bestKnownCards: string[];
+  bestKnownCards: CardDefinitionId[];
   blockers: string[];
 };
 
 export type BreakerCoverageMatrix = Record<BreakerCoverageKind, CoverageState>;
 
 export type SearchAccessTool = {
-  cardId: string;
+  cardId: CardDefinitionId;
   title: string;
   status: CapabilityCardStatus;
   canSearchPrograms: boolean;
@@ -96,7 +97,7 @@ export type SearchAccessProfile = {
 };
 
 export type EconomyBankTool = {
-  cardId: string;
+  cardId: CardDefinitionId;
   sourceCardInstanceId?: string;
   title: string;
   ownerSide: Side;
@@ -195,7 +196,7 @@ export type BuildDeckCapabilityProfileParams = {
 };
 
 type CardCapabilityRecord = {
-  cardId: string;
+  cardId: CardDefinitionId;
   title: string;
   side: Side;
   type?: string;
@@ -393,7 +394,7 @@ function buildCardCapabilityRecords(
   params: BuildDeckCapabilityProfileParams,
 ): CardCapabilityRecord[] {
   const visibleRecords = visibleCardRecords(params.playerView, params.side);
-  const byId = new Map<string, CardCapabilityRecord>();
+  const byId = new Map<CardDefinitionId, CardCapabilityRecord>();
   for (const entry of params.deckSnapshot?.cards ?? []) {
     const record = recordFromDefinition(
       entry.cardId,
@@ -416,7 +417,7 @@ function buildCardCapabilityRecords(
   }
   return [...byId.values()]
     .map((record) => reconcileKnownDeckRemainder(record))
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+    .sort((left, right) => (left.cardId - right.cardId));
 }
 
 function reconcileKnownDeckRemainder(
@@ -440,7 +441,7 @@ function reconcileKnownDeckRemainder(
 }
 
 function recordFromDefinition(
-  cardId: string,
+  cardId: CardDefinitionId,
   side: Side,
   quantityKnownInDeck: number,
 ): CardCapabilityRecord | undefined {
@@ -477,7 +478,7 @@ function recordFromVisibleCard(
   const type = definition?.type ?? card.type;
   return {
     cardId,
-    title: definition?.title ?? card.title ?? cardId,
+    title: definition?.title ?? card.title ?? String(cardId),
     side,
     ...(type ? { type } : {}),
     subtypes: [...(definition?.subtypes ?? card.subtypes ?? [])],
@@ -719,7 +720,7 @@ function buildBreakerCoverageMatrix(
       (entry) => entry.cardId === card.definitionId,
     );
     if (!breaker) return [];
-    const definition = CARD_DEFINITIONS_BY_ID[breaker.cardId];
+    const definition = planningCardFactsByDefinitionId(breaker.cardId);
     // Only canonical configurable matchers introduce a mode-dependent fact.
     // Other inventory entries retain their existing source/confidence contract.
     if (!definition) return [breaker];
@@ -829,7 +830,7 @@ function buildSearchAccessProfile(
   const tools = records
     .map((record) => searchAccessToolForRecord(params, record))
     .filter((tool): tool is SearchAccessTool => tool !== undefined)
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+    .sort((left, right) => (left.cardId - right.cardId));
   return {
     tools,
     canSearchProgramsNow: tools.some(
@@ -934,7 +935,7 @@ function buildEconomyBankTools(
     .filter((tool): tool is EconomyBankTool => tool !== undefined)
     .sort(
       (left, right) =>
-        left.cardId.localeCompare(right.cardId) ||
+        (left.cardId - right.cardId) ||
         (left.sourceCardInstanceId ?? "").localeCompare(
           right.sourceCardInstanceId ?? "",
         ),
@@ -1488,9 +1489,8 @@ function actionSourceMatchesRecord(
     record.visibleCards.some(
       (card) => card.instanceId === source || card.instanceId === payloadCardId,
     ) ||
-    source === record.cardId ||
-    payloadCardId === record.cardId ||
-    action.payload?.sourceCardId === record.cardId
+    action.payload?.sourceDefinitionId === record.cardId ||
+    action.payload?.cardDefinitionId === record.cardId
   );
 }
 
@@ -1557,7 +1557,7 @@ function currentVisibleBankAmounts(cards: readonly VisibleCard[]): number[] {
 }
 
 function runtimeNumber(
-  cardId: string,
+  cardId: CardDefinitionId,
   key: "installCost" | "memoryCost" | "strength" | "memoryLimitBonus",
 ): { [K in typeof key]?: number } {
   const value =
@@ -1615,7 +1615,7 @@ function compareBreakerCapabilities(
   return (
     confidenceRank(right.confidence) - confidenceRank(left.confidence) ||
     right.coverage.length - left.coverage.length ||
-    left.cardId.localeCompare(right.cardId)
+    (left.cardId - right.cardId)
   );
 }
 

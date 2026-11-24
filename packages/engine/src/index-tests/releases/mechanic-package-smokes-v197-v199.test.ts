@@ -1,3 +1,5 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -187,7 +189,7 @@ import {
 describe("V1.9.7 Mechanikpaket P", () => {
   it("adds Afreet as a playable daemon host and validates smoke decks", () => {
     expect(ONR_V1_9_7_FINAL_CARD_IDS).toHaveLength(1);
-    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_001_afreet"];
+    const definition = CARD_DEFINITIONS_BY_ID[213];
     expect(definition?.implementationStatus).toBe("playable_mvp");
     expect(definition?.mechanics.join(" ")).toMatch(/host/);
     expect(definition?.mechanics.join(" ")).not.toMatch(
@@ -208,18 +210,18 @@ describe("V1.9.7 Mechanikpaket P", () => {
   it("installs Afreet through LegalActions and consumes runner memory", () => {
     let state = toRunnerTurn(v197CardReleaseGame("v197-afreet"));
     state.runner.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_001_afreet");
+    moveRunnerCardToGrip(state, 213);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_001_afreet",
+        sourceDefinition(state, action) === 213,
     );
     expect(
       state.runner.rig.programs.some(
         (programId) =>
-          state.cardInstances[programId]?.definitionId === "onr_v1_001_afreet",
+          state.cardInstances[programId]?.definitionId === 213,
       ),
     ).toBe(true);
     expect(state.runner.memoryUsed).toBeGreaterThanOrEqual(1);
@@ -231,19 +233,19 @@ describe("V1.9.8 Mechanikpaket Q", () => {
     expect(ONR_V1_9_8_FINAL_CARD_IDS).toHaveLength(2);
     for (const definitionId of ONR_V1_9_8_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(/break/);
+      expect(definition?.mechanics.join(" "), String(definitionId)).toMatch(/break/);
       expect(
         cardImplementationForDefinitionId(
           definitionId,
         )?.icebreakerAbilities?.some(
           (ability) => ability.kind === "increase_strength",
         ),
-        definitionId,
+        String(definitionId),
       ).toBe(true);
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /v2|matchmaking|ranking/,
       );
     }
@@ -262,33 +264,33 @@ describe("V1.9.8 Mechanikpaket Q", () => {
   it("installs Dogcatcher and Dropp through LegalActions without leaking hidden Corp cards", () => {
     let state = toRunnerTurn(v198CardReleaseGame("v198-breakers"));
     state.runner.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_018_dogcatcher");
-    moveRunnerCardToGrip(state, "onr_v1_019_dropp");
+    moveRunnerCardToGrip(state, 230);
+    moveRunnerCardToGrip(state, 231);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_018_dogcatcher",
+        sourceDefinition(state, action) === 230,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_019_dropp",
+        sourceDefinition(state, action) === 231,
     );
     expect(
       state.runner.rig.programs.some(
         (programId) =>
           state.cardInstances[programId]?.definitionId ===
-          "onr_v1_018_dogcatcher",
+          230,
       ),
     ).toBe(true);
     expect(
       state.runner.rig.programs.some(
         (programId) =>
-          state.cardInstances[programId]?.definitionId === "onr_v1_019_dropp",
+          state.cardInstances[programId]?.definitionId === 231,
       ),
     ).toBe(true);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
@@ -302,23 +304,23 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(ONR_V1_9_9_FINAL_CARD_IDS).toHaveLength(4);
     for (const definitionId of ONR_V1_9_9_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.type, definitionId).toBe("upgrade");
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.type, String(definitionId)).toBe("upgrade");
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /v2|matchmaking|ranking/,
       );
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_349_aardvark"]?.mechanics.join(" "),
+      CARD_DEFINITIONS_BY_ID[561]?.mechanics.join(" "),
     ).toMatch(/worm/);
     expect(
-      cardImplementationForDefinitionId("onr_v1_351_bizarre-encryption-scheme")
+      cardImplementationForDefinitionId(563)
         ?.hiddenReplacementLongtail?.kind,
     ).toBe("delayed_agenda_access_replacement");
     expect(
-      cardImplementationForDefinitionId("onr_v1_352_chester-mix")?.modifiers,
+      cardImplementationForDefinitionId(564)?.modifiers,
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -333,10 +335,10 @@ describe("V1.9.9 Mechanikpaket R", () => {
       ]),
     );
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_352_chester-mix"]?.rulesText,
+      CARD_DEFINITIONS_BY_ID[564]?.rulesText,
     ).toContain("reduced by [2]");
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_353_chimera"]?.mechanics.join(" "),
+      CARD_DEFINITIONS_BY_ID[565]?.mechanics.join(" "),
     ).toMatch(/trash_installed_runner_cards/);
     expect(
       validateDeckDefinition(ONR_V1_9_9_RUNNER_DECK, { expectedSide: "runner" })
@@ -354,12 +356,12 @@ describe("V1.9.9 Mechanikpaket R", () => {
     let state = toRunnerTurn(v199CardReleaseGame("v199-aardvark"));
     state.runner.credits = 20;
     state.corp.credits = 20;
-    const wormId = installRunnerProgramForTest(state, "onr_v1_074_worm");
-    const aardvarkId = putCorpRootInRemote(state, "onr_v1_349_aardvark");
+    const wormId = installRunnerProgramForTest(state, 286);
+    const aardvarkId = putCorpRootInRemote(state, 561);
     const wallId = putCorpIceOnServer(
       state,
-      "remote_1",
-      "onr_v1_279_wall-of-static",
+      "r1",
+      491,
     );
     state.cardInstances[wallId] = {
       ...state.cardInstances[wallId]!,
@@ -373,7 +375,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(
       state,
@@ -400,7 +402,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       ),
     ).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_349_aardvark",
+      cardDefinitionId: 561,
       title: "Aardvark",
     });
 
@@ -414,15 +416,15 @@ describe("V1.9.9 Mechanikpaket R", () => {
 
   it("does not rez Coyote or pay its rez income during Dr. Dreff's encounter", () => {
     let state = toRunnerTurn(onrV1Game("dreff-coyote"));
-    addRezzedCorpRootForTest(state, "onr_v1_358_dr-dreff", "remote_1", "dr");
+    addRezzedCorpRootForTest(state, 570, "r1", "dr");
     const iceId = addCorpCardToHqForTest(
       state,
-      "onr_proteus_016_coyote",
+      74,
       "coyote",
     );
     const unselectedIceId = addCorpCardToHqForTest(
       state,
-      "onr_v1_223_banpei",
+      435,
       "unselected_banpei",
     );
     const initial = structuredClone(state);
@@ -432,7 +434,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     const option = state.pendingChoice!.options.find(
       (candidate) => candidate.value === iceId,
@@ -443,7 +445,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       temporaryEncounterHasAdditionalMechanics: false,
     });
     const runnerView = JSON.stringify(getPlayerView(state, "runner"));
-    expect(runnerView).not.toContain("onr_proteus_016_coyote");
+    expect(serializedDefinitionReferences(runnerView)).not.toContain(74);
     state = applyChoice(state, "corp", option.id);
     expect(state.corp.credits).toBe(creditsBefore);
     expect(state.cardInstances[iceId]).toMatchObject({
@@ -455,14 +457,14 @@ describe("V1.9.9 Mechanikpaket R", () => {
       successful: false,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_358_dr-dreff",
+      sourceDefinitionId: 570,
       publicRevealKind: "reveal",
-      publicRevealDefinitionId: "onr_proteus_016_coyote",
+      publicRevealDefinitionId: 74,
       hiddenZoneAction: "successful_run_temporary_encounter",
       rezCostPaid: 0,
     });
     const publicEvent = JSON.stringify(state.eventLog.at(-1)?.publicPayload);
-    expect(publicEvent).not.toContain("onr_v1_223_banpei");
+    expect(serializedDefinitionReferences(publicEvent)).not.toContain(435);
     expect(publicEvent).not.toContain(unselectedIceId);
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -476,13 +478,13 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state.corp.credits = 20;
     addInstalledRunnerProgramForTest(
       state,
-      "onr_v1_073_wizards-book",
+      285,
       "wizard",
     );
-    addRezzedCorpRootForTest(state, "onr_v1_358_dr-dreff", "remote_1", "dr");
+    addRezzedCorpRootForTest(state, 570, "r1", "dr");
     const hqIceId = addCorpCardToHqForTest(
       state,
-      "onr_v1_261_quandary",
+      473,
       "dr_quandary",
     );
     const initial = structuredClone(state);
@@ -492,7 +494,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     expect(state.pendingChoice?.source).toContain("p3_54.delayed_success");
     expect(state.run?.successful).toBe(false);
@@ -500,7 +502,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state = applyChoice(
       state,
       "corp",
-      traceChoiceOptionIdForDefinition(state, "onr_v1_261_quandary", "ice_"),
+      traceChoiceOptionIdForDefinition(state, 473, "ice_"),
     );
     expect(state.run).toMatchObject({
       phase: "encounter_ice",
@@ -534,8 +536,8 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state.corp.credits = 20;
     const jennyId = addRezzedCorpRootForTest(
       state,
-      "onr_v1_359_jenny-jett",
-      "remote_1",
+      571,
+      "r1",
       "jenny",
     );
     state.cardInstances[jennyId] = {
@@ -545,7 +547,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     };
     const hqIceId = addCorpCardToHqForTest(
       state,
-      "onr_v1_261_quandary",
+      473,
       "jenny_quandary",
     );
     const initial = structuredClone(state);
@@ -555,7 +557,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     const jennyRez = mustAction(
@@ -570,7 +572,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
         "install_hq_ice_innermost_after_successful_run",
       cardImplementationFortRunRezSupportQuoteComplete: true,
       cardImplementationFortRunRezSupportQuoteSourceCardInstanceId: jennyId,
-      cardImplementationFortRunRezSupportQuoteTargetServerId: "remote_1",
+      cardImplementationFortRunRezSupportQuoteTargetServerId: "r1",
       cardImplementationFortRunRezSupportQuoteStateVersion: state.stateVersion,
       cardImplementationFortRunRezSupportQuoteActionId: jennyRez.actionId,
       cardImplementationFortRunRezSupportQuoteRezCredits: 1,
@@ -589,7 +591,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     const runnerView = JSON.stringify(getPlayerView(state, "runner"));
     expect(runnerView).not.toContain("corp-fort-run-rez-support-quote-v1");
     expect(runnerView).not.toContain(hqIceId);
-    expect(runnerView).not.toContain("onr_v1_261_quandary");
+    expect(serializedDefinitionReferences(runnerView)).not.toContain(473);
 
     const changedState = structuredClone(state);
     changedState.stateVersion += 1;
@@ -614,11 +616,11 @@ describe("V1.9.9 Mechanikpaket R", () => {
       "corp-fort-run-rez-support-quote-v1",
     );
     expect(runnerViewAfterRez).not.toContain(hqIceId);
-    expect(runnerViewAfterRez).not.toContain("onr_v1_261_quandary");
+    expect(serializedDefinitionReferences(runnerViewAfterRez)).not.toContain(473);
     state = applyChoice(
       state,
       "corp",
-      traceChoiceOptionIdForDefinition(state, "onr_v1_261_quandary", "ice_"),
+      traceChoiceOptionIdForDefinition(state, 473, "ice_"),
     );
     expect(state.run).toMatchObject({
       phase: "approach_ice",
@@ -628,7 +630,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(state.corp.credits).toBe(19);
     expect(state.corp.hq).not.toContain(hqIceId);
     expect(
-      state.corp.servers.find((server) => server.id === "remote_1")?.ice[0],
+      state.corp.servers.find((server) => server.id === "r1")?.ice[0],
     ).toBe(hqIceId);
 
     state = apply(state, "corp", (action) => action.type === "decline_rez");
@@ -637,7 +639,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(state.run).toMatchObject({ phase: "access", successful: true });
     expect(state.corp.archives).not.toContain(hqIceId);
     expect(
-      state.corp.servers.find((server) => server.id === "remote_1")?.ice,
+      state.corp.servers.find((server) => server.id === "r1")?.ice,
     ).toContain(hqIceId);
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -653,23 +655,23 @@ describe("V1.9.9 Mechanikpaket R", () => {
       state.corp.credits = 20;
       const bizarreId = putCorpRootInRemote(
         state,
-        "onr_v1_351_bizarre-encryption-scheme",
+        563,
       );
       const agendaId = putCorpRootInRemote(
         state,
-        "onr_v1_203_hostile-takeover",
+        415,
       );
       if (stealCredits > 0) {
         const redId = "bizarre-paid-steal-red-herrings" as typeof agendaId;
         state.cardInstances[redId] = {
           ...state.cardInstances[bizarreId]!,
           instanceId: redId,
-          definitionId: CARD_DEFINITIONS_BY_ID["onr_v1_366_red-herrings"]!.id,
+          definitionId: CARD_DEFINITIONS_BY_ID[578]!.id,
           faceup: true,
           rezzed: true,
         };
         state.corp.servers
-          .find((server) => server.id === "remote_1")!
+          .find((server) => server.id === "r1")!
           .root.push(redId);
       }
 
@@ -678,7 +680,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
         "runner",
         (action) =>
           action.type === "start_run" &&
-          action.payload?.serverId === "remote_1",
+          action.payload?.serverId === "r1",
       );
       if (state.timingPoint === "run.jack_out_window") {
         state = apply(
@@ -703,8 +705,8 @@ describe("V1.9.9 Mechanikpaket R", () => {
       expect(state.run?.runDurationEffects).toEqual([
         expect.objectContaining({
           kind: "delayed_agenda_access_replacement",
-          sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
-          serverId: "remote_1",
+          sourceDefinitionId: 563,
+          serverId: "r1",
           replacementWindow: "agenda_access",
           delayUntil: "runner_next_turn_start",
         }),
@@ -730,7 +732,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
         agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
         delayedAgendaAccessScoreScheduled: true,
         delayedAgendaAccessSourceDefinitionId:
-          "onr_v1_351_bizarre-encryption-scheme",
+          563,
       });
       expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
         "agendaPoints",
@@ -739,8 +741,8 @@ describe("V1.9.9 Mechanikpaket R", () => {
         {
           kind: "delayed_agenda_access_replacement",
           agendaId,
-          serverId: "remote_1",
-          sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+          serverId: "r1",
+          sourceDefinitionId: 563,
           sourceCardInstanceId: expect.any(String),
           resolveAt: "runner_start_turn",
         },
@@ -782,8 +784,8 @@ describe("V1.9.9 Mechanikpaket R", () => {
           expect.objectContaining({
             kind: "score_agenda",
             side: "runner",
-            cardDefinitionId: "onr_v1_203_hostile-takeover",
-            sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+            cardDefinitionId: 415,
+            sourceDefinitionId: 563,
             reason: "start_of_turn",
             visibility: "public",
           }),
@@ -798,7 +800,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state.corp.credits = 20;
     const bizarreId = moveCorpCardToHq(
       state,
-      "onr_v1_351_bizarre-encryption-scheme",
+      563,
     );
 
     const installActions = getLegalActions(state, "corp").filter(
@@ -811,7 +813,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(
       installActions.every((action) => {
         const serverId = String(action.payload?.serverId ?? "");
-        return serverId === "new_remote" || serverId.startsWith("remote_");
+        return serverId === "new_remote" || isRemoteServerId(serverId);
       }),
     ).toBe(true);
 
@@ -839,23 +841,23 @@ describe("V1.9.9 Mechanikpaket R", () => {
         ...ONR_V1_9_9_CORP_DECK,
         cards: [
           ...ONR_V1_9_9_CORP_DECK.cards,
-          { id: "onr_v1_324_fortress-architects", quantity: 1 },
-          { id: "simple_barrier_ice", quantity: 1 },
-          { id: "simple_sentry_ice", quantity: 1 },
+          { id: 536, quantity: 1 },
+          { id: 589, quantity: 1 },
+          { id: 601, quantity: 1 },
         ],
       },
       agendaPointsToWin: 7,
     });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
-    const chesterId = putCorpRootInRemote(state, "onr_v1_352_chester-mix");
+    const chesterId = putCorpRootInRemote(state, 564);
     state.cardInstances[chesterId] = {
       ...state.cardInstances[chesterId]!,
       faceup: true,
       rezzed: true,
     };
-    putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
-    const iceId = moveCorpCardToHq(state, "simple_code_gate_ice");
+    putCorpIceOnServer(state, "r1", 491);
+    const iceId = moveCorpCardToHq(state, 590);
 
     const install = mustAction(
       state,
@@ -863,7 +865,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       (action) =>
         action.type === "install_card" &&
         action.source === iceId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "ice",
     );
     expect(install.payload?.iceInstallBaseCost).toBe(1);
@@ -880,9 +882,9 @@ describe("V1.9.9 Mechanikpaket R", () => {
         ...ONR_V1_9_9_CORP_DECK,
         cards: [
           ...ONR_V1_9_9_CORP_DECK.cards,
-          { id: "onr_v1_324_fortress-architects", quantity: 1 },
-          { id: "simple_barrier_ice", quantity: 1 },
-          { id: "simple_sentry_ice", quantity: 1 },
+          { id: 536, quantity: 1 },
+          { id: 589, quantity: 1 },
+          { id: 601, quantity: 1 },
         ],
       },
       agendaPointsToWin: 7,
@@ -890,7 +892,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
     state.corp.clicks = 3;
-    const chesterId = putCorpRootInRemote(state, "onr_v1_352_chester-mix");
+    const chesterId = putCorpRootInRemote(state, 564);
     state.cardInstances[chesterId] = {
       ...state.cardInstances[chesterId]!,
       faceup: true,
@@ -898,17 +900,17 @@ describe("V1.9.9 Mechanikpaket R", () => {
     };
     const fortressId = putCorpRootInRemote(
       state,
-      "onr_v1_324_fortress-architects",
+      536,
     );
     state.cardInstances[fortressId] = {
       ...state.cardInstances[fortressId]!,
       faceup: true,
       rezzed: true,
     };
-    putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
-    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
-    putCorpIceOnServer(state, "rd", "simple_sentry_ice");
-    const iceId = moveCorpCardToHq(state, "simple_code_gate_ice");
+    putCorpIceOnServer(state, "r1", 491);
+    putCorpIceOnServer(state, "r1", 589);
+    putCorpIceOnServer(state, "rd", 601);
+    const iceId = moveCorpCardToHq(state, 590);
 
     const sameFortInstall = mustAction(
       state,
@@ -916,7 +918,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
       (action) =>
         action.type === "install_card" &&
         action.source === iceId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.placement === "ice",
     );
     expect(sameFortInstall.payload).toMatchObject({
@@ -927,11 +929,11 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(
       String(
         sameFortInstall.payload?.iceInstallReductionSourceDefinitionIds,
-      ).split(","),
+      ).split(",").map(Number),
     ).toEqual(
       expect.arrayContaining([
-        "onr_v1_352_chester-mix",
-        "onr_v1_324_fortress-architects",
+        564,
+        536,
       ]),
     );
 
@@ -948,11 +950,11 @@ describe("V1.9.9 Mechanikpaket R", () => {
       iceInstallBaseCost: 1,
       iceInstallReduction: 1,
       iceInstallTotalCost: 0,
-      iceInstallReductionSourceDefinitionIds: "onr_v1_324_fortress-architects",
+      iceInstallReductionSourceDefinitionIds: String(536),
     });
     expect(
       getPlayerView(state, "corp").servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       )?.statuses,
     ).toEqual([
       expect.objectContaining({
@@ -960,7 +962,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
         costKind: "corp_ice_install",
         operation: "reduce",
         amount: 2,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: chesterId,
         sourceTitle: "Chester Mix",
         sourceSide: "corp",
@@ -992,14 +994,14 @@ describe("V1.9.9 Mechanikpaket R", () => {
   it("trashes a Runner daemon when Chimera is accessed and keeps the access flow legal", () => {
     let state = toRunnerTurn(v199CardReleaseGame("v199-chimera"));
     state.runner.credits = 20;
-    const afreetId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
-    const chimeraId = putCorpRootInRemote(state, "onr_v1_353_chimera");
+    const afreetId = installRunnerProgramForTest(state, 213);
+    const chimeraId = putCorpRootInRemote(state, 565);
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(

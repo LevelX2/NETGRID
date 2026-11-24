@@ -13,7 +13,10 @@ import type {
   RunnerRunTargetEvaluation,
 } from "../../runner-run-target-evaluation";
 import type { DiscardKeepScorer } from "../../runtime/discard-choice-selection";
-import { runnerCandidateIsOneShotSearch } from "../../runtime/runner-development-action-facts";
+import {
+  runnerCandidateIsOneShotSearch,
+  runnerCandidateIsOptionalProgramTrashInstall,
+} from "../../runtime/runner-development-action-facts";
 import { runnerExactFundingRouteContract } from "../../runtime/runner-exact-funding-routes";
 import {
   runnerStrategicExchangeHardExclusion,
@@ -42,6 +45,7 @@ import {
 import type { RunnerDevelopmentInstallServices } from "./development-services";
 import { runnerAccessPayoffDevelopmentLacksBoundAccessRoute } from "./development-signals";
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
+import { runnerInstallTaxTarget } from "./ice-install-tax-target";
 import { assessPassiveStrengthInvestment } from "./passive-strength-investment";
 import { assessRunStrengthStock } from "./run-strength-stock";
 import { assessSuccessfulRunCounterDevelopment } from "./successful-run-counter-development";
@@ -104,6 +108,32 @@ export function buildRunnerCardDevelopmentSignals({
   cardDevelopments: RunnerPlanDomain["developments"];
   developmentFundingNeeds: RunnerCorePlanDomain["fundingNeeds"];
 } {
+  const specialistOwnedActionIds = new Set([
+    ...creditBanks.flatMap((signal) => [
+      ...signal.actionIds,
+      ...(signal.rejectedActionIds ?? []),
+    ]),
+    ...(recurringEconomy ?? []).flatMap((signal) => signal.actionIds),
+    ...(resourceLifecycle ?? []).flatMap((signal) => [
+      ...signal.actionIds,
+      ...(signal.rejectedActionIds ?? []),
+    ]),
+    ...(installedAgendaScores ?? []).flatMap((signal) => signal.actionIds),
+    ...immediateAgendaPointTerminalWins.flatMap(
+      (signal) => signal.actionIds ?? [],
+    ),
+    ...immediateAgendaPointDevelopments.flatMap(
+      (signal) => signal.actionIds,
+    ),
+    ...shellTradersPipelines.flatMap((signal) => [
+      ...signal.actionIds,
+      ...(signal.rejectedActions ?? []).map(({ actionId }) => actionId),
+    ]),
+    ...defenseSupportAllInstallActionIds,
+    ...exposeInformation.flatMap(
+      (signal) => signal.actionIds ?? [signal.selectedActionId],
+    ),
+  ]);
   const handCardDevelopments: RunnerPlanDomain["developments"] =
     handDevelopment.flatMap((evaluation): RunnerPlanDomain["developments"] => {
       const runStrengthStock = assessRunStrengthStock(
@@ -279,52 +309,21 @@ export function buildRunnerCardDevelopmentSignals({
               ) {
                 return false;
               }
-              const canonicalAction = input.legalActions.find(
-                (action) => action.actionId === candidate.actionId,
-              );
-              const alternativeAction = input.legalActions.find(
-                (action) => action.actionId === entry.actionId,
-              );
-              return !(
-                canonicalAction?.payload?.runnerProgramTrashBeforeInstall !==
-                  true &&
-                !candidate.actionId.endsWith(
-                  ".runner_program_trash_before_install",
-                ) &&
-                (alternativeAction?.payload?.runnerProgramTrashBeforeInstall ===
-                  true ||
-                  entry.actionId.endsWith(
-                    ".runner_program_trash_before_install",
-                  ))
+              return (
+                runnerCandidateIsOptionalProgramTrashInstall(input, candidate) ||
+                !runnerCandidateIsOptionalProgramTrashInstall(input, entry)
               );
             })
           : [];
-      const specialistOwnedActionIds = new Set([
-        ...creditBanks.flatMap((signal) => [
-          ...signal.actionIds,
-          ...(signal.rejectedActionIds ?? []),
-        ]),
-        ...(recurringEconomy ?? []).flatMap((signal) => signal.actionIds),
-        ...(resourceLifecycle ?? []).flatMap((signal) => [
-          ...signal.actionIds,
-          ...(signal.rejectedActionIds ?? []),
-        ]),
-        ...(installedAgendaScores ?? []).flatMap((signal) => signal.actionIds),
-        ...immediateAgendaPointTerminalWins.flatMap(
-          (signal) => signal.actionIds ?? [],
-        ),
-        ...immediateAgendaPointDevelopments.flatMap(
-          (signal) => signal.actionIds,
-        ),
-        ...shellTradersPipelines.flatMap((signal) => [
-          ...signal.actionIds,
-          ...(signal.rejectedActionIds ?? []),
-        ]),
-        ...defenseSupportAllInstallActionIds,
-        ...exposeInformation.flatMap(
-          (signal) => signal.actionIds ?? [signal.selectedActionId],
-        ),
-      ]);
+      const installTax =
+        candidate?.actionType === "install_card"
+          ? runnerInstallTaxTarget(
+              input,
+              evaluation.definitionId,
+              executableCardActionCandidates,
+            )
+          : undefined;
+      if (installTax && !installTax.target) return [];
       if (
         (candidate !== undefined &&
           specialistOwnedActionIds.has(candidate.actionId)) ||
@@ -387,9 +386,8 @@ export function buildRunnerCardDevelopmentSignals({
           ? runnerRestrictedProgramInstallSequenceCommitment(
               input,
               candidate,
-              candidates,
               handDevelopment,
-              economy,
+              economy.minimumCreditFloor,
             )
           : undefined;
       const eventInstallChoiceCommitment = candidate
@@ -585,9 +583,11 @@ export function buildRunnerCardDevelopmentSignals({
               },
             )
           : undefined;
-      const actionIds = candidate
-        ? executableCardActionCandidates.map((entry) => entry.actionId)
-        : [];
+      const actionIds = installTax?.target
+        ? [installTax.target.actionId]
+        : candidate
+          ? executableCardActionCandidates.map((entry) => entry.actionId)
+          : [];
       const semanticActionTypes = candidate
         ? [candidate.semanticActionType]
         : [];
@@ -649,7 +649,9 @@ export function buildRunnerCardDevelopmentSignals({
               ? ("P4" as const)
               : developmentPriorityClass,
           value: normalizedDevelopmentValue,
-          evidenceCode: evaluation.evidence[0] ?? "runner_hand_development",
+          evidenceCode: installTax?.target
+            ? `runner_ice_install_tax_target:${installTax.target.serverId}`
+            : (evaluation.evidence[0] ?? "runner_hand_development"),
           ...(strengthInvestment
             ? { evidenceCodes: strengthInvestment.evidenceCodes }
             : runCreditInvestment

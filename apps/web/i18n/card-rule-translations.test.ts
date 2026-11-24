@@ -9,7 +9,7 @@ describe("translated card rules in text tooltips", () => {
   it("keeps canonical rules text while translation is disabled", () => {
     expect(
       tooltipCardRulesText({
-        definitionId: "onr_v1_046_pattels-virus",
+        definitionId: 258,
         englishRulesText,
         locale: "de",
         translateToSelectedLanguage: false,
@@ -20,7 +20,7 @@ describe("translated card rules in text tooltips", () => {
   it("selects confirmed German and French rules by definition id", () => {
     expect(
       tooltipCardRulesText({
-        definitionId: "onr_v1_046_pattels-virus",
+        definitionId: 258,
         englishRulesText,
         locale: "de",
         translateToSelectedLanguage: true,
@@ -28,7 +28,7 @@ describe("translated card rules in text tooltips", () => {
     ).toContain("erfolgreichen Run");
     expect(
       tooltipCardRulesText({
-        definitionId: "onr_v1_046_pattels-virus",
+        definitionId: 258,
         englishRulesText,
         locale: "fr",
         translateToSelectedLanguage: true,
@@ -39,7 +39,7 @@ describe("translated card rules in text tooltips", () => {
   it("falls back to English for unsupported locales or missing translations", () => {
     expect(
       tooltipCardRulesText({
-        definitionId: "onr_v1_046_pattels-virus",
+        definitionId: 258,
         englishRulesText,
         locale: "es",
         translateToSelectedLanguage: true,
@@ -47,7 +47,7 @@ describe("translated card rules in text tooltips", () => {
     ).toBe(englishRulesText);
     expect(
       tooltipCardRulesText({
-        definitionId: "card_without_translation",
+        definitionId: 9142,
         englishRulesText,
         locale: "fr",
         translateToSelectedLanguage: true,

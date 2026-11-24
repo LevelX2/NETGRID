@@ -2,23 +2,19 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import {
   eventRefreshesCentralTarget,
   mergedPublicHistory,
-  serverIdFromEvent,
-} from "../runtime/public-event-history";
+  runStartServerIdFromEvent,
+} from "../public-event-history";
 import type { CentralServerId } from "../runtime/server-target";
 
 export function recentCentralRunSameTargetWithoutRefresh(
   input: AiDecisionInput,
   target: CentralServerId,
 ): boolean {
-  const history = centralRunHistory(input);
+  const history = mergedPublicHistory(input);
   let lastSameRun = -1;
   for (let index = history.length - 1; index >= 0; index -= 1) {
     const event = history[index]!;
-    if (
-      serverIdFromEvent(event) === target &&
-      (event.publicPayload.actionType === "start_run" ||
-        event.type === "run_started")
-    ) {
+    if (runStartServerIdFromEvent(event) === target) {
       lastSameRun = index;
       break;
     }
@@ -38,7 +34,7 @@ export function centralRunStreakWithoutValueForMetrics(
   input: AiDecisionInput,
   target: CentralServerId,
 ): number {
-  const history = centralRunHistory(input);
+  const history = mergedPublicHistory(input);
   let streak = 0;
   for (let index = history.length - 1; index >= 0; index -= 1) {
     const event = history[index]!;
@@ -50,23 +46,13 @@ export function centralRunStreakWithoutValueForMetrics(
       typeof event.publicPayload.actor === "string"
         ? event.publicPayload.actor
         : undefined;
-    if (
-      actionType === "steal_agenda" ||
-      actionType === "trash_accessed_card" ||
-      actionType === "score_agenda"
-    )
-      break;
-    if (serverIdFromEvent(event) === target && actionType === "start_run") {
+    if (runStartServerIdFromEvent(event) === target) {
       streak += 1;
       continue;
     }
     if (
-      (target === "hq" &&
-        (actionType === "draw_card" || actionType === "mandatory_draw")) ||
-      (target === "rd" &&
-        (actionType === "draw_card" ||
-          actionType === "mandatory_draw" ||
-          actionType === "shuffle_stack")) ||
+      actionType === "score_agenda" ||
+      eventRefreshesCentralTarget(event, target) ||
       (actor === "runner" && actionType === "install_card")
     )
       break;
@@ -99,8 +85,4 @@ export function centralRepeatHasFreshValueForMetrics(
   )
     return true;
   return !recentCentralRunSameTargetWithoutRefresh(input, target);
-}
-
-function centralRunHistory(input: AiDecisionInput) {
-  return mergedPublicHistory(input);
 }

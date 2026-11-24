@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -52,8 +53,8 @@ it.each([
     (a) => a.actionId === decision.actionId,
   )!;
   expect(action.type).toBe("install_card");
-  expect(action.source).toContain("fall-guy");
-  const parent = "plan:runner.pressure_central:central%3Ahq";
+  expect(referencesDefaultDeckCard(action.source, 373)).toBe(true);
+  const parent = "pa7nez1ioecg7mf06q1uwqq57o";
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
     parent,
   );
@@ -88,7 +89,7 @@ it.each([
     const source = input.playerView.own.gripOrHq.find(
       (card) => card.instanceId === action.source,
     );
-    expect(source?.definitionId).not.toBe("onr_v1_161_fall-guy");
+    expect(source?.definitionId).not.toBe(373);
   }
   expect(
     portfolio.instances

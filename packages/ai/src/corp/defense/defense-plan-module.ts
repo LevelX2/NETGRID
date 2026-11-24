@@ -2,7 +2,7 @@ import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { corpIceRezSupportEmptyTargetDispositionEvidence } from "./corp-defense-rez-support-facts";
 import { corpArchivesAgendaRelocationSignal } from "./archives-agenda-relocation";
 import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
-import type { AiDecisionInput } from "@netgrid/shared";
+import { isRemoteServerId, type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   assessment,
@@ -34,11 +34,7 @@ import type {
   PlanModule,
   PlanSchedulerContext,
 } from "../../plans/plan-scheduler";
-import {
-  exactCorpIceRezRoutesEqual,
-  projectExactCorpIceRezRoute,
-  type CorpExactIceRezRouteProjection,
-} from "../../runtime/corp-exact-ice-rez-route";
+import { type CorpExactIceRezRouteProjection } from "../../runtime/corp-exact-ice-rez-route";
 import {
   assessBestFundedCorpScoreProtection,
   type KnownCorpFundedIceInstallRouteProjection,
@@ -50,13 +46,17 @@ import {
 } from "../economy/economy-routes";
 import { corpScorePriorityClass } from "../score/corp-score-priority";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
+import { readCorpPublicOffServerAccessThreat } from "./corp-central-defense-facts-adapter";
 import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 import { prepareSelectedCorpIceInstallation } from "./corp-ice-install-cost-support";
+import {
+  exactIceRezRouteIsCurrent,
+  exactInstallProjectionMatchesSignal,
+  exactInstallProjectionIsCurrent,
+  legalActionResourceCost,
+} from "./defense-current-route-quotes";
 import { corpPostPassIceLifecycleComponent } from "./post-pass-ice-lifecycle";
 import {
-  canonicalSubtypeArray,
-  canonicalSubtypeCsv,
-  definitionIdListsAreDisjoint,
   isGenericDefenseSignal,
   isScoreProtectionDrawSignal,
   isScoreProtectionInstallSignal,
@@ -65,17 +65,8 @@ import {
   isValidDefenseSignal,
   knownExactInstallRouteCreditCost,
   knownNonNegativeInteger,
-  selectedInstalledRezCreditsFromCurrentQuote,
-  selectedPostInstallRezCreditsFromCurrentQuote,
-  selectedRezCostsAreUnique,
-  selectedRezCostSetsEqual,
-  selectedRezAgendaPointCost,
   technicalCompare,
   validDefenseSignals,
-  validDefinitionIdArray,
-  validMandatoryInstalledRezCosts,
-  validPostInstallProjectedServerBinding,
-  validPostInstallRezQuoteModifiers,
 } from "./defense-validation";
 
 export function defenseModule(): PlanModule {
@@ -130,11 +121,7 @@ export function defenseModule(): PlanModule {
           target: { kind: "capability", id: "allocate_server_defense" },
           routeExists: candidates.length > 0,
           supportable: resourceGaps.length > 0,
-          evidenceCode: defensePortfolioEvidenceCode(
-            context,
-            signals,
-            currentDomain.centralDefenseAllocation,
-          ),
+          evidenceCode: defensePortfolioEvidenceCode(context, selectedBand),
           ...(scoreProtectionRoute
             ? {
                 parentInstanceId: planInstanceIdForProposal({
@@ -177,33 +164,18 @@ export function defenseModule(): PlanModule {
       );
       const priorityClass: PriorityClass =
         selectedBand.kind === "score" ? "P5" : selectedBand.priorityClass;
-      const candidates = defensePortfolioCandidates(
-        context,
-        signals,
-        currentDomain.centralDefenseAllocation,
-      );
+      const candidates = selectedBand.candidates;
       const resourceGaps = defenseResourceGaps(selectedBand);
       return {
         ...assessment(
           instance,
           priorityClass,
           resourceGaps.length === 0 && candidates.length > 0,
-          defensePortfolioAssessmentValue(
-            context,
-            signals,
-            priorityClass,
-            currentDomain.centralDefenseAllocation,
-          ),
+          defensePortfolioAssessmentValue(context, selectedBand),
           portfolio.executorInstanceId,
           resourceGaps,
         ),
-        evidenceCodes: [
-          defensePortfolioEvidenceCode(
-            context,
-            signals,
-            currentDomain.centralDefenseAllocation,
-          ),
-        ],
+        evidenceCodes: [defensePortfolioEvidenceCode(context, selectedBand)],
       };
     },
     materialize: (instance, _assessment, context) => {
@@ -218,11 +190,7 @@ export function defenseModule(): PlanModule {
       const scoreProtectionRoute =
         selectedBand.kind === "score" ? selectedBand.route : undefined;
       const remoteProtectionRoute = selectedRemoteProtectionRoute(selectedBand);
-      const candidates = defensePortfolioCandidates(
-        context,
-        signals,
-        currentDomain.centralDefenseAllocation,
-      );
+      const candidates = selectedBand.candidates;
       const engineRandomizedIceInstallNearTie =
         engineRandomizedCentralIceInstallNearTie(
           context,
@@ -343,14 +311,8 @@ function engineRandomizedCentralIceInstallNearTie(
 
 function defensePortfolioEvidenceCode(
   context: PlanSchedulerContext,
-  signals: readonly CorpDefenseSignal[],
-  centralAllocation?: CorpCentralDefenseAllocation,
+  selectedBand: SelectedDefensePortfolioBand,
 ): string {
-  const selectedBand = selectedDefensePortfolioBand(
-    context,
-    signals,
-    centralAllocation,
-  );
   if (selectedBand.kind === "score") {
     return selectedBand.route.signal.evidenceCode;
   }
@@ -369,15 +331,6 @@ function defensePortfolioEvidenceCode(
           left.defenseId.localeCompare(right.defenseId),
       )[0]?.evidenceCode ?? "visible_server_defense_portfolio"
   );
-}
-
-function defensePriority(
-  context: PlanSchedulerContext,
-  signals: readonly CorpDefenseSignal[],
-  centralAllocation?: CorpCentralDefenseAllocation,
-): PriorityClass {
-  return selectedDefensePortfolioBand(context, signals, centralAllocation)
-    .priorityClass;
 }
 
 function defensePriorityRank(priorityClass: PriorityClass): number {
@@ -671,7 +624,8 @@ function defenseCandidates(
       }
       if (
         signal.sourceDefinitionIds.length > 0 &&
-        !signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
+        (candidate.sourceDefinitionId === undefined ||
+          !signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId))
       )
         return false;
       if (signal.phase === "install_defense_support")
@@ -808,36 +762,6 @@ function genericDefenseFundingAlternativeExists(
   );
 }
 
-function exactIceRezRouteIsCurrent(
-  context: PlanSchedulerContext,
-  signal: CorpGenericDefenseSignal,
-  route: CorpExactIceRezRouteProjection,
-): boolean {
-  if (
-    route.targetServerId !== signal.serverId ||
-    route.actionId !== signal.actionIds?.[0] ||
-    signal.actionIds?.length !== 1 ||
-    route.sourceCardInstanceId !== signal.targetIceInstanceId
-  ) {
-    return false;
-  }
-  const candidate = context.actionCandidates.find(
-    (candidate) => candidate.actionId === route.actionId,
-  );
-  const sourceCard = context.input.playerView.servers
-    .flatMap((server) => server.ice)
-    .find((card) => card.instanceId === route.sourceCardInstanceId);
-  if (!candidate || !sourceCard) return false;
-  const expected = projectExactCorpIceRezRoute({
-    input: context.input,
-    candidate,
-    sourceCard,
-    targetServerId: signal.serverId,
-    bluffDefenseNeed: route.bluffDefenseNeed,
-  });
-  return expected !== undefined && exactCorpIceRezRoutesEqual(route, expected);
-}
-
 function scoreProtectionInstallActionMatches(
   context: PlanSchedulerContext,
   candidate: ActionSemanticCandidate,
@@ -857,293 +781,6 @@ function scoreProtectionInstallActionMatches(
       payload.sourceDefinitionId === signal.sourceDefinitionId) &&
     payload.serverId === targetServerId
   );
-}
-
-function exactInstallProjectionMatchesSignal(
-  context: PlanSchedulerContext,
-  signal: CorpGenericDefenseSignal,
-  projection: KnownCorpFundedIceInstallRouteProjection,
-): boolean {
-  if (
-    projection.knowledge !== "known" ||
-    projection.actionId !== signal.actionIds?.[0] ||
-    signal.actionIds.length !== 1 ||
-    projection.targetServerId !== signal.serverId ||
-    signal.sourceDefinitionIds.length !== 1 ||
-    signal.sourceDefinitionIds[0] !== projection.sourceDefinitionId ||
-    !exactInstallProjectionIsCurrent(
-      context,
-      projection,
-      signal.installRoute?.progressKind === "staged_central_defense",
-      signal.installRoute?.progressKind ===
-        "scoreline_central_tax_allocation" ||
-        signal.installRoute?.progressKind ===
-          "score_material_capacity_release" ||
-        signal.installRoute?.progressKind ===
-          "agenda_capacity_defense_conversion" ||
-        signal.installRoute?.progressKind ===
-          "funded_structured_central_defense",
-    )
-  ) {
-    return false;
-  }
-  return true;
-}
-
-function exactInstallProjectionIsCurrent(
-  context: PlanSchedulerContext,
-  projection: KnownCorpFundedIceInstallRouteProjection,
-  useMinimumSatisfyingRoute = false,
-  useExactPostInstallSourceQuote = false,
-): boolean {
-  if (
-    projection.knowledge !== "known" ||
-    projection.before.knowledge !== "known" ||
-    projection.after.knowledge !== "known" ||
-    !knownNonNegativeInteger(context.input.playerView.own.credits) ||
-    !knownNonNegativeInteger(context.input.playerView.own.clicks) ||
-    !knownNonNegativeInteger(context.input.playerView.own.agendaPoints) ||
-    projection.before.availableCorpCredits !==
-      context.input.playerView.own.credits ||
-    projection.before.availableCorpClicks !==
-      context.input.playerView.own.clicks ||
-    projection.before.availableCorpAgendaPoints !==
-      context.input.playerView.own.agendaPoints ||
-    projection.after.availableCorpAgendaPoints !==
-      context.input.playerView.own.agendaPoints
-  ) {
-    return false;
-  }
-  const action = context.input.legalActions.find(
-    (candidate) => candidate.actionId === projection.actionId,
-  );
-  const routeRezCosts =
-    useMinimumSatisfyingRoute && projection.selectedRezCosts.length === 0
-      ? (projection.after.minimumSatisfyingRezCosts ?? [])
-      : projection.selectedRezCosts;
-  const afterRouteRezCosts =
-    useMinimumSatisfyingRoute && projection.selectedRezCosts.length === 0
-      ? (projection.after.minimumSatisfyingRezCosts ?? [])
-      : projection.after.selectedRezCosts;
-  const projectedRezCost = routeRezCosts.find(
-    (selected) =>
-      selected.iceInstanceId === projection.sourceCardInstanceId &&
-      selected.iceDefinitionId === projection.sourceDefinitionId &&
-      selected.source === "engine_rez_cost_quote",
-  );
-  const projectedServerId =
-    action?.payload?.postInstallRezQuoteProjectedServerId;
-  const selectedPostInstallRezChoiceIsCurrent =
-    action?.payload && projectedRezCost
-      ? postInstallRezSelectionMatchesCurrentQuote(
-          action.payload,
-          projectedRezCost,
-        )
-      : useExactPostInstallSourceQuote &&
-        action?.payload?.postInstallRezQuoteComplete === true;
-  const routeAgendaPoints = selectedRezAgendaPointCost(routeRezCosts);
-  const selectedAgendaPoints = selectedRezAgendaPointCost(
-    projection.after.selectedRezCosts,
-  );
-  const pointBank = context.input.playerView.own.agendaPoints;
-  const selectedAgendaPointsAreCurrent =
-    routeAgendaPoints !== undefined &&
-    routeAgendaPoints <= pointBank &&
-    selectedAgendaPoints !== undefined &&
-    selectedAgendaPoints <= pointBank &&
-    selectedRezAgendaPointCost(projection.selectedRezCosts) ===
-      selectedAgendaPoints &&
-    projection.after.totalSelectedAgendaPointCost === selectedAgendaPoints &&
-    projection.after.agendaPointsAfterDefense ===
-      pointBank - selectedAgendaPoints;
-  const selectedRezCostsAreCurrent =
-    useExactPostInstallSourceQuote ||
-    (selectedRezCostSetsEqual(routeRezCosts, afterRouteRezCosts) &&
-      selectedRezCostsAreUnique(routeRezCosts) &&
-      routeRezCosts.every((selected) =>
-        selected.iceInstanceId === projection.sourceCardInstanceId
-          ? selected === projectedRezCost
-          : currentInstalledRezQuoteMatchesSelection(
-              context,
-              selected,
-              projectedServerId,
-            ),
-      ));
-  return (
-    action?.expiresAtStateVersion === context.input.playerView.stateVersion &&
-    action.side === "corp" &&
-    action.type === "install_card" &&
-    action.source === projection.sourceCardInstanceId &&
-    action.payload?.placement === "ice" &&
-    action.payload.cardId === projection.sourceCardInstanceId &&
-    action.payload.serverId === projection.targetServerId &&
-    action.payload.postInstallRezQuoteComplete === true &&
-    action.payload.postInstallRezQuoteCardId ===
-      projection.sourceCardInstanceId &&
-    action.payload.postInstallRezQuoteTargetServerId ===
-      projection.targetServerId &&
-    action.payload.postInstallRezQuoteExpiresAtStateVersion ===
-      context.input.playerView.stateVersion &&
-    validPostInstallProjectedServerBinding(
-      projection.targetServerId,
-      action.payload.postInstallRezQuoteProjectedServerId,
-    ) &&
-    knownNonNegativeInteger(action.payload.postInstallRezQuoteBaseCredits) &&
-    knownNonNegativeInteger(action.payload.postInstallRezQuoteFinalCredits) &&
-    knownNonNegativeInteger(
-      action.payload.postInstallRezQuoteMandatoryAgendaPointCost,
-    ) &&
-    action.payload.postInstallRezQuoteMandatoryAgendaPointCost <= pointBank &&
-    action.payload.postInstallRezQuoteMandatoryAdditionalCostKind ===
-      (action.payload.postInstallRezQuoteMandatoryAgendaPointCost > 0
-        ? "agenda_point"
-        : undefined) &&
-    validPostInstallRezQuoteModifiers(action.payload) &&
-    selectedPostInstallRezChoiceIsCurrent &&
-    selectedAgendaPointsAreCurrent &&
-    selectedRezCostsAreCurrent &&
-    legalActionResourceCost(action, "credits") === projection.installCredits &&
-    legalActionResourceCost(action, "clicks") === projection.installClicks
-  );
-}
-
-function currentInstalledRezQuoteMatchesSelection(
-  context: PlanSchedulerContext,
-  selected: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"][number],
-  projectedServerId: unknown,
-): boolean {
-  if (
-    typeof projectedServerId !== "string" ||
-    selected.source !== "engine_rez_cost_quote"
-  ) {
-    return false;
-  }
-  const matches = context.input.playerView.servers.flatMap((server) =>
-    server.ice
-      .filter((ice) => ice.instanceId === selected.iceInstanceId)
-      .map((ice) => ({ ice, serverId: server.id })),
-  );
-  if (matches.length !== 1) return false;
-  const match = matches[0]!;
-  const quote = match.ice.effectiveRezCostQuote;
-  const selectedInstalledRezCredits =
-    quote?.complete === true
-      ? selectedInstalledRezCreditsFromCurrentQuote(quote)
-      : undefined;
-  if (
-    match.serverId !== projectedServerId ||
-    match.ice.known !== true ||
-    match.ice.type !== "ice" ||
-    match.ice.definitionId !== selected.iceDefinitionId ||
-    match.ice.rezzed !== false ||
-    quote?.context !== "installed" ||
-    quote.complete !== true ||
-    quote.cardId !== selected.iceInstanceId ||
-    quote.targetServerId !== projectedServerId ||
-    quote.projectedServerId !== projectedServerId ||
-    quote.expiresAtStateVersion !== context.input.playerView.stateVersion ||
-    !knownNonNegativeInteger(quote.baseCredits) ||
-    !knownNonNegativeInteger(quote.finalCredits) ||
-    selectedInstalledRezCredits === undefined ||
-    selectedInstalledRezCredits !== selected.credits ||
-    !validMandatoryInstalledRezCosts(quote.mandatoryAdditionalCosts) ||
-    (selected.agendaPoints ?? 0) !==
-      quote.mandatoryAdditionalCosts.agendaPoints ||
-    !validDefinitionIdArray(quote.reductionSourceDefinitionIds) ||
-    !validDefinitionIdArray(quote.increaseSourceDefinitionIds)
-  ) {
-    return false;
-  }
-  const reductions = quote.reductionSourceDefinitionIds ?? [];
-  const increases = quote.increaseSourceDefinitionIds ?? [];
-  return (
-    definitionIdListsAreDisjoint(reductions, increases) &&
-    (quote.baseCredits === quote.finalCredits ||
-      reductions.length + increases.length > 0)
-  );
-}
-
-function postInstallRezSelectionMatchesCurrentQuote(
-  payload: NonNullable<AiDecisionInput["legalActions"][number]["payload"]>,
-  selection: KnownCorpFundedIceInstallRouteProjection["selectedRezCosts"][number],
-): boolean {
-  if (
-    (selection.agendaPoints ?? 0) !==
-    payload.postInstallRezQuoteMandatoryAgendaPointCost
-  ) {
-    return false;
-  }
-  if (payload.postInstallRezQuoteCostKind === "fixed") {
-    return (
-      selection.variableRezChoice === undefined &&
-      selection.credits ===
-        selectedPostInstallRezCreditsFromCurrentQuote(payload)
-    );
-  }
-  if (payload.postInstallRezQuoteCostKind !== "variable") return false;
-  const choice = selection.variableRezChoice;
-  if (!choice) {
-    return (
-      selection.credits ===
-      selectedPostInstallRezCreditsFromCurrentQuote(payload)
-    );
-  }
-  if (choice.kind === "x_strength") {
-    return (
-      payload.postInstallRezQuoteVariableRezKind === "x_strength" &&
-      choice.value === payload.postInstallRezQuoteVariableMinValue &&
-      selection.credits ===
-        selectedPostInstallRezCreditsFromCurrentQuote(payload)
-    );
-  }
-  if (choice.kind === "paid_end_the_run_subroutines") {
-    return (
-      choice.subroutineCount ===
-        payload.postInstallRezQuoteVariableFirstEndTheRunSubroutineCount &&
-      selection.credits ===
-        selectedPostInstallRezCreditsFromCurrentQuote(payload)
-    );
-  }
-  if (
-    choice.kind !== "alternate_subtype" ||
-    payload.postInstallRezQuoteVariableRezKind !== "alternate_subtype"
-  ) {
-    return false;
-  }
-  const selectedSubtypes = canonicalSubtypeArray(choice.selectedSubtypes);
-  const baseSubtypes = canonicalSubtypeCsv(
-    payload.postInstallRezQuoteVariableBaseSubtypes,
-  );
-  const alternateSubtypes = canonicalSubtypeCsv(
-    payload.postInstallRezQuoteVariableAlternateSubtypes,
-  );
-  if (!selectedSubtypes || !baseSubtypes || !alternateSubtypes) return false;
-  const selectedKey = selectedSubtypes.join(",");
-  if (selectedKey === baseSubtypes.join(",")) {
-    return (
-      selection.credits ===
-      payload.postInstallRezQuoteVariableBaseSubtypesFinalCredits
-    );
-  }
-  return (
-    selectedKey === alternateSubtypes.join(",") &&
-    selection.credits ===
-      payload.postInstallRezQuoteVariableAlternateSubtypesFinalCredits
-  );
-}
-
-function legalActionResourceCost(
-  action: AiDecisionInput["legalActions"][number],
-  resource: "credits" | "clicks",
-): number | undefined {
-  let total = 0;
-  for (const cost of action.costs) {
-    const amount = cost[resource] ?? 0;
-    if (!knownNonNegativeInteger(amount)) return undefined;
-    total += amount;
-    if (!Number.isSafeInteger(total)) return undefined;
-  }
-  return total;
 }
 
 function defensePortfolioCandidates(
@@ -1355,8 +992,28 @@ function selectedDefensePortfolioBand(
         },
       ]
     : [];
+  // The unfinished remote is an option for a future turn. In the same
+  // priority band, protect a repeatedly accessed central with real Agenda
+  // exposure when an immediately funded installation changes the route.
+  const repeatedCentralAccessPrecedesRemoteStaging =
+    scoreProtectionRoute?.signal.kind === "score_protection_install" &&
+    scoreProtectionRoute.signal.effect === "progress" &&
+    scoreProtectionRoute.signal.delegatedPriorityClass === "P3" &&
+    genericPriority === "P3" &&
+    (scoreProtectionRoute.signal.serverId === "new_remote" ||
+      context.input.playerView.servers.some(
+        (server) =>
+          server.id === scoreProtectionRoute.signal.serverId &&
+          server.root.length === 0,
+      )) &&
+    hasFundedDefenseAgainstRepeatedCentralAccess(
+      centralAllocation,
+      selectedGenericBand.eligibleSignals,
+      genericCandidates,
+    );
   if (
     scoreProtectionRoute &&
+    !repeatedCentralAccessPrecedesRemoteStaging &&
     (!genericBandAvailable ||
       defensePriorityRank(scoreProtectionRoute.signal.delegatedPriorityClass) <
         defensePriorityRank(genericPriority) ||
@@ -1395,6 +1052,40 @@ function selectedDefensePortfolioBand(
     priorityClass: scoreProtectionRoute.signal.delegatedPriorityClass,
     candidates: scoreCandidates,
   };
+}
+
+function hasFundedDefenseAgainstRepeatedCentralAccess(
+  allocation: CorpCentralDefenseAllocation | undefined,
+  signals: readonly CorpGenericDefenseSignal[],
+  candidates: PlanMaterialization["candidates"],
+): boolean {
+  if (allocation?.status !== "known") return false;
+  const target = allocation.selectedServerId;
+  const pressure = allocation.evidence[target];
+  if (
+    pressure.threat !== "acute" ||
+    pressure.recentSuccessfulAccessRunnerTurns < 2 ||
+    pressure.expectedAgendaLoss.numerator <= 0
+  )
+    return false;
+  return signals.some((signal) => {
+    const route = signal.installRoute;
+    if (
+      signal.serverId !== target ||
+      signal.phase !== "install_ice" ||
+      route?.disposition !== "productive" ||
+      route.progressKind !== "engine_certified_access" ||
+      route.rezFundingGap !== 0 ||
+      !route.projection.preservesReserves ||
+      !route.projection.selectedRezCosts.some(
+        (cost) => cost.iceInstanceId === route.projection.sourceCardInstanceId,
+      )
+    )
+      return false;
+    return candidates.some(
+      ({ candidate }) => candidate.actionId === route.projection.actionId,
+    );
+  });
 }
 
 function selectedGenericDefensePortfolioBand(
@@ -1551,6 +1242,15 @@ function genericDefensePortfolioCandidates(
     ),
     centralAllocation,
   );
+  if (
+    !eligibleSignals.some((signal) => signal.iceInstallCostSupportActionId) ||
+    engineRandomizedCentralIceInstallNearTie(
+      context,
+      selected,
+      centralAllocation,
+    )
+  )
+    return selected;
   return prepareSelectedCorpIceInstallation(context, selected, eligibleSignals);
 }
 
@@ -1870,12 +1570,93 @@ function selectedExactGenericDefenseRoutes(
       stepValue,
     }));
   }
-  const selected = [...eligibleRoutes].sort(
-    compareGenericExactInstallRoutes,
-  )[0];
+  const sorted = [...eligibleRoutes].sort(compareGenericExactInstallRoutes);
+  const selected =
+    strongerTerminalEntryProtection(context.input, sorted) ?? sorted[0];
   return selected
     ? [{ candidate: selected.candidate, stepValue: selected.stepValue }]
     : supportRoutes;
+}
+
+type GenericIceInstallRoute = {
+  candidate: ActionSemanticCandidate;
+  signal: CorpGenericDefenseSignal;
+  projection: KnownCorpFundedIceInstallRouteProjection;
+  stepValue: number;
+};
+
+/** The same Agenda can be reached through two different forts. Improve the
+ * cheaper reachable entrance only if the funded defense of the other remains
+ * affordable from the remaining shared credits and Agenda points. */
+function strongerTerminalEntryProtection(
+  input: AiDecisionInput,
+  routes: readonly GenericIceInstallRoute[],
+): GenericIceInstallRoute | undefined {
+  const direct = routes[0];
+  if (
+    !direct ||
+    direct.signal.centralPressure !== "terminal" ||
+    (direct.signal.serverId !== "hq" && direct.signal.serverId !== "rd") ||
+    direct.projection.before.knowledge !== "known"
+  )
+    return undefined;
+  const accessServer = direct.signal.serverId;
+  const offServerEntries = input.playerView.servers.filter(
+    (server) =>
+      server.id !== accessServer &&
+      !server.statuses?.some((status) => status.kind === "run_prohibited") &&
+      readCorpPublicOffServerAccessThreat(
+        input,
+        server.id,
+      )?.accessServerIds.includes(accessServer),
+  );
+  if (offServerEntries.length !== 1) return undefined;
+  const entry = offServerEntries[0]!.id;
+  const directBefore = direct.projection.before;
+  return routes.find(({ signal, projection }) => {
+    if (
+      signal.serverId !== entry ||
+      signal.centralPressure !== "terminal" ||
+      signal.installRoute?.disposition !== "productive" ||
+      signal.installRoute.progressKind !== "engine_certified_access" ||
+      signal.installRoute.rezFundingGap !== 0 ||
+      projection.before.knowledge !== "known" ||
+      !projection.preservesReserves ||
+      !projection.selectedRezCosts.some(
+        (cost) => cost.iceInstanceId === projection.sourceCardInstanceId,
+      ) ||
+      projection.creditsAfterDefense -
+        projection.after.totalScoreReserveCredits <
+        directBefore.totalSelectedRezCost ||
+      projection.creditsAfterDefense - directBefore.totalSelectedRezCost <
+        direct.projection.creditsAfterDefense ||
+      projection.after.agendaPointsAfterDefense -
+        directBefore.totalSelectedAgendaPointCost <
+        direct.projection.after.agendaPointsAfterDefense
+    )
+      return false;
+    const weakestPath = projection.before.protection;
+    return (
+      compareEffectiveAccess(weakestPath, directBefore.protection) === 1 &&
+      compareEffectiveAccess(weakestPath, projection.after.protection) === 1
+    );
+  });
+}
+
+function compareEffectiveAccess(
+  left: KnownCorpFundedIceInstallRouteProjection["after"]["protection"],
+  right: KnownCorpFundedIceInstallRouteProjection["after"]["protection"],
+): -1 | 0 | 1 | undefined {
+  const odds = compareExactProbabilities(
+    left.runnerAccessSuccessProbability,
+    right.runnerAccessSuccessProbability,
+  );
+  if (odds !== 0 || left.runnerAccessSuccessProbability.numerator === 0)
+    return odds;
+  const credits =
+    left.runnerCreditsRemainingOnBestAccessPath -
+    right.runnerCreditsRemainingOnBestAccessPath;
+  return credits > 0 ? 1 : credits < 0 ? -1 : 0;
 }
 
 function selectedCentralAccessRiskRemains(
@@ -1959,6 +1740,8 @@ function compareGenericExactInstallRoutes(
     knownExactInstallRouteCreditCost(right.projection);
   return (
     costComparison ||
+    Number(isRemoteServerId(left.signal.serverId)) -
+      Number(isRemoteServerId(right.signal.serverId)) ||
     technicalCompare(left.candidate.actionId, right.candidate.actionId)
   );
 }
@@ -2478,7 +2261,7 @@ function authoritativeDefensePlacementSource(
   }
   if (
     candidate.sourceDefinitionId !== undefined &&
-    typeof action.payload?.sourceDefinitionId === "string" &&
+    typeof action.payload?.sourceDefinitionId === "number" &&
     action.payload.sourceDefinitionId !== candidate.sourceDefinitionId
   ) {
     return undefined;
@@ -2497,15 +2280,8 @@ function defenseSignalOrderingValue(signal: CorpDefenseSignal): number {
 
 function defensePortfolioAssessmentValue(
   context: PlanSchedulerContext,
-  signals: readonly CorpDefenseSignal[],
-  _priorityClass: PriorityClass,
-  centralAllocation?: CorpCentralDefenseAllocation,
+  selectedBand: SelectedDefensePortfolioBand,
 ): number {
-  const selectedBand = selectedDefensePortfolioBand(
-    context,
-    signals,
-    centralAllocation,
-  );
   if (selectedBand.kind === "score") {
     return selectedBand.route.signal.kind === "score_protection_install" &&
       selectedBand.route.signal.effect === "satisfied"

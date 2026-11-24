@@ -1,7 +1,9 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import {
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
+  type CardDefinitionId,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
@@ -34,7 +36,10 @@ import {
   corpScorelineFeasibilityForDecisionInput,
   type CorpScorelineFeasibility,
 } from "../../runtime/corp-scoreline-feasibility";
-import { CorpScoreAccelerationSetupBinding } from "../../runtime/corp-scoreline/score-hand-support";
+import {
+  corpCampaignSlotJustCleared,
+  type CorpScoreAccelerationSetupBinding,
+} from "../../runtime/corp-scoreline/score-hand-support";
 import {
   hasExactNonNegativeCostProfile,
   isFiniteNonNegativeInteger,
@@ -227,7 +232,7 @@ export function corpNextTurnScoreContinuationProjects(
       return [
         {
           projectId: corpScoreProjectId(agenda.instanceId, server.id),
-          agendaDefinitionId: agenda.definitionId ?? agenda.instanceId,
+          agendaDefinitionId: requireVisibleCardDefinition(input, agenda, "agenda").id,
           agendaPoints,
           agendaInstanceId: agenda.instanceId,
           serverId: server.id,
@@ -279,7 +284,7 @@ export function corpRemoteCreationUnlockScoreProjects(
   const action = corpRemoteCreationLockRemovalAction(input, candidate);
   if (
     !action ||
-    input.playerView.servers.some((server) => server.id.startsWith("remote_"))
+    input.playerView.servers.some((server) => isRemoteServerId(server.id))
   ) {
     return [];
   }
@@ -290,7 +295,7 @@ export function corpRemoteCreationUnlockScoreProjects(
     return [
       {
         projectId,
-        agendaDefinitionId: card.definitionId ?? card.instanceId,
+        agendaDefinitionId: requireVisibleCardDefinition(input, card, "agenda").id,
         agendaPoints,
         agendaInstanceId: card.instanceId,
         serverId: "new_remote",
@@ -656,9 +661,16 @@ export function scoreProjectForCandidate(
       protectionNeed?.baseline.knowledge === "known" &&
       protectionNeed.baseline.agendaPointsAfterDefense + agendaPoints >=
         input.playerView.agendaPointsToWin;
+    const continuedCampaignSlotRelease =
+      certifiedNearTermScoreHorizon &&
+      serverId !== undefined &&
+      input.playerView.own.clicks === 1 &&
+      corpCampaignSlotJustCleared(input, serverId);
     const developmentClickAvailable =
       input.playerView.own.clicks >=
-        (boundedStagedScoreWindow || protectedNearTermMatchpointWindow
+        (boundedStagedScoreWindow ||
+        protectedNearTermMatchpointWindow ||
+        continuedCampaignSlotRelease
           ? 1
           : 2) || deadlinePressure;
     const protectedScoreWindow =
@@ -970,8 +982,7 @@ export function scoreProjectForCandidate(
     return [
       {
         projectId,
-        agendaDefinitionId:
-          installedCard.definitionId ?? candidate.sourceDefinitionId ?? target,
+        agendaDefinitionId: requireVisibleCardDefinition(input, installedCard, "agenda").id,
         agendaPoints,
         agendaInstanceId: target,
         actionIds: [candidate.actionId],
@@ -1048,7 +1059,7 @@ export function scoreProjectForCandidate(
 }
 
 export function corpAgendaRecyclesHqAgendasIntoRd(
-  agendaDefinitionId: string,
+  agendaDefinitionId: number,
 ): boolean {
   return (
     AI_HINTS_BY_CARD.get(agendaDefinitionId)?.strategySupportPairs?.some(
@@ -1777,7 +1788,7 @@ export function corpScoreHorizonCertificationIsCurrent(
 }
 
 export function corpScoreProjectId(
-  agendaInstanceOrDefinitionId: string,
+  agendaInstanceOrDefinitionId: string | CardDefinitionId,
   serverId: string | undefined,
 ): string {
   return `agenda:${agendaInstanceOrDefinitionId}:${serverId ?? "unbound"}`;

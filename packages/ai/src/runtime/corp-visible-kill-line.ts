@@ -1,16 +1,17 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-import { createAiHintsByCard } from "../ai-hints";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 import type { StrategicIntentFamily } from "../strategic-intent-state";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
-
-const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export function corpVisibleHandHasTagDamagePair(
   input: AiDecisionInput,
 ): boolean {
+  if (input.side !== "corp") return false;
   const hints = input.playerView.own.gripOrHq
     .map((card) =>
-      card.definitionId ? AI_HINTS_BY_CARD.get(card.definitionId) : undefined,
+      card.known && card.definitionId
+        ? AI_HINTS_BY_CARD.get(card.definitionId)
+        : undefined,
     )
     .filter((hint) => hint !== undefined);
   const hasTagSource = hints.some((hint) =>

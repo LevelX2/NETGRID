@@ -9,6 +9,7 @@ import {
   type PlayerAction,
   type ServerId,
   type Side,
+  type TraceId,
   type TraceSuccessEffect,
 } from "@netgrid/shared";
 import type {
@@ -168,7 +169,7 @@ export type TraceOrchestrationHost = {
     resolveTraceTrashRunnerResourceSuccess: (
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
-      traceId: string,
+      traceId: TraceId,
       targetCardId: CardInstanceId | undefined,
     ) => Record<string, unknown>;
   };
@@ -176,7 +177,7 @@ export type TraceOrchestrationHost = {
 
 export function startTraceFromOperation(
   host: TraceOrchestrationHost,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
   traceLimit: number,
   legalAction: LegalAction,
   successEffect: TraceSuccessEffect = { type: "add_tag", amount: 1 },
@@ -191,7 +192,7 @@ export function startTraceFromOperation(
   const sourceCardInstanceId = String(legalAction.payload?.cardId ?? "");
   if (!sourceCardInstanceId || !state.cardInstances[sourceCardInstanceId])
     throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
-  const traceId = `op_trace.${state.stateVersion + 1}.${host.callbacks.sanitizeId(sourceDefinitionId)}.${sourceCardInstanceId}`;
+  const traceId = state.stateVersion + 1;
   const fortTraceBitPoolSource = host.fort.fortTraceBitPoolSource();
   const corpTraceCounterPool = host.counters.corpTraceCounterPoolTotal();
   const paymentCapacity =
@@ -297,7 +298,7 @@ export function handleTraceOrchestrationAction(
 export function traceBidChoice(
   state: GameState,
   side: Side,
-  traceId: string,
+  traceId: TraceId,
   prompt: string,
   maxBid: number,
   optionUnit = "Credits",
@@ -1445,7 +1446,7 @@ function completeTraceWithoutRun(
   const hackerTrackerCountersAdded =
     host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
-    ? { amount: 0, sourceDefinitionIds: [] as string[] }
+    ? { amount: 0, sourceDefinitionIds: [] as CardDefinitionId[] }
     : applyTraceAvoidRewardsForOperation(state, trace);
   const traceResourceTrashPayload =
     successful &&
@@ -1496,7 +1497,9 @@ function completeTraceWithoutRun(
           gainedCredits: traceAvoidReward.amount,
           runnerCreditsAfter: state.runner.credits,
           traceAvoidRewardSourceDefinitionIds:
-            traceAvoidReward.sourceDefinitionIds.sort().join(","),
+            traceAvoidReward.sourceDefinitionIds
+              .sort((left, right) => left - right)
+              .join(","),
         }
       : {}),
     ...traceResourceTrashPayload,
@@ -1527,9 +1530,9 @@ function traceSuccessTagAmountForOperation(
 function applyTraceAvoidRewardsForOperation(
   state: GameState,
   trace: CurrentTrace,
-): { amount: number; sourceDefinitionIds: string[] } {
+): { amount: number; sourceDefinitionIds: CardDefinitionId[] } {
   let amount = 0;
-  const sourceDefinitionIds: string[] = [];
+  const sourceDefinitionIds: CardDefinitionId[] = [];
   for (const reward of trace.traceAvoidRewardUsages ?? []) {
     if (!Number.isInteger(reward.amount) || reward.amount <= 0) continue;
     amount += reward.amount;
@@ -1538,7 +1541,7 @@ function applyTraceAvoidRewardsForOperation(
   if (amount > 0)
     credits(state, "runner", amount, {
       kind: "trace_effect",
-      sourceDefinitionIds: sourceDefinitionIds as CardDefinitionId[],
+      sourceDefinitionIds,
       reason: "trace_avoid_rewards",
     });
   return { amount, sourceDefinitionIds };

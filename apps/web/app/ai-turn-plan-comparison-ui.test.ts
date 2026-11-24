@@ -33,7 +33,7 @@ describe("AI turn-plan comparison UI", () => {
       actionLabel: "ICE installieren",
       scalarValue: 46,
       defenseLine: {
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         totalValue: 46,
       },
       steps: [
@@ -219,7 +219,7 @@ function planFirstDecision(): AiPlanFirstDecisionDebug {
         lines: [
           {
             lineId: "line:defense",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             disposition: "install_rez_ready",
             actionCount: 1,
             fundingGapBefore: 0,

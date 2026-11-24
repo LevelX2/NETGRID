@@ -59,7 +59,7 @@ export function reconcileSelectedRunnerSuccessfulReplacementChoice(
     executorState.signal.serverId !== run.attackedServerId ||
     pending?.rootPlanInstanceId !== root.instanceId ||
     pending.executorInstanceId !== executor.instanceId ||
-    pending.originalActionId !== "runner.continue_run" ||
+    pending.originalActionId !== "r5" ||
     pending.selectedAtStateVersion !== previous.stateVersion ||
     pending.windowId !== undefined ||
     result.portfolio?.rootForegroundInstanceId !== root.instanceId ||

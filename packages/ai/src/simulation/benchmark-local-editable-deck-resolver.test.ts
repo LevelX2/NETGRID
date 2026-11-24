@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const hostPath = vi.hoisted(() => ({
@@ -9,6 +9,7 @@ vi.mock("node:fs", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:fs")>();
   return {
     ...actual,
+    readFileSync: vi.fn(actual.readFileSync),
     // Module initialization keeps the real filesystem. Individual cases own
     // their lookup result, independently of private local deck files.
     existsSync: vi.fn((filePath: Parameters<typeof actual.existsSync>[0]) =>
@@ -102,5 +103,40 @@ describe.each(["posix", "win32"] as const)(
         expect(existsSync).toHaveBeenCalledExactlyOnceWith(result.filePath);
       },
     );
+  },
+);
+
+it.each([
+  ["null", "unsupported schema"],
+  [
+    JSON.stringify({
+      schemaVersion: "netgrid-editable-deck-v1",
+      deck: {
+        deckId: "local-test",
+        name: "Local Test",
+        side: "runner",
+        cards: [null],
+      },
+    }),
+    "malformed card entry",
+  ],
+])(
+  "reports a malformed deck as unavailable",
+  (fileContents, expectedReason) => {
+    hostPath.flavor = "posix";
+    vi.mocked(existsSync).mockReturnValueOnce(true);
+    vi.mocked(readFileSync).mockReturnValueOnce(fileContents);
+    const result = benchmarkDeckFromLocalEditableDeck({
+      kind: "local_editable_deck",
+      localDeckId: "local-test",
+      expectedName: "Local Test",
+      baseDir: "/benchmark-decks",
+      fileName: "local-test.json",
+    });
+    expect(result).toMatchObject({
+      ok: false,
+      classification: "unclear",
+      reason: expect.stringContaining(expectedReason),
+    });
   },
 );

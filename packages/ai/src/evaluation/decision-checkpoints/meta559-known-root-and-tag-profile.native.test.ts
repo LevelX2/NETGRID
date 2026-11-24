@@ -37,14 +37,14 @@ describe("pairing559: valid known root type reaches terminal threat facts (SP-66
         .knownPositionMemory,
     ).toContainEqual(
       expect.objectContaining({
-        zone: "remote_1",
+        zone: "r1",
         positionKey: "root:0",
-        definitionId: "onr_v1_345_trap",
-        sourceEventId: "evt_235",
+        definitionId: 557,
+        sourceEventId: 236,
       }),
     );
     expect(
-      runnerTargetHasTerminalContestThreat(f.native.input, "remote_1"),
+      runnerTargetHasTerminalContestThreat(f.native.input, "r1"),
     ).toBe(false);
   });
   it.each([false, true])(
@@ -74,9 +74,9 @@ describe("pairing559: valid known root type reaches terminal threat facts (SP-66
       expect(
         r.decisionDebug!.planFirstDecision!.selectedPlan?.evidenceCodes,
       ).not.toContain(
-        "runner_terminal_remote_contest_mandatory:remote_1:runner.start_run.remote_1",
+        "runner_terminal_remote_contest_mandatory:r1:rs.r1",
       );
-      expect(runnerTargetHasTerminalContestThreat(input, "remote_1")).toBe(
+      expect(runnerTargetHasTerminalContestThreat(input, "r1")).toBe(
         false,
       );
     },
@@ -84,25 +84,25 @@ describe("pairing559: valid known root type reaches terminal threat facts (SP-66
   it("retains a genuine unknown additional root beside the remembered trap", () => {
     const input = original("known-root-terminal").native.input;
     input.playerView.servers
-      .find((s: any) => s.id === "remote_1")
+      .find((s: any) => s.id === "r1")
       .root.push({
         instanceId: "new-unknown-root",
         known: false,
         rezzed: false,
         advancementCounters: 0,
       });
-    expect(runnerTargetHasTerminalContestThreat(input, "remote_1")).toBe(true);
+    expect(runnerTargetHasTerminalContestThreat(input, "r1")).toBe(true);
   });
   it("retains a canonically remembered agenda as a terminal target", () => {
     const input = original("known-root-terminal").native.input;
     for (const events of [input.eventTail, input.playerView.publicEvents ?? []])
       for (const e of events)
-        if (e.eventId === "evt_235") {
-          e.publicPayload.cardDefinitionId = "onr_proteus_004_fetal-ai";
+        if (e.eventId === 236) {
+          e.publicPayload.cardDefinitionId = 62;
           e.publicPayload.title = "Fetal AI";
-          e.publicPayload.targets.cardDefinitionId = "onr_proteus_004_fetal-ai";
+          e.publicPayload.targets.cardDefinitionId = 62;
         }
-    expect(runnerTargetHasTerminalContestThreat(input, "remote_1")).toBe(true);
+    expect(runnerTargetHasTerminalContestThreat(input, "r1")).toBe(true);
   });
   it.each([4, 5, 6])(
     "does not turn an advanced remembered trap into an agenda at Corp %s",
@@ -110,9 +110,9 @@ describe("pairing559: valid known root type reaches terminal threat facts (SP-66
       const input = original("known-root-terminal").native.input;
       input.playerView.opponent.agendaPoints = points;
       input.playerView.servers.find(
-        (s: any) => s.id === "remote_1",
+        (s: any) => s.id === "r1",
       ).root[0].advancementCounters = 2;
-      expect(runnerTargetHasTerminalContestThreat(input, "remote_1")).toBe(
+      expect(runnerTargetHasTerminalContestThreat(input, "r1")).toBe(
         false,
       );
     },
@@ -123,7 +123,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
     const f = original("tag-prevention-profile"),
       input = f.native.input;
     const card = input.playerView.own.gripOrHq.find(
-      (c: any) => c.definitionId === "onr_v1_135_nasuko-cycle",
+      (c: any) => c.definitionId === 347,
     );
     expect(
       persistentFunctionalProfileForCard(card, card.rulesText)
@@ -145,7 +145,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
     // Semantic coverage countercase; this modified board is not an original replay.
     const input = original("tag-prevention-profile").native.input;
     const fallGuy = input.playerView.own.heapOrArchives.find(
-      (c: any) => c.definitionId === "onr_v1_161_fall-guy",
+      (c: any) => c.definitionId === 373,
     );
     expect(fallGuy).toBeDefined();
     input.playerView.own.heapOrArchives =
@@ -157,7 +157,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
       input,
       strategicIntent: input.ownRunnerStrategicIntent,
       deckCapabilities: input.ownDeckCapabilities,
-    }).find((e) => e.definitionId === "onr_v1_135_nasuko-cycle")!;
+    }).find((e) => e.definitionId === 347)!;
     expect(
       evaluation.persistentInstallEvaluation!.newFunctionalCoverage,
     ).not.toContain("tag_prevention");
@@ -183,7 +183,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
       expect(r.fallbackUsed).toBe(false);
       expect(r.timeoutUsed).toBe(false);
       expect(a.type).toBe("install_card");
-      expect(a.source).toBe("runner_onr_v1_135_nasuko-cycle_1");
+      expect(a.source).toBe("c255");
       expect(r.decisionDebug!.planFirstDecision!.selectedPlan!.moduleId).toBe(
         "runner.defense_and_recovery",
       );
@@ -200,7 +200,7 @@ describe("pairing559: tag prevention survives the persistent functional profile 
       if (!applied.ok) throw Error(JSON.stringify(applied.error));
       expect(applied.state.runner.credits).toBe(10);
       expect(applied.state.runner.rig.hardware).toContain(
-        "runner_onr_v1_135_nasuko-cycle_1",
+        "c255",
       );
     },
   );

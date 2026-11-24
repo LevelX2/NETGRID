@@ -1,3 +1,5 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import { compactCampaignId } from "./compact-plan-identity";
 import type { CorpCorePlanDomain } from "./corp-core-plan-contracts";
 import { corpSpecialDevelopmentAdmission } from "./corp-tactical-module-support";
 import {
@@ -8,11 +10,8 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 
-import {
-  corpTacticalActionFamilyOwner,
-  createCorpTacticalPlanModules,
-} from "./corp-tactical-plan-modules";
-import { instantiatePlanProposal } from "./plan-instance";
+import { createCorpTacticalPlanModules } from "./corp-tactical-plan-modules";
+import { instantiatePlanProposal, planInstanceIdForProposal } from "./plan-instance";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 
@@ -30,6 +29,9 @@ describe("Corp tactical plan modules", () => {
           virusPressure: [
             {
               pressureId: "virus",
+              actionId: purge.actionId,
+              stateVersion: 10,
+              actionCost: 3,
               virusCounters: 3,
               strategicDamage: 10,
               critical: true,
@@ -49,6 +51,9 @@ describe("Corp tactical plan modules", () => {
           virusPressure: [
             {
               pressureId: "virus",
+              actionId: purge.actionId,
+              stateVersion: 10,
+              actionCost: 3,
               virusCounters: 3,
               strategicDamage: 0,
               critical: false,
@@ -81,7 +86,8 @@ describe("Corp tactical plan modules", () => {
 
   it("assigns a bound punish-support rez to the preparation campaign", () => {
     const rez = cardAction("rez-support", "corp_window.rez", "punish-card");
-    const planDomain = domain({
+    const module = tacticalModule("corp.punish_campaign");
+    const moduleContext = context([rez], {
       punishCampaigns: [
         {
           ...punishSignal("prepare"),
@@ -89,10 +95,15 @@ describe("Corp tactical plan modules", () => {
         },
       ],
     });
-
-    expect(corpTacticalActionFamilyOwner(rez, planDomain)).toBe(
-      "corp.punish_campaign",
+    const instance = instantiatePlanProposal(
+      module.discover(moduleContext)[0]!,
+      10,
     );
+    expect(
+      module
+        .materialize(instance, {} as never, moduleContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([rez.actionId]);
   });
 
   it("binds a punish-support preparation to its exact planned placement action", () => {
@@ -108,11 +119,10 @@ describe("Corp tactical plan modules", () => {
     );
     const signal = {
       ...punishSignal("prepare"),
-      sourceDefinitionIds: ["paris-city-grid"],
+      sourceDefinitionIds: [syntheticCardDefinitionId("paris-city-grid")],
       actionIds: [hq.actionId],
       initiatingSemanticActionType: "install.card",
     };
-    const planDomain = domain({ punishCampaigns: [signal] });
     const module = tacticalModule("corp.punish_campaign");
     const moduleContext = context([hq, rd], {
       punishCampaigns: [signal],
@@ -122,10 +132,6 @@ describe("Corp tactical plan modules", () => {
       10,
     );
 
-    expect(corpTacticalActionFamilyOwner(hq, planDomain)).toBe(
-      "corp.punish_campaign",
-    );
-    expect(corpTacticalActionFamilyOwner(rd, planDomain)).toBeUndefined();
     expect(
       module
         .materialize(instance, {} as never, moduleContext)
@@ -218,7 +224,7 @@ describe("Corp tactical plan modules", () => {
     const instance = instantiatePlanProposal(proposal, 10);
 
     expect(proposal.parentInstanceId).toBe(
-      "plan:corp.punish_campaign:campaign",
+      planInstanceIdForProposal({ moduleId: "corp.punish_campaign", dedupeKey: punishSignal("trace").campaignId }),
     );
     expect(proposal.parentNeedId).toBe("punish-execution:campaign:route");
     expect(
@@ -241,7 +247,7 @@ describe("Corp tactical plan modules", () => {
     const install = {
       ...cardAction("install", "install.card", "ambush"),
       runProjectionSummary: {
-        serverId: "remote_1",
+        serverId: "r1",
         serverKind: "remote" as const,
         source: "legal_action_payload" as const,
         evidence: [],
@@ -254,10 +260,10 @@ describe("Corp tactical plan modules", () => {
             {
               commitmentVersion: "corp_ambush_commitment_v1",
               ambushId: "ambush",
-              sourceDefinitionId: "ambush",
+              sourceDefinitionId: syntheticCardDefinitionId("ambush"),
               sourceInstanceId: "ambush-instance",
               actionIds: ["install"],
-              serverId: "remote_1",
+              serverId: "r1",
               phase: "install",
               assignedDomainPlanIds: [],
               duplicateAlreadyInstalled: false,
@@ -278,7 +284,7 @@ describe("Corp tactical plan modules", () => {
       ...cardAction("install-a", "install.card", "ambush"),
       sourceCardInstanceId: "ambush-a",
       runProjectionSummary: {
-        serverId: "remote_1",
+        serverId: "r1",
         serverKind: "remote" as const,
         source: "legal_action_payload" as const,
         evidence: [],
@@ -288,7 +294,7 @@ describe("Corp tactical plan modules", () => {
       ...cardAction("install-b", "install.card", "ambush"),
       sourceCardInstanceId: "ambush-b",
       runProjectionSummary: {
-        serverId: "remote_1",
+        serverId: "r1",
         serverKind: "remote" as const,
         source: "legal_action_payload" as const,
         evidence: [],
@@ -312,21 +318,6 @@ describe("Corp tactical plan modules", () => {
           .candidates.map((entry) => entry.candidate.actionId);
       }),
     ).toEqual([["install-a"], ["install-b"]]);
-    expect(
-      corpTacticalActionFamilyOwner(
-        installA,
-        corpContext.domain as CorpPlanDomain,
-      ),
-    ).toBe("corp.ambush_and_bluff");
-    expect(
-      corpTacticalActionFamilyOwner(
-        {
-          ...installA,
-          actionId: "unbound-sibling-action",
-        },
-        corpContext.domain as CorpPlanDomain,
-      ),
-    ).toBeUndefined();
   });
 
   it("materializes recycling from the recycler source to the exact Ambush target", () => {
@@ -347,7 +338,7 @@ describe("Corp tactical plan modules", () => {
           recycleRoute: {
             actionId: "recycle-trap",
             recyclerSourceInstanceId: "recycler-instance",
-            recyclerSourceDefinitionId: "recycler-definition",
+            recyclerSourceDefinitionId: syntheticCardDefinitionId("recycler-definition"),
             targetCardInstanceId: "ambush-instance",
           },
         },
@@ -363,7 +354,7 @@ describe("Corp tactical plan modules", () => {
     expect(materialization.step).toMatchObject({
       capability: {
         semanticActionTypes: ["corp_board.return_installed_card_to_hq"],
-        requiredSourceDefinitionIds: ["recycler-definition"],
+        requiredSourceDefinitionIds: [syntheticCardDefinitionId("recycler-definition")],
       },
       target: { kind: "card", id: "ambush-instance" },
     });
@@ -420,7 +411,7 @@ describe("Corp tactical plan modules", () => {
       ).toEqual([action.actionId]);
       expect(materialized.step.target).toEqual(
         phase === "install"
-          ? { kind: "server", id: "remote_1" }
+          ? { kind: "server", id: "r1" }
           : { kind: "card", id: "ambush-a" },
       );
       if (phase === "trigger") {
@@ -432,40 +423,57 @@ describe("Corp tactical plan modules", () => {
     }
   });
 
-  it("owns only a draw explicitly materialized by an allowed hand plan", () => {
+  it("materializes only the exact allowed draw or choice offer", () => {
     const draw = candidate("draw", "draw_card", "draw.card");
-    const planDomain = domain({
-      handManagement: [
-        {
-          handPlanId: "draw-for-plan",
-          phase: "draw_for_plan",
-          agendaCount: 0,
-          handSize: 2,
-          maximumHandSize: 5,
-          actionIds: ["draw"],
-          concretePurposeCode: "find_plan_material",
-          value: 20,
-          evidenceCode: "concrete_draw_need",
-        },
-      ],
-    });
-    expect(corpTacticalActionFamilyOwner(draw, planDomain)).toBe(
-      "corp.hand_and_agenda_management",
-    );
+    const choice = candidate("discard", "resolve_choice", "choice.resolve");
+    const candidates = [
+      draw,
+      { ...draw, actionId: "unbound-draw" },
+      choice,
+      { ...choice, actionId: "unbound-choice" },
+    ];
+    const signal = {
+      handPlanId: "hand-plan",
+      agendaCount: 0,
+      handSize: 2,
+      maximumHandSize: 5,
+      concretePurposeCode: "handle_exact_hand_need",
+      value: 20,
+      evidenceCode: "concrete_hand_need",
+    };
+    const module = tacticalModule("corp.hand_and_agenda_management");
+    const materialize = (
+      handSignal: CorpTacticalPlanDomain["handManagement"][number],
+    ) => {
+      const moduleContext = context(candidates, {
+        handManagement: [handSignal],
+      });
+      const instance = instantiatePlanProposal(
+        module.discover(moduleContext)[0]!,
+        10,
+      );
+      return module
+        .materialize(instance, {} as never, moduleContext)
+        .candidates.map((entry) => entry.candidate.actionId);
+    };
+    const drawSignal = {
+      ...signal,
+      phase: "draw_for_plan" as const,
+      actionIds: [draw.actionId],
+      parentPlanInstanceId: "p2p7bi93nhut6wvl9yi754dfw8",
+      parentNeedId: "draw-one",
+    };
+
+    expect(materialize(drawSignal)).toEqual([draw.actionId]);
+    expect(materialize({ ...drawSignal, routeAllowed: false })).toEqual([]);
     expect(
-      corpTacticalActionFamilyOwner(
-        draw,
-        domain({
-          handManagement: [
-            {
-              ...planDomain.handManagement[0]!,
-              routeAllowed: false,
-            },
-          ],
-        }),
-      ),
-    ).toBeUndefined();
-    expect(corpTacticalActionFamilyOwner(draw, domain({}))).toBeUndefined();
+      materialize({
+        ...signal,
+        phase: "discard_window",
+        actionIds: [choice.actionId],
+      }),
+    ).toEqual([choice.actionId]);
+    expect(module.discover(context(candidates, {}))).toEqual([]);
   });
 
   it("materializes an exact mixed economy action only when it projects a draw", () => {
@@ -473,7 +481,7 @@ describe("Corp tactical plan modules", () => {
       ...cardAction(
         "night-shift",
         "economy.gain_credit",
-        "onr_v1_295_night-shift",
+        507,
       ),
       economyProjection: { cardsDrawn: 1 } as never,
     };
@@ -488,7 +496,7 @@ describe("Corp tactical plan modules", () => {
     };
     const handSignal = {
       handPlanId: "draw-for-plan",
-      parentPlanInstanceId: "plan:corp.score_agenda:general",
+      parentPlanInstanceId: "pa1d7j8c33k25iup8n8nyo9r2g",
       parentNeedId: "score-material:general",
       phase: "draw_for_plan" as const,
       agendaCount: 0,
@@ -544,9 +552,9 @@ describe("Corp tactical plan modules", () => {
           },
           {
             handPlanId: "partial-card-support",
-            parentPlanInstanceId: "plan:corp.score_agenda:agenda",
+            parentPlanInstanceId: "p75vwiqoqyj17mzri2e0m2ote6",
             phase: "develop_card",
-            sourceDefinitionIds: ["score-support"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("score-support")],
             actionIds: [develop.actionId],
             agendaCount: 1,
             handSize: 2,
@@ -557,10 +565,10 @@ describe("Corp tactical plan modules", () => {
           },
           {
             handPlanId: "bound-card-support",
-            parentPlanInstanceId: "plan:corp.score_agenda:agenda",
+            parentPlanInstanceId: "p75vwiqoqyj17mzri2e0m2ote6",
             parentNeedId: "score-setup:agenda:score-support",
             phase: "develop_card",
-            sourceDefinitionIds: ["score-support"],
+            sourceDefinitionIds: [syntheticCardDefinitionId("score-support")],
             actionIds: [develop.actionId],
             agendaCount: 1,
             handSize: 2,
@@ -597,7 +605,7 @@ describe("Corp tactical plan modules", () => {
     ]);
     expect(proposals[0]).toMatchObject({
       persistencePolicy: "flexible_support",
-      parentInstanceId: "plan:corp.score_agenda:agenda",
+      parentInstanceId: "p75vwiqoqyj17mzri2e0m2ote6",
       parentNeedId: "score-setup:agenda:score-support",
     });
     expect(proposals[1]).toMatchObject({
@@ -613,7 +621,11 @@ describe("Corp tactical plan modules", () => {
       "purge_virus_counters",
       "counter.purge_runner_virus",
     );
-    expect(corpTacticalActionFamilyOwner(purge, domain({}))).toBeUndefined();
+    expect(
+      tacticalModule("corp.respond_to_virus_pressure").discover(
+        context([purge], {}),
+      ),
+    ).toEqual([]);
   });
 });
 
@@ -625,9 +637,10 @@ function tacticalModule(moduleId: string) {
 
 function punishSignal(phase: "prepare" | "trace" | "tag" | "damage" | "kill") {
   return {
-    campaignId: "campaign",
+    campaignId: compactCampaignId({ ownerModuleId: "corp.punish_campaign", objectiveKey: "fixture-punish-campaign" }),
+    identity: { ownerModuleId: "corp.punish_campaign" as const, objectiveKey: "fixture-punish-campaign" },
     phase,
-    sourceDefinitionIds: ["punish-card"],
+    sourceDefinitionIds: [syntheticCardDefinitionId("punish-card")],
     feasible: true,
     guarantee: "visible_state_forced" as const,
     visibleTerminalProjection: false,
@@ -684,10 +697,10 @@ function ambushSignal(
   return {
     commitmentVersion: "corp_ambush_commitment_v1" as const,
     ambushId: `ambush:${sourceInstanceId}`,
-    sourceDefinitionId: "ambush",
+    sourceDefinitionId: syntheticCardDefinitionId("ambush"),
     sourceInstanceId,
     actionIds: [actionId],
-    serverId: "remote_1",
+    serverId: "r1",
     phase,
     purposeCode: "develop_ambush",
     assignedDomainPlanIds: ["ambush"],
@@ -760,8 +773,11 @@ function emptyPortfolio(): ResidentPlanPortfolio {
 function cardAction(
   actionId: string,
   semanticActionType: string,
-  sourceDefinitionId: string,
+  definition: number | string,
 ): ActionSemanticCandidate {
+  const sourceDefinitionId = typeof definition === "string"
+    ? syntheticCardDefinitionId(definition)
+    : definition;
   return {
     ...candidate(actionId, actionId, semanticActionType),
     sourceKind: "card",

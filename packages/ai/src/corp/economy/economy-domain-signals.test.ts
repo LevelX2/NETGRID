@@ -37,16 +37,30 @@ describe("corp economy domain signals", () => {
       extraLegalActions: [
         {
           actionId: "install-ice",
+          side: "corp",
+          timingPoint: "corp_action.main",
+          expiresAtStateVersion: 12,
           costs: [{ clicks: 1, credits: 2 }],
           payload: {
             postInstallRezQuoteComplete: true,
             postInstallRezQuoteFinalCredits: 4,
           },
         },
+        {
+          actionId: "wrong-timing",
+          side: "corp",
+          timingPoint: "corp_draw.mandatory_draw",
+          expiresAtStateVersion: 12,
+          costs: [{ credits: 99 }],
+        },
       ],
     });
 
     expect(corpVisibleLiquidityDemandTarget(input)).toBe(6);
+    input.legalActions[0]!.timingPoint = "corp_draw.mandatory_draw";
+    expect(
+      corpExactCurrentBasicLiquidCreditCandidate(input, basicCreditCandidate()),
+    ).toBe(false);
   });
 
   it("emits the unchanged P6 liquidity-development contract", () => {
@@ -313,7 +327,7 @@ function decisionInput(params?: {
   clicks?: number;
   handSize?: number;
   maximumHandSize?: number;
-  extraLegalActions?: unknown[];
+  extraLegalActions?: Array<Record<string, unknown>>;
 }): AiDecisionInput {
   return {
     side: "corp",
@@ -324,15 +338,22 @@ function decisionInput(params?: {
         side: "corp",
         type: "gain_credit",
         source: "basic_action",
+        timingPoint: "corp_action.main",
         expiresAtStateVersion: 12,
         targetRequirements: [],
         choiceRequirements: [],
         costs: [{ clicks: 1 }],
       },
-      ...(params?.extraLegalActions ?? []),
+      ...(params?.extraLegalActions ?? []).map((action) => ({
+        side: "corp",
+        timingPoint: "corp_action.main",
+        expiresAtStateVersion: 12,
+        ...action,
+      })),
     ],
     playerView: {
       stateVersion: 12,
+      timingPoint: "corp_action.main",
       turnSerial: 23,
       own: {
         credits: params?.credits ?? 0,

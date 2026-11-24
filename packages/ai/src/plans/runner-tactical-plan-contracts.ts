@@ -1,4 +1,5 @@
-import { type RunnerCorePlanDomain } from "./runner-core-plan-contracts";
+import type { RunId } from "@netgrid/shared";
+import type { RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import type {
   RunnerFortIceTrashObjective,
@@ -6,7 +7,7 @@ import type {
   RunnerRunTargetEvaluation,
 } from "../run-analysis/runner-run-target-types";
 import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
-import { RunnerDevelopmentSignal } from "../runner/hand-development/development-types";
+import type { RunnerDevelopmentSignal } from "../runner/hand-development/development-types";
 import type { RunnerTerminalWinSignal } from "../runner/terminal-win/terminal-win-types";
 import type { RunnerTargetedBypassCommitment } from "../runner/run-window/runner-targeted-bypass-plan";
 import type { RunnerTargetedIceTrashCommitment } from "../runtime/runner-targeted-ice-trash-plan";
@@ -29,7 +30,7 @@ export type RunnerRunRiskContractSignal = {
     serverId: string;
     observedAtStateVersion: number;
     breakerInstanceId: string;
-    breakerDefinitionId: string;
+    breakerDefinitionId: number;
     targetIceInstanceId: string;
     targetSubroutineId: string;
     successProbability: number;
@@ -60,11 +61,11 @@ export type RunnerPressureSignal = {
   serverId: "hq" | "rd" | "archives";
   purpose: "access" | "multiaccess" | "information";
   strategyLineIds: string[];
-  priorityClass: "P2" | "P3" | "P4" | "P5" | "P6";
+  priorityClass: "P1" | "P2" | "P3" | "P4" | "P5" | "P6";
   reachable: boolean;
   marginalValue: number;
   evidenceCode: string;
-  sourceDefinitionIds?: string[];
+  sourceDefinitionIds?: number[];
   runActionIds?: string[];
   runActionValues?: Record<string, number>;
   runActionEvidence?: Record<string, string[]>;
@@ -95,7 +96,7 @@ export type RunnerPressureSignal = {
   informationBoundaryReassessment?: RunnerInformationBoundaryReassessmentSignal;
   accessPayoffCampaign?: {
     payoffCardInstanceId: string;
-    payoffDefinitionId: string;
+    payoffDefinitionId: number;
     desiredCopyCount: number;
     installedCopyCount: number;
     selectedCopyOrdinal: number;
@@ -137,7 +138,7 @@ export type RunnerRemoteContestSignal = {
   remoteExposePreparation?: {
     sourceActionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     targetCardInstanceId: string;
     targetRootIndex: number;
     observedAtStateVersion: number;
@@ -189,7 +190,7 @@ export type RunnerRunAccessCommitmentSignal = {
     | "access_bonus";
   intendedAction: "steal" | "trash" | "decline" | "access" | "replace_access";
   fortIceTrashObjective?: RunnerFortIceTrashObjective;
-  knownTargetDefinitionIds: string[];
+  knownTargetDefinitionIds: number[];
   trashBudget: RunnerAccessFacts["trashBudget"];
   evidenceCode: string;
 };
@@ -226,10 +227,10 @@ export type RunnerRunWindowActionAssessment = {
   programSearchCommitment?: {
     sourceActionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
-    targetDefinitionId: string;
+    sourceDefinitionId: number;
+    targetDefinitionId: number;
     serverId: string;
-    runId: string;
+    runId: RunId;
     plannedAtStateVersion: number;
     installCost: number;
     targetMemoryCost: number;

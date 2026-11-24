@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   applyAction,
   createGameAfterSetup,
@@ -7,6 +8,7 @@ import {
 import {
   DEMO_DECKS,
   type AiDecision,
+  type CardDefinitionId,
   type CardInstanceId,
   type DeckDefinition,
   type GameState,
@@ -22,12 +24,12 @@ import {
   withDecisionLocalCorpPunishRouteQuotes,
 } from "../corp/punish/punish-route-quote-input";
 
-const POWER_GRID = "onr_v1_299_power-grid-overload";
-const POWER_GRID_CAPABILITY_ID = `${POWER_GRID}:corp_utility_installed_hardware_trash_by_counter`;
-const RD_INTERFACE = "onr_v1_139_r-and-d-interface";
-const SIMPLE_HARDWARE = "simple_setup_hardware";
-const CYBERNETICS = "onr_v1_127_full-body-conversion";
-const UMBRELLA_POLICY = "onr_v1_186_umbrella-policy";
+const POWER_GRID = 511;
+const POWER_GRID_CAPABILITY_ID = canonicalCapabilityId(POWER_GRID, capabilityKey("corp_utility_installed_hardware_trash_by_counter"));
+const RD_INTERFACE = 351;
+const SIMPLE_HARDWARE = 602;
+const CYBERNETICS = 339;
+const UMBRELLA_POLICY = 398;
 
 const CORP_DECK = withCards(DEMO_DECKS.demo_corp_001, "power-grid-quote-corp", [
   POWER_GRID,
@@ -39,7 +41,7 @@ const RUNNER_DECK = withCards(
 );
 
 describe("Power Grid decision-local real-Engine punish quote", () => {
-  it("executes the exact X=1 LegalAction and resolves a real X<N target choice deterministically [legacy_compare]", () => {
+  it("executes the exact X=1 LegalAction and resolves a real X<N target choice deterministically", () => {
     let state = powerGridState("power-grid-execute", 3, {
       hardware: [RD_INTERFACE, SIMPLE_HARDWARE, CYBERNETICS],
     });
@@ -126,9 +128,11 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const playDecision = chooseCorpAction(input, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(playDecision.actionId).toBe(actions[1]!.actionId);
+    expect(
+      playDecision.decisionDebug?.planFirstDecision?.selectionAuthority,
+    ).toBe("turn_plan_commitment");
     expect(playDecision.fallbackUsed).toBe(false);
     state = applyDecision(state, playDecision);
 
@@ -154,17 +158,11 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     );
     if (!choice || !choiceAction) throw new Error("Missing hardware choice.");
     expect(
-      selectedCorpHardwareTrashChoiceOptionIds(
-        choiceInput,
-        choiceAction,
-        choice,
-        choice.options,
-      ),
+      selectedCorpHardwareTrashChoiceOptionIds(choiceInput, choiceAction),
     ).toEqual([expectedOptionId]);
 
     const choiceDecision = chooseCorpAction(decisionInput(state), {
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decisionActionType(state, choiceDecision)).toBe("resolve_choice");
     expect(choiceDecision.selectedChoices).toEqual({
@@ -177,7 +175,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     expect(state.runner.rig.hardware).toHaveLength(hardwareBefore - 1);
   });
 
-  it("funds an exact one-credit gap under the punish parent, then re-quotes, plays and resolves the choice [legacy_compare]", () => {
+  it("funds an exact one-credit gap under the punish parent, then re-quotes, plays and resolves the choice", () => {
     let state = powerGridState("power-grid-funding", 0, {
       hardware: [RD_INTERFACE, SIMPLE_HARDWARE],
     });
@@ -220,11 +218,10 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const fundingDecision = chooseCorpAction(initialInput, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decisionActionType(state, fundingDecision)).toBe("gain_credit");
     expect(fundingDecision.evidence).toContain(
-      "plan_priority_delegated_from:plan:corp.punish_campaign:corp-punish%3Aengine-certified-payoff",
+      "plan_priority_delegated_from:pp3zys3mvrb02r0muk2126s52",
     );
     expect(JSON.stringify(fundingDecision.decisionDebug)).toContain(
       "|module:corp.punish_campaign|phase:fund",
@@ -241,13 +238,11 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const playDecision = chooseCorpAction(fundedInput, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(playDecision.actionId).toBe(fundedActions[1]!.actionId);
     state = applyDecision(state, playDecision);
     const choiceDecision = chooseCorpAction(decisionInput(state), {
       persistTacticalPlanMemory: false,
-      corpTurnPlannerMode: "legacy_compare",
     });
     expect(decisionActionType(state, choiceDecision)).toBe("resolve_choice");
     expect(choiceDecision.selectedChoices?.selectedOptionIds).toHaveLength(1);
@@ -335,27 +330,38 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     "current action drift",
     "capability drift",
     "target envelope drift",
-  ] as const)("rejects %s at the actor-private DTO boundary", (drift) => {
+  ] as const)("diagnoses %s at the actor-private DTO boundary", (drift) => {
     const state = powerGridState(`power-grid-dto-${drift}`, 3, {
       hardware: [RD_INTERFACE, SIMPLE_HARDWARE],
     });
     const input = decisionInput(state);
     const actions = powerGridActions(input.legalActions);
-    const quoted = withDecisionLocalCorpPunishRouteQuotes(input, (request) => {
-      const result = quoteCorpPunishRoute(state, request);
-      if (!result.ok || !result.quote.complete) return result;
-      const forged = structuredClone(result);
-      const head = forged.quote.steps[0]!;
-      if (drift === "current action drift") {
-        head.currentLegalAction!.actionId = actions[2]!.actionId;
-      } else if (drift === "capability drift") {
-        head.sourceCapabilityId = "ability:on_play:0";
-      } else {
-        head.hardwareTrashProjection!.eligibleTargetCount += 1;
-      }
-      return forged;
-    });
-    expect(quoted.playerView.corpPunishRouteQuoteSet).toBeUndefined();
+    expect(() =>
+      withDecisionLocalCorpPunishRouteQuotes(input, (request) => {
+        const result = quoteCorpPunishRoute(state, request);
+        if (!result.ok || !result.quote.complete) return result;
+        const forged = structuredClone(result);
+        const head = forged.quote.steps[0]!;
+        if (drift === "current action drift") {
+          head.currentLegalAction!.actionId = actions[2]!.actionId;
+        } else if (drift === "capability drift") {
+          head.sourceCapabilityId = Number.MAX_SAFE_INTEGER;
+        } else {
+          head.hardwareTrashProjection!.eligibleTargetCount += 1;
+        }
+        return forged;
+      }),
+    ).toThrow(
+      expect.objectContaining({
+        code: "engine_quote_contract_failed",
+        context: expect.objectContaining({
+          removalCondition: expect.stringContaining(
+            "corp_punish_quote:invalid_response_schema",
+          ),
+        }),
+      }),
+    );
+    expect(input.playerView.corpPunishRouteQuoteSet).toBeUndefined();
   });
 });
 
@@ -363,8 +369,8 @@ function powerGridState(
   seed: string,
   corpCredits: number,
   options: {
-    hardware: readonly string[];
-    resources?: readonly string[];
+    hardware: readonly CardDefinitionId[];
+    resources?: readonly CardDefinitionId[];
     runnerTags?: number;
   },
 ): GameState {
@@ -466,7 +472,7 @@ function applyLegal(
 
 function installRunnerCard(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   zone: "hardware" | "resource",
 ): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
@@ -489,7 +495,7 @@ function installRunnerCard(
   return cardId;
 }
 
-function moveCorpCardToHq(state: GameState, definitionId: string): void {
+function moveCorpCardToHq(state: GameState, definitionId: number): void {
   const entry = Object.entries(state.cardInstances).find(
     ([, instance]) => instance.definitionId === definitionId,
   );
@@ -537,7 +543,7 @@ function removeCardEverywhere(state: GameState, cardId: CardInstanceId): void {
 function withCards(
   base: DeckDefinition,
   id: string,
-  additions: readonly string[],
+  additions: readonly CardDefinitionId[],
 ): DeckDefinition {
   return {
     ...base,

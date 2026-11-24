@@ -136,7 +136,7 @@ describe("Engine-certified costless ICE credit gain under Defense", () => {
   );
   it("retains the native no-gate Minotaur decline", () => {
     const input = inputFor(capture().states.noGateMinotaur);
-    expect(chooseAiAction(input).actionId).toBe("corp.decline_rez");
+    expect(chooseAiAction(input).actionId).toBe("c6");
     expect(routeFor(input)).toBeUndefined();
   });
   it("does not claim income consumed by actual Corp credit debt", () => {
@@ -148,7 +148,7 @@ describe("Engine-certified costless ICE credit gain under Defense", () => {
     const before = hashGameState(state),
       input = inputFor(state);
     expect(routeFor(input)).toBeUndefined();
-    expect(chooseAiAction(input).actionId).toBe("corp.decline_rez");
+    expect(chooseAiAction(input).actionId).toBe("c6");
     expect(hashGameState(state)).toBe(before);
     expect(state.actionEconomy.corpCreditForfeitDebt.remaining).toBe(3);
   });

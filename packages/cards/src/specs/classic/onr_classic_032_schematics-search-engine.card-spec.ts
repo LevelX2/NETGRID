@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_classic_032_schematics-search-engine",
+      36,
     ),
     title: "Schematics Search Engine",
     side: "runner",

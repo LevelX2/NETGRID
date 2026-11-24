@@ -1,6 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { beforeEach, describe, expect, it } from "vitest";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import { releaseAiMatchRuntime } from "../runtime/match-runtime-memory";
 import { reconcileResidentPlanPortfolio } from "./resident-plan-portfolio";
 import {
   rememberResidentPlanPortfolio,
@@ -34,6 +35,29 @@ function portfolio(stateVersion: number) {
 }
 describe("resident portfolio binding diagnostics", () => {
   beforeEach(resetResidentPlanPortfolioMemory);
+  it("isolates complete scopes containing colons and releases the exact scope", () => {
+    const first = {
+      ...input(2),
+      matchId: "live:one",
+      decisionId: "live:one:2:runner",
+    };
+    const second = {
+      ...input(2),
+      matchId: "live:two",
+      decisionId: "live:two:2:runner",
+    };
+    rememberResidentPlanPortfolio(first, portfolio(2));
+    expect(residentPlanPortfolioSnapshot(second)).toBeUndefined();
+    const later = {
+      ...input(3),
+      matchId: first.matchId,
+      decisionId: "live:one:3:runner",
+    };
+    expect(residentPlanPortfolioSnapshot(later)?.stateVersion).toBe(2);
+    releaseAiMatchRuntime(first.matchId);
+    expect(residentPlanPortfolioSnapshot(later)).toBeUndefined();
+  });
+
   it("retains the rejected version binding after deleting a future cached portfolio", () => {
     rememberResidentPlanPortfolio(input(150), portfolio(150));
     let failure: PlanResolutionFailure | undefined;

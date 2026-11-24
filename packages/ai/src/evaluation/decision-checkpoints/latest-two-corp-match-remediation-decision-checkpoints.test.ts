@@ -31,7 +31,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["develop_score_protection"],
         requiredAssessmentEvidence: [
-          "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_203_hostile-takeover_1:remote_1:remote_1",
+          "score_plan_requires_effective_ice_draw:agenda:c2kd:r1:r1",
         ],
       };
     }
@@ -53,11 +53,11 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         forbiddenActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_203_hostile-takeover",
+            sourceDefinitionId: 415,
           },
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_193_corporate-coup",
+            sourceDefinitionId: 405,
           },
         ],
       };
@@ -69,9 +69,10 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
   it("does not force central support or a blind draw when no agenda can use the remote", () => {
     const checkpoint = mutateFixture(keepScoreRemoteOpenJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
-      const agendas = state.corp.hq.filter((cardId) =>
-        A759_AGENDAS.has(state.cardInstances[cardId]?.definitionId ?? ""),
-      );
+      const agendas = state.corp.hq.filter((cardId) => {
+        const definitionId = state.cardInstances[cardId]?.definitionId;
+        return definitionId !== undefined && A759_AGENDAS.has(definitionId);
+      });
       state.corp.hq = state.corp.hq.filter(
         (cardId) => !agendas.includes(cardId),
       );
@@ -90,7 +91,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_365_paris-city-grid_1.remote_1.corp_onr_v1_365_paris-city-grid_1",
+              "cc.c3kd.r1.c3kd",
           },
         ],
         forbiddenActions: [{ type: "draw_card" }],
@@ -114,7 +115,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       state.runnerActionsPerTurnOverride = 1;
       state.corp.credits = 20;
       const remote = state.corp.servers.find(
-        (server) => server.id === "remote_1",
+        (server) => server.id === "r1",
       );
       if (!remote) throw new Error("Missing agenda-risk control remote");
       for (const server of state.corp.servers) {
@@ -136,14 +137,14 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_195_corporate-retreat_1.remote_1.corp_onr_v1_195_corporate-retreat_1",
+              "cc.c2il.r1.c2il",
           },
         ],
         planExecution: {
           acceptablePlanKinds: ["corp.score_agenda"],
           acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_mature_remote_score_install:remote_1",
+            "corp_engine_certified_mature_remote_score_install:r1",
           ],
         },
         selectedScoreBreakdown: {
@@ -174,7 +175,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_236_data-raven_1.rd.corp_onr_v1_236_data-raven_1.0",
+              "cc.c2rp.rd.c2rp.0",
           },
         ],
         planExecution: {
@@ -195,7 +196,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       const scoredCardId = state.corp.scoreArea.find(
         (cardId) =>
           state.cardInstances[cardId]?.definitionId ===
-          "onr_v1_206_marine-arcology",
+          418,
       );
       if (!scoredCardId) throw new Error("Missing matchpoint control agenda");
       state.corp.scoreArea = state.corp.scoreArea.filter(
@@ -214,14 +215,14 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "corp.install_card.corp_onr_v1_231_cortical-scrub_2.hq.corp_onr_v1_231_cortical-scrub_2.1",
+              "cc.c2qm.hq.c2qm.1",
           },
         ],
         planExecution: {
           acceptablePlanKinds: ["corp.defend_servers"],
           acceptableCapabilities: ["allocate_server_defense"],
           requiredAssessmentEvidence: [
-            "corp_terminal_central_additional_layer_staging:hq:corp.install_card.corp_onr_v1_231_cortical-scrub_2.hq.corp_onr_v1_231_cortical-scrub_2.1:rez_gap_2",
+            "corp_terminal_central_additional_layer_staging:hq:cc.c2qm.hq.c2qm.1:rez_gap_2",
           ],
         },
       };
@@ -232,8 +233,8 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
 });
 
 const A759_AGENDAS = new Set([
-  "onr_v1_193_corporate-coup",
-  "onr_v1_203_hostile-takeover",
+  405,
+  415,
 ]);
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

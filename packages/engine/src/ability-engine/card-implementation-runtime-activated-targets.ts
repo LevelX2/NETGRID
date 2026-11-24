@@ -7,6 +7,7 @@ import type {
   SubroutineDefinition,
 } from "@netgrid/shared";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
+import { requireSubroutineProvenance, sameSubroutineProvenance } from "./subroutine-provenance";
 import {
   advancementCounterCostForActivatedAbility,
   creditCostForActivatedAbility,
@@ -703,7 +704,10 @@ export function sameFortSubroutineTargets(
           (record) =>
             record.sourceCardInstanceId === sourceCardId &&
             record.targetIceId === iceId &&
-            record.originalSubroutineId === subroutine.id,
+            sameSubroutineProvenance(
+              record.originalSubroutineProvenance,
+              requireSubroutineProvenance(subroutine),
+            ),
         )
       )
         return;

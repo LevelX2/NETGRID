@@ -9,14 +9,14 @@ import { runnerActionDispositions } from "../../runtime/plan-first-live-runtime"
 
 describe("exact Runner coverage-copy ownership", () => {
   it.each([
-    ["onr_v1_014_codecracker", "breaker_code_gate"],
-    ["onr_proteus_083_corrosion", "breaker_wall"],
+    [226, "breaker_code_gate"],
+    [141, "breaker_wall"],
   ] as const)(
     "defers an unselected %s copy without changing the selected route",
     (definitionId, requiredRole) => {
       const actions = ["bound", "alternative"].map((source) =>
         legalAction(
-          `runner.install_card.${source}`,
+          `rc.${source}`,
           "runner",
           "install_card",
           "Install breaker",
@@ -104,15 +104,15 @@ describe("exact Runner coverage-copy ownership", () => {
       ]);
       expect(gap.installActionIds).toEqual([actions[0]!.actionId]);
       expect(actions.map((action) => action.actionId)).toEqual([
-        "runner.install_card.bound",
-        "runner.install_card.alternative",
+        "rc.bound",
+        "rc.alternative",
       ]);
       gap.installActionIds.push(actions[1]!.actionId);
       expect(inspect()).toEqual([]);
       gap.installActionIds.pop();
       Object.assign(gap, {
         requesterModuleId: "runner.pressure_central",
-        requesterPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
+        requesterPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
         requesterNeedId: gap.gapId,
       });
       const parent = {
@@ -150,11 +150,11 @@ describe("exact Runner coverage-copy ownership", () => {
       domain.centralPressure.pop();
       Object.assign(gap, {
         requesterModuleId: "runner.contest_remote",
-        requesterPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        requesterPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
       });
       const remoteParent = {
         ...parent,
-        contestId: "remote:remote_1",
+        contestId: "remote:r1",
         marginalValue: 0,
       };
       (domain.remoteContests as unknown[]).push(remoteParent);
@@ -179,14 +179,14 @@ describe("exact Runner coverage-copy ownership", () => {
       );
       domain.coverageGaps.pop();
       Object.assign(gap, {
-        requesterPlanInstanceId: "plan:runner.contest_remote:remote%3Aother",
+        requesterPlanInstanceId: "prfibc7dsrjjjfxns4glb4n2",
       });
       expect(inspect().some((d) => d.actionId === actions[0]!.actionId)).toBe(
         false,
       );
       domain.remoteContests.pop();
-      candidates[0]!.sourceDefinitionId = "onr_v1_039_krash";
-      input.playerView.own.gripOrHq[0]!.definitionId = "onr_v1_039_krash";
+      candidates[0]!.sourceDefinitionId = 251;
+      input.playerView.own.gripOrHq[0]!.definitionId = 251;
       // A different answer is not proven interchangeable. Do not conceal that
       // ownership defect with a blanket unowned-action disposition.
       expect(inspect()).toEqual([]);

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { exactBasicLiquidCreditCandidate } from "../../actions/action-candidate-facts";
 import { assessCorpSpendAgainstScoreFundingMilestones } from "../score/corp-score-funding";
 import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
@@ -5,12 +6,15 @@ import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { rootRezCreditOutcomeProjectionStatus } from "../../actions/action-economy-projection";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { corpVisibleLiquidityDemandTarget } from "./economy-domain-signals";
-import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import {
+  corpScoreClosesBeforeMandatoryDraw,
+  type CorpScoreProjectSignal,
+} from "../../plans/corp-score-contracts";
 import { corpScorePriorityClass } from "../score/corp-score-priority";
 import { scoreFundingPreservesCounterBanks } from "../score/score-counter-bank-funding";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
@@ -20,12 +24,18 @@ import { uniqueBy } from "../../runtime/collection";
 import {
   corpHostedCreditBankProfile,
   corpImmediateEconomyGainFromHint,
-} from "../../runtime/corp-canonical-card-facts";
+  corpRezHostedCreditPayoutProfile,
+} from "../../runtime/corp-canonical-credit-facts";
 import { corpDefenseReserveNeeds } from "../defense/corp-defense-funding-facts";
 import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-draw-action-facts";
 import { corpVoluntaryDrawLeavesUnsafeMandatoryHorizon } from "../../runtime/corp-draw-admission";
 import { assessCorpEconomyAssetPayback } from "./economy-asset-payback";
-import { corpReservedScoreServerIds } from "../../runtime/corp-scoreline/score-hand-support";
+import { remotePathMeetsProtectionTarget } from "../../runtime/corp-remote-maturity-assessment";
+import {
+  corpReservedScoreServerIds,
+  corpScoreProjectReservesSlotAfterCampaign,
+  scoreInstallWaitsBeyondCampaignPayouts,
+} from "../../runtime/corp-scoreline/score-hand-support";
 import { visibleKnownCardType } from "../../runtime/visible-action-facts";
 import { type CorpPunishCampaignSignal } from "../punish/punish-types";
 import { corpEconomyPriorityClass } from "./economy-plan-module";
@@ -81,6 +91,9 @@ export function corpOptionalActionCapacityConversions(
 ): CorpCorePlanDomain["economyNeeds"] {
   return candidates.flatMap((candidate) => {
     const projection = candidate.actionCapacityProjection;
+    const accept = input.legalActions.find(
+      (action) => action.actionId === candidate.actionId,
+    );
     if (
       candidate.actorSide !== "corp" ||
       candidate.sourceKind !== "card" ||
@@ -88,23 +101,29 @@ export function corpOptionalActionCapacityConversions(
       candidate.semanticActionType !==
         "score_conversion.gain_action_capacity" ||
       typeof candidate.sourceCardInstanceId !== "string" ||
-      typeof candidate.sourceDefinitionId !== "string" ||
+      typeof candidate.sourceDefinitionId !== "number" ||
       projection?.timing !== "immediate" ||
       projection.reliability !== "guaranteed" ||
       projection.followupActionCapacity !== 1 ||
       projection.preExistingActionCost !== 0 ||
       projection.restriction === "unknown" ||
-      !candidate.actionId.endsWith(".accept_extra_action_offer")
+      accept?.payload?.actionEconomyAbility !== "accept_extra_action_offer"
     ) {
       return [];
     }
-    const declineActionId = candidate.actionId.replace(
-      /\.accept_extra_action_offer$/,
-      ".decline_extra_action_offer",
+    const decline = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.side === "corp" &&
+        action.source === accept.source &&
+        action.timingPoint === accept.timingPoint &&
+        action.expiresAtStateVersion === accept.expiresAtStateVersion &&
+        action.payload?.restrictedActionFamily === accept.payload?.restrictedActionFamily &&
+        action.payload?.actionEconomyAbility === "decline_extra_action_offer",
     );
     const declineCandidate = candidates.find(
       (entry) =>
-        entry.actionId === declineActionId &&
+        entry.actionId === decline?.actionId &&
         entry.actorSide === "corp" &&
         entry.sourceCardInstanceId === candidate.sourceCardInstanceId &&
         entry.sourceDefinitionId === candidate.sourceDefinitionId &&
@@ -117,6 +136,8 @@ export function corpOptionalActionCapacityConversions(
       input.playerView.own.gripOrHq.length < input.playerView.own.maxHandSize &&
       !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
         remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
+        mandatoryBaseDrawCount:
+          input.playerView.corpMandatoryBaseDrawQuote?.baseCount,
         netDeckConsumption: 1,
         terminalNeedBeforeMandatoryDraw: false,
       });
@@ -150,16 +171,34 @@ export function corpOptionalActionCapacityConversions(
   });
 }
 
+export function corpReservedCampaignNextTurnClicks(
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): number {
+  return Math.max(
+    0,
+    ...scoreProjects.flatMap((project) =>
+      project.conversion?.residentParent && project.continuationReserve
+        ? [project.continuationReserve.remainingAdvancementCounters]
+        : [],
+    ),
+  );
+}
+
 export function corpEconomyDevelopmentCampaigns(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   scoreProjects: readonly CorpScoreProjectSignal[],
+  remoteProjects: CorpCorePlanDomain["remoteProjects"] = [],
 ): CorpCorePlanDomain["economyNeeds"] {
   const signals: CorpCorePlanDomain["economyNeeds"] = [];
   const reservedScoreServerIds = corpReservedScoreServerIds(
     input,
-    scoreProjects,
+    scoreProjects.filter((project) =>
+      corpScoreProjectReservesSlotAfterCampaign(input, project),
+    ),
   );
+  const reservedNextTurnClicks =
+    corpReservedCampaignNextTurnClicks(scoreProjects);
   const addCampaign = (
     card: VisibleCard,
     phase: "install" | "rez",
@@ -172,7 +211,7 @@ export function corpEconomyDevelopmentCampaigns(
     ) {
       return;
     }
-    const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+    const definition = planningCardFactsByDefinitionId(card.definitionId);
     const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     const startRezChoice = input.playerView.pendingChoice;
     const startRezOption =
@@ -481,9 +520,6 @@ export function corpEconomyDevelopmentCampaigns(
           ? corpEconomyCampaignTargetServerId(input, candidate)
           : undefined);
       if (!targetServerId) continue;
-      if (phase === "install" && reservedScoreServerIds.has(targetServerId)) {
-        continue;
-      }
       const setupCreditCost =
         (startRezChoiceBinding
           ? (startRezOption!.metadata!.creditCost as number)
@@ -506,12 +542,13 @@ export function corpEconomyDevelopmentCampaigns(
           );
       if (creditsAfterSetup < corpFundedCentralProtectionReserve(input))
         continue;
-      const payback = assessCorpEconomyAssetPayback({
+      const paybackInput = {
         input,
         serverId: targetServerId,
         cadence,
         baselineHorizonTurns,
         finitePoolCredits,
+        reservedNextTurnClicks,
         payoutCreditsPerExecution:
           cadence === "finite_pool"
             ? (hostedCreditProfile?.payoutCredits ?? 0)
@@ -524,8 +561,97 @@ export function corpEconomyDevelopmentCampaigns(
         setupActionCost: quote
           ? quote.consumer.clickCost + quote.payoutClickCost
           : (candidate!.costProfile.clickCost as number),
-      });
+      };
+      let payback = assessCorpEconomyAssetPayback(paybackInput);
       if (!payback || payback.projectedNetCredits <= 0) continue;
+      // The fort's funded path already accounts for the Central rez reserve.
+      // A paid setup would change that quote before the Runner gets a turn.
+      const maturity =
+        phase === "install" &&
+        cadence === "finite_pool" &&
+        setupCreditCost === 0
+          ? remoteProjects.find(
+              (project) =>
+                project.target.status === "bound" &&
+                project.target.serverId === targetServerId &&
+                project.maturity.observedAtStateVersion ===
+                  input.playerView.stateVersion,
+            )?.maturity
+          : undefined;
+      const fundedLightProtection =
+        maturity?.knowledge === "known" &&
+        remotePathMeetsProtectionTarget(maturity.fundedPath, "light");
+      const reservedFortFunding =
+        phase === "install" && reservedScoreServerIds.has(targetServerId);
+      if (reservedFortFunding) {
+        const exhaustion = payback.projectedExhaustion;
+        const remote = input.playerView.servers.find(
+          (server) => server.id === targetServerId,
+        );
+        const sameFortScores = scoreProjects.filter(
+          (project) =>
+            project.phase === "install_agenda" &&
+            project.serverId === targetServerId,
+        );
+        const netCash = payback.projectedCredits - setupCreditCost;
+        if (
+          cadence !== "finite_pool" ||
+          !corpRezHostedCreditPayoutProfile(card.definitionId, true)
+            ?.trashesWhenEmpty ||
+          !remote ||
+          !remote.root.every(
+            (entry) => entry.known && entry.type === "upgrade",
+          ) ||
+          sameFortScores.some(
+            (project) =>
+              project.feasible ||
+              project.deadlinePressure ||
+              project.sameTurnCloseout,
+          )
+        )
+          continue;
+        const emptiesBeforeScore =
+          exhaustion !== undefined &&
+          exhaustion.remainingFlexibleClicks >= 1 &&
+          input.playerView.own.stackOrRdCount > exhaustion.turnsFromNow + 1 &&
+          sameFortScores.some((project) => {
+            const gap =
+              project.fundingMilestone?.remainingGap ?? project.fundingGap;
+            return typeof gap === "number" && gap > 0 && gap <= netCash;
+          });
+        if (!emptiesBeforeScore) {
+          if (
+            !fundedLightProtection ||
+            input.playerView.own.stackOrRdCount <= 1 ||
+            sameFortScores.length === 0
+          )
+            continue;
+          // A later agenda can replace the asset in its ordinary install action.
+          // Credit only the income earned before the next Runner gets priority.
+          const current = assessCorpEconomyAssetPayback({
+            ...paybackInput,
+            baselineHorizonTurns: 1,
+          });
+          if (
+            !current ||
+            current.projectedNetCredits <= 0 ||
+            !sameFortScores.every((project) =>
+              scoreInstallWaitsBeyondCampaignPayouts(
+                project,
+                input.playerView.stateVersion,
+                current.projectedCredits,
+                (!maturity.stagedTargetReached &&
+                  maturity.stagedPath.accessStatus !== "conditional" &&
+                  maturity.stagedPath.accessStatus !== "unknown") ||
+                  (maturity.minimumRezFundingGap !== undefined &&
+                    maturity.minimumRezFundingGap > current.projectedCredits),
+              ),
+            )
+          )
+            continue;
+          payback = current;
+        }
+      }
       signals.push({
         kind: "develop_campaign",
         needId: `economy-campaign:${card.instanceId}:${phase}:${targetServerId}`,
@@ -558,6 +684,9 @@ export function corpEconomyDevelopmentCampaigns(
         },
         riskAdjustment: {
           serverId: payback.serverId,
+          ...(fundedLightProtection
+            ? { fundedLightProtection: true as const }
+            : {}),
           protectionState: payback.protectionState,
           baselineHorizonTurns: payback.baselineHorizonTurns,
           riskAdjustedHorizonTurns: payback.riskAdjustedHorizonTurns,
@@ -570,7 +699,9 @@ export function corpEconomyDevelopmentCampaigns(
             phase === "install" ? "installed_unrezzed" : "installed_rezzed",
         },
         urgentForScore: false,
-        evidenceCode: `corp_visible_economy_campaign:${phase}:${targetServerId}:${payback.protectionState}`,
+        evidenceCode: reservedFortFunding
+          ? `corp_finite_campaign_funds_reserved_fort:${targetServerId}`
+          : `corp_visible_economy_campaign:${phase}:${targetServerId}:${payback.protectionState}`,
       });
     }
   };
@@ -579,7 +710,7 @@ export function corpEconomyDevelopmentCampaigns(
     addCampaign(card, "install");
   }
   for (const server of input.playerView.servers) {
-    if (!server.id.startsWith("remote_")) continue;
+    if (!isRemoteServerId(server.id)) continue;
     for (const card of server.root) {
       if (card.rezzed !== true) addCampaign(card, "rez", server.id);
     }
@@ -678,6 +809,7 @@ export function corpEconomyDevelopmentCampaigns(
           needId: need.needId,
           gap: need.gap,
           actionIds: quotes.map((quote) => quote.request.payoutActionId),
+          parentPlanModuleId: "corp.economy" as const,
           parentPlanInstanceId: planInstanceIdForProposal({
             moduleId: "corp.economy",
             dedupeKey: signal.needId,
@@ -726,7 +858,7 @@ function corpEconomyCampaignTargetServerId(
 }
 
 function corpCounterCashoutProfile(
-  definitionId: string,
+  definitionId: number,
 ): { creditsPerCounter: number } | undefined {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   if (
@@ -875,6 +1007,10 @@ export function corpImmediateOperationEconomyConversions(
 export function corpVisibleCardEconomyWithdrawals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
+  options?: {
+    slotReleaseActionIds?: ReadonlySet<string>;
+    reservedNextTurnClicks?: number;
+  },
 ): CorpEconomyVisibleCardWithdrawalSignal[] {
   const visibleSourceCardsById = new Map<
     string,
@@ -1055,7 +1191,8 @@ export function corpVisibleCardEconomyWithdrawals(
       grossLiquidCreditGain !== admittedPayout.expectedGrossCreditGain ||
       typeof netLiquidCreditGain !== "number" ||
       !Number.isSafeInteger(netLiquidCreditGain) ||
-      netLiquidCreditGain <= projection.clickCost ||
+      (netLiquidCreditGain <= projection.clickCost &&
+        !options?.slotReleaseActionIds?.has(candidate.actionId)) ||
       grossLiquidCreditGain - projection.creditCost !== netLiquidCreditGain ||
       input.playerView.own.credits < projection.creditCost ||
       input.playerView.own.clicks < projection.clickCost
@@ -1078,6 +1215,9 @@ export function corpVisibleCardEconomyWithdrawals(
             cadence: "finite_pool",
             baselineHorizonTurns: 3,
             finitePoolCredits: remainingPoolCredits!,
+            ...(options?.reservedNextTurnClicks !== undefined
+              ? { reservedNextTurnClicks: options.reservedNextTurnClicks }
+              : {}),
             payoutCreditsPerExecution: grossLiquidCreditGain,
             payoutActionCost: projection.clickCost,
             setupCreditCost: 0,
@@ -1168,7 +1308,7 @@ export function corpImmediateOperationThresholdPreparations(
       ) {
         return [];
       }
-      const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+      const definition = planningCardFactsByDefinitionId(card.definitionId);
       const hint = AI_HINTS_BY_CARD.get(card.definitionId);
       const operationCreditCost = definition?.cost;
       if (
@@ -1237,10 +1377,13 @@ export function corpRequiredEconomyNeeds(
   immediateFundingActionIds: string[],
   terminalFundingActionIds: string[],
   candidates: readonly ActionSemanticCandidate[],
+  comparedScoreProtectionDrawIds: ReadonlySet<string> = new Set(),
 ): CorpCorePlanDomain["economyNeeds"] {
   const projectsWithCurrentProtectionSupport = new Set(
     defenseNeeds.flatMap((need) =>
       need.kind === "generic" ||
+      (need.kind === "score_protection_draw" &&
+        comparedScoreProtectionDrawIds.has(need.defenseId)) ||
       (need.kind === "score_protection_install" && need.effect === "progress")
         ? []
         : [need.parentProjectId],
@@ -1277,12 +1420,20 @@ export function corpRequiredEconomyNeeds(
               input,
               project,
               scoreProjects,
-              project.sameTurnFundingActionIds ??
-                (project.feasible &&
-                (project.sameTurnCloseout || project.terminalScore)
-                  ? terminalFundingActionIds
-                  : immediateFundingActionIds),
+              project.sameTurnFundingActionIds?.filter((id) =>
+                candidates.some((candidate) =>
+                  candidate.actionId === id &&
+                  corpCandidatePreservesVoluntaryDrawHorizon(
+                    input,
+                    candidate,
+                    corpScoreClosesBeforeMandatoryDraw(project),
+                  ),
+                ),
+              ) ?? (corpScoreClosesBeforeMandatoryDraw(project)
+                ? terminalFundingActionIds
+                : immediateFundingActionIds),
             ),
+            parentPlanModuleId: "corp.score_agenda" as const,
             parentPlanInstanceId: planInstanceIdForProposal({
               moduleId: "corp.score_agenda",
               dedupeKey: project.projectId,
@@ -1318,6 +1469,7 @@ export function corpRequiredEconomyNeeds(
         needId: need.needId,
         gap: need.minimum,
         actionIds: immediateFundingActionIds,
+        parentPlanModuleId: "corp.establish_scoring_remote" as const,
         parentPlanInstanceId: planInstanceIdForProposal({
           moduleId: "corp.establish_scoring_remote",
           dedupeKey: project.projectId,
@@ -1350,6 +1502,7 @@ export function corpRequiredEconomyNeeds(
         needId,
         gap,
         actionIds: immediateFundingActionIds,
+        parentPlanModuleId: "corp.ambush_and_bluff" as const,
         parentPlanInstanceId: planInstanceIdForProposal({
           moduleId: "corp.ambush_and_bluff",
           dedupeKey: ambush.ambushId,
@@ -1379,6 +1532,7 @@ export function corpRequiredEconomyNeeds(
         needId: route.fundingNeedId,
         gap: route.fundingGap,
         actionIds: route.fundingActionIds,
+        parentPlanModuleId: "corp.punish_campaign" as const,
         parentPlanInstanceId: planInstanceIdForProposal({
           moduleId: "corp.punish_campaign",
           dedupeKey: campaign.campaignId,

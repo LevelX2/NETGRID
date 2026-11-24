@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   PublicGameEvent,
@@ -6,8 +7,8 @@ import type {
 
 import { createAiHintsByCard } from "../ai-hints";
 import type { AiHintStructuredEffect } from "../hint-ontology";
-import { mergedPublicHistory } from "./public-event-history";
-import { rolesMatch } from "./role-match";
+import { mergedPublicHistory } from "../public-event-history";
+import { rolesMatch } from "../role-match";
 
 type CorpRemoteLike = {
   id: string;
@@ -210,7 +211,7 @@ function protectionConditionsCanBeMet(
         }
         break;
       case "requires_remote_server":
-        if (!context.serverId?.startsWith("remote_")) return false;
+        if (!isRemoteServerId(context.serverId)) return false;
         break;
       case "requires_runner_tagged":
         if ((context.runnerTags ?? 0) <= 0) return false;
@@ -280,7 +281,7 @@ function normalizeServerId(value: string | undefined): string | undefined {
   if (!value) return undefined;
   const normalized = value.trim().toLocaleLowerCase("en-US");
   const remoteMatch = normalized.match(/^remote[ _-]?(\d+)$/);
-  if (remoteMatch) return `remote_${remoteMatch[1]}`;
+  if (remoteMatch) return `r${remoteMatch[1]}`;
   return normalized;
 }
 

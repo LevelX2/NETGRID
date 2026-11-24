@@ -11,7 +11,7 @@ describe("Data Fort Reclamation sequence rez payment projection", () => {
     const cardId = state.corp.hq[0] as CardInstanceId;
     state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [cardId],
@@ -19,12 +19,12 @@ describe("Data Fort Reclamation sequence rez payment projection", () => {
     });
     state.cardInstances[cardId] = {
       ...state.cardInstances[cardId]!,
-      definitionId: "onr_proteus_013_caryatid",
+      definitionId: 71,
       owner: "corp",
       controller: "corp",
       faceup: false,
       rezzed: false,
-      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverIce", serverId: "r1" },
     };
 
     expect(projectInstalledCorpSequenceRezPayment(state, cardId, 10)).toEqual({
@@ -43,7 +43,7 @@ describe("Data Fort Reclamation sequence rez payment projection", () => {
     hq.ice.push(cardId);
     state.cardInstances[cardId] = {
       ...state.cardInstances[cardId]!,
-      definitionId: "simple_barrier_ice",
+      definitionId: 589,
       owner: "corp",
       controller: "corp",
       faceup: false,

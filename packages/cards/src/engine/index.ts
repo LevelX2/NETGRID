@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 export type * from "./definition-types";
 export {
   activatedAbilityAtTiming,
@@ -45,25 +46,19 @@ export const engineCards = (): ReturnType<typeof engineCardViews> =>
   engineCardViews(CARD_REGISTRY);
 import {
   hasCardSpecImplementation,
-  projectCardSpecDefinition,
+  projectEngineCardDefinition,
   projectCardSpecImplementation,
   projectTraceSuccessEffect,
-} from "./card-spec-compatibility-projections";
+} from "./card-spec-engine-projections";
 export { projectTraceSuccessEffect };
-export type {
-  CardSpecCardImplementation,
-  Cs06CardImplementation,
-} from "./card-spec-compatibility-projections";
-import { CS06_CARD_DEFINITION_IDS } from "../cs06-slice";
-export { CS06_CARD_DEFINITION_IDS } from "../cs06-slice";
+export type { CardSpecCardImplementation } from "./card-spec-engine-projections";
 
 const cardSpecEngineViews = engineCardViews(CARD_REGISTRY);
-const expectedCs06Ids = new Set<string>(CS06_CARD_DEFINITION_IDS);
 const cachedCardSpecSourceRefs = Object.freeze(
   CARD_SPEC_SOURCE_REFS.map((entry) => Object.freeze({ ...entry })),
 );
 const cachedCardSpecSourceRefsById = new Map<
-  string,
+  CardDefinitionId,
   (typeof cachedCardSpecSourceRefs)[number]
 >(cachedCardSpecSourceRefs.map((entry) => [entry.cardDefinitionId, entry]));
 const expectedCardSpecRuntimeDefinitionIds = Object.freeze(
@@ -81,7 +76,9 @@ const expectedCardSpecRuntimeDefinitionIds = Object.freeze(
       : [];
   }),
 );
-function hasRuntimeCardSpecImplementation(definitionId: string): boolean {
+function hasRuntimeCardSpecImplementation(
+  definitionId: CardDefinitionId,
+): boolean {
   const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
   if (spec === undefined)
     throw new Error(`card_spec_runtime_missing_spec:${definitionId}`);
@@ -113,12 +110,12 @@ const cachedCardSpecDefinitions = Object.freeze(
       engine.cardDefinitionId,
     );
     if (spec === undefined)
-      throw new Error("cs06_projection_missing_card_spec");
-    return projectCardSpecDefinition(engine, spec);
+      throw new Error("card_spec_engine_projection_missing_spec");
+    return projectEngineCardDefinition(engine, spec);
   }),
 );
 const cachedCardSpecDefinitionsById = new Map<
-  string,
+  CardDefinitionId,
   (typeof cachedCardSpecDefinitions)[number]
 >(cachedCardSpecDefinitions.map((definition) => [definition.id, definition]));
 const cachedCardSpecImplementations = Object.freeze(
@@ -129,12 +126,12 @@ const cachedCardSpecImplementations = Object.freeze(
       engine.cardDefinitionId,
     );
     if (spec === undefined)
-      throw new Error("cs06_projection_missing_card_spec");
+      throw new Error("card_spec_engine_projection_missing_spec");
     return [projectCardSpecImplementation(engine, spec)];
   }),
 );
 const cachedCardSpecImplementationsById = new Map<
-  string,
+  CardDefinitionId,
   (typeof cachedCardSpecImplementations)[number]
 >(
   cachedCardSpecImplementations.map((implementation) => [
@@ -154,54 +151,28 @@ if (
 )
   throw new Error("card_spec_implementation_partition_mismatch");
 
-export const cardSpecDefinitionById = (definitionId: string) =>
+export const cardSpecDefinitionById = (definitionId: CardDefinitionId) =>
   cachedCardSpecDefinitionsById.get(definitionId);
 export const cardSpecDefinitions = () => cachedCardSpecDefinitions;
-export const cardSpecImplementationById = (definitionId: string) =>
+export const cardSpecImplementationById = (definitionId: CardDefinitionId) =>
   cachedCardSpecImplementationsById.get(definitionId);
 export const cardSpecImplementations = () => cachedCardSpecImplementations;
-export const cardSpecSourceRefByDefinitionId = (definitionId: string) =>
-  cachedCardSpecSourceRefsById.get(definitionId);
+export const cardSpecSourceRefByDefinitionId = (
+  definitionId: CardDefinitionId,
+) => cachedCardSpecSourceRefsById.get(definitionId);
 export const cardSpecSourceRefs = () => cachedCardSpecSourceRefs;
+export function cardSpecSetIdsForDefinitionId(definitionId: CardDefinitionId) {
+  const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
+  if (spec === undefined) return undefined;
+  return Object.freeze([
+    ...new Set(spec.printings.map((printing) => printing.setId)),
+  ]);
+}
 export const cardSpecRuntimeDefinitionIds = () =>
   expectedCardSpecRuntimeDefinitionIds;
 export const cardSpecImplementationDefinitionIds = () =>
   expectedCardSpecImplementationIds;
 
-const cachedCs06Definitions = Object.freeze(
-  cachedCardSpecDefinitions.filter((entry) => expectedCs06Ids.has(entry.id)),
-);
-const cachedCs06Implementations = Object.freeze(
-  cachedCardSpecImplementations.filter((entry) =>
-    expectedCs06Ids.has(entry.cardDefinitionId),
-  ),
-);
-if (
-  cachedCs06Definitions.length !== expectedCs06Ids.size ||
-  cachedCs06Implementations.length !== expectedCs06Ids.size
-)
-  throw new Error("cs06_registry_slice_mismatch");
-
-export const cs06CardDefinitionById = (definitionId: string) =>
-  expectedCs06Ids.has(definitionId)
-    ? cachedCardSpecDefinitionsById.get(definitionId)
-    : undefined;
-export const cs06CardDefinitions = () => cachedCs06Definitions;
-export const cs06CardImplementationById = (definitionId: string) =>
-  expectedCs06Ids.has(definitionId)
-    ? cachedCardSpecImplementationsById.get(definitionId)
-    : undefined;
-export const cs06CardImplementations = () => cachedCs06Implementations;
-export const cs06CardSpecSourceRefByDefinitionId = (definitionId: string) =>
-  expectedCs06Ids.has(definitionId)
-    ? cachedCardSpecSourceRefsById.get(definitionId)
-    : undefined;
-export const cs06CardSpecSourceRefs = () =>
-  Object.freeze(
-    cachedCardSpecSourceRefs.filter((entry) =>
-      expectedCs06Ids.has(entry.cardDefinitionId),
-    ),
-  );
 export function createEngineRegistryRulesContext(
   versions: EngineRegistryVersionContext,
 ): ReturnType<typeof createRulesContextForRegistry> {

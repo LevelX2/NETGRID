@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   createGameAfterSetup,
@@ -17,6 +19,9 @@ import {
   summarizeActionSemanticCandidateCoverage,
   summarizeActionSemanticCandidateCoverageSources,
 } from "./action-semantic-coverage";
+
+const visibleAbilityKey = "store_credits";
+const visibleAbilityId = canonicalCapabilityId(366, capabilityKey(visibleAbilityKey));
 
 const ALL_ACTION_TYPES = [
   "mandatory_draw",
@@ -54,6 +59,46 @@ const ALL_ACTION_TYPES = [
 ] as const satisfies readonly LegalAction["type"][];
 
 describe("Action semantic coverage", () => {
+  it("reports unsafe rows and counts hidden-info blocking separately from schema gaps", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [legalAction("gain_credit", 0)],
+      observerSide: "system",
+      stateVersion: 108,
+    });
+    const unsafe = {
+      ...candidate!,
+      semanticActionType: "DecisionDebug",
+      projectionIssues: [],
+    };
+    const blocked = {
+      ...candidate!,
+      projectionIssues: [
+        "hidden_info_blocked",
+      ] as ActionSemanticCandidate["projectionIssues"],
+    };
+
+    expect(
+      summarizeActionSemanticCandidateCoverage([unsafe, blocked]),
+    ).toMatchObject({
+      redactionSafe: false,
+      forbiddenMarkers: ["DecisionDebug"],
+      redactionUnsafeRows: 1,
+      hiddenInfoBlockers: 1,
+      schemaGapRows: 0,
+      schemaGaps: {},
+    });
+    expect(
+      summarizeActionSemanticCandidateCoverageSources({
+        syntheticCandidates: [unsafe],
+        engineBackedCandidates: [blocked],
+      }),
+    ).toMatchObject({
+      redactionUnsafeRows: 1,
+      hiddenInfoBlockedCount: 1,
+      schemaGapCount: 0,
+    });
+  });
+
   it("projects every LegalAction type with identity, gates, visibility, cost, timing and evidence", () => {
     const actions = ALL_ACTION_TYPES.map((type, index) =>
       legalAction(type, index),
@@ -247,13 +292,13 @@ describe("Action semantic coverage", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [action],
       visibleSourceDefinitionsByInstanceId: {
-        "newsgroup-instance": "onr_v1_045_newsgroup-filter",
+        "newsgroup-instance": 257,
       },
     });
 
     expect(candidate).toMatchObject({
       sourceKind: "card",
-      sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+      sourceDefinitionId: 257,
       semanticActionType: "economy.gain_credit",
       primaryProjectionStatus: "projected",
       confidence: "high",
@@ -349,21 +394,21 @@ describe("Action semantic coverage", () => {
           source: "runner-hidden-instance",
           abilityRef: {
             sourceCardInstanceId: "runner-hidden-instance",
-            sourceAbilityId: "runner-visible-definition:visible_ability",
+            sourceAbilityId: visibleAbilityId,
           },
           payload: {
             cardId: "runner-hidden-instance",
-            sourceDefinitionId: "runner-visible-definition",
+            sourceDefinitionId: 366,
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityId:
-              "runner-visible-definition:visible_ability",
-            cardImplementationAbilityKey: "visible_ability",
+              visibleAbilityId,
+            cardImplementationAbilityKey: visibleAbilityKey,
           },
         }),
         legalAction("install_card", 5, {
           side: "corp",
           source: "corp-hidden-instance",
-          payload: { sourceDefinitionId: "corp-visible-definition" },
+          payload: { sourceDefinitionId: syntheticCardDefinitionId("corp-visible-definition") },
         }),
         legalAction("advance_card", 6, {
           side: "corp",
@@ -451,8 +496,7 @@ describe("Action semantic coverage", () => {
     expect(summary.fieldCoverage.hasEffectKind).toBe(1);
     expect(summary.hiddenInfoBlockers).toBe(1);
     expect(sourceSummary.engineBackedCandidates).toBeGreaterThan(0);
-    expect(sourceSummary.hiddenInfoLeaks).toBe(0);
-    expect(sourceSummary.legalActionGenerationChanges).toBe(0);
+    expect(sourceSummary.redactionUnsafeRows).toBe(0);
     expect(summary.schemaGaps).toMatchObject({
       target_context_unavailable: 6,
     });
@@ -585,9 +629,9 @@ function coverageReportFixtureCandidates(): ActionSemanticCandidate[] {
         visibility: "private_to_actor",
         payload: {
           sourceCardId: "runner-hidden-instance",
-          sourceDefinitionId: "onr_proteus_136_credit-subversion",
+          sourceDefinitionId: 194,
           cardImplementationAbilityId:
-            "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+            "194:successful_run_before_access:0",
           cardImplementationAbilityKey: "successful_run_before_access:0",
           cardImplementationPrimitiveKind:
             "successful_run_before_access_effect",
@@ -599,21 +643,21 @@ function coverageReportFixtureCandidates(): ActionSemanticCandidate[] {
         source: "runner-hidden-instance",
         abilityRef: {
           sourceCardInstanceId: "runner-hidden-instance",
-          sourceAbilityId: "runner-visible-definition:visible_ability",
+          sourceAbilityId: visibleAbilityId,
         },
         payload: {
           cardId: "runner-hidden-instance",
-          sourceDefinitionId: "runner-visible-definition",
+          sourceDefinitionId: 366,
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityId:
-            "runner-visible-definition:visible_ability",
-          cardImplementationAbilityKey: "visible_ability",
+            visibleAbilityId,
+          cardImplementationAbilityKey: visibleAbilityKey,
         },
       }),
       legalAction("install_card", 6, {
         side: "corp",
         source: "corp-hidden-instance",
-        payload: { sourceDefinitionId: "corp-visible-definition" },
+        payload: { sourceDefinitionId: syntheticCardDefinitionId("corp-visible-definition") },
       }),
       legalAction("advance_card", 7, {
         side: "corp",
@@ -705,13 +749,6 @@ function coverageReportArtifact(
         unsafeRows: summary.redactionUnsafeRows,
         forbiddenMarkers: summary.forbiddenMarkers,
       },
-    },
-    gates: {
-      deterministic: true,
-      hiddenInfoLeaks: summary.redactionSafe ? 0 : summary.redactionUnsafeRows,
-      runtimeBehaviorChanges: 0,
-      actionSelectionChanges: 0,
-      legalActionGenerationChanges: 0,
     },
     noEffectFlags: [
       "no_runtime_scoring",

@@ -1,4 +1,4 @@
-import type { CardSpecPlanningCompatibilityCard } from "@netgrid/cards/planning";
+import type { PlanningCardView } from "@netgrid/cards/planning";
 import type { VisibleCard } from "@netgrid/shared";
 
 export type RunnerAccessTrashImpactClass =
@@ -11,7 +11,7 @@ export type RunnerAccessTrashImpactClass =
   | "other_visible_impact";
 
 export type RunnerAccessTrashImpactAssessment = Readonly<{
-  targetDefinitionId: string;
+  targetDefinitionId: number;
   trashCost: number;
   dedicatedTrashCredits: number;
   generalCreditCost: number;
@@ -34,7 +34,7 @@ export type RunnerAccessTrashImpactAssessment = Readonly<{
 
 /** Pure canonical projection entry point used by generic fixtures and runtime. */
 export function assessRunnerAccessTrashImpactFromPlanningCard(params: {
-  planningCard: CardSpecPlanningCompatibilityCard;
+  planningCard: PlanningCardView;
   accessed: Pick<
     VisibleCard,
     "known" | "definitionId" | "counters" | "advancementCounters"
@@ -46,7 +46,7 @@ export function assessRunnerAccessTrashImpactFromPlanningCard(params: {
   economyReserve: number;
   parentReservedCredits?: number;
 }): RunnerAccessTrashImpactAssessment | undefined {
-  const { planning } = params.planningCard;
+  const planning = params.planningCard;
   if (
     planning.side !== "corp" ||
     params.accessed.known !== true ||
@@ -158,7 +158,7 @@ export function assessRunnerAccessTrashImpactFromPlanningCard(params: {
 }
 
 function canonicalVisibleImpactFacts(
-  card: CardSpecPlanningCompatibilityCard,
+  card: PlanningCardView,
   accessed: Pick<
     VisibleCard,
     "known" | "definitionId" | "counters" | "advancementCounters"
@@ -176,7 +176,7 @@ function canonicalVisibleImpactFacts(
   uncertainVisibleImpact: boolean;
   impactClasses: RunnerAccessTrashImpactClass[];
 } {
-  const capabilities = card.planning.prospectiveCapabilities.capabilities;
+  const capabilities = card.prospectiveCapabilities.capabilities;
   const finiteStoredEconomy = capabilities.some((capability) =>
     capability.descriptors.some(
       (descriptor) =>
@@ -235,7 +235,7 @@ function canonicalVisibleImpactFacts(
     }),
     0,
   );
-  const annotations = card.planning.planningAnnotations?.card ?? [];
+  const annotations = card.planningAnnotations?.card ?? [];
   const remoteRole = annotations.find(
     (annotation) => annotation.kind === "remote_role",
   );
@@ -328,16 +328,16 @@ function canonicalVisibleImpactFacts(
 }
 
 function exactProspectiveRezCost(
-  card: CardSpecPlanningCompatibilityCard,
+  card: PlanningCardView,
 ): number {
-  const cost = card.definition.rezCost;
+  const cost = card.engine.characteristics.numeric.rezCost;
   if (typeof cost !== "number" || !Number.isFinite(cost) || cost < 0) {
     throw Object.assign(
       new Error("runner_access_trash_missing_prospective_rez_cost"),
       {
         code: "runner_access_trash_missing_prospective_rez_cost",
         ownerPath: "access/runner-access-trash-impact.ts",
-        cardDefinitionId: card.planning.cardDefinitionId,
+        cardDefinitionId: card.cardDefinitionId,
       },
     );
   }
@@ -345,7 +345,7 @@ function exactProspectiveRezCost(
 }
 
 function maximumAmountForKinds(
-  descriptors: CardSpecPlanningCompatibilityCard["planning"]["prospectiveCapabilities"]["capabilities"][number]["descriptors"],
+  descriptors: PlanningCardView["prospectiveCapabilities"]["capabilities"][number]["descriptors"],
   kinds: readonly string[],
 ): number {
   const kindSet = new Set(kinds);

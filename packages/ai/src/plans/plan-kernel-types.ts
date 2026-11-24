@@ -174,6 +174,8 @@ export type PlanInstance = {
 };
 
 export type PlanInstanceStateIssue =
+  | "incomplete_instance_state"
+  | "noncanonical_instance_id"
   | "module_side_mismatch"
   | "blank_dedupe_key"
   | "blank_phase"
@@ -186,4 +188,5 @@ export type PlanInstanceStateIssue =
   | "terminal_plan_has_commitment"
   | "blocked_plan_without_blocker"
   | "ready_plan_has_blocker"
-  | "invalid_state_version_order";
+  | "invalid_state_version_order"
+  | "invalid_retention_policy";

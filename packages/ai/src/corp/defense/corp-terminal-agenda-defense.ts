@@ -1,10 +1,11 @@
 import { visibleRunnerHeapBreakerPreparations } from "../../runtime/corp-public-heap-breaker-preparation";
-import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import {
   visibleFortPassProtection,
+  visibleRunnerNextTurnPreparationCreditGain,
   visibleRunnerPreparationIncomePerClick,
 } from "@netgrid/engine";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { visibleRunnerRunOnlyCredits } from "../../run-analysis/visible-run-credit-budget";
 import {
   assessBestFundedCorpScoreProtection,
@@ -25,7 +26,7 @@ export type CorpTerminalAgendaDefense = Readonly<{
   install?: Readonly<{
     actionId: string;
     sourceCardInstanceId: string;
-    sourceDefinitionId: string;
+    sourceDefinitionId: number;
     placement: "ice" | "root";
     credits: number;
     clicks: number;
@@ -60,7 +61,7 @@ export function assessCorpTerminalAgendaDefense(
         action.type === "gain_credit" &&
         action.source === "basic_action" &&
         action.payload?.gainCreditsAmount === 1 &&
-        action.expiresAtStateVersion === view.stateVersion &&
+        actionMatchesCurrentDecision(input, action) &&
         exactCost(action, "clicks") === 1 &&
         exactCost(action, "credits") === 0,
     );
@@ -154,8 +155,7 @@ export function assessCorpTerminalAgendaDefense(
     if (
       !canPrepare ||
       action.type !== "install_card" ||
-      action.side !== "corp" ||
-      action.expiresAtStateVersion !== view.stateVersion ||
+      !actionMatchesCurrentDecision(input, action) ||
       action.payload?.serverId !== serverId ||
       action.targetRequirements.length > 0 ||
       (action.choiceRequirements?.length ?? 0) > 0 ||

@@ -26,7 +26,7 @@ it("keeps the paid Asp avoidance cost but removes its prevented residual risk un
   );
   expect(Object.values(checkpoint.validation)).toEqual(Array(9).fill(true));
   const rd = evaluateRunnerRunTargets({ input }).find(
-    (x) => x.actionId === "runner.start_run.rd",
+    (x) => x.actionId === "rs.rd",
   )!;
   expect(rd.routeQuote).toMatchObject({
     reachability: "guaranteed_access",
@@ -38,12 +38,12 @@ it("keeps the paid Asp avoidance cost but removes its prevented residual risk un
   expect(rd.score).toBeGreaterThan(0);
   const chosen = chooseAiAction(input);
   expect(chosen.actionId).toBe(
-    "runner.install_card.runner_onr_v1_129_hq-interface_2.runner_onr_v1_129_hq-interface_2",
+    "rc.c23u.c23u",
   );
   expect(chosen.fallbackUsed).toBe(false);
   expect(chosen.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
-    leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+    rootPlanInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
+    leafExecutorInstanceId: "pa7nez1ioecg7mf06q1uwqq57o",
     selectedPlan: { moduleId: "runner.pressure_central" },
     route: {
       actionId: chosen.actionId,
@@ -69,7 +69,7 @@ it.each(["credits", "coverage"] as const)(
         throw new Error("native_checkpoint_requires_runner_rig_and_memory");
       }
       input.playerView.own.rig = rig.filter(
-        (c) => c.definitionId !== "onr_v1_040_loony-goon",
+        (c) => c.definitionId !== 252,
       );
       input.playerView.own.memoryUsed = memoryUsed - 1;
     }
@@ -79,12 +79,12 @@ it.each(["credits", "coverage"] as const)(
       cp.runtime,
     );
     const rd = evaluateRunnerRunTargets({ input }).find(
-      (x) => x.actionId === "runner.start_run.rd",
+      (x) => x.actionId === "rs.rd",
     )!;
     expect(rd.routeQuote?.reachability).not.toBe("guaranteed_access");
     expect(rd.visibleIceHazardPenalty).toBeGreaterThan(0);
     const chosen = chooseAiAction(input);
-    expect(chosen.actionId).not.toBe("runner.start_run.rd");
+    expect(chosen.actionId).not.toBe("rs.rd");
     expect(chosen.fallbackUsed).toBe(false);
   },
 );

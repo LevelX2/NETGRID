@@ -53,15 +53,15 @@ writeFileSync(
 // Two predeclared candidates. Both preserve every named thematic core card,
 // all agendas and the complete set of Node/Region/punish functions.
 const economy = [
-  { cardId: "onr_proteus_054_bel-digmo-antibody", delta: -1 },
-  { cardId: "onr_proteus_075_stereogram-antibody", delta: -1 },
-  { cardId: "onr_v1_281_accounts-receivable", delta: 2 },
+  { cardId: 112, delta: -1 },
+  { cardId: 133, delta: -1 },
+  { cardId: 493, delta: 2 },
 ];
 const balanced = [
   ...economy,
-  { cardId: "onr_proteus_017_credit-blocks", delta: -1 },
-  { cardId: "onr_proteus_040_sumo-2008", delta: -1 },
-  { cardId: "onr_v1_237_data-wall", delta: 2 },
+  { cardId: 75, delta: -1 },
+  { cardId: 98, delta: -1 },
+  { cardId: 449, delta: 2 },
 ];
 for (const [label, changes] of [
   ["economy", economy],

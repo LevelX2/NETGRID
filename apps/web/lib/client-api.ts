@@ -1,15 +1,8 @@
-import type {
-  ApiCreateMatchResponse,
-  ApiJoinMatchResponse,
-  ApiLobbyPayload,
-  ApiPersonalRecentResults,
-  ApiPublicMatchListEntry,
-  ApiSidePayload,
-  LegalAction,
-  Side,
-} from "@netgrid/shared";
+import type { ApiCreateMatchResponse, ApiJoinMatchResponse, ApiLobbyPayload, ApiPersonalRecentResults, ApiPublicMatchListEntry, ApiSidePayload, Side } from "@netgrid/shared";
+import type { LegalAction } from "./presented-player-view";
 
 import {
+  buildMaintenanceAiTraceDetailPath,
   buildMaintenanceAiTraceEnablePath,
   buildMaintenanceAiTraceIndexPath,
   findForbiddenMaintenanceMarkers,
@@ -35,6 +28,7 @@ export type AiDecisionPreview = {
   side: Side;
   generatedAt: string;
   actionId: string;
+  actionOfferId: number;
   actionType: LegalAction["type"];
   actionLabel: string;
   reasonCode: string;
@@ -87,8 +81,6 @@ export function fromInitialResponse(
     isPublic: response.isPublic,
     side,
     playerView: response.playerView,
-    legalActions: response.legalActions,
-    eventTail: response.playerView.publicEvents,
     opponentStatus: {
       side: side === "runner" ? "corp" : "runner",
       connected: response.mode !== "human_vs_human",
@@ -117,8 +109,6 @@ export function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
     isPublic: response.isPublic,
     side: response.side,
     playerView: response.playerView,
-    legalActions: response.legalActions,
-    eventTail: response.eventTail ?? response.playerView.publicEvents,
     opponentStatus: {
       side: response.side === "runner" ? "corp" : "runner",
       connected: false,
@@ -342,12 +332,13 @@ export async function fetchAiDecisionDebugTraceIndex(
 }
 
 export async function fetchAiDecisionDebugTraceDetail(
-  traceId: string,
+  matchId: string,
+  decisionIndex: number,
 ): Promise<MaintenanceAiTraceDetail> {
   let response: Response;
   try {
     response = await fetch(
-      `${configuredServerHttp()}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`,
+      `${configuredServerHttp()}${buildMaintenanceAiTraceDetailPath(matchId, decisionIndex)}`,
       { cache: "no-store" },
     );
   } catch {

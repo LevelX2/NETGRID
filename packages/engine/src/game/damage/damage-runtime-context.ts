@@ -1,3 +1,4 @@
+import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -104,7 +105,7 @@ export type DamageCoreHost = {
     spend: (state: GameState, side: "corp" | "runner", amount: number) => void;
   };
   rng: {
-    nextRandom: (state: GameState, purpose: string) => number;
+    nextRandom: (state: GameState, purpose: RandomPurpose) => number;
   };
   reactions?: {
     openPostMeatDamageReactionWindow: (
@@ -274,7 +275,7 @@ export function spendCredits(
   requireDamageCoreHost().credits.spend(state, side, amount);
 }
 
-export function nextRandom(state: GameState, purpose: string): number {
+export function nextRandom(state: GameState, purpose: RandomPurpose): number {
   return requireDamageCoreHost().rng.nextRandom(state, purpose);
 }
 
@@ -403,7 +404,7 @@ export function hiddenRunnerResourceRevealPayload(
   return {
     hiddenRunnerResource: true,
     hiddenRunnerResourceRevealed: true,
-    hiddenResourceSlotId: hiddenRunnerResourceSlotId(cardId),
+    hiddenResourceSlotId: hiddenRunnerResourceSlotId(state, cardId),
     publicRevealDefinitionId: definition.id,
   };
 }

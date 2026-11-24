@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_157_crash-everett-inventive-fixer",
+      369,
     ),
     title: "Crash Everett, Inventive Fixer",
     side: "runner",

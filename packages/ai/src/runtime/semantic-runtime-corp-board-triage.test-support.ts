@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -67,7 +68,7 @@ export function testDependencies(
       action: LegalAction,
     ) => boolean;
   } = {},
-): CorpBoardTriageDependencies<"test"> {
+): CorpBoardTriageDependencies {
   return {
     actionCreditCost: options.actionCreditCost ?? (() => 0),
     rolesForAction: () => [],
@@ -90,7 +91,7 @@ export function scoringWindow(
   overrides: Partial<CorpScoringWindowAssessment>,
 ): CorpScoringWindowAssessment {
   return {
-    serverId: "remote_1",
+    serverId: "r1",
     windowKind: "unsafe",
     runnerCanContestNow: true,
     runnerCanReachAccessNow: true,
@@ -156,7 +157,7 @@ export function centralServer(
 }
 
 export function remoteServer(
-  id: `remote_${number}`,
+  id: `r${number}`,
   ice: readonly VisibleCard[],
   root: readonly VisibleCard[] = [],
 ): AiDecisionInput["playerView"]["servers"][number] {
@@ -184,8 +185,8 @@ export function iceCard(
   instanceId: string,
   overrides: Partial<VisibleCard> = {},
 ): VisibleCard {
-  const definitionId = overrides.definitionId ?? "simple_barrier_ice";
-  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+  const definitionId = overrides.definitionId ?? 589;
+  const definition = planningCardFactsByDefinitionId(definitionId);
   return {
     instanceId,
     known: true,
@@ -239,7 +240,7 @@ function bindEngineInstallQuotes(
         postInstallRezQuoteCardId: sourceCard.instanceId,
         postInstallRezQuoteTargetServerId: serverId,
         postInstallRezQuoteProjectedServerId:
-          serverId === "new_remote" ? "remote_1" : serverId,
+          serverId === "new_remote" ? "r1" : serverId,
         postInstallRezQuoteExpiresAtStateVersion: stateVersion,
         postInstallRezQuoteComplete: true,
         postInstallRezQuoteBaseCredits: sourceCard.rezCost,
@@ -256,7 +257,7 @@ export function assetCard(instanceId: string): VisibleCard {
     known: true,
     type: "asset",
     owner: "corp",
-    definitionId: "support_asset",
+    definitionId: syntheticCardDefinitionId("support_asset"),
   } as VisibleCard;
 }
 
@@ -279,7 +280,7 @@ export function earlyWormBreaker(): VisibleCard {
     type: "program",
     owner: "runner",
     title: "Early Worm",
-    definitionId: "onr_classic_027_early-worm",
+    definitionId: 31,
     subtypes: ["Icebreaker", "Worm"],
   } as VisibleCard;
 }
@@ -297,16 +298,18 @@ export function fracterBreaker(): VisibleCard {
 }
 
 export function publicCentralEvent(
-  eventId: string,
+  eventLabel: `${"hq" | "rd"}-${"run" | "access"}-${number}`,
   actionType: "start_run" | "access_card",
   serverId: "hq" | "rd",
 ): AiDecisionInput["eventTail"][number] {
+  const runNumber = Number(eventLabel.slice(eventLabel.lastIndexOf("-") + 1));
+  const stateVersionAfter = runNumber * 2 - (actionType === "start_run" ? 1 : 0);
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
-    stateVersionBefore: 1,
-    stateVersionAfter: 2,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventLabel}`,
     visibilityClass: "public",
     publicPayload: {
       actor: "runner",

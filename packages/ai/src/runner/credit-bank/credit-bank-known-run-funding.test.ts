@@ -12,9 +12,10 @@ import {
 } from "../../runner-run-target-evaluation";
 import { assessRunnerRunFundingAdmission } from "../../runtime/runner-run-funding-admission";
 import { creditBankFundsKnownUrgentRun } from "./credit-bank-known-run-funding";
+import { runnerCreditBankRunFundingClickCapacity } from "./credit-bank-basic-run-funding";
 
 function params() {
-  const fixture = structuredClone(cp) as AiDecisionCheckpointV1;
+  const fixture = structuredClone(cp) as unknown as AiDecisionCheckpointV1;
   const state = fixture.engine.testOnlyGameState;
   state.eventLog = structuredClone(fixture.engine.eventPrefix);
   const input = buildAiDecisionInput(state, "runner", {
@@ -34,7 +35,7 @@ function params() {
   const economy = buildRunnerEconomyPosture({ input });
   const targets = evaluateRunnerRunTargets({ input });
   const target = targets.find(
-    (entry) => entry.actionId === "runner.start_run.remote_1",
+    (entry) => entry.actionId === "rs.r1",
   )!;
   const admission = assessRunnerRunFundingAdmission({
     input,
@@ -76,8 +77,8 @@ it("quotes the complete funded payoff before rejecting an unfunded negative-scor
   const route = creditBankFundsKnownUrgentRun(p);
   expect(JSON.stringify(p)).toBe(before);
   expect(route?.runFunding).toMatchObject({
-    parentPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-    runActionId: "runner.start_run.remote_1",
+    parentPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+    runActionId: "rs.r1",
     stateVersion: p.input.playerView.stateVersion,
     routeAssessment: {
       status: "covered_guaranteed",
@@ -127,4 +128,24 @@ it("retains the run click and requires an admitted parent", () => {
   p.input.playerView.own.clicks = 4;
   p.admission.admitted = false;
   expect(creditBankFundsKnownUrgentRun(p)).toBeUndefined();
+});
+
+it("reserves the actual number of clicks for the current target run", () => {
+  const { input, target } = params();
+  const action = input.legalActions.find(
+    (offer) => offer.actionId === target.actionId,
+  )!;
+  input.playerView.own.clicks = 2;
+  action.costs = [];
+  expect(runnerCreditBankRunFundingClickCapacity(input, target.actionId)).toBe(
+    2,
+  );
+  action.costs = [{ clicks: 2 }];
+  expect(runnerCreditBankRunFundingClickCapacity(input, target.actionId)).toBe(
+    0,
+  );
+  action.expiresAtStateVersion--;
+  expect(
+    runnerCreditBankRunFundingClickCapacity(input, target.actionId),
+  ).toBeUndefined();
 });

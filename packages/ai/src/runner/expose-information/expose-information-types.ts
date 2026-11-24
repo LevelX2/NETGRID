@@ -1,12 +1,13 @@
+import type { RunId } from "@netgrid/shared";
 export type RunnerExposeInformationSignal = {
   kind: "run_window" | "proactive";
   informationId: string;
   rootPlanInstanceId?: string;
   parentPlanInstanceId?: string;
   serverId?: string;
-  runId?: string;
+  runId?: RunId;
   sourceCardInstanceId: string;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: number;
   targetIceInstanceId?: string;
   targetPositionKeys?: string[];
   phase:

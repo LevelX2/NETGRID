@@ -1,4 +1,5 @@
 import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
+import { exactBasicLiquidCreditCandidate } from "../../actions/action-candidate-facts";
 import { corpEconomyCandidateHasExecutablePayload } from "../economy/economy-routes";
 import type { CorpEconomyNeedSignal } from "../economy/economy-types";
 import type {
@@ -15,6 +16,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import type { PriorityClass } from "../../plans/plan-assessment";
 import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { compactCampaignId, defenseCampaignIdentity } from "../../plans/compact-plan-identity";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 import { hasExactNonNegativeCostProfile } from "../../runtime/exact-action-cost-facts";
@@ -116,12 +118,12 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
   const productiveExists = genericInstalls.some(
     (signal) =>
       signal.installRoute?.disposition === "productive" &&
-      exactInstallCandidate(params.candidates, signal) !== undefined,
+      exactInstallCandidate(params, signal) !== undefined,
   );
   const rejected: CorpDefenseTurnPlanningSlice["rejected"] = [];
   const lines = genericInstalls.flatMap((signal) => {
     const route = signal.installRoute!;
-    const installCandidate = exactInstallCandidate(params.candidates, signal);
+    const installCandidate = exactInstallCandidate(params, signal);
     if (!installCandidate) {
       rejected.push({
         defenseId: signal.defenseId,
@@ -130,12 +132,33 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       });
       return [];
     }
-    const fundingNeed = exactFundingNeed(
-      params.input,
-      signal,
-      params.economyNeeds,
-      params.candidates,
-    );
+    const fundingSignal = exactDefenseFundingNeed(signal, params.economyNeeds);
+    const fundingAlternatives = fundingSignal
+      ? params.candidates.flatMap((candidate) => {
+          const quote = exactDefenseFundingQuote(
+            params.input,
+            candidate,
+            fundingSignal,
+          );
+          return quote ? [{ candidate, ...quote }] : [];
+        })
+      : [];
+    const fundingHead =
+      fundingSignal &&
+      fundingAlternatives
+        .filter(
+          ({ gain, clickCost }) =>
+            gain >= fundingSignal.gap &&
+            clickCost + route.projection.installClicks <=
+              params.input.playerView.own.clicks,
+        )
+        .sort((left, right) =>
+          left.candidate.actionId.localeCompare(right.candidate.actionId),
+        )[0];
+    const fundingNeed =
+      fundingSignal && fundingHead
+        ? { signal: fundingSignal, candidate: fundingHead.candidate }
+        : undefined;
     if (
       route.disposition === "productive" &&
       !route.projection.funded &&
@@ -171,12 +194,7 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       input: params.input,
       signal,
       productiveAlternativeExists: productiveExists,
-      fundingAlternativeExists: hasExactFundingAlternative(
-        params.input,
-        signal,
-        params.economyNeeds,
-        params.candidates,
-      ),
+      fundingAlternativeExists: fundingAlternatives.length > 0,
     });
     if (!staging.admissible) {
       rejected.push({
@@ -194,10 +212,7 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
     ];
   });
   for (const signal of scoreProtectionStagingInstalls) {
-    const installCandidate = exactScoreProtectionStagingCandidate(
-      params.candidates,
-      signal,
-    );
+    const installCandidate = exactBoundDefenseInstallCandidate(params, signal);
     if (!installCandidate) {
       rejected.push({
         defenseId: signal.defenseId,
@@ -211,10 +226,7 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
     );
   }
   for (const signal of scoreProtectionInstalls) {
-    const installCandidate = exactScoreProtectionInstallCandidate(
-      params.candidates,
-      signal,
-    );
+    const installCandidate = exactBoundDefenseInstallCandidate(params, signal);
     if (!installCandidate) {
       rejected.push({
         defenseId: signal.defenseId,
@@ -261,15 +273,20 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
   }
   for (const signal of params.defenseNeeds) {
     if (signal.kind !== "score_protection_terminal_install") continue;
-    const candidate = params.candidates.find(
-      (entry) => entry.actionId === signal.actionId,
-    );
     const quote = assessCorpTerminalAgendaDefense(
       params.input,
       signal.serverId,
       signal.parentProjectId,
     );
-    if (!candidate || quote?.install?.actionId !== signal.actionId) {
+    const install = quote?.install;
+    const candidate =
+      install?.actionId === signal.actionId
+        ? exactBoundDefenseInstallCandidate(params, {
+            ...install,
+            serverId: signal.serverId,
+          })
+        : undefined;
+    if (!candidate || !quote) {
       rejected.push({
         defenseId: signal.defenseId,
         actionId: signal.actionId,
@@ -277,7 +294,11 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       });
       continue;
     }
-    const invocation = invocationFor(params.stateIdentity, candidate);
+    const invocation = invocationFor(
+      params.stateIdentity,
+      candidate,
+      signal.serverId,
+    );
     const lineId = turnPlanningFingerprint("terminal-defense-line", {
       defenseId: signal.defenseId,
       invocation,
@@ -302,7 +323,7 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
         beforeProbability.numerator / beforeProbability.denominator -
           probability.numerator / probability.denominator,
       );
-    const campaignId = "campaign:corp.defend_servers";
+    const campaignId = compactCampaignId(defenseCampaignIdentity());
     lines.push({
       lineId,
       defenseId: signal.defenseId,
@@ -410,31 +431,49 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
   };
 }
 
-function exactScoreProtectionStagingCandidate(
-  candidates: readonly ActionSemanticCandidate[],
-  signal: CorpScoreProtectionStagingInstallSignal,
+function exactBoundDefenseInstallCandidate(
+  params: {
+    input: AiDecisionInput;
+    candidates: readonly ActionSemanticCandidate[];
+  },
+  binding: {
+    actionId: string;
+    sourceCardInstanceId: string;
+    sourceDefinitionId: number;
+    serverId: string;
+    placement?: "ice" | "root";
+  },
 ): ActionSemanticCandidate | undefined {
-  return candidates.find(
-    (candidate) =>
-      candidate.actionId === signal.actionId &&
-      candidate.semanticActionType === "install.card" &&
-      candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
-      candidate.sourceDefinitionId === signal.sourceDefinitionId &&
-      candidateTargetIds(candidate).includes(signal.serverId),
+  const action = params.input.legalActions.find(
+    (entry) => entry.actionId === binding.actionId,
   );
-}
-
-function exactScoreProtectionInstallCandidate(
-  candidates: readonly ActionSemanticCandidate[],
-  signal: CorpScoreProtectionInstallSignal,
-): ActionSemanticCandidate | undefined {
-  return candidates.find(
+  if (
+    action?.type !== "install_card" ||
+    action.side !== "corp" ||
+    action.timingPoint !== params.input.playerView.timingPoint ||
+    action.expiresAtStateVersion !== params.input.playerView.stateVersion ||
+    action.source !== binding.sourceCardInstanceId ||
+    action.payload?.placement !== (binding.placement ?? "ice") ||
+    action.payload.cardId !== binding.sourceCardInstanceId ||
+    action.payload.serverId !== binding.serverId
+  )
+    return undefined;
+  return params.candidates.find(
     (candidate) =>
-      candidate.actionId === signal.actionId &&
+      candidate.actionId === binding.actionId &&
       candidate.semanticActionType === "install.card" &&
-      candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
-      candidate.sourceDefinitionId === signal.sourceDefinitionId &&
-      candidateTargetIds(candidate).includes(signal.serverId),
+      candidate.sourceCardInstanceId === binding.sourceCardInstanceId &&
+      candidate.sourceDefinitionId === binding.sourceDefinitionId &&
+      candidate.targetContext?.selectedTargets.some(
+        (target) =>
+          target.targetKind === "server" &&
+          target.targetId === binding.serverId,
+      ) === true &&
+      candidate.targetContext.selectedTargets.every(
+        (target) =>
+          target.targetKind !== "server" ||
+          target.targetId === binding.serverId,
+      ),
   );
 }
 
@@ -451,115 +490,79 @@ function exactScoreProtectionDrawCandidate(
 }
 
 function exactInstallCandidate(
-  candidates: readonly ActionSemanticCandidate[],
+  params: Parameters<typeof exactBoundDefenseInstallCandidate>[0],
   signal: CorpGenericDefenseSignal,
 ): ActionSemanticCandidate | undefined {
-  const route = signal.installRoute;
-  if (!route) return undefined;
-  return candidates.find(
-    (candidate) =>
-      candidate.actionId === route.projection.actionId &&
-      candidate.semanticActionType === "install.card" &&
-      candidate.sourceCardInstanceId ===
-        route.projection.sourceCardInstanceId &&
-      candidate.sourceDefinitionId === route.projection.sourceDefinitionId &&
-      candidateTargetIds(candidate).includes(signal.serverId),
-  );
+  const projection = signal.installRoute?.projection;
+  if (!projection || projection.targetServerId !== signal.serverId)
+    return undefined;
+  return exactBoundDefenseInstallCandidate(params, {
+    actionId: projection.actionId,
+    sourceCardInstanceId: projection.sourceCardInstanceId,
+    sourceDefinitionId: projection.sourceDefinitionId,
+    serverId: signal.serverId,
+  });
 }
 
-function exactFundingNeed(
-  input: AiDecisionInput,
+type ParentFunding = Extract<CorpEconomyNeedSignal, { kind: "parent_funding" }>;
+
+function exactDefenseFundingNeed(
   signal: CorpGenericDefenseSignal,
   economyNeeds: readonly CorpEconomyNeedSignal[],
-  candidates: readonly ActionSemanticCandidate[],
-):
-  | {
-      signal: Extract<CorpEconomyNeedSignal, { kind: "parent_funding" }>;
-      candidate: ActionSemanticCandidate;
-    }
-  | undefined {
+): ParentFunding | undefined {
   const projection = signal.installRoute?.projection;
   if (!projection) return undefined;
   const gap =
     projection.after.minimumAdditionalCreditsToSatisfy ??
     signal.installRoute?.rezFundingGap;
-  if (gap === undefined) return undefined;
+  if (!Number.isSafeInteger(gap) || gap! <= 0) return undefined;
   const expectedNeedId = `defense-reserve:${signal.serverId}:${projection.sourceCardInstanceId}`;
-  const funding = economyNeeds.find(
-    (
-      need,
-    ): need is Extract<CorpEconomyNeedSignal, { kind: "parent_funding" }> =>
+  return economyNeeds.find(
+    (need): need is ParentFunding =>
       need.kind === "parent_funding" &&
       need.needId === expectedNeedId &&
       need.gap === gap &&
       need.parentPlanInstanceId ===
-        "plan:corp.defend_servers:server-defense-portfolio" &&
+        "penw02zfrkklof54c2nuye5att" &&
       need.parentNeedId === signal.defenseId &&
       need.immediateDefenseConversion === true &&
       need.incrementalDefenseReserve?.serverId === signal.serverId &&
       need.incrementalDefenseReserve.iceInstanceId ===
         projection.sourceCardInstanceId,
   );
-  if (!funding) return undefined;
-  const candidate = candidates
-    .filter(
-      (entry) =>
-        funding.actionIds.includes(entry.actionId) &&
-        entry.semanticActionType === "economy.gain_credit" &&
-        entry.economyProjection?.kind === "immediate_liquid" &&
-        entry.economyProjection.timing === "immediate" &&
-        entry.economyProjection.creditRestriction === "general" &&
-        corpEconomyCandidateHasExecutablePayload(input, entry) &&
-        typeof entry.economyProjection.clickCost === "number" &&
-        Number.isSafeInteger(entry.economyProjection.clickCost) &&
-        entry.economyProjection.clickCost >= 0 &&
-        entry.economyProjection.clickCost + projection.installClicks <=
-          input.playerView.own.clicks &&
-        (entry.economyProjection?.netLiquidCreditGain ?? 0) >= funding.gap,
-    )
-    .sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
-  return candidate ? { signal: funding, candidate } : undefined;
 }
 
-function hasExactFundingAlternative(
+function exactDefenseFundingQuote(
   input: AiDecisionInput,
-  signal: CorpGenericDefenseSignal,
-  economyNeeds: readonly CorpEconomyNeedSignal[],
-  candidates: readonly ActionSemanticCandidate[],
-): boolean {
-  const projection = signal.installRoute?.projection;
-  const gap =
-    projection?.after.minimumAdditionalCreditsToSatisfy ??
-    signal.installRoute?.rezFundingGap;
-  if (!projection || gap === undefined) return false;
-  const expectedNeedId = `defense-reserve:${signal.serverId}:${projection.sourceCardInstanceId}`;
-  const funding = economyNeeds.find(
-    (need) =>
-      need.kind === "parent_funding" &&
-      need.needId === expectedNeedId &&
-      need.gap === gap &&
-      need.parentPlanInstanceId ===
-        "plan:corp.defend_servers:server-defense-portfolio" &&
-      need.parentNeedId === signal.defenseId &&
-      need.immediateDefenseConversion === true &&
-      need.incrementalDefenseReserve?.serverId === signal.serverId &&
-      need.incrementalDefenseReserve.iceInstanceId ===
-        projection.sourceCardInstanceId,
-  );
-  return (
-    funding?.actionIds.some((actionId) =>
-      candidates.some(
-        (candidate) =>
-          candidate.actionId === actionId &&
-          candidate.semanticActionType === "economy.gain_credit" &&
-          candidate.economyProjection?.kind === "immediate_liquid" &&
-          candidate.economyProjection.timing === "immediate" &&
-          candidate.economyProjection.creditRestriction === "general" &&
-          corpEconomyCandidateHasExecutablePayload(input, candidate) &&
-          (candidate.economyProjection.netLiquidCreditGain ?? 0) > 0,
-      ),
-    ) === true
-  );
+  candidate: ActionSemanticCandidate,
+  funding: ParentFunding,
+): { gain: number; clickCost: number } | undefined {
+  const projection = candidate.economyProjection;
+  const gain = projection?.netLiquidCreditGain;
+  const clickCost = projection?.clickCost;
+  if (
+    !funding.actionIds.includes(candidate.actionId) ||
+    candidate.semanticActionType !== "economy.gain_credit" ||
+    projection?.kind !== "immediate_liquid" ||
+    projection.timing !== "immediate" ||
+    projection.creditRestriction !== "general" ||
+    projection.reliability !== "guaranteed" ||
+    typeof clickCost !== "number" ||
+    !Number.isSafeInteger(clickCost) ||
+    clickCost < 0 ||
+    clickCost > input.playerView.own.clicks ||
+    typeof gain !== "number" ||
+    !Number.isSafeInteger(gain) ||
+    gain <= 0 ||
+    !(
+      (projection.source === "legal_action_payload" &&
+        projection.confidence === "high") ||
+      exactBasicLiquidCreditCandidate(candidate)
+    ) ||
+    !corpEconomyCandidateHasExecutablePayload(input, candidate)
+  )
+    return undefined;
+  return { gain, clickCost };
 }
 
 function createDefenseLine(
@@ -615,7 +618,11 @@ function createDefenseLine(
       candidate === fundingCandidate
         ? fundingPlanInstanceId!
         : defensePlanInstanceId;
-    const invocation = invocationFor(params.stateIdentity, candidate);
+    const invocation = invocationFor(
+      params.stateIdentity,
+      candidate,
+      candidate === install ? signal.serverId : undefined,
+    );
     return {
       nodeId: turnPlanningFingerprint("defense-line-node", {
         defenseId: signal.defenseId,
@@ -655,7 +662,7 @@ function createDefenseLine(
     disposition: classification.disposition,
     nodes: nodes.map((node) => node.invocation.invocationKey),
   });
-  const campaignId = "campaign:corp.defend_servers";
+  const campaignId = compactCampaignId(defenseCampaignIdentity());
   const beforeQuoteId = turnPlanningFingerprint("defense-before", {
     defenseId: signal.defenseId,
     state: params.stateIdentity.sideSafePlanningFingerprint,
@@ -795,7 +802,11 @@ function createScoreProtectionStagingLine(
   signal: CorpScoreProtectionStagingInstallSignal,
   install: ActionSemanticCandidate,
 ): CorpDefenseTurnPlanningLine {
-  const invocation = invocationFor(params.stateIdentity, install);
+  const invocation = invocationFor(
+    params.stateIdentity,
+    install,
+    signal.serverId,
+  );
   const nodeId = turnPlanningFingerprint("defense-line-node", {
     defenseId: signal.defenseId,
     index: 0,
@@ -860,7 +871,7 @@ function createScoreProtectionStagingLine(
     Number(mandatoryAgendaPoints) <= params.input.playerView.own.agendaPoints;
   const defenseValue = rezReadyAfterLine ? 18 : 12;
   const totalValue = defenseValue - fundingGapAfter * 3;
-  const campaignId = "campaign:corp.defend_servers";
+  const campaignId = compactCampaignId(defenseCampaignIdentity());
   const beforeQuoteId = turnPlanningFingerprint("defense-before", {
     defenseId: signal.defenseId,
     state: params.stateIdentity.sideSafePlanningFingerprint,
@@ -1069,7 +1080,7 @@ function createDefenseDrawLine(
     Math.max(0, draw.economyProjection?.netLiquidCreditGain ?? 0) * 2;
   const defenseValue = 12;
   const totalValue = defenseValue + economyValue;
-  const campaignId = "campaign:corp.defend_servers";
+  const campaignId = compactCampaignId(defenseCampaignIdentity());
   const beforeQuoteId = turnPlanningFingerprint("defense-before", {
     defenseId: signal.defenseId,
     state: params.stateIdentity.sideSafePlanningFingerprint,
@@ -1184,8 +1195,13 @@ function createDefenseDrawLine(
 function invocationFor(
   stateIdentity: PlanningStateIdentity,
   candidate: ActionSemanticCandidate,
+  exactServerId?: string,
 ): CanonicalLegalActionInvocation {
-  const targets = candidateTargetIds(candidate);
+  const targets = exactServerId
+    ? [exactServerId]
+    : (candidate.targetContext?.selectedTargets ?? [])
+        .filter((target) => target.targetKind === "server")
+        .map((target) => target.targetId);
   return buildCanonicalLegalActionInvocation({
     stateIdentity,
     semanticActionType: candidate.semanticActionType,
@@ -1204,15 +1220,6 @@ function invocationFor(
         }
       : {}),
   });
-}
-
-function candidateTargetIds(candidate: ActionSemanticCandidate): string[] {
-  return [
-    ...(candidate.targetContext?.selectedTargets ?? []),
-    ...(candidate.targetContext?.availableTargets ?? []),
-  ]
-    .map((target) => target.targetId)
-    .filter((targetId): targetId is string => typeof targetId === "string");
 }
 
 function compareDefenseLines(

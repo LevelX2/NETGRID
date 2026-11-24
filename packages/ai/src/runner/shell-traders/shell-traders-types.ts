@@ -8,17 +8,16 @@ export type RunnerShellTradersPipelineSignal = {
   pipelineId: string;
   phase: "prepare" | "progress" | "hold";
   sourceCardInstanceId: string;
-  sourceDefinitionId: "onr_v1_176_the-shell-traders";
+  sourceDefinitionId: 388;
   targetCardInstanceId: string;
-  targetDefinitionId: string;
+  targetDefinitionId: number;
   targetCardType: "program" | "hardware";
   actionIds: string[];
-  rejectedActionIds?: string[];
+  rejectedActions?: { actionId: string; evidenceCode: string }[];
   priorityClass: "P2" | "P4" | "P5";
   value: number;
   shellCountersBefore: number;
   shellCountersAfterAction: number;
-  targetInstallCost: number;
   targetMemoryCost: number;
   freeMemory: number;
   replacementAssessment: Readonly<{

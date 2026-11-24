@@ -1,3 +1,4 @@
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { visibleRunnerNextTurnPreparationCreditGain } from "@netgrid/engine";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -54,7 +55,7 @@ export function corpMatureRemoteAffordableDefenseLayerCertification(
           input,
           server,
           [layers[left]!.iceInstanceId, layers[right]!.iceInstanceId],
-          availableCredits,
+          availableCredits - layers[left]!.credits - layers[right]!.credits,
         )
       ) {
         return {
@@ -150,6 +151,7 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
       [...server.root],
       visibleCorpCredits,
       {
+        ...visibleIcePathTraceContext(input),
         targetServerId: server.id,
         visibleCorpCredits,
         visibleRemoteServerCount: input.playerView.servers.filter(
@@ -257,6 +259,8 @@ export function corpArchivesHasCertifiedPaidAccess(
   ) {
     return false;
   }
+  const visibleCorpCredits = view.own.credits - layer.credits;
+  const runOnlyCredits = view.runnerNextRunBadPublicityCredits ?? 0;
   const assessment = assessEngineCertifiedPostRezIcePath(
     [ice],
     server.id,
@@ -264,17 +268,19 @@ export function corpArchivesHasCertifiedPaidAccess(
     new Set([ice.instanceId]),
     runnerRig,
     runnerRunPathCreditBudgetWithVisiblePools(
-      view.opponent.credits,
+      view.opponent.credits + runOnlyCredits,
       runnerRig,
       {
+        liquidCredits: view.opponent.credits,
         creditPoolHorizon: "next_runner_turn",
       },
     ),
     [],
-    view.own.credits,
+    visibleCorpCredits,
     {
+      ...visibleIcePathTraceContext(input),
       targetServerId: server.id,
-      visibleCorpCredits: view.own.credits,
+      visibleCorpCredits,
       visibleRemoteServerCount: view.servers.filter(
         (candidate) => !["hq", "rd", "archives"].includes(candidate.id),
       ).length,

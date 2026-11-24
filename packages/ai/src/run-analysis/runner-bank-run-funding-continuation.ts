@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
 import {
@@ -6,9 +7,12 @@ import {
   buildRunnerEconomyPosture,
   type RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
-import { runnerRunFundingSupport } from "./runner-plan-run-funding";
+import {
+  runnerRunFundingSupport,
+  runnerRunTargetCanConvertNow,
+} from "./runner-plan-run-funding";
 import { runnerTerminalRemoteContestIsDirectlyMandatory } from "../runner/remote-contest/remote-contest-admission";
-import { runnerRunTargetIsDirectlyConvertible } from "../runtime/runner-run-funding-admission";
+import { currentLegalActionResourceCost } from "../runtime/visible-action-facts";
 import type { RunnerRunFundingSupport } from "../plans/runner-funding-service-contract";
 
 /** Certify a bank-owned prefix with the existing non-bank funding owner.
@@ -21,6 +25,12 @@ export function runnerBankRunFundingContinuation(
   cashOutActionId: string,
 ): RunnerRunFundingSupport | undefined {
   if (target.accessTargetKind !== "remote") return undefined;
+  const run = input.legalActions.find(
+    (action) => action.actionId === target.actionId,
+  );
+  if (!actionMatchesCurrentDecision(input, run)) return undefined;
+  const runClicks = currentLegalActionResourceCost(run, "clicks");
+  if (!Number.isSafeInteger(runClicks) || runClicks < 0) return undefined;
   const bank = candidates.find(
     (candidate) => candidate.actionId === cashOutActionId,
   );
@@ -31,7 +41,9 @@ export function runnerBankRunFundingContinuation(
     projection?.sourcePool !== "finite" ||
     projection.payoutMode !== "all_available" ||
     projection.cardsConsumed !== 0 ||
-    !(projection.storedCreditsTaken! > 0)
+    typeof projection.storedCreditsTaken !== "number" ||
+    !Number.isSafeInteger(projection.storedCreditsTaken) ||
+    projection.storedCreditsTaken <= 0
   )
     return undefined;
   const nonBankCandidates = candidates.filter(
@@ -78,10 +90,12 @@ export function runnerBankRunFundingContinuation(
           nextInput,
           nextTarget,
         ) ||
-          runnerRunTargetIsDirectlyConvertible({
-            target: nextTarget,
-            economy,
-          })),
+          runnerRunTargetCanConvertNow(
+            nextInput,
+            buildRunnerEconomyPosture({ input: nextInput, deckCapabilities }),
+            nextTarget,
+            nonBankCandidates,
+          )),
     },
   );
   if (
@@ -91,7 +105,7 @@ export function runnerBankRunFundingContinuation(
     support.routeAssessment.horizon !== "same_turn" ||
     support.routeAssessment.projectedGap !== 0 ||
     support.routeActionIds.length !== 1 ||
-    projection.clickCost + support.routeAssessment.totalClickCost + 1 >
+    projection.clickCost + support.routeAssessment.totalClickCost + runClicks >
       input.playerView.own.clicks
   )
     return undefined;

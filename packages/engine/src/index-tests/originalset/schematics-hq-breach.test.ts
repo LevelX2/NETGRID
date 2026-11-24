@@ -24,8 +24,8 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { passRootRezWindowBeforeAccessIfOpen } from "../../test-fixtures/index-test-helpers";
 
-const SCHEMATICS = "onr_classic_032_schematics-search-engine";
-const HQ_INTERFACE = "onr_v1_129_hq-interface";
+const SCHEMATICS = 36;
+const HQ_INTERFACE = 341;
 const REVIEW = "schematics_search_engine_expose_installed_cards_review";
 const FINISH = "schematics_search_engine_expose_installed_cards_finish";
 
@@ -49,14 +49,14 @@ describe("Schematics Search Engine HQ breach", () => {
           ...DEMO_DECKS.demo_corp_004,
           id: "schematics_multiaccess_corp",
           cards: [
-            { id: "simple_upgrade", quantity: 1 },
-            { id: "simple_economy_asset", quantity: 1 },
-            { id: "simple_barrier_ice", quantity: 1 },
+            { id: 606, quantity: 1 },
+            { id: 594, quantity: 1 },
+            { id: 589, quantity: 1 },
             ...DEMO_DECKS.demo_corp_004.cards.filter(
               (entry) =>
-                entry.id !== "simple_upgrade" &&
-                entry.id !== "simple_economy_asset" &&
-                entry.id !== "simple_barrier_ice",
+                entry.id !== 606 &&
+                entry.id !== 594 &&
+                entry.id !== 589,
             ),
           ],
         },
@@ -64,12 +64,12 @@ describe("Schematics Search Engine HQ breach", () => {
     );
     installRunnerProgramForTest(state, SCHEMATICS);
     installRunnerHardwareForTest(state, HQ_INTERFACE);
-    const hqRootId = installCorpRootOnHq(state, "simple_upgrade");
-    const remoteAssetId = putCorpRootInRemote(state, "simple_economy_asset");
+    const hqRootId = installCorpRootOnHq(state, 606);
+    const remoteAssetId = putCorpRootInRemote(state, 594);
     const remoteIceId = putCorpIceOnServer(
       state,
-      "remote_1",
-      "simple_barrier_ice",
+      "r1",
+      589,
     );
     state.runner.credits = 20;
 
@@ -149,7 +149,7 @@ describe("Schematics Search Engine HQ breach", () => {
     });
     const runnerViewAfterReview = getPlayerView(state, "runner");
     const remoteAfterReview = runnerViewAfterReview.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(remoteAfterReview?.root[0]).toMatchObject({ known: false });
     expect(remoteAfterReview?.ice[0]).toMatchObject({ known: false });
@@ -254,14 +254,14 @@ function createSchematicsMultiaccessState(seed: string) {
         ...DEMO_DECKS.demo_corp_004,
         id: `${seed}_corp`,
         cards: [
-          { id: "simple_upgrade", quantity: 1 },
-          { id: "simple_economy_asset", quantity: 1 },
-          { id: "simple_barrier_ice", quantity: 1 },
+          { id: 606, quantity: 1 },
+          { id: 594, quantity: 1 },
+          { id: 589, quantity: 1 },
           ...DEMO_DECKS.demo_corp_004.cards.filter(
             (entry) =>
-              entry.id !== "simple_upgrade" &&
-              entry.id !== "simple_economy_asset" &&
-              entry.id !== "simple_barrier_ice",
+              entry.id !== 606 &&
+              entry.id !== 594 &&
+              entry.id !== 589,
           ),
         ],
       },
@@ -269,16 +269,16 @@ function createSchematicsMultiaccessState(seed: string) {
   );
   installRunnerProgramForTest(state, SCHEMATICS);
   installRunnerHardwareForTest(state, HQ_INTERFACE);
-  installCorpRootOnHq(state, "simple_upgrade");
-  putCorpRootInRemote(state, "simple_economy_asset");
-  putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+  installCorpRootOnHq(state, 606);
+  putCorpRootInRemote(state, 594);
+  putCorpIceOnServer(state, "r1", 589);
   state.runner.credits = 20;
   return state;
 }
 
 function installCorpRootOnHq(
   state: Parameters<typeof moveCorpCardToHq>[0],
-  definitionId: string,
+  definitionId: number,
 ): CardInstanceId {
   const cardId = moveCorpCardToHq(state, definitionId);
   const hq = state.corp.servers.find((server) => server.id === "hq");

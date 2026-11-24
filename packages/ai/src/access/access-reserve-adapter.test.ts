@@ -1,13 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { quoteAccessReserve } from "./access-reserve-adapter";
 import type { AiDecisionInput, PlayerView } from "@netgrid/shared";
 
 describe("access reserve adapter", () => {
-  it("uses RunnerEconomyPosture when provided", () => {
+  it("uses RunnerEconomyPosture without evaluating the phase policy", () => {
+    const remotePhaseReserve = vi.fn(() => 4);
     expect(
       quoteAccessReserve({
         input: aiInput(),
-        fallbackReserve: 4,
+        remotePhaseReserve,
         economyPosture: {
           desiredCreditReserve: 8,
           creditReservePolicy: {
@@ -26,19 +27,20 @@ describe("access reserve adapter", () => {
         "access_reserve_override:late_contest",
       ]),
     });
+    expect(remotePhaseReserve).not.toHaveBeenCalled();
   });
 
-  it("falls back only when no economy posture is available", () => {
+  it("uses the remote phase policy when no economy posture was requested", () => {
     expect(
       quoteAccessReserve({
         input: aiInput(),
-        fallbackReserve: 5,
+        remotePhaseReserve: () => 5,
       }),
     ).toMatchObject({
       desiredCreditReserve: 5,
-      source: "fallback",
+      source: "remote_phase_policy",
       evidence: expect.arrayContaining([
-        "access_reserve_source:fallback",
+        "access_reserve_source:remote_phase_policy",
         "access_reserve_desired:5",
       ]),
     });

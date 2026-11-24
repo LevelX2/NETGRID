@@ -16,10 +16,10 @@ import {
 
 describe("current score credit facts through the strict AI input", () => {
   it.each([
-    [2, false, 0, "onr_v1_196_corporate-war"],
-    [12, false, 24, "onr_v1_196_corporate-war"],
-    [8, true, 0, "onr_v1_196_corporate-war"],
-    [2, false, 7, "onr_v1_203_hostile-takeover"],
+    [2, false, 0, 408],
+    [12, false, 24, 408],
+    [8, true, 0, 408],
+    [2, false, 7, 415],
   ] as const)(
     "projects the exact score balance from %i, terminal=%s to %i",
     (credits, terminal, expected, definitionId) => {
@@ -65,14 +65,14 @@ describe("current score credit facts through the strict AI input", () => {
     const { state, agendaId, action } = strictScenario(
       2,
       false,
-      "onr_v1_193_corporate-coup",
+      405,
     );
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [action],
       observerSide: "corp",
       stateVersion: state.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
-        [agendaId]: "onr_v1_193_corporate-coup",
+        [agendaId]: 405,
       },
     });
     expect(candidate!.economyProjection?.netLiquidCreditGain).toBeUndefined();
@@ -151,7 +151,7 @@ describe("current score credit facts through the strict AI input", () => {
           observerSide: "corp",
           stateVersion: state.stateVersion,
           visibleSourceDefinitionsByInstanceId: {
-            [agendaId]: "onr_v1_196_corporate-war",
+            [agendaId]: 408,
           },
         }),
       ).toThrow("corp_score_credit_outcome_quote_invalid");
@@ -162,7 +162,7 @@ describe("current score credit facts through the strict AI input", () => {
 function strictScenario(
   credits: number,
   terminal: boolean,
-  definitionId = "onr_v1_196_corporate-war",
+  definitionId = 408,
 ) {
   const { state, agendaId } = currentCorpScoreCreditFixture(
     credits,

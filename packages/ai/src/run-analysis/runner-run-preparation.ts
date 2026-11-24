@@ -1,37 +1,39 @@
 import { type AiDecisionInput } from "@netgrid/shared";
-import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
   assessRunnerRunAfterAccessPreparation,
   buildRunnerEconomyPosture,
-  type RunnerEconomyPosture,
   type RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
 import { runnerCandidateSourceDefinitionId } from "../runtime/runner-action-source-facts";
 import { runnerTargetedIceTrashState } from "../runtime/runner-targeted-ice-trash-plan";
 import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import { runnerRunTargetCanConvertNow } from "./runner-plan-run-funding";
-import { mergedPublicHistory } from "../runtime/public-event-history";
+import { mergedPublicHistory } from "../public-event-history";
 
 export function runnerHasExpiringAgendaAccessPayoff(
   input: AiDecisionInput,
 ): boolean {
+  const { turnSerial } = input.playerView;
+  if (!Number.isSafeInteger(turnSerial)) return false;
   let credit = false;
   let point = false;
   for (const event of mergedPublicHistory(input)) {
-    if (event.turnSerial !== input.playerView.turnSerial) continue;
+    if (event.turnSerial !== turnSerial) continue;
     const payload = event.publicPayload;
     if (payload.nextAgendaAccessCreditGainResolved === true) credit = false;
     if (payload.nextAgendaAccessAgendaPointConsumed === true) point = false;
     if (
       payload.actor !== "runner" ||
       event.type !== "play_event" ||
-      typeof payload.cardDefinitionId !== "string"
+      typeof payload.cardDefinitionId !== "number"
     )
       continue;
-    const abilities = cardSpecPlanningCardByDefinitionId(
+    const abilities = planningCardByDefinitionId(
       payload.cardDefinitionId,
-    )?.planning.engine.abilities;
+    )?.engine.abilities;
     for (const ability of abilities ?? []) {
       if (ability.kind !== "on_play") continue;
       for (const effect of ability.effects) {
@@ -80,9 +82,9 @@ export function runnerRunReplacesAgendaAccess(
   const capability = run.payload?.cardImplementationAbilityKey;
   const boundAbility =
     source && typeof capability === "string"
-      ? cardSpecPlanningCardByDefinitionId(
+      ? planningCardByDefinitionId(
           source,
-        )?.planning.engine.abilities?.find(
+        )?.engine.abilities?.find(
           (ability) => ability.capabilityKey === capability,
         )
       : undefined;
@@ -101,7 +103,6 @@ export function runnerSameTurnAccessPreparationFitsTarget(
   preparationActionId: string,
   target: RunnerRunTargetEvaluation,
   continuation: {
-    economy: RunnerEconomyPosture;
     candidates: readonly ActionSemanticCandidate[];
     minimumHandBuffer: number;
   },
@@ -154,7 +155,7 @@ export function runnerSameTurnAccessPreparationFitsTarget(
 export function runnerSameTurnAccessPreparationSourceDefinitionId(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
-): string | undefined {
+): number | undefined {
   if (candidate.actionType !== "play_event") return undefined;
   const createsSameTurnAccessPayoff = candidate.functionalEffects?.some(
     (effect) =>
@@ -198,13 +199,20 @@ export function runnerRezOrTrashPreparationBeatsImmediateRun(params: {
   if (params.targetIceState !== "rez_or_trash") return true;
   const corpCreditPressureValue =
     Math.max(0, 5 - params.input.playerView.opponent.credits) * 20;
+  const currentActionIds = new Set(
+    params.input.legalActions
+      .filter((action) => actionMatchesCurrentDecision(params.input, action))
+      .map(({ actionId }) => actionId),
+  );
   const bestImmediateAlternative = params.runTargets
     .filter(
       (target) =>
         target.targetServerId !== params.serverId &&
         target.accessServerId !== params.serverId &&
-        target.recommendation !== "do_not_run_now" &&
-        target.recommendation !== "known_no_current_payoff",
+        target.pathPassability === "reachable" &&
+        (target.recommendation === "run_now" ||
+          target.recommendation === "run_if_free") &&
+        currentActionIds.has(target.actionId),
     )
     .reduce((best, target) => Math.max(best, target.score), 0);
   return (

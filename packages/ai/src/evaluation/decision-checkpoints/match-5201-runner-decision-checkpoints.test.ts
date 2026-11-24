@@ -20,7 +20,7 @@ describe("match 5201 runner decision checkpoints", () => {
       }
       cp.expectation = {
         ...cp.expectation,
-        acceptableActions: [{ actionId: "runner.draw_card" }],
+        acceptableActions: [{ actionId: "r8" }],
         planExecution: {
           acceptablePlanKinds: ["runner.defense_and_recovery"],
           acceptableCapabilities: ["build_required_hand_buffer"],
@@ -41,7 +41,7 @@ describe("match 5201 runner decision checkpoints", () => {
         portfolio.instances.some(
           (instance) =>
             instance.instanceId ===
-            "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Arun%3Arunner.start_run.remote_1",
+            "peva6bp6lh8hz7bnk1xotgorx4",
         ),
       ).toBe(true);
       const state = structuredClone(cp.engine.testOnlyGameState);
@@ -80,7 +80,7 @@ describe("match 5201 runner decision checkpoints", () => {
     if (!applied.ok) throw new Error("Native checkpoint draw was rejected");
     expect(applied.state.runner.grip).toHaveLength(4);
     expect(applied.state.runner.grip).toContain(
-      "runner_onr_classic_027_early-worm_2",
+      "c6y",
     );
     expect(applied.state.runner.coreDamage).toBe(state.runner.coreDamage);
     expect(applied.state.runner.rig).toEqual(state.runner.rig);

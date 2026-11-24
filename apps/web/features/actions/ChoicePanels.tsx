@@ -1,7 +1,8 @@
 "use client";
 
+import { type SelectionId } from "../../lib/presented-player-view";
 import { Check, Clipboard, Crosshair, Trash2, X } from "lucide-react";
-import type { LegalAction, PlayerView } from "@netgrid/shared";
+import type { LegalAction, PlayerView } from "../../lib/presented-player-view";
 import { useLocale, useTranslations } from "use-intl/react";
 
 import {
@@ -24,14 +25,14 @@ export function FieldCardChoicePanel({
 }: {
   choice: NonNullable<PlayerView["pendingChoice"]>;
   action: LegalAction;
-  selected: string[];
+  selected: SelectionId[];
   disabled: boolean;
   highlighted: boolean;
   onClear(): void;
   onChoiceOptions(
     action: LegalAction,
-    choiceId: string,
-    selectedOptionIds: string[],
+    choiceId: SelectionId,
+    selectedOptionIds: SelectionId[],
   ): void;
 }) {
   const locale = useLocale();
@@ -104,14 +105,14 @@ export function DiscardChoicePanel({
 }: {
   choice: NonNullable<PlayerView["pendingChoice"]>;
   action: LegalAction;
-  selected: string[];
+  selected: SelectionId[];
   disabled: boolean;
   highlighted: boolean;
-  onToggle(optionId: string): void;
+  onToggle(optionId: SelectionId): void;
   onChoiceOptions(
     action: LegalAction,
-    choiceId: string,
-    selectedOptionIds: string[],
+    choiceId: SelectionId,
+    selectedOptionIds: SelectionId[],
   ): void;
 }) {
   const t = useTranslations("Actions.choices");

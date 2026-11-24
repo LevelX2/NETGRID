@@ -1,5 +1,7 @@
 import { Brain, Building2, Fingerprint, Goal } from "lucide-react";
-import type { PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type { ReactNode } from "react";
+import type { Side, VisibleCard } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 import { useTranslations } from "use-intl/react";
 
 import { CreditBadge, ScoreAreaStat, Stat } from "./ResourceStrip";
@@ -9,6 +11,7 @@ export function OpponentPanel({
   view,
   displayName,
   agendaPointsToWin,
+  showResourceStats = true,
   scoreAreaCards,
   scoreAreaOpen,
   scoreAreaHighlighted,
@@ -17,6 +20,7 @@ export function OpponentPanel({
   view: PlayerView;
   displayName?: string;
   agendaPointsToWin: number;
+  showResourceStats?: boolean;
   scoreAreaCards: VisibleCard[];
   scoreAreaOpen: boolean;
   scoreAreaHighlighted: boolean;
@@ -38,30 +42,38 @@ export function OpponentPanel({
           ? `${displayName} · ${t(`side.${side}`)}`
           : t(`side.${side}`)}
       </h2>
-      <div className="stats">
-        <CreditBadge credits={view.opponent.credits} />
-        <ScoreAreaStat
-          value={`${view.opponent.agendaPoints} / ${agendaPointsToWin}`}
-          open={scoreAreaOpen}
-          highlighted={scoreAreaHighlighted}
-          interactive={scoreAreaCards.length > 0}
-          onToggle={onToggleScoreArea}
-        />
-        {side === "runner" ? (
-          <Stat
-            value={view.opponent.tags}
-            icon={<Goal size={14} />}
-            helpText={t("tagHelp")}
+      {showResourceStats || scoreAreaCards.length > 0 ? (
+        <div className="stats">
+          {showResourceStats ? (
+            <CreditBadge credits={view.opponent.credits} />
+          ) : null}
+          <ScoreAreaStat
+            value={
+              showResourceStats
+                ? `${view.opponent.agendaPoints} / ${agendaPointsToWin}`
+                : undefined
+            }
+            open={scoreAreaOpen}
+            highlighted={scoreAreaHighlighted}
+            interactive={scoreAreaCards.length > 0}
+            onToggle={onToggleScoreArea}
           />
-        ) : null}
-        {side === "runner" ? (
-          <Stat
-            value={view.opponent.coreDamage ?? 0}
-            icon={<Brain size={14} />}
-            helpText={t("coreDamageHelp")}
-          />
-        ) : null}
-      </div>
+          {showResourceStats && side === "runner" ? (
+            <Stat
+              value={view.opponent.tags}
+              icon={<Goal size={14} />}
+              helpText={t("tagHelp")}
+            />
+          ) : null}
+          {showResourceStats && side === "runner" ? (
+            <Stat
+              value={view.opponent.coreDamage ?? 0}
+              icon={<Brain size={14} />}
+              helpText={t("coreDamageHelp")}
+            />
+          ) : null}
+        </div>
+      ) : null}
       <IdentityCounterStrip
         displays={view.opponent.identity.counterDisplays}
         side={side}
@@ -80,17 +92,21 @@ export function PlayerPanel({
   title,
   scoreAreaCards,
   agendaPointsToWin,
+  showResourceStats = true,
   scoreAreaOpen,
   scoreAreaHighlighted,
   onToggleScoreArea,
+  children,
 }: {
   view: PlayerView;
   title: string;
   scoreAreaCards: VisibleCard[];
   agendaPointsToWin: number;
+  showResourceStats?: boolean;
   scoreAreaOpen: boolean;
   scoreAreaHighlighted: boolean;
   onToggleScoreArea(): void;
+  children?: ReactNode;
 }) {
   const t = useTranslations("Board.status");
   const turnSide = turnSideForView(view);
@@ -105,30 +121,38 @@ export function PlayerPanel({
         <RoleIcon size={16} />
         {title}
       </h2>
-      <div className="stats">
-        <CreditBadge credits={view.own.credits} />
-        <ScoreAreaStat
-          value={`${view.own.agendaPoints} / ${agendaPointsToWin}`}
-          open={scoreAreaOpen}
-          highlighted={scoreAreaHighlighted}
-          interactive={scoreAreaCards.length > 0}
-          onToggle={onToggleScoreArea}
-        />
-        {view.side === "runner" ? (
-          <Stat
-            value={view.own.tags}
-            icon={<Goal size={14} />}
-            helpText={t("tagHelp")}
+      {showResourceStats || scoreAreaCards.length > 0 ? (
+        <div className="stats">
+          {showResourceStats ? (
+            <CreditBadge credits={view.own.credits} />
+          ) : null}
+          <ScoreAreaStat
+            value={
+              showResourceStats
+                ? `${view.own.agendaPoints} / ${agendaPointsToWin}`
+                : undefined
+            }
+            open={scoreAreaOpen}
+            highlighted={scoreAreaHighlighted}
+            interactive={scoreAreaCards.length > 0}
+            onToggle={onToggleScoreArea}
           />
-        ) : null}
-        {view.side === "runner" ? (
-          <Stat
-            value={view.own.coreDamage ?? 0}
-            icon={<Brain size={14} />}
-            helpText={t("coreDamageHelp")}
-          />
-        ) : null}
-      </div>
+          {showResourceStats && view.side === "runner" ? (
+            <Stat
+              value={view.own.tags}
+              icon={<Goal size={14} />}
+              helpText={t("tagHelp")}
+            />
+          ) : null}
+          {showResourceStats && view.side === "runner" ? (
+            <Stat
+              value={view.own.coreDamage ?? 0}
+              icon={<Brain size={14} />}
+              helpText={t("coreDamageHelp")}
+            />
+          ) : null}
+        </div>
+      ) : null}
       <IdentityCounterStrip
         displays={view.own.identity.counterDisplays}
         side={view.side}
@@ -138,6 +162,7 @@ export function PlayerPanel({
           ? t(status.key, { side: t(`side.${status.side}`) })
           : t(status.key)}
       </p>
+      {children}
     </section>
   );
 }

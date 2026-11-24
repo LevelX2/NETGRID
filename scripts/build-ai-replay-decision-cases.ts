@@ -27,13 +27,13 @@ const rows = (
         .prepare(
           `${selectTraceRowsSql()}
            WHERE t.created_at <= ?
-           ORDER BY m.created_at ASC, t.decision_index ASC, t.trace_id ASC`,
+           ORDER BY m.created_at ASC, m.match_id ASC, t.decision_index ASC`,
         )
         .all(maxCreatedAt)
     : db
         .prepare(
           `${selectTraceRowsSql()}
-           ORDER BY m.created_at ASC, t.decision_index ASC, t.trace_id ASC`,
+           ORDER BY m.created_at ASC, m.match_id ASC, t.decision_index ASC`,
         )
         .all()
 ) as Array<Omit<ReplayDecisionTraceInput, "traceJson"> & { traceJson: string }>;
@@ -59,7 +59,6 @@ function selectTraceRowsSql(): string {
        m.match_id AS matchId,
        m.mode AS mode,
        m.status AS status,
-       t.trace_id AS traceId,
        t.event_id AS eventId,
        t.state_version AS stateVersion,
        t.match_version AS matchVersion,
@@ -113,7 +112,7 @@ function selectAiMatchesWithoutTraceRows(
        m.status AS status,
        m.updated_at AS updatedAt,
        COUNT(DISTINCT e.event_id) AS eventCount,
-       COUNT(DISTINCT t.trace_id) AS traceCount
+       COUNT(DISTINCT t.decision_index) AS traceCount
      FROM matches m
      LEFT JOIN events e ON e.match_id = m.match_id
      LEFT JOIN ai_decision_traces t ON t.match_id = m.match_id

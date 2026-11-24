@@ -28,7 +28,7 @@ function facts() {
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((entry) => entry.actionId === "runner.start_run.remote_1")!;
+  }).find((entry) => entry.actionId === "rs.r1")!;
   const action = input.legalActions.find(
     (entry) =>
       entry.payload?.cardImplementationEffectKind === "move_top_trash_to_grip",
@@ -97,7 +97,7 @@ it.each([
     if (variant === "nonterminal") input.playerView.opponent.agendaPoints = 0;
     const available =
       variant === "no_basic_credit"
-        ? candidates.filter((entry) => entry.actionId !== "runner.gain_credit")
+        ? candidates.filter((entry) => entry.actionId !== "rb")
         : candidates;
     expect(
       runnerHeapIncomePreparation(input, available, target),

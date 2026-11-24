@@ -1,4 +1,5 @@
 import type { DeckSnapshot } from "../decks/deck-api-types";
+import { isCardDefinitionId } from "@netgrid/shared";
 import { AccountClientError } from "./account-client";
 import { configuredServerHttp } from "../../lib/server-endpoint";
 import { loadStandardDecks, type StandardDeck } from "./account-deck-client";
@@ -128,6 +129,21 @@ export function validateStandardDeckCatalogPayload(
   ) {
     throw new StandardDeckCatalogPayloadError(
       "standard_deck_catalog_shape_invalid",
+    );
+  }
+  if (
+    [...payload.catalog.decks, ...payload.catalog.snapshots].some(
+      (deck) =>
+        !deck ||
+        !isCardDefinitionId(deck.identityCardId) ||
+        !Array.isArray(deck.cards) ||
+        Array.from(deck.cards).some(
+          (entry) => !entry || !isCardDefinitionId(entry.cardId),
+        ),
+    )
+  ) {
+    throw new StandardDeckCatalogPayloadError(
+      "standard_deck_catalog_card_id_invalid",
     );
   }
   const validRunner = payload.catalog.snapshots.some(

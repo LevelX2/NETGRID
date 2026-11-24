@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
+import type { CardDefinitionId } from "@netgrid/shared";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import {
@@ -30,7 +31,7 @@ function fixture(name: string) {
 }
 function candidate(
   input: AiDecisionInputWithDeckCapabilities,
-  definition: string,
+  definition: CardDefinitionId,
 ) {
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -43,21 +44,20 @@ function candidate(
       buildActionCardSemanticProfilesByDefinitionId(),
   });
   const c = candidates.find((c) =>
-    input.legalActions.some(
+    c.sourceDefinitionId === definition && input.legalActions.some(
       (a) =>
         a.actionId === c.actionId &&
-        a.source?.includes(definition) &&
-        a.payload?.serverId === "remote_1",
+        a.payload?.serverId === "r1",
     ),
   );
   if (!c) throw Error("Native agenda candidate missing");
   return c;
 }
 afterEach(resetResidentPlanPortfolioMemory);
-it.each([
-  ["cp-meta-555-r1-g7-d184.json", "employee-empowerment"],
-  ["cp-meta-555-r1-g36-d132.json", "tycho-extension"],
-  ["cp-meta-555-r1-g34-d38.json", "employee-empowerment"],
+it.each<[string, CardDefinitionId]>([
+  ["cp-meta-555-r1-g7-d184.json", 411],
+  ["cp-meta-555-r1-g36-d132.json", 432],
+  ["cp-meta-555-r1-g34-d38.json", 411],
 ])(
   "does not certify damage without an access barrier: %s",
   (name, definition) => {
@@ -66,7 +66,7 @@ it.each([
       c = candidate(input, definition);
     const unchanged = JSON.stringify([input.playerView, input.legalActions]);
     expect(
-      corpMatureRemoteAffordableDefenseLayerCertification(input, c, "remote_1"),
+      corpMatureRemoteAffordableDefenseLayerCertification(input, c, "r1"),
     ).toBeUndefined();
     restoreAiRuntimeCheckpoint(
       input,
@@ -95,12 +95,12 @@ it.each([
 it("preserves the native funded ETR protection for an immediate next-turn matchpoint", () => {
   const cp = fixture("cp-meta-475-r2-g20-d355.json"),
     input = cp.input,
-    c = candidate(input, "superserum");
+    c = candidate(input, 6);
   expect(
-    corpMatureRemoteAffordableDefenseLayerCertification(input, c, "remote_1"),
+    corpMatureRemoteAffordableDefenseLayerCertification(input, c, "r1"),
   ).toMatchObject({
     kind: "affordable_engine_quoted_defense_layers",
-    serverId: "remote_1",
+    serverId: "r1",
     observedAtStateVersion: input.playerView.stateVersion,
   });
   restoreAiRuntimeCheckpoint(

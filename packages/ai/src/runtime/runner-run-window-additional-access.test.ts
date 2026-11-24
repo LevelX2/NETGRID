@@ -101,12 +101,12 @@ function additionalAccessCandidate(params: {
   >["payoffs"];
 }): ActionSemanticCandidate {
   return {
-    actionId: "runner.activated_card_ability.visible-additional-access",
+    actionId: "r1.visible-additional-access",
     actionType: "activated_card_ability",
     actorSide: "runner",
     visibilityScope: "public",
     legalActionRef: {
-      actionId: "runner.activated_card_ability.visible-additional-access",
+      actionId: "r1.visible-additional-access",
       actionType: "activated_card_ability",
       originalPayloadKeys: [],
     },

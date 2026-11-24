@@ -6,7 +6,7 @@ import { publishTacticalPlanCreditDemands } from "./tactical-plan-credit-demands
 describe("tactical plan credit demands", () => {
   it("publishes an unaffordable current breaker as an acute hard demand", () => {
     const plan = createTacticalPlan({
-      planId: "runner.obtain_breaker_coverage:remote_1",
+      planId: "runner.obtain_breaker_coverage:r1",
       side: "runner",
       type: "runner.obtain_breaker_coverage",
       status: "blocked",

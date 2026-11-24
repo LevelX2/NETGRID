@@ -85,29 +85,38 @@ export function corpTacticalAssessment(
   terminalProjection = false,
   resourceGaps: readonly ResourceGap[] = [],
 ): PlanAssessment {
+  const evidenceCode = instance.evidenceRefs[0]?.code;
   const claim: PriorityClaim =
     priorityClass === "P1"
       ? {
           requestedClass: "P1",
           reasonCode: "terminal_win",
           horizon: "current_turn",
-          witness: {
-            kind: "terminal_path",
-            evidenceCode: instance.evidenceRefs[0]?.code ?? "terminal",
-            guarantee,
-            target: { kind: "player", id: "runner" },
-          },
+          ...(terminalProjection && evidenceCode
+            ? {
+                witness: {
+                  kind: "terminal_path",
+                  evidenceCode,
+                  guarantee,
+                  target: { kind: "player", id: "runner" },
+                },
+              }
+            : {}),
         }
       : priorityClass === "P2"
         ? {
             requestedClass: "P2",
             reasonCode: "irreversible_threat",
             horizon: "current_turn",
-            witness: {
-              kind: "irreversible_threat",
-              evidenceCode: instance.evidenceRefs[0]?.code ?? "threat",
-              guarantee,
-            },
+            ...(evidenceCode
+              ? {
+                  witness: {
+                    kind: "irreversible_threat",
+                    evidenceCode,
+                    guarantee,
+                  },
+                }
+              : {}),
           }
         : priorityClass === "P3"
           ? {
@@ -189,10 +198,10 @@ export function corpTacticalPlanDomain<T>(context: PlanSchedulerContext): T {
       })
     | undefined;
   if (
-    value?.virusPressure &&
-    value.punishCampaigns &&
-    value.ambushes &&
-    value.handManagement
+    Array.isArray(value?.virusPressure) &&
+    Array.isArray(value.punishCampaigns) &&
+    Array.isArray(value.ambushes) &&
+    Array.isArray(value.handManagement)
   )
     return value;
   throw new PlanResolutionFailure("missing_plan_module_coverage", {

@@ -5,6 +5,8 @@ import {
   applyRandomizedTurnPlanSelection,
   createGameAfterSetup,
   getLegalActions,
+  hashGameState,
+  replayEvents,
 } from "@netgrid/engine";
 import {
   DEMO_DECKS,
@@ -24,12 +26,12 @@ import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { RealEngineFixtureBuilder } from "./real-engine-fixture-builder";
 
-const CORPORATE_WAR = "onr_v1_196_corporate-war";
-const SYSTEMATIC_LAYOFFS = "onr_v1_304_systematic-layoffs";
-const CITY_SURVEILLANCE = "onr_v1_313_city-surveillance";
-const BROKER = "onr_v1_154_broker";
-const RUSH_HOUR = "onr_proteus_122_rush-hour";
-const PILE_DRIVER = "onr_v1_047_pile-driver";
+const CORPORATE_WAR = 408;
+const SYSTEMATIC_LAYOFFS = 516;
+const CITY_SURVEILLANCE = 525;
+const BROKER = 366;
+const RUSH_HOUR = 180;
+const PILE_DRIVER = 259;
 
 describe("match series 70BE real Engine regressions", () => {
   beforeEach(() => {
@@ -79,9 +81,9 @@ describe("match series 70BE real Engine regressions", () => {
     RealEngineFixtureBuilder.forState(state)
       .withRunnerResourceInstalled(BROKER)
       .withRunnerGripSize(0)
-      .withRunnerCardInGrip("simple_decoder")
-      .withRezzedCorpIceOnServer("hq", "simple_code_gate_ice")
-      .withRezzedCorpIceOnServer("rd", "simple_code_gate_ice")
+      .withRunnerCardInGrip(591)
+      .withRezzedCorpIceOnServer("hq", 590)
+      .withRezzedCorpIceOnServer("rd", 590)
       .withRunnerCredits(6);
     const input = decisionInput(state, "runner", RUNNER_DECK);
     const build = input.legalActions.find(
@@ -97,10 +99,10 @@ describe("match series 70BE real Engine regressions", () => {
     const selected = input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
+    const decoder = state.runner.grip.find((id) => state.cardInstances[id]?.definitionId === 591);
+    expect(decoder).toBeDefined();
     expect(selected?.type).toBe("install_card");
-    expect(selected?.payload).toMatchObject({
-      cardId: "runner_simple_decoder_1",
-    });
+    expect(selected?.payload).toMatchObject({ cardId: decoder });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.rig_and_coverage",
@@ -114,7 +116,7 @@ describe("match series 70BE real Engine regressions", () => {
     RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(1)
       .withRunnerCredits(3)
-      .withCorpRemoteRoot("remote_1", CITY_SURVEILLANCE, 0, {
+      .withCorpRemoteRoot("r1", CITY_SURVEILLANCE, 0, {
         faceup: true,
         rezzed: true,
       });
@@ -153,7 +155,7 @@ describe("match series 70BE real Engine regressions", () => {
       .withRunnerGripSize(1)
       .withRunnerCredits(3)
       .withCorpCredits(1)
-      .withCorpRemoteRoot("remote_1", CITY_SURVEILLANCE, 0, {
+      .withCorpRemoteRoot("r1", CITY_SURVEILLANCE, 0, {
         faceup: false,
         rezzed: false,
       });
@@ -188,7 +190,7 @@ describe("match series 70BE real Engine regressions", () => {
       .withRunnerCardInGrip(RUSH_HOUR)
       .withRunnerProgramInstalled(PILE_DRIVER)
       .withRunnerCredits(3)
-      .withRezzedCorpIceOnServer("rd", "simple_barrier_ice");
+      .withRezzedCorpIceOnServer("rd", 589);
     const input = decisionInput(state, "runner", RUNNER_DECK);
     const rushHour = input.legalActions.find(
       (action) =>
@@ -224,7 +226,8 @@ describe("match series 70BE real Engine regressions", () => {
   it("keeps a safe productive central run above a non-acute one-card hand buffer", () => {
     const state = runnerTurnState("series-70be-hand-buffer-live-input");
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerGripSize(1)
+      .withRunnerGripSize(0)
+      .withRunnerCardInGrip(RUSH_HOUR)
       .withRunnerCredits(5);
     const input = decisionInput(state, "runner", RUNNER_DECK);
     const decision = chooseRunnerAction(input);
@@ -235,14 +238,20 @@ describe("match series 70BE real Engine regressions", () => {
     expect(["start_run", "play_event"]).toContain(selected?.type);
     expect(selected?.payload).toMatchObject({ serverId: "rd" });
     expect(decision.evidence).toContain("plan_module:runner.pressure_central");
+    const after = applyDecision(state, "runner", decision);
+    expect(after.run?.attackedServerId).toBe("rd");
+    const replay = replayEvents(state, after.eventLog.slice(state.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashGameState(replay.state)).toBe(hashGameState(after));
   });
 
   it("keeps a visible immediate remote score threat as a hand-buffer override", () => {
     const state = runnerTurnState("series-70be-hand-buffer-score-threat");
     RealEngineFixtureBuilder.forState(state)
-      .withRunnerGripSize(1)
+      .withRunnerGripSize(0)
+      .withRunnerCardInGrip(RUSH_HOUR)
       .withRunnerCredits(10)
-      .withCorpRemoteAgenda("remote_1", 2);
+      .withCorpRemoteAgenda("r1", 2);
     const input = decisionInput(state, "runner", RUNNER_DECK);
     const decision = chooseRunnerAction(input);
     const selected = input.legalActions.find(
@@ -251,8 +260,13 @@ describe("match series 70BE real Engine regressions", () => {
 
     expect(selected).toMatchObject({
       type: "start_run",
-      payload: { serverId: "remote_1" },
+      payload: { serverId: "r1" },
     });
+    const after = applyDecision(state, "runner", decision);
+    expect(after.run?.attackedServerId).toBe("r1");
+    const replay = replayEvents(state, after.eventLog.slice(state.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashGameState(replay.state)).toBe(hashGameState(after));
   });
 });
 
@@ -370,7 +384,7 @@ function applyByPredicate(
 function deck(
   base: DeckDefinition,
   id: string,
-  additions: string[],
+  additions: number[],
 ): DeckDefinition {
   return {
     ...base,

@@ -1,10 +1,14 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { createRunnerCentralPressureDiagnosticsForSimulationAction } from "./runner-central-pressure-diagnostics";
+import {
+  createRunnerCentralPressureDiagnosticsForSimulationAction,
+  type RunnerCentralPressureDiagnosticsDependencies,
+} from "./runner-central-pressure-diagnostics";
 
 describe("runner central pressure diagnostics", () => {
   it("matches installed multiaccess roles by bounded role terms", () => {
@@ -15,9 +19,39 @@ describe("runner central pressure diagnostics", () => {
       "runnerCentralRunWithMultiaccess",
     );
   });
+  it("checks the remaining general credits after the actual payment pools", () => {
+    const result = (general: number, canReachAccess = true) =>
+      diagnosticsForRoles([], {
+        runnerCreditReserveTargetForInput: () => 3,
+        assessKnownRezzedIcePath: () =>
+          ({
+            canReachAccess,
+            visibleBreakCost: 4,
+            creditBudgetAfterPath: {
+              credits: 4,
+              traceEligibleCredits: general,
+            },
+          }) as ReturnType<
+            RunnerCentralPressureDiagnosticsDependencies["assessKnownRezzedIcePath"]
+          >,
+      });
+
+    expect(result(4)).not.toHaveProperty(
+      "runnerCentralRunStartedWithInsufficientPostRunReserve",
+    );
+    expect(result(2)).toMatchObject({
+      runnerCentralRunStartedWithInsufficientPostRunReserve: true,
+    });
+    expect(result(0, false)).not.toHaveProperty(
+      "runnerCentralRunStartedWithInsufficientPostRunReserve",
+    );
+  });
 });
 
-function diagnosticsForRoles(roles: string[]) {
+function diagnosticsForRoles(
+  roles: string[],
+  overrides: Partial<RunnerCentralPressureDiagnosticsDependencies> = {},
+) {
   const diagnostics = createRunnerCentralPressureDiagnosticsForSimulationAction(
     {
       rolesForCardId: () => roles,
@@ -39,6 +73,7 @@ function diagnosticsForRoles(roles: string[]) {
       runnerCreditReserveTargetForInput: () => 0,
       assessKnownRezzedIcePath: () =>
         ({ blocked: false, visibleBreakCost: 0 }) as never,
+      ...overrides,
     },
   );
   return diagnostics(input(), startRun(), "rd");
@@ -90,10 +125,10 @@ function startRun(): LegalAction {
   };
 }
 
-function card(definitionId: string): VisibleCard {
+function card(id: number | string): VisibleCard {
   return {
-    instanceId: definitionId,
-    definitionId,
+    instanceId: typeof id === "number" ? "card_" + id : id,
+    definitionId: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     known: true,
   } as VisibleCard;
 }

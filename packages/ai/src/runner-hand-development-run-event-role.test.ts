@@ -12,7 +12,7 @@ import {
 describe("Runner hand-development run-event roles", () => {
   it("classifies a credit-tax run event as a run event before economy text", () => {
     const runningInterference = visibleCard("running-interference-1", {
-      definitionId: "onr_classic_043_running-interference",
+      definitionId: 47,
       title: "Running Interference",
       type: "event",
       cost: 1,

@@ -1,9 +1,10 @@
-import type { PublicGameEvent } from "@netgrid/shared";
+import type { AccessPresentationId } from "./access-reveal-ui";
+import { isCardDefinitionId, type PublicGameEvent } from "@netgrid/shared";
 
 export function appendPendingAccessPresentationEvents(
   current: PublicGameEvent[],
   incoming: PublicGameEvent[],
-  dismissedEventIds: string[],
+  dismissedEventIds: AccessPresentationId[],
 ): PublicGameEvent[] {
   const seen = new Set([
     ...dismissedEventIds,
@@ -20,7 +21,7 @@ export function appendPendingAccessPresentationEvents(
 
 export function dismissPendingAccessPresentationEvent(
   current: PublicGameEvent[],
-  eventId: string,
+  eventId: AccessPresentationId,
 ): PublicGameEvent[] {
   return current.filter((event) => event.eventId !== eventId);
 }
@@ -28,7 +29,7 @@ export function dismissPendingAccessPresentationEvent(
 function isPublicCardAccessEvent(event: PublicGameEvent): boolean {
   return (
     event.publicPayload.actionType === "access_card" &&
-    nonEmptyString(event.publicPayload.cardDefinitionId) &&
+    isCardDefinitionId(event.publicPayload.cardDefinitionId) &&
     nonEmptyString(event.publicPayload.title)
   );
 }

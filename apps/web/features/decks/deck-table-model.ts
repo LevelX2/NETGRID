@@ -1,3 +1,4 @@
+import { type CardDefinitionId } from "@netgrid/shared";
 import type { DeckPublicMetadata, Side } from "@netgrid/shared";
 
 type CatalogCardSummary = {
@@ -34,7 +35,7 @@ function deckBuilderCardGroup(card: CatalogCardSummary | null): string {
 }
 
 export type DeckCardEntry = {
-  cardId: string;
+  cardId: CardDefinitionId;
   quantity: number;
 };
 
@@ -43,7 +44,7 @@ export type EditableDeck = {
   deckVersion: string;
   name: string;
   side: Side;
-  identityCardId: string;
+  identityCardId: CardDefinitionId;
   cardPoolSnapshotId: string;
   cardPoolVersion?: string;
   formatProfileId: string;
@@ -71,7 +72,7 @@ export type DeckTablePileSortMode = "free" | DeckTableSortKey;
 export type DeckTableArrangeMode = "type" | "install-piles" | DeckTableSortKey;
 
 export type DeckTableLayoutEntry = {
-  cardId: string;
+  cardId: CardDefinitionId;
   quantity: number;
   order: number;
 };
@@ -92,7 +93,7 @@ export type DeckTableLayout = {
 
 export type DeckTableSelectionEntry = {
   pileId: string;
-  cardId: string;
+  cardId: CardDefinitionId;
   order: number;
 };
 
@@ -205,7 +206,7 @@ export function deckFingerprint(deck: EditableDeck): string {
     notes: deck.notes ?? "",
     tableLayout: deck.tableLayout ?? null,
     cards: [...deck.cards].sort((left, right) =>
-      left.cardId.localeCompare(right.cardId),
+      left.cardId - right.cardId,
     ),
   });
 }
@@ -226,7 +227,7 @@ export function deckStrategyProfileFingerprint(deck: EditableDeck): string {
         quantity: Math.max(0, Math.floor(entry.quantity)),
       }))
       .filter((entry) => entry.quantity > 0)
-      .sort((left, right) => left.cardId.localeCompare(right.cardId)),
+      .sort((left, right) => left.cardId - right.cardId),
   });
 }
 
@@ -313,10 +314,10 @@ export function deckTableSortRequiresDetails(
 
 export function normalizeDeckTableLayout(
   deck: EditableDeck,
-  cardLookup?: Map<string, CatalogCardSummary>,
+  cardLookup?: Map<CardDefinitionId, CatalogCardSummary>,
   detailsById: Record<string, CatalogCardDetail> = {},
 ): DeckTableLayout {
-  const desired = new Map<string, number>();
+  const desired = new Map<CardDefinitionId, number>();
   for (const entry of deck.cards) {
     if (!entry.cardId || !Number.isFinite(entry.quantity)) continue;
     desired.set(
@@ -400,7 +401,7 @@ export function normalizeDeckTableLayout(
     piles: normalizedPiles.map((pile) =>
       applyDeckTablePileSort(
         pile,
-        cardLookup ?? new Map<string, CatalogCardSummary>(),
+        cardLookup ?? new Map<CardDefinitionId, CatalogCardSummary>(),
         detailsById,
       ),
     ),
@@ -410,7 +411,7 @@ export function normalizeDeckTableLayout(
 export function deckCardsFromTableLayout(
   layout: DeckTableLayout,
 ): DeckCardEntry[] {
-  const byCard = new Map<string, number>();
+  const byCard = new Map<CardDefinitionId, number>();
   for (const pile of layout.piles) {
     for (const entry of pile.entries) {
       byCard.set(
@@ -423,12 +424,12 @@ export function deckCardsFromTableLayout(
   return [...byCard.entries()]
     .map(([cardId, quantity]) => ({ cardId, quantity }))
     .filter((entry) => entry.quantity > 0)
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+    .sort((left, right) => left.cardId - right.cardId);
 }
 
 export function deckTableCardTotal(
   layout: DeckTableLayout,
-  cardId: string,
+  cardId: CardDefinitionId,
 ): number {
   return layout.piles.reduce(
     (sum, pile) =>
@@ -502,7 +503,7 @@ export function insertDeckTableEntries(
 
 export function deckTableSelectionKey(
   pileId: string,
-  cardId: string,
+  cardId: CardDefinitionId,
   order: number,
 ): string {
   return `${pileId}::${order}::${cardId}`;
@@ -552,7 +553,7 @@ export function deckTableNumericSortValue(
 
 function sortDeckTableEntries(
   entries: DeckTableLayoutEntry[],
-  cardLookup: Map<string, CatalogCardSummary>,
+  cardLookup: Map<CardDefinitionId, CatalogCardSummary>,
   detailsById: Record<string, CatalogCardDetail>,
   sortBy: DeckTableSortKey,
 ): DeckTableLayoutEntry[] {
@@ -563,7 +564,7 @@ function sortDeckTableEntries(
       : value;
   };
   const titleValue = (entry: DeckTableLayoutEntry): string =>
-    cardLookup.get(entry.cardId)?.title ?? entry.cardId;
+    cardLookup.get(entry.cardId)?.title ?? String(entry.cardId);
   const typeValue = (entry: DeckTableLayoutEntry): string =>
     deckBuilderCardGroup(cardLookup.get(entry.cardId) ?? null);
   const numericKey = deckTableNumericKey(sortBy);
@@ -593,7 +594,7 @@ export function deckTablePileSortModeLabel(
 
 export function applyDeckTablePileSort(
   pile: DeckTablePile,
-  cardLookup: Map<string, CatalogCardSummary>,
+  cardLookup: Map<CardDefinitionId, CatalogCardSummary>,
   detailsById: Record<string, CatalogCardDetail>,
 ): DeckTablePile {
   if (pile.sortMode === "free")
@@ -646,7 +647,7 @@ function deckTableEntryBuildCost(
 function deckTableBuildCostGroupName(
   key: string,
   entries: DeckTableLayoutEntry[],
-  cardLookup: Map<string, CatalogCardSummary>,
+  cardLookup: Map<CardDefinitionId, CatalogCardSummary>,
 ): string {
   if (key === "overflow") return "Weitere Kosten";
   if (key === "none") return "Keine Kartenkosten";
@@ -673,7 +674,7 @@ function deckTableTypeGroupOrder(side: Side, label: string): number {
 export function distributeDeckTableByType(
   layout: DeckTableLayout,
   side: Side,
-  cardLookup: Map<string, CatalogCardSummary>,
+  cardLookup: Map<CardDefinitionId, CatalogCardSummary>,
   detailsById: Record<string, CatalogCardDetail>,
 ): DeckTableLayout {
   const allEntries = sortDeckTableEntries(
@@ -719,7 +720,7 @@ export function distributeDeckTableByType(
 export function distributeDeckTableByInstallCost(
   layout: DeckTableLayout,
   side: Side,
-  cardLookup: Map<string, CatalogCardSummary>,
+  cardLookup: Map<CardDefinitionId, CatalogCardSummary>,
   detailsById: Record<string, CatalogCardDetail>,
 ): DeckTableLayout {
   const allEntries = sortDeckTableEntries(
@@ -741,8 +742,8 @@ export function distributeDeckTableByInstallCost(
     return (
       normalizedLeft - normalizedRight ||
       leftType.localeCompare(rightType) ||
-      (cardLookup.get(left.cardId)?.title ?? left.cardId).localeCompare(
-        cardLookup.get(right.cardId)?.title ?? right.cardId,
+      (cardLookup.get(left.cardId)?.title ?? String(left.cardId)).localeCompare(
+        cardLookup.get(right.cardId)?.title ?? String(right.cardId),
       )
     );
   });

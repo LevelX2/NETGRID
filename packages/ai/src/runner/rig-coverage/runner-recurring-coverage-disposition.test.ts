@@ -12,10 +12,10 @@ describe("recurring-economy deferral of multipurpose coverage hardware", () => {
     "runner_restricted_run_economy_install_deferred",
     "runner_restricted_run_economy_hand_route_deferred",
   ])("keeps exact MU preparation executable despite %s", (evidenceCode) => {
-    const definitionId = "onr_proteus_151_sunburst-cranial-interface";
+    const definitionId = 209;
     const actions = ["bound-memory", "unbound-memory"].map((source) =>
       legalAction(
-        `runner.install_card.${source}`,
+        `rc.${source}`,
         "runner",
         "install_card",
         "Install memory hardware",

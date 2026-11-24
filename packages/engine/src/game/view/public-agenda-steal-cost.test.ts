@@ -11,29 +11,29 @@ function fixture() {
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_v1_366_red-herrings", quantity: 2 },
-        { id: "onr_proteus_008_project-zurich", quantity: 1 },
+        { id: 578, quantity: 2 },
+        { id: 66, quantity: 1 },
         ...ORIGINALSET_DEFAULT_DECKS.corp.cards.filter(
           (c) =>
             ![
-              "onr_v1_366_red-herrings",
-              "onr_proteus_008_project-zurich",
+              578,
+              66,
             ].includes(c.id),
         ),
       ],
     },
   });
-  const tax = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
-  const agenda = putCorpRootInRemote(state, "onr_proteus_008_project-zurich");
+  const tax = putCorpRootInRemote(state, 578);
+  const agenda = putCorpRootInRemote(state, 66);
   return { state, tax, agenda };
 }
 it("quotes only public active server modifiers before any agenda is known", () => {
   const { state, tax, agenda } = fixture();
   const quote = () =>
-    getPlayerView(state, "runner").servers.find((s) => s.id === "remote_1")!;
+    getPlayerView(state, "runner").servers.find((s) => s.id === "r1")!;
   expect(quote().runnerAgendaStealCostQuote).toMatchObject({
     stateVersion: state.stateVersion,
-    serverId: "remote_1",
+    serverId: "r1",
     minimumCreditCost: 0,
     complete: true,
   });
@@ -43,10 +43,10 @@ it("quotes only public active server modifiers before any agenda is known", () =
   expect(quote().root[1]).toMatchObject({ known: false });
   expect(quote().root[1]).not.toHaveProperty("definitionId");
   const original = structuredClone(quote().runnerAgendaStealCostQuote);
-  state.cardInstances[agenda]!.definitionId = "onr_v1_366_red-herrings";
+  state.cardInstances[agenda]!.definitionId = 578;
   expect(quote().runnerAgendaStealCostQuote).toEqual(original);
   expect(
-    getPlayerView(state, "corp").servers.find((s) => s.id === "remote_1"),
+    getPlayerView(state, "corp").servers.find((s) => s.id === "r1"),
   ).not.toHaveProperty("runnerAgendaStealCostQuote");
   expect(
     getPlayerView(state, "runner").servers.find((s) => s.id === "hq")!
@@ -61,12 +61,12 @@ it("keeps the complete known agenda cost distinct from the public lower bound", 
   state.cardInstances[tax]!.faceup = true;
   state.cardInstances[agenda]!.faceup = true;
   const view = getPlayerView(state, "runner"),
-    server = view.servers.find((s) => s.id === "remote_1")!;
+    server = view.servers.find((s) => s.id === "r1")!;
   expect(
     server.root.find((c) => c.instanceId === agenda)?.effectiveStealCostQuote,
   ).toEqual({
     stateVersion: state.stateVersion,
-    serverId: "remote_1",
+    serverId: "r1",
     agendaInstanceId: agenda,
     creditCost: 5,
     complete: true,
@@ -76,18 +76,18 @@ it("counts a public access snapshot once and preserves it after its active sourc
   const { state, tax } = fixture();
   state.cardInstances[tax]!.rezzed = true;
   state.run = {
-    runId: "public-steal-cost-snapshot",
-    attackedServerId: "remote_1",
+    runId: 201431,
+    attackedServerId: "r1",
     phase: "access",
-    position: { kind: "server", serverId: "remote_1" },
+    position: { kind: "server", serverId: "r1" },
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
     successful: true,
     accessStealCostModifierSnapshotsByServer: {
-      remote_1: [
+      r1: [
         {
           sourceCardInstanceId: tax,
-          sourceDefinitionId: "onr_v1_366_red-herrings",
+          sourceDefinitionId: 578,
           sourceTitle: "Red Herrings",
           amount: 5,
           visibility: "public",
@@ -96,8 +96,8 @@ it("counts a public access snapshot once and preserves it after its active sourc
       ],
     },
   };
-  expect(quotePublicServerAgendaStealCost(state, "remote_1")).toBe(5);
+  expect(quotePublicServerAgendaStealCost(state, "r1")).toBe(5);
   state.cardInstances[tax]!.rezzed = false;
-  expect(quotePublicServerAgendaStealCost(state, "remote_1")).toBe(5);
+  expect(quotePublicServerAgendaStealCost(state, "r1")).toBe(5);
   expect(quotePublicServerAgendaStealCost(state, "hq")).toBe(0);
 });

@@ -1,6 +1,6 @@
 import { chooseAiAction } from "./ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -13,9 +13,9 @@ import {
 import { RealEngineFixtureBuilder } from "./evaluation/real-engine-fixture-builder";
 import { evaluateRunnerHandDevelopment } from "./runner/hand-development/hand-development-evaluation";
 import standardCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
-const id = "onr_v1_064_skivviss";
+const id = 276;
 const entry = () =>
-  cardSpecPlanningCards().find((c) => c.definition.id === id)!;
+  listPlanningCardsWithFacts().find((c) => c.facts.id === id)!;
 const expected = {
   kind: "persistent_counter_effect",
   scope: "corp",
@@ -66,9 +66,9 @@ function nativeInput() {
   RealEngineFixtureBuilder.forState(s)
     .withRunnerGripSize(0)
     .withRunnerCardInGrip(id)
-    .withRunnerCardInGrip("onr_v1_095_jack-n-joe")
-    .withRunnerCardInGrip("onr_v1_097_livewires-contacts")
-    .withRunnerCardInGrip("onr_v1_133_militech-mram-chip")
+    .withRunnerCardInGrip(307)
+    .withRunnerCardInGrip(309)
+    .withRunnerCardInGrip(345)
     .withRunnerCredits(10)
     .withRunnerClicks(4);
   const input = buildAiDecisionInput(s, "runner", {
@@ -87,7 +87,11 @@ describe("canonical forced Corp draw reaches Runner development", () => {
     const { state, input } = nativeInput(),
       before = JSON.stringify(input);
     const d = chooseAiAction(input);
-    expect(d.actionId).toContain("install_card.runner_onr_v1_064_skivviss");
+    const install = input.legalActions.find((action) => action.actionId === d.actionId);
+    expect(install?.type).toBe("install_card");
+    expect(input.playerView.own.gripOrHq.find((card) =>
+      card.instanceId === install?.source,
+    )?.definitionId).toBe(276);
     expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
       "runner.pressure_central",
     );
@@ -117,17 +121,17 @@ describe("canonical forced Corp draw reaches Runner development", () => {
   });
   it("uses mechanics rather than the card identity", () => {
     const source = mechanical(),
-      base = cardSpecPlanningCards().find(
+      base = listPlanningCardsWithFacts().find(
         (c) =>
-          c.definition.side === "runner" &&
+          c.facts.side === "runner" &&
           !c.planning.engine.abilities &&
           !c.planning.engine.virusCounter,
       )!;
     expect(
       deriveCardSpecAiHint({
         ...base,
-        definition: {
-          ...base.definition,
+        facts: {
+          ...base.facts,
           title: "Unrelated identity",
           rulesText: "Unrelated text",
         },
@@ -178,7 +182,7 @@ describe("canonical forced Corp draw reaches Runner development", () => {
     expect(v.developmentRole).toBe("access_payoff");
     expect(
       evaluateRunnerHandDevelopment({ input }).find(
-        (v) => v.definitionId === "onr_v1_095_jack-n-joe",
+        (v) => v.definitionId === 307,
       )?.developmentRole,
     ).toBe("draw_or_search_engine");
     expect(v.persistentInstallEvaluation?.newFunctionalCoverage).toContain(

@@ -132,7 +132,7 @@ describe("pending choice resolution", () => {
   it("dispatches Schematics multi-expose review choices through the expose resolver", () => {
     const state = stateWithChoice(
       "schematics_review",
-      "p3_36.expose_installed_cards_review:ice_1|asset_1:schematics:onr_classic_032_schematics-search-engine:2",
+      "p3_36.expose_installed_cards_review:ice_1|asset_1:schematics:36:2",
     );
     const resolveExposeInstalledCorpCardsChoice = vi.fn();
 
@@ -195,7 +195,7 @@ describe("pending choice resolution", () => {
     );
     const sourceId = "schlaghund_1" as CardInstanceId;
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -203,10 +203,10 @@ describe("pending choice resolution", () => {
     });
     state.cardInstances[sourceId] = {
       instanceId: sourceId,
-      definitionId: "onr_v1_339_schlaghund",
+      definitionId: 551,
       owner: "corp",
       controller: "corp",
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
       faceup: true,
       rezzed: true,
       advancementCounters: 0,
@@ -215,7 +215,7 @@ describe("pending choice resolution", () => {
     state.pendingDamageFollowup = {
       kind: "trash_corp_source",
       sourceCardInstanceId: sourceId,
-      sourceDefinitionId: "onr_v1_339_schlaghund",
+      sourceDefinitionId: 551,
     };
     const trashSource = vi.fn();
     const resolveDamageChoice = vi.fn((current: GameState) => {
@@ -238,7 +238,7 @@ describe("pending choice resolution", () => {
     expect(trashSource).toHaveBeenCalledWith(state, sourceId, legalAction);
     expect(state.pendingDamageFollowup).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
-      sourceDefinitionId: "onr_v1_339_schlaghund",
+      sourceDefinitionId: 551,
       selfTrashed: true,
     });
   });
@@ -266,7 +266,7 @@ function stateWithChoice(choiceId: string, source: string): GameState {
 
 function choiceAction(choiceId: string): LegalAction {
   return {
-    actionId: `runner.resolve_choice.${choiceId}`,
+    actionId: `rn.${choiceId}`,
     side: "runner",
     type: "resolve_choice",
     label: "Choice",
@@ -287,7 +287,7 @@ function playerChoice(
   return {
     matchId: "local-demo-match",
     side: "runner",
-    actionId: `runner.resolve_choice.${choiceId}`,
+    actionId: `rn.${choiceId}`,
     clientKnownStateVersion: 0,
     selectedChoices: { choiceId, selectedOptionIds },
   };

@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { clickCreditBankProfile } from "../../plans/credit-bank-investment";
 import type { CorpHostedBankInvestment } from "./economy-types";
@@ -31,6 +32,8 @@ export function corpHostedBankLoadMatches(
     input.playerView.run === undefined &&
     investment.stateVersion === input.playerView.stateVersion &&
     candidate.actionId === investment.actionId &&
+    candidate.actorSide === input.side &&
+    candidate.stateVersion === investment.stateVersion &&
     candidate.sourceCardInstanceId === investment.sourceInstanceId &&
     candidate.sourceDefinitionId === investment.sourceDefinitionId &&
     card?.known === true &&
@@ -41,10 +44,9 @@ export function corpHostedBankLoadMatches(
     (card.counters?.bit ?? 0) === investment.storedCredits &&
     profile?.side === "corp" &&
     profile.creditsPerLoad === investment.creditsPerLoad &&
-    action?.side === "corp" &&
+    actionMatchesCurrentDecision(input, action) &&
     action.type === "activated_card_ability" &&
     action.source === investment.sourceInstanceId &&
-    action.expiresAtStateVersion === investment.stateVersion &&
     action.abilityRef?.sourceCardInstanceId === investment.sourceInstanceId &&
     action.abilityRef.sourceAbilityId === profile.loadAbilityId &&
     action.payload?.cardImplementationAddsHostedCredits === true &&

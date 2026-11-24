@@ -1,9 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
-import { withDecisionDerivedCache } from "./decision-derived-cache";
+import { withDecisionDerivedCache } from "../decision-derived-cache";
 import { createRunnerMultiRunContext } from "./runner-multi-run-context";
-import { createRunnerPersistentInstallContext } from "./runner-persistent-install-context";
 
 function runnerAction(actionId: string): LegalAction {
   return {
@@ -46,7 +45,7 @@ describe("runner decision-derived evaluations", () => {
         ] as unknown as RunnerRunTargetEvaluation[],
     );
     const context = createRunnerMultiRunContext({
-      sourceDefinitionIdForAction: () => "all-nighter",
+      sourceDefinitionIdForAction: () => 288,
       targetServerId: () => undefined,
       payoffClass: () => "normal",
       canTakeRun: () => true,
@@ -68,53 +67,5 @@ describe("runner decision-derived evaluations", () => {
       context.runnerMultiRunTargetEvaluation(input, action, "hq"),
     );
     expect(runTargets).toHaveBeenCalledTimes(3);
-  });
-
-  it("reuses hand development and per-action install fit within one decision", () => {
-    const firstAction = runnerAction("install-first");
-    const secondAction = runnerAction("install-second");
-    const input = runnerInput([firstAction, secondAction]);
-    const persistentInstallEvaluation = {
-      stackabilityClass: "absolute_non_stackable",
-      capabilityDelta: "backup_only",
-      duplicateRole: "redundant_duplicate",
-      finalInstallFit: -920,
-      evidence: ["duplicate"],
-    };
-    const handDevelopmentEvaluations = vi.fn(() => [
-      {
-        cardInstanceId: "install-first-card",
-        legalActionId: "install-first",
-        persistentInstallEvaluation,
-      },
-      {
-        cardInstanceId: "install-second-card",
-        legalActionId: "install-second",
-        persistentInstallEvaluation,
-      },
-    ]);
-    const context = createRunnerPersistentInstallContext({
-      deckCapabilities: () => ({}),
-      strategicIntent: () => ({}),
-      handDevelopmentEvaluations,
-    });
-
-    withDecisionDerivedCache(() => {
-      expect(
-        context.runnerPersistentInstallEvaluationForAction(input, firstAction),
-      ).toBe(persistentInstallEvaluation);
-      expect(
-        context.runnerPersistentInstallEvidenceForAction(input, firstAction),
-      ).toContain("persistentInstallFinalFit:-920");
-      expect(
-        context.runnerPersistentInstallEvaluationForAction(input, secondAction),
-      ).toBe(persistentInstallEvaluation);
-    });
-    expect(handDevelopmentEvaluations).toHaveBeenCalledTimes(1);
-
-    withDecisionDerivedCache(() =>
-      context.runnerPersistentInstallEvaluationForAction(input, firstAction),
-    );
-    expect(handDevelopmentEvaluations).toHaveBeenCalledTimes(2);
   });
 });

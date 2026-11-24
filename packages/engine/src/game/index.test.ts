@@ -149,9 +149,9 @@ describe("game facade", () => {
     expect(() => requireCurrentTrace(state)).toThrow("Kein aktiver Trace.");
 
     state.trace = {
-      traceId: "arch-12.trace",
+      traceId: 1,
       sourceCardInstanceId: state.runner.identity,
-      sourceDefinitionId: "demo_runner_identity",
+      sourceDefinitionId: 2958753808,
       traceLimit: 2,
       status: "corp_bid",
       successEffect: { type: "add_tag", amount: 1 },
@@ -165,7 +165,7 @@ describe("game facade", () => {
       "Es ist kein Runner-Trace-Bid offen.",
     );
     expect(describeCurrentTraceWindow(state)).toMatchObject({
-      traceId: "arch-12.trace",
+      traceId: 1,
       phase: "corp_bid",
       traceLimit: 2,
       hasCorpBid: false,
@@ -176,9 +176,9 @@ describe("game facade", () => {
 
   it("describes trace results without mutating state", () => {
     const trace = {
-      traceId: "arch-13.trace",
+      traceId: 1,
       sourceCardInstanceId: "runner-identity",
-      sourceDefinitionId: "demo_runner_identity",
+      sourceDefinitionId: 2958753808,
       traceRulesProfile: "classic_blind_corp_ties",
       traceLimit: 4,
       status: "post_bid_link",
@@ -213,9 +213,9 @@ describe("game facade", () => {
 
   it("starts a Classic Corp-ties trace at zero and keeps ties Corp-favorable", () => {
     const trace = {
-      traceId: "arch-13.strict-success",
+      traceId: 2,
       sourceCardInstanceId: "runner-identity",
-      sourceDefinitionId: "demo_runner_identity",
+      sourceDefinitionId: 2958753808,
       traceRulesProfile: "classic_blind_corp_ties",
       traceLimit: 5,
       status: "post_bid_link",

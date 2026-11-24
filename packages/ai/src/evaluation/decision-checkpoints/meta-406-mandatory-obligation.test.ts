@@ -28,7 +28,7 @@ it.each([
       runtime,
     );
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.actionId).toBe("cb");
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       route: {
         actionId: decision.actionId,
@@ -36,8 +36,10 @@ it.each([
       },
     });
     expect(
-      decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toMatch(/^plan:corp\.economy:/);
+      decision.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("corp.economy");
   },
 );
 
@@ -70,7 +72,7 @@ it("keeps multi-obligation funding reachable and does not impose the Corp deadli
     input.ownDeckSnapshot!.deckSnapshotId,
     runtime,
   );
-  expect(chooseAiAction(input).actionId).toBe("corp.gain_credit");
+  expect(chooseAiAction(input).actionId).toBe("cb");
   input.playerView.activeSide = "runner";
   expect(currentCorpCreditObligation(input)).toBeUndefined();
 });

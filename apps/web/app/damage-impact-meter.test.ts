@@ -14,10 +14,10 @@ describe("damageImpactMeterUnits", () => {
         runnerGripBefore: 3,
         runnerGripAfter: 1,
       }),
-    ).toEqual(["lost", "lost", "remaining", "flatline"]);
+    ).toEqual(["lost", "lost", "remaining"]);
   });
 
-  it("keeps all surviving cards next to the right-hand flatline boundary", () => {
+  it("shows all surviving cards after the lost cards", () => {
     expect(
       kinds({
         amount: 2,
@@ -32,19 +32,18 @@ describe("damageImpactMeterUnits", () => {
       "remaining",
       "remaining",
       "remaining",
-      "flatline",
     ]);
   });
 
-  it("places exact lethal damage before the flatline boundary", () => {
+  it("shows an empty grip without a flatline marker when the runner survives", () => {
     expect(
       kinds({
         amount: 3,
-        flatline: true,
+        flatline: false,
         runnerGripBefore: 3,
         runnerGripAfter: 0,
       }),
-    ).toEqual(["lost", "lost", "lost", "flatline"]);
+    ).toEqual(["lost", "lost", "lost"]);
   });
 
   it("places overkill damage beyond the flatline boundary", () => {
@@ -58,8 +57,12 @@ describe("damageImpactMeterUnits", () => {
     ).toEqual(["lost", "lost", "lost", "flatline", "overkill", "overkill"]);
   });
 
-  it("keeps the boundary visible when public grip counts are unavailable", () => {
+  it("shows the boundary for a confirmed flatline even without public grip counts", () => {
     expect(kinds({ amount: 2, flatline: false })).toEqual([
+      "unknown",
+      "unknown",
+    ]);
+    expect(kinds({ amount: 2, flatline: true })).toEqual([
       "unknown",
       "unknown",
       "flatline",

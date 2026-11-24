@@ -37,9 +37,9 @@ it("finishes the installed terminal-steal agenda before a speculative defense dr
   );
   const decision = chooseAiAction(input),
     root =
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_206_marine-arcology_1%3Aremote_1";
+      "pdvpqdj4cqkxou94gx0fkps709";
   expect(decision.actionId).toBe(
-    "corp.play_operation.corp_onr_v1_304_systematic-layoffs_2.corp_onr_v1_304_systematic-layoffs_2",
+    "ci.c36u.c36u",
   );
   expect(decision).toMatchObject({ fallbackUsed: false, timeoutUsed: false });
   expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({
@@ -71,7 +71,7 @@ it("finishes the installed terminal-steal agenda before a speculative defense dr
   const choice = getPlayerView(state, "corp").pendingChoice!;
   expect(choice.options).toHaveLength(1);
   expect(choice.options[0]!.id).toBe(
-    "placement_corp_onr_v1_206_marine-arcology_1_2",
+    "placement_c2l1_2",
   );
   step(
     getLegalActions(state, "corp").find((a) => a.type === "resolve_choice")!
@@ -98,7 +98,7 @@ it.each([1, 2, 3])(
   (agendaPoints) => {
     const f = {
       agendaPoints,
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       opponentAgendaPoints: 7 - agendaPoints,
       agendaPointsToWin: 7,
       visibleHqAgendaIds: ["hq-a", "hq-b"],

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -21,7 +22,7 @@ import {
 } from "./search-choice-activations";
 
 const sourceCardId = "source" as CardInstanceId;
-const sourceDefinitionId = "source_def" as CardDefinitionId;
+const sourceDefinitionId = 2523707740 as CardDefinitionId;
 
 function card(
   id: string,
@@ -30,7 +31,7 @@ function card(
   memoryCost = 0,
 ): CardDefinition {
   return {
-    id: id as CardDefinitionId,
+    id: syntheticCardDefinitionId(id),
     title,
     type,
     memoryCost,
@@ -118,7 +119,7 @@ describe("hidden-zone search choice activations", () => {
       "p3_37_search_stack_to_grip_11",
     );
     expect(host.state.pendingChoice?.source).toBe(
-      "p3_37.search_stack_to_grip:source:source_def:program:reveal:shuffle:11",
+      "p3_37.search_stack_to_grip:source:2523707740:program:reveal:shuffle:11",
     );
     expect(stackResult.publicPayload).toMatchObject({
       hiddenZoneAction: "p3_37_search_stack_to_grip",
@@ -229,7 +230,7 @@ describe("hidden-zone search choice activations", () => {
   it("starts p3_38 Mystery Box with a Corp review before Runner program choice", () => {
     const program = "program" as CardInstanceId;
     const resource = "resource" as CardInstanceId;
-    const run = { runId: "run_1" };
+    const run = { runId: 1 };
     const host = makeHost({
       run: run as NonNullable<HiddenZoneSearchActivationHost["state"]["run"]>,
       stack: [program, resource],
@@ -300,14 +301,14 @@ describe("hidden-zone search choice activations", () => {
     startTemporaryProgramInstallSourceActivation(host, {
       sourcePrefix: "p3_38.stack_or_trash_program_install",
       sourceCardId: "sneak_preview_instance" as CardInstanceId,
-      sourceDefinitionId: "temporary_program_install" as CardDefinitionId,
+      sourceDefinitionId: 4073938019 as CardDefinitionId,
     });
 
     expect(host.state.pendingChoice?.choiceId).toBe(
       "v1911_temporary_program_install_source_11",
     );
     expect(host.state.pendingChoice?.source).toBe(
-      "p3_38.stack_or_trash_program_install_source:sneak_preview_instance:temporary_program_install:11",
+      "p3_38.stack_or_trash_program_install_source:sneak_preview_instance:4073938019:11",
     );
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "temporary_program_install_source_choice",
@@ -318,7 +319,7 @@ describe("hidden-zone search choice activations", () => {
   it("starts Mystery Box public install choice without changing payload fields", () => {
     const program = "program" as CardInstanceId;
     const resource = "resource" as CardInstanceId;
-    const run = { runId: "run_1" };
+    const run = { runId: 1 };
     const host = makeHost({
       run: run as NonNullable<HiddenZoneSearchActivationHost["state"]["run"]>,
       stack: [program, resource],

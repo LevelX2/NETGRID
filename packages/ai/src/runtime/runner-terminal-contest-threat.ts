@@ -1,8 +1,9 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-import { mergedPublicHistory } from "./public-event-history";
+import { mergedPublicHistory } from "../public-event-history";
 
 /** Reconcealment does not erase an exposure that the belief owner still validates. */
 function rootMayBeAgenda(
@@ -10,14 +11,13 @@ function rootMayBeAgenda(
   serverId: string,
   card: AiDecisionInput["playerView"]["servers"][number]["root"][number],
   index: number,
-  minimumAgendaPoints = 0,
+  minimumAgendaPoints: number,
 ): boolean {
   if (card.known !== false)
     return (
       card.type === "agenda" &&
-      (minimumAgendaPoints === 0 ||
-        (card.agendaPoints !== undefined &&
-          card.agendaPoints >= minimumAgendaPoints))
+      card.agendaPoints !== undefined &&
+      card.agendaPoints >= minimumAgendaPoints
     );
   const memory = reconstructBeliefState(
     input,
@@ -28,7 +28,7 @@ function rootMayBeAgenda(
       entry.invalidatedBy.length === 0,
   );
   if (!memory) return true;
-  const definition = CARD_DEFINITIONS_BY_ID[memory.definitionId];
+  const definition = planningCardFactsByDefinitionId(memory.definitionId);
   if (!definition) {
     throw new PlanResolutionFailure("missing_card_definition", {
       side: input.side,
@@ -42,9 +42,8 @@ function rootMayBeAgenda(
   }
   return (
     definition.type === "agenda" &&
-    (minimumAgendaPoints === 0 ||
-      (definition.agendaPoints !== undefined &&
-        definition.agendaPoints >= minimumAgendaPoints))
+    definition.agendaPoints !== undefined &&
+    definition.agendaPoints >= minimumAgendaPoints
   );
 }
 
@@ -63,6 +62,7 @@ export type RunnerTerminalContestThreat = {
 export function runnerTerminalContestThreat(
   input: AiDecisionInput,
 ): RunnerTerminalContestThreat | undefined {
+  if (input.side !== "runner") return undefined;
   const pointsNeeded = Math.max(
     0,
     input.playerView.agendaPointsToWin - input.playerView.opponent.agendaPoints,
@@ -90,16 +90,16 @@ export function runnerTerminalContestThreat(
             : typeof targets?.scoredFromServerId === "string"
               ? targets.scoredFromServerId
               : undefined;
-        return serverId?.startsWith("remote_") ? [serverId] : [];
+        return isRemoteServerId(serverId) ? [serverId] : [];
       }),
     );
     const remoteServerIds = input.playerView.servers
       .filter(
         (server) =>
-          server.id.startsWith("remote_") &&
+          isRemoteServerId(server.id) &&
           previouslyScoredRemoteIds.has(server.id) &&
           server.root.some((card, index) =>
-            rootMayBeAgenda(input, server.id, card, index),
+            rootMayBeAgenda(input, server.id, card, index, pointsNeeded),
           ),
       )
       .map((server) => server.id)
@@ -127,16 +127,11 @@ export function runnerTerminalContestThreat(
     const visibleRemoteIds = input.playerView.servers
       .filter(
         (server) =>
-          server.id.startsWith("remote_") &&
+          isRemoteServerId(server.id) &&
           server.root.some(
             (card, index) =>
-              rootMayBeAgenda(
-                input,
-                server.id,
-                card,
-                index,
-                pointsNeeded === 4 ? 4 : 0,
-              ) && (card.advancementCounters ?? 0) >= 1,
+              rootMayBeAgenda(input, server.id, card, index, pointsNeeded) &&
+              (card.advancementCounters ?? 0) >= 1,
           ),
       )
       .map((server) => server.id)
@@ -163,10 +158,10 @@ export function runnerTerminalContestThreat(
   const visibleTwoPointRemoteIds = input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.root.some(
           (card, index) =>
-            rootMayBeAgenda(input, server.id, card, index) &&
+            rootMayBeAgenda(input, server.id, card, index, pointsNeeded) &&
             (card.advancementCounters ?? 0) >= 2,
         ),
     )
@@ -189,12 +184,12 @@ export function runnerTerminalContestThreat(
   const protectedHiddenRemoteIds = input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.ice.length >= 2 &&
         server.root.some(
           (card, index) =>
             card.known === false &&
-            rootMayBeAgenda(input, server.id, card, index),
+            rootMayBeAgenda(input, server.id, card, index, pointsNeeded),
         ),
     )
     .map((server) => server.id)
@@ -218,23 +213,25 @@ export function runnerTargetHasTerminalContestThreat(
   input: AiDecisionInput,
   targetServerId: string,
 ): boolean {
+  if (!isRemoteServerId(targetServerId)) return false;
   const terminalThreat = runnerTerminalContestThreat(input);
   if (!terminalThreat) return false;
+  if (terminalThreat.remoteServerIds.includes(targetServerId)) return true;
+  if (terminalThreat.kind !== "opponent_matchpoint") return false;
   const server = input.playerView.servers.find(
-    (candidate) => candidate.id === targetServerId,
+    ({ id }) => id === targetServerId,
   );
-  const visiblyAdvancedRoot =
+  return (
     server?.root.some(
       (card, index) =>
-        rootMayBeAgenda(input, server.id, card, index) &&
-        (card.advancementCounters ?? 0) > 0,
-    ) === true;
-  const repeatedMatchpointRemote =
-    terminalThreat.remoteServerIds.includes(targetServerId);
-  if (!visiblyAdvancedRoot && !repeatedMatchpointRemote) {
-    return false;
-  }
-  return (
-    terminalThreat.kind === "opponent_matchpoint" || repeatedMatchpointRemote
+        (card.advancementCounters ?? 0) > 0 &&
+        rootMayBeAgenda(
+          input,
+          server.id,
+          card,
+          index,
+          terminalThreat.pointsNeeded,
+        ),
+    ) === true
   );
 }

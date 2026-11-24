@@ -44,8 +44,8 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
     const checkpoint = fixture(confirmedDamageReserveJson);
     const publicPrefix = JSON.stringify(checkpoint.engine.eventPrefix);
 
-    expect(publicPrefix).not.toContain("onr_v1_284_chance-observation");
-    expect(publicPrefix).not.toContain("onr_v1_307_urban-renewal");
+    expect(publicPrefix).not.toContain(496);
+    expect(publicPrefix).not.toContain(519);
     expect(publicPrefix).not.toContain("Chance Observation");
     expect(publicPrefix).not.toContain("Urban Renewal");
   });
@@ -54,7 +54,7 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
     const checkpoint = fixture(marginalMemoryInstallJson);
     const state = checkpoint.engine.testOnlyGameState;
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!;
     for (const id of remote.ice) {
       state.corp.archives.push(id);
@@ -108,9 +108,9 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     // current ten-credit reaction reserve incomplete. The remote in 02/05
     // has an unknown root and unrezzed Fang, so it supplies no immediate payoff.
     checkpoint.expectation = {
-      acceptableActions: [{ actionId: "runner.gain_credit" }],
+      acceptableActions: [{ actionId: "rb" }],
       forbiddenActions: [
-        { sourceDefinitionId: "onr_v1_146_zetatech-mem-chip" },
+        { sourceDefinitionId: 358 },
       ],
       planExecution: {
         acceptablePlanKinds: ["runner.defense_and_recovery"],

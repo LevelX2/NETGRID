@@ -189,35 +189,35 @@ describe("V1.0.5K Card Release", () => {
     for (const definitionId of ONR_V1_0_5K_FINAL_CARD_IDS) {
       expect(
         CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
-        definitionId,
+        String(definitionId),
       ).toBe("playable_mvp");
     }
 
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_237_data-wall"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[449]).toMatchObject({
       rezCost: 1,
       strength: 0,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[450]).toMatchObject({
       rezCost: 2,
       strength: 1,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject(
+    expect(CARD_DEFINITIONS_BY_ID[451]).toMatchObject(
       {
         rezCost: 4,
         strength: 2,
       },
     );
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_144_tycho-mem-chip"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[356]).toMatchObject({
       installCost: 5,
       memoryLimitBonus: 3,
     });
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_146_zetatech-mem-chip"],
+      CARD_DEFINITIONS_BY_ID[358],
     ).toMatchObject({
       installCost: 3,
       memoryLimitBonus: 2,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_203_hostile-takeover"]).toMatchObject(
+    expect(CARD_DEFINITIONS_BY_ID[415]).toMatchObject(
       {
         advancementRequirement: 3,
         agendaPoints: 1,
@@ -249,22 +249,22 @@ describe("V1.0.5K Card Release", () => {
     let state = toRunnerTurn(v105kCardReleaseGame("v105k-memory-chips"));
     state.runner.credits = 40;
     state.runner.clicks = 10;
-    moveRunnerCardToGrip(state, "onr_v1_144_tycho-mem-chip");
-    moveRunnerCardToGrip(state, "onr_v1_146_zetatech-mem-chip");
+    moveRunnerCardToGrip(state, 356);
+    moveRunnerCardToGrip(state, 358);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_144_tycho-mem-chip",
+        sourceDefinition(state, action) === 356,
     );
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_146_zetatech-mem-chip",
+        sourceDefinition(state, action) === 358,
     );
 
     const runnerView = getPlayerView(state, "runner");
@@ -272,47 +272,47 @@ describe("V1.0.5K Card Release", () => {
     expect(runnerView.own.memoryLimit).toBe(9);
     expect(
       runnerView.own.rig?.find(
-        (card) => card.definitionId === "onr_v1_144_tycho-mem-chip",
+        (card) => card.definitionId === 356,
       )?.memoryLimitBonus,
     ).toBe(3);
     expect(
       runnerView.own.rig?.find(
-        (card) => card.definitionId === "onr_v1_146_zetatech-mem-chip",
+        (card) => card.definitionId === 358,
       )?.memoryLimitBonus,
     ).toBe(2);
 
     let gatedState = toRunnerTurn(v105kCardReleaseGame("v105k-memory-gate"));
     gatedState.runner.credits = 40;
     gatedState.runner.clicks = 10;
-    installRunnerProgramForTest(gatedState, "onr_v1_015_codeslinger");
-    installRunnerProgramForTest(gatedState, "onr_v1_052_raffles");
-    installRunnerProgramForTest(gatedState, "onr_v1_054_raptor");
-    installRunnerProgramForTest(gatedState, "onr_v1_070_tinweasel");
-    moveRunnerCardCopyToGrip(gatedState, "onr_v1_015_codeslinger");
+    installRunnerProgramForTest(gatedState, 227);
+    installRunnerProgramForTest(gatedState, 264);
+    installRunnerProgramForTest(gatedState, 266);
+    installRunnerProgramForTest(gatedState, 282);
+    moveRunnerCardCopyToGrip(gatedState, 227);
 
     expect(gatedState.runner.memoryUsed).toBe(4);
     expect(
       getLegalActions(gatedState, "runner").some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(gatedState, action) === "onr_v1_015_codeslinger",
+          sourceDefinition(gatedState, action) === 227,
       ),
     ).toBe(true);
 
-    moveRunnerCardToGrip(gatedState, "onr_v1_144_tycho-mem-chip");
+    moveRunnerCardToGrip(gatedState, 356);
     gatedState = apply(
       gatedState,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(gatedState, action) === "onr_v1_144_tycho-mem-chip",
+        sourceDefinition(gatedState, action) === 356,
     );
     expect(getPlayerView(gatedState, "runner").own.memoryLimit).toBe(7);
     expect(
       getLegalActions(gatedState, "runner").some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(gatedState, action) === "onr_v1_015_codeslinger",
+          sourceDefinition(gatedState, action) === 227,
       ),
     ).toBe(true);
   });
@@ -323,12 +323,12 @@ describe("V1.0.5K Card Release", () => {
     );
     state.runner.credits = 40;
     state.runner.clicks = 10;
-    installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
-    const rafflesId = installRunnerProgramForTest(state, "onr_v1_052_raffles");
-    installRunnerProgramForTest(state, "onr_v1_054_raptor");
-    installRunnerProgramForTest(state, "onr_v1_070_tinweasel");
-    installRunnerHardwareForTest(state, "onr_v1_144_tycho-mem-chip");
-    const sourceId = moveRunnerCardCopyToGrip(state, "onr_v1_015_codeslinger");
+    installRunnerProgramForTest(state, 227);
+    const rafflesId = installRunnerProgramForTest(state, 264);
+    installRunnerProgramForTest(state, 266);
+    installRunnerProgramForTest(state, 282);
+    installRunnerHardwareForTest(state, 356);
+    const sourceId = moveRunnerCardCopyToGrip(state, 227);
     const initial = structuredClone(state);
 
     expect(state.runner.memoryUsed).toBe(4);
@@ -337,7 +337,7 @@ describe("V1.0.5K Card Release", () => {
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_015_codeslinger" &&
+        sourceDefinition(state, action) === 227 &&
         action.payload?.runnerProgramTrashBeforeInstall === true,
     );
 
@@ -351,9 +351,9 @@ describe("V1.0.5K Card Release", () => {
       actionType: "install_card",
       abilityId: "runner_program_trash_before_install",
       effectKind: "install_card",
-      sourceDefinitionId: "onr_v1_015_codeslinger",
+      sourceDefinitionId: 227,
       targets: {
-        installedProgramDefinitionId: "onr_v1_015_codeslinger",
+        installedProgramDefinitionId: 227,
         installDeferredForMemory: true,
       },
     });
@@ -389,15 +389,15 @@ describe("V1.0.5K Card Release", () => {
       actionType: "resolve_choice",
       abilityId: "runner_program_trash_before_install",
       effectKind: "install_card",
-      sourceDefinitionId: "onr_v1_015_codeslinger",
+      sourceDefinitionId: 227,
       amounts: {
         trashedCount: 1,
         memoryUsedAfter: 4,
         memoryLimitAfter: 7,
       },
       targets: {
-        installedProgramDefinitionId: "onr_v1_015_codeslinger",
-        trashedCardDefinitionIds: "onr_v1_052_raffles",
+        installedProgramDefinitionId: 227,
+        trashedCardDefinitionIds: "264",
         installed: true,
       },
     });
@@ -426,18 +426,18 @@ describe("V1.0.5K Card Release", () => {
     );
     state.runner.credits = 40;
     state.runner.clicks = 10;
-    installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
-    const rafflesId = installRunnerProgramForTest(state, "onr_v1_052_raffles");
-    installRunnerProgramForTest(state, "onr_v1_054_raptor");
-    installRunnerProgramForTest(state, "onr_v1_070_tinweasel");
-    const sourceId = moveRunnerCardCopyToGrip(state, "onr_v1_015_codeslinger");
+    installRunnerProgramForTest(state, 227);
+    const rafflesId = installRunnerProgramForTest(state, 264);
+    installRunnerProgramForTest(state, 266);
+    installRunnerProgramForTest(state, 282);
+    const sourceId = moveRunnerCardCopyToGrip(state, 227);
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_015_codeslinger" &&
+        sourceDefinition(state, action) === 227 &&
         action.payload?.runnerProgramTrashBeforeInstall === true,
     );
 
@@ -520,9 +520,9 @@ describe("V1.0.5K Card Release", () => {
   it("breaks matching V1.0.5K ICE subroutines and rejects mismatched breaker targets", () => {
     let state = toRunnerTurn(v105kCardReleaseGame("v105k-raffles-endless"));
     state.runner.credits = 20;
-    installRunnerProgramForTest(state, "onr_v1_052_raffles");
-    putCorpIceOnServer(state, "rd", "onr_v1_239_endless-corridor");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    installRunnerProgramForTest(state, 264);
+    putCorpIceOnServer(state, "rd", 451);
+    putCorpCardOnTopOfRd(state, 596);
     state.corp.credits = 20;
 
     state = apply(
@@ -536,7 +536,7 @@ describe("V1.0.5K Card Release", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_239_endless-corridor",
+        sourceDefinition(state, action) === 451,
     );
     state = enterEncounterFromMovementWindow(state);
     state = apply(
@@ -544,7 +544,7 @@ describe("V1.0.5K Card Release", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_052_raffles" &&
+        sourceDefinition(state, action) === 264 &&
         action.payload?.subroutineIndex === 0,
     );
     state = apply(
@@ -552,7 +552,7 @@ describe("V1.0.5K Card Release", () => {
       "runner",
       (action) =>
         action.type === "break_subroutine" &&
-        sourceDefinition(state, action) === "onr_v1_052_raffles" &&
+        sourceDefinition(state, action) === 264 &&
         action.payload?.subroutineIndex === 1,
     );
     state = continueRunThroughMovement(state);
@@ -560,12 +560,12 @@ describe("V1.0.5K Card Release", () => {
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
     });
 
     for (const [breakerId, iceId] of [
-      ["onr_v1_015_codeslinger", "onr_v1_237_data-wall"],
-      ["onr_v1_070_tinweasel", "onr_v1_232_crystal-wall"],
+      [227, 449],
+      [282, 444],
     ] as const) {
       let mismatch = toRunnerTurn(
         v105kCardReleaseGame(`v105k-mismatch-${breakerId}`),
@@ -610,7 +610,7 @@ describe("V1.0.5K Card Release", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
     state.corp.clicks = 10;
-    moveCorpCardToHq(state, "onr_v1_203_hostile-takeover");
+    moveCorpCardToHq(state, 415);
     const initial = structuredClone(state);
 
     state = apply(
@@ -618,28 +618,28 @@ describe("V1.0.5K Card Release", () => {
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_203_hostile-takeover",
+        sourceDefinition(state, action) === 415,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(state, action) === "onr_v1_203_hostile-takeover",
+        sourceDefinition(state, action) === 415,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(state, action) === "onr_v1_203_hostile-takeover",
+        sourceDefinition(state, action) === 415,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "advance_card" &&
-        sourceDefinition(state, action) === "onr_v1_203_hostile-takeover",
+        sourceDefinition(state, action) === 415,
     );
     const beforeScoreCredits = state.corp.credits;
     state = apply(
@@ -647,14 +647,14 @@ describe("V1.0.5K Card Release", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_203_hostile-takeover",
+        sourceDefinition(state, action) === 415,
     );
 
     expect(state.corp.credits).toBe(beforeScoreCredits + 5);
     expect(agendaPoints(state, "corp")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "score_agenda",
-      cardDefinitionId: "onr_v1_203_hostile-takeover",
+      cardDefinitionId: 415,
       onScoreGainCredits: 5,
       corpCreditsAfter: state.corp.credits,
     });
@@ -676,8 +676,8 @@ describe("V1.0.5K Card Release", () => {
       id: "v105k_remote_root_limit_corp",
       cards: [
         ...ONR_V1_0_5K_CORP_DECK.cards,
-        { id: "simple_economy_asset", quantity: 1 },
-        { id: "simple_upgrade", quantity: 1 },
+        { id: 594, quantity: 1 },
+        { id: 606, quantity: 1 },
       ],
     };
     let state = createGameAfterSetup({
@@ -689,17 +689,17 @@ describe("V1.0.5K Card Release", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
     state.corp.clicks = 10;
-    moveCorpCardToHq(state, "onr_v1_203_hostile-takeover");
-    moveCorpCardToHq(state, "simple_agenda");
-    moveCorpCardToHq(state, "simple_economy_asset");
-    moveCorpCardToHq(state, "simple_upgrade");
+    moveCorpCardToHq(state, 415);
+    moveCorpCardToHq(state, 588);
+    moveCorpCardToHq(state, 594);
+    moveCorpCardToHq(state, 606);
 
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_203_hostile-takeover" &&
+        sourceDefinition(state, action) === 415 &&
         action.payload?.serverId === "new_remote",
     );
     const actions = getLegalActions(state, "corp");
@@ -708,31 +708,31 @@ describe("V1.0.5K Card Release", () => {
       actions.some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(state, action) === "simple_agenda" &&
-          action.payload?.serverId === "remote_1",
+          sourceDefinition(state, action) === 588 &&
+          action.payload?.serverId === "r1",
       ),
     ).toBe(false);
     expect(
       actions.some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(state, action) === "simple_economy_asset" &&
-          action.payload?.serverId === "remote_1",
+          sourceDefinition(state, action) === 594 &&
+          action.payload?.serverId === "r1",
       ),
     ).toBe(false);
     expect(
       actions.some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(state, action) === "simple_upgrade" &&
-          action.payload?.serverId === "remote_1",
+          sourceDefinition(state, action) === 606 &&
+          action.payload?.serverId === "r1",
       ),
     ).toBe(true);
     expect(
       actions.some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(state, action) === "simple_agenda" &&
+          sourceDefinition(state, action) === 588 &&
           action.payload?.serverId === "new_remote",
       ),
     ).toBe(true);
@@ -744,7 +744,7 @@ describe("V1.0.5K Card Release", () => {
       id: "v105k_agenda_over_node_corp",
       cards: [
         ...ONR_V1_0_5K_CORP_DECK.cards,
-        { id: "simple_economy_asset", quantity: 1 },
+        { id: 594, quantity: 1 },
       ],
     };
     let state = createGameAfterSetup({
@@ -756,8 +756,8 @@ describe("V1.0.5K Card Release", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
     state.corp.clicks = 10;
-    const assetId = moveCorpCardToHq(state, "simple_economy_asset");
-    const agendaId = moveCorpCardToHq(state, "simple_agenda");
+    const assetId = moveCorpCardToHq(state, 594);
+    const agendaId = moveCorpCardToHq(state, 588);
 
     state = apply(
       state,
@@ -778,15 +778,15 @@ describe("V1.0.5K Card Release", () => {
       (action) =>
         action.type === "install_card" &&
         action.payload?.cardId === agendaId &&
-        action.payload?.serverId === "remote_1" &&
+        action.payload?.serverId === "r1" &&
         action.payload?.rootReplacement === "asset_to_agenda",
     );
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
           action.type === "install_card" &&
-          sourceDefinition(state, action) === "simple_economy_asset" &&
-          action.payload?.serverId === "remote_1",
+          sourceDefinition(state, action) === 594 &&
+          action.payload?.serverId === "r1",
       ),
     ).toBe(false);
 
@@ -798,7 +798,7 @@ describe("V1.0.5K Card Release", () => {
       (action) => action.actionId === installAgenda.actionId,
     );
     const remote = state.corp.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     );
     expect(remote?.root).toContain(agendaId);
     expect(remote?.root).not.toContain(assetId);
@@ -812,7 +812,7 @@ describe("V1.0.5K Card Release", () => {
     expect(state.cardInstances[agendaId]?.zone).toEqual({
       side: "corp",
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
@@ -831,7 +831,7 @@ describe("V1.0.5K Card Release", () => {
     let state = toRunnerTurn(
       v105kCardReleaseGame("v105k-visibility-data-wall-2"),
     );
-    putCorpIceOnServer(state, "rd", "onr_v1_238_data-wall-2-0");
+    putCorpIceOnServer(state, "rd", 450);
     state.corp.credits = 20;
 
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
@@ -849,7 +849,7 @@ describe("V1.0.5K Card Release", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_238_data-wall-2-0",
+        sourceDefinition(state, action) === 450,
     );
 
     expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
@@ -858,7 +858,7 @@ describe("V1.0.5K Card Release", () => {
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_ice",
-      cardDefinitionId: "onr_v1_238_data-wall-2-0",
+      cardDefinitionId: 450,
       title: "Data Wall 2.0",
     });
   });

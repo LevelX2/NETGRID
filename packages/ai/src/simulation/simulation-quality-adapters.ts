@@ -12,17 +12,18 @@ import {
 import {
   metricsForSimulationActionSequence,
   type AiQualityMetrics,
+  type SimulationFailureCounts,
 } from "./quality-metrics";
 
 export function metricsFor(
   actionSequence: AiSimulationSummary["actionSequence"],
-  errors: string[],
+  failures: SimulationFailureCounts,
   replayOk: boolean,
   holdout: boolean,
 ): AiQualityMetrics {
   return metricsForSimulationActionSequence(
     actionSequence,
-    errors,
+    failures,
     replayOk,
     holdout,
     summarizeDoctrineQualityMetrics,

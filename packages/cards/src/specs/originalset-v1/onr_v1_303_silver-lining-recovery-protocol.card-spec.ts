@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_303_silver-lining-recovery-protocol",
+      515,
     ),
     title: "Silver Lining Recovery Protocol",
     side: "corp",

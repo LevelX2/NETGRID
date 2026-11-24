@@ -1,5 +1,5 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
-import { quoteCorpDefensePackageRetention } from "../defense/corp-defense-package-retention";
+import { corpDefensePackageRetentionPairs } from "../defense/corp-defense-package-retention";
 import { discardOptionInstanceId } from "../../runtime/discard-choice-option";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
@@ -116,65 +116,151 @@ export function selectedCorpHqRetainPaymentOptionIds(
         ...input.playerView.own.gripOrHq,
       ].reduce((sum, card) => sum + points(card), 0);
   }
-  const selectedSets = (selectionCount: number) =>
-    combinations(ranked, selectionCount)
-      .map((entries) => ({
-        entries,
-        terminalExposure:
-          archivesOpen &&
-          exposedBeforeRetention -
-            entries.reduce((sum, entry) => sum + points(entry.card), 0) >=
-            input.playerView.agendaPointsToWin,
-        total:
-          entries.reduce((sum, entry) => sum + entry.score, 0) +
-          quoteCorpDefensePackageRetention(
-            input,
-            entries.map((entry) => entry.card),
-          ).bonus,
-        key: entries
-          .map((entry) => entry.option.id)
-          .sort()
-          .join("|"),
-      }))
-      .sort(
-        (left, right) =>
-          right.total - left.total || left.key.localeCompare(right.key),
-      );
-  const baseline = selectedSets(count);
-  if (!baseline.length) return fail();
-  // Change neither ordinary reserve spending nor already unavoidable exposure.
-  // Only the cheapest payable set that removes terminal open-Archives exposure
-  // may consume additional reserve; at the same count safety precedes keep value.
-  for (
-    let selectionCount = count;
-    selectionCount <= absoluteAffordableCount;
-    selectionCount++
-  ) {
-    const sets =
-      selectionCount === count ? baseline : selectedSets(selectionCount);
-    const safe = sets.find((set) => !set.terminalExposure);
-    if (safe) return safe.entries.map((entry) => entry.option.id);
-    if (!archivesOpen) break;
+  if (!Number.isSafeInteger(exposedBeforeRetention)) return fail();
+  const requiredRetainedPoints = archivesOpen
+    ? Math.max(
+        0,
+        exposedBeforeRetention - input.playerView.agendaPointsToWin + 1,
+      )
+    : 0;
+  const rankedOptions = ranked.map((entry, index) => ({
+    index,
+    instanceId: entry.card.instanceId,
+    optionId: entry.option.id,
+    score: entry.score,
+    agendaPoints: archivesOpen ? points(entry.card) : 0,
+  }));
+  if (rankedOptions.some((option) => !Number.isFinite(option.score)))
+    return fail();
+
+  const byInstance = new Map(
+    rankedOptions.map((option) => [option.instanceId, option]),
+  );
+  const maximumCount =
+    requiredRetainedPoints > 0 ? absoluteAffordableCount : count;
+  const selections = retentionSelections(
+    rankedOptions,
+    maximumCount,
+    requiredRetainedPoints,
+    [],
+    0,
+  );
+  // A package's value is its best eligible pair. Maximizing over each forced
+  // pair and the unbonused selection preserves the same portfolio scoring.
+  for (const pair of corpDefensePackageRetentionPairs(
+    input,
+    ranked.map(({ card }) => card),
+  )) {
+    const ice = byInstance.get(pair.iceInstanceId);
+    const support = byInstance.get(pair.supportInstanceId);
+    if (!ice || !support || ice === support || maximumCount < 2) continue;
+    const withPair = retentionSelections(
+      rankedOptions,
+      maximumCount,
+      requiredRetainedPoints,
+      [ice, support],
+      pair.bonus,
+    );
+    for (let size = 2; size <= maximumCount; size++) {
+      for (const [agendaPoints, selection] of withPair[size]!) {
+        keepBetterSelection(selections[size]!, agendaPoints, selection);
+      }
+    }
   }
-  return baseline[0]!.entries.map((entry) => entry.option.id);
+  for (let size = count; size <= maximumCount; size++) {
+    const safe = selections[size]!.get(requiredRetainedPoints);
+    if (safe) return selectedOptionIds(safe);
+  }
+  const baseline = [...selections[count]!.values()].sort(compareSelections)[0];
+  return baseline ? selectedOptionIds(baseline) : fail();
 }
 
-function combinations<T>(values: readonly T[], count: number): T[][] {
-  if (count === 0) return [[]];
-  if (count < 0 || count > values.length) return [];
-  const result: T[][] = [];
-  const visit = (start: number, selected: T[]): void => {
-    if (selected.length === count) {
-      result.push([...selected]);
-      return;
+type RankedRetentionOption = {
+  index: number;
+  instanceId: string;
+  optionId: string;
+  score: number;
+  agendaPoints: number;
+};
+
+type RetentionSelection = {
+  options: readonly RankedRetentionOption[];
+  value: number;
+  tieKey: string;
+};
+
+function retentionSelections(
+  options: readonly RankedRetentionOption[],
+  maximumCount: number,
+  requiredPoints: number,
+  forced: readonly RankedRetentionOption[],
+  bonus: number,
+): Array<Map<number, RetentionSelection>> {
+  const selections = Array.from(
+    { length: maximumCount + 1 },
+    () => new Map<number, RetentionSelection>(),
+  );
+  const initialPoints = Math.min(
+    requiredPoints,
+    forced.reduce((sum, entry) => sum + entry.agendaPoints, 0),
+  );
+  const initialValue = forced.reduce((sum, entry) => sum + entry.score, bonus);
+  selections[forced.length]!.set(
+    initialPoints,
+    retentionSelection(forced, initialValue),
+  );
+  for (const option of options) {
+    if (forced.includes(option)) continue;
+    for (let count = maximumCount; count > forced.length; count--) {
+      for (const [points, prior] of selections[count - 1]!) {
+        const nextPoints = Math.min(
+          requiredPoints,
+          points + option.agendaPoints,
+        );
+        const next = retentionSelection(
+          [...prior.options, option],
+          prior.value + option.score,
+        );
+        keepBetterSelection(selections[count]!, nextPoints, next);
+      }
     }
-    const remaining = count - selected.length;
-    for (let index = start; index <= values.length - remaining; index++) {
-      selected.push(values[index]!);
-      visit(index + 1, selected);
-      selected.pop();
-    }
+  }
+  return selections;
+}
+
+function retentionSelection(
+  options: readonly RankedRetentionOption[],
+  value: number,
+): RetentionSelection {
+  return {
+    options,
+    value,
+    tieKey: options
+      .map(({ optionId }) => optionId)
+      .sort()
+      .join("|"),
   };
-  visit(0, []);
-  return result;
+}
+
+function compareSelections(
+  left: RetentionSelection,
+  right: RetentionSelection,
+): number {
+  return right.value - left.value || left.tieKey.localeCompare(right.tieKey);
+}
+
+function keepBetterSelection(
+  selections: Map<number, RetentionSelection>,
+  points: number,
+  candidate: RetentionSelection,
+): void {
+  const prior = selections.get(points);
+  if (!prior || compareSelections(candidate, prior) < 0)
+    selections.set(points, candidate);
+}
+
+function selectedOptionIds(selection: RetentionSelection): string[] {
+  return [...selection.options]
+    .sort((left, right) => left.index - right.index)
+    .map(({ optionId }) => optionId);
 }

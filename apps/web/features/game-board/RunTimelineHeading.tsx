@@ -1,4 +1,4 @@
-import type { PlayerView } from "@netgrid/shared";
+import type { PlayerView } from "../../lib/presented-player-view";
 import { runHeaderTargetLabel } from "./run-header";
 
 /** Two single-line rows; the phase remains visible when the server is long. */

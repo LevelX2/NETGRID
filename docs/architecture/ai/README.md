@@ -209,6 +209,7 @@ fachliche Idee steht ausdrücklich als offen in den Ownerverträgen.
 - [R&D-Zugriffsgedächtnis](rnd-access-memory.md): geordnete side-sichere Erinnerung.
 - [Simulations- und Evidenzmatrix](simulation-test-matrix.md): passende Nachweise.
 - [Arbeitsboard](../../activities/README.md): aktueller Umsetzungsauftrag.
+- [Offene Befunde aus dem KI-Code- und Owner-Review](../../reviews/ai/ai-code-and-ownership-review.md)
 
 ## Pflegevertrag
 

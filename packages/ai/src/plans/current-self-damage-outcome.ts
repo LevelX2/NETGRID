@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { exactImmediateHandDelta } from "../actions/action-candidate-facts";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 
 export type CurrentSelfDamageOutcome = {
   handCountDelta: number;
@@ -19,10 +20,11 @@ export function currentSelfDamageOutcome(
   const sourceDelta = exactImmediateHandDelta(candidate);
   if (
     input.side !== "runner" ||
-    action.side !== "runner" ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.type !== "play_event" ||
     candidate.stateVersion !== input.playerView.stateVersion ||
-    action.expiresAtStateVersion !== candidate.stateVersion ||
+    candidate.actorSide !== input.side ||
+    candidate.timingProfile.window !== input.playerView.timingPoint ||
     candidate.actionId !== action.actionId ||
     candidate.sourceCardInstanceId !== action.source ||
     !input.playerView.own.gripOrHq.some(

@@ -1,6 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import {
+  decodeStoredEngineEvent,
+  decodeStoredGameState,
+} from "../apps/server/src/storage-sqlite";
 import { buildAiDecisionInput, chooseAiAction } from "../packages/ai/src/index";
 import { getLegalActions } from "../packages/engine/src/index";
 import type {
@@ -19,13 +23,15 @@ import {
 } from "../packages/ai/src/evaluation/current-ai-holdout-runner";
 import { replayDecisionCaseSplit } from "../packages/ai/src/evaluation/replay-decision-case-extraction";
 import { assertSemanticObjectSideSafe } from "../packages/ai/src/diagnostics/semantic-redaction";
+import {
+  applySimulationEngineSelection,
+  simulationEngineRuntimeOptions,
+} from "../packages/ai/src/simulation/engine-selection";
 
 type TraceRow = {
   matchId: string;
   mode: string;
   status: string;
-  traceId: string;
-  eventId: string;
   stateVersion: number;
   matchVersion: number;
   side: Side;
@@ -124,7 +130,7 @@ function selectHoldoutTraces(
 ): TraceRow[] {
   const sql = `${selectTraceRowsSql()}
     ${maxCreatedAt ? "WHERE t.created_at <= ?" : ""}
-    ORDER BY m.created_at ASC, t.decision_index ASC, t.trace_id ASC`;
+    ORDER BY m.created_at ASC, m.match_id ASC, t.decision_index ASC`;
   const rows = (
     maxCreatedAt ? db.prepare(sql).all(maxCreatedAt) : db.prepare(sql).all()
   ) as TraceRow[];
@@ -144,8 +150,6 @@ function selectTraceRowsSql(): string {
       m.match_id AS matchId,
       m.mode AS mode,
       m.status AS status,
-      t.trace_id AS traceId,
-      t.event_id AS eventId,
       t.state_version AS stateVersion,
       t.match_version AS matchVersion,
       t.side AS side,
@@ -167,6 +171,8 @@ function evaluateTrace(
   trace: TraceRow,
 ): CurrentAiHoldoutEvaluation {
   const base = baseEvaluation(trace);
+  let failureStage: "reconstruction_error" | "ai_error" =
+    "reconstruction_error";
   try {
     const state = stateForTrace(db, trace);
     if (!state) {
@@ -203,10 +209,22 @@ function evaluateTrace(
       ownDeckSnapshot,
     });
     assertSemanticObjectSideSafe(input, "CurrentAiHoldoutAiInput");
-    const decision = chooseAiAction(input);
-    const selected = legalActions.find(
-      (action) => action.actionId === decision.actionId,
+    failureStage = "ai_error";
+    const decision = chooseAiAction(
+      input,
+      simulationEngineRuntimeOptions(state),
     );
+    const randomizedResult = applySimulationEngineSelection(
+      state,
+      decision,
+      `holdout:${base.caseKey}`,
+    );
+    const selected =
+      randomizedResult === undefined
+        ? legalActions.find((action) => action.actionId === decision.actionId)
+        : randomizedResult.ok
+          ? randomizedResult.receipt.selectedLegalAction
+          : undefined;
     return {
       ...base,
       status: "evaluated",
@@ -221,7 +239,7 @@ function evaluateTrace(
       ...base,
       status: message.includes("forbidden hidden-info marker")
         ? "redaction_violation"
-        : "ai_error",
+        : failureStage,
       errorCode: safeErrorCode(message),
     };
   }
@@ -234,9 +252,6 @@ function baseEvaluation(trace: TraceRow): CurrentAiHoldoutEvaluation {
     status: "reconstruction_error",
     caseKey: currentAiHoldoutCaseKey({
       matchId: trace.matchId,
-      traceId: trace.traceId,
-      eventId: trace.eventId,
-      stateVersion: trace.stateVersion,
       decisionIndex: trace.decisionIndex,
     }),
     side: trace.side,
@@ -308,7 +323,7 @@ function stateForTrace(
     )
     .get(trace.matchId, trace.stateVersion) as SnapshotRow | undefined;
   if (!row?.gameStateJson) return undefined;
-  const state = JSON.parse(row.gameStateJson) as GameState;
+  const state = decodeStoredGameState(row.gameStateJson);
   state.eventLog = engineEventsFor(db, trace.matchId).filter(
     (event) => event.stateVersionAfter <= state.stateVersion,
   );
@@ -318,10 +333,10 @@ function stateForTrace(
 function engineEventsFor(db: DatabaseSync, matchId: string): GameEvent[] {
   const rows = db
     .prepare(
-      "SELECT event_json AS eventJson FROM engine_events WHERE match_id = ? ORDER BY event_index ASC",
+      "SELECT event_id AS eventId, event_json AS eventJson FROM engine_events WHERE match_id = ? ORDER BY event_index ASC",
     )
-    .all(matchId) as Array<{ eventJson: string }>;
-  return rows.map((row) => JSON.parse(row.eventJson) as GameEvent);
+    .all(matchId) as Array<Parameters<typeof decodeStoredEngineEvent>[0]>;
+  return rows.map(decodeStoredEngineEvent);
 }
 
 function aiControllerFor(
@@ -368,9 +383,12 @@ function currentDecisionSummary(
   selected: LegalAction | undefined,
   legalActions: readonly LegalAction[],
 ): NonNullable<CurrentAiHoldoutEvaluation["current"]> {
+  const actionId = selected?.actionId ?? decision.actionId;
   return {
     ...(selected ? { actionType: selected.type } : {}),
-    actionIdDigest: currentAiHoldoutActionDigest(decision.actionId),
+    ...(actionId
+      ? { actionIdDigest: currentAiHoldoutActionDigest(actionId) }
+      : {}),
     ...(decision.decisionDebug?.planKind
       ? { planKind: decision.decisionDebug.planKind }
       : {}),

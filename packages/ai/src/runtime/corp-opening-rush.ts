@@ -1,4 +1,7 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { isRemoteServerId } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
+import { readExactCurrentInstalledCorpIceRezQuote } from "./corp-exact-ice-rez-route";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpFundedRemoteAccessRiskNeed } from "./corp-funded-score-protection";
@@ -23,7 +26,7 @@ export type CorpOpeningRushQuote = Readonly<{
   schemaVersion: typeof CORP_OPENING_RUSH_SCHEMA_VERSION;
   opportunityKey: string;
   agendaInstanceId: string;
-  agendaDefinitionId: string;
+  agendaDefinitionId: number;
   targetServerId: string;
   observedAtTurnSerial: number;
   firstContestTurnSerial: number;
@@ -75,7 +78,7 @@ export type CorpOpeningRushDecision =
 type OpeningRushProject = Readonly<{
   projectId: string;
   agendaInstanceId?: string;
-  agendaDefinitionId?: string;
+  agendaDefinitionId?: number;
   serverId?: string;
   actionIds?: readonly string[];
   phase: string;
@@ -115,6 +118,9 @@ export function assessCorpOpeningRush(params: {
   const agendaInstanceId = project.agendaInstanceId;
   const agendaDefinitionId = project.agendaDefinitionId;
   const targetServerId = project.serverId;
+  const offeredInstall = input.legalActions.find(
+    (action) => action.actionId === candidate?.actionId,
+  );
   if (
     !candidate ||
     !agendaInstanceId ||
@@ -123,6 +129,10 @@ export function assessCorpOpeningRush(params: {
     project.actionIds[0] !== candidate.actionId ||
     candidate.sourceCardInstanceId !== agendaInstanceId ||
     candidate.semanticActionType !== "install.card" ||
+    !actionMatchesCurrentDecision(input, offeredInstall) ||
+    offeredInstall.type !== "install_card" ||
+    offeredInstall.source !== agendaInstanceId ||
+    offeredInstall.payload?.serverId !== targetServerId ||
     !exactActionCost(candidate)
   ) {
     return blocked("missing_exact_action", [
@@ -134,7 +144,7 @@ export function assessCorpOpeningRush(params: {
     targetServerId && targetServerId !== "new_remote"
       ? input.playerView.servers.find((server) => server.id === targetServerId)
       : undefined;
-  if (!targetServer || !targetServer.id.startsWith("remote_")) {
+  if (!targetServer || !isRemoteServerId(targetServer.id)) {
     return blocked("missing_existing_remote", [
       `target_server:${targetServerId ?? "missing"}`,
     ]);
@@ -274,7 +284,7 @@ function visiblePublicStagedBreakers(input: AiDecisionInput): string[] {
   return (input.playerView.specialZones?.setAside ?? [])
     .filter((card) => {
       if (!card.known || !card.definitionId) return false;
-      const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+      const definition = planningCardFactsByDefinitionId(card.definitionId);
       return definition?.subtypes.some(
         (subtype) => subtype.toLocaleLowerCase("en-US") === "icebreaker",
       );
@@ -298,15 +308,14 @@ function acuteCentralDefenseIsUnfunded(
     );
     if (!server) return true;
     if (server.ice.some((ice) => ice.rezzed === true)) continue;
-    const exactRezCosts = server.ice.flatMap((ice) => {
-      const quote = ice.effectiveRezCostQuote;
-      return quote?.complete === true &&
-        quote.cardId === ice.instanceId &&
-        quote.targetServerId === serverId &&
-        quote.expiresAtStateVersion === input.playerView.stateVersion &&
-        Number.isSafeInteger(quote.finalCredits) &&
-        quote.finalCredits >= 0
-        ? [quote.finalCredits]
+    const exactRezCosts = server.ice.flatMap((sourceCard) => {
+      const priced = readExactCurrentInstalledCorpIceRezQuote({
+        input,
+        sourceCard,
+        targetServerId: serverId,
+      });
+      return priced && priced.quote.mandatoryAdditionalCosts.agendaPoints === 0
+        ? [priced.totalRezCredits]
         : [];
     });
     if (exactRezCosts.length === 0) return true;

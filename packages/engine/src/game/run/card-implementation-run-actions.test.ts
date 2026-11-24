@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardInstance,
@@ -13,7 +14,7 @@ import {
   type RunCardImplementationActionHost,
 } from "./card-implementation-run-actions";
 
-function definition(id: string, title: string): CardDefinition {
+function definition(id: number, title: string): CardDefinition {
   return {
     id,
     title,
@@ -54,7 +55,7 @@ function makeState(options: { activeRun?: boolean } = {}): GameState {
       ? {}
       : {
           run: {
-            runId: "run_1",
+            runId: 1,
             attackedServerId: "rd",
             phase: "encounter_ice",
             position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -81,7 +82,7 @@ function action(
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   options: Partial<CardInstance> = {},
 ): CardInstance {
   return {
@@ -105,7 +106,7 @@ describe("runner during-run CardImplementation actions", () => {
       state,
       cards: {
         cardInstanceFor: () => undefined,
-        definitionFor: () => definition("unused", "Unused"),
+        definitionFor: () => definition(2244955947, "Unused"),
         runnerInstalledCardIds: () => ["program_b" as CardInstanceId],
       },
       runtime: {
@@ -125,8 +126,8 @@ describe("runner during-run CardImplementation actions", () => {
     const state = makeState();
     const calls: string[] = [];
     const definitions: Record<string, CardDefinition> = {
-      program_a: definition("program_a_definition", "Program A"),
-      program_b: definition("program_b_definition", "Program B"),
+      program_a: definition(3155259737, "Program A"),
+      program_b: definition(1991566114, "Program B"),
     };
     const host: RunCardImplementationActionHost = {
       state,
@@ -161,14 +162,14 @@ describe("runner during-run CardImplementation actions", () => {
     const result = buildRunnerDuringRunCardImplementationActions(host);
 
     expect(calls).toEqual([
-      "runner:program_a:program_a_definition:during_run,runner_paid",
-      "runner:program_b:program_b_definition:during_run,runner_paid",
+      "runner:program_a:3155259737:during_run,runner_paid",
+      "runner:program_b:1991566114:during_run,runner_paid",
     ]);
     expect(
       result.legalActions.map((legalAction) => legalAction.source),
     ).toEqual(["program_a", "program_b"]);
     expect(result.legalActions[0]?.payload).toEqual({
-      sourceDefinitionId: "program_a_definition",
+      sourceDefinitionId: 3155259737,
       cardImplementationAbilityTiming: "during_run",
     });
   });
@@ -180,7 +181,7 @@ describe("runner during-run CardImplementation actions", () => {
       state,
       cards: {
         cardInstanceFor: () => undefined,
-        definitionFor: () => definition("program_a_definition", "Program A"),
+        definitionFor: () => definition(3155259737, "Program A"),
         runnerInstalledCardIds: () => ["program_a" as CardInstanceId],
       },
       runtime: {
@@ -194,7 +195,7 @@ describe("runner during-run CardImplementation actions", () => {
           if (!Array.isArray(timing) || !timing.includes("during_run")) return;
           legalActions.push(
             action(sourceCardId, {
-              sourceDefinitionId: "program_a_definition",
+              sourceDefinitionId: 3155259737,
             }),
           );
         },
@@ -214,12 +215,12 @@ describe("runner during-run CardImplementation actions", () => {
     state.timingPoint = "run.movement_rez_window";
     state.run!.phase = "movement";
     state.runner.rig.programs = [sourceId, targetId];
-    state.cardInstances[sourceId] = instance(sourceId, "lockjaw_definition", {
+    state.cardInstances[sourceId] = instance(sourceId, 1292001620, {
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
     });
-    state.cardInstances[targetId] = instance(targetId, "breaker_definition", {
+    state.cardInstances[targetId] = instance(targetId, 1482612353, {
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -235,7 +236,7 @@ describe("runner during-run CardImplementation actions", () => {
           ),
         runnerInstalledCardIds: () => [sourceId, targetId],
         cardImplementationForDefinitionId: (definitionId) =>
-          definitionId === "lockjaw_definition"
+          definitionId === 1292001620
             ? {
                 runnerRunStrengthBoost: {
                   amount: 2,
@@ -264,9 +265,8 @@ describe("corp encounter CardImplementation actions", () => {
     const host: RunCardImplementationActionHost = {
       state,
       cards: {
-        cardInstanceFor: () =>
-          instance("ice_1" as CardInstanceId, "ice_definition"),
-        definitionFor: () => definition("ice_definition", "Encounter ICE"),
+        cardInstanceFor: () => instance("ice_1" as CardInstanceId, 2630481112),
+        definitionFor: () => definition(2630481112, "Encounter ICE"),
         runnerInstalledCardIds: () => [],
       },
       runtime: {
@@ -294,8 +294,8 @@ describe("corp encounter CardImplementation actions", () => {
     const host: RunCardImplementationActionHost = {
       state,
       cards: {
-        cardInstanceFor: () => instance(iceId, "ice_definition"),
-        definitionFor: () => definition("ice_definition", "Encounter ICE"),
+        cardInstanceFor: () => instance(iceId, 2630481112),
+        definitionFor: () => definition(2630481112, "Encounter ICE"),
         runnerInstalledCardIds: () => [],
       },
       runtime: {
@@ -319,7 +319,7 @@ describe("corp encounter CardImplementation actions", () => {
 
     const result = buildCorpEncounterCardImplementationActions(host);
 
-    expect(calls).toEqual(["corp:ice_1:ice_definition:corp_encounter"]);
+    expect(calls).toEqual(["corp:ice_1:2630481112:corp_encounter"]);
     expect(result.legalActions).toHaveLength(2);
     expect(result.legalActions[1]).toMatchObject({
       side: "corp",
@@ -338,12 +338,12 @@ describe("corp during-run CardImplementation actions", () => {
     ];
     state.cardInstances.agenda_a = instance(
       "agenda_a" as CardInstanceId,
-      "agenda_a_definition",
+      244256607,
       { zone: { side: "corp", zone: "scoreArea" } },
     );
     state.cardInstances.agenda_b = instance(
       "agenda_b" as CardInstanceId,
-      "agenda_b_definition",
+      47955012,
       { zone: { side: "corp", zone: "scoreArea" } },
     );
     const calls: string[] = [];
@@ -352,7 +352,10 @@ describe("corp during-run CardImplementation actions", () => {
       cards: {
         cardInstanceFor: (cardId) => state.cardInstances[cardId],
         definitionFor: (cardId) =>
-          definition(`${cardId}_definition`, `Scored ${cardId}`),
+          definition(
+            syntheticCardDefinitionId(`${cardId}_definition`),
+            `Scored ${cardId}`,
+          ),
         runnerInstalledCardIds: () => [],
       },
       runtime: {
@@ -378,8 +381,8 @@ describe("corp during-run CardImplementation actions", () => {
     const result = buildCorpDuringRunCardImplementationActions(host);
 
     expect(calls).toEqual([
-      "corp:agenda_a:agenda_a_definition:corp_during_run,corp_paid",
-      "corp:agenda_b:agenda_b_definition:corp_during_run,corp_paid",
+      "corp:agenda_a:244256607:corp_during_run,corp_paid",
+      "corp:agenda_b:47955012:corp_during_run,corp_paid",
     ]);
     expect(
       result.legalActions.map((legalAction) => legalAction.source),

@@ -1,3 +1,4 @@
+import type { MatchEventId } from "@netgrid/shared";
 import type { AppLocale } from "../i18n/locale";
 import { validateServerOrigin } from "../lib/server-endpoint";
 
@@ -101,9 +102,8 @@ export type MaintenanceAiTraceMatchEntry = {
 };
 
 export type MaintenanceAiTraceIndexEntry = {
-  traceId: string;
   matchId: string;
-  eventId: string;
+  eventId: import("@netgrid/shared").MatchEventId;
   stateVersion: number;
   matchVersion: number;
   side: "runner" | "corp";
@@ -121,6 +121,10 @@ export type MaintenanceAiTraceIndexEntry = {
 
 export type MaintenanceAiTraceDetail = MaintenanceAiTraceIndexEntry & {
   detail: Record<string, unknown>;
+};
+
+export type AiDecisionDebugTrace = Omit<MaintenanceAiTraceDetail, "eventId"> & {
+  eventId?: MatchEventId;
 };
 
 export type MaintenanceAiTraceActionRow = {
@@ -369,17 +373,22 @@ export function buildMaintenanceAiTraceEnablePath(matchId: string): string {
   return `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(matchId)}/enable`;
 }
 
+export function buildMaintenanceAiTraceDetailPath(
+  matchId: string,
+  decisionIndex: number,
+): string {
+  return `${buildMaintenanceAiTraceIndexPath(matchId)}/decisions/${decisionIndex}`;
+}
+
 export function mergeMaintenanceAiTraceIndex(
   current: MaintenanceAiTraceIndexEntry[],
   incoming: MaintenanceAiTraceIndexEntry[],
 ): MaintenanceAiTraceIndexEntry[] {
-  const byId = new Map<string, MaintenanceAiTraceIndexEntry>();
-  for (const trace of current) byId.set(trace.traceId, trace);
-  for (const trace of incoming) byId.set(trace.traceId, trace);
-  return Array.from(byId.values()).sort(
-    (left, right) =>
-      left.decisionIndex - right.decisionIndex ||
-      left.createdAt.localeCompare(right.createdAt),
+  const byIndex = new Map<number, MaintenanceAiTraceIndexEntry>();
+  for (const trace of current) byIndex.set(trace.decisionIndex, trace);
+  for (const trace of incoming) byIndex.set(trace.decisionIndex, trace);
+  return Array.from(byIndex.values()).sort(
+    (left, right) => left.decisionIndex - right.decisionIndex,
   );
 }
 
@@ -401,10 +410,10 @@ export function mergeMaintenanceAiTraceMatches(
   });
 }
 
-export function latestMaintenanceAiTraceId(
+export function latestMaintenanceAiDecisionIndex(
   traces: MaintenanceAiTraceIndexEntry[],
-): string {
-  return traces.at(-1)?.traceId ?? "";
+): number | null {
+  return traces.at(-1)?.decisionIndex ?? null;
 }
 
 export function buildMaintenanceAiTraceNdjsonExport(input: {
@@ -413,7 +422,7 @@ export function buildMaintenanceAiTraceNdjsonExport(input: {
   traces: MaintenanceAiTraceIndexEntry[];
 }): string {
   const payload = {
-    exportKind: "netgrid-ai-decision-trace-index-export-v1",
+    exportKind: "netgrid-ai-decision-trace-index-export-v2",
     redaction: "maintenance-redacted-index-projection",
     matchId: input.matchId,
     generatedAt: input.generatedAt,
@@ -491,7 +500,7 @@ export function aiTracePlanLabel(value: string): string {
 }
 
 export function aiTraceMetaRows(
-  trace: MaintenanceAiTraceDetail | MaintenanceAiTraceIndexEntry,
+  trace: AiDecisionDebugTrace | MaintenanceAiTraceIndexEntry,
   locale: AppLocale = "de",
 ): Array<[string, string]> {
   const detail = "detail" in trace ? trace.detail : trace.meta;

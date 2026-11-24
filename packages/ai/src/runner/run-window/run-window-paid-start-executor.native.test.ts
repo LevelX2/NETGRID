@@ -11,6 +11,7 @@ import {
   resolvePlanBoundRunnerCostPenaltyContinuation,
 } from "./run-window-cost-continuation";
 import { resolvePlanBoundRunnerTraceBaseLinkChoice } from "./run-window-trace-continuation";
+import { selectedRunnerTraceBaseLinkOptionId } from "./run-window-choice-binding";
 
 function original() {
   return JSON.parse(
@@ -52,7 +53,9 @@ it("resumes the paid Disgruntled Ice Technician Run under the original R&D owner
   const origin = previous.pendingRunnerCostPenaltySupportOrigin!;
   const before = JSON.stringify(previous);
   const result = engineContinuation(paymentInput, previous);
-  expect(previous.executorInstanceId).toContain("runner.economy");
+  expect(previous.instances.find(
+    (instance) => instance.instanceId === previous.executorInstanceId,
+  )?.moduleId).toBe("runner.economy");
   reconcileSelectedRunnerCostPenaltySupportOrigin(
     paymentInput,
     result,
@@ -78,12 +81,51 @@ it("resumes the paid Disgruntled Ice Technician Run under the original R&D owner
       result.portfolio,
     ),
   ).toMatchObject({
-    actionId: "runner.resolve_choice",
+    actionId: "rn",
     origin: {
       rootPlanInstanceId: origin.rootPlanInstanceId,
       leafPlanInstanceId: origin.executorInstanceId,
     },
   });
+});
+
+it("binds only a selectable option from the complete Engine Trace offer", () => {
+  const { paymentInput, traceInput, previous } = original();
+  const result = engineContinuation(paymentInput, previous);
+  reconcileSelectedRunnerCostPenaltySupportOrigin(
+    paymentInput,
+    result,
+    previous,
+  );
+  const choice = traceInput.playerView.pendingChoice!;
+  const support = choice.options.find((option) => option.id !== "pass")!;
+  const action = traceInput.legalActions[0]!;
+  const resolve = () =>
+    resolvePlanBoundRunnerTraceBaseLinkChoice(
+      { input: traceInput } as PlanSchedulerContext,
+      result.portfolio,
+    );
+  resolve();
+  expect(
+    selectedRunnerTraceBaseLinkOptionId(
+      traceInput,
+      action,
+      choice,
+      choice.options,
+      result.portfolio,
+    ),
+  ).toEqual([support.id]);
+  support.selectable = false;
+  resolve();
+  expect(
+    selectedRunnerTraceBaseLinkOptionId(
+      traceInput,
+      action,
+      choice,
+      choice.options.filter((option) => option.selectable !== false),
+      result.portfolio,
+    ),
+  ).toEqual(["pass"]);
 });
 
 it("rejects a foreign Run target on the paid continuation", () => {

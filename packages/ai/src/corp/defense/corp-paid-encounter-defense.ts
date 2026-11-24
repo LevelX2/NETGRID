@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
 /** Facts and valuation for the existing corp.defend_servers owner. */
@@ -23,7 +24,7 @@ export function assessCorpPaidEncounterDefense(
     !run ||
     run.phase !== "encounter_ice" ||
     run.encounteredIce?.instanceId !== action.source ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !actionMatchesCurrentDecision(input, action) ||
     !quote ||
     quote.exchange.expiresAtStateVersion !== input.playerView.stateVersion ||
     quote.exchange.cardId !== action.source ||
@@ -38,7 +39,7 @@ export function assessCorpPaidEncounterDefense(
       legalActionTypes: input.legalActions.map((entry) => entry.type),
       unresolvedActionIds: [action.actionId],
       owner: "plan_module",
-      planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      planInstanceId: "penw02zfrkklof54c2nuye5att",
       removalCondition:
         "Bind the exact legal paid encounter ability to its current Engine defense quote in corp.defend_servers.",
     });

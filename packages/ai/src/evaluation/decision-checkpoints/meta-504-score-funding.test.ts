@@ -31,7 +31,7 @@ it("executes the exact bound funding provider before the currently unfunded urge
     capture.runtime,
   );
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("corp.gain_credit");
+  expect(decision.actionId).toBe("cb");
   expect(
     input.legalActions.find((a) => a.actionId === decision.actionId)?.type,
   ).toBe("gain_credit");
@@ -39,7 +39,7 @@ it("executes the exact bound funding provider before the currently unfunded urge
   const debug = decision.decisionDebug!.planFirstDecision!;
   expect(debug.selectedPlan?.moduleId).toBe("corp.economy");
   expect(debug.selectedPlan?.parentNeedId).toBe(
-    "score-support:agenda:corp_onr_v1_212_priority-requisition_1:remote_1",
+    "score-support:agenda:c2md:r1",
   );
   const serialized = JSON.stringify(debug.turnPlanning);
   expect(serialized).toContain('"family":"fund_setup"');

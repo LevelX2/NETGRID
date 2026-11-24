@@ -1,3 +1,4 @@
+import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 import type {
   RuntimeDeps,
   GameState,
@@ -261,8 +262,11 @@ export function createTurnCorpRuntime(
     amount: number;
     mode: AdvancementDistributionMode;
   } {
-    const [, sourceDefinitionId, sourceCardId, rawAmount, mode] =
+    const [, sourceDefinitionIdToken, sourceCardId, rawAmount, mode] =
       source.split(":");
+    const sourceDefinitionId = parseCardDefinitionIdToken(
+      sourceDefinitionIdToken,
+    );
     const amount = Number(rawAmount);
     if (
       !sourceDefinitionId ||
@@ -511,12 +515,15 @@ export function createTurnCorpRuntime(
       throw new Error("Die Advancement-Move-Choice braucht eine Auswahl.");
     const [
       ,
-      sourceDefinitionId,
+      sourceDefinitionIdToken,
       sourceCardId,
       sourceMode,
       rawMaxAmount,
       rawMinimumAmount,
     ] = choice.source.split(":");
+    const sourceDefinitionId = parseCardDefinitionIdToken(
+      sourceDefinitionIdToken,
+    );
     const [fromId, toId, rawAmount] = selectedOption.value.split("|");
     const amount = Number(rawAmount);
     const minimumAmount = Number(rawMinimumAmount);

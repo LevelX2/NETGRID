@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -13,8 +14,8 @@ import { currentRuleTagRemovalCounterInput } from "./current-rule-tag-removal-co
 
 afterEach(resetResidentPlanPortfolioMemory);
 it.each([
-  [9, 361, "runner.gain_credit", "fund_active_tag_removal"],
-  [32, 106, "runner.remove_tag", "remove_active_tags"],
+  [9, 361, "rb", "fund_active_tag_removal"],
+  [32, 106, "rm", "remove_active_tags"],
 ])(
   "rejects the incomplete historical quote and keeps active-tax Defense in the current-rule G%i D%i countermodel",
   (g, d, actionId, capabilityId) => {
@@ -33,7 +34,7 @@ it.each([
     resetResidentPlanPortfolioMemory();
     const input = currentRuleTagRemovalCounterInput(cp.input);
     const meat = input.legalActions.find((a: { actionId: string }) =>
-      a.actionId.includes("meat-upgrade"),
+      referencesDefaultDeckCard(a.actionId, 44),
     )!;
     expect(visibleRunnerDrawTaxSourceCount(input)).toBe(1);
     expect(runnerDrawTaxLiabilityProjection(input, meat)).toMatchObject({
@@ -61,8 +62,8 @@ it.each([
       }),
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-      leafExecutorInstanceId: "plan:runner.defense_and_recovery:runner",
+      rootPlanInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
+      leafExecutorInstanceId: "p1gzjb6yfcv4zbzow512kexs33",
       route: {
         actionId: decision.actionId,
         stateVersion: input.playerView.stateVersion,

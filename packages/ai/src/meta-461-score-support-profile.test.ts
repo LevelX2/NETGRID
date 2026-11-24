@@ -21,12 +21,12 @@ describe("meta 461 canonical score-support profile", () => {
     expect(acceleration.supportEvidence).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          cardId: "onr_v1_312_chicago-branch",
+          cardId: 524,
           quantity: 2,
           reason: "support:scoreAcceleration",
         }),
         expect.objectContaining({
-          cardId: "onr_v1_347_vapor-ops",
+          cardId: 559,
           quantity: 3,
           reason: "support:scoreAcceleration",
         }),
@@ -42,11 +42,11 @@ describe("meta 461 canonical score-support profile", () => {
   });
 
   it.each([
-    "onr_v1_291_falsified-transactions-expert",
-    "onr_v1_304_systematic-layoffs",
-    "onr_v1_305_team-restructuring",
-    "onr_v1_312_chicago-branch",
-    "onr_v1_347_vapor-ops",
+    503,
+    516,
+    517,
+    524,
+    559,
   ])("counts the generated advancement-support semantics of %s", (cardId) => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: `score-support-${cardId}`,
@@ -64,9 +64,9 @@ describe("meta 461 canonical score-support profile", () => {
       deckSnapshotId: "score-payoffs-are-not-support",
       side: "corp",
       cards: [
-        { cardId: "onr_proteus_007_project-venice", quantity: 2 },
-        { cardId: "onr_proteus_008_project-zurich", quantity: 3 },
-        { cardId: "onr_v1_281_accounts-receivable", quantity: 2 },
+        { cardId: 65, quantity: 2 },
+        { cardId: 66, quantity: 3 },
+        { cardId: 493, quantity: 2 },
       ],
     });
     expect(profile.corpProfile?.scoreProfile.scoreAcceleration).toBe(0);

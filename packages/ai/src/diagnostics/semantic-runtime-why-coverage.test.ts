@@ -168,6 +168,31 @@ describe("SemanticRuntimeWhyCoverage", () => {
     );
   });
 
+  it("reports an empty Runtime Why Not section as missing evidence", () => {
+    const report = buildSemanticRuntimeWhyCoverageReport([
+      decisionDebug({
+        whyNot: ["alternative:draw_card:semantic_score_below_selected"],
+        detailSections: [
+          { id: "runtime_why_not", title: "Runtime Why Not", items: [] },
+        ],
+        actionAlternatives: [
+          {
+            rank: 2,
+            actionId: "draw",
+            actionType: "draw_card",
+            selected: false,
+            whyNot: ["semantic_score_below_selected"],
+          },
+        ],
+      }),
+    ]);
+    expect(report).toMatchObject({
+      auditStatus: "incomplete",
+      decisionsWithRuntimeWhyNotSection: 0,
+      decisionsMissingRuntimeWhyNotSection: 1,
+    });
+  });
+
   it("keeps empty samples distinct from complete coverage", () => {
     const report = buildSemanticRuntimeWhyCoverageReport([]);
 

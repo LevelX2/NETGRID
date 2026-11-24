@@ -19,7 +19,7 @@ describe("turn action builders", () => {
         [{ clicks: 1 }],
       ),
     ).toMatchObject({
-      actionId: "corp.gain_credit",
+      actionId: "cb",
       side: "corp",
       type: "gain_credit",
       label: "1 Credit nehmen",
@@ -40,7 +40,7 @@ describe("turn action builders", () => {
         { serverId: "rd", runStartTaxCredits: 2 },
         "basic_action",
       ),
-    ).toBe("runner.start_run.rd");
+    ).toBe("rs.rd");
   });
 
   it("does not reinterpret legacy primitive ability IDs as canonical action identity", () => {
@@ -51,7 +51,7 @@ describe("turn action builders", () => {
         { cardImplementationAbilityId: "legacy:primitive" },
         "legacy-source",
       ),
-    ).toBe("runner.trigger_ability.legacy-source");
+    ).toBe("rx.legacy-source");
     expect(
       makeActionId(
         "trigger_ability",
@@ -62,7 +62,7 @@ describe("turn action builders", () => {
         },
         "canonical-source",
       ),
-    ).toBe("runner.trigger_ability.canonical-source.test_card:gain");
+    ).toBe("rx.canonical-source.test_card:gain");
   });
 
   it("distinguishes a bonus run from a normal run on the same server", () => {
@@ -79,15 +79,13 @@ describe("turn action builders", () => {
         serverId: "rd",
         runStartTaxCredits: 0,
         bonusRunNoClick: true,
-        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+        bonusRunSource: 335,
       },
       "basic_action",
     );
 
-    expect(normalRun).toBe("runner.start_run.rd");
-    expect(bonusRun).toBe(
-      "runner.start_run.rd.bonus_run.onr_v1_123_bodyweight-data-creche",
-    );
+    expect(normalRun).toBe("rs.rd");
+    expect(bonusRun).toBe("rs.rd.bonus_run.335");
     expect(bonusRun).not.toBe(normalRun);
   });
 

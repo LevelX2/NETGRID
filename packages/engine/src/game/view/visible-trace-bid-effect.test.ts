@@ -10,9 +10,9 @@ describe("public fixed automatic trace effect", () => {
       setupMode: "completed",
     });
     state.trace = {
-      traceId: "fixed-trace",
+      traceId: 1,
       sourceCardInstanceId: state.corp.identity,
-      sourceDefinitionId: "onr_v1_284_chance-observation",
+      sourceDefinitionId: 496,
       traceRulesProfile: "modern_open",
       traceLimit: 5,
       status: "corp_bid",
@@ -22,7 +22,7 @@ describe("public fixed automatic trace effect", () => {
     state.runner.rig.resources.push(id);
     state.cardInstances[id] = {
       instanceId: id,
-      definitionId: "onr_classic_044_crash-space",
+      definitionId: 48,
       owner: "runner",
       controller: "runner",
       zone: { side: "runner", zone: "rig" },
@@ -47,7 +47,7 @@ describe("public fixed automatic trace effect", () => {
     state.trace.successEffect = { type: "add_tag", amount: 1 };
     state.cardInstances[id]!.faceup = false;
     expect(visibleTraceBidEffect(state)).toBeUndefined();
-    state.cardInstances[id]!.definitionId = "onr_classic_050_sandbox-dig";
+    state.cardInstances[id]!.definitionId = 54;
     expect(visibleTraceBidEffect(state)).toBeUndefined();
     state.cardInstances[id]!.faceup = true;
     expect(visibleTraceBidEffect(state)).toBeUndefined();

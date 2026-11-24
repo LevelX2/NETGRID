@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -12,6 +13,14 @@ import { runnerCoverageSearchLifecycleBinding } from "./coverage-support";
 import { addRunnerCoverageRejectedSearchDispositions } from "./coverage-dispositions";
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import type { AiDecisionInput } from "@netgrid/shared";
+
+function fromVisibleEvent(input: AiDecisionInput, actionId: string | undefined, definitionId: number): boolean {
+  const action = input.legalActions.find((candidate) => candidate.actionId === actionId);
+  return action !== undefined && input.playerView.own.gripOrHq.some((card) =>
+    card.instanceId === action.source && card.definitionId === definitionId,
+  );
+}
 function original(name: string) {
   const cp = JSON.parse(
       readFileSync(
@@ -37,7 +46,7 @@ it("does not spend three credits on a temporary general Rig-first answer without
   const { input } = original("meta592-r3-g29-d069"),
     before = JSON.stringify(input),
     d = chooseAiAction(input);
-  expect(d.actionId).not.toContain("sneak-preview");
+  expect(fromVisibleEvent(input, d.actionId, 322)).toBe(false);
   expect(input.legalActions.some((a: any) => a.actionId === d.actionId)).toBe(
     true,
   );
@@ -49,16 +58,16 @@ it("does not spend three credits on a temporary general Rig-first answer without
       .filter((x) => x.moduleId === "runner.rig_and_coverage")
       .every(
         (x) =>
-          !JSON.stringify(
-            (x.moduleState as any).gap?.directSearchActionIds,
-          ).includes("sneak-preview"),
+          !((x.moduleState as { gap?: RunnerCoverageGapSignal }).gap?.directSearchActionIds ?? []).some((id) =>
+            fromVisibleEvent(input, id, 322),
+          ),
       ),
   ).toBe(true);
 });
 it("keeps the native urgent remote's actual temporary Rent-I-Con search", () => {
   const { input } = original("meta592-g34-d159-temporary-coverage"),
     d = chooseAiAction(input);
-  expect(d.actionId).toContain("sneak-preview");
+  expect(fromVisibleEvent(input, d.actionId, 322)).toBe(true);
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.rig_and_coverage",
   );
@@ -85,8 +94,8 @@ it.each([
         {
           actionId: "search",
           sourceCardInstanceId: "source",
-          sourceDefinitionId: "source_definition",
-          targetDefinitionId: "target",
+          sourceDefinitionId: syntheticCardDefinitionId("source_definition"),
+          targetDefinitionId: syntheticCardDefinitionId("target"),
         },
       ],
       searchEngineSetupActionIds: [],
@@ -181,7 +190,7 @@ it.each([
     const { input } = original(fixture),
       before = JSON.stringify(input),
       d = chooseAiAction(input);
-    expect(d.actionId).not.toContain("sneak-preview");
+    expect(fromVisibleEvent(input, d.actionId, 322)).toBe(false);
     expect(
       input.legalActions.some(
         (a: { actionId: string }) => a.actionId === d.actionId,
@@ -207,7 +216,7 @@ it("keeps the native three-click temporary search that actually reaches the remo
   const { input } = original("meta592-r4-g04-d082-used-temporary"),
     before = JSON.stringify(input),
     d = chooseAiAction(input);
-  expect(d.actionId).toContain("sneak-preview");
+  expect(fromVisibleEvent(input, d.actionId, 322)).toBe(true);
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
   expect(JSON.stringify(input)).toBe(before);
 });
@@ -216,7 +225,7 @@ it("keeps the native terminal remote search with one guaranteed funding click (S
   const { input } = original("meta592-r5-g07-d182-terminal-search"),
     before = JSON.stringify(input),
     d = chooseAiAction(input);
-  expect(d.actionId).toContain("sneak-preview");
+  expect(fromVisibleEvent(input, d.actionId, 322)).toBe(true);
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
   expect(JSON.stringify(input)).toBe(before);
   const gaps = residentPlanPortfolioSnapshot(input)!
@@ -225,15 +234,13 @@ it("keeps the native terminal remote search with one guaranteed funding click (S
   expect(
     gaps.some(
       (g) =>
-        g.targetRunActionId === "runner.start_run.remote_1" &&
+        g.targetRunActionId === "rs.r1" &&
         g.directSearchActionIds.includes(d.actionId!),
     ),
   ).toBe(true);
   expect(
     gaps
-      .filter((g) =>
-        g.targetRunActionId?.includes("disgruntled-ice-technician"),
-      )
+      .filter((g) => fromVisibleEvent(input, g.targetRunActionId, 164))
       .every((g) => !g.directSearchActionIds.includes(d.actionId!)),
   ).toBe(true);
 });
@@ -254,13 +261,13 @@ it("uses the existing terminal run admission after two actual engine draws, with
   expect(cp.origin.checkedOriginalPrefix).toBe(159);
   expect(
     cp.origin.commands.map((x: { actionId: string }) => x.actionId),
-  ).toEqual(["runner.draw_card", "runner.draw_card"]);
+  ).toEqual(["r8", "r8"]);
   const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   input.planningStateIdentity = buildPlanningStateIdentity(input);
   resetResidentPlanPortfolioMemory();
   const before = JSON.stringify(input),
     d = chooseAiAction(input);
-  expect(d.actionId).toContain("sneak-preview");
+  expect(fromVisibleEvent(input, d.actionId, 322)).toBe(true);
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
   expect(JSON.stringify(input)).toBe(before);
 });
@@ -268,7 +275,7 @@ it("keeps a native temporary search with two reserved hand-buffer draws before i
   const { input } = original("meta592-r4-g04-d100-planned-draws"),
     before = JSON.stringify(input),
     d = chooseAiAction(input);
-  expect(d.actionId).toContain("sneak-preview");
+  expect(fromVisibleEvent(input, d.actionId, 322)).toBe(true);
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
   expect(JSON.stringify(input)).toBe(before);
 });
@@ -277,7 +284,7 @@ it("does not buy temporary coverage when its remote information horizon is unfun
   const { input } = original("meta592-r6-g27-d681-information-search"),
     before = JSON.stringify(input),
     d = chooseAiAction(input);
-  expect(d.actionId).not.toContain("sneak-preview");
+  expect(fromVisibleEvent(input, d.actionId, 322)).toBe(false);
   expect(d.fallbackUsed || d.timeoutUsed).toBe(false);
   expect(JSON.stringify(input)).toBe(before);
   const gaps = residentPlanPortfolioSnapshot(input)!

@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_classic_019_indiscriminate-response-team",
+      23,
     ),
     title: "Indiscriminate Response Team",
     side: "corp",

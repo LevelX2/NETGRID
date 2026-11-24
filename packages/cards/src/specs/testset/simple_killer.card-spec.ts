@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("simple_killer"),
+    cardDefinitionId: cardDefinitionId(598),
     title: "Simple Killer",
     side: "runner",
     cardType: "program",

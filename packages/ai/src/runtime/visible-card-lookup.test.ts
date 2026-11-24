@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
@@ -11,7 +12,7 @@ describe("semanticRuntimeVisibleSourceCard", () => {
   it("uses source and payload identifiers but ignores label-only card titles", () => {
     const card = visibleCard({
       instanceId: "runtime-card-1",
-      definitionId: "runtime_definition",
+      definitionId: syntheticCardDefinitionId("runtime_definition"),
       title: "Runtime Bank",
     });
     const input = decisionInputWithVisibleCards([card]);
@@ -27,7 +28,7 @@ describe("semanticRuntimeVisibleSourceCard", () => {
         input,
         action({
           source: "unknown",
-          payload: { sourceDefinitionId: "runtime_definition" },
+          payload: { sourceDefinitionId: syntheticCardDefinitionId("runtime_definition") },
         }),
       )?.instanceId,
     ).toBe("runtime-card-1");
@@ -86,7 +87,7 @@ function decisionInputWithVisibleCards(cards: VisibleCard[]): AiDecisionInput {
 function visibleCard(overrides: Partial<VisibleCard>): VisibleCard {
   return {
     instanceId: "card",
-    definitionId: "definition",
+    definitionId: syntheticCardDefinitionId("definition"),
     title: "Visible Card",
     type: "resource",
     known: true,

@@ -7,6 +7,7 @@ import {
   KNOWN_HINT_ACTION_CAPACITY_CLASSES,
   KNOWN_HINT_EFFECT_KINDS,
   validateAiHintOntologyFields,
+  validateAiHintActionCapabilitySemantics,
 } from "./hint-ontology";
 
 const repoRoot = path.resolve(
@@ -16,6 +17,35 @@ const repoRoot = path.resolve(
 const currentHints = generatedArtifact.cards.map((record) => record.hint);
 
 describe("AI hint ontology validation", () => {
+  it("checks exact cost dimensions in standalone capability validation", () => {
+    expect(
+      validateAiHintActionCapabilitySemantics([
+        { capabilityKey: "draw", costProfile: { clicks: 0.5, credits: -1 } },
+      ]).errors.map(({ path }) => path),
+    ).toEqual([
+      "$.actionCapabilitySemantics[0].costProfile.clicks",
+      "$.actionCapabilitySemantics[0].costProfile.credits",
+    ]);
+  });
+
+  it("applies the hint side-safety contract to standalone capability effects", () => {
+    expect(
+      validateAiHintActionCapabilitySemantics([
+        {
+          capabilityKey: "draw",
+          effects: [
+            {
+              kind: "draw",
+              timing: "action",
+              scope: "runner",
+              privatePayload: "unexpected",
+            },
+          ],
+        },
+      ]).errors.some((issue) => issue.kind === "hidden_info_risk"),
+    ).toBe(true);
+  });
+
   it("accepts all generated hints except the exact known asset-economy evidence debt", () => {
     const results = currentHints.map((hint) => ({
       cardId: hint.cardId,
@@ -29,15 +59,15 @@ describe("AI hint ontology validation", () => {
       })),
     ).toEqual([
       {
-        cardId: "onr_v1_308_acme-savings-and-loan",
+        cardId: 520,
         errors: ["asset_economy_without_economy_evidence"],
       },
       {
-        cardId: "onr_v1_314_corporate-negotiating-center",
+        cardId: 526,
         errors: ["asset_economy_without_economy_evidence"],
       },
       {
-        cardId: "onr_v1_329_investment-firm",
+        cardId: 541,
         errors: ["asset_economy_without_economy_evidence"],
       },
     ]);
@@ -45,35 +75,36 @@ describe("AI hint ontology validation", () => {
 
   it("keeps the Phase 2 high-impact pilot cards structured and valid", () => {
     const pilotCardIds = [
-      "onr_v1_210_political-overthrow",
-      "onr_v1_037_japanese-water-torture",
-      "onr_v1_059_self-modifying-code",
-      "onr_v1_043_mystery-box",
-      "onr_v1_057_scatter-shot",
-      "onr_v1_355_crystal-palace-station-grid",
-      "onr_v1_366_red-herrings",
-      "onr_v1_274_tutor",
-      "onr_v1_277_virizz",
-      "onr_v1_302_scorched-earth",
+      422,
+      249,
+      271,
+      255,
+      269,
+      567,
+      578,
+      486,
+      489,
+      514,
     ];
     const hintsByCard = new Map(
       currentHints.map((hint) => [hint.cardId, hint]),
     );
     const strategyCoveredPilotCardIds = new Set([
-      "onr_v1_355_crystal-palace-station-grid",
-      "onr_v1_366_red-herrings",
-      "onr_v1_274_tutor",
-      "onr_v1_277_virizz",
-      "onr_v1_302_scorched-earth",
+      567,
+      578,
+      486,
+      489,
+      514,
     ]);
 
     for (const cardId of pilotCardIds) {
       const hint = hintsByCard.get(cardId);
-      expect(hint, cardId).toBeDefined();
-      expect(validateAiHintOntologyFields(hint).errors, cardId).toEqual([]);
-      expect(hint?.requiredMechanics?.length, cardId).toBeGreaterThan(0);
-      expect(hint?.quality?.hintReviewed, cardId).toBe(true);
-      expect(hint?.quality?.strategyCovered, cardId).toBe(
+      const description = `Card ${cardId}`;
+      expect(hint, description).toBeDefined();
+      expect(validateAiHintOntologyFields(hint).errors, description).toEqual([]);
+      expect(hint?.requiredMechanics?.length, description).toBeGreaterThan(0);
+      expect(hint?.quality?.hintReviewed, description).toBe(true);
+      expect(hint?.quality?.strategyCovered, description).toBe(
         strategyCoveredPilotCardIds.has(cardId),
       );
     }
@@ -673,6 +704,10 @@ describe("AI hint ontology validation", () => {
       "missing route",
     ],
     [[{ capabilityKey: "forged", owner: "runner.unknown" }], "forged owner"],
+    [
+      [{ capabilityKey: "  ", owner: "runner.resource_lifecycle" }],
+      "blank capability key",
+    ],
     [
       [{ capabilityKey: "wrong-side", owner: "corp.score_agenda" }],
       "wrong side",

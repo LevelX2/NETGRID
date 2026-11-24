@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import { type AiDecisionInput } from "@netgrid/shared";
 
 import { type ServerFeatures } from "./ai-feature-server";
@@ -7,13 +8,13 @@ export type AiFeatures = {
   memoryRemaining: number;
   hasInstalledNonNoisyIcebreaker: boolean;
   rigRoles: Set<string>;
-  rigDefinitionIds: Set<string>;
-  gripDefinitionCounts: Map<string, number>;
+  rigDefinitionIds: Set<number>;
+  gripDefinitionCounts: Map<CardDefinitionId, number>;
   serverFeaturesById: Map<string, ServerFeatures>;
 };
 
 export type AiFeaturesDependencies = {
-  readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
+  readonly rolesForCardId: (cardId: CardDefinitionId | undefined) => readonly string[];
   readonly buildServerFeatures: (
     input: AiDecisionInput,
   ) => Map<string, ServerFeatures>;
@@ -47,9 +48,9 @@ export function extractAiFeatures(
   const rigDefinitionIds = new Set(
     (input.playerView.own.rig ?? [])
       .map((card) => card.definitionId)
-      .filter((id): id is string => Boolean(id)),
+      .filter((id) => id !== undefined),
   );
-  const gripDefinitionCounts = new Map<string, number>();
+  const gripDefinitionCounts = new Map<CardDefinitionId, number>();
   for (const card of input.playerView.own.gripOrHq) {
     if (!card.definitionId) continue;
     gripDefinitionCounts.set(

@@ -15,40 +15,40 @@ import catalog from "../../../../../data/decks/standard-deck-catalog-1.0.0.json"
 
 it.each([
   [
-    "onr_proteus_051_rent-to-own-contract",
-    "onr_proteus_024_gatekeeper",
+    109,
+    82,
     0,
     0,
     "term",
     3,
   ],
   [
-    "onr_proteus_049_emergency-rig",
-    "onr_proteus_024_gatekeeper",
+    107,
+    82,
     1,
     0,
     "kludge",
     1,
   ],
   [
-    "onr_proteus_051_rent-to-own-contract",
-    "onr_proteus_036_sandstorm",
+    109,
+    94,
     0,
     0,
     "term",
     4,
   ],
   [
-    "onr_proteus_051_rent-to-own-contract",
-    "onr_proteus_012_bug-zapper",
+    109,
+    70,
     0,
     2,
     "term",
     6,
   ],
   [
-    "onr_proteus_049_emergency-rig",
-    "onr_proteus_014_chihuahua",
+    107,
+    72,
     1,
     1,
     "kludge",
@@ -113,7 +113,7 @@ it.each([
         .servers.find((s) => s.id === "rd")
         ?.ice.find((c) => c.instanceId === ice)?.effectiveRunQuote?.subroutines,
     ).toEqual(quote.postRez.effectiveRunQuote.subroutines);
-    if (target === "onr_proteus_014_chihuahua") {
+    if (target === 72) {
       expect(quote.postRez.creditGainOnRez).toMatchObject({
         creditsBefore: 0,
         creditGain: 2,

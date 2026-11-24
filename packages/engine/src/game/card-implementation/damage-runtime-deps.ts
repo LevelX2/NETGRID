@@ -1,4 +1,4 @@
-import type { DamageType, ImminentEvent } from "@netgrid/shared";
+import type { DamageType, DamageRandomSource, ImminentEvent } from "@netgrid/shared";
 import type { CardEffectDamageResult } from "../../ability-engine/effect-execution-types";
 import type { CardImplementationRuntimeDependencies } from "../../ability-engine/card-implementation-runtime";
 import {
@@ -29,6 +29,7 @@ type DamageRequestForCardImplementation = {
   damageType: DamageType;
   amount: number;
   source: string;
+  randomSource: DamageRandomSource;
 };
 
 export type DamageRuntimeDepsKey =
@@ -110,11 +111,12 @@ export function createDamageCardImplementationRuntimeDeps(
     damageType: Extract<DamageType, "meat" | "net" | "core">,
     amount: number,
   ): CardEffectDamageResult {
-    const request = {
+    const request: DamageRequestForCardImplementation = {
       damageId: damageResolutionId(state, sourceDefinitionId),
       damageType,
       amount,
       source: `operation:${sourceDefinitionId}`,
+      randomSource: ["c", sourceDefinitionId],
     };
     const event = host.damage.createDamageImminentEvent(state, request);
     if (host.damage.openDamageResolutionWindow(state, event, legalAction)) {
@@ -158,6 +160,7 @@ export function createDamageCardImplementationRuntimeDeps(
       damageType,
       amount,
       source: `unpreventable:${sourceDefinitionId}`,
+      randomSource: ["c", sourceDefinitionId],
     });
     return {
       resolved: true,

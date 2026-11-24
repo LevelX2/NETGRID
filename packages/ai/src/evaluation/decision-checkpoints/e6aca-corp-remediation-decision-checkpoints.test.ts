@@ -44,7 +44,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       activateBbsEconomyJson,
     ],
   ])("passes the corrected Corp behavior: %s", (_label, json) => {
-    const checkpoint = structuredClone(json) as AiDecisionCheckpointV1;
+    const checkpoint = structuredClone(json) as unknown as AiDecisionCheckpointV1;
     if (json === activateBbsEconomyJson) {
       // The old selected BBS sequence borrowed a remote_1 score-draw quote
       // for the independent urgent R&D draw. That replaced its P2 priority
@@ -64,7 +64,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     if (json === activateBbsEconomyJson) {
       const plan = result.decision?.decisionDebug?.planFirstDecision;
-      const defenseRoot = "plan:corp.defend_servers:server-defense-portfolio";
+      const defenseRoot = "penw02zfrkklof54c2nuye5att";
       expect(plan?.selectedPlan).toMatchObject({
         moduleId: "corp.defend_servers",
         instanceId: defenseRoot,
@@ -80,14 +80,14 @@ describe("e6aca Corp remediation decision checkpoints", () => {
         planInstanceId: plan?.selectedPlan?.instanceId,
       });
       const bbsRoot =
-        "plan:corp.economy:economy-campaign%3Acorp_onr_v1_309_bbs-whispering-campaign_1%3Arez%3Aremote_1";
+        "p26dm801tcnpn5btscwp4uv3o9";
       expect(plan?.turnPlanning?.heads).toContainEqual(
         expect.objectContaining({
           moduleId: "corp.economy",
           rootPlanInstanceId: bbsRoot,
           executorPlanInstanceId: bbsRoot,
           actionId:
-            "corp.rez_card.corp_onr_v1_309_bbs-whispering-campaign_1.remote_1.corp_onr_v1_309_bbs-whispering-campaign_1",
+            "cp.c37x.r1.c37x",
           witnessValid: true,
         }),
       );
@@ -99,14 +99,14 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       fixture.expectation = {
         forbiddenActions: [
           {
-            sourceDefinitionId: "onr_v1_366_red-herrings",
+            sourceDefinitionId: 578,
             targetServerId: "hq",
           },
         ],
         acceptableActions: [
           {
-            sourceDefinitionId: "onr_v1_347_vapor-ops",
-            targetServerId: "remote_1",
+            sourceDefinitionId: 559,
+            targetServerId: "r1",
           },
         ],
         planExecution: {
@@ -121,7 +121,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       (server) => server.id === "rd",
     )!;
     expect(
-      rd.ice.find((ice) => ice.definitionId === "onr_v1_231_cortical-scrub")
+      rd.ice.find((ice) => ice.definitionId === 443)
         ?.effectiveRezCostQuote,
     ).toMatchObject({ complete: true, finalCredits: 7 });
     expect(result.input.playerView.own).toMatchObject({
@@ -158,7 +158,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
           acceptableActions: [
             {
               actionId:
-                "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4",
+                "cc.cfx.rd.cfx.4",
             },
           ],
         };
@@ -206,7 +206,7 @@ function mutateFixture(
   value: unknown,
   mutation: (fixture: AiDecisionCheckpointV1) => void,
 ): AiDecisionCheckpointV1 {
-  const fixture = structuredClone(value) as AiDecisionCheckpointV1;
+  const fixture = structuredClone(value) as unknown as AiDecisionCheckpointV1;
   mutation(fixture);
   fixture.source.kind = "synthetic_companion";
   fixture.engine.stateHash = hashGameState(fixture.engine.testOnlyGameState);

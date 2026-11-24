@@ -3,7 +3,7 @@ import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_v1_374_washington-d-c-city-grid"),
+    cardDefinitionId: cardDefinitionId(586),
     title: "Washington, D.C., City Grid",
     side: "corp",
     cardType: "upgrade",

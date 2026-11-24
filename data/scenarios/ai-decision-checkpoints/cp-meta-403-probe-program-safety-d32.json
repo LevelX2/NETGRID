@@ -17,10 +17,10 @@
       "phase": "run",
       "own": {
         "identity": {
-          "instanceId": "runner_runner_identity_001_0",
+          "instanceId": "c3mg",
           "known": true,
           "title": "Runner",
-          "definitionId": "runner_identity_001",
+          "definitionId": 587,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -35,10 +35,10 @@
         "agendaPoints": 0,
         "gripOrHq": [
           {
-            "instanceId": "runner_onr_proteus_105_demolition-run_2",
+            "instanceId": "c10a",
             "known": true,
             "title": "Demolition Run",
-            "definitionId": "onr_proteus_105_demolition-run",
+            "definitionId": 163,
             "type": "event",
             "subtypes": [
               "sabotage"
@@ -55,10 +55,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_onr_proteus_125_subliminal-corruption_1",
+            "instanceId": "c14p",
             "known": true,
             "title": "Subliminal Corruption",
-            "definitionId": "onr_proteus_125_subliminal-corruption",
+            "definitionId": 183,
             "type": "event",
             "subtypes": [
               "bad_publicity"
@@ -75,10 +75,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_onr_v1_021_dwarf_1",
+            "instanceId": "c1ft",
             "known": true,
             "title": "Dwarf",
-            "definitionId": "onr_v1_021_dwarf",
+            "definitionId": 233,
             "type": "program",
             "subtypes": [
               "icebreaker",
@@ -94,10 +94,10 @@
             "controller": "runner"
           },
           {
-            "instanceId": "runner_onr_proteus_113_live-news-feed_1",
+            "instanceId": "c121",
             "known": true,
             "title": "Live News Feed",
-            "definitionId": "onr_proteus_113_live-news-feed",
+            "definitionId": 171,
             "type": "event",
             "subtypes": [
               "bad_publicity"
@@ -117,10 +117,10 @@
         "stackOrRdCount": 40,
         "heapOrArchives": [
           {
-            "instanceId": "runner_onr_proteus_128_airport-locker_1",
+            "instanceId": "c15d",
             "known": true,
             "title": "Airport Locker",
-            "definitionId": "onr_proteus_128_airport-locker",
+            "definitionId": 186,
             "type": "resource",
             "subtypes": [
               "hidden"
@@ -136,10 +136,10 @@
         "scoreArea": [],
         "rig": [
           {
-            "instanceId": "runner_onr_v1_039_krash_1",
+            "instanceId": "c1jt",
             "known": true,
             "title": "Krash",
-            "definitionId": "onr_v1_039_krash",
+            "definitionId": 251,
             "type": "program",
             "subtypes": [
               "icebreaker"
@@ -177,10 +177,10 @@
       },
       "opponent": {
         "identity": {
-          "instanceId": "corp_corp_identity_001_0",
+          "instanceId": "cs",
           "known": true,
           "title": "Korp",
-          "definitionId": "corp_identity_001",
+          "definitionId": 3,
           "type": "identity",
           "subtypes": [],
           "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
@@ -205,10 +205,10 @@
           "label": "HQ",
           "ice": [
             {
-              "instanceId": "corp_onr_v1_237_data-wall_1",
+              "instanceId": "c2rx",
               "known": true,
               "title": "Data Wall",
-              "definitionId": "onr_v1_237_data-wall",
+              "definitionId": 449,
               "type": "ice",
               "subtypes": [
                 "wall"
@@ -221,14 +221,14 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_onr_v1_237_data-wall_1",
-                "iceDefinitionId": "onr_v1_237_data-wall",
+                "iceInstanceId": "c2rx",
+                "iceDefinitionId": 449,
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "0",
                     "type": "end_the_run",
-                    "sourceDefinitionId": "onr_v1_237_data-wall",
+                    "sourceDefinitionId": 449,
                     "sourceTitle": "Data Wall"
                   }
                 ]
@@ -237,13 +237,13 @@
           ],
           "root": [
             {
-              "instanceId": "hidden_4b9818c5",
+              "instanceId": "hhq.r0",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
             },
             {
-              "instanceId": "hidden_b296b7ed",
+              "instanceId": "hhq.r1",
               "known": false,
               "rezzed": false,
               "advancementCounters": 0
@@ -255,10 +255,10 @@
           "label": "R&D",
           "ice": [
             {
-              "instanceId": "corp_onr_v1_223_banpei_1",
+              "instanceId": "c2ot",
               "known": true,
               "title": "Banpei",
-              "definitionId": "onr_v1_223_banpei",
+              "definitionId": 435,
               "type": "ice",
               "subtypes": [
                 "killer",
@@ -272,23 +272,23 @@
               "owner": "corp",
               "controller": "corp",
               "effectiveRunQuote": {
-                "iceInstanceId": "corp_onr_v1_223_banpei_1",
-                "iceDefinitionId": "onr_v1_223_banpei",
+                "iceInstanceId": "c2ot",
+                "iceDefinitionId": 435,
                 "effectiveStrength": 0,
                 "subroutines": [
                   {
-                    "id": "printed_subroutines_trash_program",
+                    "id": "0",
                     "type": "trash_installed_program",
-                    "sourceDefinitionId": "onr_v1_223_banpei",
+                    "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei",
                     "unbrokenRunEffect": {
                       "causesDamageOrProgramTrash": true
                     }
                   },
                   {
-                    "id": "printed_subroutines_end_the_run",
+                    "id": "1",
                     "type": "end_the_run",
-                    "sourceDefinitionId": "onr_v1_223_banpei",
+                    "sourceDefinitionId": 435,
                     "sourceTitle": "Banpei"
                   }
                 ]
@@ -311,7 +311,7 @@
         "removedFromGameCount": 0
       },
       "run": {
-        "runId": "run_29",
+        "runId": 29,
         "attackedServerId": "rd",
         "phase": "encounter_ice",
         "position": {
@@ -320,10 +320,10 @@
           "iceIndex": 0
         },
         "encounteredIce": {
-          "instanceId": "corp_onr_v1_223_banpei_1",
+          "instanceId": "c2ot",
           "known": true,
           "title": "Banpei",
-          "definitionId": "onr_v1_223_banpei",
+          "definitionId": 435,
           "type": "ice",
           "subtypes": [
             "killer",
@@ -337,23 +337,23 @@
           "owner": "corp",
           "controller": "corp",
           "effectiveRunQuote": {
-            "iceInstanceId": "corp_onr_v1_223_banpei_1",
-            "iceDefinitionId": "onr_v1_223_banpei",
+            "iceInstanceId": "c2ot",
+            "iceDefinitionId": 435,
             "effectiveStrength": 0,
             "subroutines": [
               {
-                "id": "printed_subroutines_trash_program",
+                "id": "0",
                 "type": "trash_installed_program",
-                "sourceDefinitionId": "onr_v1_223_banpei",
+                "sourceDefinitionId": 435,
                 "sourceTitle": "Banpei",
                 "unbrokenRunEffect": {
                   "causesDamageOrProgramTrash": true
                 }
               },
               {
-                "id": "printed_subroutines_end_the_run",
+                "id": "1",
                 "type": "end_the_run",
-                "sourceDefinitionId": "onr_v1_223_banpei",
+                "sourceDefinitionId": 435,
                 "sourceTitle": "Banpei"
               }
             ]
@@ -365,7 +365,7 @@
       "deckMetadata": {
         "own": {
           "side": "runner",
-          "identityCardId": "runner_identity_001",
+          "identityCardId": 587,
           "deckName": "Proteus Runner - Hidden Backdoor Sabotage",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
@@ -375,7 +375,7 @@
         },
         "opponent": {
           "side": "corp",
-          "identityCardId": "corp_identity_001",
+          "identityCardId": 3,
           "deckName": "Mumie",
           "cardPoolSnapshotId": "card-snapshot-0.8",
           "cardPoolVersion": "private-local-onr-v1",
@@ -388,7 +388,7 @@
       "agendaPointsToWin": 7,
       "publicEvents": [
         {
-          "eventId": "evt_0",
+          "eventId": 1,
           "type": "game_created",
           "stateVersionBefore": 0,
           "stateVersionAfter": 0,
@@ -414,7 +414,7 @@
               "deckName": "Proteus Runner - Hidden Backdoor Sabotage",
               "deckHash": "fnv1a:d661af9c",
               "side": "runner",
-              "identityCardId": "runner_identity_001",
+              "identityCardId": 587,
               "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             },
@@ -422,14 +422,14 @@
               "deckName": "Mumie",
               "deckHash": "fnv1a:c6bca694",
               "side": "corp",
-              "identityCardId": "corp_identity_001",
+              "identityCardId": 3,
               "formatProfileId": "netgrid_private_local_v1",
               "cardPoolSnapshotId": "card-snapshot-0.8"
             }
           }
         },
         {
-          "eventId": "evt_1",
+          "eventId": 2,
           "type": "resolve_choice",
           "stateVersionBefore": 0,
           "stateVersionAfter": 1,
@@ -460,7 +460,7 @@
           }
         },
         {
-          "eventId": "evt_2",
+          "eventId": 3,
           "type": "resolve_choice",
           "stateVersionBefore": 1,
           "stateVersionAfter": 2,
@@ -491,7 +491,7 @@
           }
         },
         {
-          "eventId": "evt_3",
+          "eventId": 4,
           "type": "mandatory_draw",
           "stateVersionBefore": 2,
           "stateVersionAfter": 3,
@@ -518,7 +518,7 @@
           }
         },
         {
-          "eventId": "evt_4",
+          "eventId": 5,
           "type": "install_card",
           "stateVersionBefore": 3,
           "stateVersionAfter": 4,
@@ -545,7 +545,7 @@
           }
         },
         {
-          "eventId": "evt_5",
+          "eventId": 6,
           "type": "draw_card",
           "stateVersionBefore": 4,
           "stateVersionAfter": 5,
@@ -566,7 +566,7 @@
           }
         },
         {
-          "eventId": "evt_6",
+          "eventId": 7,
           "type": "install_card",
           "stateVersionBefore": 5,
           "stateVersionAfter": 6,
@@ -593,7 +593,7 @@
           }
         },
         {
-          "eventId": "evt_7",
+          "eventId": 8,
           "type": "end_turn",
           "stateVersionBefore": 6,
           "stateVersionAfter": 7,
@@ -610,7 +610,7 @@
           }
         },
         {
-          "eventId": "evt_8",
+          "eventId": 9,
           "type": "start_run",
           "stateVersionBefore": 7,
           "stateVersionAfter": 8,
@@ -639,7 +639,7 @@
           }
         },
         {
-          "eventId": "evt_9",
+          "eventId": 10,
           "type": "continue_run",
           "stateVersionBefore": 8,
           "stateVersionAfter": 9,
@@ -662,7 +662,7 @@
           }
         },
         {
-          "eventId": "evt_10",
+          "eventId": 11,
           "type": "decline_rez",
           "stateVersionBefore": 9,
           "stateVersionAfter": 10,
@@ -683,7 +683,7 @@
           }
         },
         {
-          "eventId": "evt_11",
+          "eventId": 12,
           "type": "access_card",
           "stateVersionBefore": 10,
           "stateVersionAfter": 11,
@@ -695,7 +695,7 @@
             "actionType": "access_card",
             "label": "Karte accessen",
             "title": "Banpei",
-            "cardDefinitionId": "onr_v1_223_banpei",
+            "cardDefinitionId": 435,
             "serverLabel": "R&D",
             "abilityFamily": "run-access",
             "targets": {
@@ -707,7 +707,7 @@
           }
         },
         {
-          "eventId": "evt_12",
+          "eventId": 13,
           "type": "start_run",
           "stateVersionBefore": 11,
           "stateVersionAfter": 12,
@@ -736,7 +736,7 @@
           }
         },
         {
-          "eventId": "evt_13",
+          "eventId": 14,
           "type": "rez_ice",
           "stateVersionBefore": 12,
           "stateVersionAfter": 13,
@@ -748,7 +748,7 @@
             "actionType": "rez_ice",
             "label": "Data Wall rezzen",
             "title": "Data Wall",
-            "cardDefinitionId": "onr_v1_237_data-wall",
+            "cardDefinitionId": 449,
             "serverId": "hq",
             "serverLabel": "HQ",
             "installPlacement": "ice",
@@ -762,7 +762,7 @@
           }
         },
         {
-          "eventId": "evt_14",
+          "eventId": 15,
           "type": "decline_rez",
           "stateVersionBefore": 13,
           "stateVersionAfter": 14,
@@ -779,7 +779,7 @@
           }
         },
         {
-          "eventId": "evt_15",
+          "eventId": 16,
           "type": "continue_run",
           "stateVersionBefore": 14,
           "stateVersionAfter": 15,
@@ -790,29 +790,29 @@
             "actor": "runner",
             "actionType": "continue_run",
             "label": "Subroutinen auslösen (Run endet)",
-            "sourceDefinitionId": "onr_v1_237_data-wall",
+            "sourceDefinitionId": 449,
             "abilityFamily": "run-access",
             "targets": {
-              "sourceDefinitionId": "onr_v1_237_data-wall"
+              "sourceDefinitionId": 449
             },
             "visibility": {
               "class": "private_to_side"
             },
             "resolvedEffects": [
               {
-                "effectId": "subroutine_1",
+                "effectId": 0,
                 "kind": "resolve_subroutine",
                 "visibility": "public",
                 "side": "runner",
                 "reason": "ice_subroutine",
-                "sourceDefinitionId": "onr_v1_237_data-wall",
+                "sourceDefinitionId": 449,
                 "sourceTitle": "Data Wall"
               }
             ]
           }
         },
         {
-          "eventId": "evt_16",
+          "eventId": 17,
           "type": "install_card",
           "stateVersionBefore": 15,
           "stateVersionAfter": 16,
@@ -824,7 +824,7 @@
             "actionType": "install_card",
             "label": "Runner installiert eine verdeckte Resource.",
             "redactedKind": "hidden_runner_resource",
-            "hiddenResourceSlotId": "hidden_runner_resource_3a42542b",
+            "hiddenResourceSlotId": "s1v2m1sw",
             "hiddenRunnerResourceInstall": true,
             "effectKind": "install_card",
             "runnerCreditsAfter": 5,
@@ -841,7 +841,7 @@
           }
         },
         {
-          "eventId": "evt_17",
+          "eventId": 18,
           "type": "activated_card_ability",
           "stateVersionBefore": 16,
           "stateVersionAfter": 17,
@@ -853,12 +853,12 @@
             "actionType": "activated_card_ability",
             "label": "Airport Locker: Programm aus dem Stack installieren",
             "title": "Airport Locker",
-            "cardDefinitionId": "onr_proteus_128_airport-locker",
-            "sourceCardInstanceId": "runner_onr_proteus_128_airport-locker_1",
-            "sourceDefinitionId": "onr_proteus_128_airport-locker",
-            "trashedCardDefinitionId": "onr_proteus_128_airport-locker",
+            "cardDefinitionId": 186,
+            "sourceCardInstanceId": "c15d",
+            "sourceDefinitionId": 186,
+            "trashedCardDefinitionId": 186,
             "redactedKind": "hidden_zone",
-            "hiddenResourceSlotId": "hidden_runner_resource_3a42542b",
+            "hiddenResourceSlotId": "s1v2m1sw",
             "hiddenRunnerResourceRevealed": true,
             "hiddenZoneAction": "p3_38_search_stack_install",
             "abilityFamily": "hidden-zone",
@@ -866,8 +866,8 @@
             "effectKind": "hidden_zone",
             "hiddenZoneBarrier": true,
             "targets": {
-              "sourceDefinitionId": "onr_proteus_128_airport-locker",
-              "trashedCardDefinitionId": "onr_proteus_128_airport-locker",
+              "sourceDefinitionId": 186,
+              "trashedCardDefinitionId": 186,
               "redactedKind": "hidden_zone"
             },
             "visibility": {
@@ -878,7 +878,7 @@
           }
         },
         {
-          "eventId": "evt_18",
+          "eventId": 19,
           "type": "resolve_choice",
           "stateVersionBefore": 17,
           "stateVersionAfter": 18,
@@ -890,9 +890,9 @@
             "actionType": "resolve_choice",
             "label": "Choice wurde beantwortet.",
             "title": "Krash",
-            "cardDefinitionId": "onr_v1_039_krash",
-            "sourceDefinitionId": "onr_proteus_128_airport-locker",
-            "installedProgramDefinitionId": "onr_v1_039_krash",
+            "cardDefinitionId": 251,
+            "sourceDefinitionId": 186,
+            "installedProgramDefinitionId": 251,
             "choiceVisibility": "hidden_info_barrier",
             "redactedKind": "hidden_zone",
             "hiddenZoneAction": "p3_38_search_stack_install",
@@ -906,8 +906,8 @@
               "runnerCreditsAfter": 0
             },
             "targets": {
-              "sourceDefinitionId": "onr_proteus_128_airport-locker",
-              "installedProgramDefinitionId": "onr_v1_039_krash",
+              "sourceDefinitionId": 186,
+              "installedProgramDefinitionId": 251,
               "choiceVisibility": "hidden_info_barrier",
               "redactedKind": "hidden_zone"
             },
@@ -919,7 +919,7 @@
           }
         },
         {
-          "eventId": "evt_19",
+          "eventId": 20,
           "type": "gain_credit",
           "stateVersionBefore": 18,
           "stateVersionAfter": 19,
@@ -944,7 +944,7 @@
           }
         },
         {
-          "eventId": "evt_20",
+          "eventId": 21,
           "type": "end_turn",
           "stateVersionBefore": 19,
           "stateVersionAfter": 20,
@@ -961,7 +961,7 @@
           }
         },
         {
-          "eventId": "evt_21",
+          "eventId": 22,
           "type": "mandatory_draw",
           "stateVersionBefore": 20,
           "stateVersionAfter": 21,
@@ -988,7 +988,7 @@
           }
         },
         {
-          "eventId": "evt_22",
+          "eventId": 23,
           "type": "install_card",
           "stateVersionBefore": 21,
           "stateVersionAfter": 22,
@@ -1015,7 +1015,7 @@
           }
         },
         {
-          "eventId": "evt_23",
+          "eventId": 24,
           "type": "draw_card",
           "stateVersionBefore": 22,
           "stateVersionAfter": 23,
@@ -1036,7 +1036,7 @@
           }
         },
         {
-          "eventId": "evt_24",
+          "eventId": 25,
           "type": "install_card",
           "stateVersionBefore": 23,
           "stateVersionAfter": 24,
@@ -1063,7 +1063,7 @@
           }
         },
         {
-          "eventId": "evt_25",
+          "eventId": 26,
           "type": "end_turn",
           "stateVersionBefore": 24,
           "stateVersionAfter": 25,
@@ -1080,7 +1080,7 @@
           }
         },
         {
-          "eventId": "evt_26",
+          "eventId": 27,
           "type": "gain_credit",
           "stateVersionBefore": 25,
           "stateVersionAfter": 26,
@@ -1105,7 +1105,7 @@
           }
         },
         {
-          "eventId": "evt_27",
+          "eventId": 28,
           "type": "gain_credit",
           "stateVersionBefore": 26,
           "stateVersionAfter": 27,
@@ -1130,7 +1130,7 @@
           }
         },
         {
-          "eventId": "evt_28",
+          "eventId": 29,
           "type": "gain_credit",
           "stateVersionBefore": 27,
           "stateVersionAfter": 28,
@@ -1155,7 +1155,7 @@
           }
         },
         {
-          "eventId": "evt_29",
+          "eventId": 30,
           "type": "start_run",
           "stateVersionBefore": 28,
           "stateVersionAfter": 29,
@@ -1184,7 +1184,7 @@
           }
         },
         {
-          "eventId": "evt_30",
+          "eventId": 31,
           "type": "rez_ice",
           "stateVersionBefore": 29,
           "stateVersionAfter": 30,
@@ -1196,7 +1196,7 @@
             "actionType": "rez_ice",
             "label": "Banpei rezzen",
             "title": "Banpei",
-            "cardDefinitionId": "onr_v1_223_banpei",
+            "cardDefinitionId": 435,
             "serverId": "rd",
             "serverLabel": "R&D",
             "installPlacement": "ice",
@@ -1210,7 +1210,7 @@
           }
         },
         {
-          "eventId": "evt_31",
+          "eventId": 32,
           "type": "decline_rez",
           "stateVersionBefore": 30,
           "stateVersionAfter": 31,
@@ -1229,11 +1229,11 @@
       ],
       "legalActions": [
         {
-          "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_223_banpei_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+          "actionId": "rj.c1jt.c1jt.c1jt.c2ot.329",
           "side": "runner",
           "type": "pump_breaker",
           "label": "Krash: Stärke +1",
-          "source": "runner_onr_v1_039_krash_1",
+          "source": "c1jt",
           "timingPoint": "run.encounter_ice",
           "costs": [
             {
@@ -1249,32 +1249,32 @@
             {
               "id": "subroutine",
               "kind": "subroutine",
-              "sourceIceRef": "corp_onr_v1_223_banpei_1"
+              "sourceIceRef": "c2ot"
             }
           ],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_onr_v1_039_krash_1",
-            "sourceAbilityId": "onr_v1_039_krash:icebreaker_abilities_increase_strength"
+            "sourceCardInstanceId": "c1jt",
+            "sourceAbilityId": 329
           },
-          "effectRef": "effect.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+          "effectRef": "effect.329",
           "visibility": "private_to_actor",
           "expiresAtStateVersion": 31,
           "payload": {
-            "breakerId": "runner_onr_v1_039_krash_1",
-            "iceId": "corp_onr_v1_223_banpei_1",
+            "breakerId": "c1jt",
+            "iceId": "c2ot",
             "pumpStrengthAmount": 1,
-            "cardId": "runner_onr_v1_039_krash_1",
+            "cardId": "c1jt",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "onr_v1_039_krash:icebreaker_abilities_increase_strength",
+            "cardImplementationAbilityId": 329,
             "cardImplementationAbilityKey": "icebreaker_abilities_increase_strength"
           }
         },
         {
-          "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_223_banpei_1.0.printed_subroutines_trash_program.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+          "actionId": "r3.c1jt.c1jt.c1jt.c2ot.0.0.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 1 brechen",
-          "source": "runner_onr_v1_039_krash_1",
+          "source": "c1jt",
           "timingPoint": "run.encounter_ice",
           "costs": [
             {
@@ -1290,33 +1290,33 @@
             {
               "id": "subroutine",
               "kind": "subroutine",
-              "sourceIceRef": "corp_onr_v1_223_banpei_1"
+              "sourceIceRef": "c2ot"
             }
           ],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_onr_v1_039_krash_1",
-            "sourceAbilityId": "onr_v1_039_krash:icebreaker_abilities_break_subroutine"
+            "sourceCardInstanceId": "c1jt",
+            "sourceAbilityId": 328
           },
-          "effectRef": "effect.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+          "effectRef": "effect.328",
           "visibility": "private_to_actor",
           "expiresAtStateVersion": 31,
           "payload": {
-            "breakerId": "runner_onr_v1_039_krash_1",
-            "iceId": "corp_onr_v1_223_banpei_1",
+            "breakerId": "c1jt",
+            "iceId": "c2ot",
             "subroutineIndex": 0,
-            "targetIceDefinitionId": "onr_v1_223_banpei",
-            "cardId": "runner_onr_v1_039_krash_1",
+            "targetIceDefinitionId": 435,
+            "cardId": "c1jt",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+            "cardImplementationAbilityId": 328,
             "cardImplementationAbilityKey": "icebreaker_abilities_break_subroutine"
           }
         },
         {
-          "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_223_banpei_1.1.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+          "actionId": "r3.c1jt.c1jt.c1jt.c2ot.1.1.328",
           "side": "runner",
           "type": "break_subroutine",
           "label": "Krash: Subroutine 2 brechen",
-          "source": "runner_onr_v1_039_krash_1",
+          "source": "c1jt",
           "timingPoint": "run.encounter_ice",
           "costs": [
             {
@@ -1332,29 +1332,29 @@
             {
               "id": "subroutine",
               "kind": "subroutine",
-              "sourceIceRef": "corp_onr_v1_223_banpei_1"
+              "sourceIceRef": "c2ot"
             }
           ],
           "abilityRef": {
-            "sourceCardInstanceId": "runner_onr_v1_039_krash_1",
-            "sourceAbilityId": "onr_v1_039_krash:icebreaker_abilities_break_subroutine"
+            "sourceCardInstanceId": "c1jt",
+            "sourceAbilityId": 328
           },
-          "effectRef": "effect.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+          "effectRef": "effect.328",
           "visibility": "private_to_actor",
           "expiresAtStateVersion": 31,
           "payload": {
-            "breakerId": "runner_onr_v1_039_krash_1",
-            "iceId": "corp_onr_v1_223_banpei_1",
+            "breakerId": "c1jt",
+            "iceId": "c2ot",
             "subroutineIndex": 1,
-            "targetIceDefinitionId": "onr_v1_223_banpei",
-            "cardId": "runner_onr_v1_039_krash_1",
+            "targetIceDefinitionId": 435,
+            "cardId": "c1jt",
             "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-            "cardImplementationAbilityId": "onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+            "cardImplementationAbilityId": 328,
             "cardImplementationAbilityKey": "icebreaker_abilities_break_subroutine"
           }
         },
         {
-          "actionId": "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run",
+          "actionId": "r5.0,1",
           "side": "runner",
           "type": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
@@ -1367,18 +1367,21 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 2,
-            "encounterSubroutineIds": "printed_subroutines_trash_program,printed_subroutines_end_the_run",
             "encounterWillEndRun": true,
             "encounterSourceWillTrashAtEndOfTurn": false,
             "abilityFamily": "run-access",
-            "sourceDefinitionId": "onr_v1_223_banpei"
-          }
+            "sourceDefinitionId": 435
+          },
+          "encounterSubroutineIds": [
+            "0",
+            "1"
+          ]
         }
       ]
     },
     "eventTail": [
       {
-        "eventId": "evt_0",
+        "eventId": 1,
         "type": "game_created",
         "stateVersionBefore": 0,
         "stateVersionAfter": 0,
@@ -1404,7 +1407,7 @@
             "deckName": "Proteus Runner - Hidden Backdoor Sabotage",
             "deckHash": "fnv1a:d661af9c",
             "side": "runner",
-            "identityCardId": "runner_identity_001",
+            "identityCardId": 587,
             "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           },
@@ -1412,14 +1415,14 @@
             "deckName": "Mumie",
             "deckHash": "fnv1a:c6bca694",
             "side": "corp",
-            "identityCardId": "corp_identity_001",
+            "identityCardId": 3,
             "formatProfileId": "netgrid_private_local_v1",
             "cardPoolSnapshotId": "card-snapshot-0.8"
           }
         }
       },
       {
-        "eventId": "evt_1",
+        "eventId": 2,
         "type": "resolve_choice",
         "stateVersionBefore": 0,
         "stateVersionAfter": 1,
@@ -1450,7 +1453,7 @@
         }
       },
       {
-        "eventId": "evt_2",
+        "eventId": 3,
         "type": "resolve_choice",
         "stateVersionBefore": 1,
         "stateVersionAfter": 2,
@@ -1481,7 +1484,7 @@
         }
       },
       {
-        "eventId": "evt_3",
+        "eventId": 4,
         "type": "mandatory_draw",
         "stateVersionBefore": 2,
         "stateVersionAfter": 3,
@@ -1508,7 +1511,7 @@
         }
       },
       {
-        "eventId": "evt_4",
+        "eventId": 5,
         "type": "install_card",
         "stateVersionBefore": 3,
         "stateVersionAfter": 4,
@@ -1535,7 +1538,7 @@
         }
       },
       {
-        "eventId": "evt_5",
+        "eventId": 6,
         "type": "draw_card",
         "stateVersionBefore": 4,
         "stateVersionAfter": 5,
@@ -1556,7 +1559,7 @@
         }
       },
       {
-        "eventId": "evt_6",
+        "eventId": 7,
         "type": "install_card",
         "stateVersionBefore": 5,
         "stateVersionAfter": 6,
@@ -1583,7 +1586,7 @@
         }
       },
       {
-        "eventId": "evt_7",
+        "eventId": 8,
         "type": "end_turn",
         "stateVersionBefore": 6,
         "stateVersionAfter": 7,
@@ -1600,7 +1603,7 @@
         }
       },
       {
-        "eventId": "evt_8",
+        "eventId": 9,
         "type": "start_run",
         "stateVersionBefore": 7,
         "stateVersionAfter": 8,
@@ -1629,7 +1632,7 @@
         }
       },
       {
-        "eventId": "evt_9",
+        "eventId": 10,
         "type": "continue_run",
         "stateVersionBefore": 8,
         "stateVersionAfter": 9,
@@ -1652,7 +1655,7 @@
         }
       },
       {
-        "eventId": "evt_10",
+        "eventId": 11,
         "type": "decline_rez",
         "stateVersionBefore": 9,
         "stateVersionAfter": 10,
@@ -1673,7 +1676,7 @@
         }
       },
       {
-        "eventId": "evt_11",
+        "eventId": 12,
         "type": "access_card",
         "stateVersionBefore": 10,
         "stateVersionAfter": 11,
@@ -1685,7 +1688,7 @@
           "actionType": "access_card",
           "label": "Karte accessen",
           "title": "Banpei",
-          "cardDefinitionId": "onr_v1_223_banpei",
+          "cardDefinitionId": 435,
           "serverLabel": "R&D",
           "abilityFamily": "run-access",
           "targets": {
@@ -1697,7 +1700,7 @@
         }
       },
       {
-        "eventId": "evt_12",
+        "eventId": 13,
         "type": "start_run",
         "stateVersionBefore": 11,
         "stateVersionAfter": 12,
@@ -1726,7 +1729,7 @@
         }
       },
       {
-        "eventId": "evt_13",
+        "eventId": 14,
         "type": "rez_ice",
         "stateVersionBefore": 12,
         "stateVersionAfter": 13,
@@ -1738,7 +1741,7 @@
           "actionType": "rez_ice",
           "label": "Data Wall rezzen",
           "title": "Data Wall",
-          "cardDefinitionId": "onr_v1_237_data-wall",
+          "cardDefinitionId": 449,
           "serverId": "hq",
           "serverLabel": "HQ",
           "installPlacement": "ice",
@@ -1752,7 +1755,7 @@
         }
       },
       {
-        "eventId": "evt_14",
+        "eventId": 15,
         "type": "decline_rez",
         "stateVersionBefore": 13,
         "stateVersionAfter": 14,
@@ -1769,7 +1772,7 @@
         }
       },
       {
-        "eventId": "evt_15",
+        "eventId": 16,
         "type": "continue_run",
         "stateVersionBefore": 14,
         "stateVersionAfter": 15,
@@ -1780,29 +1783,29 @@
           "actor": "runner",
           "actionType": "continue_run",
           "label": "Subroutinen auslösen (Run endet)",
-          "sourceDefinitionId": "onr_v1_237_data-wall",
+          "sourceDefinitionId": 449,
           "abilityFamily": "run-access",
           "targets": {
-            "sourceDefinitionId": "onr_v1_237_data-wall"
+            "sourceDefinitionId": 449
           },
           "visibility": {
             "class": "private_to_side"
           },
           "resolvedEffects": [
             {
-              "effectId": "subroutine_1",
+              "effectId": 0,
               "kind": "resolve_subroutine",
               "visibility": "public",
               "side": "runner",
               "reason": "ice_subroutine",
-              "sourceDefinitionId": "onr_v1_237_data-wall",
+              "sourceDefinitionId": 449,
               "sourceTitle": "Data Wall"
             }
           ]
         }
       },
       {
-        "eventId": "evt_16",
+        "eventId": 17,
         "type": "install_card",
         "stateVersionBefore": 15,
         "stateVersionAfter": 16,
@@ -1814,7 +1817,7 @@
           "actionType": "install_card",
           "label": "Runner installiert eine verdeckte Resource.",
           "redactedKind": "hidden_runner_resource",
-          "hiddenResourceSlotId": "hidden_runner_resource_3a42542b",
+          "hiddenResourceSlotId": "s1v2m1sw",
           "hiddenRunnerResourceInstall": true,
           "effectKind": "install_card",
           "runnerCreditsAfter": 5,
@@ -1831,7 +1834,7 @@
         }
       },
       {
-        "eventId": "evt_17",
+        "eventId": 18,
         "type": "activated_card_ability",
         "stateVersionBefore": 16,
         "stateVersionAfter": 17,
@@ -1843,12 +1846,12 @@
           "actionType": "activated_card_ability",
           "label": "Airport Locker: Programm aus dem Stack installieren",
           "title": "Airport Locker",
-          "cardDefinitionId": "onr_proteus_128_airport-locker",
-          "sourceCardInstanceId": "runner_onr_proteus_128_airport-locker_1",
-          "sourceDefinitionId": "onr_proteus_128_airport-locker",
-          "trashedCardDefinitionId": "onr_proteus_128_airport-locker",
+          "cardDefinitionId": 186,
+          "sourceCardInstanceId": "c15d",
+          "sourceDefinitionId": 186,
+          "trashedCardDefinitionId": 186,
           "redactedKind": "hidden_zone",
-          "hiddenResourceSlotId": "hidden_runner_resource_3a42542b",
+          "hiddenResourceSlotId": "s1v2m1sw",
           "hiddenRunnerResourceRevealed": true,
           "hiddenZoneAction": "p3_38_search_stack_install",
           "abilityFamily": "hidden-zone",
@@ -1856,8 +1859,8 @@
           "effectKind": "hidden_zone",
           "hiddenZoneBarrier": true,
           "targets": {
-            "sourceDefinitionId": "onr_proteus_128_airport-locker",
-            "trashedCardDefinitionId": "onr_proteus_128_airport-locker",
+            "sourceDefinitionId": 186,
+            "trashedCardDefinitionId": 186,
             "redactedKind": "hidden_zone"
           },
           "visibility": {
@@ -1868,7 +1871,7 @@
         }
       },
       {
-        "eventId": "evt_18",
+        "eventId": 19,
         "type": "resolve_choice",
         "stateVersionBefore": 17,
         "stateVersionAfter": 18,
@@ -1880,9 +1883,9 @@
           "actionType": "resolve_choice",
           "label": "Choice wurde beantwortet.",
           "title": "Krash",
-          "cardDefinitionId": "onr_v1_039_krash",
-          "sourceDefinitionId": "onr_proteus_128_airport-locker",
-          "installedProgramDefinitionId": "onr_v1_039_krash",
+          "cardDefinitionId": 251,
+          "sourceDefinitionId": 186,
+          "installedProgramDefinitionId": 251,
           "choiceVisibility": "hidden_info_barrier",
           "redactedKind": "hidden_zone",
           "hiddenZoneAction": "p3_38_search_stack_install",
@@ -1896,8 +1899,8 @@
             "runnerCreditsAfter": 0
           },
           "targets": {
-            "sourceDefinitionId": "onr_proteus_128_airport-locker",
-            "installedProgramDefinitionId": "onr_v1_039_krash",
+            "sourceDefinitionId": 186,
+            "installedProgramDefinitionId": 251,
             "choiceVisibility": "hidden_info_barrier",
             "redactedKind": "hidden_zone"
           },
@@ -1909,7 +1912,7 @@
         }
       },
       {
-        "eventId": "evt_19",
+        "eventId": 20,
         "type": "gain_credit",
         "stateVersionBefore": 18,
         "stateVersionAfter": 19,
@@ -1934,7 +1937,7 @@
         }
       },
       {
-        "eventId": "evt_20",
+        "eventId": 21,
         "type": "end_turn",
         "stateVersionBefore": 19,
         "stateVersionAfter": 20,
@@ -1951,7 +1954,7 @@
         }
       },
       {
-        "eventId": "evt_21",
+        "eventId": 22,
         "type": "mandatory_draw",
         "stateVersionBefore": 20,
         "stateVersionAfter": 21,
@@ -1978,7 +1981,7 @@
         }
       },
       {
-        "eventId": "evt_22",
+        "eventId": 23,
         "type": "install_card",
         "stateVersionBefore": 21,
         "stateVersionAfter": 22,
@@ -2005,7 +2008,7 @@
         }
       },
       {
-        "eventId": "evt_23",
+        "eventId": 24,
         "type": "draw_card",
         "stateVersionBefore": 22,
         "stateVersionAfter": 23,
@@ -2026,7 +2029,7 @@
         }
       },
       {
-        "eventId": "evt_24",
+        "eventId": 25,
         "type": "install_card",
         "stateVersionBefore": 23,
         "stateVersionAfter": 24,
@@ -2053,7 +2056,7 @@
         }
       },
       {
-        "eventId": "evt_25",
+        "eventId": 26,
         "type": "end_turn",
         "stateVersionBefore": 24,
         "stateVersionAfter": 25,
@@ -2070,7 +2073,7 @@
         }
       },
       {
-        "eventId": "evt_26",
+        "eventId": 27,
         "type": "gain_credit",
         "stateVersionBefore": 25,
         "stateVersionAfter": 26,
@@ -2095,7 +2098,7 @@
         }
       },
       {
-        "eventId": "evt_27",
+        "eventId": 28,
         "type": "gain_credit",
         "stateVersionBefore": 26,
         "stateVersionAfter": 27,
@@ -2120,7 +2123,7 @@
         }
       },
       {
-        "eventId": "evt_28",
+        "eventId": 29,
         "type": "gain_credit",
         "stateVersionBefore": 27,
         "stateVersionAfter": 28,
@@ -2145,7 +2148,7 @@
         }
       },
       {
-        "eventId": "evt_29",
+        "eventId": 30,
         "type": "start_run",
         "stateVersionBefore": 28,
         "stateVersionAfter": 29,
@@ -2174,7 +2177,7 @@
         }
       },
       {
-        "eventId": "evt_30",
+        "eventId": 31,
         "type": "rez_ice",
         "stateVersionBefore": 29,
         "stateVersionAfter": 30,
@@ -2186,7 +2189,7 @@
           "actionType": "rez_ice",
           "label": "Banpei rezzen",
           "title": "Banpei",
-          "cardDefinitionId": "onr_v1_223_banpei",
+          "cardDefinitionId": 435,
           "serverId": "rd",
           "serverLabel": "R&D",
           "installPlacement": "ice",
@@ -2200,7 +2203,7 @@
         }
       },
       {
-        "eventId": "evt_31",
+        "eventId": 32,
         "type": "decline_rez",
         "stateVersionBefore": 30,
         "stateVersionAfter": 31,
@@ -2219,11 +2222,11 @@
     ],
     "legalActions": [
       {
-        "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_223_banpei_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+        "actionId": "rj.c1jt.c1jt.c1jt.c2ot.329",
         "side": "runner",
         "type": "pump_breaker",
         "label": "Krash: Stärke +1",
-        "source": "runner_onr_v1_039_krash_1",
+        "source": "c1jt",
         "timingPoint": "run.encounter_ice",
         "costs": [
           {
@@ -2239,32 +2242,32 @@
           {
             "id": "subroutine",
             "kind": "subroutine",
-            "sourceIceRef": "corp_onr_v1_223_banpei_1"
+            "sourceIceRef": "c2ot"
           }
         ],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_onr_v1_039_krash_1",
-          "sourceAbilityId": "onr_v1_039_krash:icebreaker_abilities_increase_strength"
+          "sourceCardInstanceId": "c1jt",
+          "sourceAbilityId": 329
         },
-        "effectRef": "effect.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+        "effectRef": "effect.329",
         "visibility": "private_to_actor",
         "expiresAtStateVersion": 31,
         "payload": {
-          "breakerId": "runner_onr_v1_039_krash_1",
-          "iceId": "corp_onr_v1_223_banpei_1",
+          "breakerId": "c1jt",
+          "iceId": "c2ot",
           "pumpStrengthAmount": 1,
-          "cardId": "runner_onr_v1_039_krash_1",
+          "cardId": "c1jt",
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "onr_v1_039_krash:icebreaker_abilities_increase_strength",
+          "cardImplementationAbilityId": 329,
           "cardImplementationAbilityKey": "icebreaker_abilities_increase_strength"
         }
       },
       {
-        "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_223_banpei_1.0.printed_subroutines_trash_program.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+        "actionId": "r3.c1jt.c1jt.c1jt.c2ot.0.0.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 1 brechen",
-        "source": "runner_onr_v1_039_krash_1",
+        "source": "c1jt",
         "timingPoint": "run.encounter_ice",
         "costs": [
           {
@@ -2280,33 +2283,33 @@
           {
             "id": "subroutine",
             "kind": "subroutine",
-            "sourceIceRef": "corp_onr_v1_223_banpei_1"
+            "sourceIceRef": "c2ot"
           }
         ],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_onr_v1_039_krash_1",
-          "sourceAbilityId": "onr_v1_039_krash:icebreaker_abilities_break_subroutine"
+          "sourceCardInstanceId": "c1jt",
+          "sourceAbilityId": 328
         },
-        "effectRef": "effect.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+        "effectRef": "effect.328",
         "visibility": "private_to_actor",
         "expiresAtStateVersion": 31,
         "payload": {
-          "breakerId": "runner_onr_v1_039_krash_1",
-          "iceId": "corp_onr_v1_223_banpei_1",
+          "breakerId": "c1jt",
+          "iceId": "c2ot",
           "subroutineIndex": 0,
-          "targetIceDefinitionId": "onr_v1_223_banpei",
-          "cardId": "runner_onr_v1_039_krash_1",
+          "targetIceDefinitionId": 435,
+          "cardId": "c1jt",
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+          "cardImplementationAbilityId": 328,
           "cardImplementationAbilityKey": "icebreaker_abilities_break_subroutine"
         }
       },
       {
-        "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_223_banpei_1.1.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+        "actionId": "r3.c1jt.c1jt.c1jt.c2ot.1.1.328",
         "side": "runner",
         "type": "break_subroutine",
         "label": "Krash: Subroutine 2 brechen",
-        "source": "runner_onr_v1_039_krash_1",
+        "source": "c1jt",
         "timingPoint": "run.encounter_ice",
         "costs": [
           {
@@ -2322,29 +2325,29 @@
           {
             "id": "subroutine",
             "kind": "subroutine",
-            "sourceIceRef": "corp_onr_v1_223_banpei_1"
+            "sourceIceRef": "c2ot"
           }
         ],
         "abilityRef": {
-          "sourceCardInstanceId": "runner_onr_v1_039_krash_1",
-          "sourceAbilityId": "onr_v1_039_krash:icebreaker_abilities_break_subroutine"
+          "sourceCardInstanceId": "c1jt",
+          "sourceAbilityId": 328
         },
-        "effectRef": "effect.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+        "effectRef": "effect.328",
         "visibility": "private_to_actor",
         "expiresAtStateVersion": 31,
         "payload": {
-          "breakerId": "runner_onr_v1_039_krash_1",
-          "iceId": "corp_onr_v1_223_banpei_1",
+          "breakerId": "c1jt",
+          "iceId": "c2ot",
           "subroutineIndex": 1,
-          "targetIceDefinitionId": "onr_v1_223_banpei",
-          "cardId": "runner_onr_v1_039_krash_1",
+          "targetIceDefinitionId": 435,
+          "cardId": "c1jt",
           "cardImplementationCapabilityBindingKind": "card_spec_capability_key",
-          "cardImplementationAbilityId": "onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+          "cardImplementationAbilityId": 328,
           "cardImplementationAbilityKey": "icebreaker_abilities_break_subroutine"
         }
       },
       {
-        "actionId": "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run",
+        "actionId": "r5.0,1",
         "side": "runner",
         "type": "continue_run",
         "label": "Subroutinen auslösen (Run endet)",
@@ -2357,12 +2360,15 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 2,
-          "encounterSubroutineIds": "printed_subroutines_trash_program,printed_subroutines_end_the_run",
           "encounterWillEndRun": true,
           "encounterSourceWillTrashAtEndOfTurn": false,
           "abilityFamily": "run-access",
-          "sourceDefinitionId": "onr_v1_223_banpei"
-        }
+          "sourceDefinitionId": 435
+        },
+        "encounterSubroutineIds": [
+          "0",
+          "1"
+        ]
       }
     ],
     "difficulty": "hard",
@@ -2407,7 +2413,7 @@
     },
     "planningStateIdentity": {
       "stateVersion": 31,
-      "sideSafePlanningFingerprint": "fnv1a:747482ab"
+      "sideSafePlanningFingerprint": "fnv1a:a24d2611"
     },
     "ownDeckSnapshot": {
       "deckSnapshotId": "standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0",
@@ -2415,7 +2421,7 @@
       "deckVersion": "1",
       "name": "Proteus Runner - Hidden Backdoor Sabotage",
       "side": "runner",
-      "identityCardId": "runner_identity_001",
+      "identityCardId": 587,
       "cardPoolSnapshotId": "card-snapshot-0.8",
       "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
       "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
@@ -2424,139 +2430,139 @@
       "immutable": true,
       "cards": [
         {
-          "cardId": "onr_proteus_084_crumble",
+          "cardId": 142,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_089_garbage-in",
+          "cardId": 147,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_090_highlighter",
+          "cardId": 148,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_094_scaldan",
+          "cardId": 152,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_097_taxman",
+          "cardId": 155,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_098_vienna-22",
+          "cardId": 156,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_099_viral-pipeline",
+          "cardId": 157,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_102_blackmail",
+          "cardId": 160,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "cardId": 161,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_104_decoy-signal",
+          "cardId": 162,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_105_demolition-run",
+          "cardId": 163,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_106_disgruntled-ice-technician",
+          "cardId": 164,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_108_faked-hit",
+          "cardId": 166,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_109_frame-up",
+          "cardId": 167,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_112_identity-donor",
+          "cardId": 170,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_113_live-news-feed",
+          "cardId": 171,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_117_poisoned-water-supply",
+          "cardId": 175,
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_121_remote-detonator",
+          "cardId": 179,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_123_senatorial-field-trip",
+          "cardId": 181,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_125_subliminal-corruption",
+          "cardId": 183,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_128_airport-locker",
+          "cardId": 186,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_129_back-door-to-netwatch",
+          "cardId": 187,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_130_back-door-to-rivals",
+          "cardId": 188,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_132_bolt-hole",
+          "cardId": 190,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_133_chiba-bank-account",
+          "cardId": 191,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_136_credit-subversion",
+          "cardId": 194,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_137_death-from-above",
+          "cardId": 195,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_142_hq-mole",
+          "cardId": 200,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_147_r-and-d-mole",
+          "cardId": 205,
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_150_streetware-distributor",
+          "cardId": 208,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 1
         }
       ],
@@ -2570,7 +2576,7 @@
       },
       "publicMetadata": {
         "side": "runner",
-        "identityCardId": "runner_identity_001",
+        "identityCardId": 587,
         "deckName": "Proteus Runner - Hidden Backdoor Sabotage",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
@@ -2586,7 +2592,7 @@
       "runner": {
         "breakerInventory": [
           {
-            "cardId": "onr_v1_014_codecracker",
+            "cardId": 226,
             "title": "Codecracker",
             "coverage": [
               "code_gate",
@@ -2612,7 +2618,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_021_dwarf",
+            "cardId": 233,
             "title": "Dwarf",
             "coverage": [
               "subtype_limited",
@@ -2638,7 +2644,7 @@
             ]
           },
           {
-            "cardId": "onr_v1_039_krash",
+            "cardId": 251,
             "title": "Krash",
             "coverage": [
               "subtype_limited",
@@ -2664,7 +2670,7 @@
             ]
           },
           {
-            "cardId": "onr_proteus_112_identity-donor",
+            "cardId": 170,
             "title": "Identity Donor",
             "coverage": [
               "ap"
@@ -2684,7 +2690,7 @@
             ]
           },
           {
-            "cardId": "onr_proteus_129_back-door-to-netwatch",
+            "cardId": 187,
             "title": "Back Door to Netwatch",
             "coverage": [
               "trace"
@@ -2705,7 +2711,7 @@
             ]
           },
           {
-            "cardId": "onr_proteus_130_back-door-to-rivals",
+            "cardId": 188,
             "title": "Back Door to Rivals",
             "coverage": [
               "trace"
@@ -2726,7 +2732,7 @@
             ]
           },
           {
-            "cardId": "onr_proteus_132_bolt-hole",
+            "cardId": 190,
             "title": "Bolt-Hole",
             "coverage": [
               "ap"
@@ -2757,8 +2763,8 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_021_dwarf",
-              "onr_v1_039_krash"
+              "233",
+              "251"
             ],
             "blockers": []
           },
@@ -2771,8 +2777,8 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_014_codecracker",
-              "onr_v1_039_krash"
+              "226",
+              "251"
             ],
             "blockers": []
           },
@@ -2785,7 +2791,7 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_039_krash"
+              "251"
             ],
             "blockers": []
           },
@@ -2798,9 +2804,9 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_039_krash",
-              "onr_proteus_112_identity-donor",
-              "onr_proteus_132_bolt-hole"
+              "251",
+              "170",
+              "190"
             ],
             "blockers": []
           },
@@ -2813,9 +2819,9 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_039_krash",
-              "onr_proteus_129_back-door-to-netwatch",
-              "onr_proteus_130_back-door-to-rivals"
+              "251",
+              "187",
+              "188"
             ],
             "blockers": []
           },
@@ -2828,7 +2834,7 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_039_krash"
+              "251"
             ],
             "blockers": []
           },
@@ -2841,9 +2847,9 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_014_codecracker",
-              "onr_v1_021_dwarf",
-              "onr_v1_039_krash"
+              "226",
+              "233",
+              "251"
             ],
             "blockers": []
           },
@@ -2856,7 +2862,7 @@
             "drawOnly": false,
             "missing": false,
             "bestKnownCards": [
-              "onr_v1_039_krash"
+              "251"
             ],
             "blockers": []
           }
@@ -2864,7 +2870,7 @@
         "searchAccess": {
           "tools": [
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "title": "Airport Locker",
               "status": "discarded",
               "canSearchPrograms": true,
@@ -2885,7 +2891,7 @@
         },
         "economyBankTools": [
           {
-            "cardId": "onr_proteus_150_streetware-distributor",
+            "cardId": 208,
             "title": "Streetware Distributor",
             "ownerSide": "runner",
             "status": "in_deck",
@@ -2947,105 +2953,105 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_130_back-door-to-rivals",
+              "cardId": 188,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.trace_defense",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_132_bolt-hole",
+              "cardId": 190,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "access.hq_multiaccess",
               "reason": "support:pressurePayoff"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "access.rnd_multiaccess",
               "reason": "support:pressurePayoff"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_014_codecracker",
+              "cardId": 226,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_021_dwarf",
+              "cardId": 233,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -3068,14 +3074,14 @@
           "finalScore": 84,
           "anchorEvidence": [
             {
-              "cardId": "onr_proteus_084_crumble",
+              "cardId": 142,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.hq_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_084_crumble",
+              "cardId": 142,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
@@ -3083,7 +3089,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_084_crumble",
+              "cardId": 142,
               "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3091,14 +3097,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_098_vienna-22",
+              "cardId": 156,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.hq_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_098_vienna-22",
+              "cardId": 156,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
@@ -3106,7 +3112,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_098_vienna-22",
+              "cardId": 156,
               "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3114,7 +3120,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_102_blackmail",
+              "cardId": 160,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
@@ -3122,7 +3128,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_102_blackmail",
+              "cardId": 160,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3130,7 +3136,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_109_frame-up",
+              "cardId": 167,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
@@ -3138,7 +3144,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_136_credit-subversion",
+              "cardId": 194,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
@@ -3146,7 +3152,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_136_credit-subversion",
+              "cardId": 194,
               "quantity": 1,
               "source": "strategicRole",
               "role": "punish_payoff",
@@ -3154,14 +3160,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.hq_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.hq_pressure",
@@ -3169,7 +3175,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3179,91 +3185,91 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_130_back-door-to-rivals",
+              "cardId": 188,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.trace_defense",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_132_bolt-hole",
+              "cardId": 190,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_014_codecracker",
+              "cardId": 226,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_021_dwarf",
+              "cardId": 233,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -3285,14 +3291,14 @@
           "finalScore": 86,
           "anchorEvidence": [
             {
-              "cardId": "onr_proteus_090_highlighter",
+              "cardId": 148,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.interface_closeout",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_090_highlighter",
+              "cardId": 148,
               "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3300,14 +3306,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_098_vienna-22",
+              "cardId": 156,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.interface_closeout",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_098_vienna-22",
+              "cardId": 156,
               "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3315,14 +3321,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_102_blackmail",
+              "cardId": 160,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.interface_closeout",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_102_blackmail",
+              "cardId": 160,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.interface_closeout",
@@ -3330,7 +3336,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_102_blackmail",
+              "cardId": 160,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3338,14 +3344,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.interface_closeout",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.interface_closeout",
@@ -3353,7 +3359,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3361,14 +3367,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.interface_closeout",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.interface_closeout",
@@ -3376,7 +3382,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3386,91 +3392,91 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_130_back-door-to-rivals",
+              "cardId": 188,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.trace_defense",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_132_bolt-hole",
+              "cardId": 190,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "access.hq_multiaccess",
               "reason": "support:centralAccess"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "access.rnd_multiaccess",
               "reason": "support:centralAccess"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_014_codecracker",
+              "cardId": 226,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_021_dwarf",
+              "cardId": 233,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -3492,7 +3498,7 @@
           "finalScore": 50,
           "anchorEvidence": [
             {
-              "cardId": "onr_proteus_137_death-from-above",
+              "cardId": 195,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.remote_contest",
@@ -3500,7 +3506,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_137_death-from-above",
+              "cardId": 195,
               "quantity": 1,
               "source": "strategicRole",
               "role": "punish_payoff",
@@ -3510,91 +3516,91 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_130_back-door-to-rivals",
+              "cardId": 188,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.trace_defense",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_132_bolt-hole",
+              "cardId": 190,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_014_codecracker",
+              "cardId": 226,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_021_dwarf",
+              "cardId": 233,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -3617,14 +3623,14 @@
           "finalScore": 62,
           "anchorEvidence": [
             {
-              "cardId": "onr_proteus_137_death-from-above",
+              "cardId": 195,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.remote_trash",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_137_death-from-above",
+              "cardId": 195,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.remote_trash",
@@ -3632,7 +3638,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_137_death-from-above",
+              "cardId": 195,
               "quantity": 1,
               "source": "strategicRole",
               "role": "punish_payoff",
@@ -3642,84 +3648,84 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "access.hq_multiaccess",
               "reason": "support:remoteAccess"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "access.rnd_multiaccess",
               "reason": "support:remoteAccess"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_014_codecracker",
+              "cardId": 226,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_021_dwarf",
+              "cardId": 233,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -3742,91 +3748,91 @@
           "anchorEvidence": [],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_130_back-door-to-rivals",
+              "cardId": 188,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.trace_defense",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_132_bolt-hole",
+              "cardId": 190,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_014_codecracker",
+              "cardId": 226,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_021_dwarf",
+              "cardId": 233,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -3849,14 +3855,14 @@
           "finalScore": 78,
           "anchorEvidence": [
             {
-              "cardId": "onr_proteus_089_garbage-in",
+              "cardId": 147,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.rnd_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_089_garbage-in",
+              "cardId": 147,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "runner.rnd_pressure",
@@ -3864,7 +3870,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_089_garbage-in",
+              "cardId": 147,
               "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3872,14 +3878,14 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_090_highlighter",
+              "cardId": 148,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.rnd_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_090_highlighter",
+              "cardId": 148,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "runner.rnd_pressure",
@@ -3887,7 +3893,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_090_highlighter",
+              "cardId": 148,
               "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3895,7 +3901,7 @@
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
-              "cardId": "onr_proteus_109_frame-up",
+              "cardId": 167,
               "quantity": 2,
               "source": "lineSupport",
               "signal": "runner.rnd_pressure",
@@ -3903,14 +3909,14 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.rnd_pressure",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.rnd_pressure",
@@ -3918,7 +3924,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
@@ -3928,91 +3934,91 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_130_back-door-to-rivals",
+              "cardId": 188,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.trace_defense",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_132_bolt-hole",
+              "cardId": 190,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_014_codecracker",
+              "cardId": 226,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_021_dwarf",
+              "cardId": 233,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -4035,7 +4041,7 @@
           "finalScore": 79,
           "anchorEvidence": [
             {
-              "cardId": "onr_proteus_104_decoy-signal",
+              "cardId": 162,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.run_event_tempo",
@@ -4043,14 +4049,14 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_105_demolition-run",
+              "cardId": 163,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.run_event_tempo",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_106_disgruntled-ice-technician",
+              "cardId": 164,
               "quantity": 2,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.run_event_tempo",
@@ -4059,175 +4065,175 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_102_blackmail",
+              "cardId": 160,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_104_decoy-signal",
+              "cardId": 162,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_105_demolition-run",
+              "cardId": 163,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_106_disgruntled-ice-technician",
+              "cardId": 164,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_108_faked-hit",
+              "cardId": 166,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_109_frame-up",
+              "cardId": 167,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_113_live-news-feed",
+              "cardId": 171,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_117_poisoned-water-supply",
+              "cardId": 175,
               "quantity": 2,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_121_remote-detonator",
+              "cardId": 179,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_123_senatorial-field-trip",
+              "cardId": 181,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_125_subliminal-corruption",
+              "cardId": 183,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_proteus_130_back-door-to-rivals",
+              "cardId": 188,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.trace_defense",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_132_bolt-hole",
+              "cardId": 190,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_014_codecracker",
+              "cardId": 226,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_021_dwarf",
+              "cardId": 233,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "cardHint",
               "signal": "cardType:event",
               "reason": "support:eventDensity"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -4249,14 +4255,14 @@
           "finalScore": 54,
           "anchorEvidence": [
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "runner.search.breaker",
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.search.breaker",
@@ -4264,7 +4270,7 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "strategicRole",
               "role": "engine_anchor",
@@ -4274,70 +4280,70 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_014_codecracker",
+              "cardId": 226,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.code_gate",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_021_dwarf",
+              "cardId": 233,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "breaker.wall",
               "reason": "support:breakerCoverage"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -4360,7 +4366,7 @@
           "finalScore": 68,
           "anchorEvidence": [
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.survival_defense",
@@ -4370,28 +4376,28 @@
           ],
           "supportEvidence": [
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_103_cruising-for-netwatch",
+              "cardId": 161,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_112_identity-donor",
+              "cardId": 170,
               "quantity": 1,
               "source": "lineSupport",
               "signal": "runner.survival_defense",
@@ -4399,70 +4405,70 @@
               "reason": "card_hint_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_proteus_128_airport-locker",
+              "cardId": 186,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "setup.search",
               "reason": "support:searchOrDraw"
             },
             {
-              "cardId": "onr_proteus_130_back-door-to-rivals",
+              "cardId": 188,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.trace_defense",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_132_bolt-hole",
+              "cardId": 190,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "defense.damage_prevention",
               "reason": "support:defense"
             },
             {
-              "cardId": "onr_proteus_133_chiba-bank-account",
+              "cardId": 191,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_142_hq-mole",
+              "cardId": 200,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "access.hq_multiaccess",
               "reason": "support:pressurePayoff"
             },
             {
-              "cardId": "onr_proteus_147_r-and-d-mole",
+              "cardId": 205,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "access.rnd_multiaccess",
               "reason": "support:pressurePayoff"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.action",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_proteus_150_streetware-distributor",
+              "cardId": 208,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
             {
-              "cardId": "onr_v1_108_score",
+              "cardId": 320,
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
@@ -4646,8 +4652,8 @@
         "schemaVersion": "runner-deck-engine-doctrine-v1",
         "providers": [
           {
-            "providerId": "runner.provider:onr_proteus_103_cruising-for-netwatch",
-            "cardId": "onr_proteus_103_cruising-for-netwatch",
+            "providerId": "runner.provider:161",
+            "cardId": 161,
             "copies": 1,
             "capabilities": [
               "runner.throughput.draw"
@@ -4657,14 +4663,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_proteus_103_cruising-for-netwatch",
+              "provider_card:161",
               "provider_copies:1",
               "provides:runner.throughput.draw"
             ]
           },
           {
-            "providerId": "runner.provider:onr_proteus_128_airport-locker",
-            "cardId": "onr_proteus_128_airport-locker",
+            "providerId": "runner.provider:186",
+            "cardId": 186,
             "copies": 1,
             "capabilities": [
               "runner.throughput.search"
@@ -4674,14 +4680,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_proteus_128_airport-locker",
+              "provider_card:186",
               "provider_copies:1",
               "provides:runner.throughput.search"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_014_codecracker",
-            "cardId": "onr_v1_014_codecracker",
+            "providerId": "runner.provider:226",
+            "cardId": 226,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -4691,14 +4697,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_014_codecracker",
+              "provider_card:226",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_021_dwarf",
-            "cardId": "onr_v1_021_dwarf",
+            "providerId": "runner.provider:233",
+            "cardId": 233,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -4708,14 +4714,14 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_021_dwarf",
+              "provider_card:233",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
           },
           {
-            "providerId": "runner.provider:onr_v1_039_krash",
-            "cardId": "onr_v1_039_krash",
+            "providerId": "runner.provider:251",
+            "cardId": 251,
             "copies": 1,
             "capabilities": [
               "runner.coverage.breaker"
@@ -4725,7 +4731,7 @@
             "additivity": "distinct_provider_first",
             "compatibleDemandIds": [],
             "evidence": [
-              "provider_card:onr_v1_039_krash",
+              "provider_card:251",
               "provider_copies:1",
               "provides:runner.coverage.breaker"
             ]
@@ -4738,9 +4744,9 @@
               "runner.coverage.breaker"
             ],
             "providerIds": [
-              "runner.provider:onr_v1_014_codecracker",
-              "runner.provider:onr_v1_021_dwarf",
-              "runner.provider:onr_v1_039_krash"
+              "runner.provider:226",
+              "runner.provider:233",
+              "runner.provider:251"
             ],
             "supportProviderIds": [],
             "distinctProviderDefinitions": 3,
@@ -4758,9 +4764,9 @@
             "lineId": "runner.engine.persistent_rig",
             "status": "coherent",
             "providerIds": [
-              "runner.provider:onr_v1_014_codecracker",
-              "runner.provider:onr_v1_021_dwarf",
-              "runner.provider:onr_v1_039_krash"
+              "runner.provider:226",
+              "runner.provider:233",
+              "runner.provider:251"
             ],
             "dependencyIds": [
               "runner.dependency.breaker_coverage"
@@ -4800,9 +4806,9 @@
             "lineId": "runner.engine.delayed_install",
             "status": "supported",
             "providerIds": [
-              "runner.provider:onr_v1_014_codecracker",
-              "runner.provider:onr_v1_021_dwarf",
-              "runner.provider:onr_v1_039_krash"
+              "runner.provider:226",
+              "runner.provider:233",
+              "runner.provider:251"
             ],
             "dependencyIds": [
               "runner.dependency.breaker_coverage"
@@ -4823,9 +4829,9 @@
             "lineId": "runner.engine.compatible_recurring_economy",
             "status": "supported",
             "providerIds": [
-              "runner.provider:onr_v1_014_codecracker",
-              "runner.provider:onr_v1_021_dwarf",
-              "runner.provider:onr_v1_039_krash"
+              "runner.provider:226",
+              "runner.provider:233",
+              "runner.provider:251"
             ],
             "dependencyIds": [
               "runner.dependency.breaker_coverage"
@@ -4846,8 +4852,8 @@
             "lineId": "runner.engine.throughput_until_ready",
             "status": "coherent",
             "providerIds": [
-              "runner.provider:onr_proteus_103_cruising-for-netwatch",
-              "runner.provider:onr_proteus_128_airport-locker"
+              "runner.provider:161",
+              "runner.provider:186"
             ],
             "dependencyIds": [
               "runner.dependency.breaker_coverage"
@@ -5144,7 +5150,7 @@
       },
       "cardRoles": [
         {
-          "cardId": "onr_proteus_084_crumble",
+          "cardId": 142,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5166,7 +5172,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_089_garbage-in",
+          "cardId": 147,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5188,7 +5194,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_090_highlighter",
+          "cardId": 148,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5210,7 +5216,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_094_scaldan",
+          "cardId": 152,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5226,7 +5232,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_097_taxman",
+          "cardId": 155,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5242,7 +5248,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_098_vienna-22",
+          "cardId": 156,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5264,7 +5270,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_099_viral-pipeline",
+          "cardId": 157,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5282,7 +5288,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_102_blackmail",
+          "cardId": 160,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5308,7 +5314,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "cardId": 161,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5328,7 +5334,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_104_decoy-signal",
+          "cardId": 162,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5347,7 +5353,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_105_demolition-run",
+          "cardId": 163,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5369,7 +5375,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_106_disgruntled-ice-technician",
+          "cardId": 164,
           "quantity": 2,
           "status": "complete",
           "roles": [
@@ -5393,7 +5399,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_108_faked-hit",
+          "cardId": 166,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5406,7 +5412,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_109_frame-up",
+          "cardId": 167,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5423,7 +5429,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_112_identity-donor",
+          "cardId": 170,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5442,7 +5448,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_113_live-news-feed",
+          "cardId": 171,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5458,7 +5464,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_117_poisoned-water-supply",
+          "cardId": 175,
           "quantity": 2,
           "status": "partial",
           "roles": [
@@ -5472,7 +5478,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_121_remote-detonator",
+          "cardId": 179,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5483,7 +5489,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_123_senatorial-field-trip",
+          "cardId": 181,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5495,7 +5501,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_125_subliminal-corruption",
+          "cardId": 183,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5511,7 +5517,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_128_airport-locker",
+          "cardId": 186,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5532,7 +5538,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_129_back-door-to-netwatch",
+          "cardId": 187,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5546,7 +5552,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_130_back-door-to-rivals",
+          "cardId": 188,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5561,7 +5567,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_132_bolt-hole",
+          "cardId": 190,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5578,7 +5584,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_133_chiba-bank-account",
+          "cardId": 191,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5596,7 +5602,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_136_credit-subversion",
+          "cardId": 194,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5613,7 +5619,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_137_death-from-above",
+          "cardId": 195,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5634,7 +5640,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_142_hq-mole",
+          "cardId": 200,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5660,7 +5666,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_147_r-and-d-mole",
+          "cardId": 205,
           "quantity": 1,
           "status": "complete",
           "roles": [
@@ -5685,7 +5691,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_proteus_150_streetware-distributor",
+          "cardId": 208,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5707,7 +5713,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_014_codecracker",
+          "cardId": 226,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5726,7 +5732,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_021_dwarf",
+          "cardId": 233,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5745,7 +5751,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_039_krash",
+          "cardId": 251,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -5765,7 +5771,7 @@
           "warnings": []
         },
         {
-          "cardId": "onr_v1_108_score",
+          "cardId": 320,
           "quantity": 1,
           "status": "partial",
           "roles": [
@@ -6707,8 +6713,8 @@
       ],
       "engineProviders": [
         {
-          "providerId": "runner.provider:onr_proteus_103_cruising-for-netwatch",
-          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "providerId": "runner.provider:161",
+          "cardId": 161,
           "copies": 1,
           "capabilities": [
             "runner.throughput.draw"
@@ -6718,14 +6724,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_proteus_103_cruising-for-netwatch",
+            "provider_card:161",
             "provider_copies:1",
             "provides:runner.throughput.draw"
           ]
         },
         {
-          "providerId": "runner.provider:onr_proteus_128_airport-locker",
-          "cardId": "onr_proteus_128_airport-locker",
+          "providerId": "runner.provider:186",
+          "cardId": 186,
           "copies": 1,
           "capabilities": [
             "runner.throughput.search"
@@ -6735,14 +6741,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_proteus_128_airport-locker",
+            "provider_card:186",
             "provider_copies:1",
             "provides:runner.throughput.search"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_014_codecracker",
-          "cardId": "onr_v1_014_codecracker",
+          "providerId": "runner.provider:226",
+          "cardId": 226,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -6752,14 +6758,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_014_codecracker",
+            "provider_card:226",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_021_dwarf",
-          "cardId": "onr_v1_021_dwarf",
+          "providerId": "runner.provider:233",
+          "cardId": 233,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -6769,14 +6775,14 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_021_dwarf",
+            "provider_card:233",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
         },
         {
-          "providerId": "runner.provider:onr_v1_039_krash",
-          "cardId": "onr_v1_039_krash",
+          "providerId": "runner.provider:251",
+          "cardId": 251,
           "copies": 1,
           "capabilities": [
             "runner.coverage.breaker"
@@ -6786,7 +6792,7 @@
           "additivity": "distinct_provider_first",
           "compatibleDemandIds": [],
           "evidence": [
-            "provider_card:onr_v1_039_krash",
+            "provider_card:251",
             "provider_copies:1",
             "provides:runner.coverage.breaker"
           ]
@@ -6799,9 +6805,9 @@
             "runner.coverage.breaker"
           ],
           "providerIds": [
-            "runner.provider:onr_v1_014_codecracker",
-            "runner.provider:onr_v1_021_dwarf",
-            "runner.provider:onr_v1_039_krash"
+            "runner.provider:226",
+            "runner.provider:233",
+            "runner.provider:251"
           ],
           "supportProviderIds": [],
           "distinctProviderDefinitions": 3,
@@ -7853,8 +7859,8 @@
       "stateVersion": 31,
       "instances": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_29",
-          "dedupeKey": "run:run_29",
+          "instanceId": "p8lbz795irfbx5hejm5zh6ui1v",
+          "dedupeKey": "run:29",
           "moduleId": "runner.convert_run_window",
           "moduleVersion": "1",
           "side": "runner",
@@ -7874,26 +7880,26 @@
           },
           "target": {
             "kind": "window",
-            "id": "run:run_29"
+            "id": "run:29"
           },
-          "parentInstanceId": "plan:runner.pressure_central:central%3Ard",
+          "parentInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "openNeedIds": [],
           "phase": "execute",
           "milestone": "admitted",
           "moduleState": {
             "kind": "run_window",
             "signal": {
-              "windowId": "run:run_29",
+              "windowId": "run:29",
               "serverId": "rd",
-              "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
-              "leafPlanInstanceId": "plan:runner.convert_run_window:run%3Arun_29",
+              "rootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+              "leafPlanInstanceId": "p8lbz795irfbx5hejm5zh6ui1v",
               "semanticActionTypes": [
                 "breaker.boost_strength",
                 "breaker.break_subroutine",
                 "run.continue"
               ],
               "purposeCode": "convert_active_run_window",
-              "evidenceCode": "runner_visible_encounter_requires_mitigation:onr_v1_223_banpei",
+              "evidenceCode": "runner_visible_encounter_requires_mitigation:435",
               "accessCommitment": {
                 "payoff": "unknown",
                 "intendedAction": "access",
@@ -7983,9 +7989,9 @@
                 ]
               },
               "encounterIntent": "mitigate_threat",
-              "encounterEvidenceCode": "runner_visible_encounter_requires_mitigation:onr_v1_223_banpei",
+              "encounterEvidenceCode": "runner_visible_encounter_requires_mitigation:435",
               "actionAssessments": {
-                "runner.pump_breaker.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_223_banpei_1.onr_v1_039_krash:icebreaker_abilities_increase_strength": {
+                "rj.c1jt.c1jt.c1jt.c2ot.251:icebreaker_abilities_increase_strength": {
                   "admissible": false,
                   "evidenceCodes": [
                     "runner_run_window_action_excluded:pump_cannot_lead_to_useful_break",
@@ -7993,7 +7999,7 @@
                     "pump_direct_break_already_legal:true"
                   ]
                 },
-                "runner.break_subroutine.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_223_banpei_1.0.printed_subroutines_trash_program.onr_v1_039_krash:icebreaker_abilities_break_subroutine": {
+                "r3.c1jt.c1jt.c1jt.c2ot.0.printed_subroutines_trash_program.251:icebreaker_abilities_break_subroutine": {
                   "admissible": false,
                   "evidenceCodes": [
                     "runner_run_window_action_excluded:run_plan_information_budget_exceeded",
@@ -8003,7 +8009,7 @@
                     "run_plan_action_credit_cost:2"
                   ]
                 },
-                "runner.break_subroutine.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.runner_onr_v1_039_krash_1.corp_onr_v1_223_banpei_1.1.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine": {
+                "r3.c1jt.c1jt.c1jt.c2ot.1.printed_subroutines_end_the_run.251:icebreaker_abilities_break_subroutine": {
                   "admissible": false,
                   "evidenceCodes": [
                     "runner_run_window_action_excluded:break_does_not_mitigate_visible_safety_threat",
@@ -8011,7 +8017,7 @@
                     "visible_safety_threat_has_exact_break_route:true"
                   ]
                 },
-                "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run": {
+                "r5.printed_subroutines_trash_program,printed_subroutines_end_the_run": {
                   "admissible": true,
                   "evidenceCodes": [
                     "runner_run_window_action_plan_admissible",
@@ -8068,13 +8074,13 @@
           "updatedAtStateVersion": 31,
           "evidenceRefs": [
             {
-              "code": "runner_visible_encounter_requires_mitigation:onr_v1_223_banpei",
+              "code": "runner_visible_encounter_requires_mitigation:435",
               "source": "visible_state"
             }
           ]
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "dedupeKey": "central:rd",
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
@@ -8116,24 +8122,24 @@
               "marginalValue": 180,
               "evidenceCode": "runner_information_boundary_parent_requoted:retain_information",
               "runActionIds": [
-                "runner.start_run.rd",
-                "runner.play_event.runner_onr_proteus_113_live-news-feed_1.rd.runner_onr_proteus_113_live-news-feed_1.onr_proteus_113_live-news-feed:on_play_run_with_bad_publicity_aftermath"
+                "rs.rd",
+                "rh.c121.rd.c121.234"
               ],
               "runActionValues": {
-                "runner.start_run.rd": 0,
-                "runner.play_event.runner_onr_proteus_113_live-news-feed_1.rd.runner_onr_proteus_113_live-news-feed_1.onr_proteus_113_live-news-feed:on_play_run_with_bad_publicity_aftermath": -20,
-                "runner.play_event.runner_onr_proteus_125_subliminal-corruption_1.rd.runner_onr_proteus_125_subliminal-corruption_1.onr_proteus_125_subliminal-corruption:on_play_run_with_advertisement_bad_publicity": -80,
-                "runner.play_event.runner_onr_proteus_105_demolition-run_2.rd.runner_onr_proteus_105_demolition-run_2.onr_proteus_105_demolition-run:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": -240
+                "rs.rd": 0,
+                "rh.c121.rd.c121.171:on_play_run_with_bad_publicity_aftermath": -20,
+                "rh.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": -80,
+                "rh.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": -240
               },
               "runActionDifferentialPayoffIds": [],
               "runActionEvidence": {
-                "runner.start_run.rd": [
+                "rs.rd": [
                   "run_route_raw_score:180",
                   "run_route_opportunity_cost:0",
                   "run_route_effective_score:180",
                   "run_route_relative_value:0"
                 ],
-                "runner.play_event.runner_onr_proteus_113_live-news-feed_1.rd.runner_onr_proteus_113_live-news-feed_1.onr_proteus_113_live-news-feed:on_play_run_with_bad_publicity_aftermath": [
+                "rh.c121.rd.c121.171:on_play_run_with_bad_publicity_aftermath": [
                   "run_route_raw_score:180",
                   "run_route_opportunity_cost:20",
                   "run_route_effective_score:160",
@@ -8150,7 +8156,7 @@
                   "consumable_run_raw_route_score:180",
                   "consumable_run_effective_route_score:160"
                 ],
-                "runner.play_event.runner_onr_proteus_125_subliminal-corruption_1.rd.runner_onr_proteus_125_subliminal-corruption_1.onr_proteus_125_subliminal-corruption:on_play_run_with_advertisement_bad_publicity": [
+                "rh.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": [
                   "run_route_raw_score:120",
                   "run_route_opportunity_cost:20",
                   "run_route_effective_score:100",
@@ -8167,7 +8173,7 @@
                   "consumable_run_raw_route_score:120",
                   "consumable_run_effective_route_score:100"
                 ],
-                "runner.play_event.runner_onr_proteus_105_demolition-run_2.rd.runner_onr_proteus_105_demolition-run_2.onr_proteus_105_demolition-run:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": [
+                "rh.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": [
                   "run_route_raw_score:-40",
                   "run_route_opportunity_cost:20",
                   "run_route_effective_score:-60",
@@ -8186,29 +8192,29 @@
                 ]
               },
               "runActionRouteDiagnostics": {
-                "runner.start_run.rd": {
+                "rs.rd": {
                   "rawRouteScore": 180,
                   "opportunityCost": 0,
                   "effectiveRouteScore": 180
                 },
-                "runner.play_event.runner_onr_proteus_113_live-news-feed_1.rd.runner_onr_proteus_113_live-news-feed_1.onr_proteus_113_live-news-feed:on_play_run_with_bad_publicity_aftermath": {
+                "rh.c121.rd.c121.171:on_play_run_with_bad_publicity_aftermath": {
                   "rawRouteScore": 180,
                   "opportunityCost": 20,
                   "effectiveRouteScore": 160
                 },
-                "runner.play_event.runner_onr_proteus_125_subliminal-corruption_1.rd.runner_onr_proteus_125_subliminal-corruption_1.onr_proteus_125_subliminal-corruption:on_play_run_with_advertisement_bad_publicity": {
+                "rh.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": {
                   "rawRouteScore": 120,
                   "opportunityCost": 20,
                   "effectiveRouteScore": 100
                 },
-                "runner.play_event.runner_onr_proteus_105_demolition-run_2.rd.runner_onr_proteus_105_demolition-run_2.onr_proteus_105_demolition-run:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": {
+                "rh.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": {
                   "rawRouteScore": -40,
                   "opportunityCost": 20,
                   "effectiveRouteScore": -60
                 }
               },
               "runActionExclusions": {
-                "runner.play_event.runner_onr_proteus_113_live-news-feed_1.rd.runner_onr_proteus_113_live-news-feed_1.onr_proteus_113_live-news-feed:on_play_run_with_bad_publicity_aftermath": [
+                "rh.c121.rd.c121.171:on_play_run_with_bad_publicity_aftermath": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:run_now",
                   "run_route_excluded:score:160",
@@ -8234,7 +8240,7 @@
                   "visible_trace_end_run_lock_unavoidable:false",
                   "recommendation:run_now"
                 ],
-                "runner.play_event.runner_onr_proteus_125_subliminal-corruption_1.rd.runner_onr_proteus_125_subliminal-corruption_1.onr_proteus_125_subliminal-corruption:on_play_run_with_advertisement_bad_publicity": [
+                "rh.c14p.rd.c14p.183:on_play_run_with_advertisement_bad_publicity": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:gain_credits_first",
                   "run_route_excluded:score:100",
@@ -8260,7 +8266,7 @@
                   "visible_trace_end_run_lock_unavoidable:false",
                   "recommendation:gain_credits_first"
                 ],
-                "runner.play_event.runner_onr_proteus_105_demolition-run_2.rd.runner_onr_proteus_105_demolition-run_2.onr_proteus_105_demolition-run:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": [
+                "rh.c10a.rd.c10a.163:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags": [
                   "run_route_excluded:path:reachable",
                   "run_route_excluded:recommendation:gain_credits_first",
                   "run_route_excluded:score:-60",
@@ -8351,7 +8357,7 @@
                 "decision": "retain_information",
                 "boundaryKind": "visible_ice_path_changed",
                 "observedAtStateVersion": 31,
-                "observedIceInstanceId": "corp_onr_v1_223_banpei_1",
+                "observedIceInstanceId": "c2ot",
                 "knownPathCost": 4,
                 "knownPathReachable": true,
                 "unknownIceCount": 0,
@@ -8432,49 +8438,49 @@
       "completionHistory": [],
       "transitions": [
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_29",
+          "instanceId": "p8lbz795irfbx5hejm5zh6ui1v",
           "stateVersion": 31,
           "reason": "discovered",
           "detailCode": "new_proposal"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ard",
+          "instanceId": "pa90fufw9vc5bkshp96ztlryxl",
           "stateVersion": 31,
           "reason": "retained",
           "detailCode": "proposal_still_relevant"
         },
         {
-          "instanceId": "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+          "instanceId": "p6hb5l9cujr02om3vqn7gbqr35",
           "stateVersion": 31,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:economy-liquidity-development%3Arunner%3A3",
+          "instanceId": "pd33mvvgfoi81yxutcq8pt7qkt",
           "stateVersion": 31,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.economy:runner-portfolio-credit-reserve",
+          "instanceId": "pc7ebuiw5dxhlbzbf1nhcs4p4z",
           "stateVersion": 31,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Aarchives",
+          "instanceId": "p22f66p721g9dgs7gsawwpf6hs",
           "stateVersion": 31,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.pressure_central:central%3Ahq",
+          "instanceId": "pa7nez1ioecg7mf06q1uwqq57o",
           "stateVersion": 31,
           "reason": "target_disappeared",
           "detailCode": "proposal_missing_target_contract"
         },
         {
-          "instanceId": "plan:runner.convert_run_window:run%3Arun_29",
+          "instanceId": "p8lbz795irfbx5hejm5zh6ui1v",
           "stateVersion": 31,
           "reason": "preempted_by_higher_class",
           "fromExecutionState": "idle",
@@ -8487,7 +8493,7 @@
         "commitmentId": "fnv1a:1ef1628d",
         "sourcePlanId": "fnv1a:d875b77a",
         "sourceLineHash": "fnv1a:f125cfa1",
-        "sequenceRootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
+        "sequenceRootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
         "side": "runner",
         "turnKey": "runner:turn:3",
         "planningRulesFingerprint": "fnv1a:ce3968ab",
@@ -8504,7 +8510,7 @@
           {
             "phaseId": "fnv1a:2762c1c4",
             "root": {
-              "planInstanceId": "plan:runner.pressure_central:central%3Ard",
+              "planInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
               "moduleId": "runner.convert_run_window",
               "milestoneId": "convert_active_run_window",
               "provenance": "resident"
@@ -8599,7 +8605,7 @@
           "sideSafePlanningFingerprint": "fnv1a:747482ab"
         },
         "currentBinding": {
-          "actionId": "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run",
+          "actionId": "r5.0,1",
           "stateVersion": 31,
           "semanticActionSetFingerprint": "fnv1a:fb647a0f",
           "invocationKey": "fnv1a:d01d3102"
@@ -8607,13 +8613,13 @@
         "actionType": "continue_run",
         "expectationId": "fnv1a:8cba5e76"
       },
-      "rootForegroundInstanceId": "plan:runner.pressure_central:central%3Ard",
-      "executorInstanceId": "plan:runner.convert_run_window:run%3Arun_29",
+      "rootForegroundInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+      "executorInstanceId": "p8lbz795irfbx5hejm5zh6ui1v",
       "pendingRunnerCostPenaltySupportOrigin": {
-        "rootPlanInstanceId": "plan:runner.pressure_central:central%3Ard",
-        "executorInstanceId": "plan:runner.convert_run_window:run%3Arun_29",
-        "sourceStepId": "plan:runner.convert_run_window:run%3Arun_29:convert",
-        "originalActionId": "runner.continue_run.printed_subroutines_trash_program,printed_subroutines_end_the_run",
+        "rootPlanInstanceId": "pa90fufw9vc5bkshp96ztlryxl",
+        "executorInstanceId": "p8lbz795irfbx5hejm5zh6ui1v",
+        "sourceStepId": "p8lbz795irfbx5hejm5zh6ui1v:convert",
+        "originalActionId": "r5.0,1",
         "selectedAtStateVersion": 31
       }
     }

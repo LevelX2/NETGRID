@@ -1,4 +1,4 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -15,9 +15,9 @@ function syntheticHint(
   engine: Record<string, unknown>,
   options: { side?: "corp" | "runner"; type?: string } = {},
 ) {
-  const entry = cardSpecPlanningCards().find(
+  const entry = listPlanningCardsWithFacts().find(
     (candidate) =>
-      candidate.definition.side === (options.side ?? "corp") &&
+      candidate.facts.side === (options.side ?? "corp") &&
       candidate.planning.engine.abilities === undefined &&
       candidate.planning.engine.corpUtility === undefined &&
       candidate.planning.engine.flatlineReplacementSources === undefined &&
@@ -29,8 +29,8 @@ function syntheticHint(
   )!;
   return deriveCardSpecAiHint({
     ...entry,
-    definition: {
-      ...entry.definition,
+    facts: {
+      ...entry.facts,
       ...(options.type === undefined ? {} : { type: options.type }),
     },
     planning: {

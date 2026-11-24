@@ -8,7 +8,7 @@ describe("remote-contest-candidate", () => {
   it("marks a structured remote score-threat run as eligible", () => {
     expect(
       evaluateRemoteContestCandidate({
-        frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+        frame: frame(runCandidate("run-remote", "r1", "target_context")),
         top: rankedAction("run-remote"),
         topActionType: "start_run",
         scoreGap: 30,
@@ -16,7 +16,7 @@ describe("remote-contest-candidate", () => {
       }),
     ).toMatchObject({
       actionId: "run-remote",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
       targetKind: "remote",
       recommendation: "run_now",
       pathPassability: "reachable",
@@ -52,7 +52,7 @@ describe("remote-contest-candidate", () => {
   it("blocks evidence-only remote contest alignment", () => {
     expect(
       evaluateRemoteContestCandidate({
-        frame: frame(runCandidate("run-remote", "remote_1", "evidence")),
+        frame: frame(runCandidate("run-remote", "r1", "evidence")),
         top: rankedAction("run-remote"),
         topActionType: "start_run",
         scoreGap: 30,
@@ -78,7 +78,7 @@ describe("remote-contest-candidate", () => {
   it("blocks remote contest below the score gap threshold", () => {
     expect(
       evaluateRemoteContestCandidate({
-        frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+        frame: frame(runCandidate("run-remote", "r1", "target_context")),
         top: rankedAction("run-remote"),
         topActionType: "start_run",
         scoreGap: 4,
@@ -93,7 +93,7 @@ describe("remote-contest-candidate", () => {
 
   it("keeps eligible remote contest candidates report-only", () => {
     const candidate = evaluateRemoteContestCandidate({
-      frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+      frame: frame(runCandidate("run-remote", "r1", "target_context")),
       top: rankedAction("run-remote"),
       topActionType: "start_run",
       scoreGap: 30,
@@ -124,7 +124,7 @@ describe("remote-contest-candidate", () => {
   it("matches primary goal ids by bounded utility-family terms", () => {
     expect(
       evaluateRemoteContestCandidate({
-        frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+        frame: frame(runCandidate("run-remote", "r1", "target_context")),
         top: rankedAction(
           "run-remote",
           "runner.neutral.remote_contest_if_score_threat",
@@ -137,12 +137,27 @@ describe("remote-contest-candidate", () => {
 
     expect(
       evaluateRemoteContestCandidate({
-        frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+        frame: frame(runCandidate("run-remote", "r1", "target_context")),
         top: rankedAction("run-remote", "runner.remote_contestish_noise", []),
         topActionType: "start_run",
         scoreGap: 30,
       }),
     ).toBeUndefined();
+  });
+
+  it("preserves an unknown score gap through JSON", () => {
+    const result = evaluateRemoteContestCandidate({
+      frame: frame(runCandidate("run-remote", "r1", "target_context")),
+      top: rankedAction("run-remote"),
+      topActionType: "start_run",
+      scoreGap: null,
+    });
+    expect(result).toMatchObject({
+      scoreGap: null,
+      candidateStatus: "blocked",
+      blockedReason: "remote_contest_score_gap_unknown",
+    });
+    expect(JSON.parse(JSON.stringify(result)).scoreGap).toBeNull();
   });
 
   it.each([
@@ -156,7 +171,7 @@ describe("remote-contest-candidate", () => {
       expect(() =>
         evaluateRemoteContestCandidate({
           frame: frame(
-            runCandidate("run-remote", "remote_1", "target_context"),
+            runCandidate("run-remote", "r1", "target_context"),
           ),
           top: rankedAction("run-remote"),
           topActionType: "start_run",
@@ -181,10 +196,13 @@ function frame(candidate: ActionSemanticCandidate): SemanticDecisionFrame {
       runTargets: [
         {
           schemaVersion: "runner-run-target-evaluation-v1",
-          accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" as const },
-          targetServerId: "remote_1",
+          accessFacts: {
+            knownTargetDefinitionIds: [],
+            trashBudget: "unknown" as const,
+          },
+          targetServerId: "r1",
           targetKind: "remote",
-          accessServerId: "remote_1",
+          accessServerId: "r1",
           accessTargetKind: "remote",
           actionId: candidate.actionId,
           accessPayoff: "score_threat",
@@ -208,9 +226,9 @@ function frame(candidate: ActionSemanticCandidate): SemanticDecisionFrame {
             actionId: candidate.actionId,
             actionType: "start_run",
             sourceKind: "basic_action",
-            targetServerId: "remote_1",
+            targetServerId: "r1",
             targetKind: "remote",
-            accessServerId: "remote_1",
+            accessServerId: "r1",
             structure: "direct_start_run",
             accessPayoffSignals: ["score_threat"],
             constraintSignals: [],

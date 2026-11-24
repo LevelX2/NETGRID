@@ -1,3 +1,4 @@
+import type { PlayerAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -21,7 +22,7 @@ describe("Corp mixed draw score-protection coverage", () => {
     const captures = new Map<number, AiSimulationDecisionCheckpointCapture>();
     const summary = simulateAiGame({
       ...resolved.config,
-      seed: "ai-behavior-baseline-v1-05",
+      seed: "corp-day-shift-economy-73",
       maxActions: 27,
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
@@ -42,23 +43,32 @@ describe("Corp mixed draw score-protection coverage", () => {
     expect(conversionCapture.state.timingPoint).toBe("corp_action.main");
     expect(drawCapture.state.timingPoint).toBe("corp_action.main");
 
+    const efficiency = conversionCapture.input.playerView.own.gripOrHq.find(
+      (card) => card.definitionId === 502,
+    );
+    const annualReviews = conversionCapture.input.playerView.own.gripOrHq.find(
+      (card) => card.definitionId === 494,
+    );
+    if (!efficiency || !annualReviews) {
+      throw new Error("Missing the captured Corp economy and draw sources.");
+    }
     const efficiencyAction = conversionCapture.input.legalActions.find(
       (action) =>
         action.type === "play_operation" &&
-        action.source === "corp_onr_v1_290_efficiency-experts_1",
+        action.source === efficiency.instanceId,
     );
     const annualReviewsAction = conversionCapture.input.legalActions.find(
       (action) =>
         action.type === "play_operation" &&
-        action.source === "corp_onr_v1_282_annual-reviews_1",
+        action.source === annualReviews.instanceId,
     );
     expect(efficiencyAction).toMatchObject({
       side: "corp",
       type: "play_operation",
-      source: "corp_onr_v1_290_efficiency-experts_1",
+      source: efficiency.instanceId,
       costs: [{ clicks: 1, credits: 0 }],
       payload: {
-        cardId: "corp_onr_v1_290_efficiency-experts_1",
+        cardId: efficiency.instanceId,
         gainCreditsAmount: 3,
       },
     });
@@ -84,7 +94,7 @@ describe("Corp mixed draw score-protection coverage", () => {
       ),
     ).toMatchObject({
       semanticActionType: "economy.gain_credit",
-      sourceDefinitionId: "onr_v1_290_efficiency-experts",
+      sourceDefinitionId: 502,
       economyProjection: {
         kind: "immediate_liquid",
         netLiquidCreditGain: 3,
@@ -105,27 +115,29 @@ describe("Corp mixed draw score-protection coverage", () => {
       (entry) => entry.stateVersionBefore === 5,
     );
     expect(conversion).toMatchObject({
-      selectedActionId: "corp.play_operation",
       actionType: "play_operation",
       planKind: "corp.economy",
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(continuedEconomy).toMatchObject({
-      selectedActionId: "corp.gain_credit",
       actionType: "gain_credit",
       planKind: "corp.economy",
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(
-      summary.actionSequence
-        .filter((entry) => [4, 5].includes(entry.stateVersionBefore))
-        .map((entry) => entry.selectedActionId),
-    ).not.toContain(annualReviewsAction?.actionId);
+    const conversionEvent = drawCapture.state.eventLog.find(
+      (event) => event.stateVersionBefore === conversionCapture.state.stateVersion,
+    );
+    const recordedAction = conversionEvent?.privatePayload?.corp?.action as PlayerAction | undefined;
+    expect(recordedAction).toMatchObject({
+      side: "corp", clientKnownStateVersion: conversionCapture.state.stateVersion,
+      actionId: efficiencyAction!.actionId,
+    });
+    expect(recordedAction?.actionId).not.toBe(annualReviewsAction!.actionId);
     expect(
       drawCapture.input.playerView.own.gripOrHq.some(
-        (card) => card.definitionId === "onr_v1_290_efficiency-experts",
+        (card) => card.instanceId === efficiency.instanceId,
       ),
     ).toBe(false);
   });

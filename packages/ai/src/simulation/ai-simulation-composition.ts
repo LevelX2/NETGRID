@@ -38,7 +38,6 @@ export function createAiSimulationComposition(
       chooseAiAction: dependencies.chooseAiAction,
       chooseRunnerAction: dependencies.chooseRunnerAction,
       chooseCorpAction: dependencies.chooseCorpAction,
-      selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
     });
 
   const { simulateAiGame } = createAiGameSimulator({

@@ -32,13 +32,6 @@ export function remoteAccessFingerprint(params: {
   ].join(";");
 }
 
-export function remoteAccessFingerprintChanged(params: {
-  previousFingerprint: string;
-  currentFingerprint: string;
-}): boolean {
-  return params.previousFingerprint !== params.currentFingerprint;
-}
-
 function counterFingerprint(
   counters: VisibleCard["counters"] | undefined,
 ): string {

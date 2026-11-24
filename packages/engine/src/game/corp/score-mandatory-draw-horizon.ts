@@ -9,6 +9,20 @@ import { corpMandatoryAgendaDrawSources } from "./mandatory-agenda-draw-sources"
  * Other draw replacements can add consumption; this is a required lower bound,
  * never a certificate that a future opponent turn or extra draw is harmless.
  */
+export function corpMandatoryBaseDrawQuote(state: GameState) {
+  const virusDrawCount = virusCounterDrawsAtCorpStart(state);
+  const mandatoryAgendaDraws = corpMandatoryAgendaDrawSources(
+    state,
+    definitionFor,
+    (definition) =>
+      cardImplementationForDefinitionId(definition.id)?.scoredAgenda,
+  ).reduce((sum, source) => sum + source.count, 0);
+  return {
+    baseCount: 1 + mandatoryAgendaDraws + virusDrawCount,
+    virusDrawCount,
+  };
+}
+
 export function corpScoreMandatoryDrawHorizonPayload(
   state: GameState,
   cardId: CardInstanceId,
@@ -17,15 +31,7 @@ export function corpScoreMandatoryDrawHorizonPayload(
     definitionFor(state, cardId).id,
   )?.scoredAgenda;
   if (target?.kind !== "corp_start_turn_mandatory_draw") return undefined;
-  const current =
-    1 +
-    corpMandatoryAgendaDrawSources(
-      state,
-      definitionFor,
-      (definition) =>
-        cardImplementationForDefinitionId(definition.id)?.scoredAgenda,
-    ).reduce((sum, source) => sum + source.count, 0) +
-    virusCounterDrawsAtCorpStart(state);
+  const { baseCount: current } = corpMandatoryBaseDrawQuote(state);
   return {
     corpScoreMandatoryDrawQuoteSchemaVersion:
       "corp-score-mandatory-draw-horizon-v1",

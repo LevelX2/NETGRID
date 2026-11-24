@@ -1,30 +1,11 @@
-export type AccessIntent = "steal" | "trash" | "access_only" | "decline";
-
-export type AccessDecisionReason =
-  | "agenda_payoff"
-  | "trash_affordable"
-  | "insufficient_credits"
-  | "reserve_would_break"
-  | "low_value_target"
-  | "finite_pool_depleted"
-  | "target_unavailable"
-  | "unknown";
-
-export type AccessTargetKind =
-  | "agenda"
-  | "asset"
-  | "node"
-  | "upgrade"
-  | "unknown";
-
-export const ACCESS_INTENTS: readonly AccessIntent[] = [
+export const ACCESS_INTENTS = [
   "steal",
   "trash",
   "access_only",
   "decline",
-];
+] as const;
 
-export const ACCESS_DECISION_REASONS: readonly AccessDecisionReason[] = [
+export const ACCESS_DECISION_REASONS = [
   "agenda_payoff",
   "trash_affordable",
   "insufficient_credits",
@@ -33,12 +14,16 @@ export const ACCESS_DECISION_REASONS: readonly AccessDecisionReason[] = [
   "finite_pool_depleted",
   "target_unavailable",
   "unknown",
-];
+] as const;
 
-export const ACCESS_TARGET_KINDS: readonly AccessTargetKind[] = [
+export const ACCESS_TARGET_KINDS = [
   "agenda",
   "asset",
   "node",
   "upgrade",
   "unknown",
-];
+] as const;
+
+export type AccessIntent = (typeof ACCESS_INTENTS)[number];
+export type AccessDecisionReason = (typeof ACCESS_DECISION_REASONS)[number];
+export type AccessTargetKind = (typeof ACCESS_TARGET_KINDS)[number];

@@ -5,18 +5,11 @@ import {
   type AccessDecisionProjection,
 } from "./access-decision-projection";
 
-export type AccessWindowTargetType =
-  | "agenda"
-  | "asset_node"
-  | "upgrade"
-  | "unknown"
-  | string;
-
 export function projectAccessWindowChoice(params: {
   actionType: LegalAction["type"];
   serverId: string | undefined;
-  knownRootDefinitionId?: string;
-  targetType: AccessWindowTargetType;
+  knownRootDefinitionId?: number;
+  targetType: string;
   trashCost: number;
   stealCost?: number;
   generalTrashCost: number;
@@ -52,7 +45,7 @@ export function projectAccessWindowChoice(params: {
 }
 
 export function accessWindowProjectionTarget(
-  targetType: AccessWindowTargetType,
+  targetType: string,
 ): AccessTargetKind {
   if (targetType === "agenda") return "agenda";
   if (targetType === "asset_node") return "asset";

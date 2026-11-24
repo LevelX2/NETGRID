@@ -14,7 +14,7 @@ describe("chronicle system and start-turn grouping", () => {
       actor: "corp",
       resolvedEffects: [
         {
-          effectId: "runner.start.public-system-kind",
+          effectId: 0,
           kind: "public_start_effect",
           visibility: "public",
           side: "runner",
@@ -63,7 +63,7 @@ function event(
   payload: Record<string, unknown>,
 ): PublicGameEvent {
   return {
-    eventId: `evt_${actionType}`,
+    eventId: 1,
     type: actionType,
     stateVersionBefore: 1,
     stateVersionAfter: 2,

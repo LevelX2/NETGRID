@@ -1,4 +1,9 @@
 import {
+  randomContextFingerprint,
+  isRandomHistory,
+  type RandomPurpose,
+} from "@netgrid/shared";
+import {
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   type AiTurnPlanRandomDrawRecord,
   type ApplyActionOptions,
@@ -16,7 +21,7 @@ import {
 import { buildApplyAction, type ApplyActionCoreHost } from "./apply-action";
 import { cloneGameStateForAction } from "./apply-action-state";
 import { getLegalActions } from "./legal-actions";
-import { deterministicNumber } from "./state/draw-random";
+import { createRandomDraw } from "./state/draw-random";
 
 let defaultHost: ApplyActionCoreHost | undefined;
 
@@ -161,11 +166,14 @@ export function buildApplyRandomizedTurnPlanSelection(
   }
 
   const next = cloneGameStateForAction(state);
-  const counter = next.aiTurnPlanRandomCounter ?? 0;
+  const counter = next.aiTurnPlanRandomCounter;
   if (
-    !Number.isSafeInteger(counter) ||
-    counter < 0 ||
-    counter >= Number.MAX_SAFE_INTEGER
+    counter === undefined ||
+    !isRandomHistory(
+      counter,
+      next.aiTurnPlanRandomDrawRecords,
+      "ai_turn_plan_selection",
+    )
   ) {
     return applyFail(
       state,
@@ -174,18 +182,14 @@ export function buildApplyRandomizedTurnPlanSelection(
     );
   }
   const purpose = turnPlanSelectionPurpose(requoted.quote);
-  const value = deterministicNumber(
-    `${next.seed}:ai_turn_plan_selection:${purpose}:${counter}`,
-  );
   const randomDraw: AiTurnPlanRandomDrawRecord = {
+    ...createRandomDraw(next.seed, purpose, counter, "ai_turn_plan_selection"),
     domain: "ai_turn_plan_selection",
-    counter,
-    purpose,
-    value,
   };
+  const value = randomDraw.value;
   next.aiTurnPlanRandomCounter = counter + 1;
   next.aiTurnPlanRandomDrawRecords = [
-    ...(next.aiTurnPlanRandomDrawRecords ?? []),
+    ...next.aiTurnPlanRandomDrawRecords!,
     randomDraw,
   ];
   const totalWeight = requoted.quote.candidates.reduce(
@@ -270,12 +274,16 @@ function canonicalCandidates(
 
 function turnPlanSelectionPurpose(
   quote: EngineRandomizedTurnPlanSelectionQuote,
-): string {
-  return encodeParts([
-    quote.opportunityKey,
-    quote.candidateFingerprint,
-    String(quote.stateVersion),
-  ]);
+): RandomPurpose {
+  return [
+    60,
+    quote.side === "runner" ? 0 : 1,
+    quote.stateVersion,
+    randomContextFingerprint([
+      quote.opportunityKey,
+      quote.candidateFingerprint,
+    ]),
+  ];
 }
 
 function encodeParts(parts: readonly string[]): string {

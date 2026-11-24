@@ -1,4 +1,8 @@
-import { visibleRunnerRunCreditPool } from "./visible-run-credit-facts";
+import {
+  normalizeRunnerRunPathCreditBudget,
+  projectBreakerCreditPayment,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../run-analysis/visible-run-credit-budget";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -115,11 +119,9 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
     input,
     action,
   );
-  const visibleBreakCost = visibleRunnerBreakCostForRezzedIce(input, action);
-  const runnerCanAffordVisibleBreak =
-    visibleBreakCost !== undefined
-      ? visibleRunnerContestCredits(input) >= visibleBreakCost
-      : undefined;
+  const visibleBreak = visibleRunnerBreakForRezzedIce(input, action);
+  const visibleBreakCost = visibleBreak?.cost;
+  const runnerCanAffordVisibleBreak = visibleBreak?.affordable;
   const hasVisibleBreakerTax =
     visibleBreakerCoverage &&
     visibleBreakCost !== undefined &&
@@ -220,10 +222,10 @@ function visibleRezCreditGain(
   return Math.max(0, Number(match?.[1] ?? match?.[2] ?? 0));
 }
 
-function visibleRunnerBreakCostForRezzedIce(
+function visibleRunnerBreakForRezzedIce(
   input: AiDecisionInput,
   action: LegalAction,
-): number | undefined {
+): { cost: number; affordable: boolean } | undefined {
   const sourceCard = visibleActionSourceCard(input, action);
   if (!sourceCard?.definitionId) return undefined;
   const selectedSubtypes = selectedSubtypesAfterRez(action);
@@ -236,33 +238,44 @@ function visibleRunnerBreakCostForRezzedIce(
       : sourceCard;
   const endTheRunCount = visibleEndTheRunSubroutineCount(sourceCard);
   if (endTheRunCount <= 0) return undefined;
-  return minimumCreditsToBreakEndTheRunSubroutines(
+  const rig = input.playerView.opponent.rig ?? [];
+  const budget = normalizeRunnerRunPathCreditBudget(
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.opponent.credits,
+      rig,
+    ),
+  );
+  const assessedBreak = minimumCreditsToBreakEndTheRunSubroutines(
     assessedIce,
-    input.playerView.opponent.rig ?? [],
+    rig,
     endTheRunCount,
     new Map(),
-  )?.cost;
+    0,
+    [],
+    undefined,
+    false,
+    budget,
+  );
+  return assessedBreak
+    ? projectBreakerCreditPayment(budget, assessedBreak)
+    : undefined;
 }
 
 function visibleEndTheRunSubroutineCount(sourceCard: {
-  definitionId?: string;
+  definitionId?: number;
   effectiveRunQuote?: { subroutines?: readonly { type?: string }[] };
 }): number {
-  const quoteCount =
-    sourceCard.effectiveRunQuote?.subroutines?.filter(
-      (subroutine) => subroutine.type === "end_the_run",
-    ).length ?? 0;
-  if (quoteCount > 0) return quoteCount;
+  const subroutines = sourceCard.effectiveRunQuote?.subroutines;
+  if (subroutines !== undefined) {
+    return subroutines.filter(
+      ({ type }) =>
+        type === "end_the_run" ||
+        type === "end_the_run_and_trash_source_at_end_of_turn",
+    ).length;
+  }
   return sourceCard.definitionId
     ? endTheRunSubroutineCount(sourceCard.definitionId)
     : 0;
-}
-
-function visibleRunnerContestCredits(input: AiDecisionInput): number {
-  return (
-    input.playerView.opponent.credits +
-    visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? [])
-  );
 }
 
 export function visibleCorpIceDefenseProfile(
@@ -325,7 +338,7 @@ export function visibleCorpIceDefenseProfile(
   const textInput: {
     title?: string;
     rulesText?: string;
-    definitionId?: string;
+    definitionId?: number;
     subtypes?: readonly string[];
   } = {
     rulesText: [
@@ -337,7 +350,7 @@ export function visibleCorpIceDefenseProfile(
       .join(" "),
   };
   if (typeof sourceCard.title === "string") textInput.title = sourceCard.title;
-  if (typeof sourceCard.definitionId === "string") {
+  if (typeof sourceCard.definitionId === "number") {
     textInput.definitionId = sourceCard.definitionId;
   }
   if (Array.isArray(sourceCard.subtypes))
@@ -453,6 +466,7 @@ function subroutineLooksLikeImmediateStop(subroutine: unknown): boolean {
   const type = subroutineType(subroutine);
   if (
     type === "end_the_run" ||
+    type === "end_the_run_and_trash_source_at_end_of_turn" ||
     type === "end_the_run_unless_runner_pays" ||
     type === "set_run_future_end_the_run_subroutine" ||
     type === "set_runner_run_lock_actions"
@@ -574,7 +588,7 @@ function selectedSubtypesAfterRez(action: LegalAction): string[] {
 function visibleCardText(card: {
   title?: string;
   rulesText?: string;
-  definitionId?: string;
+  definitionId?: number;
   subtypes?: readonly string[];
 }): string {
   return [
@@ -628,7 +642,6 @@ function variableRezKindForAction(
 ): string | undefined {
   return (
     payloadString(action, "variableRezKind") ??
-    variableRezFromActionId(action)?.kind ??
     actionSemanticCandidate?.costProfile.variableCost?.kind
   );
 }
@@ -645,8 +658,7 @@ function variableRezChosenValue(
       : undefined) ??
     (typeof actionSemanticCandidate?.costProfile.xValue === "number"
       ? actionSemanticCandidate.costProfile.xValue
-      : undefined) ??
-    variableRezFromActionId(action)?.value
+      : undefined)
   );
 }
 
@@ -663,27 +675,6 @@ function minimumUsefulVariableRezValue(
     )
   ) {
     return 1;
-  }
-  return undefined;
-}
-
-function variableRezFromActionId(
-  action: LegalAction,
-): { kind: string; value: number } | undefined {
-  const actionIdParts = action.actionId.split(".");
-  for (let index = 0; index < actionIdParts.length - 1; index += 1) {
-    const kind = actionIdParts[index];
-    if (
-      kind !== "x_strength" &&
-      kind !== "trace_boost" &&
-      kind !== "paid_end_the_run_subroutines"
-    ) {
-      continue;
-    }
-    const value = Number(actionIdParts[index + 1]);
-    if (Number.isFinite(value)) {
-      return { kind, value };
-    }
   }
   return undefined;
 }
@@ -721,17 +712,21 @@ function signalSegmentHasTerm(segment: string, term: string): boolean {
   );
 }
 
+const FUTURE_ENCOUNTER_EFFECTS = new Set([
+  "set_run_encounter_tax",
+  "set_run_break_subroutine_cost_modifier",
+  "set_run_future_end_the_run_subroutine",
+  "set_run_future_strength_bonus",
+  "set_next_encounter_unless_fully_break_damage",
+  "set_next_encounter_lock",
+  "set_next_encounter_no_break_subroutines",
+]);
+
 export function corpIceEffectsOnlyReachFutureEncounters(
   types: readonly string[],
 ): boolean {
-  const futureTypes = new Set([
-    "set_run_encounter_tax",
-    "set_run_break_subroutine_cost_modifier",
-    "set_run_future_end_the_run_subroutine",
-    "set_run_future_strength_bonus",
-    "set_next_encounter_unless_fully_break_damage",
-    "set_next_encounter_lock",
-    "set_next_encounter_no_break_subroutines",
-  ]);
-  return types.length > 0 && types.every((type) => futureTypes.has(type));
+  return (
+    types.length > 0 &&
+    types.every((type) => FUTURE_ENCOUNTER_EFFECTS.has(type))
+  );
 }

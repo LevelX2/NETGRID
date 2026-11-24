@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { isRemoteServerId } from "@netgrid/shared";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -48,7 +49,7 @@ it.each(["g5d43", "g29d124"])(
     const fort = input.playerView.servers.find((s) =>
       s.ice.some((i) => i.instanceId === old.payload!.targetCardId),
     )!;
-    expect(fort.id).toMatch(/^remote_/);
+    expect(isRemoteServerId(fort.id)).toBe(true);
     expect(fort.root).toEqual([]);
     expect(input.playerView.own.clicks).toBe(1);
     expect(old.payload?.xValue).toBe(1);

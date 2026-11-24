@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -47,28 +48,28 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     expect(
       input.playerView.servers
         .flatMap((s) => s.ice)
-        .find((c) => c.instanceId === "corp_onr_v1_228_cinderella_1")?.rezzed,
+        .find((c) => c.instanceId === "c2px")?.rezzed,
     ).toBe(false);
     const decision = chooseAiAction(input);
     expect(decision).toMatchObject({
-      actionId: "corp.resolve_choice",
+      actionId: "cn",
       fallbackUsed: false,
       timeoutUsed: false,
       selectedChoices: {
         choiceId: input.playerView.pendingChoice!.choiceId,
-        selectedOptionIds: ["hardware_runner_onr_v1_129_hq-interface_1"],
+        selectedOptionIds: ["hardware_c23t"],
       },
     });
     expect(input.legalActions[0]!.expiresAtStateVersion).toBe(298);
     expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({
       stateVersion: 298,
       lane: "plan",
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
       selectedStep: {
-        planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
-        stepId: "plan:corp.defend_servers:server-defense-portfolio:allocate",
+        planInstanceId: "penw02zfrkklof54c2nuye5att",
+        stepId: "penw02zfrkklof54c2nuye5att:allocate",
       },
       route: { actionId: decision.actionId },
     });
@@ -77,7 +78,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
   it("retains Defense ownership when only one hardware target remains", () => {
     const input = checkpoint();
     const choice = input.playerView.pendingChoice!;
-    const remainingId = "runner_onr_v1_139_r-and-d-interface_1";
+    const remainingId = "c261";
     // Keep the original native R&D Interface, its option and LegalAction binding.
     input.playerView.opponent.rig = input.playerView.opponent.rig!.filter(
       (card) => card.type !== "hardware" || card.instanceId === remainingId,
@@ -94,7 +95,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       lane: "plan",
       leafExecutorInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+        "penw02zfrkklof54c2nuye5att",
     });
     expect(decision.fallbackUsed).toBe(false);
   });
@@ -105,7 +106,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
       (card) => card.type === "hardware",
     );
     const target = hardware.find(
-      (card) => card.instanceId === "runner_onr_v1_139_r-and-d-interface_1",
+      (card) => card.instanceId === "c261",
     )!;
     target.counters = { power: 2 };
     const choice = input.playerView.pendingChoice!;
@@ -170,6 +171,8 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     "quote_source",
     "effect",
     "event",
+    "trace_id",
+    "trace_outcome",
     "cost",
     "duplicate",
     "option_binding",
@@ -182,7 +185,7 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
     const action = input.legalActions[0]!;
     const source = input.playerView.servers
       .flatMap((server) => server.ice)
-      .find((card) => card.instanceId === "corp_onr_v1_228_cinderella_1")!;
+      .find((card) => card.instanceId === "c2px")!;
     const quote = source.effectivePostRezRunQuote!;
     if (!quote.complete)
       throw new Error("Native checkpoint requires a complete quote");
@@ -196,6 +199,10 @@ describe("pairing 474: mandatory Trace hardware target after run end", () => {
       };
     if (kind === "event")
       input.eventTail.at(-1)!.publicPayload.traceStep = "corp_bid";
+    if (kind === "trace_id")
+      input.eventTail.at(-1)!.publicPayload.traceId!++;
+    if (kind === "trace_outcome")
+      input.eventTail.at(-1)!.publicPayload.traceSuccessful = false;
     if (kind === "cost")
       delete input.playerView.opponent.rig!.find(
         (card) => card.type === "hardware",
@@ -218,12 +225,12 @@ describe("SP-473: a Trace completed after the Runner's link window", () => {
     const input = checkpoint(nativeCheckpoint);
     const choice = input.playerView.pendingChoice!;
     expect(input.eventTail.at(-1)?.publicPayload).toMatchObject({
-      traceId: choice.source.slice("trace_success.hardware_wrecker:".length),
+      traceId: Number(choice.source.slice("trace_success.hardware_wrecker:".length)),
       traceStep: "post_bid_link",
       traceSuccessful: true,
     });
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("corp.resolve_choice");
+    expect(decision.actionId).toBe("cn");
     expect(decision.selectedChoices?.choiceId).toBe(choice.choiceId);
     const selectedOptions = decision.selectedChoices?.selectedOptionIds;
     expect(selectedOptions).toHaveLength(1);
@@ -232,7 +239,7 @@ describe("SP-473: a Trace completed after the Runner's link window", () => {
       selectedOptions[0],
     );
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "penw02zfrkklof54c2nuye5att",
     });
     expect(decision.fallbackUsed).toBe(false);
   });
@@ -242,8 +249,8 @@ describe("SP-473: a Trace completed after the Runner's link window", () => {
     (kind) => {
       const input = checkpoint(nativeCheckpoint);
       const event = input.eventTail.at(-1)!;
-      if (kind === "trace") event.publicPayload.traceId = "different-trace";
-      if (kind === "source") event.publicPayload.sourceDefinitionId = "different-ice";
+      if (kind === "trace") event.publicPayload.traceId!++;
+      if (kind === "source") event.publicPayload.sourceDefinitionId = syntheticCardDefinitionId("different-ice");
       if (kind === "version") event.stateVersionAfter--;
       if (kind === "outcome") event.publicPayload.traceSuccessful = false;
       expect(() => chooseAiAction(input)).toThrow(PlanResolutionFailure);

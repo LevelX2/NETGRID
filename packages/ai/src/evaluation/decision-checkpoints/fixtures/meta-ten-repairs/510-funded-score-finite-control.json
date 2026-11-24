@@ -2,51 +2,51 @@
   "rows": [
     {
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_204_ice-transmutation_2.corp_onr_v1_204_ice-transmutation_2",
-      "beforeHash": "fnv1a:418f854f",
-      "afterHash": "fnv1a:f06aa037"
+      "actionId": "c2.c2km.c2km",
+      "beforeHash": "fnv1a:d29630c5",
+      "afterHash": "fnv1a:8932a960"
     },
     {
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_204_ice-transmutation_2.corp_onr_v1_204_ice-transmutation_2",
-      "beforeHash": "fnv1a:f06aa037",
-      "afterHash": "fnv1a:19490421"
+      "actionId": "c2.c2km.c2km",
+      "beforeHash": "fnv1a:8932a960",
+      "afterHash": "fnv1a:61952e88"
     },
     {
       "side": "corp",
-      "actionId": "corp.advance_card.corp_onr_v1_204_ice-transmutation_2.corp_onr_v1_204_ice-transmutation_2",
-      "beforeHash": "fnv1a:19490421",
-      "afterHash": "fnv1a:b20dc11f"
+      "actionId": "c2.c2km.c2km",
+      "beforeHash": "fnv1a:61952e88",
+      "afterHash": "fnv1a:be8e60b0"
     },
     {
       "side": "corp",
-      "actionId": "corp.score_agenda.corp_onr_v1_204_ice-transmutation_2.corp_onr_v1_204_ice-transmutation_2",
-      "beforeHash": "fnv1a:b20dc11f",
-      "afterHash": "fnv1a:a7607803"
+      "actionId": "cr.c2km.c2km",
+      "beforeHash": "fnv1a:be8e60b0",
+      "afterHash": "fnv1a:0a9dc93e"
     },
     {
       "side": "corp",
-      "actionId": "corp.resolve_choice",
+      "actionId": "cn",
       "selectedChoices": {
         "choiceId": "choice_card_implementation_select_rezzed_ice_mark_modifier_337",
         "selectedOptionIds": [
-          "card_corp_onr_v1_247_haunting-inquisition_1"
+          "card_c2u5"
         ]
       },
-      "beforeHash": "fnv1a:a7607803",
-      "afterHash": "fnv1a:695d1285"
+      "beforeHash": "fnv1a:0a9dc93e",
+      "afterHash": "fnv1a:1ccb33fb"
     },
     {
       "side": "corp",
-      "actionId": "corp.end_turn",
-      "beforeHash": "fnv1a:695d1285",
-      "afterHash": "fnv1a:d835b55a"
+      "actionId": "c9",
+      "beforeHash": "fnv1a:1ccb33fb",
+      "afterHash": "fnv1a:1aae3742"
     }
   ],
   "scorePoints": 6,
   "credits": 0,
   "winner": null,
-  "hash": "fnv1a:d835b55a",
+  "hash": "fnv1a:35d6a668",
   "everyOriginalCommandHashMatches": true,
   "limit": "Sechs tatsächliche Originalcommands bis nach dem finanzierten zweiten Trans-Score; keine volle alternative Gewinnerpopulation.",
   "deterministicReplay": true

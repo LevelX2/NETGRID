@@ -75,7 +75,7 @@ export type ApiUserErrorDescriptor = {
 export type ApiUserErrorPayload = ApiUserErrorDescriptor & {
   diagnosticCode?: string;
   currentStateVersion?: number;
-  playerView?: import("./index").PlayerView;
+  playerView?: import("./match-offer-contracts").OfferedPlayerView;
 };
 
 export type ApiLobbyPresentationDescriptor = {

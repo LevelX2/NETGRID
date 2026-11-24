@@ -42,7 +42,7 @@ it("removes the native G4D13 parentless ready Spinal economy producer while reta
       ?.expiresAtStateVersion,
   ).toBe(cp.stateVersion);
   const source = input.playerView.own.gripOrHq.find(
-    (c) => c.definitionId === "onr_classic_048_omnitech-spinal-tap-cybermodem",
+    (c) => c.definitionId === 52,
   )!;
   expect(source).toBeDefined();
   expect(

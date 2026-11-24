@@ -1,22 +1,16 @@
 import {
   canonicalCapabilityId,
-  cardSpecPlanningCardByDefinitionId,
+  planningCardByDefinitionId,
 } from "@netgrid/cards/planning";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { AiCardHint } from "../ai-hints";
-
-export type CorpConditionalScoreCreditProfile = Readonly<{
-  threshold: number;
-  gainAmount: number;
-}>;
 
 /** Canonical same-fort discount facts, never an installation recommendation. */
 export function corpSameFortAgendaDiscountProfiles(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): readonly Readonly<{ requiredSubtype?: string; reduction: number }>[] {
   const card = planningCard(definitionId);
-  return (card?.planning.engine.modifiers ?? []).flatMap((modifier) =>
+  return (card?.engine.modifiers ?? []).flatMap((modifier) =>
     modifier.kind === "agenda_difficulty" &&
     modifier.operation === "reduce" &&
     modifier.side === "corp" &&
@@ -39,18 +33,18 @@ export function corpSameFortAgendaDiscountProfiles(
 /** A public, unconditional reusable run has separate physical entry and access.
  * This certifies a possible path, never predicts the Runner's next action. */
 export function corpPublicFixedOffServerRunProfiles(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): readonly Readonly<{
   entryServerId: "hq" | "rd" | "archives";
   accessServerId: "hq" | "rd";
 }>[] {
   const card = planningCard(definitionId);
-  if (card?.planning.side !== "runner") return [];
+  if (card?.side !== "runner") return [];
   const result: {
     entryServerId: "hq" | "rd" | "archives";
     accessServerId: "hq" | "rd";
   }[] = [];
-  for (const ability of card.planning.engine.abilities ?? []) {
+  for (const ability of card.engine.abilities ?? []) {
     if (
       ability.kind !== "activated" ||
       ability.timing !== "runner_main" ||
@@ -101,13 +95,6 @@ export function corpPublicFixedOffServerRunProfiles(
   return result;
 }
 
-export type CorpHostedCreditBankProfile = Readonly<{
-  poolCredits: number;
-  payoutCredits: number;
-  payoutActionCost: number;
-  payoutTiming: "action" | "start_of_corp_turn";
-}>;
-
 export type CorpTaggedDamagePayoffProfile = Readonly<{
   requiredRunnerTags: number;
   agendaPointCost: number;
@@ -117,36 +104,36 @@ export type CorpTaggedDamagePayoffProfile = Readonly<{
 
 export type CorpTaggedMeatDamageProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   damageAmount: number;
   agendaPointCost?: number;
 }>;
 
 export type CorpTraceTagSourceProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
 }>;
 
 export type CorpOnPlayCapabilityProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
 }>;
 
 /** Fixed printed cost for a visible operation, independent of its play conditions. */
 export function corpFixedOperationPlayCredits(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number | undefined {
-  const card = planningCard(definitionId)?.planning;
+  const card = planningCard(definitionId);
   if (card?.side !== "corp" || card.cardType !== "operation") return undefined;
   const cost = card.engine.characteristics.playCost;
   return cost?.kind === "fixed" ? cost.credits : undefined;
 }
 
 export function corpPunishFixedCapabilityCost(
-  definitionId: string,
-  capabilityId: string,
+  definitionId: number,
+  capabilityId: number,
 ): { clicks: number; credits: number } | undefined {
-  const card = planningCard(definitionId)?.planning;
+  const card = planningCard(definitionId);
   if (card?.side !== "corp") return undefined;
   if (card.cardType === "operation") {
     const credits = corpFixedOperationPlayCredits(definitionId);
@@ -193,7 +180,7 @@ export type CorpScoreConversionProfile = Readonly<{
 
 export type CorpArchivesToHqOperationProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   maxSelections: 1 | "all";
   filterCardType?: "ice";
   visibility: "hidden_info_barrier";
@@ -201,14 +188,14 @@ export type CorpArchivesToHqOperationProfile = Readonly<{
 
 export type CorpScoredAgendaFreeRezProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   visibility: "hidden_info_barrier";
   targetPurpose: "rez_best_defensive_ice";
 }>;
 
 export type CorpScoredAgendaIceMarkProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   visibility: "public";
   targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
   targetPreferences: readonly [
@@ -220,7 +207,7 @@ export type CorpScoredAgendaIceMarkProfile = Readonly<{
 
 export type CorpScoredAgendaHqShuffleProfile = Readonly<{
   capabilityKey: string;
-  sourceCapabilityId: string;
+  sourceCapabilityId: number;
   creditPerAgendaPoint: number;
   visibility: "hidden_info_barrier";
   targetPurpose: "choose_hq_agenda_subset_for_reveal_credit_and_shuffle";
@@ -232,12 +219,12 @@ export type CorpStartOfTurnOptionalDrawProfile = Readonly<{
 }>;
 
 export function corpStartOfTurnOptionalDrawProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpStartOfTurnOptionalDrawProfile | undefined {
   const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
-  return planning?.planning.side === "corp" &&
-    planning.planning.cardType === "agenda" &&
+  const scoredAgenda = planning?.engine.scoredAgenda;
+  return planning?.side === "corp" &&
+    planning.cardType === "agenda" &&
     scoredAgenda?.kind === "corp_start_turn_optional_draw" &&
     positiveSafeInteger(scoredAgenda.drawCount)
     ? {
@@ -248,19 +235,19 @@ export function corpStartOfTurnOptionalDrawProfile(
 }
 
 export function corpScoredAgendaHqShuffleProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpScoredAgendaHqShuffleProfile | undefined {
   const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
-  const targetPreference = planning?.planning.planningAnnotations?.card?.find(
+  const scoredAgenda = planning?.engine.scoredAgenda;
+  const targetPreference = planning?.planningAnnotations?.card?.find(
     (annotation) =>
       annotation.kind === "target_preference" &&
       annotation.purpose ===
         "choose_hq_agenda_subset_for_reveal_credit_and_shuffle",
   );
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "agenda" ||
     scoredAgenda?.kind !== "shuffle_selected_hq_agendas_into_rd_gain_credits" ||
     scoredAgenda.shuffleSelectedIntoRnd !== true ||
     scoredAgenda.visibility !== "hidden_info_barrier" ||
@@ -274,7 +261,7 @@ export function corpScoredAgendaHqShuffleProfile(
   return {
     capabilityKey: scoredAgenda.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       scoredAgenda.capabilityKey,
     ),
     creditPerAgendaPoint: scoredAgenda.creditPerAgendaPoint,
@@ -284,18 +271,18 @@ export function corpScoredAgendaHqShuffleProfile(
 }
 
 export function corpScoredAgendaIceMarkProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpScoredAgendaIceMarkProfile | undefined {
   const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
-  const targetPreference = planning?.planning.planningAnnotations?.card?.find(
+  const scoredAgenda = planning?.engine.scoredAgenda;
+  const targetPreference = planning?.planningAnnotations?.card?.find(
     (annotation) =>
       annotation.kind === "target_preference" &&
       annotation.purpose === "strengthen_and_repeat_best_ice_subroutine",
   );
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "agenda" ||
     scoredAgenda?.kind !== "select_rezzed_ice_mark_modifier" ||
     scoredAgenda.target !== "rezzed_installed_ice" ||
     scoredAgenda.counterType !== "mark" ||
@@ -316,7 +303,7 @@ export function corpScoredAgendaIceMarkProfile(
   return {
     capabilityKey: scoredAgenda.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       scoredAgenda.capabilityKey,
     ),
     visibility: scoredAgenda.visibility,
@@ -327,13 +314,13 @@ export function corpScoredAgendaIceMarkProfile(
 }
 
 export function corpScoredAgendaFreeRezProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpScoredAgendaFreeRezProfile | undefined {
   const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
+  const scoredAgenda = planning?.engine.scoredAgenda;
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "agenda" ||
     scoredAgenda?.kind !== "score_rez_installed_ice_at_no_cost" ||
     scoredAgenda.visibility !== "hidden_info_barrier" ||
     typeof scoredAgenda.capabilityKey !== "string" ||
@@ -344,62 +331,11 @@ export function corpScoredAgendaFreeRezProfile(
   return {
     capabilityKey: scoredAgenda.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       scoredAgenda.capabilityKey,
     ),
     visibility: scoredAgenda.visibility,
     targetPurpose: "rez_best_defensive_ice",
-  };
-}
-
-/** Only a direct, unconditional liquid payout; no pool, threshold or choice. */
-export function corpUnconditionalScoreCreditGain(
-  definitionId: string | undefined,
-): number | undefined {
-  const card = planningCard(definitionId);
-  const effect = card?.planning.engine.scoredAgenda;
-  if (card?.planning.side !== "corp" || card.planning.cardType !== "agenda")
-    return undefined;
-  // A threshold, pool, choice or other compound scored effect is not a
-  // certificate of an unconditional liquid end-of-score balance.
-  if (
-    effect &&
-    (effect.kind !== "gain_credits_on_score" ||
-      effect.recipient !== "corp" ||
-      !positiveSafeInteger(effect.amount))
-  )
-    return undefined;
-  let payout = effect?.amount ?? 0;
-  for (const lifecycle of card.planning.engine.lifecycle?.on_score ?? []) {
-    if (lifecycle.kind === "add_bad_publicity") continue;
-    if (
-      lifecycle.kind !== "gain_credits" ||
-      (lifecycle.recipient !== "corp" &&
-        lifecycle.recipient !== "controller") ||
-      !positiveSafeInteger(lifecycle.amount)
-    )
-      return undefined;
-    payout += lifecycle.amount;
-  }
-  return positiveSafeInteger(payout) ? payout : undefined;
-}
-
-export function corpConditionalScoreCreditProfile(
-  definitionId: string | undefined,
-): CorpConditionalScoreCreditProfile | undefined {
-  const planning = planningCard(definitionId);
-  const scoredAgenda = planning?.planning.engine.scoredAgenda;
-  if (
-    planning?.planning.side !== "corp" ||
-    scoredAgenda?.kind !== "score_credit_swing_if_corp_credit_threshold_met" ||
-    !positiveSafeInteger(scoredAgenda.threshold) ||
-    !positiveSafeInteger(scoredAgenda.gainAmount)
-  ) {
-    return undefined;
-  }
-  return {
-    threshold: scoredAgenda.threshold,
-    gainAmount: scoredAgenda.gainAmount,
   };
 }
 
@@ -408,12 +344,12 @@ export function corpConditionalScoreCreditProfile(
  * income. Past on-score payouts are inert in the scored area.
  */
 export function corpDefinitionIsMainPhasePassive(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   scoreEffect: "none" | "past" | "unreachable" = "none",
 ): boolean {
   const card = planningCard(definitionId);
-  if (card?.planning.side !== "corp") return false;
-  const engine = card.planning.engine;
+  if (card?.side !== "corp") return false;
+  const engine = card.engine;
   const allowedKeys = new Set([
     "schemaVersion",
     "characteristics",
@@ -443,12 +379,12 @@ export function corpDefinitionIsMainPhasePassive(
  * The caller must exclude other installed agendas and advancement triggers.
  */
 export function corpOperationCannotFundWithLastClick(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   const card = planningCard(definitionId);
-  if (card?.planning.side !== "corp" || card.planning.cardType !== "operation")
+  if (card?.side !== "corp" || card.cardType !== "operation")
     return false;
-  const engine = card.planning.engine;
+  const engine = card.engine;
   const keys = new Set([
     "schemaVersion",
     "characteristics",
@@ -472,214 +408,12 @@ export function corpOperationCannotFundWithLastClick(
   );
 }
 
-export function corpImmediateEconomyGainFromHint(
-  hint: AiCardHint | undefined,
-): number | undefined {
-  if (hint?.side !== "corp" || hint.cardType !== "operation") return undefined;
-  const amounts = (hint.effects ?? [])
-    .filter(
-      (effect) =>
-        effect.kind === "economy" &&
-        effect.scope === "corp" &&
-        effect.timing === "action" &&
-        effect.finite === true &&
-        positiveSafeInteger(effect.amount),
-    )
-    .map((effect) => effect.amount as number);
-  return amounts.length > 0 ? Math.max(...amounts) : undefined;
-}
-
-export function corpHostedCreditBankProfile(
-  definitionId: string | undefined,
-): CorpHostedCreditBankProfile | undefined {
-  const planning = planningCard(definitionId);
-  if (planning?.planning.side !== "corp") return undefined;
-  const lifecycle = planning.planning.engine.lifecycle;
-  const poolCredits = [
-    ...(lifecycle?.on_install ?? []),
-    ...(lifecycle?.on_rez ?? []),
-  ].reduce(
-    (sum, effect) =>
-      effect.kind === "add_hosted_credits" &&
-      effect.target === "source" &&
-      positiveSafeInteger(effect.amount)
-        ? sum + effect.amount
-        : sum,
-    0,
-  );
-  const payoutCredits = Math.max(
-    0,
-    ...(planning.planning.engine.abilities ?? []).flatMap((ability) =>
-      ability.effects.flatMap((effect) =>
-        effect.kind === "take_hosted_credits" &&
-        effect.recipient === "controller" &&
-        positiveSafeInteger(effect.amount)
-          ? [effect.amount]
-          : [],
-      ),
-    ),
-    ...(lifecycle?.start_of_corp_turn ?? []).flatMap((ability) =>
-      ability.effects.flatMap((effect) =>
-        effect.kind === "take_hosted_credits" &&
-        effect.recipient === "controller" &&
-        positiveSafeInteger(effect.amount)
-          ? [effect.amount]
-          : [],
-      ),
-    ),
-  );
-  const lifecyclePayout = (lifecycle?.start_of_corp_turn ?? []).some(
-    (ability) =>
-      ability.effects.some(
-        (effect) =>
-          effect.kind === "take_hosted_credits" &&
-          effect.recipient === "controller" &&
-          positiveSafeInteger(effect.amount),
-      ),
-  );
-  const payoutActionCost = Math.max(
-    0,
-    ...(planning.planning.engine.abilities ?? []).flatMap((ability) =>
-      ability.effects.some(
-        (effect) =>
-          effect.kind === "take_hosted_credits" &&
-          effect.recipient === "controller",
-      )
-        ? [
-            Array.isArray(ability.costs)
-              ? ability.costs.reduce(
-                  (sum: number, cost) =>
-                    cost.kind === "action" && positiveSafeInteger(cost.amount)
-                      ? sum + cost.amount
-                      : sum,
-                  0,
-                )
-              : 0,
-          ]
-        : [],
-    ),
-  );
-  return poolCredits > 0 && payoutCredits > 0
-    ? {
-        poolCredits,
-        payoutCredits,
-        payoutActionCost,
-        payoutTiming: lifecyclePayout ? "start_of_corp_turn" : "action",
-      }
-    : undefined;
-}
-
-/** A plain rez-created pool with a single-click, otherwise free current-turn payout. */
-export function corpRezHostedCreditPayoutProfile(
-  definitionId: string | undefined,
-  installing = false,
-): { poolCredits: number; payoutCredits: number } | undefined {
-  const planning = planningCard(definitionId);
-  const effects = planning?.planning.engine.lifecycle?.on_rez;
-  if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "asset" ||
-    (installing &&
-      (planning.planning.engine.lifecycle?.on_install?.length ?? 0) > 0) ||
-    !effects?.length ||
-    !effects.every(
-      (effect) =>
-        effect.kind === "add_hosted_credits" &&
-        effect.target === "source" &&
-        positiveSafeInteger(effect.amount),
-    )
-  )
-    return undefined;
-  const poolCredits = effects.reduce(
-    (sum, effect) =>
-      sum + (effect.kind === "add_hosted_credits" ? effect.amount : 0),
-    0,
-  );
-  const payouts = (planning.planning.engine.abilities ?? []).flatMap(
-    (ability) => {
-      const effect = ability.effects.find(
-        (effect) => effect.kind === "take_hosted_credits",
-      );
-      return ability.kind === "activated" &&
-        ability.timing === "corp_main" &&
-        ability.effects.every(
-          (other) =>
-            other === effect || other.kind === "trash_source_when_empty",
-        ) &&
-        ability.costs.length === 1 &&
-        ability.costs[0]?.kind === "action" &&
-        ability.costs[0].amount === 1 &&
-        ability.condition?.kind === "source_has_hosted_credits" &&
-        effect?.kind === "take_hosted_credits" &&
-        effect.source === "source" &&
-        effect.recipient === "controller" &&
-        effect.mode === "up_to_amount_if_available" &&
-        positiveSafeInteger(effect.amount)
-        ? [effect.amount]
-        : [];
-    },
-  );
-  return payouts.length === 1 &&
-    positiveSafeInteger(poolCredits) &&
-    poolCredits > payouts[0]!
-    ? { poolCredits, payoutCredits: Math.min(poolCredits, payouts[0]!) }
-    : undefined;
-}
-
-/** A plain score-created pool with a single-click, otherwise free payout. */
-export function corpScoreHostedCreditPayoutProfile(
-  definitionId: string | undefined,
-): { poolCredits: number; payoutCredits: number } | undefined {
-  const planning = planningCard(definitionId);
-  const engine = planning?.planning.engine;
-  const effects = engine?.lifecycle?.on_score;
-  if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda" ||
-    !engine ||
-    engine?.scoredAgenda !== undefined ||
-    !effects?.length ||
-    !effects.every(
-      (effect) =>
-        effect.kind === "add_hosted_credits" &&
-        effect.target === "source" &&
-        positiveSafeInteger(effect.amount),
-    )
-  )
-    return undefined;
-  const poolCredits = effects.reduce(
-    (sum, effect) =>
-      sum + (effect.kind === "add_hosted_credits" ? effect.amount : 0),
-    0,
-  );
-  const payouts = (engine.abilities ?? []).flatMap((ability) => {
-    const effect =
-      ability.effects.length === 1 ? ability.effects[0] : undefined;
-    return ability.kind === "activated" &&
-      ability.timing === "corp_main" &&
-      ability.costs.length === 1 &&
-      ability.costs[0]?.kind === "action" &&
-      ability.costs[0].amount === 1 &&
-      ability.condition?.kind === "source_has_hosted_credits" &&
-      effect?.kind === "take_hosted_credits" &&
-      effect.source === "source" &&
-      effect.recipient === "controller" &&
-      effect.mode === "up_to_amount_if_available" &&
-      positiveSafeInteger(effect.amount)
-      ? [effect.amount]
-      : [];
-  });
-  return payouts.length === 1 && positiveSafeInteger(poolCredits)
-    ? { poolCredits, payoutCredits: payouts[0]! }
-    : undefined;
-}
-
 export function corpDefinitionHasTraceSource(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   const planning = planningCard(definitionId);
-  if (planning?.planning.side !== "corp") return false;
-  const engine = planning.planning.engine;
+  if (planning?.side !== "corp") return false;
+  const engine = planning.engine;
   return (
     containsMechanicalKind(engine, "trace") ||
     (isRecord(engine.relativeIce) &&
@@ -688,33 +422,33 @@ export function corpDefinitionHasTraceSource(
 }
 
 export function corpDefinitionHasTagSource(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   const planning = planningCard(definitionId);
   return (
-    planning?.planning.side === "corp" &&
-    (containsMechanicalKind(planning.planning.engine, "add_tags") ||
-      planning.planning.engine.corpUtility?.kind === "encounter_tag")
+    planning?.side === "corp" &&
+    (containsMechanicalKind(planning.engine, "add_tags") ||
+      planning.engine.corpUtility?.kind === "encounter_tag")
   );
 }
 
 export function corpDefinitionHasTraceTagSource(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   return corpTraceTagSourceProfile(definitionId) !== undefined;
 }
 
 export function corpTraceTagSourceProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTraceTagSourceProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation"
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation"
   ) {
     return undefined;
   }
-  const ability = (planning.planning.engine.abilities ?? []).find(
+  const ability = (planning.engine.abilities ?? []).find(
     (candidate) =>
       candidate.kind === "on_play" &&
       mechanicalRecordsByKind(candidate.effects, "trace").some(
@@ -730,7 +464,7 @@ export function corpTraceTagSourceProfile(
     ? {
         capabilityKey: ability.capabilityKey,
         sourceCapabilityId: canonicalCapabilityId(
-          planning.planning.cardDefinitionId,
+          planning.cardDefinitionId,
           ability.capabilityKey,
         ),
       }
@@ -738,15 +472,15 @@ export function corpTraceTagSourceProfile(
 }
 
 export function corpScoredTraceTagSourceProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTraceTagSourceProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "agenda"
+    planning?.side !== "corp" ||
+    planning.cardType !== "agenda"
   )
     return undefined;
-  const ability = (planning.planning.engine.abilities ?? []).find(
+  const ability = (planning.engine.abilities ?? []).find(
     (candidate) =>
       candidate.kind === "activated" &&
       candidate.timing === "corp_main" &&
@@ -763,7 +497,7 @@ export function corpScoredTraceTagSourceProfile(
     ? {
         capabilityKey: ability.capabilityKey,
         sourceCapabilityId: canonicalCapabilityId(
-          planning.planning.cardDefinitionId,
+          planning.cardDefinitionId,
           ability.capabilityKey,
         ),
       }
@@ -771,16 +505,16 @@ export function corpScoredTraceTagSourceProfile(
 }
 
 export function corpDirectTagOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpOnPlayCapabilityProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation"
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation"
   ) {
     return undefined;
   }
-  const utility = planning.planning.engine.corpUtility;
+  const utility = planning.engine.corpUtility;
   if (
     utility?.kind === "encounter_tag" &&
     utility.visibility === "public" &&
@@ -791,12 +525,12 @@ export function corpDirectTagOperationProfile(
     return {
       capabilityKey: utility.capabilityKey,
       sourceCapabilityId: canonicalCapabilityId(
-        planning.planning.cardDefinitionId,
+        planning.cardDefinitionId,
         utility.capabilityKey,
       ),
     };
   }
-  const ability = (planning.planning.engine.abilities ?? []).find(
+  const ability = (planning.engine.abilities ?? []).find(
     (candidate) =>
       candidate.kind === "on_play" &&
       candidate.effects.some(
@@ -810,7 +544,7 @@ export function corpDirectTagOperationProfile(
     ? {
         capabilityKey: ability.capabilityKey,
         sourceCapabilityId: canonicalCapabilityId(
-          planning.planning.cardDefinitionId,
+          planning.cardDefinitionId,
           ability.capabilityKey,
         ),
       }
@@ -818,16 +552,16 @@ export function corpDirectTagOperationProfile(
 }
 
 export function corpTaggedCreditDenialOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpOnPlayCapabilityProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation"
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation"
   ) {
     return undefined;
   }
-  const ability = (planning.planning.engine.abilities ?? []).find(
+  const ability = (planning.engine.abilities ?? []).find(
     (candidate) =>
       candidate.kind === "on_play" &&
       (containsMechanicalKind(candidate.condition, "runner_is_tagged") ||
@@ -841,7 +575,7 @@ export function corpTaggedCreditDenialOperationProfile(
     ? {
         capabilityKey: ability.capabilityKey,
         sourceCapabilityId: canonicalCapabilityId(
-          planning.planning.cardDefinitionId,
+          planning.cardDefinitionId,
           ability.capabilityKey,
         ),
       }
@@ -849,13 +583,13 @@ export function corpTaggedCreditDenialOperationProfile(
 }
 
 export function corpInstalledHardwareTrashOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpOnPlayCapabilityProfile | undefined {
   const planning = planningCard(definitionId);
-  const utility = planning?.planning.engine.corpUtility;
+  const utility = planning?.engine.corpUtility;
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation" ||
     utility?.kind !== "installed_hardware_trash_by_counter" ||
     utility.excludesSubtype !== "cybernetics" ||
     utility.visibility !== "public"
@@ -865,20 +599,20 @@ export function corpInstalledHardwareTrashOperationProfile(
   return {
     capabilityKey: utility.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       utility.capabilityKey,
     ),
   };
 }
 
 export function corpArchivesToHqOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpArchivesToHqOperationProfile | undefined {
   const planning = planningCard(definitionId);
-  const utility = planning?.planning.engine.corpUtility;
+  const utility = planning?.engine.corpUtility;
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== "operation" ||
+    planning?.side !== "corp" ||
+    planning.cardType !== "operation" ||
     utility?.kind !== "corp_archives_to_hq" ||
     utility.visibility !== "hidden_info_barrier" ||
     (utility.maxSelections !== undefined &&
@@ -892,7 +626,7 @@ export function corpArchivesToHqOperationProfile(
   return {
     capabilityKey: utility.capabilityKey,
     sourceCapabilityId: canonicalCapabilityId(
-      planning.planning.cardDefinitionId,
+      planning.cardDefinitionId,
       utility.capabilityKey,
     ),
     maxSelections: utility.maxSelections ?? 1,
@@ -904,19 +638,19 @@ export function corpArchivesToHqOperationProfile(
 }
 
 export function corpTaggedMeatDamageOperationProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
   return taggedMeatDamageProfile(definitionId, "operation");
 }
 
 export function corpScoredTaggedMeatDamageProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
   const card = planningCard(definitionId);
-  const scored = card?.planning.engine.scoredAgenda;
+  const scored = card?.engine.scoredAgenda;
   if (
-    card?.planning.side === "corp" &&
-    card.planning.cardType === "agenda" &&
+    card?.side === "corp" &&
+    card.cardType === "agenda" &&
     scored?.kind === "tagged_runner_meat_damage_reduce_hand_size_on_success" &&
     scored.visibility === "public" &&
     positiveSafeInteger(scored.damageAmount)
@@ -924,7 +658,7 @@ export function corpScoredTaggedMeatDamageProfile(
     return {
       capabilityKey: scored.capabilityKey,
       sourceCapabilityId: canonicalCapabilityId(
-        card.planning.cardDefinitionId,
+        card.cardDefinitionId,
         scored.capabilityKey,
       ),
       damageAmount: scored.damageAmount,
@@ -934,9 +668,9 @@ export function corpScoredTaggedMeatDamageProfile(
 }
 
 export function corpInstalledTaggedMeatDamageProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTaggedMeatDamageProfile | undefined {
-  const card = planningCard(definitionId)?.planning;
+  const card = planningCard(definitionId);
   if (
     card?.side !== "corp" ||
     (card.cardType !== "asset" && card.cardType !== "upgrade")
@@ -958,17 +692,17 @@ export function corpInstalledTaggedMeatDamageProfile(
 }
 
 function taggedMeatDamageProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
   cardType: "operation" | "agenda" | "asset" | "upgrade",
 ): CorpTaggedMeatDamageProfile | undefined {
   const planning = planningCard(definitionId);
   if (
-    planning?.planning.side !== "corp" ||
-    planning.planning.cardType !== cardType
+    planning?.side !== "corp" ||
+    planning.cardType !== cardType
   ) {
     return undefined;
   }
-  const profiles = (planning.planning.engine.abilities ?? []).flatMap(
+  const profiles = (planning.engine.abilities ?? []).flatMap(
     (ability) => {
       if (cardType === "operation") {
         if (ability.kind !== "on_play") return [];
@@ -991,7 +725,7 @@ function taggedMeatDamageProfile(
               {
                 capabilityKey: ability.capabilityKey,
                 sourceCapabilityId: canonicalCapabilityId(
-                  planning.planning.cardDefinitionId,
+                  planning.cardDefinitionId,
                   ability.capabilityKey,
                 ),
                 damageAmount: effect.amount,
@@ -1009,12 +743,12 @@ function taggedMeatDamageProfile(
 }
 
 export function corpTaggedDamagePayoffProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpTaggedDamagePayoffProfile | undefined {
   const planning = planningCard(definitionId);
-  const payoff = planning?.planning.engine.uniqueDirectLongtail;
+  const payoff = planning?.engine.uniqueDirectLongtail;
   if (
-    planning?.planning.side !== "corp" ||
+    planning?.side !== "corp" ||
     payoff?.kind !== "tagged_meat_damage" ||
     !positiveSafeInteger(payoff.requiredRunnerTags) ||
     !positiveSafeInteger(payoff.agendaPointCost) ||
@@ -1034,12 +768,12 @@ export function corpTaggedDamagePayoffProfile(
 /** Guaranteed placement on one target from a plain unconditional operation.
  * Distinct-target distribution contributes at most one counter to that agenda. */
 export function corpGuaranteedOnPlayAdvancementCountersPerTarget(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): number {
   const card = planningCard(definitionId);
-  if (card?.planning.side !== "corp" || card.planning.cardType !== "operation")
+  if (card?.side !== "corp" || card.cardType !== "operation")
     return 0;
-  const abilities = card.planning.engine.abilities;
+  const abilities = card.engine.abilities;
   if (abilities?.length !== 1) return 0;
   const ability = abilities[0]!;
   if (
@@ -1062,12 +796,12 @@ export function corpGuaranteedOnPlayAdvancementCountersPerTarget(
 }
 
 export function corpScoreConversionProfile(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): CorpScoreConversionProfile | undefined {
   const planning = planningCard(definitionId);
-  if (planning?.planning.side !== "corp") return undefined;
+  if (planning?.side !== "corp") return undefined;
   const effectKinds = new Set(
-    (planning.planning.engine.abilities ?? []).flatMap((ability) =>
+    (planning.engine.abilities ?? []).flatMap((ability) =>
       ability.effects.map((effect) => effect.kind),
     ),
   );
@@ -1076,7 +810,7 @@ export function corpScoreConversionProfile(
     placesAdvancementCounters: effectKinds.has(
       "distribute_advancement_counters",
     ),
-    gainsCorpActions: (planning.planning.engine.abilities ?? []).some(
+    gainsCorpActions: (planning.engine.abilities ?? []).some(
       (ability) =>
         ability.effects.some(
           (effect) =>
@@ -1110,9 +844,9 @@ export function corpCandidateProvidesScoreConversion(
   return corpScoreConversionProfile(candidate.sourceDefinitionId) !== undefined;
 }
 
-function planningCard(definitionId: string | undefined) {
+function planningCard(definitionId: number | undefined) {
   return definitionId
-    ? cardSpecPlanningCardByDefinitionId(definitionId)
+    ? planningCardByDefinitionId(definitionId)
     : undefined;
 }
 

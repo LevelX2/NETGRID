@@ -1,6 +1,8 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
+  CardDefinitionId,
   LegalAction,
   PublicGameEvent,
   VisibleCard,
@@ -21,7 +23,7 @@ describe("runner damage threat model v2 red evidence", () => {
             actionType: "core_damage",
             damageType: "core",
             damageAmount: 1,
-            sourceDefinitionId: "onr_v1_093_if-you-want-it-done-right",
+            sourceDefinitionId: 305,
           }),
         ],
       }),
@@ -50,14 +52,14 @@ describe("runner damage threat model v2 red evidence", () => {
             damageResolved: true,
             resolvedEffects: [
               {
-                effectId: "virus-test-site-access-damage-effect",
+                effectId: 0,
                 kind: "damage",
                 visibility: "public",
                 side: "runner",
                 amount: 2,
                 damageType: "net",
                 cardsTrashed: 2,
-                sourceDefinitionId: "onr_v1_348_virus-test-site",
+                sourceDefinitionId: 560,
               },
             ],
           }),
@@ -91,7 +93,7 @@ describe("runner damage threat model v2 red evidence", () => {
             damageType: "net",
             damageAmount: 0,
             damageResolved: true,
-            sourceDefinitionId: "onr_v1_340_setup",
+            sourceDefinitionId: 552,
           }),
         ],
       }),
@@ -110,7 +112,7 @@ describe("runner damage threat model v2 red evidence", () => {
     });
   });
 
-  it.each(["onr_v1_340_setup", "onr_proteus_004_fetal-ai"])(
+  it.each([552, 62])(
     "attributes canonical access damage to the publicly accessed Corp card %s",
     (cardDefinitionId) => {
       const assessment = runnerDamageThreatAssessment(
@@ -147,7 +149,7 @@ describe("runner damage threat model v2 red evidence", () => {
       events: [event("prevented-access", 31, 8, {
         actor: "runner",
         actionType: "access_card",
-        cardDefinitionId: "onr_v1_340_setup",
+        cardDefinitionId: 552,
         damageResolved: true,
         damageAmount: 0,
         damageType: "net",
@@ -160,10 +162,10 @@ describe("runner damage threat model v2 red evidence", () => {
   });
 
   it.each([
-    { actionType: "trash_accessed_card", cardDefinitionId: "onr_v1_340_setup", damageResolved: true },
-    { actionType: "access_card", cardDefinitionId: "onr_v1_340_setup", damageResolved: false },
-    { actionType: "access_card", cardDefinitionId: "unknown-damage-source", damageResolved: true },
-    { actionType: "access_card", cardDefinitionId: "onr_v1_093_if-you-want-it-done-right", damageResolved: true },
+    { actionType: "trash_accessed_card", cardDefinitionId: 552, damageResolved: true },
+    { actionType: "access_card", cardDefinitionId: 552, damageResolved: false },
+    { actionType: "access_card", cardDefinitionId: syntheticCardDefinitionId("unknown-damage-source"), damageResolved: true },
+    { actionType: "access_card", cardDefinitionId: 305, damageResolved: true },
   ])("does not infer a Corp damage binding from $actionType / $cardDefinitionId / $damageResolved", (payload) => {
     const assessment = runnerDamageThreatAssessment(input({
       handCount: 1,
@@ -210,12 +212,12 @@ describe("runner damage threat model v2 red evidence", () => {
           event("seen-chance-observation", 27, 7, {
             actor: "runner",
             actionType: "access_card",
-            cardDefinitionId: "onr_v1_284_chance-observation",
+            cardDefinitionId: 496,
           }),
           event("seen-urban-renewal", 29, 7, {
             actor: "runner",
             actionType: "access_card",
-            cardDefinitionId: "onr_v1_307_urban-renewal",
+            cardDefinitionId: 519,
           }),
         ],
       }),
@@ -242,7 +244,7 @@ describe("runner damage threat model v2 red evidence", () => {
             damageType: "net",
             damageAmount: 2,
             damageResolved: true,
-            sourceDefinitionId: "onr_v1_340_setup",
+            sourceDefinitionId: 552,
           }),
         ],
       }),
@@ -275,7 +277,7 @@ describe("runner damage threat model v2 red evidence", () => {
           damageType: "core",
           damageAmount: 3,
           damageResolved: true,
-          sourceDefinitionId: "onr_v1_258_neural-blade",
+          sourceDefinitionId: 470,
         }),
       ],
     });
@@ -317,7 +319,7 @@ describe("runner damage threat model v2 red evidence", () => {
           damageType: "net",
           damageAmount: 1,
           damageResolved: true,
-          sourceDefinitionId: "onr_v1_258_neural-blade",
+          sourceDefinitionId: 470,
         }),
       ],
     });
@@ -359,7 +361,7 @@ describe("runner damage threat model v2 red evidence", () => {
           damageType: "net",
           damageAmount: 1,
           damageResolved: true,
-          sourceDefinitionId: "onr_v1_258_neural-blade",
+          sourceDefinitionId: 470,
         }),
       ],
     });
@@ -426,12 +428,12 @@ function input(params: {
       activeSide: "runner",
       phase: "action",
       own: {
-        identity: card("runner-identity", "identity", "runner"),
+        identity: card(syntheticCardDefinitionId("runner-identity"), "identity", "runner"),
         credits: params.credits ?? 5,
         clicks: params.clicks ?? 4,
         agendaPoints: 0,
         gripOrHq: Array.from({ length: params.handCount }, (_, index) =>
-          card(`runner-hand-${index}`, "event", "runner"),
+          card(syntheticCardDefinitionId(`runner-hand-${index}`), "event", "runner"),
         ),
         stackOrRdCount: 20,
         heapOrArchives: [],
@@ -441,7 +443,7 @@ function input(params: {
         tags: 0,
       },
       opponent: {
-        identity: card("corp-identity", "identity", "corp"),
+        identity: card(syntheticCardDefinitionId("corp-identity"), "identity", "corp"),
         credits: 5,
         clicks: 3,
         agendaPoints: 0,
@@ -474,35 +476,35 @@ function input(params: {
 }
 
 function event(
-  eventId: string,
+  label: string,
   stateVersionAfter: number,
   turnSerial: number,
-  publicPayload: Record<string, unknown>,
+  publicPayload: PublicGameEvent["publicPayload"],
 ): PublicGameEvent {
   return {
-    eventId,
-    type: String(publicPayload.actionType ?? "game_event"),
+    eventId: stateVersionAfter + 1,
+    type: publicPayload.actionType ?? "game_event",
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
     turnSerial,
-    stateHashAfter: `fnv1a:${eventId}`,
+    stateHashAfter: `fnv1a:${label}`,
     visibilityClass: "public",
     publicPayload,
-  } as PublicGameEvent;
+  };
 }
 
 function card(
-  definitionId: string,
+  definitionId: CardDefinitionId,
   type: NonNullable<VisibleCard["type"]>,
   owner: "corp" | "runner",
 ): VisibleCard {
   return {
     instanceId: `${definitionId}-instance`,
     definitionId,
-    title: definitionId,
+    title: String(definitionId),
     owner,
     controller: owner,
     type,
     known: true,
-  } as VisibleCard;
+  };
 }

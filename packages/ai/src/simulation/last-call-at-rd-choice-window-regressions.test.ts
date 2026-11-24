@@ -1,5 +1,5 @@
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
-import type { DeckDefinition } from "@netgrid/shared";
+import type { DeckDefinition, GameEvent, PlayerAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
@@ -9,9 +9,12 @@ import {
   createGameAfterSetup,
   applyAction,
   getLegalActions,
+  replayEvents,
+  hashGameState,
 } from "@netgrid/engine";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
+import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
 const RUNNER_DECK_ID = "standard_runner_last_call_at_rd";
@@ -44,7 +47,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       expect(source).toMatchObject({ side: "runner", fallbackUsed: false });
       expect(choice).toMatchObject({
         side: "runner",
-        selectedActionId: "runner.resolve_choice",
+        selectedActionId: "rn",
         actionType: "resolve_choice",
         planKind: source!.planKind,
         fallbackUsed: false,
@@ -77,11 +80,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     state.runner.clicks = 4;
     state.runner.credits = 10;
     for (const agenda of Object.values(state.cardInstances)
-      .filter(
-        (c) =>
-          c.definitionId === "onr_v1_209_political-coup" ||
-          c.definitionId === "onr_v1_193_corporate-coup",
-      )
+      .filter((c) => c.definitionId === 421 || c.definitionId === 405)
       .slice(0, 3)) {
       state.corp.hq = state.corp.hq.filter((id) => id !== agenda.instanceId);
       state.corp.rd = state.corp.rd.filter((id) => id !== agenda.instanceId);
@@ -92,10 +91,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
         rezzed: false,
       });
     }
-    for (const id of [
-      "onr_v1_211_polymer-breakthrough",
-      "onr_v1_219_superior-net-barriers",
-    ]) {
+    for (const id of [423, 431]) {
       const agenda = Object.values(state.cardInstances).find(
         (c) => c.definitionId === id,
       )!;
@@ -115,10 +111,10 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     // Two independently mandatory self-trash triggers create a real Engine
     // ordering choice. An installed ETR makes the event's bypass material.
     const conferences = Object.values(state.cardInstances)
-      .filter((c) => c.definitionId === "onr_v1_184_top-runners-conference")
+      .filter((c) => c.definitionId === 396)
       .slice(0, 2);
     const inside = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_v1_094_inside-job",
+      (c) => c.definitionId === 306,
     )!;
     for (const c of [...conferences, inside]) {
       state.runner.grip = state.runner.grip.filter((id) => id !== c.instanceId);
@@ -141,7 +137,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       });
     }
     const blocker = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_v1_223_banpei",
+      (c) => c.definitionId === 435,
     )!;
     state.corp.hq = state.corp.hq.filter((id) => id !== blocker.instanceId);
     state.corp.rd = state.corp.rd.filter((id) => id !== blocker.instanceId);
@@ -152,7 +148,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       rezzed: true,
     });
     const rdBlocker = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_v1_244_filter",
+      (c) => c.definitionId === 456,
     )!;
     state.corp.hq = state.corp.hq.filter((id) => id !== rdBlocker.instanceId);
     state.corp.rd = state.corp.rd.filter((id) => id !== rdBlocker.instanceId);
@@ -165,7 +161,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       rezzed: true,
     });
     const knownAgenda = Object.values(state.cardInstances).find(
-      (c) => c.definitionId === "onr_v1_200_encryption-breakthrough",
+      (c) => c.definitionId === 412,
     )!;
     state.corp.hq = state.corp.hq.filter((id) => id !== knownAgenda.instanceId);
     state.corp.rd = state.corp.rd.filter((id) => id !== knownAgenda.instanceId);
@@ -179,7 +175,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       rezzed: false,
     });
     state.eventLog.push({
-      eventId: "fixture-known-hq-agenda",
+      eventId: state.stateVersion + 1,
       type: "access_card",
       turnSerial: 2,
       stateVersionBefore: state.stateVersion - 1,
@@ -234,7 +230,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       /^runner_run_start\.order:/,
     );
     const choice = chooseAiAction(choiceInput);
-    expect(choice.actionId).toBe("runner.resolve_choice");
+    expect(choice.actionId).toBe("rn");
     expect(choice.fallbackUsed).toBe(false);
     expect(choice.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
       source.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
@@ -265,8 +261,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
             action.type === "play_event" &&
             snapshot.input.playerView.own.gripOrHq.some(
               (card) =>
-                card.instanceId === action.source &&
-                card.definitionId === "onr_v1_095_jack-n-joe",
+                card.instanceId === action.source && card.definitionId === 307,
             ),
         ),
     });
@@ -275,113 +270,165 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     expect(captures).toEqual([]);
   }, 240_000);
 
-  it("keeps consecutive Fast Advance Seed 9 run-start ordering bound to its originating run route", () => {
-    const captures: AiSimulationDecisionCheckpointCapture[] = [];
-    const summary = simulateStandardGame({
-      seed: "last-call-panel-fast-advance-batch-01-game-09",
-      corpDeckId: "standard_corp_universal_fast_advance",
-      captures,
-      capturePredicate: () => true,
+  it("keeps consecutive run-start cleanup effects bound to their originating run route", () => {
+    let state = createGameAfterSetup({
+      seed: "last-call-authored-run-start-order",
+      runnerDeck: deckDefinition(standardDeck(RUNNER_DECK_ID)),
+      corpDeck: deckDefinition(standardDeck("standard_corp_mph465dv")),
     });
-
-    assertRegularReplay(summary);
-    const choiceCapture = captures.find((entry) =>
-      entry.input.playerView.pendingChoice?.source.startsWith(
-        "runner_run_start.order:",
-      ),
-    );
-    const sourceCapture = captures.find(
-      (entry) =>
-        entry.input.playerView.stateVersion ===
-        choiceCapture!.state.stateVersion - 1,
-    );
-    expect(sourceCapture).toBeDefined();
-    expect(choiceCapture).toBeDefined();
-    assertSemanticObjectSideSafe(sourceCapture?.input, "runStartSourceInput");
-    assertSemanticObjectSideSafe(choiceCapture?.input, "runStartChoiceInput");
-
-    const source = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === sourceCapture!.state.stateVersion,
-    );
-    const choice = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === choiceCapture!.state.stateVersion,
-    );
-    const sourceExecutor = source?.evidence.find((entry) =>
-      entry.startsWith("plan_first_executor:"),
-    );
-    const sourceRoot = source?.evidence.find((entry) =>
-      entry.startsWith("plan_first_root:"),
-    );
-    const sourceAction = sourceCapture!.input.legalActions.find(
-      (action) => action.actionId === source?.selectedActionId,
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.turnSerial = 4;
+    state.stateVersion = 10;
+    state.runner.clicks = 4;
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerCredits(10)
+      .withRunnerGripSize(0)
+      .withCorpRemoteRoot("r1", 412, 4, { faceup: true });
+    for (const definitionId of [423, 431]) {
+      const agenda = Object.values(state.cardInstances).find(
+        (card) => card.definitionId === definitionId,
+      )!;
+      state.corp.hq = state.corp.hq.filter((id) => id !== agenda.instanceId);
+      state.corp.rd = state.corp.rd.filter((id) => id !== agenda.instanceId);
+      state.runner.scoreArea.push(agenda.instanceId);
+      Object.assign(agenda, {
+        zone: { side: "runner", zone: "score" },
+        faceup: true,
+      });
+    }
+    const conferences = Object.values(state.cardInstances)
+      .filter((card) => card.definitionId === 396)
+      .slice(0, 2);
+    expect(conferences).toHaveLength(2);
+    for (const conference of conferences) {
+      state.runner.stack = state.runner.stack.filter(
+        (id) => id !== conference.instanceId,
+      );
+      state.runner.rig.resources.push(conference.instanceId);
+      Object.assign(conference, {
+        zone: { side: "runner", zone: "rig" },
+        faceup: true,
+        rezzed: true,
+      });
+    }
+    const original = structuredClone(state);
+    const options = {
+      ownDeckSnapshot: {
+        deckSnapshotId: "last-call-authored-run-start-order",
+        side: "runner" as const,
+        cards: standardDeck(RUNNER_DECK_ID).cards,
+      },
+    };
+    resetResidentPlanPortfolioMemory();
+    const sourceInput = buildAiDecisionInput(state, "runner", options);
+    assertSemanticObjectSideSafe(sourceInput, "runStartSourceInput");
+    const source = chooseAiAction(sourceInput);
+    const sourceAction = sourceInput.legalActions.find(
+      (action) => action.actionId === source.actionId,
     )!;
-    expect(sourceAction.type).toBe("start_run");
-    const sourceServer = String(sourceAction.payload!.serverId);
-    const remote = sourceServer.startsWith("remote_");
-    const sourceModule = remote
-      ? "runner.contest_remote"
-      : "runner.pressure_central";
-    const root = `plan:${sourceModule}:${encodeURIComponent(`${remote ? "remote" : "central"}:${sourceServer}`)}`;
-
-    expect(source).toMatchObject({
-      side: "runner",
-      selectedActionId: sourceAction.actionId,
-      actionType: "start_run",
-      planKind: sourceModule,
-      fallbackUsed: false,
+    expect(sourceAction).toMatchObject({
+      type: "start_run",
+      payload: { serverId: "r1" },
     });
-    expect(sourceRoot).toBe(`plan_first_root:${root}`);
-    expect(sourceExecutor).toBe(`plan_first_executor:${root}`);
-    expect(source?.evidence).toContain(
-      `plan_step_id:${root}:${remote ? "contest" : `pressure:${sourceServer}`}`,
-    );
-    expect(choiceCapture?.input.playerView.pendingChoice).toMatchObject({
-      choiceId: `runner_run_start_order_${choiceCapture!.state.stateVersion}`,
-      side: "runner",
-      source: `runner_run_start.order:run_${choiceCapture!.state.stateVersion}`,
-      kind: "select_cards",
-      minSelections: 1,
-      maxSelections: 1,
-      stateVersion: choiceCapture!.state.stateVersion,
-      visibility: "hidden_info_barrier",
+    expect(source.fallbackUsed).toBe(false);
+    const root = "p1p4xezjcxov79rno40lq3f7rv";
+    expect(source.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: root,
+      leafExecutorInstanceId: root,
     });
-    const conferences = sourceCapture!.input.playerView.own.rig!.filter(
-      (card) => card.definitionId === "onr_v1_184_top-runners-conference",
-    );
-    expect(conferences.length).toBeGreaterThanOrEqual(2);
+    const started = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: sourceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    expect(started.ok).toBe(true);
+    if (!started.ok) throw Error(started.error.message);
+    state = started.state;
+    let resolutions = 0;
+    for (
+      let index = 0;
+      index < conferences.length &&
+      state.pendingChoice?.source.startsWith("runner_run_start.order:");
+      index += 1
+    ) {
+      const input = buildAiDecisionInput(state, "runner", options);
+      assertSemanticObjectSideSafe(input, "runStartChoiceInput");
+      expect(input.playerView.pendingChoice).toMatchObject({
+        choiceId: "runner_run_start_order_" + state.stateVersion,
+        side: "runner",
+        source: "runner_run_start.order:" + state.stateVersion,
+        kind: "select_cards",
+        minSelections: 1,
+        maxSelections: 1,
+        stateVersion: state.stateVersion,
+        visibility: "hidden_info_barrier",
+      });
+      if (resolutions === 0) {
+        expect(
+          input.playerView.pendingChoice?.options.map((option) => option.value),
+        ).toEqual(
+          expect.arrayContaining(
+            conferences.map((card) => "card_implementation:" + card.instanceId),
+          ),
+        );
+      }
+      const choice = chooseAiAction(input);
+      expect(choice).toMatchObject({
+        actionId: "rn",
+        fallbackUsed: false,
+      });
+      expect(choice.decisionDebug?.planFirstDecision).toMatchObject({
+        rootPlanInstanceId: root,
+        leafExecutorInstanceId: root,
+      });
+      expect(choice.evidence).toContain(
+        "plan_scheduler:window:plan_bound_runner_run_start_order_choice:none",
+      );
+      const resolved = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: choice.actionId!,
+        clientKnownStateVersion: state.stateVersion,
+        selectedChoices: choice.selectedChoices!,
+      });
+      expect(resolved.ok).toBe(true);
+      if (!resolved.ok) throw Error(resolved.error.message);
+      expect(resolved.state.stateVersion).toBe(state.stateVersion + 1);
+      state = resolved.state;
+      resolutions += 1;
+    }
+    expect(resolutions).toBeGreaterThan(0);
     expect(
-      choiceCapture?.input.playerView.pendingChoice?.options.map(
-        (option) => option.value,
-      ),
-    ).toEqual(
-      expect.arrayContaining(
-        conferences.map((card) => `card_implementation:${card.instanceId}`),
-      ),
+      state.pendingChoice?.source.startsWith("runner_run_start.order:"),
+    ).not.toBe(true);
+    expect(state.run?.attackedServerId).toBe("r1");
+    for (const conference of conferences)
+      expect(state.runner.heap).toContain(conference.instanceId);
+    const replay = replayEvents(
+      original,
+      state.eventLog.slice(original.eventLog.length),
     );
-    expect(choice).toMatchObject({
-      side: "runner",
-      selectedActionId: "runner.resolve_choice",
-      actionType: "resolve_choice",
-      planKind: sourceModule,
-      fallbackUsed: false,
-    });
-    expect(sourceExecutor).toBeDefined();
-    expect(sourceRoot).toBeDefined();
-    expect(choice?.evidence).toContain(sourceExecutor);
-    expect(choice?.evidence).toContain(sourceRoot);
-    expect(choice?.evidence).toContain(
-      "plan_scheduler:window:plan_bound_runner_run_start_order_choice:none",
-    );
-  }, 240_000);
+    expect(replay.errors).toEqual([]);
+    expect(hashGameState(replay.state)).toBe(hashGameState(state));
+  });
 
   it("replays the frozen singleton variant deterministically and resolves its actual start windows legally", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
+    const appliedChoiceEvents = new Map<number, GameEvent>();
     const first = simulateStandardGame({
       seed: "last-call-panel-fast-advance-batch-01-game-01",
       corpDeckId: "standard_corp_universal_fast_advance",
       runnerCards: singletonKeyCardRegressionCards(),
       runnerDeckHash: "standard-deck:a71c0dcc",
       captures,
+      onCapture: (snapshot) => {
+        const event = snapshot.state.eventLog.at(-1);
+        if (event && captures.some((capture) => capture.state.stateVersion === event.stateVersionBefore))
+          appliedChoiceEvents.set(event.stateVersionBefore, event);
+      },
       capturePredicate: (snapshot) =>
         snapshot.input.playerView.pendingChoice?.source.startsWith(
           "runner_start.order:",
@@ -412,11 +459,18 @@ describe("Last Call at R&D exact choice-window regressions", () => {
         actionType: "resolve_choice",
         fallbackUsed: false,
       });
-      expect(
-        capture.input.legalActions.some(
-          (action) => action.actionId === resolution!.selectedActionId,
-        ),
-      ).toBe(true);
+      const event = appliedChoiceEvents.get(capture.state.stateVersion);
+      expect(event).toBeDefined();
+      const recordedAction = event?.privatePayload?.runner?.action as PlayerAction | undefined;
+      expect(recordedAction).toMatchObject({
+        matchId: capture.state.matchId, side: "runner",
+        clientKnownStateVersion: capture.state.stateVersion,
+      });
+      expect(capture.input.legalActions.some((action) => action.actionId === recordedAction!.actionId)).toBe(true);
+      const applied = applyAction(capture.state, recordedAction!);
+      expect(applied.ok).toBe(true);
+      if (!applied.ok) throw new Error(applied.error.message);
+      expect(applied.stateHash).toBe(event!.stateHashAfter);
     }
   }, 240_000);
 
@@ -424,13 +478,14 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({
       seed: "last-call-panel-siren-batch-01-game-06",
+      maxActions: 720,
       corpDeckId: "standard_corp_siren_fortress",
       captures,
       capturePredicate: (snapshot) =>
         snapshot.input.legalActions.some(
           (action) =>
             action.type === "play_operation" &&
-            String(action.source).includes("onr_v1_296_off-site-backups"),
+            String(action.source).includes("508"),
         ) ||
         snapshot.input.playerView.pendingChoice?.source.startsWith(
           "v1922.corp_archives_to_hq:",
@@ -446,7 +501,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       actionSequence.some(
         (entry) =>
           entry.actionType === "play_operation" &&
-          entry.selectedActionId?.includes("onr_v1_296_off-site-backups"),
+          entry.selectedActionId?.includes("508"),
       ),
     ).toBe(false);
     expect(
@@ -455,7 +510,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
           .find(
             (entry) => entry.stateVersionBefore === capture.state.stateVersion,
           )
-          ?.selectedActionId?.includes("onr_v1_296_off-site-backups"),
+          ?.selectedActionId?.includes("508"),
       ),
     ).toBeUndefined();
     expect(
@@ -476,8 +531,8 @@ type StandardDeck = {
   version: string;
   name: string;
   side: "runner" | "corp";
-  identityCardId: string;
-  cards: Array<{ cardId: string; quantity: number }>;
+  identityCardId: number;
+  cards: Array<{ cardId: number; quantity: number }>;
   cardPoolSnapshotId: string;
   cardPoolVersion: string;
   formatProfileId: string;
@@ -541,10 +596,10 @@ function simulateStandardGame(params: {
 
 function singletonKeyCardRegressionCards(): StandardDeck["cards"] {
   const quantities = new Map([
-    ["onr_v1_076_all-nighter", 2],
-    ["onr_v1_086_forged-activation-orders", 2],
-    ["onr_v1_123_bodyweight-data-creche", 1],
-    ["onr_v1_179_silicon-saloon-franchise", 1],
+    [288, 2],
+    [298, 2],
+    [335, 1],
+    [391, 1],
   ]);
   return standardDeck(RUNNER_DECK_ID).cards.map((card) => ({
     ...card,
@@ -587,9 +642,9 @@ function deckMetadata(deck: StandardDeck, deckHash: string) {
 }
 
 function assertRegularReplay(summary: ReturnType<typeof simulateAiGame>): void {
-  expect(summary.terminationKind).toBe("game_result");
-  expect(summary.errors).toEqual([]);
   expect(summary.runtimeFailures).toEqual([]);
+  expect(summary.errors).toEqual([]);
+  expect(summary.terminationKind).toBe("game_result");
   expect(summary.metrics.illegalActions).toBe(0);
   expect(summary.replayOk).toBe(true);
   expect(summary.replayErrors).toEqual([]);

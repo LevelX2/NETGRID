@@ -2,6 +2,7 @@ import type {
   AiDecisionInput,
   CorpRestrictedCreditBankQuote,
 } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 
 export type CorpRestrictedRezPreparation = {
@@ -24,6 +25,7 @@ export type CorpRestrictedRezPreparation = {
 export function currentCorpRestrictedCreditBanks(
   input: AiDecisionInput,
 ): CorpRestrictedCreditBankQuote[] {
+  if (input.side !== "corp") return [];
   return input.playerView.servers.flatMap((server) =>
     server.root.flatMap((card) => {
       const quote = card.restrictedCreditBankQuote;
@@ -50,7 +52,10 @@ export function corpRestrictedRezPreparationCandidates(
   },
 ): CorpRestrictedRezPreparation[] {
   if (
+    input.side !== "corp" ||
     input.playerView.timingPoint !== "corp_action.main" ||
+    !Number.isSafeInteger(target.requiredRezCredits) ||
+    target.requiredRezCredits < 0 ||
     input.playerView.run
   )
     return [];
@@ -70,7 +75,7 @@ export function corpRestrictedRezPreparationCandidates(
       if (
         action?.type !== "advance_card" ||
         action.source !== bank.sourceCardInstanceId ||
-        action.expiresAtStateVersion !== input.playerView.stateVersion ||
+        !actionMatchesCurrentDecision(input, action) ||
         action.targetRequirements.length > 0 ||
         (action.choiceRequirements?.length ?? 0) > 0 ||
         candidate.costProfile.costKnownStatus !== "known" ||
@@ -105,7 +110,7 @@ export function corpRestrictedRezPreparationCandidates(
         );
         return (
           head?.type === "gain_credit" &&
-          head.expiresAtStateVersion === input.playerView.stateVersion &&
+          actionMatchesCurrentDecision(input, head) &&
           entry.economyProjection?.reliability === "guaranteed" &&
           entry.economyProjection.netLiquidCreditGain === 1 &&
           entry.costProfile.clickCost === 1 &&
@@ -167,7 +172,7 @@ export function corpRestrictedRezPreparationCandidates(
             !candidate ||
             action.type !== setupRoute.headKind ||
             action.source !== card.instanceId ||
-            action.expiresAtStateVersion !== input.playerView.stateVersion ||
+            !actionMatchesCurrentDecision(input, action) ||
             action.targetRequirements.length > 0 ||
             (action.choiceRequirements?.length ?? 0) > 0 ||
             candidate.costProfile.costKnownStatus !== "known" ||
@@ -178,7 +183,11 @@ export function corpRestrictedRezPreparationCandidates(
           const clickCost = candidate.costProfile.clickCost;
           if (
             typeof creditCost !== "number" ||
+            !Number.isSafeInteger(creditCost) ||
+            creditCost < 0 ||
             typeof clickCost !== "number" ||
+            !Number.isSafeInteger(clickCost) ||
+            clickCost < 0 ||
             setupRoute.setupCredits > bank.generalCreditsAvailable ||
             setupRoute.setupClicks > input.playerView.own.clicks
           )

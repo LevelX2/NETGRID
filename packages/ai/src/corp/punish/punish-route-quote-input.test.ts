@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   DEMO_DECKS,
@@ -29,20 +31,20 @@ import {
   withDecisionLocalCorpPunishRouteQuotes,
 } from "./punish-route-quote-input";
 
-const DATA_SIFTERS = "onr_proteus_048_data-sifters";
-const AUDIT = "onr_v1_283_audit-of-call-records";
-const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";
-const MANHUNT = "onr_proteus_050_manhunt";
-const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
-const TROJAN_HORSE = "onr_v1_306_trojan-horse";
-const PUNITIVE = "onr_v1_301_punitive-counterstrike";
-const SCORCHED = "onr_v1_302_scorched-earth";
+const DATA_SIFTERS = 106;
+const AUDIT = 495;
+const CHANCE_OBSERVATION = 496;
+const MANHUNT = 108;
+const CLOSED_ACCOUNTS = 497;
+const TROJAN_HORSE = 518;
+const PUNITIVE = 513;
+const SCORCHED = 514;
 
 describe("decision-local Corp punish route quote input", () => {
   it("discovers a scored activated trace source while excluding the same agenda still in HQ", () => {
     const input = punishInput({ runnerTags: 0, runnerHandCount: 4 });
     const agenda = {
-      ...operation("netwatch", "onr_v1_207_netwatch-operations-office"),
+      ...operation("netwatch", 419),
       type: "agenda" as const,
     };
     input.playerView.own.gripOrHq = [agenda, operation("scorched", SCORCHED)];
@@ -60,8 +62,7 @@ describe("decision-local Corp punish route quote input", () => {
             expect.objectContaining({
               kind: "trace_tag",
               sourceCardInstanceId: "netwatch",
-              sourceCapabilityId:
-                "onr_v1_207_netwatch-operations-office:abilities_activated_corp_main_trace",
+              sourceCapabilityId: canonicalCapabilityId(419, capabilityKey("abilities_activated_corp_main_trace")),
             }),
             expect.objectContaining({ kind: "meat_damage" }),
           ],
@@ -195,15 +196,13 @@ describe("decision-local Corp punish route quote input", () => {
               kind: "tag",
               sourceCardInstanceId: "data-sifters",
               sourceCapabilityBindingKind: "card_spec_capability_key",
-              sourceCapabilityId:
-                "onr_proteus_048_data-sifters:on_play_tag_after_runner_trashed_node",
+              sourceCapabilityId: canonicalCapabilityId(106, capabilityKey("on_play_tag_after_runner_trashed_node")),
             }),
             expect.objectContaining({
               kind: "meat_damage",
               sourceCardInstanceId: "scorched",
               sourceCapabilityBindingKind: "card_spec_capability_key",
-              sourceCapabilityId:
-                "onr_v1_302_scorched-earth:abilities_on_play_damage",
+              sourceCapabilityId: canonicalCapabilityId(514, capabilityKey("abilities_on_play_damage")),
             }),
           ],
         }),
@@ -252,8 +251,7 @@ describe("decision-local Corp punish route quote input", () => {
             kind: "trace_tag",
             sourceCardInstanceId: "chance",
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId:
-              "onr_v1_284_chance-observation:abilities_on_play_trace",
+            sourceCapabilityId: canonicalCapabilityId(496, capabilityKey("abilities_on_play_trace")),
           }),
           expect.objectContaining({
             kind: "meat_damage",
@@ -286,8 +284,7 @@ describe("decision-local Corp punish route quote input", () => {
             kind: "trace_tag",
             sourceCardInstanceId: "manhunt",
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId:
-              "onr_proteus_050_manhunt:on_play_trace_six_tags_by_margin",
+            sourceCapabilityId: canonicalCapabilityId(108, capabilityKey("on_play_trace_six_tags_by_margin")),
           }),
           expect.objectContaining({
             kind: "meat_damage",
@@ -321,7 +318,7 @@ describe("decision-local Corp punish route quote input", () => {
       operation("scorched-copy", SCORCHED),
       operation("punitive-copy", PUNITIVE),
       operation("closed-accounts", CLOSED_ACCOUNTS),
-      operation("power-grid", "onr_v1_299_power-grid-overload"),
+      operation("power-grid", 511),
     );
     const first = buildBoundedCorpPunishRouteRequests(input);
     expect(first).toHaveLength(8);
@@ -376,8 +373,7 @@ describe("decision-local Corp punish route quote input", () => {
             kind: "other_punish",
             sourceCardInstanceId: "closed-accounts",
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId:
-              "onr_v1_285_closed-accounts:abilities_on_play_lose_credits",
+            sourceCapabilityId: canonicalCapabilityId(497, capabilityKey("abilities_on_play_lose_credits")),
           }),
         ],
       }),
@@ -447,8 +443,7 @@ describe("decision-local Corp punish route quote input", () => {
             kind: "tag",
             sourceCardInstanceId: "trojan",
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId:
-              "onr_v1_306_trojan-horse:corp_utility_encounter_tag",
+            sourceCapabilityId: canonicalCapabilityId(518, capabilityKey("corp_utility_encounter_tag")),
             currentLegalActionId: "play-trojan-horse",
           }),
         ],
@@ -478,7 +473,7 @@ describe("decision-local Corp punish route quote input", () => {
     input.playerView.own.gripOrHq = [
       hiddenCard("hidden-data-sifters", DATA_SIFTERS),
       operation("scorched", SCORCHED),
-      operation("unknown-punish", "test-unknown-damage"),
+      operation("unknown-punish", syntheticCardDefinitionId("test-unknown-damage")),
     ];
 
     expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([]);
@@ -513,9 +508,15 @@ describe("decision-local Corp punish route quote input", () => {
     ).toBe(true);
   });
 
-  it.each(["stale", "malformed", "thrown", "rejected"] as const)(
-    "fails closed a %s callback result without mutating the decision input",
-    (failure) => {
+  it.each([
+    ["stale", "response_binding_mismatch"],
+    ["malformed", "response_binding_mismatch"],
+    ["invalid_schema", "invalid_response_schema"],
+    ["thrown", "provider_threw"],
+    ["rejected", "request_rejected"],
+  ] as const)(
+    "diagnoses a %s callback result without mutating the decision input",
+    (failure, reason) => {
       const input = punishInput({ runnerTags: 1, runnerHandCount: 3 });
       const before = structuredClone(input);
       const callback = (
@@ -531,19 +532,34 @@ describe("decision-local Corp punish route quote input", () => {
         const result = completeQuote(input, request);
         if (!result.ok) return result;
         if (failure === "stale") result.quote.stateVersion += 1;
+        if (failure === "invalid_schema") result.quote.totalClicks = -1;
         if (failure === "malformed") {
           result.quote.requestEcho.routeId = "foreign-route";
         }
         return result;
       };
 
-      const quoted = withDecisionLocalCorpPunishRouteQuotes(input, callback);
-
-      expect(quoted).toBe(input);
+      expect(() => withDecisionLocalCorpPunishRouteQuotes(input, callback))
+        .toThrow(expect.objectContaining({
+          code: "engine_quote_contract_failed",
+          context: expect.objectContaining({
+            owner: "rules_contract",
+            stateVersion: input.playerView.stateVersion,
+            removalCondition: expect.stringContaining(`corp_punish_quote:${reason}`),
+          }),
+        }));
       expect(input).toEqual(before);
       expect(input.playerView.corpPunishRouteQuoteSet).toBeUndefined();
     },
   );
+
+  it("does not ask the Engine to quote a route outside Corp main", () => {
+    const input = punishInput({ runnerTags: 1, runnerHandCount: 3 });
+    input.playerView.timingPoint = "corp_draw.mandatory_draw";
+    const callback = vi.fn();
+    expect(withDecisionLocalCorpPunishRouteQuotes(input, callback)).toBe(input);
+    expect(callback).not.toHaveBeenCalled();
+  });
 
   it("leaves normal planning untouched without a callback or a complete visible route", () => {
     const missingCallback = punishInput({
@@ -650,7 +666,7 @@ function punishInput(params: {
         identity: {
           instanceId: "corp-identity",
           known: true,
-          definitionId: "corp-identity",
+          definitionId: syntheticCardDefinitionId("corp-identity"),
           title: "Corp identity",
           owner: "corp",
           controller: "corp",
@@ -670,7 +686,7 @@ function punishInput(params: {
         identity: {
           instanceId: "runner-identity",
           known: true,
-          definitionId: "runner-identity",
+          definitionId: syntheticCardDefinitionId("runner-identity"),
           title: "Runner identity",
           owner: "runner",
           controller: "runner",
@@ -702,19 +718,19 @@ function punishInput(params: {
   };
 }
 
-function operation(instanceId: string, definitionId: string): VisibleCard {
+function operation(instanceId: string, definitionId: number): VisibleCard {
   return {
     instanceId,
     known: true,
     definitionId,
-    title: definitionId,
+    title: String(definitionId),
     owner: "corp",
     controller: "corp",
     type: "operation",
   };
 }
 
-function hiddenCard(instanceId: string, definitionId: string): VisibleCard {
+function hiddenCard(instanceId: string, definitionId: number): VisibleCard {
   return {
     instanceId,
     known: false,

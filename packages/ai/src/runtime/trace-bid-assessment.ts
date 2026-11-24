@@ -18,6 +18,7 @@ import { reconstructBeliefState } from "../belief-state";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import { selectableChoiceOptions } from "./choice-option";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -52,9 +53,39 @@ export function assessTraceBidCandidates(
   ) {
     return undefined;
   }
-  const allOptions = choice.options
+  const { stateVersion, timingPoint } = input.playerView;
+  const requirement = input.legalActions.find(
+    (action) =>
+      action.type === "resolve_choice" &&
+      action.side === input.side &&
+      action.expiresAtStateVersion === stateVersion &&
+      action.timingPoint === timingPoint &&
+      action.choiceRequirements?.length === 1 &&
+      action.choiceRequirements[0]?.choiceId === choice.choiceId,
+  )?.choiceRequirements?.[0];
+  if (
+    choice.side !== input.side ||
+    choice.stateVersion !== stateVersion ||
+    !requirement ||
+    requirement.minSelections !== 1 ||
+    requirement.maxSelections !== 1
+  ) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion,
+      timingPoint,
+      legalActionTypes: input.legalActions.map(({ type }) => type),
+      owner: "rules_contract",
+      removalCondition:
+        "A blind Trace must offer one current Engine choice for its bidding side.",
+    });
+  }
+  const allowedOptions = new Set(requirement.optionIds);
+  const allOptions = selectableChoiceOptions(choice.options)
     .flatMap((option) =>
-      Number.isSafeInteger(option.value) && Number(option.value) >= 0
+      allowedOptions.has(option.id) &&
+      Number.isSafeInteger(option.value) &&
+      Number(option.value) >= 0
         ? [
             {
               optionId: option.id,
@@ -68,7 +99,17 @@ export function assessTraceBidCandidates(
       (left, right) =>
         left.bid - right.bid || left.optionId.localeCompare(right.optionId),
     );
-  if (allOptions.length === 0) return undefined;
+  if (allOptions.length === 0) {
+    throw new PlanResolutionFailure("missing_action_semantics", {
+      side: input.side,
+      stateVersion,
+      timingPoint,
+      legalActionTypes: input.legalActions.map(({ type }) => type),
+      owner: "rules_contract",
+      removalCondition:
+        "The bid assessment requires selectable nonnegative options bound to the current Trace LegalAction.",
+    });
+  }
   const fixedAutomaticSuccess =
     trace.bidEffect === "automatic_success_fixed_effect";
   const effect = visibleTraceSuccessEffect(input, traceContext);
@@ -103,17 +144,8 @@ export function assessTraceBidCandidates(
   const tagPunishFollowup = effectCreatesTag(effect)
     ? knownTagPunishFollowup(input)
     : { payoffKnown: false, lethalDamage: 0 };
-  const outcomeValue = traceOutcomeValue(
-    input,
-    traceContext,
-    tagPunishFollowup.payoffKnown,
-  );
-  const stakes = classifyStakes(
-    input,
-    outcomeValue,
-    traceContext,
-    tagPunishFollowup,
-  );
+  const outcomeValue = traceOutcomeValue(effect, tagPunishFollowup.payoffKnown);
+  const stakes = classifyStakes(input, outcomeValue, effect, tagPunishFollowup);
   const behavioralBias = behavioralBiasFor(stakes, outcomeValue);
   const reserveTarget = reserveTargetFor(input, stakes);
   const maxBid = options.at(-1)!.bid;
@@ -335,11 +367,9 @@ function runnerPreventionProbability(input: {
 }
 
 function traceOutcomeValue(
-  input: AiDecisionInput,
-  traceContext: LatestTraceContext,
+  effect: TraceSuccessEffect | undefined,
   tagPunishFollowupKnown: boolean,
 ): number {
-  const effect = visibleTraceSuccessEffect(input, traceContext);
   if (!effect) return 3;
   const baseValue = (() => {
     switch (effect.type) {
@@ -498,7 +528,7 @@ function knownTagPunishFollowup(
 }
 
 function visibleTagKillStrategyIsConfirmed(
-  knownDefinitionIds: ReadonlySet<string>,
+  knownDefinitionIds: ReadonlySet<number>,
 ): boolean {
   return [...knownDefinitionIds].some((definitionId) => {
     const hint = AI_HINTS_BY_CARD.get(definitionId);
@@ -527,7 +557,7 @@ function credibleLethalTagPunishProfile(input: {
       dangerousCorpBidCapacity: number;
     }
   | undefined {
-  if (input.runnerGrip <= 0 || input.corpClicks <= 0) return undefined;
+  if (input.corpClicks <= 0) return undefined;
   const candidates = [...AI_HINTS_BY_CARD.values()].flatMap((hint) => {
     if (
       hint.side !== "corp" ||
@@ -568,7 +598,7 @@ function credibleLethalTagPunishProfile(input: {
       }))
       .filter(
         (profile) =>
-          profile.damage >= input.runnerGrip &&
+          profile.damage > input.runnerGrip &&
           profile.creditCost <= input.corpCredits,
       )
       .map((profile) => {
@@ -599,10 +629,9 @@ function credibleLethalTagPunishProfile(input: {
 }
 
 function knownLethalTagPunishProfile(
-  definitionId: string,
+  definitionId: number,
   runnerGrip: number,
 ): { damage: number; creditCost: number; clickCost: number } | undefined {
-  if (runnerGrip <= 0) return undefined;
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   if (!hint) return undefined;
   const damage = Math.max(
@@ -619,7 +648,7 @@ function knownLethalTagPunishProfile(
   const creditCost = exactNonNegativeInteger(hint.costProfile?.credits);
   const clickCost = exactNonNegativeInteger(hint.costProfile?.clicks);
   if (
-    damage < runnerGrip ||
+    damage <= runnerGrip ||
     creditCost === undefined ||
     clickCost === undefined ||
     clickCost <= 0
@@ -667,20 +696,25 @@ export function visibleTraceSuccessEffect(
   input: AiDecisionInput,
   traceContext: LatestTraceContext,
 ): TraceSuccessEffect | undefined {
+  const trace = input.playerView.trace;
   const encountered = input.playerView.run?.encounteredIce;
-  const effects =
-    encountered?.effectiveRunQuote?.subroutines.flatMap((subroutine) =>
-      subroutine.traceSuccessEffect ? [subroutine.traceSuccessEffect] : [],
-    ) ?? [];
-  if (effects.length === 1) return effects[0];
-  const sourceDefinitionId = traceContext.sourceDefinitionId;
+  if (
+    trace?.sourceSubroutineIndex !== undefined &&
+    encountered?.instanceId === trace.sourceCardInstanceId &&
+    encountered?.definitionId === trace.sourceDefinitionId
+  ) {
+    return encountered.effectiveRunQuote?.subroutines[
+      trace.sourceSubroutineIndex
+    ]?.traceSuccessEffect;
+  }
+  const sourceDefinitionId =
+    trace?.sourceDefinitionId ?? traceContext.sourceDefinitionId;
+  const traceLimit = trace?.printedTrace ?? traceContext.traceLimit;
   if (!sourceDefinitionId) return undefined;
   const quotes = traceSuccessEffectCardImplementationQuotesForDefinition(
     sourceDefinitionId,
   ).filter(
-    (quote) =>
-      traceContext.traceLimit === undefined ||
-      quote.traceLimit === traceContext.traceLimit,
+    (quote) => traceLimit === undefined || quote.traceLimit === traceLimit,
   );
   return quotes.length === 1 ? quotes[0]?.traceSuccessEffect : undefined;
 }
@@ -688,38 +722,35 @@ export function visibleTraceSuccessEffect(
 function classifyStakes(
   input: AiDecisionInput,
   outcomeValue: number,
-  traceContext: LatestTraceContext,
+  effect: TraceSuccessEffect | undefined,
   tagPunishFollowup: KnownTagPunishFollowup,
 ): TraceBidStakes {
-  const effect = visibleTraceSuccessEffect(input, traceContext);
   const runnerGrip =
     input.side === "runner"
       ? input.playerView.own.gripOrHq.length
       : input.playerView.opponent.handCount;
   if (
-    effect?.type === "net_damage" &&
-    effect.amount >= runnerGrip &&
-    runnerGrip > 0
-  ) {
+    directTraceDamageExceedsGrip(effect, runnerGrip) ||
+    (effectCreatesTag(effect) &&
+      tagPunishFollowup.lethalDamage > runnerGrip &&
+      tagPunishFollowup.dangerousCorpBidCapacity !== undefined)
+  )
     return "terminal";
-  }
-  if (
-    effectCreatesTag(effect) &&
-    tagPunishFollowup.lethalDamage >= runnerGrip &&
-    tagPunishFollowup.dangerousCorpBidCapacity !== undefined
-  ) {
-    return "terminal";
-  }
-  if (
-    effect?.type === "end_run_trash_hardware_and_unpreventable_meat_damage" &&
-    effect.amount >= runnerGrip &&
-    runnerGrip > 0
-  ) {
-    return "terminal";
-  }
   if (outcomeValue >= 11 || input.playerView.own.tags > 0) return "high";
   if (outcomeValue >= 5) return "normal";
   return "low";
+}
+
+function directTraceDamageExceedsGrip(
+  effect: TraceSuccessEffect | undefined,
+  grip: number,
+): boolean {
+  return (
+    (effect?.type === "net_damage" ||
+      effect?.type ===
+        "end_run_trash_hardware_and_unpreventable_meat_damage") &&
+    effect.amount > grip
+  );
 }
 
 function runnerMinimumSafeStrength(input: {
@@ -737,12 +768,7 @@ function runnerMinimumSafeStrength(input: {
       Math.floor(input.input.playerView.trace!.visibleOpponentBidCapacity),
     ),
   );
-  const directLethal =
-    (input.effect?.type === "net_damage" ||
-      input.effect?.type ===
-        "end_run_trash_hardware_and_unpreventable_meat_damage") &&
-    input.effect.amount >= runnerGrip &&
-    runnerGrip > 0;
+  const directLethal = directTraceDamageExceedsGrip(input.effect, runnerGrip);
   const dangerousCorpBidCapacity = directLethal
     ? visibleCorpCapacity
     : input.tagPunishFollowup.dangerousCorpBidCapacity;

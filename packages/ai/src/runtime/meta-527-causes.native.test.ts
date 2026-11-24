@@ -22,10 +22,14 @@ describe("meta 527 original Engine checkpoints", () => {
     const native = input.legalActions.find((a: { actionId: string }) => a.actionId === result.actionId);
     expect(native).toBeDefined();
     if (key === "region") {
-      expect(native.source).not.toBe("corp_onr_proteus_077_weapons-depot_1");
+      expect(native.source).not.toBe("cu5");
     } else {
       expect(["pump_breaker", "break_subroutine", "continue_run", "jack_out"]).toContain(native.type);
-      expect(result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toContain("runner.convert_run_window");
+      expect(
+        result.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+        )?.moduleId,
+      ).toBe("runner.convert_run_window");
     }
     const applied = applyAction(state, { matchId: state.matchId, side: input.side,
       actionId: result.actionId, clientKnownStateVersion: state.stateVersion,

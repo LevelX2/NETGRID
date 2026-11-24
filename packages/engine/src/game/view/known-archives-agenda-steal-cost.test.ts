@@ -14,15 +14,15 @@ function fixture() {
     corpDeck: {
       ...ORIGINALSET_DEFAULT_DECKS.corp,
       cards: [
-        { id: "onr_proteus_004_fetal-ai", quantity: 1 },
+        { id: 62, quantity: 1 },
         ...ORIGINALSET_DEFAULT_DECKS.corp.cards.filter(
-          (c) => c.id !== "onr_proteus_004_fetal-ai",
+          (c) => c.id !== 62,
         ),
       ],
     },
   });
-  const id = putCorpRootInRemote(state, "onr_proteus_004_fetal-ai");
-  const remote = state.corp.servers.find((server) => server.id === "remote_1")!;
+  const id = putCorpRootInRemote(state, 62);
+  const remote = state.corp.servers.find((server) => server.id === "r1")!;
   remote.root = remote.root.filter((card) => card !== id);
   state.corp.archives.push(id);
   state.cardInstances[id]!.zone = { side: "corp", zone: "archives" };

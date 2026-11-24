@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   type CardDefinitionId,
@@ -32,7 +33,7 @@ const RESOURCE_ID = "resource_1" as CardInstanceId;
 const ASSET_ID = "asset_1" as CardInstanceId;
 const AGENDA_ID = "agenda_1" as CardInstanceId;
 const ICE_ID = "ice_1" as CardInstanceId;
-const UNKNOWN_DEF_ID = "missing_definition" as CardDefinitionId;
+const UNKNOWN_DEF_ID = 358042617 as CardDefinitionId;
 
 function definitionIdFor(type: CardType): CardDefinitionId {
   const definition = Object.values(CARD_DEFINITIONS_BY_ID).find(
@@ -55,7 +56,7 @@ function card(
     zone: options.zone ?? {
       side: "corp",
       zone: "serverRoot",
-      serverId: "remote_1",
+      serverId: "r1",
     },
     faceup: options.faceup ?? false,
     rezzed: options.rezzed ?? false,
@@ -68,9 +69,9 @@ function card(
 function server(id: CorpServer["id"], root: CardInstanceId[] = []): CorpServer {
   return {
     id,
-    kind: id.startsWith("remote_") ? "remote" : id,
+    kind: isRemoteServerId(id) ? "remote" : id,
     label: id,
-    ice: id === "remote_1" ? [ICE_ID] : [],
+    ice: id === "r1" ? [ICE_ID] : [],
     root,
   } as CorpServer;
 }
@@ -114,7 +115,7 @@ function state(): GameState {
       rd: [],
       archives: [],
       scoreArea: [AGENDA_ID],
-      servers: [server("hq"), server("remote_1", [ASSET_ID, AGENDA_ID])],
+      servers: [server("hq"), server("r1", [ASSET_ID, AGENDA_ID])],
     },
     cardInstances: {
       [PROGRAM_ID]: card(PROGRAM_ID, programDefinitionId, {
@@ -144,12 +145,12 @@ function state(): GameState {
         rezzed: false,
       }),
       [ICE_ID]: card(ICE_ID, iceDefinitionId, {
-        zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+        zone: { side: "corp", zone: "serverIce", serverId: "r1" },
         rezzed: true,
       }),
     },
     run: {
-      attackedServerId: "remote_1",
+      attackedServerId: "r1",
       position: "approach_server",
       phase: "approach_server",
     },
@@ -198,7 +199,7 @@ describe("card-server-lookup", () => {
     );
 
     expect(() => definitionFor(current, "broken" as CardInstanceId)).toThrow(
-      "Unbekannte Karte: missing_definition",
+      "Unbekannte Karte: 358042617",
     );
     expect(() => mustServer(current, "missing")).toThrow(
       "Server fehlt: missing",
@@ -212,9 +213,9 @@ describe("card-server-lookup", () => {
     const current = state();
     const remote = current.corp.servers[1];
 
-    expect(serverById(current, "remote_1")).toBe(remote);
+    expect(serverById(current, "r1")).toBe(remote);
     expect(serverById(current, "missing")).toBeUndefined();
-    expect(mustServer(current, "remote_1")).toBe(remote);
+    expect(mustServer(current, "r1")).toBe(remote);
     expect(mustRun(current)).toBe(current.run);
   });
 
@@ -238,7 +239,7 @@ describe("card-server-lookup", () => {
   it("filters root cards and public corp identity visibility without mutating state", () => {
     const current = state();
     const before = JSON.stringify(current);
-    const remote = mustServer(current, "remote_1");
+    const remote = mustServer(current, "r1");
 
     expect(corpRootAssetIdsInServer(current, remote)).toEqual([ASSET_ID]);
     expect(corpRootMainCardIdsInServer(current, remote)).toEqual([
@@ -263,14 +264,14 @@ describe("card-server-lookup", () => {
     expect(
       rezzedRootCardIdOnServer(
         current,
-        "remote_1",
+        "r1",
         definitionFor(current, ASSET_ID).id,
       ),
     ).toBe(ASSET_ID);
     expect(
       unrezzedRootCardIdOnServer(
         current,
-        "remote_1",
+        "r1",
         definitionFor(current, AGENDA_ID).id,
       ),
     ).toBe(AGENDA_ID);

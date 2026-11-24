@@ -1,4 +1,3 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type LegalAction } from "@netgrid/shared";
 
 export function breakerIdForEncounterAction(
@@ -13,18 +12,12 @@ export function breakerIdForEncounterAction(
 
 export function pumpStrengthAmountForAction(
   action: LegalAction,
-  breakerDefinitionId: string,
 ): number | undefined {
-  if (typeof action.payload?.pumpStrengthAmount === "number") {
-    return Number.isFinite(action.payload.pumpStrengthAmount)
-      ? Math.max(0, action.payload.pumpStrengthAmount)
-      : undefined;
-  }
-  const pumpAbility = CARD_DEFINITIONS_BY_ID[
-    breakerDefinitionId
-  ]?.abilities?.find((ability) => ability.type === "pump_strength");
-  return typeof pumpAbility?.amount === "number" &&
-    Number.isFinite(pumpAbility.amount)
-    ? Math.max(0, pumpAbility.amount)
+  const gain = action.payload?.pumpStrengthAmount;
+  return action.type === "pump_breaker" &&
+    typeof gain === "number" &&
+    Number.isSafeInteger(gain) &&
+    gain > 0
+    ? gain
     : undefined;
 }

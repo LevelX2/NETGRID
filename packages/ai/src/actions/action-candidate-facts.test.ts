@@ -146,18 +146,18 @@ describe("shared action candidate facts", () => {
       },
     });
     candidate!.runProjectionSummary = {
-      serverId: "remote_1",
+      serverId: "r1",
       source: "run_action_projection",
       evidence: [],
     };
-    expect(candidateTargetIds(candidate!)).toEqual(["hq", "remote_1"]);
+    expect(candidateTargetIds(candidate!)).toEqual(["hq", "r1"]);
     candidate!.targetContext!.selectedTargets = [];
     expect(candidateTargetIds(candidate!)).toEqual([
       "rd",
       "archives",
-      "remote_1",
+      "r1",
     ]);
     delete candidate!.targetContext;
-    expect(candidateTargetIds(candidate!)).toEqual(["remote_1"]);
+    expect(candidateTargetIds(candidate!)).toEqual(["r1"]);
   });
 });

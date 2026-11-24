@@ -58,7 +58,7 @@ export function restorePlanPortfolioMemorySnapshot(
   snapshot: PlanPortfolioSnapshot | undefined,
 ): void {
   const key = planPortfolioMemoryKey(input);
-  if (!snapshot) {
+  if (!snapshot || input.playerView.winner !== null) {
     planPortfolioMemoryByKey.delete(key);
     return;
   }

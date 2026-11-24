@@ -21,28 +21,28 @@ const allowedCategories = new Set([
 const allowedCardIdUses = createAllowances([
   {
     relativePath: "runner/run-window/runner-targeted-bypass-plan.ts",
-    cardId: "onr_v1_111_social-engineering",
+    cardId: 323,
     category: "individual_plan_model",
     reason:
       "The definition ID identifies the source of a dedicated secret-choice plan.",
   },
   {
     relativePath: "runner/shell-traders/shell-traders-plan-signals.ts",
-    cardId: "onr_v1_176_the-shell-traders",
+    cardId: 388,
     category: "individual_plan_model",
     reason:
       "The definition ID binds signals to the dedicated delayed card plan.",
   },
   {
     relativePath: "plans/resident-plan-portfolio.ts",
-    cardId: "onr_v1_275_vacuum-link",
+    cardId: 487,
     category: "lifecycle_binding",
     reason:
       "The definition ID validates the persisted origin of the exact Vacuum Link encounter continuation.",
   },
   {
     relativePath: "runner/run-window/run-window-selected-origin.ts",
-    cardId: "onr_v1_275_vacuum-link",
+    cardId: 487,
     category: "lifecycle_binding",
     expectedCount: 3,
     reason:
@@ -50,7 +50,7 @@ const allowedCardIdUses = createAllowances([
   },
   {
     relativePath: "runner/run-window/run-window-vacuum-link-continuation.ts",
-    cardId: "onr_v1_275_vacuum-link",
+    cardId: 487,
     category: "lifecycle_binding",
     expectedCount: 3,
     reason:
@@ -58,7 +58,7 @@ const allowedCardIdUses = createAllowances([
   },
   {
     relativePath: "corp/defense/defense-discovery-support.ts",
-    cardId: "onr_v1_358_dr-dreff",
+    cardId: 570,
     category: "lifecycle_binding",
     expectedCount: 1,
     reason:
@@ -66,7 +66,7 @@ const allowedCardIdUses = createAllowances([
   },
   {
     relativePath: "corp/defense/defense-choice-continuation.ts",
-    cardId: "onr_v1_358_dr-dreff",
+    cardId: 570,
     category: "lifecycle_binding",
     expectedCount: 1,
     reason:
@@ -74,14 +74,14 @@ const allowedCardIdUses = createAllowances([
   },
   {
     relativePath: "runtime/selected-choices-for-decision.ts",
-    cardId: "onr_proteus_006_please-dont-choke-anyone",
+    cardId: 64,
     category: "lifecycle_binding",
     reason:
       "The definition ID validates the scored source of the already selected damage-replacement choice.",
   },
   {
     relativePath: "corp/score/score-choice-binding.ts",
-    cardId: "onr_classic_021_satellite-monitors",
+    cardId: 25,
     category: "lifecycle_binding",
     reason:
       "The definition ID validates the visible rezzed source of the already selected Satellite Monitors choice.",
@@ -280,6 +280,12 @@ function cardIdOccurrences(file) {
 }
 
 function cardIdText(node) {
+  if (ts.isNumericLiteral(node)) {
+    const id = Number(node.text);
+    return Number.isSafeInteger(id) && id > 0 && isCardIdPosition(node)
+      ? id
+      : undefined;
+  }
   if (
     ts.isStringLiteral(node) ||
     ts.isNoSubstitutionTemplateLiteral(node) ||
@@ -292,6 +298,58 @@ function cardIdText(node) {
     return cardIdPattern.test(candidate) ? candidate : undefined;
   }
   return undefined;
+}
+
+function isCardIdPosition(node) {
+  let expression = node;
+  while (
+    ts.isParenthesizedExpression(expression.parent) ||
+    ts.isAsExpression(expression.parent) ||
+    ts.isSatisfiesExpression(expression.parent) ||
+    ts.isArrayLiteralExpression(expression.parent)
+  ) {
+    expression = expression.parent;
+  }
+  const parent = expression.parent;
+  if (ts.isVariableDeclaration(parent) || ts.isPropertyAssignment(parent)) {
+    return (
+      parent.initializer === expression &&
+      (isCardDefinitionName(parent.name) ||
+        (ts.isVariableDeclaration(parent) &&
+          parent.type?.getText() === "CardDefinitionId"))
+    );
+  }
+  if (ts.isBinaryExpression(parent)) {
+    const other = parent.left === expression ? parent.right : parent.left;
+    return isCardDefinitionName(other);
+  }
+  if (ts.isElementAccessExpression(parent)) {
+    return (
+      parent.argumentExpression === expression &&
+      /^(CARD_DEFINITIONS_BY_ID|CARD_SPECS_BY_ID|AI_HINTS_BY_CARD)$/.test(
+        parent.expression.getText(),
+      )
+    );
+  }
+  if (ts.isCallExpression(parent) && parent.arguments.includes(expression)) {
+    return (
+      /^(cardDefinitionId|getCardAiHints|getCardDefinition)$/.test(
+        parent.expression.getText(),
+      ) ||
+      /^(AI_HINTS_BY_CARD|CARD_DEFINITIONS_BY_ID|CARD_SPECS_BY_ID)\.(get|has)$/.test(
+        parent.expression.getText(),
+      )
+    );
+  }
+  return false;
+}
+
+function isCardDefinitionName(node) {
+  const name = ts.isPropertyAccessExpression(node) ? node.name : node;
+  if (!ts.isIdentifier(name) && !ts.isStringLiteral(name)) return false;
+  return /(?:definitionIds?|definition_ids?|cardDefinitionIds?|^cardId$)$/i.test(
+    name.text,
+  );
 }
 
 function parseSourceFile(file) {
@@ -325,6 +383,11 @@ function runSelfTest() {
       if (definitionId === "onr_v1_999_future-card") return true;
       const registry = { onr_classic_123_other_card: "profile" };
       const lifecycle = \`onr_proteus_456_lifecycle:${"${instanceId}"}\`;
+      if (card.definitionId !== 17) return false;
+      const BOUND_DEFINITION_ID = 23 as const;
+      const quote = { sourceDefinitionId: 37 };
+      const hint = AI_HINTS_BY_CARD.get(45);
+      const ordinaryAmount = 17;
       const ordinary = "not-a-card-id";
       // onr_v1_111_comment-only must not be detected.
     `,
@@ -342,6 +405,10 @@ function runSelfTest() {
     "onr_v1_999_future-card",
     "onr_classic_123_other_card",
     "onr_proteus_456_lifecycle",
+    17,
+    23,
+    37,
+    45,
   ];
   if (detected.join("|") !== expected.join("|")) {
     throw new Error(

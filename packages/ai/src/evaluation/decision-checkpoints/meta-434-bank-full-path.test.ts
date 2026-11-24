@@ -44,13 +44,13 @@ it("binds the available bank payout to the complete urgent path before spending 
     (a) => a.actionId === result.actionId,
   )!;
   expect(action.actionId).toBe(
-    "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+    "r1.c29d.c29d.activated.441",
   );
   expect(result.fallbackUsed).toBe(false);
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_2",
+    rootPlanInstanceId: "p1p4x83h7yolw2hjtvi0ud06dm",
     leafExecutorInstanceId:
-      "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+      "pdeck54mcc1lshdzs9k74eyxih",
     route: {
       actionId: action.actionId,
       stateVersion: input.playerView.stateVersion,
@@ -58,7 +58,7 @@ it("binds the available bank payout to the complete urgent path before spending 
   });
   expect(
     result.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes,
-  ).toContain("runner_credit_bank_bound_run_action:runner.start_run.remote_2");
+  ).toContain("runner_credit_bank_bound_run_action:rs.r2");
 });
 
 it.each([
@@ -73,7 +73,7 @@ it.each([
     if (boundary === "no_conversion_click") input.playerView.own.clicks = 1;
     if (boundary === "cashout_not_offered")
       input.legalActions = input.legalActions.filter(
-        (a) => !a.actionId.includes("withdraw_credits"),
+        (a) => a.payload?.cardImplementationAbilityId !== 441,
       );
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(
@@ -85,7 +85,7 @@ it.each([
     expect(result.fallbackUsed).toBe(false);
     const bank = residentPlanPortfolioSnapshot(input)?.instances.find(
       (p) =>
-        p.instanceId === "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+        p.instanceId === "pdeck54mcc1lshdzs9k74eyxih",
     );
     expect(bank?.parentNeedId).toBeUndefined();
   },
@@ -94,22 +94,22 @@ it.each([
 it("keeps one provider when two banks can fund the same exact run", () => {
   const { input, runtime } = checkpoint();
   const first = input.playerView.own.rig!.find(
-    (c) => c.instanceId === "runner_onr_v1_154_broker_1",
+    (c) => c.instanceId === "c29d",
   )!;
   const second = input.playerView.own.rig!.find(
-    (c) => c.instanceId === "runner_onr_v1_154_broker_2",
+    (c) => c.instanceId === "c29e",
   )!;
   if (!first.counters || !first.counterDisplays)
     throw Error("Fixture bank must carry its quoted payout");
   second.counters = structuredClone(first.counters);
   second.counterDisplays = structuredClone(first.counterDisplays);
   const firstAction = input.legalActions.find((a) =>
-    a.actionId.includes("withdraw_credits"),
+    a.payload?.cardImplementationAbilityId === 441,
   )!;
   const secondAction = JSON.parse(
     JSON.stringify(firstAction).replaceAll(
-      "runner_onr_v1_154_broker_1",
-      "runner_onr_v1_154_broker_2",
+      "c29d",
+      "c29e",
     ),
   );
   input.legalActions.push(secondAction);
@@ -133,9 +133,9 @@ it("keeps one provider when two banks can fund the same exact run", () => {
   const result = chooseAiAction(input);
   expect(result.actionId).toBe(firstAction.actionId);
   const providers = residentPlanPortfolioSnapshot(input)!.instances.filter(
-    (p) => p.parentNeedId === "run-support:remote:remote_2",
+    (p) => p.parentNeedId === "run-support:remote:r2",
   );
   expect(providers.map((p) => p.instanceId)).toEqual([
-    "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+    "pdeck54mcc1lshdzs9k74eyxih",
   ]);
 });

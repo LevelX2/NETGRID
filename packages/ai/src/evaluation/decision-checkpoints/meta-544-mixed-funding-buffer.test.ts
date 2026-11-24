@@ -59,7 +59,7 @@ function funding(cp: ReturnType<typeof native>, server: string) {
   };
   const targets = evaluateRunnerRunTargets(params);
   const target = targets.find(
-    (t) => t.actionId === "runner.start_run." + server,
+    (t) => t.actionId === "rs." + server,
   )!;
   expect(target).toBeDefined();
   return {
@@ -100,10 +100,10 @@ function decide(cp: ReturnType<typeof native>) {
   return { action, plan };
 }
 it.each([
-  [3, 33, "remote_1"],
+  [3, 33, "r1"],
   [15, 52, "hq"],
-  [22, 161, "remote_1"],
-  [22, 176, "remote_1"],
+  [22, 161, "r1"],
+  [22, 176, "r1"],
 ] as const)(
   "rejects ordinary funding whose credit, hand-repair and run clicks do not fit: G%i D%i",
   (game, decision, server) => {
@@ -113,8 +113,8 @@ it.each([
     expect(support?.routeActionIds ?? []).toHaveLength(0);
     const { plan } = decide(cp);
     expect(plan.leafExecutorInstanceId).not.toBe(
-      "plan:runner.economy:run-support%3A" +
-        (server === "hq" ? "central%3Ahq" : "remote%3Aremote_1"),
+      "p21mj6ii5vzcnss0ouyl58zxii" +
+        (server === "hq" ? "central%3Ahq" : "remote%3Ar1"),
     );
   },
 );
@@ -123,46 +123,45 @@ it("uses independent R&D pressure while the remote mixed funding route remains i
   expect(runnerDamageThreatAssessment(cp.input).flatlineRisk).toMatchObject({
     level: "suspected", recommendedHandFloor: 2, activeDamageSourceCount: 1,
   });
-  expect(funding(cp, "remote_1").support?.routeActionIds ?? []).toHaveLength(0);
+  expect(funding(cp, "r1").support?.routeActionIds ?? []).toHaveLength(0);
   const { action, plan } = decide(cp);
-  expect(action.actionId).toBe("runner.start_run.rd");
-  expect(plan.rootPlanInstanceId).toBe("plan:runner.pressure_central:central%3Ard");
+  expect(action.actionId).toBe("rs.rd");
+  expect(plan.rootPlanInstanceId).toBe("pa90fufw9vc5bkshp96ztlryxl");
   expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
 });
 it("preserves ordinary credit funding when the current hand reserve already fits", () => {
   const cp = native(7, 80);
-  expect(funding(cp, "remote_1").support?.routeActionIds[0]).toBe(
-    "runner.gain_credit",
+  expect(funding(cp, "r1").support?.routeActionIds[0]).toBe(
+    "rb",
   );
   expect(decide(cp).plan.leafExecutorInstanceId).toBe(
-    "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+    "p8dvcw6jj6cbaz1qxlt9ksvoh5",
   );
 });
 it("credits Panzer Run's own net draw instead of reserving an unnecessary extra action", () => {
   const cp = native(27, 61);
-  const { target, support } = funding(cp, "remote_1");
+  const { target, support } = funding(cp, "r1");
   expect(target.prerunReserveQuote?.handBufferGap).toBe(1);
-  expect(support?.routeActionIds[0]).toContain("panzer-run");
   const { action, plan } = decide(cp);
-  expect(action.source).toContain("panzer-run");
+  expect(support?.routeActionIds[0]).toBe(action.actionId);
+  expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(46);
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+    "p8dvcw6jj6cbaz1qxlt9ksvoh5",
   );
 });
 it("preserves the exact four-click Drine, repair and bound-run sequence", () => {
   const cp = native(30, 264);
-  expect(funding(cp, "remote_2").support?.routeActionIds[0]).toContain(
-    "do-the-drine",
-  );
+  const { support } = funding(cp, "r2");
   const { action, plan } = decide(cp);
-  expect(action.source).toContain("do-the-drine");
+  expect(support?.routeActionIds[0]).toBe(action.actionId);
+  expect(visibleSourceDefinitionsByInstanceId(cp.input.playerView)[action.source]).toBe(40);
   expect(plan.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_2",
+    "p1p4x83h7yolw2hjtvi0ud06dm",
   );
   expect(plan.leafExecutorInstanceId).toBe(
-    "plan:runner.economy:run-support%3Aremote%3Aremote_2",
+    "p8dvdhsdwtl1qdd8vrjbusuktw",
   );
 });

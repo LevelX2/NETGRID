@@ -17,7 +17,7 @@ import {
   type RunFortTriggerExecutionHost,
 } from "./run-fort-trigger-execution";
 
-const MICROTECH_BACKUP_DRIVE_ID = "microtech_backup_drive";
+const MICROTECH_BACKUP_DRIVE_ID = 2993267245;
 
 describe("run fort trigger execution", () => {
   it("returns unhandled for actions outside the run/fort trigger boundary", () => {
@@ -93,11 +93,11 @@ describe("run fort trigger execution", () => {
       "rig",
     );
     state.cardInstances[olderHostedId] = {
-      ...instance(olderHostedId, "simple_fracter", "runner", "rig"),
+      ...instance(olderHostedId, 597, "runner", "rig"),
       hostedOn: microtechId,
     } as CardInstance;
     state.cardInstances[topHostedId] = {
-      ...instance(topHostedId, "simple_decoder", "runner", "rig"),
+      ...instance(topHostedId, 591, "runner", "rig"),
       hostedOn: microtechId,
     } as CardInstance;
     const host = testHost(state, {
@@ -105,8 +105,8 @@ describe("run fort trigger execution", () => {
         MICROTECH_BACKUP_DRIVE_ID,
         "hardware",
       ),
-      simple_fracter: definition("simple_fracter", "program"),
-      simple_decoder: definition("simple_decoder", "program"),
+      597: definition(597, "program"),
+      591: definition(591, "program"),
     });
     const action = triggerAction(state, {
       cardId: microtechId,
@@ -131,7 +131,7 @@ describe("run fort trigger execution", () => {
     expect(action.payload).toMatchObject({
       v1922RunnerHardwareAbility: "return_top_hosted_program",
       sourceDefinitionId: MICROTECH_BACKUP_DRIVE_ID,
-      returnedCardDefinitionId: "simple_decoder",
+      returnedCardDefinitionId: 591,
       returnedToGrip: true,
       hostedProgramCountAfter: 1,
     });
@@ -260,7 +260,7 @@ function removeFromAllZones(state: GameState, cardId: CardInstanceId): void {
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
   zone: "grip" | "rig",
 ): CardInstance {
@@ -278,10 +278,10 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function definition(id: string, type: CardDefinition["type"]): CardDefinition {
+function definition(id: number, type: CardDefinition["type"]): CardDefinition {
   return {
     id,
-    title: id,
+    title: String(id),
     side: "runner",
     type,
     mechanics: [],

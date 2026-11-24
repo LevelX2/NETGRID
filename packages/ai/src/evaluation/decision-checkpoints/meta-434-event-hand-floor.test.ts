@@ -52,7 +52,7 @@ it("quotes the confirmed damage floor after consuming the run event, before payi
 it("keeps the basic run's independent hand count and does not invent an event cost for it", () => {
   const { input } = checkpoint();
   const basic = evaluateRunnerRunTargets({ input }).find(
-    (t) => t.actionId === "runner.start_run.hq",
+    (t) => t.actionId === "rs.hq",
   )!;
   expect(basic.pathPassability).toBe("reachable");
   expect(basic.evidence).toContain("grip_after_run_action:3");

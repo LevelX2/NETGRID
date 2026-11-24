@@ -1,8 +1,10 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import {
   canonicalCapabilityId,
+  createCapabilityIdentityRegistry,
   type CanonicalCapabilityId,
   type CapabilityKey,
+  type CapabilityIdentityLedger,
 } from "./capability-identity";
 import {
   assertCardSpecContract,
@@ -55,6 +57,7 @@ export type CardRegistry = Readonly<{
 export type CardRegistryInput = {
   cardSpecs: readonly CardSpec[];
   setSpecs: readonly SetSpec[];
+  capabilityIdentities?: CapabilityIdentityLedger;
 };
 
 export type CardRegistryErrorCode =
@@ -125,10 +128,13 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
   for (const spec of input.cardSpecs) assertCardSpecContract(spec);
   for (const set of input.setSpecs) assertSetSpecContract(set);
 
-  const cardIds = new Set<string>();
+  const cardIds = new Set<CardDefinitionId>();
   const printingIds = new Set<string>();
   const setIds = new Set<string>();
-  const capabilityIds = new Set<string>();
+  const capabilityIds = new Set<CanonicalCapabilityId>();
+  const resolveCapabilityId = input.capabilityIdentities === undefined
+    ? canonicalCapabilityId
+    : createCapabilityIdentityRegistry(input.capabilityIdentities).idFor;
   const rawCapabilities: CapabilityRecord[] = [];
 
   for (const set of input.setSpecs) {
@@ -161,7 +167,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
       printingIds.add(printing.printingId);
     }
     for (const capability of collectCapabilities(spec)) {
-      const id = canonicalCapabilityId(definitionId, capability.capabilityKey);
+      const id = resolveCapabilityId(definitionId, capability.capabilityKey);
       if (capabilityIds.has(id))
         fail(
           "duplicate_capability_id",
@@ -181,10 +187,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
   const cards = input.cardSpecs
     .map(finalizeCardSpec)
     .sort((left, right) =>
-      compareText(
-        left.identity.cardDefinitionId,
-        right.identity.cardDefinitionId,
-      ),
+      left.identity.cardDefinitionId - right.identity.cardDefinitionId,
     );
   const sets = input.setSpecs
     .map(finalizeSetSpec)
@@ -257,6 +260,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
       projectPlanningCard(
         spec,
         sectionFingerprints.get(spec.identity.cardDefinitionId)!,
+        resolveCapabilityId,
       ),
     ]),
   );
@@ -283,7 +287,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
   const capabilitiesById = new Map(
     rawCapabilities
       .sort((left, right) =>
-        compareText(left.canonicalCapabilityId, right.canonicalCapabilityId),
+        left.canonicalCapabilityId - right.canonicalCapabilityId,
       )
       .map((record) => [
         record.canonicalCapabilityId,
@@ -344,9 +348,9 @@ export function createRulesContextForRegistry(
   const registryAccess = access(registry);
   assertEngineRegistryVersionContext(versions);
   const definitionIds = [...versions.matchCardPoolDefinitionIds].sort(
-    compareText,
+    (left, right) => left - right,
   );
-  const rows: readonly (readonly [string, string])[] = definitionIds.map(
+  const rows: readonly (readonly [CardDefinitionId, string])[] = definitionIds.map(
     (definitionId) => {
       const section = registryAccess.sectionFingerprints.get(
         definitionId as CardDefinitionId,
@@ -556,10 +560,10 @@ function access(registry: CardRegistry): RegistryAccess {
 
 function fail(
   code: CardRegistryErrorCode,
-  value: string,
+  value: string | CardDefinitionId,
   message: string,
 ): never {
-  throw new CardRegistryError(code, value, message);
+  throw new CardRegistryError(code, String(value), message);
 }
 
 function compareText(left: string, right: string): number {

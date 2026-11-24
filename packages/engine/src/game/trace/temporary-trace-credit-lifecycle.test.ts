@@ -9,7 +9,7 @@ describe("temporary trace credit lifecycle", () => {
     expect(returnUnusedCorpTraceWindowCredits(current)).toEqual({
       temporaryTraceCreditsReturned: 3,
       temporaryTraceCreditsSourceDefinitionId:
-        "onr_proteus_061_ldl-traffic-analyzers",
+        119,
       corpCreditsAfter: 6,
     });
     expect(current.corp.credits).toBe(6);
@@ -37,7 +37,7 @@ function stateWithTemporaryTraceCredits(remaining: number): GameState {
     trace: {
       corpTemporaryTraceCredits: {
         sourceCardInstanceId: "ldl_1",
-        sourceDefinitionId: "onr_proteus_061_ldl-traffic-analyzers",
+        sourceDefinitionId: 119,
         remaining,
         includedInCorpCreditPool: true,
         usableFor: "unrestricted_during_current_trace",

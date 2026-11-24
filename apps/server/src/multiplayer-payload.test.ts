@@ -17,8 +17,33 @@ import {
   SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
 } from "./multiplayer-payload";
 import type { EventRecord, StoredMatch } from "./multiplayer";
+import { advancePublicEventHistory, initialPublicEventHistory } from "./public-event-history";
 
 describe("multiplayer side payload projection", () => {
+  it("builds a live update from persisted tail context without traversing discarded public or Engine history", () => {
+    const record = storedMatchWithEvents(SIDE_PAYLOAD_EVENT_TAIL_LIMIT + 7);
+    let history = initialPublicEventHistory();
+    for (const event of record.eventLog) {
+      const next = advancePublicEventHistory(history, event.publicPayload);
+      event.history = next.stored;
+      history = next.after;
+    }
+    const deps = {
+      isAiSide: () => false, safeDisplayNameFor: () => "Gegenüber",
+      aiTurnPresentationFor: () => undefined, resultSummaryFor: () => undefined,
+      retentionProtectionPayload: { retentionProtected: false },
+    };
+    const expected = buildSidePayload(record, "runner", deps);
+    for (const event of record.eventLog.slice(0, 7))
+      Object.defineProperty(event, "publicPayload", {
+        get: () => { throw new Error("Discarded events must not be projected."); },
+      });
+    Object.defineProperty(record.gameState, "eventLog", {
+      get: () => { throw new Error("The Engine history must not be projected for a live update."); },
+    });
+    expect(buildSidePayload(record, "runner", deps)).toEqual(expected);
+  });
+
   it("limits normal playerView publicEvents to the side event tail", () => {
     const record = storedMatchWithEvents(SIDE_PAYLOAD_EVENT_TAIL_LIMIT + 7);
     const payload = buildSidePayload(record, "runner", {
@@ -29,17 +54,47 @@ describe("multiplayer side payload projection", () => {
       retentionProtectionPayload: { retentionProtected: false },
     });
 
-    expect(payload.eventTail).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
     expect(payload.playerView.publicEvents).toHaveLength(
       SIDE_PAYLOAD_EVENT_TAIL_LIMIT,
     );
-    expect(payload.playerView.publicEvents).toEqual(payload.eventTail);
-    expect(payload.eventTail[0]?.eventId).toBe("evt_7");
-    expect(payload.eventTail.at(-1)?.eventId).toBe("evt_86");
+    expect(payload).not.toHaveProperty("eventTail");
+    expect(payload).not.toHaveProperty("legalActions");
+    expect(payload).not.toHaveProperty("pendingChoice");
+    expect(payload.playerView.publicEvents[0]?.eventId).toBe(8);
+    expect(payload.playerView.publicEvents.at(-1)?.eventId).toBe(87);
     expect(
-      payload.eventTail[0]?.publicPayload.chronicleTurnNumber,
+      payload.playerView.publicEvents[0]?.publicPayload.chronicleTurnNumber,
     ).toBeGreaterThan(1);
-    expect(payload.eventTail[0]?.publicPayload.chronicleTurnSide).toBe("corp");
+    expect(
+      payload.playerView.publicEvents[0]?.publicPayload.chronicleTurnSide,
+    ).toBe("corp");
+  });
+
+  it("only offers actions for an active human side", () => {
+    const record = storedMatchWithEvents(0);
+    const deps = {
+      isAiSide: (side: Side) => side === "runner",
+      safeDisplayNameFor: () => undefined,
+      aiTurnPresentationFor: () => undefined,
+      resultSummaryFor: () => undefined,
+      retentionProtectionPayload: { retentionProtected: false },
+    };
+
+    const human = buildSidePayload(record, "runner", {
+      ...deps,
+      isAiSide: () => false,
+    });
+    expect(human.playerView.legalActions).not.toHaveLength(0);
+    expect(
+      buildSidePayload(record, "runner", deps).playerView.legalActions,
+    ).toEqual([]);
+
+    record.match.status = "finished";
+    const finished = buildSidePayload(record, "runner", {
+      ...deps,
+      isAiSide: () => false,
+    });
+    expect(finished.playerView.legalActions).toEqual([]);
   });
 
   it("projects only the explicitly supplied own deck guide reference", () => {
@@ -79,7 +134,7 @@ describe("multiplayer side payload projection", () => {
     state.corp.scoreArea = [sourceAgendaId];
     state.cardInstances[sourceAgendaId] = {
       ...state.cardInstances[sourceAgendaId]!,
-      definitionId: "onr_v1_197_data-fort-reclamation",
+      definitionId: 409,
       owner: "corp",
       controller: "corp",
       faceup: true,
@@ -87,7 +142,7 @@ describe("multiplayer side payload projection", () => {
       zone: { side: "corp", zone: "scoreArea" },
     };
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [iceId],
@@ -95,17 +150,17 @@ describe("multiplayer side payload projection", () => {
     });
     state.cardInstances[iceId] = {
       ...state.cardInstances[iceId]!,
-      definitionId: "simple_barrier_ice",
+      definitionId: 589,
       owner: "corp",
       controller: "corp",
       faceup: false,
       rezzed: false,
-      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverIce", serverId: "r1" },
     };
     state.hqInstallRezSequence = {
       sourceAgendaId,
-      sourceDefinitionId: "onr_v1_197_data-fort-reclamation",
-      serverId: "remote_1",
+      sourceDefinitionId: 409,
+      serverId: "r1",
       selectedCardIds: [iceId],
       nextCardIndex: 1,
       temporaryCreditsProvided: 10,
@@ -148,12 +203,12 @@ describe("multiplayer side payload projection", () => {
     const corpPayload = buildSidePayload(record, "corp", deps);
     const runnerPayload = buildSidePayload(record, "runner", deps);
     expect(
-      corpPayload.pendingChoice?.options[0]?.hqInstallRezOptionQuote,
+      corpPayload.playerView.pendingChoice?.options[0]?.hqInstallRezOptionQuote,
     ).toMatchObject({
       choiceId: "choice_data_fort_optional_rez_12",
       cardId: iceId,
-      cardDefinitionId: "simple_barrier_ice",
-      targetServerId: "remote_1",
+      cardDefinitionId: 589,
+      targetServerId: "r1",
       installedZone: "serverIce",
       stateVersion: 12,
       complete: true,
@@ -163,7 +218,7 @@ describe("multiplayer side payload projection", () => {
       mandatoryContinuationComplete: true,
       rezAndMandatoryContinuationExecutable: true,
     });
-    expect(runnerPayload.pendingChoice).toBeUndefined();
+    expect(runnerPayload.playerView.pendingChoice).toBeUndefined();
     expect(JSON.stringify(runnerPayload)).not.toContain(
       "corp-optional-rez-choice-quote-v2",
     );
@@ -183,7 +238,7 @@ describe("multiplayer side payload projection", () => {
     );
     const spgId = "payload-spg" as CardInstanceId;
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -191,10 +246,10 @@ describe("multiplayer side payload projection", () => {
     });
     state.cardInstances[spgId] = {
       instanceId: spgId,
-      definitionId: "onr_classic_025_strategic-planning-group",
+      definitionId: 29,
       owner: "corp",
       controller: "corp",
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
       faceup: true,
       rezzed: true,
       advancementCounters: 0,
@@ -217,19 +272,19 @@ describe("multiplayer side payload projection", () => {
 
     const corpPayload = buildSidePayload(record, "corp", deps);
     const runnerPayload = buildSidePayload(record, "runner", deps);
-    expect(corpPayload.pendingChoice?.options).toHaveLength(2);
+    expect(corpPayload.playerView.pendingChoice?.options).toHaveLength(2);
     expect(
-      corpPayload.pendingChoice?.options.every(
+      corpPayload.playerView.pendingChoice?.options.every(
         (option) => option.card?.known === true,
       ),
     ).toBe(true);
-    expect(runnerPayload.pendingChoice).toBeUndefined();
+    expect(runnerPayload.playerView.pendingChoice).toBeUndefined();
     expect(
       runnerPayload.playerView.specialZones?.setAside.every(
         (card) => card.known === false,
       ),
     ).toBe(true);
-    for (const option of corpPayload.pendingChoice?.options ?? []) {
+    for (const option of corpPayload.playerView.pendingChoice?.options ?? []) {
       if (option.card?.definitionId)
         expect(JSON.stringify(runnerPayload)).not.toContain(
           option.card.definitionId,
@@ -306,7 +361,7 @@ function deckMetadata(side: Side): DeckPublicMetadata {
   return {
     side,
     identityCardId:
-      side === "runner" ? "runner_identity_001" : "corp_identity_001",
+      side === "runner" ? 587 : 3,
     deckName: `${side} deck`,
     cardPoolSnapshotId: "test",
     formatProfileId: "test",
@@ -334,7 +389,7 @@ function session(
 
 function eventRecord(index: number): EventRecord {
   const publicEvent: PublicGameEvent = {
-    eventId: `evt_${index}`,
+    eventId: index + 1,
     type: "action",
     stateVersionBefore: index,
     stateVersionAfter: index + 1,

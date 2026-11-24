@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { runnerPendingFreeSubtypeCoverageRole } from "./coverage-pending-subtype";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
@@ -35,16 +36,16 @@ it("keeps the existing free unconfigured Sentry answer instead of buying a secon
   expect(selected).toBeDefined();
   expect(
     selected.type === "install_card" &&
-      selected.source?.includes("morphing-tool"),
+      referencesDefaultDeckCard(selected.source, 150),
   ).toBe(false);
   expect(decision.decisionDebug!.planFirstDecision!).toMatchObject({
-    rootPlanInstanceId: "plan:runner.economy:runner-portfolio-credit-reserve",
+    rootPlanInstanceId: "pc7ebuiw5dxhlbzbf1nhcs4p4z",
     selectedPlan: { moduleId: "runner.economy" },
     selectedStep: {
       stepId:
-        "plan:runner.economy:runner-portfolio-credit-reserve:fund:runner-portfolio-credit-reserve",
+        "pc7ebuiw5dxhlbzbf1nhcs4p4z:fund:runner-portfolio-credit-reserve",
     },
-    route: { actionId: "runner.gain_credit", stateVersion: 279 },
+    route: { actionId: "rb", stateVersion: 279 },
   });
 });
 
@@ -68,7 +69,7 @@ it.each([
   const { input } = native(),
     caps = input.ownDeckCapabilities;
   const fubar = input.playerView.own.rig.find(
-    (c: { definitionId: string }) => c.definitionId === "onr_proteus_088_fubar",
+    (c: { definitionId: number }) => c.definitionId === 146,
   );
   if (mode === "already_selected") fubar.selectedSubtype = "code_gate";
   if (mode === "hand_only")

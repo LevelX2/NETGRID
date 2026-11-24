@@ -7,6 +7,7 @@ import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-port
 import { runnerRunRiskContractReassessment } from "./run-window-assessment";
 import { pureEndRunEncounterPayment } from "./run-window-pure-etr-economics";
 import type { RunnerRunOrigin } from "../../plans/runner-run-origin-contract";
+import type { LegalAction } from "@netgrid/shared";
 function native(fixture = "cp-meta588-terminal-etr-reserve.json") {
   const cp = JSON.parse(
     readFileSync(
@@ -26,9 +27,12 @@ function native(fixture = "cp-meta588-terminal-etr-reserve.json") {
     accessCommitment: signal.accessCommitment,
   } as RunnerRunOrigin;
   const action = input.legalActions.find(
-    (a: { type: string; actionId: string }) =>
+    (a: LegalAction) =>
       a.type === "break_subroutine" &&
-      a.actionId.includes("printed_subroutines_end_the_run"),
+      typeof a.payload?.subroutineIndex === "number" &&
+      input.playerView.run.encounteredIce.effectiveRunQuote.subroutines[
+        a.payload.subroutineIndex
+      ]?.type === "end_the_run",
   );
   return { cp, input, origin, action };
 }
@@ -66,7 +70,7 @@ it("spends an affordable mandatory ETR payment on the last action of the bound t
   expect(d.fallbackUsed).toBe(false);
   expect(d.timeoutUsed).toBe(false);
   expect(p.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(p.selectedPlan!.moduleId).toBe("runner.convert_run_window");
   expect(p.route).toMatchObject({
@@ -96,7 +100,7 @@ it.each([
   if (boundary === "stale_action") action.expiresAtStateVersion -= 1;
   if (boundary === "known_mixed_encounter") {
     const remote = input.playerView.servers.find(
-      (server: { id: string }) => server.id === "remote_1",
+      (server: { id: string }) => server.id === "r1",
     );
     const encountered = input.playerView.run.encounteredIce;
     remote.ice[0] = { ...encountered, instanceId: remote.ice[0].instanceId };
@@ -138,7 +142,7 @@ it("keeps the free ETR break after paying Skeleton's strength in the same termin
   expect(decision.fallbackUsed).toBe(false);
   expect(decision.timeoutUsed).toBe(false);
   expect(decision.decisionDebug!.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    rootPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
     selectedPlan: { moduleId: "runner.convert_run_window" },
     route: { actionId: action.actionId, stateVersion: 342 },
   });

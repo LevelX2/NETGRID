@@ -1,10 +1,16 @@
+import { assessVisibleRunnerServerPath } from "./run-analysis/visible-run-server-path";
 import type { RunnerAccessFacts } from "./access/runner-access-facts";
-import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { reconstructBeliefState, type BeliefState } from "./belief-state";
 import { runnerHintProvidesMultiaccess } from "./runner-canonical-hint-semantics";
-import { assessKnownRezzedIcePath } from "./visible-run-analysis";
+import {
+  eventVersion,
+  findLastHistoryIndex,
+  mergedPublicHistory,
+  runStartServerIdFromEvent,
+} from "./public-event-history";
 
 export type KnownCentralAccessPayoffKind =
   | "agenda"
@@ -101,7 +107,10 @@ export function evaluateKnownCentralAccessPayoff(
     return applyRdAgendaDistributionPressure(
       input,
       beliefState,
-      unknownCentralPayoff("rd", ["central_memory_payoff:invalidated"]),
+      unknownCentralPayoff("rd", [
+        "central_memory_payoff:invalidated",
+        ...(freshness?.invalidationReasons ?? []),
+      ]),
     );
   if (freshness.freshness === "fresh_after_top_removed") {
     return {
@@ -389,7 +398,7 @@ function corpVisibleFastAdvanceSupport(input: AiDecisionInput): boolean {
 
 function evaluateKnownRdAccessSequencePayoff(
   input: AiDecisionInput,
-  knownSequenceDefinitionIds: readonly string[] | undefined,
+  knownSequenceDefinitionIds: readonly number[] | undefined,
   path: { visibleBreakCost: number; creditsAfterPath: number },
   evidenceBase: string[],
 ): KnownCentralAccessPayoff | undefined {
@@ -604,7 +613,7 @@ function evaluateKnownHqAccessPayoff(
       (
         card,
       ): card is {
-        definitionId: string;
+        definitionId: number;
         trashCost: number;
       } => card !== undefined,
     );
@@ -618,7 +627,7 @@ function evaluateKnownHqAccessPayoff(
     const cheapestTrashCard = [...currentlyProductiveTrashCards].sort(
       (left, right) =>
         left.trashCost - right.trashCost ||
-        left.definitionId.localeCompare(right.definitionId),
+        (left.definitionId - right.definitionId),
     )[0]!;
     return {
       payoff: "trash_affordable",
@@ -904,7 +913,7 @@ function hqKnownnessPenalty(
 
 function expandHqSafeDefinitionIds(
   memory: NonNullable<BeliefState["runnerOpponentModel"]>["hqHandMemory"],
-): string[] {
+): number[] {
   const fromLedger = memory.ledger.safeDefinitions.flatMap((definition) =>
     Array.from({ length: definition.count }, () => definition.definitionId),
   );
@@ -914,7 +923,7 @@ function expandHqSafeDefinitionIds(
 }
 
 function hqDefinitionHasAffordableTrashPayoff(
-  definitionId: string,
+  definitionId: number,
   creditsAfterPath: number,
 ): boolean {
   const type = cardDefinitionType(definitionId);
@@ -924,7 +933,7 @@ function hqDefinitionHasAffordableTrashPayoff(
 }
 
 function hqDefinitionIsLowValueForAccess(
-  definitionId: string,
+  definitionId: number,
   creditsAfterPath: number,
 ): boolean {
   const type = cardDefinitionType(definitionId);
@@ -1044,15 +1053,12 @@ function knownCentralPathCost(
       creditsAfterPath: input.playerView.own.credits,
     };
   }
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server.root,
-  );
+  const assessment = assessVisibleRunnerServerPath(input, server);
   return {
     visibleBreakCost: assessment.visibleBreakCost ?? 0,
-    creditsAfterPath: assessment.creditsAfterPath,
+    creditsAfterPath:
+      assessment.creditBudgetAfterPath?.traceEligibleCredits ??
+      Math.min(input.playerView.own.credits, assessment.creditsAfterPath),
   };
 }
 
@@ -1070,7 +1076,7 @@ function installedRdAccessDepthEstimate(input: AiDecisionInput): number {
 }
 
 function runnerCardProvidesInstalledRdMultiaccess(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
   return runnerHintProvidesMultiaccess(
@@ -1079,23 +1085,23 @@ function runnerCardProvidesInstalledRdMultiaccess(
   );
 }
 
-function cardDefinitionTrashCost(definitionId: string): number | undefined {
+function cardDefinitionTrashCost(definitionId: number): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
+    planningCardFactsByDefinitionId(definitionId)?.trashCost
   );
 }
 
-function cardDefinitionType(definitionId: string): string | undefined {
+function cardDefinitionType(definitionId: number): string | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.type ??
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type
+    planningCardFactsByDefinitionId(definitionId)?.type
   );
 }
 
 function recentRunnerDeclinedKnownRdTopTrash(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const history = mergedPublicHistory(input);
   const accessIndex = findLastHistoryIndex(
@@ -1104,7 +1110,7 @@ function recentRunnerDeclinedKnownRdTopTrash(
       publicActor(event) === "runner" &&
       publicActionType(event) === "access_card" &&
       eventServerId(event) === "rd" &&
-      stringPayloadValue(event, "cardDefinitionId") === definitionId,
+      event.publicPayload.cardDefinitionId === definitionId,
   );
   if (accessIndex < 0) return false;
   const accessEvent = history[accessIndex];
@@ -1115,9 +1121,14 @@ function recentRunnerDeclinedKnownRdTopTrash(
   for (const event of history.slice(accessIndex + 1)) {
     const actionType = publicActionType(event);
     const actor = publicActor(event);
-    if (actor === "runner" && actionType === "decline_trash") {
-      declined = true;
-      continue;
+    if (actor === "runner" && !declined) {
+      if (actionType === "access_card" || runStartServerIdFromEvent(event)) return false;
+      if (actionType === "decline_trash") {
+        const declineServerId = eventServerId(event);
+        if (declineServerId !== undefined && declineServerId !== "rd") return false;
+        declined = true;
+        continue;
+      }
     }
     if (eventRefreshesRdTop(event)) return false;
     if (
@@ -1136,7 +1147,7 @@ function recentRunnerDeclinedKnownRdTopTrash(
 
 function recentRunnerDeclinedKnownHqTrash(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
 ): boolean {
   const history = mergedPublicHistory(input);
   const accessIndex = findLastHistoryIndex(
@@ -1145,7 +1156,7 @@ function recentRunnerDeclinedKnownHqTrash(
       publicActor(event) === "runner" &&
       publicActionType(event) === "access_card" &&
       eventServerId(event) === "hq" &&
-      stringPayloadValue(event, "cardDefinitionId") === definitionId,
+      event.publicPayload.cardDefinitionId === definitionId,
   );
   if (accessIndex < 0) return false;
   const accessEvent = history[accessIndex];
@@ -1155,7 +1166,7 @@ function recentRunnerDeclinedKnownHqTrash(
     const event = history[index]!;
     if (publicActor(event) !== "runner") continue;
     const actionType = publicActionType(event);
-    if (actionType === "access_card") return false;
+    if (actionType === "access_card" || runStartServerIdFromEvent(event)) return false;
     if (actionType === "trash_accessed_card" || actionType === "steal_agenda")
       return false;
     if (actionType === "decline_trash") {
@@ -1182,30 +1193,6 @@ const runnerActionReopensDeclinedTrashPayoff = new Set([
   "activated_card_ability",
   "play_event",
 ]);
-
-function mergedPublicHistory(input: AiDecisionInput) {
-  const byId = new Map<string, AiDecisionInput["eventTail"][number]>();
-  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
-    const previous = byId.get(event.eventId);
-    if (!previous || eventVersion(previous) <= eventVersion(event))
-      byId.set(event.eventId, event);
-  }
-  return [...byId.values()].sort(
-    (left, right) =>
-      eventVersion(left) - eventVersion(right) ||
-      left.eventId.localeCompare(right.eventId),
-  );
-}
-
-function findLastHistoryIndex<T>(
-  values: readonly T[],
-  predicate: (value: T) => boolean,
-): number {
-  for (let index = values.length - 1; index >= 0; index -= 1) {
-    if (predicate(values[index]!)) return index;
-  }
-  return -1;
-}
 
 function eventRefreshesRdTop(
   event: AiDecisionInput["eventTail"][number],
@@ -1270,12 +1257,6 @@ function publicActor(
   event: AiDecisionInput["eventTail"][number],
 ): string | undefined {
   return stringValue(event.publicPayload.actor);
-}
-
-function eventVersion(event: AiDecisionInput["eventTail"][number]): number {
-  return typeof event.stateVersionAfter === "number"
-    ? event.stateVersionAfter
-    : 0;
 }
 
 function stringPayloadValue(

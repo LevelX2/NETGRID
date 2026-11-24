@@ -48,8 +48,10 @@ it("preserves a funded outer pump when the inner damage fits the hand budget", (
     },
   });
   expect(
-    result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("plan:runner.convert_run_window:");
+    result.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("runner.convert_run_window");
 });
 
 it.each([14, 15, 16])(
@@ -63,8 +65,10 @@ it.each([14, 15, 16])(
     expect(result.actionId).toBe(action.actionId);
     expect(result.fallbackUsed).toBe(false);
     expect(
-      result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    ).toContain("plan:runner.convert_run_window:");
+      result.decisionDebug?.planFirstDecision?.portfolio.find(
+        (instance) => instance.instanceId === result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+      )?.moduleId,
+    ).toBe("runner.convert_run_window");
   },
 );
 

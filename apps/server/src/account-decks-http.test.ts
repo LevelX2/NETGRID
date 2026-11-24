@@ -264,6 +264,7 @@ describe("account deck HTTP API", () => {
         body: JSON.stringify({
           hostSide: "runner",
           playMode: "human_vs_ai",
+          settings: { cardPool: "originalset_classic_proteus" },
           participantADecks: {
             runnerDeckSnapshot: runnerSnapshot,
             corpDeckSnapshot: corpSnapshot,

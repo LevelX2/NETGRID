@@ -53,12 +53,12 @@ it("uses the last terminal Remote opportunity instead of protecting sunk program
       .digest("hex");
   const before = visibleInputHash();
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.start_run.remote_1");
+  expect(decision.actionId).toBe("rs.r1");
   expect(
     decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
   ).toBe("runner.contest_remote");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
   // The runtime records the new risk contract in its planning fingerprint.
@@ -71,7 +71,7 @@ it("keeps the investment reserve when the same public Remote is not a terminal t
   input.playerView.opponent.agendaPoints = 2;
   expect(runnerTerminalContestThreat(input)).toBeUndefined();
   const decision = chooseAiAction(input);
-  expect(decision.actionId).not.toBe("runner.start_run.remote_1");
+  expect(decision.actionId).not.toBe("rs.r1");
   const remote = residentPlanPortfolioSnapshot(input)?.instances.find(
     (p) => p.moduleId === "runner.contest_remote",
   );
@@ -95,12 +95,12 @@ it("uses the same last opportunity against the advanced four-point threat", () =
   expect(runnerTerminalContestThreat(input)).toMatchObject({
     kind: "visible_four_point_remote",
     pointsNeeded: 4,
-    remoteServerIds: ["remote_1"],
+    remoteServerIds: ["r1"],
   });
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.start_run.remote_1");
+  expect(decision.actionId).toBe("rs.r1");
   expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
-    "plan:runner.contest_remote:remote%3Aremote_1",
+    "p1p4xezjcxov79rno40lq3f7rv",
   );
   expect(decision.fallbackUsed || decision.timeoutUsed).toBe(false);
 });

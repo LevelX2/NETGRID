@@ -8,10 +8,18 @@ import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-
 import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import { runnerBankRunFundingContinuation } from "./runner-bank-run-funding-continuation";
 
-function facts(source: unknown = checkpoint) {
+function facts(
+  source: unknown = checkpoint,
+  options?: { withoutTagPrevention: true },
+) {
   const input = structuredClone(
     (source as typeof checkpoint).input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
+  if (options?.withoutTagPrevention) {
+    input.playerView.own.rig = input.playerView.own.rig!.filter(
+      (card) => card.definitionId !== 347,
+    );
+  }
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: input.side,
@@ -25,10 +33,13 @@ function facts(source: unknown = checkpoint) {
   const target = evaluateRunnerRunTargets({
     input,
     deckCapabilities: input.ownDeckCapabilities!,
-  }).find((entry) => entry.actionId === "runner.start_run.remote_1")!;
-  const bank = candidates.find((entry) =>
-    entry.actionId.endsWith(":withdraw_credits"),
-  )!;
+  }).find((entry) => entry.actionId === "rs.r1")!;
+  const bankAction = input.legalActions.find(
+    (action) => action.payload?.cardImplementationTakesHostedCredits === true,
+  );
+  const bank = candidates.find((entry) => entry.actionId === bankAction?.actionId);
+  if (!bank)
+    throw new Error("Expected a candidate for the Engine bank withdrawal action.");
   return { input, candidates, target, bank };
 }
 
@@ -61,7 +72,7 @@ it.each(["one_credit_short", "one_click_short", "no_loan"] as const)(
     if (variant === "one_click_short") input.playerView.own.clicks = 3;
     if (variant === "no_loan")
       input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.filter(
-        (card) => card.definitionId !== "onr_v1_168_loan-from-chiba",
+        (card) => card.definitionId !== 380,
       );
     expect(
       runnerBankRunFundingContinuation(
@@ -75,8 +86,10 @@ it.each(["one_credit_short", "one_click_short", "no_loan"] as const)(
   },
 );
 
-it("certifies the complete composite route while exposing only the bank's current first step", () => {
-  const { input, candidates, target, bank } = facts();
+it("certifies the composite route without installed tag prevention and exposes the bank's first step", () => {
+  const { input, candidates, target, bank } = facts(checkpoint, {
+    withoutTagPrevention: true,
+  });
   const quote = runnerBankRunFundingContinuation(
     input,
     candidates,
@@ -85,8 +98,8 @@ it("certifies the complete composite route while exposing only the bank's curren
     bank.actionId,
   );
   expect(quote).toMatchObject({
-    parentPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-    needId: "run-support:remote:remote_1",
+    parentPlanInstanceId: "p1p4xezjcxov79rno40lq3f7rv",
+    needId: "run-support:remote:r1",
     routeActionIds: [bank.actionId],
     routeAssessment: {
       status: "covered_guaranteed",
@@ -95,6 +108,25 @@ it("certifies the complete composite route while exposing only the bank's curren
       firstStepActionId: bank.actionId,
     },
   });
+});
+
+it("does not require the composite bank prefix when installed prevention covers Hunter", () => {
+  const { input, candidates, target, bank } = facts();
+  expect(target.routeQuote?.knownCost).toBe(13);
+  expect(target.visibleIceRunHazards?.[0]).toMatchObject({
+    kind: "trace_tag",
+    minimumAvoidanceCost: 3,
+    unavoidable: false,
+  });
+  expect(
+    runnerBankRunFundingContinuation(
+      input,
+      candidates,
+      input.ownDeckCapabilities!,
+      target,
+      bank.actionId,
+    ),
+  ).toBeUndefined();
 });
 
 it.each([
@@ -107,14 +139,16 @@ it.each([
   "nonfinite_source",
   "central_consumer",
 ] as const)("does not bind an unsupported composite prefix: %s", (variant) => {
-  const { input, candidates, target, bank } = facts();
+  const { input, candidates, target, bank } = facts(checkpoint, {
+    withoutTagPrevention: true,
+  });
   if (variant === "insufficient_total_exit") input.playerView.own.credits = 12;
   if (variant === "no_run_click") input.playerView.own.clicks = 2;
   if (variant === "unheld_loan")
     input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.filter(
-      (card) => card.definitionId !== "onr_v1_168_loan-from-chiba",
+      (card) => card.definitionId !== 380,
     );
-  if (variant === "wrong_run") target.actionId = "runner.start_run.hq";
+  if (variant === "wrong_run") target.actionId = "rs.hq";
   if (variant === "central_consumer") target.accessTargetKind = "hq";
   if (variant === "stale_bank")
     input.legalActions.find((entry) => entry.actionId === bank.actionId)!

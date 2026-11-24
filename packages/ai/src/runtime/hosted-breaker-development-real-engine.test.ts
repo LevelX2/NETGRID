@@ -4,7 +4,11 @@ import {
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
-import type { DeckDefinition, GameState } from "@netgrid/shared";
+import type {
+  DeckDefinition,
+  GameState,
+  TraceRulesProfile,
+} from "@netgrid/shared";
 import catalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { buildAiDecisionInput } from "./ai-decision-input";
@@ -18,8 +22,8 @@ import {
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
 
-const stockId = "onr_proteus_139_eurocorpse-tm-spin-chip",
-  breakerId = "onr_v1_039_krash";
+const stockId = 197,
+  breakerId = 251;
 const runner = catalog.decks.find(
   (d) =>
     d.standardDeckId ===
@@ -43,7 +47,7 @@ function apply(state: GameState, side: "runner" | "corp", id: string) {
   if (!result.ok) throw Error(result.error.message);
   return result.state;
 }
-function fixture() {
+function fixture(traceRulesProfile: TraceRulesProfile = "modern_open") {
   const deck = (d: typeof runner): DeckDefinition => ({
     id: d.standardDeckId,
     name: d.name,
@@ -56,6 +60,7 @@ function fixture() {
     matchId: "run-strength-stock",
     runnerDeck: deck(runner),
     corpDeck: deck(corp),
+    traceRulesProfile,
     agendaPointsToWin: 7,
   });
   s = apply(
@@ -76,8 +81,8 @@ function fixture() {
     .withRunnerGripSize(0)
     .withRunnerCardInGrip(breakerId)
     .withRunnerCardInGrip(stockId)
-    .withRezzedCorpIceOnServer("rd", "onr_v1_245_fire-wall")
-    .withRezzedCorpIceOnServer("hq", "onr_v1_252_keeper");
+    .withRezzedCorpIceOnServer("rd", 457)
+    .withRezzedCorpIceOnServer("hq", 464);
   s.runner.memoryUsed = 0;
   return s;
 }
@@ -99,7 +104,7 @@ function evaluate(s: GameState, id = stockId) {
     )!,
   };
 }
-function install(s: GameState, definitionId: string, hosted = false) {
+function install(s: GameState, definitionId: number, hosted = false) {
   const action = getLegalActions(s, "runner").find(
     (a) =>
       a.type === "install_card" &&
@@ -110,7 +115,7 @@ function install(s: GameState, definitionId: string, hosted = false) {
   expect(action).toBeDefined();
   return apply(s, "runner", action.actionId);
 }
-function addCopy(s: GameState, definitionId: string) {
+function addCopy(s: GameState, definitionId: number) {
   const id = s.runner.stack.find(
     (c) => s.cardInstances[c]!.definitionId === definitionId,
   )!;
@@ -157,6 +162,46 @@ describe("hosted breaker investment through real Engine and plan owners", () => 
     expect(s.runner.memoryUsed).toBe(0);
     expect(s.runner.credits).toBe(14);
   });
+  it.each([
+    ["classic_blind", true],
+    ["modern_open", false],
+  ] as const)(
+    "uses the %s Rex costs in the hosting investment",
+    (profile, admitted) => {
+      const s = fixture(profile);
+      const raptor = 266;
+      const rex = 476;
+      // Substitute the cards in this scenario while retaining the native views
+      // and installation offers for both rules profiles.
+      const breaker = s.runner.grip.find(
+        (id) => s.cardInstances[id]!.definitionId === breakerId,
+      )!;
+      const hq = s.corp.servers.find((server) => server.id === "hq")!;
+      s.cardInstances[breaker]!.definitionId = raptor;
+      s.cardInstances[hq.ice[0]!]!.definitionId = rex;
+      RealEngineFixtureBuilder.forState(s)
+        .withCorpCardInHq(457)
+        .withCorpCredits(1);
+      const { input, evaluation } = evaluate(s);
+      expect(input.playerView.traceRulesProfile).toBe(profile);
+      expect(evaluation.hostedBreakerDevelopment?.admitted).toBe(admitted);
+      if (admitted) {
+        const offer = input.legalActions.find(
+          (action) => action.actionId === evaluation.legalActionId,
+        )!;
+        expect(offer).toMatchObject({
+          type: "install_card",
+          source: evaluation.cardInstanceId,
+          expiresAtStateVersion: s.stateVersion,
+        });
+        expect(evaluation.hostedBreakerDevelopment?.evidenceCodes).toContain(
+          "runner_hosted_breaker_saving_per_turn:2",
+        );
+        const installed = apply(s, "runner", offer.actionId);
+        expect(installed.runner.rig.hardware).toContain(offer.source);
+      }
+    },
+  );
   it("admits and executes a later second-breaker upgrade without dismantling coverage", () => {
     let s = install(fixture(), breakerId);
     addCopy(s, breakerId);
@@ -205,8 +250,8 @@ describe("hosted breaker investment through real Engine and plan owners", () => 
     if (reason === "short_horizon") s.runner.stack = s.runner.stack.slice(0, 2);
     if (reason === "urgent")
       RealEngineFixtureBuilder.forState(s).withCorpRemoteRoot(
-        "remote_1",
-        "onr_v1_220_tycho-extension",
+        "r1",
+        432,
         3,
       );
     if (reason === "no_saving")
@@ -227,10 +272,10 @@ describe("hosted breaker investment through real Engine and plan owners", () => 
   it("uses the host even when ordinary MU is full, without trashing support", () => {
     let s = fixture();
     for (const id of [
-      "onr_v1_012_clown",
-      "onr_v1_046_pattels-virus",
-      "onr_proteus_091_lockjaw",
-      "onr_v1_071_vewy-vewy-quiet",
+      224,
+      258,
+      149,
+      283,
     ]) {
       RealEngineFixtureBuilder.forState(s).withRunnerProgramInstalled(id);
     }
@@ -316,7 +361,7 @@ describe("hosted breaker investment through real Engine and plan owners", () => 
   it("does not double-count run credits already covered by renewable pools", () => {
     const s = fixture();
     // Real installed providers with their Engine-produced credit pools.
-    for (const id of ["onr_v1_011_cloak", "onr_v1_011_cloak"]) {
+    for (const id of [223, 223]) {
       const instance = s.runner.stack.find(
         (c) => s.cardInstances[c]!.definitionId === id,
       );
@@ -325,8 +370,8 @@ describe("hosted breaker investment through real Engine and plan owners", () => 
       s.runner.grip.push(instance);
       s.cardInstances[instance]!.zone = { side: "runner", zone: "grip" };
     }
-    let installed = install(s, "onr_v1_011_cloak");
-    installed = install(installed, "onr_v1_011_cloak");
+    let installed = install(s, 223);
+    installed = install(installed, 223);
     installed.runner.clicks = 4;
     // Strength zero still costs Krash one credit per broken subroutine.
     // Cloaks fully cover this cost, so Spin Chip adds no liquid saving.

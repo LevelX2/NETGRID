@@ -1,5 +1,6 @@
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { sortedUnique } from "../runtime/collection";
+import { roundNumber as round } from "../runtime/number-rounding";
 import type { AiDoctrineQualityMetrics } from "./doctrine-quality-types";
 import type { AiQualityMetrics } from "./quality-metric-types";
 export type { AiQualityMetrics } from "./quality-metric-types";
@@ -8,6 +9,7 @@ export type AiSoakResult = {
   summaries: AiSimulationSummary[];
   aggregate: {
     seeds: number;
+    games: number;
     illegalActions: number;
     replayFailures: number;
     fallbackRate: number;
@@ -18,9 +20,14 @@ export type AiSoakResult = {
   };
 };
 
+export type SimulationFailureCounts = {
+  illegalActions: number;
+  total: number;
+};
+
 export function metricsForSimulationActionSequence(
   actionSequence: AiSimulationSummary["actionSequence"],
-  errors: string[],
+  failures: SimulationFailureCounts,
   replayOk: boolean,
   holdout: boolean,
   summarizeDoctrineQualityMetrics: (
@@ -35,7 +42,7 @@ export function metricsForSimulationActionSequence(
   );
   const doctrine = summarizeDoctrineQualityMetrics(actionSequence);
   return {
-    illegalActions: errors.length,
+    illegalActions: failures.illegalActions,
     fallbackRate: round(
       actionSequence.filter((entry) => entry.fallbackUsed).length / actions,
     ),
@@ -54,13 +61,9 @@ export function metricsForSimulationActionSequence(
       ),
     ),
     progressScore: round(
-      actionSequence.length + (replayOk ? 10 : 0) - errors.length * 10,
+      actionSequence.length + (replayOk ? 10 : 0) - failures.total * 10,
     ),
     holdout,
     doctrine,
   };
-}
-
-function round(value: number): number {
-  return Math.round(value * 1000) / 1000;
 }

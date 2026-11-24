@@ -3,7 +3,7 @@ import { cardDefinitionId, type CardSpec } from "../..";
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
-    cardDefinitionId: cardDefinitionId("onr_proteus_134_cortical-cybermodem"),
+    cardDefinitionId: cardDefinitionId(192),
     title: "Cortical Cybermodem",
     side: "runner",
     cardType: "hardware",

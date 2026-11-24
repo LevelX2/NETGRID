@@ -13,8 +13,8 @@ import type {
 
 const programId = "program_1" as CardInstanceId;
 const sourceCardId = "source_card" as CardInstanceId;
-const programDefinitionId = "program_definition" as CardDefinitionId;
-const sourceDefinitionId = "source_definition" as CardDefinitionId;
+const programDefinitionId = 2683187541 as CardDefinitionId;
+const sourceDefinitionId = 462381168 as CardDefinitionId;
 
 function sneakPlan(
   overrides: Partial<TemporaryProgramSearchInstallExecutionPlan> = {},

@@ -19,12 +19,12 @@ describe("match 9f8cecdd78b35d0e Corp remote support D78", () => {
     const parentNeedId = "remote-hardening:strategic-score-remote:4";
     const tesseractRoute = checkpointDefenseCandidate(
       "d78-install-tesseract-remote-1",
-      "remote_1",
+      "r1",
       "d78-tesseract",
     );
     const strongerRoute = checkpointDefenseCandidate(
       "d78-install-stronger-remote-1",
-      "remote_1",
+      "r1",
       "d78-stronger-provider",
     );
     const remoteProject: CorpCorePlanDomain["remoteProjects"][number] =
@@ -59,7 +59,7 @@ describe("match 9f8cecdd78b35d0e Corp remote support D78", () => {
     expect(tesseractDisposition).toMatchObject({
       actionId: tesseractRoute.actionId,
       evidenceCode: expect.stringMatching(
-        /reason:higher_state_bound_defense_value.*selected:remote_1:.*d78-install-stronger-remote-1/,
+        /reason:higher_state_bound_defense_value.*selected:r1:.*d78-install-stronger-remote-1/,
       ),
     });
     expect(tesseractDisposition?.evidenceCode).not.toContain(
@@ -73,7 +73,7 @@ describe("match 9f8cecdd78b35d0e Corp remote support D78", () => {
     const instance = instantiatePlanProposal(proposal, 60);
     expect(proposal).toMatchObject({
       parentInstanceId:
-        "plan:corp.establish_scoring_remote:strategic-score-remote",
+        "p6vrrjl5fc78gjet2n25nst7pp",
       parentNeedId,
       initialViability: "ready",
     });

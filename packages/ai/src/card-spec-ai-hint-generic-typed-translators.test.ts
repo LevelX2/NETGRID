@@ -1,4 +1,6 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -8,9 +10,9 @@ function syntheticHint(
   engine: Record<string, unknown>,
   options: { side?: "corp" | "runner"; type?: string } = {},
 ) {
-  const entry = cardSpecPlanningCards().find(
+  const entry = listPlanningCardsWithFacts().find(
     (candidate) =>
-      candidate.definition.side === (options.side ?? "runner") &&
+      candidate.facts.side === (options.side ?? "runner") &&
       candidate.planning.engine.abilities === undefined &&
       candidate.planning.engine.lifecycle === undefined &&
       candidate.planning.engine.printedSubroutines === undefined &&
@@ -19,8 +21,8 @@ function syntheticHint(
   )!;
   return deriveCardSpecAiHint({
     ...entry,
-    definition: {
-      ...entry.definition,
+    facts: {
+      ...entry.facts,
       ...(options.type === undefined ? {} : { type: options.type }),
     },
     planning: {
@@ -30,9 +32,9 @@ function syntheticHint(
   } as never);
 }
 
-function actualHint(cardId: string) {
-  const entry = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+function actualHint(cardId: CardDefinitionId) {
+  const entry = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   const mechanicalPlanning = { ...entry.planning };
@@ -45,9 +47,9 @@ function actualHint(cardId: string) {
   });
 }
 
-function targetAnnotatedEntry(cardId: string) {
-  const entry = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+function targetAnnotatedEntry(cardId: CardDefinitionId) {
+  const entry = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   return {
@@ -84,7 +86,7 @@ const activated = (effects: unknown[]) => ({
 
 describe("generic typed CardSpec AI translators", () => {
   it("does not create a trace/tag placement owner from the annotation alone", () => {
-    const entry = targetAnnotatedEntry("onr_v1_310_blood-cat");
+    const entry = targetAnnotatedEntry(522);
     expect(
       deriveCardSpecAiHint({
         ...entry,
@@ -98,15 +100,15 @@ describe("generic typed CardSpec AI translators", () => {
   it.each([false, true])(
     "retains the installed trace/tag asset's placement preference independent of its identity: renamed=%s",
     (renamed) => {
-      const original = targetAnnotatedEntry("onr_v1_310_blood-cat");
+      const original = targetAnnotatedEntry(522);
       // Keep a supported catalog identity so the independent support-evidence
       // gate remains active while the mechanical translator is renamed.
       const entry = renamed
         ? {
             ...original,
-            definition: {
-              ...original.definition,
-              id: "onr_v1_309_bbs-whispering-campaign",
+            facts: {
+              ...original.facts,
+              id: 521,
               title: "Synthetic trace asset",
             },
           }
@@ -133,10 +135,10 @@ describe("generic typed CardSpec AI translators", () => {
       amountKind: "dynamic",
       repeatable: true,
     };
-    const actual = actualHint("onr_proteus_094_scaldan");
+    const actual = actualHint(152);
     expect(actual.effects).toContainEqual(expected);
     expect(
-      buildActionCardSemanticProfilesByDefinitionId()["onr_proteus_094_scaldan"]
+      buildActionCardSemanticProfilesByDefinitionId()[152]
         ?.functionalEffects,
     ).toContainEqual(expected);
     expect(actual.functionSignals).toEqual(
@@ -145,8 +147,8 @@ describe("generic typed CardSpec AI translators", () => {
         "risk.random_outcome",
       ]),
     );
-    const engine = cardSpecPlanningCards().find(
-      (e) => e.definition.id === "onr_proteus_094_scaldan",
+    const engine = listPlanningCardsWithFacts().find(
+      (e) => e.facts.id === 152,
     )!.planning.engine;
     expect(
       syntheticHint({ virusCounter: engine.virusCounter }, { type: "program" })
@@ -176,7 +178,7 @@ describe("generic typed CardSpec AI translators", () => {
       target: "run.expose_approached_ice_before_rez",
       finite: true,
     };
-    expect(actualHint("onr_proteus_104_decoy-signal").effects).toContainEqual(
+    expect(actualHint(162).effects).toContainEqual(
       expected,
     );
     const effect = {
@@ -201,7 +203,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("projects direct lifecycle score credits without strategy annotations and keeps conditional pools distinct", () => {
-    const charity = actualHint("onr_proteus_002_charity-takeover");
+    const charity = actualHint(60);
     expect(charity.roles).not.toContain("no_ability_agenda");
     expect(charity.effects).toContainEqual(
       expect.objectContaining({
@@ -254,15 +256,15 @@ describe("generic typed CardSpec AI translators", () => {
         { side: "corp", type: "agenda" },
       ),
     ).toThrow("card_spec_unknown_score_credit_gain_shape");
-    expect(actualHint("onr_v1_196_corporate-war").effects).not.toContainEqual(
+    expect(actualHint(408).effects).not.toContainEqual(
       expect.objectContaining({ target: "score.credit_gain" }),
     );
-    expect(actualHint("onr_v1_209_political-coup").effects).not.toContainEqual(
+    expect(actualHint(421).effects).not.toContainEqual(
       expect.objectContaining({ target: "score.credit_gain" }),
     );
   });
   it("projects a legal multi-central virus conversion as Corp action denial", () => {
-    const viralPipeline = actualHint("onr_proteus_099_viral-pipeline");
+    const viralPipeline = actualHint(157);
 
     expect(viralPipeline.actionCapabilitySemantics).toContainEqual(
       expect.objectContaining({
@@ -284,7 +286,7 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("binds Batch 9 rez and targeted-bypass choices to their mechanical owners", () => {
     const sandstorm = deriveCardSpecAiHint(
-      targetAnnotatedEntry("onr_proteus_036_sandstorm"),
+      targetAnnotatedEntry(94),
     );
     expect(sandstorm.targetProfiles).toContainEqual(
       expect.objectContaining({
@@ -297,7 +299,7 @@ describe("generic typed CardSpec AI translators", () => {
     );
 
     const socialEngineering = deriveCardSpecAiHint(
-      targetAnnotatedEntry("onr_v1_111_social-engineering"),
+      targetAnnotatedEntry(323),
     );
     expect(socialEngineering.targetProfiles).toContainEqual(
       expect.objectContaining({
@@ -312,7 +314,7 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("keeps multiple actor-private choices bound to their own capability", () => {
     const ronin = deriveCardSpecAiHint(
-      targetAnnotatedEntry("onr_v1_175_ronin-around"),
+      targetAnnotatedEntry(387),
     );
 
     expect(ronin.targetProfiles).toEqual(
@@ -333,7 +335,7 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("treats an own-stack program search as controller-known selection", () => {
     const shortCircuit = deriveCardSpecAiHint(
-      targetAnnotatedEntry("onr_v1_177_the-short-circuit"),
+      targetAnnotatedEntry(389),
     );
 
     expect(shortCircuit.targetProfiles).toContainEqual({
@@ -353,7 +355,7 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("binds Reconnaissance rez-credit planning to the chosen run server", () => {
     const reconnaissance = deriveCardSpecAiHint(
-      targetAnnotatedEntry("onr_proteus_120_reconnaissance"),
+      targetAnnotatedEntry(178),
     );
 
     expect(reconnaissance.targetProfiles).toContainEqual({
@@ -369,7 +371,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("projects a runner turn-start credit engine that ends on the first run", () => {
-    const conference = actualHint("onr_v1_184_top-runners-conference");
+    const conference = actualHint(396);
 
     expect(conference.effects).toEqual(
       expect.arrayContaining([
@@ -395,9 +397,9 @@ describe("generic typed CardSpec AI translators", () => {
       expect.arrayContaining(["economy.generic", "economy.turn_start_credit"]),
     );
 
-    const entry = cardSpecPlanningCards().find(
+    const entry = listPlanningCardsWithFacts().find(
       (candidate) =>
-        candidate.definition.id === "onr_v1_184_top-runners-conference",
+        candidate.facts.id === 396,
     );
     if (entry === undefined) throw new Error("missing_top_runners_conference");
     const withoutRunStartTrash = deriveCardSpecAiHint({
@@ -420,7 +422,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("projects an exact installed-program access ambush without text inference", () => {
-    const experimental = actualHint("onr_v1_323_experimental-ai");
+    const experimental = actualHint(535);
 
     expect(experimental.effects).toEqual(
       expect.arrayContaining([
@@ -438,8 +440,8 @@ describe("generic typed CardSpec AI translators", () => {
       ]),
     );
 
-    const entry = cardSpecPlanningCards().find(
-      (candidate) => candidate.definition.id === "onr_v1_323_experimental-ai",
+    const entry = listPlanningCardsWithFacts().find(
+      (candidate) => candidate.facts.id === 535,
     );
     if (entry === undefined) throw new Error("missing_experimental_ai");
     const withoutAccessEffect = deriveCardSpecAiHint({
@@ -456,8 +458,8 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("binds Blood Cat trace and tag semantics to its exact capability", () => {
-    const entry = cardSpecPlanningCards().find(
-      (candidate) => candidate.definition.id === "onr_v1_310_blood-cat",
+    const entry = listPlanningCardsWithFacts().find(
+      (candidate) => candidate.facts.id === 522,
     );
     if (entry === undefined) throw new Error("missing_blood_cat_test_card");
 
@@ -510,7 +512,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("projects a typed delayed-install countdown without widening nearby cards", () => {
-    const shell = actualHint("onr_v1_176_the-shell-traders");
+    const shell = actualHint(388);
     expect(shell.roles).toContain("delayed_install");
     expect(shell.effects).toContainEqual({
       kind: "install",
@@ -527,8 +529,8 @@ describe("generic typed CardSpec AI translators", () => {
       ]),
     );
 
-    const shellEntry = cardSpecPlanningCards().find(
-      (entry) => entry.definition.id === "onr_v1_176_the-shell-traders",
+    const shellEntry = listPlanningCardsWithFacts().find(
+      (entry) => entry.facts.id === 388,
     );
     if (!shellEntry) throw new Error("missing_shell_traders_test_card");
     const withoutCountdown = deriveCardSpecAiHint({
@@ -549,7 +551,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("sees all 27 canonical trace source cards without legacy trace fields", () => {
-    const cards = cardSpecPlanningCards();
+    const cards = listPlanningCardsWithFacts();
     const directTraceCards = cards.filter((entry) => {
       const engine = entry.planning.engine;
       return (
@@ -588,19 +590,19 @@ describe("generic typed CardSpec AI translators", () => {
     expect(directTraceCards).toHaveLength(26);
     expect(directTraceNodes).toBe(27);
     expect(dynamicTraceCards).toHaveLength(1);
-    expect(dynamicTraceCards[0]?.definition.id).toBe(
-      "onr_proteus_026_hunting-pack",
+    expect(dynamicTraceCards[0]?.facts.id).toBe(
+      84,
     );
     expect(
       new Set([
-        ...directTraceCards.map((entry) => entry.definition.id),
-        ...dynamicTraceCards.map((entry) => entry.definition.id),
+        ...directTraceCards.map((entry) => entry.facts.id),
+        ...dynamicTraceCards.map((entry) => entry.facts.id),
       ]).size,
     ).toBe(27);
   });
 
   it("projects typed installed tag-punish setup from access, utility, and random payoff mechanics", () => {
-    const turbeau = actualHint("onr_v1_372_turbeau-delacroix");
+    const turbeau = actualHint(584);
     expect(turbeau.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -623,7 +625,7 @@ describe("generic typed CardSpec AI translators", () => {
       ]),
     );
 
-    const omniscience = actualHint("onr_v1_333_omniscience-foundation");
+    const omniscience = actualHint(545);
     expect(omniscience.effects).toContainEqual(
       expect.objectContaining({
         kind: "tag_source",
@@ -633,7 +635,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
 
-    const schlaghund = actualHint("onr_v1_339_schlaghund");
+    const schlaghund = actualHint(551);
     expect(schlaghund.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -655,7 +657,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("keeps Codecracker's printed install and memory costs separate from ability prices", () => {
-    const hint = actualHint("onr_v1_014_codecracker");
+    const hint = actualHint(226);
 
     expect(hint.costProfile).toMatchObject({
       clicks: 1,
@@ -670,8 +672,8 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("projects Data Raven and Asp trace outcomes from exact printed unions", () => {
-    const dataRaven = actualHint("onr_v1_236_data-raven");
-    const asp = actualHint("onr_v1_221_asp");
+    const dataRaven = actualHint(448);
+    const asp = actualHint(433);
 
     expect(dataRaven.effects).toEqual(
       expect.arrayContaining([
@@ -710,9 +712,9 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("derives each persistent Runner-counter consequence from its typed contract", () => {
-    const baskerville = actualHint("onr_classic_005_baskerville");
-    const cerberus = actualHint("onr_v1_227_cerberus");
-    const mastiff = actualHint("onr_v1_255_mastiff");
+    const baskerville = actualHint(9);
+    const cerberus = actualHint(439);
+    const mastiff = actualHint(467);
 
     expect(baskerville.effects).toContainEqual(
       expect.objectContaining({
@@ -751,7 +753,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("projects Boardwalk virus pressure and the Corp purge action cost", () => {
-    const hint = actualHint("onr_v1_008_boardwalk");
+    const hint = actualHint(220);
 
     expect(hint.functionSignals).toEqual(
       expect.arrayContaining([
@@ -778,8 +780,8 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("preserves agenda trace and scored hosted-credit ownership and timing", () => {
-    const netwatch = actualHint("onr_v1_207_netwatch-operations-office");
-    const coup = actualHint("onr_v1_193_corporate-coup");
+    const netwatch = actualHint(419);
+    const coup = actualHint(405);
 
     expect(netwatch.cardType).toBe("agenda");
     expect(netwatch.effects).toEqual(
@@ -802,8 +804,8 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("projects Baedeker and Back Door trace-link windows from typed effects", () => {
     for (const cardId of [
-      "onr_v1_003_baedekers-net-map",
-      "onr_v1_152_back-door-to-hilliard",
+      215,
+      364,
     ]) {
       const hint = actualHint(cardId);
       expect(hint.effects).toEqual(
@@ -826,8 +828,8 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("emits typed target skeletons for SMC and Mystery Box without inventing them elsewhere", () => {
-    const smc = actualHint("onr_v1_059_self-modifying-code");
-    const mysteryBox = actualHint("onr_v1_043_mystery-box");
+    const smc = actualHint(271);
+    const mysteryBox = actualHint(255);
 
     expect(smc.targetProfiles).toContainEqual(
       expect.objectContaining({
@@ -893,7 +895,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("compiles Reflector's single any-of matcher without duplicating coverage", () => {
-    expect(actualHint("onr_v1_055_reflector").breakerProfile).toMatchObject({
+    expect(actualHint(267).breakerProfile).toMatchObject({
       coverage: ["unknown_special"],
       breakCost: 0,
       maxSubroutinesPerBreak: 1,
@@ -901,7 +903,7 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("retains runner self-trash semantics when trashing is an ability cost", () => {
-    expect(actualHint("onr_v1_059_self-modifying-code")).toMatchObject({
+    expect(actualHint(271)).toMatchObject({
       effects: expect.arrayContaining([
         expect.objectContaining({
           kind: "program_trash",
@@ -914,15 +916,15 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("keeps scored agenda placement and rez-support choices on their actual target dimensions", () => {
-    const hintFor = (cardId: string) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+    const hintFor = (cardId: CardDefinitionId) => {
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (!entry) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
     };
 
-    expect(hintFor("onr_v1_216_security-purge").targetProfiles).toContainEqual(
+    expect(hintFor(428).targetProfiles).toContainEqual(
       expect.objectContaining({
         kind: "install_target",
         timing: "on_score",
@@ -931,7 +933,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
     expect(
-      hintFor("onr_v1_219_superior-net-barriers").targetProfiles,
+      hintFor(431).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         kind: "use_target",
@@ -944,13 +946,13 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("does not invent a target choice for a fort already bound by the successful run", () => {
-    const entry = targetAnnotatedEntry("onr_v1_026_false-echo");
+    const entry = targetAnnotatedEntry(238);
 
     expect(deriveCardSpecAiHint(entry).targetProfiles).toBeUndefined();
   });
 
   it("projects Data Crèche as a successful-run bonus run without grip-reset semantics", () => {
-    const hint = actualHint("onr_v1_123_bodyweight-data-creche");
+    const hint = actualHint(335);
 
     expect(hint).toMatchObject({
       roles: expect.arrayContaining(["run_support"]),
@@ -979,9 +981,9 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("compiles all Originalset target preferences through exact typed owner unions", () => {
-    const entries = cardSpecPlanningCards().filter(
+    const entries = listPlanningCardsWithFacts().filter(
       (entry) =>
-        entry.definition.id.startsWith("onr_v1_") &&
+        ORIGINALSET_V1_CARD_IDS.includes(entry.facts.id) &&
         ((entry.planning.planningAnnotations?.card?.some(
           (annotation) => annotation.kind === "target_preference",
         ) ??
@@ -1010,12 +1012,12 @@ describe("generic typed CardSpec AI translators", () => {
     ).toBe(74);
     for (const entry of entries)
       expect(() =>
-        deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),
+        deriveCardSpecAiHint(targetAnnotatedEntry(entry.facts.id)),
       ).not.toThrow();
 
     const witnesses = [
       [
-        "onr_v1_046_pattels-virus",
+        258,
         {
           timing: "after_successful_run",
           targetType: "installed_ice",
@@ -1023,7 +1025,7 @@ describe("generic typed CardSpec AI translators", () => {
         },
       ],
       [
-        "onr_v1_075_zetatech-software-installer",
+        287,
         {
           kind: "install_target",
           timing: "paid_action",
@@ -1031,15 +1033,15 @@ describe("generic typed CardSpec AI translators", () => {
         },
       ],
       [
-        "onr_v1_077_anonymous-tip",
+        289,
         { kind: "use_target", timing: "on_play", targetType: "installed_ice" },
       ],
       [
-        "onr_v1_100_misc-for-sale",
+        312,
         { kind: "use_target", timing: "on_play", targetType: "card" },
       ],
       [
-        "onr_v1_131_microtech-backup-drive",
+        343,
         {
           kind: "replacement_target",
           timing: "replacement_window",
@@ -1047,19 +1049,19 @@ describe("generic typed CardSpec AI translators", () => {
         },
       ],
       [
-        "onr_v1_289_edgerunner-inc-temps",
+        501,
         { kind: "install_target", timing: "on_play", targetType: "card" },
       ],
       [
-        "onr_v1_294_new-blood",
+        506,
         { kind: "use_target", timing: "on_play", targetType: "ice_position" },
       ],
       [
-        "onr_v1_298_planning-consultants",
+        510,
         { kind: "use_target", timing: "on_play", targetType: "card" },
       ],
       [
-        "onr_v1_316_cowboy-sysop",
+        528,
         {
           kind: "use_target",
           timing: "activated_ability",
@@ -1074,17 +1076,17 @@ describe("generic typed CardSpec AI translators", () => {
 
     expect(
       deriveCardSpecAiHint(
-        targetAnnotatedEntry("onr_v1_046_pattels-virus"),
+        targetAnnotatedEntry(258),
       ).targetProfiles?.filter((profile) => "schemaVersion" in profile),
     ).toHaveLength(1);
     expect(
-      deriveCardSpecAiHint(targetAnnotatedEntry("onr_v1_044_netspace-inverter"))
+      deriveCardSpecAiHint(targetAnnotatedEntry(256))
         .targetProfiles,
     ).toBeUndefined();
   });
 
   it("rejects near-matching target families without the exact typed owner kind", () => {
-    const forged = (cardId: string, engine: Record<string, unknown>) => {
+    const forged = (cardId: CardDefinitionId, engine: Record<string, unknown>) => {
       const entry = targetAnnotatedEntry(cardId);
       return () =>
         deriveCardSpecAiHint({
@@ -1097,10 +1099,10 @@ describe("generic typed CardSpec AI translators", () => {
     };
 
     expect(
-      forged("onr_proteus_076_syd-meyer-superstores", {
+      forged(134, {
         abilities: [
           {
-            ...targetAnnotatedEntry("onr_proteus_076_syd-meyer-superstores")
+            ...targetAnnotatedEntry(134)
               .planning.engine.abilities?.[0],
             effects: [{ kind: "trash_own_rezzed_ice_for_credits_like" }],
           },
@@ -1108,18 +1110,18 @@ describe("generic typed CardSpec AI translators", () => {
       })().targetProfiles,
     ).toBeUndefined();
     expect(
-      forged("onr_v1_075_zetatech-software-installer", {
+      forged(287, {
         restrictedHostedCreditSource: {
-          ...targetAnnotatedEntry("onr_v1_075_zetatech-software-installer")
+          ...targetAnnotatedEntry(287)
             .planning.engine.restrictedHostedCreditSource,
           usableFor: ["play_events"],
         },
       }),
     ).toThrow("card_spec_target_preference_without_supported_mechanical_owner");
     expect(
-      forged("onr_v1_046_pattels-virus", {
+      forged(258, {
         virusCounter: {
-          ...targetAnnotatedEntry("onr_v1_046_pattels-virus").planning.engine
+          ...targetAnnotatedEntry(258).planning.engine
             .virusCounter,
           addOnSuccessfulRun: {
             server: "any",
@@ -1131,7 +1133,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     ).toThrow("card_spec_unknown_virus_counter_target_profile_server");
     expect(
-      forged("onr_v1_316_cowboy-sysop", {
+      forged(528, {
         corpUtility: { kind: "encounter_tag", visibility: "public" },
       }),
     ).toThrow("card_spec_target_preference_without_supported_mechanical_owner");
@@ -1141,9 +1143,9 @@ describe("generic typed CardSpec AI translators", () => {
     const runner = syntheticHint(
       {
         characteristics: {
-          ...cardSpecPlanningCards()[0]!.planning.engine.characteristics,
+          ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics,
           numeric: {
-            ...cardSpecPlanningCards()[0]!.planning.engine.characteristics
+            ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics
               .numeric,
             installCost: 3,
             memoryCost: 2,
@@ -1161,7 +1163,7 @@ describe("generic typed CardSpec AI translators", () => {
     const operation = syntheticHint(
       {
         characteristics: {
-          ...cardSpecPlanningCards()[0]!.planning.engine.characteristics,
+          ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics,
           playCost: { kind: "fixed", credits: 4 },
         },
       },
@@ -1172,9 +1174,9 @@ describe("generic typed CardSpec AI translators", () => {
     const ice = syntheticHint(
       {
         characteristics: {
-          ...cardSpecPlanningCards()[0]!.planning.engine.characteristics,
+          ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics,
           numeric: {
-            ...cardSpecPlanningCards()[0]!.planning.engine.characteristics
+            ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics
               .numeric,
             rezCost: 6,
           },
@@ -1484,9 +1486,9 @@ describe("generic typed CardSpec AI translators", () => {
     const hint = syntheticHint(
       {
         characteristics: {
-          ...cardSpecPlanningCards()[0]!.planning.engine.characteristics,
+          ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics,
           numeric: {
-            ...cardSpecPlanningCards()[0]!.planning.engine.characteristics
+            ...listPlanningCardsWithFacts()[0]!.planning.engine.characteristics
               .numeric,
             installCost: null,
             memoryCost: null,
@@ -1503,7 +1505,7 @@ describe("generic typed CardSpec AI translators", () => {
 
   it("binds Batch 12 target semantics to the real choice owners", () => {
     const tesseract = deriveCardSpecAiHint(
-      targetAnnotatedEntry("onr_v1_370_tesseract-fort-construction"),
+      targetAnnotatedEntry(582),
     );
     expect(tesseract.targetProfiles).toContainEqual(
       expect.objectContaining({
@@ -1525,7 +1527,7 @@ describe("generic typed CardSpec AI translators", () => {
     );
 
     const syd = deriveCardSpecAiHint(
-      targetAnnotatedEntry("onr_proteus_076_syd-meyer-superstores"),
+      targetAnnotatedEntry(134),
     );
     expect(syd.targetProfiles).toContainEqual(
       expect.objectContaining({
@@ -1539,17 +1541,17 @@ describe("generic typed CardSpec AI translators", () => {
 
     expect(
       deriveCardSpecAiHint(
-        targetAnnotatedEntry("onr_classic_038_gypsytm-schedule-analyzer"),
+        targetAnnotatedEntry(42),
       ).targetProfiles,
     ).toBeUndefined();
     expect(
-      deriveCardSpecAiHint(targetAnnotatedEntry("onr_v1_032_i-spy"))
+      deriveCardSpecAiHint(targetAnnotatedEntry(244))
         .targetProfiles,
     ).toBeUndefined();
   });
 
   it("derives Batch 12 trace outcomes and rez discounts without false tax semantics", () => {
-    const chihuahua = actualHint("onr_proteus_014_chihuahua");
+    const chihuahua = actualHint(72);
     expect(chihuahua.functionSignals).toEqual(
       expect.arrayContaining([
         "corp_ice.trace_source",
@@ -1562,13 +1564,13 @@ describe("generic typed CardSpec AI translators", () => {
     expect(chihuahua.functionSignals).not.toContain("tax.runner_persistent");
 
     const skalderviken = actualHint(
-      "onr_v1_341_skalderviken-sa-beta-test-site",
+      553,
     );
     expect(skalderviken.functionSignals).toContain("economy.rez_discount");
     expect(skalderviken.tacticSignals).toContain("ice.corp_rez_discount");
     expect(skalderviken.tacticSignals).not.toContain("tax.ice");
 
-    const dataRaven = actualHint("onr_v1_236_data-raven");
+    const dataRaven = actualHint(448);
     expect(dataRaven.functionSignals).toEqual(
       expect.arrayContaining([
         "corp_ice.tag_source",
@@ -1579,55 +1581,55 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("keeps Batch 12 strategy ownership proportional to each card", () => {
-    const fullHint = (cardId: string) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+    const fullHint = (cardId: CardDefinitionId) => {
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
     };
 
-    expect(fullHint("onr_proteus_008_project-zurich").strategyAnchors).toEqual([
+    expect(fullHint(66).strategyAnchors).toEqual([
       "corp.overadvance_value",
     ]);
-    expect(fullHint("onr_classic_039_library-search").strategyAnchors).toEqual([
+    expect(fullHint(43).strategyAnchors).toEqual([
       "runner.interface_closeout",
     ]);
-    expect(fullHint("onr_v1_081_custodial-position").strategyAnchors).toEqual([
+    expect(fullHint(293).strategyAnchors).toEqual([
       "runner.interface_closeout",
     ]);
     expect(
-      fullHint("onr_v1_367_rio-de-janeiro-city-grid").strategyAnchors,
+      fullHint(579).strategyAnchors,
     ).toBeUndefined();
-    expect(fullHint("onr_v1_105_priority-wreck").planRoles).toContain(
+    expect(fullHint(317).planRoles).toContain(
       "hq_credit_denial",
     );
-    expect(fullHint("onr_v1_142_record-reconstructor").planRoles).not.toContain(
+    expect(fullHint(354).planRoles).not.toContain(
       "build_rig",
     );
-    expect(fullHint("onr_v1_032_i-spy").planRoles).toContain(
+    expect(fullHint(244).planRoles).toContain(
       "information_tool",
     );
     expect(
-      fullHint("onr_proteus_076_syd-meyer-superstores").strategyAnchors,
+      fullHint(134).strategyAnchors,
     ).toBeUndefined();
   });
 
   it("keeps Batch 14 choices on their actual target and information boundary", () => {
-    const fullHint = (cardId: string) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+    const fullHint = (cardId: CardDefinitionId) => {
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
     };
 
-    expect(fullHint("onr_v1_026_false-echo").targetProfiles).toBeUndefined();
+    expect(fullHint(238).targetProfiles).toBeUndefined();
     expect(
-      fullHint("onr_proteus_085_disintegrator").targetProfiles,
+      fullHint(143).targetProfiles,
     ).toBeUndefined();
 
-    expect(fullHint("onr_v1_001_afreet").targetProfiles).toContainEqual(
+    expect(fullHint(213).targetProfiles).toContainEqual(
       expect.objectContaining({
         kind: "hosted_install_target",
         targetType: "program",
@@ -1635,7 +1637,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
     expect(
-      fullHint("onr_v1_099_mantis-fixer-at-large").targetProfiles,
+      fullHint(311).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         kind: "use_target",
@@ -1646,8 +1648,8 @@ describe("generic typed CardSpec AI translators", () => {
     );
 
     for (const cardId of [
-      "onr_proteus_044_walking-wall",
-      "onr_proteus_033_mobile-barricade",
+      102,
+      91,
     ])
       expect(fullHint(cardId).targetProfiles).toContainEqual(
         expect.objectContaining({
@@ -1661,7 +1663,7 @@ describe("generic typed CardSpec AI translators", () => {
         }),
       );
 
-    const projectConsultants = fullHint("onr_v1_300_project-consultants");
+    const projectConsultants = fullHint(512);
     expect(projectConsultants.targetProfiles).toContainEqual(
       expect.objectContaining({
         purpose: "advance_high_value_corp_card_distribution",
@@ -1675,10 +1677,10 @@ describe("generic typed CardSpec AI translators", () => {
     });
 
     for (const cardId of [
-      "onr_proteus_069_pavit-bharat",
-      "onr_v1_289_edgerunner-inc-temps",
-      "onr_proteus_071_raymond-ellison",
-      "onr_proteus_128_airport-locker",
+      127,
+      501,
+      129,
+      186,
     ]) {
       const profile = fullHint(cardId).targetProfiles?.[0];
       expect(
@@ -1688,7 +1690,7 @@ describe("generic typed CardSpec AI translators", () => {
 
     expect(
       fullHint(
-        "onr_proteus_128_airport-locker",
+        186,
       ).actionCapabilitySemantics?.find(
         (semantics) => semantics.capabilityKey === "search_install_program",
       )?.effects,
@@ -1702,15 +1704,15 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("keeps Batch 14 roles, restricted resources, and liabilities mechanically exact", () => {
-    const fullHint = (cardId: string) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+    const fullHint = (cardId: CardDefinitionId) => {
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
     };
 
-    const weefle = fullHint("onr_proteus_127_weefle-initiation");
+    const weefle = fullHint(185);
     expect(weefle.planRoles).toContain("safe_probe_run");
     expect(weefle.planRoles).not.toContain("pressure_rnd");
     expect(weefle.functionSignals).toContain("defense.run_damage_prevention");
@@ -1722,7 +1724,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
 
-    const totalGenetic = fullHint("onr_v1_116_total-genetic-retrofit");
+    const totalGenetic = fullHint(328);
     expect(totalGenetic.planRoles).toContain("recover_from_tags");
     expect(totalGenetic.functionSignals).toEqual(
       expect.arrayContaining([
@@ -1739,7 +1741,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
 
-    const marionette = fullHint("onr_proteus_029_marionette");
+    const marionette = fullHint(87);
     expect(marionette.strategyAnchors).toBeUndefined();
     expect(marionette.functionSignals).toContain(
       "corp_ice.self_bounce_or_maintenance_drawback",
@@ -1747,7 +1749,7 @@ describe("generic typed CardSpec AI translators", () => {
     expect(marionette.riskTags).toContain("self_bounce_or_maintenance_cost");
     expect(marionette.riskTags).not.toContain("start_run_reposition");
 
-    const loan = fullHint("onr_v1_168_loan-from-chiba");
+    const loan = fullHint(380);
     expect(loan.riskTags).toContain("loss_condition");
     expect(loan.functionSignals).toEqual(
       expect.arrayContaining([
@@ -1756,7 +1758,7 @@ describe("generic typed CardSpec AI translators", () => {
       ]),
     );
 
-    const omniscience = fullHint("onr_v1_333_omniscience-foundation");
+    const omniscience = fullHint(545);
     expect(omniscience.actionStrategySupportPairs).toContainEqual(
       expect.objectContaining({
         role: "enabler",
@@ -1769,7 +1771,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
 
-    const falseEcho = fullHint("onr_v1_026_false-echo");
+    const falseEcho = fullHint(238);
     expect(falseEcho.planRoles).toContain("tax_corp_rez");
     expect(falseEcho.functionSignals).toEqual(
       expect.arrayContaining([
@@ -1785,7 +1787,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
 
-    const governmentContract = fullHint("onr_proteus_059_government-contract");
+    const governmentContract = fullHint(117);
     expect(governmentContract.strategyAnchors).toEqual([
       "corp.economy_rez_reserve",
     ]);
@@ -1798,7 +1800,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
 
-    const leland = fullHint("onr_v1_167_leland-corporate-bodyguard");
+    const leland = fullHint(379);
     expect(leland.planRoles).toEqual(
       expect.arrayContaining(["survive_meat_damage", "avoid_tags"]),
     );
@@ -1807,13 +1809,13 @@ describe("generic typed CardSpec AI translators", () => {
       "defense.brain_damage_prevention",
     );
 
-    const chiba = fullHint("onr_proteus_133_chiba-bank-account");
+    const chiba = fullHint(191);
     expect(chiba.planRoles).toContain("emergency_payment");
     expect(chiba.effects).toContainEqual(
       expect.objectContaining({ timing: "payment_window", amount: 4 }),
     );
 
-    const armageddon = fullHint("onr_proteus_078_armageddon");
+    const armageddon = fullHint(136);
     expect(armageddon.planRoles).toContain("pressure_rnd");
     expect(armageddon.functionSignals).toEqual(
       expect.arrayContaining([
@@ -1836,7 +1838,7 @@ describe("generic typed CardSpec AI translators", () => {
       ]),
     );
 
-    const trode = fullHint("onr_v1_132_microtech-trode-set");
+    const trode = fullHint(344);
     expect(trode.planRoles).toContain("survive_net_damage");
     expect(trode.functionSignals).toEqual(
       expect.arrayContaining([
@@ -1847,29 +1849,29 @@ describe("generic typed CardSpec AI translators", () => {
     );
 
     for (const cardId of [
-      "onr_proteus_044_walking-wall",
-      "onr_proteus_033_mobile-barricade",
-      "onr_classic_013_puzzle",
-      "onr_proteus_085_disintegrator",
-      "onr_proteus_071_raymond-ellison",
+      102,
+      91,
+      17,
+      143,
+      129,
     ])
       expect(fullHint(cardId).strategyAnchors).toBeUndefined();
   });
 
   it("keeps Batch 15 choices on their mechanical owner and information boundary", () => {
-    const fullHint = (cardId: string) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+    const fullHint = (cardId: CardDefinitionId) => {
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
     };
 
     expect(
-      fullHint("onr_proteus_137_death-from-above").targetProfiles,
+      fullHint(195).targetProfiles,
     ).toBeUndefined();
     expect(
-      fullHint("onr_v1_080_core-command-jettison-ice").targetProfiles,
+      fullHint(292).targetProfiles,
     ).toContainEqual(
       expect.objectContaining({
         purpose: "successful_hq_run_rezzed_ice_trash",
@@ -1879,8 +1881,8 @@ describe("generic typed CardSpec AI translators", () => {
     );
 
     for (const cardId of [
-      "onr_v1_292_management-shake-up",
-      "onr_v1_304_systematic-layoffs",
+      504,
+      516,
     ]) {
       const hint = fullHint(cardId);
       expect(hint.targetProfiles).toContainEqual(
@@ -1897,14 +1899,14 @@ describe("generic typed CardSpec AI translators", () => {
     }
 
     expect(
-      fullHint("onr_v1_347_vapor-ops").actionPlanOwnerBindings,
+      fullHint(559).actionPlanOwnerBindings,
     ).toContainEqual({
       capabilityKey: "abilities_activated_corp_main_move_advancement_counters",
       owner: "corp.score_agenda",
     });
     for (const cardId of [
-      "onr_v1_315_corprunners-shattered-remains",
-      "onr_v1_299_power-grid-overload",
+      527,
+      511,
     ])
       expect(fullHint(cardId).targetProfiles).toContainEqual(
         expect.objectContaining({
@@ -1915,15 +1917,15 @@ describe("generic typed CardSpec AI translators", () => {
   });
 
   it("projects Batch 15 run exchanges, liabilities, and breaker side effects generically", () => {
-    const fullHint = (cardId: string) => {
-      const entry = cardSpecPlanningCards().find(
-        (candidate) => candidate.definition.id === cardId,
+    const fullHint = (cardId: CardDefinitionId) => {
+      const entry = listPlanningCardsWithFacts().find(
+        (candidate) => candidate.facts.id === cardId,
       );
       if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
       return deriveCardSpecAiHint(entry);
     };
 
-    const submarine = actualHint("onr_v1_182_submarine-uplink");
+    const submarine = actualHint(394);
     expect(submarine.functionSignals).toEqual(
       expect.arrayContaining([
         "run.ends_run_after_effect",
@@ -1938,7 +1940,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
 
-    const nevinyrral = fullHint("onr_v1_331_nevinyrral");
+    const nevinyrral = fullHint(543);
     expect(nevinyrral.planRoles).toContain("corp_action_tempo");
     expect(nevinyrral.riskTags).toContain("loss_condition");
     expect(nevinyrral.functionSignals).toEqual(
@@ -1948,7 +1950,7 @@ describe("generic typed CardSpec AI translators", () => {
       ]),
     );
 
-    const deathFromAbove = fullHint("onr_proteus_137_death-from-above");
+    const deathFromAbove = fullHint(195);
     expect(deathFromAbove.tacticSignals ?? []).not.toContain(
       "corp.remote_protection",
     );
@@ -1966,7 +1968,7 @@ describe("generic typed CardSpec AI translators", () => {
       }),
     );
 
-    const blink = fullHint("onr_v1_007_blink");
+    const blink = fullHint(219);
     expect(blink.planRoles).not.toContain("safe_probe_run");
     expect(blink.roles).not.toContain("self_trash");
     expect(blink.functionSignals).not.toContain("breaker.self_trash_risk");
@@ -1981,7 +1983,7 @@ describe("generic typed CardSpec AI translators", () => {
       expect.arrayContaining(["random_outcome", "net_damage"]),
     );
 
-    const bulldozer = fullHint("onr_proteus_082_bulldozer");
+    const bulldozer = fullHint(140);
     expect(bulldozer.riskTags).toContain("stealth_loss");
     expect(bulldozer.functionSignals).toEqual(
       expect.arrayContaining([

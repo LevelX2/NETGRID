@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
@@ -29,7 +30,7 @@ export function corpWinningScoreSiblingDominates(
     preparation.phase === "install_agenda" &&
     !winning.sameTurnCloseout &&
     !preparation.sameTurnCloseout &&
-    winning.serverId?.startsWith("remote_") &&
+    isRemoteServerId(winning.serverId) &&
     winning.serverId === preparation.serverId &&
     winning.agendaInstanceId !== preparation.agendaInstanceId &&
     input.playerView.own.stackOrRdCount > 0 &&
@@ -76,7 +77,7 @@ export function corpShorterTerminalScoreRouteDominates(
     !longer.terminalScore ||
     shorter.phase !== "install_agenda" ||
     longer.phase !== "install_agenda" ||
-    !shorter.serverId?.startsWith("remote_") ||
+    !isRemoteServerId(shorter.serverId) ||
     shorter.serverId !== longer.serverId ||
     shorter.agendaInstanceId === longer.agendaInstanceId ||
     shorter.sameTurnCloseout ||

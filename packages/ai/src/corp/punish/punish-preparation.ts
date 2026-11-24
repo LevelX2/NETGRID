@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import { candidateTargetIds } from "../../actions/action-candidate-facts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -66,7 +67,7 @@ export function corpFortTraceSupportPlacementIsPreferred(
   const protectedEmptyTraceRemote = input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.root.length === 0 &&
         server.ice.some(
           (ice) =>
@@ -94,7 +95,7 @@ export function corpProtectedEmptyRemoteTagSourcePlacementIsPreferred(
   const protectedEmptyRemote = input.playerView.servers
     .filter(
       (server) =>
-        server.id.startsWith("remote_") &&
+        isRemoteServerId(server.id) &&
         server.root.length === 0 &&
         server.ice.length > 0,
     )
@@ -144,7 +145,7 @@ export function corpStrategicFundingPhaseBlocksPreparation(
 }
 
 export function corpDefinitionIsTraceSupport(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   if (!definitionId) return false;
   const hint = AI_HINTS_BY_CARD.get(definitionId);
@@ -159,7 +160,7 @@ export function corpDefinitionIsTraceSupport(
 }
 
 export function corpDefinitionIsTraceSource(
-  definitionId: string | undefined,
+  definitionId: number | undefined,
 ): boolean {
   return corpDefinitionHasTraceSource(definitionId);
 }

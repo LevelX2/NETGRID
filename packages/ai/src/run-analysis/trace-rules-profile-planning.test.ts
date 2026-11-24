@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type {
   VisibleEffectiveIceRunQuote,
@@ -31,7 +32,8 @@ describe("trace rules profile planning", () => {
     const support = visibleRunnerTraceSupport(
       supportQuote({
         baseLink: 3,
-        sourceDefinitionId: "onr_v1_004_bakdoor",
+        sourceDefinitionId: 216,
+        sourceTitle: "Bakdoor",
       }),
       5,
       0,
@@ -52,7 +54,8 @@ describe("trace rules profile planning", () => {
       supportQuote({
         baseLink: 9,
         activationCost: 1,
-        sourceDefinitionId: "onr_v1_148_access-through-alpha",
+        sourceDefinitionId: 360,
+        sourceTitle: "Access Through Alpha",
       }),
       10,
       0,
@@ -121,12 +124,13 @@ describe("trace rules profile planning", () => {
     const quote = supportQuote(
       {
         baseLink: 3,
-        sourceDefinitionId: "onr_v1_004_bakdoor",
+        sourceDefinitionId: 216,
+        sourceTitle: "Bakdoor",
       },
       [
         {
           sourceCardInstanceId: "bakdoor_1",
-          sourceDefinitionId: "onr_v1_004_bakdoor",
+          sourceDefinitionId: 216,
           sourceTitle: "Bakdoor",
           linkDelta: 1,
           activationCost: 2,
@@ -137,7 +141,7 @@ describe("trace rules profile planning", () => {
         },
         {
           sourceCardInstanceId: "signpost_1",
-          sourceDefinitionId: "synthetic_signpost",
+          sourceDefinitionId: syntheticCardDefinitionId("synthetic_signpost"),
           sourceTitle: "Signpost-like",
           linkDelta: 2,
           activationCost: 1,
@@ -169,7 +173,8 @@ function supportQuote(
   base: {
     baseLink: number;
     activationCost?: number;
-    sourceDefinitionId?: string;
+    sourceDefinitionId?: number;
+    sourceTitle?: string;
   },
   postBidLinkOptions: VisibleRunnerTraceSupportQuote["postBidLinkOptions"] = [],
 ): VisibleRunnerTraceSupportQuote {
@@ -184,7 +189,7 @@ function supportQuote(
         ...(base.sourceDefinitionId
           ? {
               sourceDefinitionId: base.sourceDefinitionId,
-              sourceTitle: base.sourceDefinitionId,
+              ...(base.sourceTitle ? { sourceTitle: base.sourceTitle } : {}),
             }
           : {}),
       },

@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -7,6 +8,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type {
   CorpBoardTriage,
   CorpBoardTriageDependencies,
+  ForcedScorelineClockPressure,
   ScoredLegalAction,
 } from "./corp-scoreline/semantic-runtime-corp-board-triage-contracts";
 import {
@@ -14,7 +16,7 @@ import {
   corpLegalActions,
   corpRemoteScoringStrategyWantsRemoteDevelopment,
   corpTriageVisibleAgendaPoints,
-  inputWithOpponentDefaults,
+  requireCorpTriageOpponentView,
   legalEconomyActionExists,
   normalizedCorpBoardTriageValue,
 } from "./corp-scoreline/semantic-runtime-corp-board-triage-actions";
@@ -49,7 +51,7 @@ import {
   corpScorelineAllowsMultiTurnDevelopment,
   corpScorelineFeasibilityForDecisionInput,
 } from "./corp-scoreline-feasibility";
-import { decisionDerivedValue } from "./decision-derived-cache";
+import { decisionDerivedValue } from "../decision-derived-cache";
 
 export type {
   CorpBoardTriage,
@@ -63,9 +65,9 @@ export { normalizedCorpBoardTriageValue } from "./corp-scoreline/semantic-runtim
 const CORP_BOARD_TRIAGE_DECISION_CACHE_KEY = Symbol("corp-board-triage");
 type CorpBoardTriageDecisionCache = WeakMap<object, CorpBoardTriage>;
 
-export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
+export function semanticRuntimeCorpBoardTriage(
   input: AiDecisionInput,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage {
   const cache = decisionDerivedValue<CorpBoardTriageDecisionCache>(
     input,
@@ -79,9 +81,9 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   return triage;
 }
 
-function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
+function buildSemanticRuntimeCorpBoardTriage(
   input: AiDecisionInput,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage {
   const actions = corpLegalActions(input).map((action) =>
     scoredLegalAction(input, action, dependencies),
@@ -149,22 +151,10 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     dependencies,
   );
   if (forcedScorelinePressure) {
-    return {
-      primary: "force_scoreline_clock",
-      severity: forcedScorelinePressure.severity,
-      targetServerId: forcedScorelinePressure.targetServerId,
-      scoreRemoteServerId: forcedScorelinePressure.scoreRemoteServerId,
-      requiredRezFloor: forcedScorelinePressure.requiredRezFloor,
-      currentCredits,
-      evidence: [
-        "corp_board_triage_primary:force_scoreline_clock",
-        `corp_board_triage_severity:${forcedScorelinePressure.severity}`,
-        ...forcedScorelinePressure.evidence,
-      ],
-    };
+    return forceScorelineTriage(forcedScorelinePressure, currentCredits);
   }
 
-  const pressureInput = inputWithOpponentDefaults(input);
+  const pressureInput = requireCorpTriageOpponentView(input);
   const centralPressure = highestPriorityTriageCentralPressure(pressureInput);
   const centralPressureSeverity = centralPressure
     ? centralTriageSeverity(pressureInput, centralPressure)
@@ -272,19 +262,7 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     dependencies,
   );
   if (activeScorelineClock) {
-    return {
-      primary: "force_scoreline_clock",
-      severity: activeScorelineClock.severity,
-      targetServerId: activeScorelineClock.targetServerId,
-      scoreRemoteServerId: activeScorelineClock.scoreRemoteServerId,
-      requiredRezFloor: activeScorelineClock.requiredRezFloor,
-      currentCredits,
-      evidence: [
-        "corp_board_triage_primary:force_scoreline_clock",
-        `corp_board_triage_severity:${activeScorelineClock.severity}`,
-        ...activeScorelineClock.evidence,
-      ],
-    };
+    return forceScorelineTriage(activeScorelineClock, currentCredits);
   }
 
   if (
@@ -346,7 +324,7 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     scorelineDevelopmentAllowed &&
     (!corpTriageIsPunishPrimary(input) ||
       corpRemoteScoringStrategyWantsRemoteDevelopment(input))
-      ? actions.find((entry) => actionBuildsScoreRemote(entry))
+      ? highestPriorityScoreRemoteEntry(actions.filter(actionBuildsScoreRemote))
       : undefined;
   if (setupRemote) {
     return {
@@ -379,6 +357,25 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
   };
 }
 
+function forceScorelineTriage(
+  pressure: ForcedScorelineClockPressure,
+  currentCredits: number,
+): CorpBoardTriage {
+  return {
+    primary: "force_scoreline_clock",
+    severity: pressure.severity,
+    targetServerId: pressure.targetServerId,
+    scoreRemoteServerId: pressure.scoreRemoteServerId,
+    requiredRezFloor: pressure.requiredRezFloor,
+    currentCredits,
+    evidence: [
+      "corp_board_triage_primary:force_scoreline_clock",
+      `corp_board_triage_severity:${pressure.severity}`,
+      ...pressure.evidence,
+    ],
+  };
+}
+
 function corpScoreNowAgendaPoints(
   input: AiDecisionInput,
   action: LegalAction,
@@ -387,18 +384,18 @@ function corpScoreNowAgendaPoints(
   return source ? corpTriageVisibleAgendaPoints(source) : 0;
 }
 
-function openingCentralBaselineTriage<TConsumer extends string>(
+function openingCentralBaselineTriage(
   input: AiDecisionInput,
   actions: readonly ScoredLegalAction[],
   currentCredits: number,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
 ): CorpBoardTriage | undefined {
   if (typeof input.actionNumber !== "number" || input.actionNumber > 8) {
     return undefined;
   }
   const hasDevelopedRemote = input.playerView.servers.some(
     (server) =>
-      server.id.startsWith("remote_") &&
+      isRemoteServerId(server.id) &&
       (server.ice.length > 0 || server.root.length > 0),
   );
   if (hasDevelopedRemote) return undefined;
@@ -406,7 +403,7 @@ function openingCentralBaselineTriage<TConsumer extends string>(
     (entry) =>
       entry.action.type === "install_card" &&
       (entry.serverId === "new_remote" ||
-        entry.serverId?.startsWith("remote_")) &&
+        isRemoteServerId(entry.serverId)) &&
       entry.action.payload?.placement !== "root_agenda",
   );
   if (!hasCompetingEmptyRemoteDevelopment) return undefined;
@@ -436,12 +433,10 @@ function openingCentralBaselineTriage<TConsumer extends string>(
   };
 }
 
-export function semanticRuntimeCorpBoardTriageActionComponent<
-  TConsumer extends string,
->(
+export function semanticRuntimeCorpBoardTriageActionComponent(
   input: AiDecisionInput,
   action: LegalAction,
-  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  dependencies: CorpBoardTriageDependencies,
   actionSemanticCandidate?: ActionSemanticCandidate,
 ): AiDecisionScoreComponent | undefined {
   return semanticRuntimeCorpBoardTriageActionComponentForTriage(

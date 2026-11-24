@@ -1,4 +1,6 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { isRemoteServerId } from "@netgrid/shared";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -31,6 +33,8 @@ export function corpInput(overrides: {
     eventTail: overrides.eventTail ?? [],
     playerView: {
       stateVersion: 1,
+      timingPoint: "corp_action.main",
+      traceRulesProfile: "modern_open",
       own: {
         credits: overrides.ownCredits ?? 5,
         clicks: overrides.ownClicks ?? 3,
@@ -57,11 +61,12 @@ export function publicEvent(
   actionType: "start_run" | "access_card",
   serverId: "hq" | "rd",
 ): AiDecisionInput["eventTail"][number] {
+  const stateVersionAfter = actionType === "start_run" ? 1 : 2;
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
-    stateVersionBefore: 1,
-    stateVersionAfter: 2,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
     stateHashAfter: `fnv1a:${eventId}`,
     visibilityClass: "public",
     publicPayload: {
@@ -77,11 +82,12 @@ export function publicLabelEvent(
   actionType: "start_run" | "access_card",
   serverLabel: "HQ" | "R&D",
 ): AiDecisionInput["eventTail"][number] {
+  const stateVersionAfter = actionType === "start_run" ? 1 : 2;
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
-    stateVersionBefore: 1,
-    stateVersionAfter: 2,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
     stateHashAfter: `fnv1a:${eventId}`,
     visibilityClass: "public",
     publicPayload: {
@@ -99,7 +105,7 @@ export function remoteEvent(
   payload: Record<string, unknown>,
 ): AiDecisionInput["eventTail"][number] {
   return {
-    eventId,
+    eventId: stateVersionAfter + 1,
     type: actionType,
     stateVersionBefore: stateVersionAfter - 1,
     stateVersionAfter,
@@ -245,20 +251,20 @@ export function wallIce(
     instanceId,
     known: true,
     type: "ice",
-    definitionId: "simple_barrier_ice",
+    definitionId: 589,
     subtypes: ["Barrier"],
     rezzed: false,
     rezCost: 3,
     owner: "corp",
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "simple_barrier_ice",
+      iceDefinitionId: 589,
       effectiveStrength: 3,
       subroutines: [
         {
           id: `${instanceId}_end_the_run`,
           type: "end_the_run",
-          sourceDefinitionId: "simple_barrier_ice",
+          sourceDefinitionId: 589,
           sourceTitle: "Simple Barrier ICE",
         },
       ],
@@ -276,20 +282,20 @@ export function classicWallIce(
     known: true,
     type: "ice",
     title: "Crystal Wall",
-    definitionId: "onr_v1_232_crystal-wall",
+    definitionId: 444,
     subtypes: ["Wall"],
     rezzed: false,
     rezCost: 4,
     owner: "corp",
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_232_crystal-wall",
+      iceDefinitionId: 444,
       effectiveStrength: 3,
       subroutines: [
         {
           id: `${instanceId}_end_the_run`,
           type: "end_the_run",
-          sourceDefinitionId: "onr_v1_232_crystal-wall",
+          sourceDefinitionId: 444,
           sourceTitle: "Crystal Wall",
         },
       ],
@@ -307,7 +313,7 @@ export function genericIce(instanceId: string): VisibleCard {
     instanceId,
     known: true,
     type: "ice",
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     rezzed: false,
     rezCost: 2,
     owner: "corp",
@@ -322,13 +328,13 @@ export function blankIce(
     instanceId,
     known: true,
     type: "ice",
-    definitionId: "blank_remote_ice",
+    definitionId: syntheticCardDefinitionId("blank_remote_ice"),
     rezzed: false,
     rezCost: 0,
     owner: "corp",
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "blank_remote_ice",
+      iceDefinitionId: syntheticCardDefinitionId("blank_remote_ice"),
       effectiveStrength: 0,
       subroutines: [],
     },
@@ -345,20 +351,20 @@ export function hunterTraceTagIce(
     known: true,
     type: "ice",
     title: "Hunter",
-    definitionId: "onr_v1_249_hunter",
+    definitionId: 461,
     subtypes: ["Sentry", "Bloodhound"],
     rezzed: false,
     rezCost: 2,
     owner: "corp",
     effectiveRunQuote: {
       iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
+      iceDefinitionId: 461,
       effectiveStrength: 5,
       subroutines: [
         {
           id: `${instanceId}_trace`,
           type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceDefinitionId: 461,
           sourceTitle: "Hunter",
           traceLimit: 5,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
@@ -374,7 +380,7 @@ export function dogPileIce(instanceId: string): VisibleCard {
     instanceId,
     known: true,
     type: "ice",
-    definitionId: "onr_proteus_021_dog-pile",
+    definitionId: 79,
     subtypes: ["Sentry"],
     rezzed: false,
     rezCost: 2,
@@ -388,7 +394,7 @@ export function bugZapperIce(instanceId: string): VisibleCard {
     known: true,
     type: "ice",
     title: "Bug Zapper",
-    definitionId: "onr_proteus_012_bug-zapper",
+    definitionId: 70,
     subtypes: ["Sentry"],
     rezzed: false,
     rezCost: 2,
@@ -402,7 +408,7 @@ export function mastermindIce(instanceId: string): VisibleCard {
     known: true,
     type: "ice",
     title: "Mastermind",
-    definitionId: "onr_proteus_030_mastermind",
+    definitionId: 88,
     subtypes: ["Sentry"],
     rezzed: false,
     rezCost: 2,
@@ -416,7 +422,7 @@ export function huntingPackIce(instanceId: string): VisibleCard {
     known: true,
     type: "ice",
     title: "Hunting Pack",
-    definitionId: "onr_proteus_026_hunting-pack",
+    definitionId: 84,
     subtypes: ["Sentry"],
     rezzed: false,
     rezCost: 1,
@@ -430,7 +436,7 @@ export function mobileBarricadeIce(instanceId: string): VisibleCard {
     known: true,
     type: "ice",
     title: "Mobile Barricade",
-    definitionId: "onr_proteus_033_mobile-barricade",
+    definitionId: 91,
     subtypes: ["Barrier"],
     rezzed: false,
     rezCost: 1,
@@ -446,7 +452,7 @@ export function simpleFracter(
     instanceId,
     known: true,
     type: "program",
-    definitionId: "simple_fracter",
+    definitionId: 597,
     subtypes: ["Icebreaker", "Fracter"],
     owner: "runner",
     ...(recurringRunCredits > 0
@@ -476,7 +482,7 @@ export function earlyWormBreaker(instanceId: string): VisibleCard {
     known: true,
     type: "program",
     title: "Early Worm",
-    definitionId: "onr_classic_027_early-worm",
+    definitionId: 31,
     subtypes: ["Icebreaker", "Worm"],
     owner: "runner",
   } as VisibleCard;
@@ -487,7 +493,7 @@ export function simpleKiller(instanceId: string): VisibleCard {
     instanceId,
     known: true,
     type: "program",
-    definitionId: "simple_killer",
+    definitionId: 598,
     subtypes: ["Icebreaker", "Killer"],
     owner: "runner",
   } as VisibleCard;
@@ -499,7 +505,7 @@ export function newsgroupFilter(instanceId: string): VisibleCard {
     known: true,
     type: "program",
     title: "Newsgroup Filter",
-    definitionId: "onr_v1_045_newsgroup-filter",
+    definitionId: 257,
     owner: "runner",
   } as VisibleCard;
 }
@@ -513,10 +519,11 @@ export function brokerResource(
     known: true,
     type: "resource",
     title: "Broker",
-    definitionId: "onr_v1_154_broker",
+    definitionId: 366,
     rulesText:
       "A: Put 3 credits from the bank on Broker. A: Take all the bits from Broker.",
     owner: "runner",
+    counters: { bit: hostedCredits },
     counterDisplays: [
       {
         id: `${instanceId}-bits`,
@@ -539,7 +546,7 @@ export function runnerCentralPressureCard(
     known: true,
     type: "program",
     title: instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     rulesText,
     owner: "runner",
   } as VisibleCard;
@@ -556,7 +563,14 @@ export function corpAction(
     side: "corp",
     type,
     label: actionId,
-    costs: [],
+    costs:
+      type === "install_card" ||
+      type === "advance_card" ||
+      type === "play_operation" ||
+      type === "gain_credit" ||
+      type === "draw_card"
+        ? [{ clicks: 1 }]
+        : [],
     source,
     payload,
   } as unknown as LegalAction;
@@ -593,7 +607,7 @@ export function testDependencies() {
           (card.advancementCounters ?? 0) > 0,
       ) === true,
     isRemoteServerTarget: (serverId: string | undefined) =>
-      serverId?.startsWith("remote_") === true,
+      isRemoteServerId(serverId) === true,
     actionSourceCard: (input: AiDecisionInput, action: LegalAction) =>
       findVisibleCard(input, String(action.source)),
   };

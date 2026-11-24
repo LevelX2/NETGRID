@@ -39,7 +39,7 @@ it.each([3, 30])(
     const { input, cp } = native(game);
     const previous = cp.runtime.residentPlanPortfolio;
     const decision = chooseAiAction(input);
-    expect(decision.actionId).toBe("runner.resolve_choice");
+    expect(decision.actionId).toBe("rn");
     expect(decision.selectedChoices).toEqual({
       choiceId: input.playerView.pendingChoice!.choiceId,
       selectedOptionIds: ["source_stack"],
@@ -57,7 +57,7 @@ it.each([3, 30])(
       signal: {
         programSearchCommitment: {
           engineContinuationAtStateVersion: input.playerView.stateVersion,
-          targetDefinitionId: "onr_v1_011_cloak",
+          targetDefinitionId: 223,
         },
       },
     });
@@ -108,8 +108,7 @@ it.each([38, 40])(
         [],
         [],
       );
-    if (game === 38) expect(discovery).toThrow(/invalid_plan_identity/);
-    else expect(discovery()).toEqual([]);
+    expect(discovery()).toEqual([]);
     // The historical wrong commitment remains invalid: no resolver substitute.
     expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
   },

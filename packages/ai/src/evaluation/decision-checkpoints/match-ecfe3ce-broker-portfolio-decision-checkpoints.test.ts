@@ -55,11 +55,11 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
     // longer a correctness requirement when this pressure route is funded.
     checkpoint.expectation = {
       contractKind: "correctness",
-      acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      acceptableActions: [{ actionId: "rs.hq" }],
       forbiddenActions: [
         {
           type: "activated_card_ability",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
         },
       ],
       planExecution: {
@@ -75,12 +75,12 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
     checkpoint.expectation = {
       contractKind: "correctness",
       acceptableActions: [
-        { type: "play_event", sourceDefinitionId: "onr_v1_101_mit-west-tier" },
+        { type: "play_event", sourceDefinitionId: 313 },
       ],
       forbiddenActions: [
         {
           type: "activated_card_ability",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: 366,
         },
       ],
       planExecution: {
@@ -106,7 +106,7 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
     expect(portfolio).toEqual(
       expect.arrayContaining([
         expect.stringMatching(
-          /runner\.credit_bank:.*phase:build.*viability:ready/,
+          /\|module:runner\.credit_bank\|phase:build\|viability:ready/,
         ),
       ]),
     );
@@ -123,7 +123,7 @@ function expectSavingsPreservedBySelectedAction(
     const rig = getPlayerView(game, "runner").own.rig;
     expect(rig).toBeDefined();
     return rig!
-      .filter((card) => card.definitionId === "onr_v1_154_broker")
+      .filter((card) => card.definitionId === 366)
       .map((card) => card.counters?.bit ?? 0);
   };
   const before = balances(state);
@@ -161,7 +161,7 @@ function afterDeclinedOptionalBonusRun(
   const result = applyAction(state, {
     matchId: state.matchId,
     side: "runner",
-    actionId: "runner.trigger_ability.decline_optional_bonus_run",
+    actionId: "rx.decline_optional_bonus_run",
     clientKnownStateVersion: state.stateVersion,
     idempotencyKey: `${checkpoint.checkpointId}:decline-optional-bonus-run`,
   });

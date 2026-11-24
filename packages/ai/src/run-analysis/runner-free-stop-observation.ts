@@ -1,15 +1,16 @@
+import type { MatchEventId } from "@netgrid/shared";
 import type { AiDecisionInput } from "@netgrid/shared";
 import {
   mergedPublicHistory,
   serverIdFromEvent,
-} from "../runtime/public-event-history";
+} from "../public-event-history";
 
 /** Same-turn public outcome only. Each run owner decides whether this
  * observation excludes its current route; no hidden ICE is reconstructed. */
 export function runnerObservedFreeStopEventId(
   input: AiDecisionInput,
   targetServerId: string,
-): string | undefined {
+): MatchEventId | undefined {
   const view = input.playerView;
   if (
     input.side !== "runner" ||
@@ -19,7 +20,7 @@ export function runnerObservedFreeStopEventId(
     return undefined;
 
   let active: { serverId: string; zeroRezObserved: boolean } | undefined;
-  let stoppedEventId: string | undefined;
+  let stoppedEventId: MatchEventId | undefined;
   for (const event of mergedPublicHistory(input)) {
     if (event.turnSerial !== view.turnSerial) continue;
     const p = event.publicPayload;
@@ -94,4 +95,22 @@ export function runnerObservedFreeStopEventId(
     stoppedEventId = undefined;
   }
   return stoppedEventId;
+}
+
+/** Bind the owner's probe evaluation to the same current Engine run offer. */
+export function runnerHasCurrentBasicProbeAction(
+  input: AiDecisionInput,
+  actionId: string,
+  serverId: string,
+): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.actionId === actionId &&
+      action.side === "runner" &&
+      action.type === "start_run" &&
+      action.source === "basic_action" &&
+      action.payload?.serverId === serverId &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.timingPoint === input.playerView.timingPoint,
+  );
 }

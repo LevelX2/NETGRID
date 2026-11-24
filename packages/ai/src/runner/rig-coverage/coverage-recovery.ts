@@ -21,16 +21,27 @@ import {
   assessKnownRezzedIcePath,
   runnerKnownPathAssessmentIsCostNoAccess,
 } from "../../visible-run-analysis";
-import { runnerVisibleDeckBreaker } from "./coverage-card-facts";
-import { runnerBreakerCapabilityCoversRole } from "./coverage-card-facts";
+import { runnerDrawProjectionFor } from "../../actions/action-economy-projection";
+import {
+  mergedPublicHistory,
+  serverIdFromEvent,
+} from "../../public-event-history";
+import { visibleIcePathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
+import { runnerVisibleBreakerUpgradeInstallRoute } from "./coverage-breaker-upgrades";
+import {
+  runnerBreakerCapabilityCoversRole,
+  runnerVisibleDeckBreaker,
+} from "./coverage-card-facts";
+import { RUNNER_BREAKER_UPGRADE_CLICK_VALUE } from "./runner-breaker-upgrade-economics";
 export type RunnerCostEffectiveCoverageRecovery = Readonly<{
   requiredRole: RunnerCoverageGapSignal["requiredRole"];
   totalRecoveryCost: number;
   sameTurnPreparation?: true;
   sameTurnRunConversion?: RunnerCoverageGapSignal["sameTurnRunConversion"];
   visibleAnswer?: VisibleCard;
+  installActionId?: string;
   deckHasAlternative: boolean;
-  targetDefinitionId?: string;
+  targetDefinitionId?: number;
   recoveryMode:
     | "install_visible_answer"
     | "search_known_alternative"
@@ -43,6 +54,7 @@ export function runnerCostEffectiveCoverageRecovery(
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
   deckCapabilities: DeckCapabilityProfile,
+  minimumHandBuffer: number,
 ): RunnerCostEffectiveCoverageRecovery | undefined {
   // Missing coverage identifies one blocking role. Cost recovery instead
   // compares every role against the entire known path: a cheaper answer to
@@ -60,6 +72,7 @@ export function runnerCostEffectiveCoverageRecovery(
       evaluation,
       role,
       deckCapabilities,
+      minimumHandBuffer,
     );
     return recovery ? [recovery] : [];
   }).sort(
@@ -81,9 +94,24 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
   evaluation: RunnerRunTargetEvaluation,
   role: RunnerCoverageGapSignal["requiredRole"],
   deckCapabilities: DeckCapabilityProfile,
+  minimumHandBuffer: number,
 ): RunnerCostEffectiveCoverageRecovery | undefined {
+  const reserveDefersFundedCentralRun =
+    (evaluation.targetKind === "hq" || evaluation.targetKind === "rd") &&
+    evaluation.targetServerId === evaluation.accessServerId &&
+    evaluation.runActionProjection.sourceKind === "basic_action" &&
+    evaluation.pathPassability === "reachable" &&
+    evaluation.recommendation === "gain_credits_first" &&
+    evaluation.fundingNeed.reason === "post_run_floor_gap" &&
+    evaluation.routeQuote?.reachability === "guaranteed_access" &&
+    evaluation.routeQuote.fundingGap === 0 &&
+    evaluation.routeQuote.effects.length === 0 &&
+    (evaluation.routeQuote.conditionalRiskReasons?.length ?? 0) === 0 &&
+    evaluation.prerunReserveQuote?.status === "not_required" &&
+    evaluation.score > 0;
   if (
-    evaluation.pathPassability !== "blocked_unpayable" ||
+    (evaluation.pathPassability !== "blocked_unpayable" &&
+      !reserveDefersFundedCentralRun) ||
     evaluation.pathCost <= 0 ||
     !Number.isSafeInteger(evaluation.pathCost) ||
     evaluation.knownAccessState === "known_no_current_payoff" ||
@@ -116,10 +144,13 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
     comparisonBudget,
     server.root,
     input.playerView.opponent.credits,
+    visibleIcePathTraceContext(input),
   );
   const currentOperatingCost = currentPath.visibleBreakCost;
   if (
     currentOperatingCost === undefined ||
+    (reserveDefersFundedCentralRun &&
+      currentOperatingCost !== evaluation.pathCost) ||
     (!currentPath.canReachAccess &&
       !runnerKnownPathAssessmentIsCostNoAccess(currentPath))
   ) {
@@ -129,7 +160,7 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
     (input.playerView.own.rig ?? [])
       .filter((card) =>
         runnerRolesCoverCoverageGap(
-          rolesForDeckDoctrineCard(card.definitionId ?? ""),
+          rolesForDeckDoctrineCard(card.definitionId),
           role,
         ),
       )
@@ -137,6 +168,13 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
   );
   if (installedDefinitionIds.size === 0) return undefined;
 
+  const expectedRunUses =
+    reserveDefersFundedCentralRun &&
+    input.playerView.opponent.agendaPoints <
+      input.playerView.agendaPointsToWin - 2 &&
+    hasRepeatedCentralRunPressure(input, evaluation.targetServerId)
+      ? 2
+      : 1;
   const visibleOptions = input.playerView.own.gripOrHq
     .filter(
       (card) =>
@@ -158,11 +196,21 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
         Number.isSafeInteger(card.installCost) &&
         (card.installCost ?? -1) >= 0 &&
         visibleCardCoversRequiredCoverage(card, role, (definitionId) =>
-          rolesForDeckDoctrineCard(definitionId ?? ""),
+          rolesForDeckDoctrineCard(definitionId),
         ),
     )
     .flatMap((card) => {
-      const installCost = card.installCost;
+      const preparation = reserveDefersFundedCentralRun
+        ? runnerReserveDeferredBreakerInstall(
+            input,
+            candidates,
+            card,
+            deckCapabilities,
+            minimumHandBuffer,
+          )
+        : undefined;
+      if (reserveDefersFundedCentralRun && !preparation) return [];
+      const installCost = preparation?.creditCost ?? card.installCost;
       if (installCost === undefined) return [];
       const path = assessKnownRezzedIcePath(
         server.ice,
@@ -170,17 +218,38 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
         comparisonBudget,
         server.root,
         input.playerView.opponent.credits,
+        visibleIcePathTraceContext(input),
       );
       const breakCost = path.visibleBreakCost;
       if (
         breakCost === undefined ||
+        (reserveDefersFundedCentralRun &&
+          (!path.canReachAccess ||
+            path.blocked ||
+            (path.futureClicksLost ?? 0) > 0)) ||
         (!path.canReachAccess && !runnerKnownPathAssessmentIsCostNoAccess(path))
       ) {
         return [];
       }
       const totalRecoveryCost = installCost + breakCost;
-      return totalRecoveryCost < currentOperatingCost
-        ? [{ card, totalRecoveryCost, breakCost }]
+      const savingsAfterSetup = preparation
+        ? expectedRunUses * (currentOperatingCost - breakCost) -
+          installCost -
+          (preparation.clickCost + preparation.handRecoveryClicks) *
+            RUNNER_BREAKER_UPGRADE_CLICK_VALUE
+        : undefined;
+      return totalRecoveryCost < currentOperatingCost &&
+        (savingsAfterSetup === undefined || savingsAfterSetup > 0)
+        ? [
+            {
+              card: preparation ? { ...card, installCost } : card,
+              totalRecoveryCost,
+              breakCost,
+              installActionId: preparation?.actionId,
+              handRecoveryClicks: preparation?.handRecoveryClicks,
+              savingsAfterSetup,
+            },
+          ]
         : [];
     })
     .sort(
@@ -189,15 +258,18 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
         left.card.instanceId.localeCompare(right.card.instanceId),
     );
   const visibleAnswer = visibleOptions[0];
-  const deckAlternative = runnerCostEffectiveDeckCoverageAlternative(
-    input,
-    server,
-    deckCapabilities,
-    role,
-    installedDefinitionIds,
-    currentOperatingCost,
-    comparisonBudget,
-  );
+  // A funded path justifies this preparation only with a proven hand answer.
+  const deckAlternative = reserveDefersFundedCentralRun
+    ? undefined
+    : runnerCostEffectiveDeckCoverageAlternative(
+        input,
+        server,
+        deckCapabilities,
+        role,
+        installedDefinitionIds,
+        currentOperatingCost,
+        comparisonBudget,
+      );
   if (!visibleAnswer && !deckAlternative) return undefined;
 
   const searchToolIds = new Set(
@@ -232,6 +304,9 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
     totalRecoveryCost:
       visibleAnswer?.totalRecoveryCost ?? deckAlternative!.totalCost,
     ...(visibleAnswer ? { visibleAnswer: visibleAnswer.card } : {}),
+    ...(visibleAnswer?.installActionId
+      ? { installActionId: visibleAnswer.installActionId }
+      : {}),
     deckHasAlternative: deckAlternative !== undefined,
     ...(deckAlternative
       ? { targetDefinitionId: deckAlternative.breaker.cardId }
@@ -250,6 +325,13 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
             `coverage_efficiency_visible_answer_install_cost:${visibleAnswer.card.installCost}`,
             `coverage_efficiency_visible_answer_break_cost:${visibleAnswer.breakCost}`,
             `coverage_efficiency_visible_answer_total_cost:${visibleAnswer.totalRecoveryCost}`,
+            ...(visibleAnswer.savingsAfterSetup === undefined
+              ? []
+              : [
+                  `coverage_efficiency_plausible_accesses:${expectedRunUses}`,
+                  `coverage_efficiency_hand_recovery_clicks:${visibleAnswer.handRecoveryClicks}`,
+                  `coverage_efficiency_savings_after_setup_clicks:${visibleAnswer.savingsAfterSetup}`,
+                ]),
           ]
         : []),
       ...(deckAlternative && deckAlternativeOperatingCost !== undefined
@@ -259,9 +341,108 @@ export function runnerCostEffectiveCoverageRecoveryForRole(
             `coverage_efficiency_deck_alternative_total_known_cost:${deckAlternative.totalCost}`,
           ]
         : []),
+      ...(reserveDefersFundedCentralRun
+        ? ["coverage_efficiency_funded_path_deferred_by_reserve"]
+        : []),
       `coverage_efficiency_recovery_mode:${recoveryMode}`,
     ],
   };
+}
+
+function hasRepeatedCentralRunPressure(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const observedTurns = new Set<number>();
+  for (const event of mergedPublicHistory(input)) {
+    if (
+      event.publicPayload.actor !== "runner" ||
+      event.turnSerial === undefined
+    )
+      continue;
+    const convertedRun = event.publicPayload.resolvedEffects?.some(
+      (effect) =>
+        effect.kind === "start_run" && effect.accessServerId === serverId,
+    );
+    const directRun =
+      (event.type === "start_run" ||
+        event.publicPayload.actionType === "start_run") &&
+      serverIdFromEvent(event) === serverId;
+    if (!convertedRun && !directRun) continue;
+    observedTurns.add(event.turnSerial);
+    if (observedTurns.size >= 2) return true;
+  }
+  return false;
+}
+
+function runnerReserveDeferredBreakerInstall(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  card: VisibleCard,
+  deckCapabilities: DeckCapabilityProfile,
+  minimumHandBuffer: number,
+) {
+  const own = input.playerView.own;
+  const breaker = deckCapabilities.runner?.breakerInventory.find(
+    (candidate) => candidate.cardId === card.definitionId,
+  );
+  const install = runnerVisibleBreakerUpgradeInstallRoute(
+    input,
+    candidates.filter(
+      (candidate) => candidate.costProfile.costKnownStatus === "known",
+    ),
+    card,
+  );
+  if (
+    !breaker ||
+    breaker.confidence !== "high" ||
+    breaker.restrictions.length > 0 ||
+    breaker.risks.length > 0 ||
+    !install ||
+    !input.legalActions.some(
+      (action) =>
+        action.actionId === install.actionId &&
+        action.side === "runner" &&
+        action.expiresAtStateVersion === input.playerView.stateVersion,
+    ) ||
+    !Number.isSafeInteger(own.memoryUsed) ||
+    !Number.isSafeInteger(own.memoryLimit) ||
+    !Number.isSafeInteger(card.memoryCost) ||
+    own.memoryUsed! + card.memoryCost! > own.memoryLimit! ||
+    own.clicks <= install.clickCost
+  )
+    return undefined;
+
+  const protectedHand = Math.min(own.gripOrHq.length, minimumHandBuffer);
+  // An install-only preparation is re-evaluated before its run. Keep room
+  // to restore the current damage buffer before ending the turn.
+  const handAfterInstall = own.gripOrHq.length - 1;
+  if (handAfterInstall >= protectedHand)
+    return { ...install, handRecoveryClicks: 0 };
+
+  const handRecoveryCosts = input.legalActions.flatMap((action) => {
+    if (
+      action.side !== "runner" ||
+      action.type !== "draw_card" ||
+      action.source !== "basic_action" ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      action.costs.some((cost) => (cost.credits ?? 0) > 0)
+    )
+      return [];
+    const clickCost = action.costs.reduce(
+      (clicks, cost) => clicks + (cost.clicks ?? 0),
+      0,
+    );
+    const draw = runnerDrawProjectionFor(action);
+    return clickCost < own.clicks - install.clickCost &&
+      draw !== undefined &&
+      draw.projectedNetHandDelta >= protectedHand - handAfterInstall
+      ? [clickCost]
+      : [];
+  });
+  return handRecoveryCosts.length > 0
+    ? { ...install, handRecoveryClicks: Math.min(...handRecoveryCosts) }
+    : undefined;
 }
 
 export function runnerCostEffectiveDeckCoverageAlternative(
@@ -269,7 +450,7 @@ export function runnerCostEffectiveDeckCoverageAlternative(
   server: AiDecisionInput["playerView"]["servers"][number],
   deckCapabilities: DeckCapabilityProfile,
   role: RunnerCoverageGapSignal["requiredRole"],
-  installedDefinitionIds: ReadonlySet<string>,
+  installedDefinitionIds: ReadonlySet<number>,
   currentKnownPathCost: number,
   comparisonBudget: number,
 ):
@@ -286,6 +467,7 @@ export function runnerCostEffectiveDeckCoverageAlternative(
         comparisonBudget,
         server.root,
         input.playerView.opponent.credits,
+        visibleIcePathTraceContext(input),
       );
       const breakCost = path.visibleBreakCost;
       const eligible =
@@ -312,7 +494,7 @@ export function runnerCostEffectiveDeckCoverageAlternative(
     .sort(
       (left, right) =>
         left.totalCost - right.totalCost ||
-        left.breaker.cardId.localeCompare(right.breaker.cardId),
+        (left.breaker.cardId - right.breaker.cardId),
     )[0];
 }
 
@@ -381,6 +563,7 @@ export function runnerCoverageInstallActionValues(
           input.playerView.own.credits - cost,
           server.root,
           input.playerView.opponent.credits,
+          visibleIcePathTraceContext(input),
         );
         if (path.canReachAccess) {
           return 300 - cost - (path.visibleBreakCost ?? 0);

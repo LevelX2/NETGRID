@@ -35,8 +35,8 @@ function projects(cp: ReturnType<typeof fixture>, previousStateVersion: number) 
     cardSemanticProfilesByDefinitionId: buildActionCardSemanticProfilesByDefinitionId(),
   });
   const recent = new Set(recentlyCompromisedCorpRemoteIds(input, previousStateVersion));
-  expect(recent.has("remote_1")).toBe(true);
-  return candidates.filter(c => c.sourceDefinitionId === "onr_v1_206_marine-arcology" && c.actionType === "install_card")
+  expect(recent.has("r1")).toBe(true);
+  return candidates.filter(c => c.sourceDefinitionId === 418 && c.actionType === "install_card")
     .flatMap(c => scoreProjectForCandidate(input, c, corpScorelineFeasibilityForDecisionInput(input), undefined, false, false, undefined, recent));
 }
 function decide(cp: ReturnType<typeof fixture>) {
@@ -62,7 +62,7 @@ function restore(cp: ReturnType<typeof fixture>) {
 it("keeps the currently quoted empty fort eligible for the same forced-discard agenda", () => {
   const previous = fixture(17, 337), cp = fixture(17, 356);
   const current = projects(cp, previous.input.playerView.stateVersion);
-  const fort = current.find(p => p.serverId === "remote_1")!;
+  const fort = current.find(p => p.serverId === "r1")!;
   const naked = current.find(p => p.serverId === "new_remote")!;
   expect(fort.routeAssessment).toBe("corp_forced_agenda_discard_score_attempt");
   expect(fort.feasible).toBe(true);
@@ -78,15 +78,15 @@ it("chooses that fort across the real opponent-turn boundary without resetting i
   expect(decide(previous).action.type).toBe("end_turn");
   const { action, plan } = decide(cp);
   expect(action.type).toBe("install_card");
-  expect(action.payload?.serverId).toBe("remote_1");
-  expect(action.payload?.cardId).toBe("corp_onr_v1_206_marine-arcology_1");
+  expect(action.payload?.serverId).toBe("r1");
+  expect(action.payload?.cardId).toBe("c2l1");
   expect(plan.selectedPlan?.moduleId).toBe("corp.score_agenda");
   expect(plan.rootPlanInstanceId).toBe(plan.selectedPlan?.instanceId);
 });
 it("still requires reprotection outside the exact forced-discard exception", () => {
   const previous = fixture(3, 209), cp = fixture(3, 245);
   expect(cp.input.playerView.own.gripOrHq.length).toBeLessThanOrEqual(cp.input.playerView.own.maxHandSize);
-  const fort = projects(cp, previous.input.playerView.stateVersion).find(p => p.serverId === "remote_1")!;
+  const fort = projects(cp, previous.input.playerView.stateVersion).find(p => p.serverId === "r1")!;
   expect(fort.feasible).toBe(false);
   expect(fort.routeAssessment).toBe("corp_recently_compromised_score_remote_requires_reprotection");
   restore(previous);
@@ -108,7 +108,7 @@ it("keeps the native immediate winning install available with zero liquid credit
   const { action, plan } = decide(cp);
   expect(action.type).toBe("install_card");
   expect(action.payload?.serverId).toBe("new_remote");
-  expect(action.payload?.cardId).toBe("corp_onr_proteus_008_project-zurich_1");
+  expect(action.payload?.cardId).toBe("cet");
   expect(plan.selectedPlan?.moduleId).toBe("corp.score_agenda");
   expect(plan.priority?.effectiveClass).toBe("P1");
 });

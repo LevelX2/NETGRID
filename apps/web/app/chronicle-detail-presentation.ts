@@ -1,6 +1,8 @@
+import { cardDefinitionIdValue, cardDefinitionIdsFromCsv } from "./card-definition-id";
+import type { CardDefinitionId } from "@netgrid/shared";
 import type {
   PublicGameEvent,
-  ResolvedGameEffect,
+  PublicResolvedGameEffect,
   Side,
 } from "@netgrid/shared";
 import {
@@ -8,6 +10,7 @@ import {
   payloadRandomRoll,
   isDataFortReclamationInstallPayload,
   isDataFortReclamationRezPayload,
+  isRunCreditLossReplacementPayload,
   isSecurityPurgePayload,
 } from "./action-payload";
 import {
@@ -36,16 +39,17 @@ export function chronicleEventDetail(
   const hidden = string(p.hiddenZoneAction);
   const n = (...keys: string[]) => firstNumber(p, keys);
   const s = (...keys: string[]) => firstString(p, keys);
+  const d = (...keys: string[]) => firstDefinitionId(p, keys);
   const b = (key: string) => boolean(p, key);
-  const sourceId = s("sourceDefinitionId", "cardDefinitionId");
-  const name = (id: string | undefined) =>
+  const sourceId = d("sourceDefinitionId", "cardDefinitionId");
+  const name = (id: CardDefinitionId | undefined) =>
     publicCardTitle(id, context.cardPresentationsById);
   const source =
     name(sourceId) ??
     s("sourceTitle", "title") ??
     context.cardTitle ??
     t("card.unknown");
-  const targetId = s(
+  const targetId = d(
     "targetCardDefinitionId",
     "installedProgramDefinitionId",
     "publicRevealDefinitionId",
@@ -56,7 +60,7 @@ export function chronicleEventDetail(
     t("card.unknown");
   const known = (value: number | undefined) => value ?? t("details.unknown");
   const titles = (key: string) =>
-    (s(key)?.split(",") ?? [])
+    cardDefinitionIdsFromCsv(p[key])
       .map(name)
       .filter((v): v is string => v !== undefined);
   const say = (
@@ -165,7 +169,7 @@ export function chronicleEventDetail(
     return say(
       b("agendaStoredInHq") === true ? "gypsyAgenda" : "gypsyNoAgenda",
       {
-        agenda: name(s("storedAgendaDefinitionId")) ?? t("card.unknown"),
+        agenda: name(d("storedAgendaDefinitionId")) ?? t("card.unknown"),
       },
       detail("gypsyRevealed", {
         cards: revealed,
@@ -196,6 +200,7 @@ export function chronicleEventDetail(
   }
   if (b("strategicPlanningGroupChoiceResolved") === true) {
     return say("strategicPlanning", {
+      source: s("drawReplacementSourceTitle") ?? source,
       count: known(n("strategicPlanningGroupDrawnCardCount")),
       net: known(n("strategicPlanningGroupNetDrawCount")),
     });
@@ -321,7 +326,7 @@ export function chronicleEventDetail(
     );
   if (hidden === "v162_priority_requisition_free_rez")
     return say("priorityRez", {
-      target: name(s("priorityRequisitionTargetDefinitionId")) ?? target,
+      target: name(d("priorityRequisitionTargetDefinitionId")) ?? target,
       amount: known(n("rezCostPaid")),
     });
   if (ability === "successful_hq_run_pay_rez_cost_trash_rezzed_ice")
@@ -380,19 +385,33 @@ export function chronicleEventDetail(
       ),
       importance: "critical",
     };
-  if (s("imminentEventType") === "add_tag" && s("eventModificationDecision"))
-    return say(
-      "tagPrevention",
-      {
-        prevented: known(n("preventedTags")),
-        final: known(n("finalAmount", "tagsAdded")),
-        decision: detail(
-          s("eventModificationDecision") === "apply" ? "used" : "declined",
-        ),
-      },
-      b("sourceTrashed") ? detail("sourceTrashed", { source }) : undefined,
-      "danger",
-    );
+  if (s("imminentEventType") === "add_tag" && s("eventModificationDecision")) {
+    const preventionId =
+      (b("sourceTrashed") ? d("trashedCardDefinitionId") : undefined) ??
+      sourceId;
+    const preventionTitle =
+      name(preventionId) ??
+      (b("sourceTrashed") ? s("trashedCardTitle") : undefined) ??
+      (preventionId === sourceId ? source : t("card.unknown"));
+    return {
+      ...say(
+        "tagPrevention",
+        {
+          source: preventionTitle,
+          prevented: known(n("preventedTags")),
+          final: known(n("finalAmount", "tagsAdded")),
+          decision: detail(
+            s("eventModificationDecision") === "apply" ? "used" : "declined",
+          ),
+        },
+        undefined,
+        "danger",
+      ),
+      chips: [preventionTitle],
+      ...(preventionId === undefined ? {} : { cardDefinitionId: preventionId }),
+      cardTitle: preventionTitle,
+    };
+  }
   if (
     s("eventModificationDecision") === "apply" &&
     n("preventedAmount") !== undefined
@@ -411,6 +430,9 @@ export function chronicleEventDetail(
     hidden === "search_stack" && s("searchDestination") === "install_program";
   if (
     hidden === "self_modifying_code_install_program" ||
+    (hidden === "hidden_stack_program_install" &&
+      s("publicRevealKind") === "reveal" &&
+      d("publicRevealDefinitionId") !== undefined) ||
     stackInstall ||
     hidden === "sneak_preview_install_program"
   ) {
@@ -421,21 +443,31 @@ export function chronicleEventDetail(
       b("installed") === true ||
       b("installSucceeded") === true ||
       s("searchDestination") === "runner_rig";
+    const publicStackSearch = stackInstall && s("searchReveal") === "public";
+    const searchSourceTitle = name(d("sourceDefinitionId")) ?? s("sourceTitle");
+    const showSearchSource =
+      !publicStackSearch || searchSourceTitle !== undefined;
     return say(
       deferred
         ? "programPendingMu"
         : installed
-          ? "programInstalled"
-          : "programNotInstalled",
+          ? showSearchSource
+            ? "programInstalled"
+            : "programInstalledFromStack"
+          : showSearchSource
+            ? "programNotInstalled"
+            : "programNotInstalledFromStack",
       {
+        ...(searchSourceTitle ? { source: searchSourceTitle } : {}),
         program:
           name(
-            s(
+            d(
               "publicRevealDefinitionId",
               "installedProgramDefinitionId",
               "cardDefinitionId",
             ),
           ) ??
+          (publicStackSearch ? s("publicRevealTitle", "title") : undefined) ??
           context.cardTitle ??
           target,
       },
@@ -451,7 +483,7 @@ export function chronicleEventDetail(
   )
     return say(
       "temporaryProgramInstall",
-      { program: name(s("installedProgramDefinitionId")) ?? target },
+      { program: name(d("installedProgramDefinitionId")) ?? target },
       detail("returnsAtTurnEnd"),
     );
   if (hidden === "temporary_program_install_end_turn_return")
@@ -468,7 +500,7 @@ export function chronicleEventDetail(
       deferred ? "programPendingMu" : "programInstalled",
       {
         program:
-          name(s("installedProgramDefinitionId", "publicRevealDefinitionId")) ??
+          name(d("installedProgramDefinitionId", "publicRevealDefinitionId")) ??
           target,
       },
       deferred
@@ -495,7 +527,7 @@ export function chronicleEventDetail(
       action === "resolve_choice" ? "shortCircuitChosen" : "stackSearchOpened",
       {
         program:
-          name(s("publicRevealDefinitionId", "cardDefinitionId")) ??
+          name(d("publicRevealDefinitionId", "cardDefinitionId")) ??
           context.cardTitle ??
           target,
       },
@@ -513,7 +545,7 @@ export function chronicleEventDetail(
     return say("heapToGrip", {
       card:
         name(
-          s(
+          d(
             "returnedCardDefinitionId",
             "targetDefinitionId",
             "targetCardDefinitionId",
@@ -527,7 +559,8 @@ export function chronicleEventDetail(
     return {
       ...say(publicReveal ? "stackToHand" : "privateStackToHand", {
         card:
-          name(s("publicRevealDefinitionId", "cardDefinitionId")) ??
+          name(d("publicRevealDefinitionId", "cardDefinitionId")) ??
+          (publicReveal ? s("publicRevealTitle", "title") : undefined) ??
           context.cardTitle ??
           target,
         count: known(n("selectedCount")),
@@ -537,7 +570,7 @@ export function chronicleEventDetail(
   }
   if (
     hidden === "p3_37_search_stack_to_grip" &&
-    !s("publicRevealDefinitionId") &&
+    !d("publicRevealDefinitionId") &&
     s("publicRevealKind") !== "reveal"
   )
     return {
@@ -548,7 +581,10 @@ export function chronicleEventDetail(
     return say("exposeReviewFinished");
   if (hidden === "expose_installed_card_review")
     return say("exposeSingle", {
-      card: name(s("publicRevealDefinitionId", "cardDefinitionId")) ?? target,
+      card:
+        name(d("publicRevealDefinitionId", "cardDefinitionId")) ??
+        s("publicRevealTitle", "title") ??
+        target,
       location:
         s("exposedServerLabel", "serverLabel", "targetServerLabel") ?? server,
     });
@@ -603,7 +639,7 @@ export function chronicleEventDetail(
   )
     return say(
       "temporaryEncounterFinished",
-      { ice: name(s("temporaryIceDefinitionId")) ?? target },
+      { ice: name(d("temporaryIceDefinitionId")) ?? target },
       undefined,
       "run",
     );
@@ -611,7 +647,7 @@ export function chronicleEventDetail(
     action === "continue_run" &&
     (b("socialEngineeringAutoPassedIce") === true ||
       (b("autoPassChosenIce") === true &&
-        sourceId === "onr_v1_111_social-engineering"))
+        sourceId === 323))
   )
     return say(
       "socialAutoPass",
@@ -633,19 +669,27 @@ export function chronicleEventDetail(
     );
   if (
     hidden === "v1922_viral_15_program_trash" ||
-    (sourceId === "onr_v1_276_viral-15" && n("programTrashCount") !== undefined)
+    (sourceId === 488 && n("programTrashCount") !== undefined)
   )
     return say(
       "viralProgramTrashed",
       {
-        card: name(s("trashedCardDefinitionId")) ?? s("trashedTitle") ?? target,
+        card: name(d("trashedCardDefinitionId")) ?? s("trashedTitle") ?? target,
         count: known(n("programTrashCount")),
       },
       undefined,
       "run",
     );
-  if (action === "jack_out")
+  if (action === "jack_out") {
+    const number = n("jackOutIcePosition");
+    const titleKey =
+      number !== undefined
+        ? "event.runJackedOutBeforeIce"
+        : b("jackOutBeforeAccess") === true
+          ? "event.runJackedOutBeforeAccess"
+          : "event.runJackedOut";
     return {
+      title: t(titleKey, { subject, server, number: known(number) }),
       description: detail(
         ability === "viral_15_jack_out_tax"
           ? "viralJackOut"
@@ -653,19 +697,31 @@ export function chronicleEventDetail(
         { server, amount: known(n("jackOutAdditionalCost")) },
       ),
     };
-  if (ability === "rio_de_janeiro_passed_ice")
-    return say(
-      "rio",
-      {
-        ice: name(s("passedIceDefinitionId")) ?? target,
-        roll: known(roll),
-        outcome: detail(
-          b("rioRunEnded") === true ? "runEnded" : "runContinues",
-        ),
-      },
-      undefined,
-      "run",
-    );
+  }
+  if (ability === "rio_de_janeiro_passed_ice") {
+    const ice = name(d("passedIceDefinitionId"));
+    const number = n("passedIcePosition");
+    const location =
+      number === undefined
+        ? (ice ?? t("card.unknown"))
+        : ice
+          ? t("details.numberedNamedIce", { number, ice })
+          : t("details.numberedIce", { number });
+    const ended = b("rioRunEnded") === true;
+    return {
+      ...say(
+        "rio",
+        {
+          ice: location,
+          roll: known(roll),
+          outcome: detail(ended ? "runEnded" : "runContinues"),
+        },
+        undefined,
+        "run",
+      ),
+      importance: ended ? "critical" : "important",
+    };
+  }
   if (n("vacuumLinkDieRoll", "rezzedIceRewindDieRoll") !== undefined)
     return say(
       b("vacuumLinkRewindApplied") === true ||
@@ -692,7 +748,7 @@ export function chronicleEventDetail(
       "startupImmolator",
       {
         ice:
-          name(s("targetIceDefinitionId", "trashedCardDefinitionId")) ?? target,
+          name(d("targetIceDefinitionId", "trashedCardDefinitionId")) ?? target,
         amount: known(n("rezCostPaid")),
       },
       undefined,
@@ -727,26 +783,22 @@ export function chronicleEventDetail(
       "run",
     );
   if (hidden === "v1911_aujourdoui_top5")
-    return say(
-      "aujourdhui",
-      {
-        count: known(n("selectedCount")),
-        cards: titles("publicRevealDefinitionIds").join(", "),
-      },
-      detail("stackShuffled"),
-    );
+    return say("aujourdhui", {
+      count: known(n("selectedCount")),
+      cards: titles("publicRevealDefinitionIds").join(", "),
+    });
   if (hidden === "p3_38_look_top_stack_show_to_corp_then_install_matching")
     return say(
       b("installed") === true ||
         (n("installedProgramCount") ?? 0) > 0 ||
-        s("installedProgramDefinitionId") !== undefined
+        d("installedProgramDefinitionId") !== undefined
         ? "mysteryInstalled"
         : b("programFound") === false
           ? "mysteryNoProgram"
           : "mysteryProgramChoice",
       {
         program:
-          name(s("installedProgramDefinitionId", "publicRevealDefinitionId")) ??
+          name(d("installedProgramDefinitionId", "publicRevealDefinitionId")) ??
           target,
         count: known(n("revealCount")),
       },
@@ -793,7 +845,7 @@ export function chronicleEventDetail(
     return say(
       b("baseLinkUsed") === true ? "baseLinkUsed" : "baseLinkDeclined",
       {
-        card: name(s("traceBaseLinkSourceDefinitionId")) ?? t("card.unknown"),
+        card: name(d("traceBaseLinkSourceDefinitionId")) ?? t("card.unknown"),
         link: known(n("baseLinkValue")),
         total: known(n("runnerLink")),
         paid: known(n("traceBaseLinkCostPaid")),
@@ -899,7 +951,7 @@ export function chronicleEventDetail(
   if (
     ["remove_shell_counter", "start_turn_remove_shell_counter"].includes(
       s("shellTradersAbility") ??
-        (sourceId === "onr_v1_176_the-shell-traders" ? ability : undefined) ??
+        (sourceId === 388 ? ability : undefined) ??
         "",
     )
   )
@@ -994,14 +1046,14 @@ export function chronicleEventDetail(
     );
   if (
     action === "resolve_choice" &&
-    (s("ambushDefinitionId", "accessEffectSourceDefinitionId") ||
+    (d("ambushDefinitionId", "accessEffectSourceDefinitionId") ||
       n("ambushPaidCost") !== undefined)
   )
     return say(
       b("ambushPaymentDeclined") === true ? "ambushDeclined" : "ambushPaid",
       {
         source:
-          name(s("ambushDefinitionId", "accessEffectSourceDefinitionId")) ??
+          name(d("ambushDefinitionId", "accessEffectSourceDefinitionId")) ??
           source,
         amount: known(n("ambushPaidCost")),
       },
@@ -1044,6 +1096,27 @@ export function chronicleEventDetail(
       detail("accessReplaced"),
       "run",
     );
+  if (isRunCreditLossReplacementPayload(p)) {
+    if (action === "play_event" && b("runnerEventRun") === true)
+      return say("eventRun", {}, undefined, "run");
+    if (action === "resolve_choice" && s("choiceVisibility") === "public") {
+      const paid = n("runnerPaidAmount");
+      const lost = n("corpLostCredits");
+      return paid === undefined || lost === undefined
+        ? say(
+            "runCreditLossReplacementAmountsMissing",
+            {},
+            detail("accessReplaced"),
+            "run",
+          )
+        : say(
+            "runCreditLossReplacement",
+            { paid, lost },
+            detail("accessReplaced"),
+            "run",
+          );
+    }
+  }
   if (action === "play_event" && s("accessReplacement")) {
     const clauses: string[] = [];
     for (const [field, key, recipient] of [
@@ -1072,7 +1145,7 @@ export function chronicleEventDetail(
     return say("eventRun", {}, undefined, "run");
   const genericKey = (
     {
-      decline_trash: "declineTrash",
+      decline_trash: "accessAcknowledged",
       move_to_set_aside: "setAside",
       move_to_removed_from_game: "removedFromGame",
       return_from_set_aside: "returnedFromSetAside",
@@ -1088,13 +1161,13 @@ export function chronicleEventSupplement(
   event: PublicGameEvent,
   item: ChronicleItem,
   context: Omit<ChronicleContext, "side">,
-  mergedEffects: ResolvedGameEffect[],
+  mergedEffects: PublicResolvedGameEffect[],
 ): ChronicleItem {
   const t = context.translate!;
   const p = event.publicPayload;
   const n = (...keys: string[]) => firstNumber(p, keys);
   const s = (...keys: string[]) => firstString(p, keys);
-  const name = (id: string | undefined) =>
+  const name = (id: CardDefinitionId | undefined) =>
     publicCardTitle(id, context.cardPresentationsById);
   const lines: string[] = [];
   const outcomes: string[] = [];
@@ -1161,8 +1234,7 @@ export function chronicleEventSupplement(
     for (const [field, key] of payments)
       if (n(field) !== undefined && n(field)! > 0)
         add(key, { amount: n(field)! });
-    const replacements = s("trashedDeckDefinitionIds")
-      ?.split(",")
+    const replacements = cardDefinitionIdsFromCsv(p.trashedDeckDefinitionIds)
       .map(name)
       .filter(Boolean)
       .join(", ");
@@ -1342,6 +1414,10 @@ function record(value: unknown): Record<string, unknown> | undefined {
 function string(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
+function firstDefinitionId(p: Record<string, unknown>, keys: readonly string[]): CardDefinitionId | undefined {
+  return keys.map((key) => cardDefinitionIdValue(p[key])).find((id) => id !== undefined);
+}
+
 function firstString(
   p: Record<string, unknown>,
   keys: string[],
@@ -1375,7 +1451,7 @@ function publicTitles(value: unknown): string[] {
 
 export function chronicleEffectDetail(
   event: PublicGameEvent,
-  effect: ResolvedGameEffect,
+  effect: PublicResolvedGameEffect,
   base: ChronicleItem,
   side: Side,
   t: ChronicleTranslate,
@@ -1383,7 +1459,7 @@ export function chronicleEffectDetail(
 ): Partial<ChronicleItem> | undefined {
   // Only these public access consequences cross a hidden-information barrier.
   const access = effect.reason === "access_effect";
-  const ambush = firstString(event.publicPayload, [
+  const ambush = firstDefinitionId(event.publicPayload, [
     "ambushDefinitionId",
     "accessEffectSourceDefinitionId",
   ]);
@@ -1422,15 +1498,13 @@ export function chronicleEffectDetail(
     return undefined;
   }
   const p = effect as Record<string, unknown>;
+  const d = (...keys: string[]) => firstDefinitionId(p, keys);
   const n = (...keys: string[]) => firstNumber(p, keys);
   const s = (...keys: string[]) => firstString(p, keys);
   const known = (v: number | undefined) => v ?? t("details.unknown");
-  const sourceId = s("sourceDefinitionId") ?? ambush;
+  const sourceId = d("sourceDefinitionId") ?? ambush;
   const source =
-    s("sourceTitle") ??
-    publicCardTitle(sourceId, catalog) ??
-    base.cardTitle ??
-    t("card.unknown");
+    s("sourceTitle") ?? publicCardTitle(sourceId, catalog) ?? t("card.unknown");
   const subject = t(
     base.actor === side
       ? "actor.you"
@@ -1496,12 +1570,7 @@ export function chronicleEffectDetail(
       {
         count: known(en("trashedCount") ?? n("amount")),
         counters: known(en("advancementCounterCount", "targetTrashCount")),
-        cards: (
-          firstString(ep, ["trashedCardDefinitionIds"]) ??
-          s("cardDefinitionId") ??
-          ""
-        )
-          .split(",")
+        cards: (ep.trashedCardDefinitionIds ? cardDefinitionIdsFromCsv(ep.trashedCardDefinitionIds) : [d("cardDefinitionId")])
           .map((id) => publicCardTitle(id, catalog))
           .filter(Boolean)
           .join(", "),
@@ -1554,22 +1623,32 @@ export function chronicleEffectDetail(
     );
   if (
     effect.kind === "draw_cards" &&
-    s("sourceDefinitionId") === "onr_v1_064_skivviss"
+    d("sourceDefinitionId") === 276
   )
     return {
       ...say("skivviss"),
       description: t("details.skivvissCounters", { amount }),
     };
-  if (effect.kind === "rez_card") return say("automaticRez");
-  if (effect.kind === "score_agenda" || effect.kind === "steal_agenda")
+  if (
+    effect.kind === "rez_card" ||
+    effect.kind === "score_agenda" ||
+    effect.kind === "steal_agenda"
+  ) {
+    const card =
+      publicCardTitle(d("cardDefinitionId"), catalog) ??
+      s("cardTitle") ??
+      t("card.unknown");
+    if (effect.kind === "rez_card")
+      return say("automaticRez", { source: card });
     return {
       ...say(
         effect.kind === "score_agenda" ? "automaticScore" : "automaticSteal",
-        { card: s("cardTitle") ?? source },
+        { card },
         "agenda",
       ),
       importance: "critical",
     };
+  }
   if (effect.kind === "add_hosted_credits")
     return say("hostedAdded", {}, "economy");
   if (
@@ -1613,8 +1692,7 @@ export function chronicleEffectDetail(
         "pattelTargets",
         {
           count: known(en("targetCount")),
-          cards: (firstString(ep, ["targetCardDefinitionIds"]) ?? "")
-            .split(",")
+          cards: cardDefinitionIdsFromCsv(ep.targetCardDefinitionIds)
             .map((id) => publicCardTitle(id, catalog))
             .filter(Boolean)
             .join(", "),
@@ -1707,7 +1785,7 @@ export function chronicleEffectDetail(
           prevented: en("preventedAmount")!,
           prevention:
             publicCardTitle(
-              firstString(ep, ["sourceDefinitionId", "cardDefinitionId"]),
+              firstDefinitionId(ep, ["sourceDefinitionId", "cardDefinitionId"]),
               catalog,
             ) ??
             firstString(ep, ["sourceTitle", "title"]) ??

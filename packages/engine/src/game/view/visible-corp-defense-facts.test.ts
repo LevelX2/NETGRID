@@ -7,11 +7,11 @@ import {
   visibleRunnerNextTurnPreparationCreditGain,
 } from "./visible-runner-preparation-income";
 
-function visible(id: string): VisibleCard {
+function visible(id: number): VisibleCard {
   const definition = CARD_DEFINITIONS_BY_ID[id]!;
   return {
     ...definition,
-    instanceId: id,
+    instanceId: String(id),
     definitionId: id,
     known: true,
     owner: definition.side,
@@ -20,7 +20,7 @@ function visible(id: string): VisibleCard {
 }
 describe("visible Corp defense mechanics", () => {
   it("quotes the implemented pass trigger without drawing randomness", () => {
-    const card = visible("onr_v1_367_rio-de-janeiro-city-grid");
+    const card = visible(579);
     const before = structuredClone(card);
     expect(visibleFortPassProtection(card)).toEqual({
       complete: true,
@@ -38,12 +38,13 @@ describe("visible Corp defense mechanics", () => {
     expect(
       visibleFortPassProtection({ instanceId: "hidden", known: false }),
     ).toMatchObject({ complete: false });
-    expect(
-      visibleFortPassProtection(visible("onr_v1_279_wall-of-static")),
-    ).toEqual({ complete: true, kind: "none" });
+    expect(visibleFortPassProtection(visible(491))).toEqual({
+      complete: true,
+      kind: "none",
+    });
   });
   it("quotes repeatable public income without assuming hidden events", () => {
-    const program = visible("onr_v1_045_newsgroup-filter");
+    const program = visible(257);
     expect(visibleRunnerPreparationIncomePerClick([program])).toBe(2);
     expect(visibleRunnerPreparationIncomePerClick([])).toBe(1);
     expect(
@@ -54,8 +55,8 @@ describe("visible Corp defense mechanics", () => {
 
 function bank(id: string, amount: number): VisibleCard {
   return {
-    ...visible("onr_v1_154_broker"),
-    instanceId: id,
+    ...visible(366),
+    instanceId: String(id),
     rezzed: true,
     counters: { bit: amount },
   };

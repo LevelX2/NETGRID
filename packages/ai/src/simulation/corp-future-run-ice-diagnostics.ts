@@ -9,7 +9,7 @@ import type { AiSimulationSummary } from "./ai-simulation-summary";
 export type SourceDefinitionIdForSimulationAction = (
   input: AiDecisionInput,
   action: LegalAction,
-) => string | undefined;
+) => number | undefined;
 
 export function createCorpFutureRunIceDiagnosticsForSimulationAction(
   sourceDefinitionIdForSimulationAction: SourceDefinitionIdForSimulationAction,

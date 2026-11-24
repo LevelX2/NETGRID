@@ -12,8 +12,9 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 
-const KRASH_INSTANCE_ID = "runner_onr_v1_039_krash_1";
-const STREETWARE_DEFINITION_ID = "onr_proteus_150_streetware-distributor";
+const KRASH_INSTANCE_ID = "c1jt";
+const STREETWARE_DEFINITION_ID = 208;
+const TEMPLE_MICROCODE_OUTLET_DEFINITION_ID = 326;
 
 describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
   it.each([
@@ -47,11 +48,17 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
       // inside the existing three-turn automatic payout horizon.
       checkpoint.engine.testOnlyGameState.runner.credits = 7;
       checkpoint.source.kind = "synthetic_companion";
+      checkpoint.expectation.acceptableActions = [
+        {
+          type: "play_event",
+          sourceDefinitionId: TEMPLE_MICROCODE_OUTLET_DEFINITION_ID,
+        },
+      ];
     });
     const result = runAiDecisionCheckpoint(control);
     expect(result.ok, result.message).toBe(true);
     const bankId =
-      "plan:runner.credit_bank:runner_onr_proteus_150_streetware-distributor_2";
+      "pblmj20383eaxot3atgspmt6tr";
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.portfolio,
     ).toEqual(
@@ -67,7 +74,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     );
     const bankAction = result.input.legalActions.find(
       (action) =>
-        action.source === "runner_onr_proteus_150_streetware-distributor_2" &&
+        action.source === "c1aa" &&
         action.payload?.cardImplementationAddsHostedCredits === true,
     );
     expect(bankAction).toBeDefined();
@@ -84,7 +91,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     const bank = residentPlanPortfolioSnapshot(result.input)!.instances.find(
       (instance) =>
         instance.instanceId ===
-        "plan:runner.credit_bank:runner_onr_proteus_150_streetware-distributor_2",
+        "pblmj20383eaxot3atgspmt6tr",
     )!;
     expect(bank.moduleState).toMatchObject({
       phase: "hold",
@@ -99,7 +106,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expect(
       result.input.legalActions.some(
         (action) =>
-          action.source === "runner_onr_proteus_150_streetware-distributor_2" &&
+          action.source === "c1aa" &&
           action.payload?.cardImplementationAddsHostedCredits === true,
       ),
     ).toBe(true);
@@ -113,7 +120,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "20EB-C02-NO-FOLLOW-UP-CLICK";
         checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+          forbiddenActions: [{ actionId: "rx" }],
         };
       },
     );
@@ -136,7 +143,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "20EB-C03-HOSTABLE-EUROCORPSE";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.start_run.rd" }],
+        acceptableActions: [{ actionId: "rs.rd" }],
         planExecution: {
           acceptablePlanKinds: ["runner.pressure_central"],
           acceptableCapabilities: ["pressure_rd_information"],
@@ -169,8 +176,8 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         checkpoint.source.findingId = "20EB-C04-DRAW-BELOW-HAND-LIMIT";
         checkpoint.expectation = {
           acceptableActions: [
-            { actionId: "runner.draw_card" },
-            { actionId: "runner.trigger_ability" },
+            { actionId: "r8" },
+            { actionId: "rx" },
           ],
         };
       },
@@ -196,7 +203,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
           acceptableActions: [
             {
               type: "activated_card_ability",
-              sourceDefinitionId: "onr_v1_177_the-short-circuit",
+              sourceDefinitionId: 389,
             },
           ],
           forbiddenActions: [

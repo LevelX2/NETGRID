@@ -1,6 +1,5 @@
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { isRemoteServerTarget } from "../runtime/server-target";
-import { averageNumber } from "./simulation-metric-aggregation";
 
 export function progressionEntriesWithRunTargets(
   actionSequence: AiSimulationSummary["actionSequence"],
@@ -14,7 +13,7 @@ export function progressionEntriesWithRunTargets(
     "jack_out",
   ]);
   return actionSequence.map((entry) => {
-    if (entry.side === "runner" && entry.actionType === "start_run") {
+    if (entry.side === "runner" && entry.runnerRunStarted === true) {
       currentRunTarget = entry.targetServerId;
       return entry;
     }
@@ -30,81 +29,58 @@ export function progressionEntriesWithRunTargets(
   });
 }
 
-export function averageTurnsFromFinalAdvanceToScoreOrSteal(
-  summaries: AiSimulationSummary[],
-): number {
-  const deltas = summaries.flatMap((summary) => {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    return sequence
-      .map((entry, index) => {
-        if (entry.side !== "corp" || entry.finalAdvance !== true)
-          return undefined;
-        const later = sequence
-          .slice(index + 1)
-          .find(
-            (candidate) =>
-              candidate.actionType === "score_agenda" ||
-              candidate.actionType === "steal_agenda",
-          );
-        if (!later?.turnNumber || !entry.turnNumber) return undefined;
-        return Math.max(0, later.turnNumber - entry.turnNumber);
-      })
-      .filter((value): value is number => typeof value === "number");
-  });
-  return averageNumber(deltas);
-}
+type ActionSequence = AiSimulationSummary["actionSequence"];
 
 export function countCorpMultiIceInstallOrderFutureEffectDead(
-  sequence: AiSimulationSummary["actionSequence"],
+  sequence: ActionSequence,
 ): number {
-  return sequence.filter((entry, index) => {
+  const laterInstalls = new Set<string>();
+  let count = 0;
+  for (let index = sequence.length - 1; index >= 0; index--) {
+    const entry = sequence[index]!;
+    const key = corpIceInstallTurnAndServer(entry);
+    if (key === undefined) continue;
     if (
-      entry.side !== "corp" ||
-      entry.actionType !== "install_card" ||
-      entry.installPlacement !== "ice" ||
-      entry.corpFutureRunIceInstalledAsDeadEffect !== true ||
-      !entry.targetServerId ||
-      !entry.turnNumber
+      entry.corpFutureRunIceInstalledAsDeadEffect === true &&
+      laterInstalls.has(key)
     )
-      return false;
-    return sequence
-      .slice(index + 1)
-      .some(
-        (later) =>
-          later.side === "corp" &&
-          later.turnNumber === entry.turnNumber &&
-          later.actionType === "install_card" &&
-          later.installPlacement === "ice" &&
-          later.targetServerId === entry.targetServerId,
-      );
-  }).length;
+      count++;
+    laterInstalls.add(key);
+  }
+  return count;
 }
 
 export function countCorpMultiIceInstallOrderOptimized(
-  sequence: AiSimulationSummary["actionSequence"],
+  sequence: ActionSequence,
 ): number {
-  return sequence.filter((entry, index) => {
+  const earlierOrdinaryInstalls = new Set<string>();
+  let count = 0;
+  for (const entry of sequence) {
+    const key = corpIceInstallTurnAndServer(entry);
+    if (key === undefined) continue;
     if (
-      entry.side !== "corp" ||
-      entry.actionType !== "install_card" ||
-      entry.installPlacement !== "ice" ||
-      entry.corpFutureRunIceInstalledAsLiveEffect !== true ||
-      !entry.targetServerId ||
-      !entry.turnNumber
+      entry.corpFutureRunIceInstalledAsLiveEffect === true &&
+      earlierOrdinaryInstalls.has(key)
     )
-      return false;
-    return sequence
-      .slice(0, index)
-      .some(
-        (previous) =>
-          previous.side === "corp" &&
-          previous.turnNumber === entry.turnNumber &&
-          previous.actionType === "install_card" &&
-          previous.installPlacement === "ice" &&
-          previous.targetServerId === entry.targetServerId &&
-          previous.corpFutureRunIceInstalled !== true,
-      );
-  }).length;
+      count++;
+    if (entry.corpFutureRunIceInstalled !== true)
+      earlierOrdinaryInstalls.add(key);
+  }
+  return count;
+}
+
+function corpIceInstallTurnAndServer(
+  entry: ActionSequence[number],
+): string | undefined {
+  if (
+    entry.side !== "corp" ||
+    entry.actionType !== "install_card" ||
+    entry.installPlacement !== "ice" ||
+    !entry.targetServerId ||
+    !entry.turnNumber
+  )
+    return undefined;
+  return `${entry.turnNumber}:${entry.targetServerId}`;
 }
 
 export function isCorpRemoteAdvancementProgress(
@@ -114,4 +90,48 @@ export function isCorpRemoteAdvancementProgress(
   if (!isRemoteServerTarget(entry.targetServerId)) return false;
   if (entry.actionType === "advance_card") return true;
   return (entry.advancementCountersAdded ?? 0) > 0;
+}
+
+export function countRunnerTurnsBelowContestReserve(
+  sequence: AiSimulationSummary["actionSequence"],
+): number {
+  const turns = new Set<number>();
+  for (const entry of sequence) {
+    if (
+      entry.side === "runner" &&
+      entry.runnerBelowReserveBefore === true &&
+      entry.turnNumber !== undefined
+    )
+      turns.add(entry.turnNumber);
+  }
+  return turns.size;
+}
+
+export function countPressureTargetSwitches(
+  sequence: AiSimulationSummary["actionSequence"],
+): number {
+  let previousTarget: string | undefined;
+  let switches = 0;
+  for (const entry of sequence) {
+    if (entry.side !== "runner" || entry.runnerRunStarted !== true) continue;
+    const target = entry.targetServerId ?? "unknown";
+    if (previousTarget !== undefined && previousTarget !== target) switches++;
+    previousTarget = target;
+  }
+  return switches;
+}
+
+export function successfulRunAccessTargets(
+  sequence: AiSimulationSummary["actionSequence"],
+): string[] {
+  const byRun = new Map<number, string>();
+  for (const entry of sequence) {
+    if (
+      entry.side === "runner" &&
+      entry.runnerReserveRunId &&
+      entry.runnerReserveAccessTarget
+    )
+      byRun.set(entry.runnerReserveRunId, entry.runnerReserveAccessTarget);
+  }
+  return [...byRun.values()];
 }

@@ -2,7 +2,10 @@ import { afterEach, expect, it } from "vitest";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r5-g39-d202.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
 import {
   activeRunRootPlan,
   reassessActiveInformationRunParent,
@@ -57,14 +60,19 @@ it("pumps the affordable current Gate under the original R&D root and current le
   expect(selected.expiresAtStateVersion).toBe(input.playerView.stateVersion);
   expect(result.fallbackUsed).toBe(false);
   expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
+    rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
     route: { actionId: selected.actionId },
   });
-  expect(
-    result.evidence?.some((e) =>
-      e.startsWith("plan_first_executor:plan:runner.convert_run_window:"),
-    ),
-  ).toBe(true);
+  const executor = residentPlanPortfolioSnapshot(input)!.instances.find(
+    (instance) =>
+      instance.instanceId ===
+      result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+  );
+  expect(executor).toMatchObject({
+    moduleId: "runner.convert_run_window",
+    executionState: "executor",
+  });
+  expect(result.evidence).toContain(`plan_first_executor:${executor!.instanceId}`);
 });
 
 it.each(["credits", "visible_rez_support"])(

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 
 import type { AiCardHint } from "../ai-hints";
@@ -6,7 +7,7 @@ import { randomBreakOrDamageRiskProfileForHint } from "./risk-action-projection"
 describe("random break-or-damage risk profile", () => {
   it("projects an unseen card from functional hint semantics without an id registry", () => {
     const hint = {
-      cardId: "future-random-breaker",
+      cardId: syntheticCardDefinitionId("future-random-breaker"),
       side: "runner",
       aiSupportStatus: "ai_supported",
       breakerProfile: {
@@ -32,7 +33,7 @@ describe("random break-or-damage risk profile", () => {
   it("fails closed when the functional random outcome is missing", () => {
     expect(
       randomBreakOrDamageRiskProfileForHint({
-        cardId: "ordinary-breaker",
+        cardId: syntheticCardDefinitionId("ordinary-breaker"),
         side: "runner",
         aiSupportStatus: "ai_supported",
         breakerProfile: { coverage: ["wall"] },

@@ -1,17 +1,12 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
-import type { RunnerMultiRunEventScoreAssessment } from "./runner-multi-run-event-score";
-
-type RunnerMultiRunEventExclusionAssessment =
-  RunnerMultiRunEventScoreAssessment & {
-    canTakeRun: boolean;
-  };
+import type { RunnerMultiRunEventAssessment } from "./runner-multi-run-event-assessment";
 
 export type RunnerMultiRunEventExclusionDependencies = {
   assessment: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => RunnerMultiRunEventExclusionAssessment | undefined;
+  ) => RunnerMultiRunEventAssessment | undefined;
 };
 
 export function runnerMultiRunEventExclusion(

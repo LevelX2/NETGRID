@@ -1,3 +1,12 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+} from "@netgrid/engine";
+import { DEMO_DECKS, type Side } from "@netgrid/shared";
+import { RealEngineFixtureBuilder } from "../../evaluation/real-engine-fixture-builder";
+import { buildAiDecisionInput } from "../ai-decision-input";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -6,12 +15,12 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import { buildCorpIceDensityProfile } from "../corp-economy/corp-ice-density";
+import { buildCorpIceCardFacts } from "./corp-ice-placement";
 import {
-  buildCorpIceCardFacts,
   corpIcePlacementActionCostAgreementFact,
   corpIcePlacementActionCreditCostFact,
   corpIcePlacementPostInstallRezCostFact,
-} from "./corp-ice-placement";
+} from "./corp-ice-placement-costs";
 import {
   assessCorpIcePlacementForDiagnostics,
   classifyCorpFutureRunIcePlacementProfile,
@@ -21,7 +30,7 @@ describe("corp ICE placement profile", () => {
   it("classifies direct stops and historical future-run ICE", () => {
     const wall = buildCorpIceCardFacts(
       corpIce("wall", {
-        definitionId: "simple_barrier_ice",
+        definitionId: 589,
         rulesText: "*End the run.",
         rezCost: 3,
       }),
@@ -35,7 +44,7 @@ describe("corp ICE placement profile", () => {
     expect(wall).not.toHaveProperty("rezCost");
     expect(wall.evidence).toContain("printed_rez_cost_consumed:false");
     expect(
-      classifyCorpFutureRunIcePlacementProfile("onr_v1_222_ball-and-chain"),
+      classifyCorpFutureRunIcePlacementProfile(434),
     ).toBe("ball_and_chain");
   });
 
@@ -135,13 +144,40 @@ describe("corp ICE action and Engine quote facts", () => {
       postInstallRezQuoteBaseCredits: 3,
       postInstallRezQuoteFinalCredits: 2,
       postInstallRezQuoteMandatoryAgendaPointCost: 0,
-      postInstallRezQuoteReductionSourceDefinitionIds: "cost-reducer",
+      postInstallRezQuoteReductionSourceDefinitionIds: String(syntheticCardDefinitionId("cost-reducer")),
     };
 
     expect(corpIcePlacementPostInstallRezCostFact(input, action)).toEqual({
       status: "known",
       amount: 2,
       source: "engine_post_install_rez_quote",
+    });
+  });
+
+  it("rejects a new-remote quote that points to an already existing server", () => {
+    const wall = corpIce("wall");
+    const action = installIceAction(wall, "new_remote");
+    action.payload = {
+      ...action.payload,
+      postInstallRezQuoteCardId: wall.instanceId,
+      postInstallRezQuoteTargetServerId: "new_remote",
+      postInstallRezQuoteProjectedServerId: "r1",
+      postInstallRezQuoteExpiresAtStateVersion: 1,
+      postInstallRezQuoteComplete: true,
+      postInstallRezQuoteBaseCredits: 3,
+      postInstallRezQuoteFinalCredits: 3,
+      postInstallRezQuoteMandatoryAgendaPointCost: 0,
+    };
+    const input = corpInput({ hq: [wall], servers: [server("hq", [])] });
+    input.legalActions = [action];
+    expect(corpIcePlacementPostInstallRezCostFact(input, action)).toMatchObject({
+      status: "known",
+      amount: 3,
+    });
+    input.playerView.servers.push(server("r1", []));
+    expect(corpIcePlacementPostInstallRezCostFact(input, action)).toMatchObject({
+      status: "unknown",
+      reason: "binding_drift",
     });
   });
 
@@ -333,6 +369,100 @@ describe("corp ICE action and Engine quote facts", () => {
 });
 
 describe("corp ICE factual support", () => {
+  it("preserves Corp density when MIT West Tier leaves the Runner deck publicly", () => {
+    const mit = 313;
+    const corpDeck = DEMO_DECKS.demo_corp_001;
+    const base = DEMO_DECKS.demo_runner_001;
+    const runnerDeck = {
+      ...base,
+      cards: [...base.cards, { id: mit, quantity: 1 }],
+    };
+    let state = createGameAfterSetup({
+      seed: "sample-20-ice-density",
+      runnerDeck,
+      corpDeck,
+    });
+    const take = (side: Side, predicate: (offer: LegalAction) => boolean) => {
+      const action = getLegalActions(state, side).find(predicate);
+      if (!action) throw new Error("Expected the fixture's Engine offer");
+      const applied = applyAction(state, {
+        matchId: state.matchId,
+        side,
+        actionId: action.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: state.stateVersion + ":" + action.actionId,
+      });
+      if (!applied.ok) throw new Error(applied.error.message);
+      state = applied.state;
+    };
+    const input = () =>
+      buildAiDecisionInput(state, "corp", {
+        ownDeckSnapshot: {
+          deckSnapshotId: corpDeck.id,
+          side: "corp",
+          cards: corpDeck.cards.map(({ id, quantity }) => ({
+            cardId: id,
+            quantity,
+          })),
+        },
+      });
+
+    take("corp", (offer) => offer.type === "mandatory_draw");
+    RealEngineFixtureBuilder.forState(state).withCorpHqSize(5);
+    take("corp", (offer) => offer.type === "end_turn");
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerCardInGrip(mit)
+      .withRunnerCredits(10);
+    const before = buildCorpIceDensityProfile(input());
+    expect(before).toMatchObject({
+      confidence: "deck_snapshot",
+      remainingIceCount: 5,
+    });
+    take(
+      "runner",
+      (offer) =>
+        offer.type === "play_event" &&
+        state.cardInstances[offer.source]?.definitionId === mit,
+    );
+    const after = input();
+    expect(after.playerView.specialZones?.removedFromGame).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ definitionId: mit, owner: "runner" }),
+      ]),
+    );
+    expect(buildCorpIceDensityProfile(after)).toEqual(before);
+  });
+
+  it("counts a Corp-owned visible ICE in a mixed special zone", () => {
+    const input = corpInput({ stackOrRdCount: 2 });
+    Object.assign(input, {
+      ownDeckSnapshot: {
+        deckSnapshotId: "mixed-special-zone",
+        side: "corp",
+        cards: [{ cardId: 589, quantity: 3 }],
+      },
+    });
+    input.playerView.specialZones = {
+      setAside: [],
+      removedFromGame: [
+        corpIce("our-ice", {
+          owner: "corp",
+          definitionId: 589,
+        }),
+        { ...card("runner-card", "event"), owner: "runner" },
+        { instanceId: "hidden-special", known: false },
+      ],
+      setAsideCount: 0,
+      removedFromGameCount: 3,
+    };
+    expect(buildCorpIceDensityProfile(input)).toMatchObject({
+      confidence: "deck_snapshot",
+      knownCardsOutsideDeck: 1,
+      knownIceOutsideDeck: 1,
+      remainingIceCount: 2,
+    });
+  });
+
   it("reports deck density independently from placement policy", () => {
     const input = corpInput({
       hq: [corpIce("hq-ice")],
@@ -356,12 +486,12 @@ describe("corp ICE factual support", () => {
     const input = corpInput({
       hq: [
         corpIce("hq-ice", {
-          definitionId: "simple_barrier_ice",
+          definitionId: 589,
         }),
       ],
       archives: [
         corpIce("archives-ice", {
-          definitionId: "simple_barrier_ice",
+          definitionId: 589,
         }),
       ],
       stackOrRdCount: 7,
@@ -371,8 +501,8 @@ describe("corp ICE factual support", () => {
         deckSnapshotId: "corp-density-test",
         side: "corp",
         cards: [
-          { cardId: "simple_barrier_ice", quantity: 3 },
-          { cardId: "simple_economy_operation", quantity: 6 },
+          { cardId: 589, quantity: 3 },
+          { cardId: 596, quantity: 6 },
         ],
       },
     });
@@ -398,7 +528,7 @@ describe("corp ICE factual support", () => {
       ownDeckSnapshot: {
         deckSnapshotId: "invalid-rd-count",
         side: "corp",
-        cards: [{ cardId: "simple_barrier_ice", quantity: 3 }],
+        cards: [{ cardId: 589, quantity: 3 }],
       },
     });
 
@@ -412,13 +542,13 @@ describe("corp ICE factual support", () => {
   });
 
   it.each([
-    ["negative quantity", [{ cardId: "simple_barrier_ice", quantity: -1 }]],
-    ["fractional quantity", [{ cardId: "simple_barrier_ice", quantity: 1.5 }]],
+    ["negative quantity", [{ cardId: 589, quantity: -1 }]],
+    ["fractional quantity", [{ cardId: 589, quantity: 1.5 }]],
     [
       "duplicate card id",
       [
-        { cardId: "simple_barrier_ice", quantity: 1 },
-        { cardId: "simple_barrier_ice", quantity: 1 },
+        { cardId: 589, quantity: 1 },
+        { cardId: 589, quantity: 1 },
       ],
     ],
     [
@@ -448,8 +578,8 @@ describe("corp ICE factual support", () => {
   it("fails closed instead of clamping impossible zone accounting", () => {
     const input = corpInput({
       hq: [
-        corpIce("ice-a", { definitionId: "simple_barrier_ice" }),
-        corpIce("ice-b", { definitionId: "simple_barrier_ice" }),
+        corpIce("ice-a", { definitionId: 589 }),
+        corpIce("ice-b", { definitionId: 589 }),
       ],
       stackOrRdCount: 3,
     });
@@ -457,7 +587,7 @@ describe("corp ICE factual support", () => {
       ownDeckSnapshot: {
         deckSnapshotId: "zone-drift",
         side: "corp",
-        cards: [{ cardId: "simple_barrier_ice", quantity: 1 }],
+        cards: [{ cardId: 589, quantity: 1 }],
       },
     });
 
@@ -472,15 +602,15 @@ describe("corp ICE factual support", () => {
 
   it("retains future-run ICE diagnostics without making a decision", () => {
     const ballAndChain = corpIce("ball-and-chain", {
-      definitionId: "onr_v1_222_ball-and-chain",
+      definitionId: 434,
       title: "Ball and Chain",
       rezCost: 2,
     });
     const input = corpInput({
       hq: [ballAndChain],
-      servers: [server("remote_1", [])],
+      servers: [server("r1", [])],
     });
-    const action = installIceAction(ballAndChain, "remote_1");
+    const action = installIceAction(ballAndChain, "r1");
     input.legalActions = [action];
 
     expect(assessCorpIcePlacementForDiagnostics(input, action)).toMatchObject({
@@ -557,7 +687,7 @@ function corpInput(
 }
 
 function server(
-  id: "hq" | "rd" | "archives" | `remote_${number}`,
+  id: "hq" | "rd" | "archives" | `r${number}`,
   ice: VisibleCard[],
 ): AiDecisionInput["playerView"]["servers"][number] {
   return {

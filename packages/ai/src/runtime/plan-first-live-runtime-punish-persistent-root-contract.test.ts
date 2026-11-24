@@ -1,3 +1,5 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -19,7 +21,7 @@ import {
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
 
-const CLOSED_ACCOUNTS_DEFINITION_ID = "onr_v1_285_closed-accounts";
+const CLOSED_ACCOUNTS_DEFINITION_ID = 497;
 const CLOSED_ACCOUNTS_CAMPAIGN_ID = "tagged-closed-accounts";
 const CLOSED_ACCOUNTS_ROUTE_ID = "closed-accounts-payoff";
 const CLOSED_ACCOUNTS_FUNDING_NEED = `punish-funding:${CLOSED_ACCOUNTS_CAMPAIGN_ID}:${CLOSED_ACCOUNTS_ROUTE_ID}`;
@@ -289,7 +291,7 @@ function advanceToUnknownQuoteWithScoreAlternative(
 ): void {
   const stateVersion = 2;
   const agenda = visibleCard("score-agenda", "corp", "agenda", {
-    definitionId: "onr_v1_203_hostile-takeover",
+    definitionId: 415,
     title: "Hostile Takeover",
     agendaPoints: 2,
     advancementRequirement: 1,
@@ -318,7 +320,7 @@ function advanceToUnknownQuoteWithScoreAlternative(
           payload: {
             cardId: agenda.instanceId,
             sourceDefinitionId: agenda.definitionId!,
-            serverId: "remote_1",
+            serverId: "r1",
             placement: "root",
           },
         },
@@ -335,14 +337,14 @@ function advanceToUnknownQuoteWithScoreAlternative(
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1"),
+    server("r1"),
   ];
   input.playerView.legalActions = actions;
   input.legalActions = actions;
   bindSyntheticAgendaInstallQuotes(input);
   input.playerView.opponent.rig = [
     visibleCard("runner-virus", "runner", "program", {
-      definitionId: "test-runner-virus",
+      definitionId: syntheticCardDefinitionId("test-runner-virus"),
       title: "Visible Runner Virus",
       counters: { virus: 3 },
     }),
@@ -368,6 +370,10 @@ function closedAccountsQuoteSet(params: {
   card: VisibleCard;
   currentAction?: LegalAction;
 }): CorpPunishRouteQuoteSet {
+  const sourceCapabilityId = canonicalCapabilityId(
+    params.card.definitionId!,
+    capabilityKey("abilities_on_play_lose_credits"),
+  );
   return {
     schemaVersion: CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
     visibility: "private_to_actor",
@@ -406,7 +412,7 @@ function closedAccountsQuoteSet(params: {
               kind: "other_punish",
               sourceCardInstanceId: params.card.instanceId,
               sourceCapabilityBindingKind: "card_spec_capability_key",
-              sourceCapabilityId: `${params.card.definitionId!}:abilities_on_play_lose_credits`,
+              sourceCapabilityId,
             },
           ],
         },
@@ -420,7 +426,7 @@ function closedAccountsQuoteSet(params: {
             sourceCardInstanceId: params.card.instanceId,
             sourceCardDefinitionId: params.card.definitionId!,
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId: `${params.card.definitionId!}:abilities_on_play_lose_credits`,
+            sourceCapabilityId,
             clicks: 1,
             credits: 1,
             ...(params.currentAction

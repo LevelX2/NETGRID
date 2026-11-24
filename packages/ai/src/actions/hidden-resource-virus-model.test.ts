@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -21,12 +22,14 @@ describe("projectHiddenResourceVirusModel", () => {
   });
 
   it("redacts opponent hidden amounts and identity into the same abstract risk", () => {
+    const firstDefinitionId = syntheticCardDefinitionId("secret-definition-a");
+    const secondDefinitionId = syntheticCardDefinitionId("secret-definition-b");
     const first = projectHiddenResourceVirusModel(
-      blockedCandidate("secret-instance-a", "secret-definition-a"),
+      blockedCandidate("secret-instance-a", firstDefinitionId),
       action({ hiddenResourceAvailable: 9, hiddenResourceRequired: 1 }),
     );
     const second = projectHiddenResourceVirusModel(
-      blockedCandidate("secret-instance-b", "secret-definition-b"),
+      blockedCandidate("secret-instance-b", secondDefinitionId),
       action({ hiddenResourceAvailable: 1, hiddenResourceRequired: 9 }),
     );
 
@@ -36,7 +39,11 @@ describe("projectHiddenResourceVirusModel", () => {
       sufficiency: "unknown",
       opponentIdentityPreserved: true,
     });
-    expect(JSON.stringify(first)).not.toContain("secret-");
+    const encoded = JSON.stringify(first);
+    expect(encoded).not.toContain("secret-");
+    for (const id of [firstDefinitionId, secondDefinitionId]) {
+      expect(encoded).not.toContain(String(id));
+    }
   });
 
   it("models a Runner virus counter and purge window from structured payload", () => {
@@ -121,7 +128,7 @@ function action(
 
 function blockedCandidate(
   sourceCardInstanceId: string,
-  sourceDefinitionId: string,
+  sourceDefinitionId: number,
 ): ActionSemanticCandidate {
   return candidate({
     sourceCardInstanceId,

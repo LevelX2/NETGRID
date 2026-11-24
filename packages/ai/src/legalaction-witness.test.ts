@@ -68,6 +68,32 @@ describe("LegalActionWitness v1", () => {
     expect(witness.blockers).toContain("source_ref_hidden_blocked");
   });
 
+  it("redacts the action and witness identity of a blocked witness", () => {
+    const witness = buildLegalActionWitness({
+      legalAction: action("start_run", {
+        actionId: "test.privatePayload.unavailable",
+        payload: { serverId: "rd" },
+      }),
+      stateVersion: 1,
+    });
+    expect(witness.redactionPolicy).toBe("hidden_blocked");
+    expect(legalActionWitnessIsRedactionSafe(witness)).toBe(true);
+    expect(witness.actionId).toMatch(/^blocked-action:/);
+  });
+
+  it("blocks a hidden requirement even when an action has a public server", () => {
+    const witness = buildLegalActionWitness({
+      legalAction: action("start_run", {
+        payload: { serverId: "rd" },
+        targetRequirements: [
+          { id: "hidden", kind: "card", visibility: "engine_only" },
+        ],
+      }),
+      stateVersion: 1,
+    });
+    expect(witness.targetRef.kind).toBe("hidden_blocked");
+  });
+
   it("bounds hidden-info marker detection to exact tokens", () => {
     const witness = buildLegalActionWitness({
       legalAction: action("trigger_ability", {

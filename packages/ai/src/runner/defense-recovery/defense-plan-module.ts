@@ -85,26 +85,9 @@ export function createRunnerDefenseModule(): PlanModule {
             current.signals.tagClearFundingNeed,
             context.input.playerView.stateVersion,
           ));
-      const reactionReserveContractValid =
-        current.phase !== "build_reaction_reserve" ||
-        (current.signals.reactionReserveNeed !== undefined &&
-          validRunnerDefenseFundingNeed(
-            current.signals.reactionReserveNeed,
-            context.input.playerView.stateVersion,
-          ));
-      const candidates =
-        preventionCurrent && tagClearFundingContractValid && reactionReserveContractValid &&
-        (current.phase !== "fund_persistent_hazard_counter" ||
-          (current.signals.persistentHazardCounterFundingNeed !== undefined &&
-            validPersistentHazardCounterFundingNeed(current.signals.persistentHazardCounterFundingNeed,
-              context.input, context.actionCandidates)))
-          ? defenseCandidates(
-              context.actionCandidates,
-              current.phase,
-              current.signals,
-              context.actionDispositions,
-            )
-          : [];
+      const candidates = preventionCurrent
+        ? revalidatedDefenseCandidates(context, current)
+        : [];
       const priorityClass = defensePriorityClass(current.signals, current.phase);
       const bankNeed = current.phase === "fund_tag_clear" && tagClearFundingContractValid
         ? current.signals.tagClearFundingNeed?.bankFunding : undefined;
@@ -127,15 +110,7 @@ export function createRunnerDefenseModule(): PlanModule {
     },
     materialize: (instance, _assessment, context) => {
       const current = instance.moduleState as DefenseState;
-      const candidates = current.phase === "fund_persistent_hazard_counter" &&
-        (!current.signals.persistentHazardCounterFundingNeed ||
-          !validPersistentHazardCounterFundingNeed(current.signals.persistentHazardCounterFundingNeed,
-            context.input, context.actionCandidates)) ? [] : defenseCandidates(
-        context.actionCandidates,
-        current.phase,
-        current.signals,
-        context.actionDispositions,
-      );
+      const candidates = revalidatedDefenseCandidates(context, current);
       return {
         step: {
           stepId: `${instance.instanceId}:${current.phase}`,
@@ -327,6 +302,36 @@ function defensePhase(
         defenseCandidates(actionCandidates, phase, signals, actionDispositions)
           .length > 0,
     ) ?? openPhases[0]
+  );
+}
+
+function revalidatedDefenseCandidates(
+  context: Omit<DefenseHeadContext, "signals">,
+  { phase, signals }: DefenseState,
+): PlanMaterialization["candidates"] {
+  const stateVersion = context.input.playerView.stateVersion;
+  if (
+    (phase === "fund_tag_clear" &&
+      (!signals.tagClearFundingNeed ||
+        !validRunnerTagClearFundingNeed(signals.tagClearFundingNeed, stateVersion))) ||
+    (phase === "build_reaction_reserve" &&
+      (!signals.reactionReserveNeed ||
+        !validRunnerDefenseFundingNeed(signals.reactionReserveNeed, stateVersion))) ||
+    (phase === "fund_persistent_hazard_counter" &&
+      (!signals.persistentHazardCounterFundingNeed ||
+        !validPersistentHazardCounterFundingNeed(
+          signals.persistentHazardCounterFundingNeed,
+          context.input,
+          context.actionCandidates,
+        )))
+  ) {
+    return [];
+  }
+  return defenseCandidates(
+    context.actionCandidates,
+    phase,
+    signals,
+    context.actionDispositions,
   );
 }
 
@@ -731,20 +736,10 @@ function validRunnerDefenseFundingNeed(
   need: NonNullable<RunnerDefenseSignals["reactionReserveNeed"]>,
   stateVersion: number,
 ): boolean {
-  return (
-    need.needId === "runner-defense-reaction-reserve" &&
-    need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
-    Number.isFinite(need.targetCredits) &&
-    Number.isFinite(need.currentCreditsAtRevalidation) &&
-    Number.isFinite(need.gap) &&
-    need.targetCredits >= 0 &&
-    need.currentCreditsAtRevalidation >= 0 &&
-    need.gap > 0 &&
-    need.gap ===
-      Math.max(0, need.targetCredits - need.currentCreditsAtRevalidation) &&
-    need.actionIds.length > 0 &&
-    need.revalidation.stateVersion === stateVersion &&
-    need.revalidation.status === "defense_parent_open"
+  return validRunnerDefenseCreditNeed(
+    need,
+    "runner-defense-reaction-reserve",
+    stateVersion,
   );
 }
 
@@ -752,17 +747,28 @@ function validRunnerTagClearFundingNeed(
   need: NonNullable<RunnerDefenseSignals["tagClearFundingNeed"]>,
   stateVersion: number,
 ): boolean {
+  return validRunnerDefenseCreditNeed(
+    need,
+    "runner-defense-tag-clear-funding",
+    stateVersion,
+  );
+}
+
+function validRunnerDefenseCreditNeed(
+  need: NonNullable<RunnerDefenseSignals["reactionReserveNeed"] | RunnerDefenseSignals["tagClearFundingNeed"]>,
+  needId: string,
+  stateVersion: number,
+): boolean {
   return (
-    need.needId === "runner-defense-tag-clear-funding" &&
-    need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
-    Number.isFinite(need.targetCredits) &&
-    Number.isFinite(need.currentCreditsAtRevalidation) &&
-    Number.isFinite(need.gap) &&
+    need.needId === needId &&
+    need.parentPlanInstanceId === "p1gzjb6yfcv4zbzow512kexs33" &&
+    Number.isSafeInteger(need.targetCredits) &&
+    Number.isSafeInteger(need.currentCreditsAtRevalidation) &&
+    Number.isSafeInteger(need.gap) &&
     need.targetCredits >= 0 &&
     need.currentCreditsAtRevalidation >= 0 &&
     need.gap > 0 &&
-    need.gap ===
-      Math.max(0, need.targetCredits - need.currentCreditsAtRevalidation) &&
+    need.gap === need.targetCredits - need.currentCreditsAtRevalidation &&
     need.actionIds.length > 0 &&
     need.revalidation.stateVersion === stateVersion &&
     need.revalidation.status === "defense_parent_open"
@@ -778,7 +784,7 @@ function validPersistentHazardCounterFundingNeed(
 ): boolean {
   const quote = runnerPersistentHazardCounterFundingQuotes(input).find(q => q.counterType === need.counterType);
   return need.needId === "runner-defense-persistent-hazard-counter-funding" &&
-    need.parentPlanInstanceId === "plan:runner.defense_and_recovery:runner" &&
+    need.parentPlanInstanceId === "p1gzjb6yfcv4zbzow512kexs33" &&
     quote !== undefined && quote.observedAmount === need.observedAmount &&
     quote.credits === need.targetCredits &&
     Number.isSafeInteger(need.targetCredits) && Number.isSafeInteger(need.gap) &&

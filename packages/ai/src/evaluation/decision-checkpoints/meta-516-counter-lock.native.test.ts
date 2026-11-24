@@ -54,7 +54,7 @@ afterEach(resetResidentPlanPortfolioMemory);
 it("corrects the native Raven fact while preserving the bound defense owner and legal Engine installation", () => {
   const { state, input } = native("g2d21");
   const raven = input.playerView.own.gripOrHq.find(
-    (c) => c.definitionId === "onr_v1_236_data-raven",
+    (c) => c.definitionId === 448,
   )!;
   expect(buildCorpIceCardFacts(raven)).toMatchObject({
     damage: false,
@@ -104,7 +104,7 @@ it("keeps the exact native Jack continuation and the genuine run-duration lock",
   expect(d.fallbackUsed).toBe(false);
   expect(d.timeoutUsed).not.toBe(true);
   expect(d.actionId).toBe(
-    "runner.continue_run.printed_subroutines_run_duration_cannot_jack_out,printed_subroutines_trace",
+    "r5.0,1",
   );
   expect(d.decisionDebug!.planFirstDecision!.selectedStep?.planInstanceId).toBe(
     "rules.window_resolution",

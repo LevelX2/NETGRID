@@ -1,3 +1,5 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -31,7 +33,7 @@ import {
 describe("Corp ambush plan signal duplicate scope", () => {
   it("admits an agenda ambush only when its exact access effect prevents the steal", () => {
     const source = visibleCard("fetal-ai-in-hq", "corp", "agenda", {
-      definitionId: "onr_proteus_004_fetal-ai",
+      definitionId: 62,
       title: "Fetal AI",
       advancementRequirement: 5,
       agendaPoints: 3,
@@ -46,7 +48,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
         source: source.instanceId,
         payload: {
           cardId: source.instanceId,
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
         },
       },
@@ -57,14 +59,14 @@ describe("Corp ambush plan signal duplicate scope", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1"),
+      server("r1"),
     ];
     setAmbushIntent(input);
     const candidate = ambushInstallCandidate(
       install.actionId,
       source.instanceId,
       source.definitionId!,
-      "remote_1",
+      "r1",
     );
 
     input.playerView.opponent.handCount = 5;
@@ -87,22 +89,22 @@ describe("Corp ambush plan signal duplicate scope", () => {
       expect.objectContaining({
         sourceInstanceId: source.instanceId,
         actionIds: [install.actionId],
-        serverId: "remote_1",
+        serverId: "r1",
         phase: "install",
       }),
     );
   });
   it.each([
-    ["onr_proteus_054_bel-digmo-antibody", false],
-    ["onr_proteus_075_stereogram-antibody", false],
-    ["onr_proteus_004_fetal-ai", true],
+    [112, false],
+    [133, false],
+    [62, true],
   ] as const)(
     "does not confuse access-zone identity with remote preparation: %s",
     (definitionId, remotePreparation) => {
       const source = visibleCard(
         "access-source",
         "corp",
-        definitionId.includes("fetal") ? "agenda" : "asset",
+        definitionId === 62 ? "agenda" : "asset",
         {
           definitionId,
         },
@@ -117,7 +119,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
           source: source.instanceId,
           payload: {
             cardId: source.instanceId,
-            serverId: "remote_1",
+            serverId: "r1",
             placement: "root",
           },
         },
@@ -128,13 +130,13 @@ describe("Corp ambush plan signal duplicate scope", () => {
       // Keep the positive remote case lethal under the exact-steal safety gate.
       // The access-zone-only cards must still remain non-remote preparations.
       input.playerView.opponent.handCount = 1;
-      input.playerView.servers = [server("remote_1")];
+      input.playerView.servers = [server("r1")];
       setAmbushIntent(input);
       const candidate = ambushInstallCandidate(
         install.actionId,
         source.instanceId,
         definitionId,
-        "remote_1",
+        "r1",
       );
       const signals = buildCorpAmbushPlanSignals({
         input,
@@ -147,11 +149,11 @@ describe("Corp ambush plan signal duplicate scope", () => {
             sourceInstanceId: source.instanceId,
             actionIds: [install.actionId],
             phase: "install",
-            serverId: "remote_1",
+            serverId: "r1",
             assignedDomainPlanIds: ["corp.ambush_bluff"],
           }),
         ]);
-      } else if (definitionId === "onr_proteus_054_bel-digmo-antibody") {
+      } else if (definitionId === 112) {
         expect(signals).toMatchObject([
           {
             patternKind: "rd_recycle",
@@ -171,7 +173,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
   );
 
   it("counts only same-definition copies in active remote roots as installed duplicates", () => {
-    const definitionId = "onr_v1_345_trap";
+    const definitionId = 557;
     const handCopy = visibleCard("trap-in-hq", "corp", "asset", {
       definitionId,
       title: "TRAP!",
@@ -186,7 +188,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
         source: handCopy.instanceId,
         payload: {
           cardId: handCopy.instanceId,
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
         },
       },
@@ -198,14 +200,14 @@ describe("Corp ambush plan signal duplicate scope", () => {
       server("hq", [], [sameDefinitionCopy("trap-in-hq-root")]),
       server("rd", [], [sameDefinitionCopy("trap-in-rd")]),
       server("archives", [], [sameDefinitionCopy("trap-in-archives")]),
-      server("remote_1"),
+      server("r1"),
     ];
     setAmbushIntent(input);
     const candidate = ambushInstallCandidate(
       install.actionId,
       handCopy.instanceId,
       definitionId,
-      "remote_1",
+      "r1",
     );
 
     expect(
@@ -219,14 +221,14 @@ describe("Corp ambush plan signal duplicate scope", () => {
         sourceInstanceId: handCopy.instanceId,
         sourceDefinitionId: definitionId,
         actionIds: [install.actionId],
-        serverId: "remote_1",
+        serverId: "r1",
         phase: "install",
         duplicateAlreadyInstalled: false,
       }),
     ]);
 
     input.playerView.servers.push(
-      server("remote_2", [], [sameDefinitionCopy("trap-in-remote-2")]),
+      server("r2", [], [sameDefinitionCopy("trap-in-remote-2")]),
     );
 
     expect(
@@ -251,7 +253,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
       "corp",
       "asset",
       {
-        definitionId: "synthetic_counter_bank",
+        definitionId: syntheticCardDefinitionId("synthetic_counter_bank"),
         advancementCounters: 0,
         counterBankPreparationQuote: {
           schemaVersion: CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
@@ -278,7 +280,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
       },
     );
     const agenda = visibleCard("followup-agenda-1", "corp", "agenda", {
-      definitionId: "simple_agenda",
+      definitionId: 588,
       advancementRequirement: 3,
       agendaPoints: 2,
     });
@@ -292,7 +294,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
         source: counterBank.instanceId,
         payload: {
           cardId: counterBank.instanceId,
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
         },
       },
@@ -302,7 +304,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
     input.playerView.opponent.credits = 4;
     input.playerView.opponent.rig = [
       visibleCard("generic-breaker-1", "runner", "program", {
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         subtypes: ["icebreaker"],
         strength: 2,
       }),
@@ -311,9 +313,9 @@ describe("Corp ambush plan signal duplicate scope", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
+      server("r1", [
         visibleCard("remote-code-gate-1", "corp", "ice", {
-          definitionId: "onr_v1_261_quandary",
+          definitionId: 473,
           rezzed: true,
           subtypes: ["code_gate"],
           strength: 2,
@@ -330,7 +332,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
             install.actionId,
             counterBank.instanceId,
             counterBank.definitionId!,
-            "remote_1",
+            "r1",
           ),
         ],
         previous: undefined,
@@ -340,7 +342,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
         patternKind: "score_decoy",
         sourceInstanceId: counterBank.instanceId,
         followupAgendaInstanceId: agenda.instanceId,
-        serverId: "remote_1",
+        serverId: "r1",
         actionIds: [install.actionId],
         plannedAdvancementTarget: 1,
       }),
@@ -349,7 +351,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
 
   it("retires a score decoy after rez instead of re-advancing a liquidated counter bank", () => {
     const source = visibleCard("synthetic-counter-bank-1", "corp", "asset", {
-      definitionId: "synthetic_counter_bank",
+      definitionId: syntheticCardDefinitionId("synthetic_counter_bank"),
       advancementCounters: 0,
       rezzed: true,
     });
@@ -358,23 +360,23 @@ describe("Corp ambush plan signal duplicate scope", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [source]),
+      server("r1", [], [source]),
     ];
     const previous = {
       instances: [
         {
-          instanceId: "plan:corp.ambush_and_bluff:score-decoy",
+          instanceId: "pe5pup97zofoollhlodzvhb7rw",
           moduleId: "corp.ambush_and_bluff",
           moduleState: {
             kind: "ambush",
             signal: {
               commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
               ambushId:
-                "score-decoy:synthetic-counter-bank-1:remote_1:agenda-1",
-              sourceDefinitionId: "synthetic_counter_bank",
+                "score-decoy:synthetic-counter-bank-1:r1:agenda-1",
+              sourceDefinitionId: syntheticCardDefinitionId("synthetic_counter_bank"),
               sourceInstanceId: source.instanceId,
               actionIds: [],
-              serverId: "remote_1",
+              serverId: "r1",
               phase: "advance",
               patternKind: "score_decoy",
               followupAgendaInstanceId: "agenda-1",
@@ -410,7 +412,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
 
   it("retires an installed ambush commitment when the exact score plan owns the agenda", () => {
     const source = visibleCard("installed-agenda-1", "corp", "agenda", {
-      definitionId: "synthetic_access_ambush_agenda",
+      definitionId: syntheticCardDefinitionId("synthetic_access_ambush_agenda"),
       advancementCounters: 0,
       advancementRequirement: 3,
       agendaPoints: 2,
@@ -420,14 +422,14 @@ describe("Corp ambush plan signal duplicate scope", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [source]),
+      server("r1", [], [source]),
     ];
     const advanceCandidate = {
       ...ambushInstallCandidate(
         "advance-installed-agenda-1",
         source.instanceId,
         source.definitionId!,
-        "remote_1",
+        "r1",
       ),
       actionType: "advance_card",
       semanticActionType: "score.advance_card",
@@ -440,18 +442,18 @@ describe("Corp ambush plan signal duplicate scope", () => {
     const previous = {
       instances: [
         {
-          instanceId: "plan:corp.ambush_and_bluff:installed-agenda-1",
+          instanceId: "pd88k490ca5o3bqc16bkmlzir0",
           moduleId: "corp.ambush_and_bluff",
           viability: "ready",
           moduleState: {
             kind: "ambush",
             signal: {
               commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
-              ambushId: "ambush:installed-agenda-1:remote_1",
+              ambushId: "ambush:installed-agenda-1:r1",
               sourceDefinitionId: source.definitionId,
               sourceInstanceId: source.instanceId,
               actionIds: [],
-              serverId: "remote_1",
+              serverId: "r1",
               phase: "trigger",
               patternKind: "access_ambush",
               purposeCode: "test_installed_access_ambush",
@@ -466,14 +468,14 @@ describe("Corp ambush plan signal duplicate scope", () => {
           },
         },
         {
-          instanceId: "plan:corp.score_agenda:installed-agenda-1:remote_1",
+          instanceId: "p7kyljsblpxr66h941uncyboom",
           moduleId: "corp.score_agenda",
           viability: "ready",
           moduleState: {
             kind: "score",
             signal: {
               agendaInstanceId: source.instanceId,
-              serverId: "remote_1",
+              serverId: "r1",
             },
           },
         },
@@ -492,7 +494,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
     ).toBeUndefined();
     expect(advanceCandidate.actionId).toBe("advance-installed-agenda-1");
     expect(previous.instances[1]).toMatchObject({
-      instanceId: "plan:corp.score_agenda:installed-agenda-1:remote_1",
+      instanceId: "p7kyljsblpxr66h941uncyboom",
       moduleId: "corp.score_agenda",
       viability: "ready",
     });
@@ -500,17 +502,17 @@ describe("Corp ambush plan signal duplicate scope", () => {
 
   it("reconciles a new-remote Vacant Soulkiller install into its exact advance route", () => {
     const source = visibleCard(
-      "corp_onr_v1_346_vacant-soulkiller_1",
+      "c3g5",
       "corp",
       "asset",
       {
-        definitionId: "onr_v1_346_vacant-soulkiller",
+        definitionId: 558,
         title: "Vacant Soulkiller",
         advancementCounters: 0,
       },
     );
     const advance = legalAction(
-      `corp.advance_card.${source.instanceId}.${source.instanceId}`,
+      `c2.${source.instanceId}.${source.instanceId}`,
       "corp",
       "advance_card",
       "Advance Vacant Soulkiller",
@@ -527,7 +529,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_3", [], [source]),
+      server("r3", [], [source]),
     ];
     const candidates = buildActionSemanticCandidates({
       legalActions: input.legalActions,
@@ -540,7 +542,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
     const previous = {
       instances: [
         {
-          instanceId: `plan:corp.ambush_and_bluff:ambush%3A${source.instanceId}`,
+          instanceId: planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: `ambush:${source.instanceId}` }),
           moduleId: "corp.ambush_and_bluff",
           viability: "ready",
           moduleState: {
@@ -551,7 +553,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
               sourceDefinitionId: source.definitionId,
               sourceInstanceId: source.instanceId,
               actionIds: [
-                `corp.install_card.${source.instanceId}.new_remote.${source.instanceId}`,
+                `cc.${source.instanceId}.new_remote.${source.instanceId}`,
               ],
               serverId: "new_remote",
               phase: "install",
@@ -573,7 +575,7 @@ describe("Corp ambush plan signal duplicate scope", () => {
       [
         expect.objectContaining({
           sourceInstanceId: source.instanceId,
-          serverId: "remote_3",
+          serverId: "r3",
           phase: "advance",
           actionIds: [advance.actionId],
           plannedAdvancementTarget: 2,
@@ -597,7 +599,7 @@ describe("Corp compromised Ambush disposition", () => {
       recycleRoute: {
         actionId: "recycle-trap",
         recyclerSourceInstanceId: "recycler-installed",
-        recyclerSourceDefinitionId: "onr_v1_316_cowboy-sysop",
+        recyclerSourceDefinitionId: 528,
         targetCardInstanceId: "trap-installed",
       },
     });
@@ -625,7 +627,7 @@ describe("Corp compromised Ambush disposition", () => {
   it("holds a payable material rezzed TRAP as a known threat", () => {
     const fixture = installedTrapFixture({ exposed: true, corpCredits: 4 });
     fixture.input.playerView.servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )!.root[0]!.rezzed = true;
     fixture.input.playerView.opponent.handCount = 3;
     const [signal] = buildCorpAmbushPlanSignals(fixture);
@@ -667,7 +669,7 @@ describe("Corp compromised Ambush disposition", () => {
     });
     const [signal] = buildCorpAmbushPlanSignals(fixture);
     expect(signal).toMatchObject({
-      sourceDefinitionId: "onr_v1_348_virus-test-site",
+      sourceDefinitionId: 560,
       phase: "trigger",
       actionIds: ["rez-prepared-trap"],
     });
@@ -678,7 +680,7 @@ describe("Corp compromised Ambush disposition", () => {
       exposed: false,
       corpCredits: 0,
       zeroCostAccessRez: true,
-      definitionId: "onr_v1_340_setup",
+      definitionId: 552,
       counters: 0,
     });
     const signals = buildCorpAmbushPlanSignals(fixture);
@@ -723,7 +725,7 @@ describe("Corp compromised Ambush disposition", () => {
         corpCredits,
         zeroCostAccessRez: true,
         accessRezCredits: 2,
-        definitionId: "onr_v1_345_trap",
+        definitionId: 557,
         counters: 0,
       });
       const [signal] = buildCorpAmbushPlanSignals(fixture);
@@ -732,9 +734,9 @@ describe("Corp compromised Ambush disposition", () => {
   );
 
   it.each([
-    ["onr_v1_340_setup", 0, true],
-    ["onr_v1_348_virus-test-site", 0, false],
-    ["onr_v1_348_virus-test-site", 3, true],
+    [552, 0, true],
+    [560, 0, false],
+    [560, 3, true],
   ] as const)(
     "binds the actual post-rez payoff for %s with %i counters",
     (definitionId, counters, shouldRez) => {
@@ -757,14 +759,18 @@ describe("Corp compromised Ambush disposition", () => {
     const left = installedTrapFixture({ exposed: true, corpCredits: 3 });
     const right = installedTrapFixture({ exposed: true, corpCredits: 3 });
     type InputWithTestOnlyHiddenRunnerHand = AiDecisionInput & {
-      testOnlyHiddenRunnerHandDefinitionIds: string[];
+      testOnlyHiddenRunnerHandDefinitionIds: number[];
     };
     (
       left.input as InputWithTestOnlyHiddenRunnerHand
-    ).testOnlyHiddenRunnerHandDefinitionIds = ["hidden_runner_card_a"];
+    ).testOnlyHiddenRunnerHandDefinitionIds = [
+      syntheticCardDefinitionId("hidden_runner_card_a"),
+    ];
     (
       right.input as InputWithTestOnlyHiddenRunnerHand
-    ).testOnlyHiddenRunnerHandDefinitionIds = ["hidden_runner_card_b"];
+    ).testOnlyHiddenRunnerHandDefinitionIds = [
+      syntheticCardDefinitionId("hidden_runner_card_b"),
+    ];
 
     const leftBelief = reconstructBeliefState(left.input);
     const rightBelief = reconstructBeliefState(right.input);
@@ -785,12 +791,12 @@ describe("Corp compromised Ambush disposition", () => {
 describe("Corp Ambush advancement support ownership", () => {
   it("keeps an exact support install inside the resident Ambush plan", () => {
     const trap = visibleCard("trap-installed", "corp", "asset", {
-      definitionId: "onr_v1_346_vacant-soulkiller",
+      definitionId: 558,
       title: "Vacant Soulkiller",
       advancementCounters: 0,
     });
     const support = visibleCard("lesley-in-hq", "corp", "upgrade", {
-      definitionId: "onr_proteus_062_lesley-major",
+      definitionId: 120,
       title: "Lesley Major",
     });
     const install = legalAction(
@@ -803,7 +809,7 @@ describe("Corp Ambush advancement support ownership", () => {
         source: support.instanceId,
         payload: {
           cardId: support.instanceId,
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
         },
       },
@@ -826,7 +832,7 @@ describe("Corp Ambush advancement support ownership", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [trap]),
+      server("r1", [], [trap]),
     ];
     setAmbushIntent(input);
 
@@ -845,7 +851,7 @@ describe("Corp Ambush advancement support ownership", () => {
           install.actionId,
           support.instanceId,
           support.definitionId!,
-          "remote_1",
+          "r1",
         ),
         advanceCandidate,
       ],
@@ -863,7 +869,7 @@ describe("Corp Ambush advancement support ownership", () => {
         supportSourceInstanceId: support.instanceId,
         supportSourceDefinitionId: support.definitionId,
         targetCardInstanceId: trap.instanceId,
-        serverId: "remote_1",
+        serverId: "r1",
       },
     });
     expect(
@@ -875,12 +881,12 @@ describe("Corp Ambush advancement support ownership", () => {
 
   it("binds the exact support trigger and Ambush target without changing the resident root", () => {
     const trap = visibleCard("trap-installed", "corp", "asset", {
-      definitionId: "onr_v1_346_vacant-soulkiller",
+      definitionId: 558,
       title: "Vacant Soulkiller",
       advancementCounters: 0,
     });
     const support = visibleCard("lesley-installed", "corp", "upgrade", {
-      definitionId: "onr_proteus_062_lesley-major",
+      definitionId: 120,
       title: "Lesley Major",
       rezzed: true,
     });
@@ -897,7 +903,7 @@ describe("Corp Ambush advancement support ownership", () => {
           sourceDefinitionId: support.definitionId!,
           targetCardId: trap.instanceId,
           targetCardDefinitionId: trap.definitionId!,
-          serverId: "remote_1",
+          serverId: "r1",
           fortRunWindowAbility:
             "add_advancement_counters_after_passing_last_ice_on_this_fort",
         },
@@ -909,7 +915,7 @@ describe("Corp Ambush advancement support ownership", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [trap, support]),
+      server("r1", [], [trap, support]),
     ];
     setAmbushIntent(input);
     const candidate = {
@@ -917,7 +923,7 @@ describe("Corp Ambush advancement support ownership", () => {
         trigger.actionId,
         support.instanceId,
         support.definitionId!,
-        "remote_1",
+        "r1",
       ),
       actionType: "trigger_ability",
       semanticActionType: "card_ability.trigger",
@@ -970,7 +976,7 @@ function ambushSupportPrevious(
   return {
     instances: [
       {
-        instanceId: `plan:corp.ambush_and_bluff:ambush%3A${trap.instanceId}`,
+        instanceId: planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: `ambush:${trap.instanceId}` }),
         moduleId: "corp.ambush_and_bluff",
         viability: "ready",
         moduleState: {
@@ -981,7 +987,7 @@ function ambushSupportPrevious(
             sourceDefinitionId: trap.definitionId,
             sourceInstanceId: trap.instanceId,
             actionIds: [],
-            serverId: "remote_1",
+            serverId: "r1",
             phase: "advance",
             assignedDomainPlanIds: ["corp.ambush_bluff"],
             duplicateAlreadyInstalled: false,
@@ -1003,7 +1009,7 @@ function installedTrapFixture(options: {
   triggerAction?: boolean;
   zeroCostAccessRez?: boolean;
   accessRezCredits?: number;
-  definitionId?: string;
+  definitionId?: number;
   counters?: number;
 }): {
   input: AiDecisionInput;
@@ -1014,15 +1020,15 @@ function installedTrapFixture(options: {
     definitionId:
       options.definitionId ??
       (options.zeroCostAccessRez
-        ? "onr_v1_348_virus-test-site"
-        : "onr_v1_345_trap"),
+        ? 560
+        : 557),
     title: options.zeroCostAccessRez ? "Virus Test Site" : "TRAP!",
     rezzed: false,
     advancementCounters:
       options.counters ?? (options.zeroCostAccessRez ? 3 : 0),
   });
   const recycler = visibleCard("recycler-installed", "corp", "asset", {
-    definitionId: "onr_v1_316_cowboy-sysop",
+    definitionId: 528,
     title: "Cowboy Sysop",
     rezzed: true,
   });
@@ -1049,7 +1055,7 @@ function installedTrapFixture(options: {
     { credits: options.accessRezCredits ?? 0, clicks: 0 },
     {
       source: trap.instanceId,
-      payload: { cardId: trap.instanceId, serverId: "remote_1" },
+      payload: { cardId: trap.instanceId, serverId: "r1" },
     },
   );
   const legalActions = options.zeroCostAccessRez
@@ -1062,21 +1068,21 @@ function installedTrapFixture(options: {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1", [], [trap, recycler]),
+    server("r1", [], [trap, recycler]),
   ];
   if (options.zeroCostAccessRez) {
     input.playerView.timingPoint = "run.movement_rez_window";
     accessRez.timingPoint = input.playerView.timingPoint;
     input.playerView.run = {
-      runId: "run-access-remote-1",
-      attackedServerId: "remote_1",
+      runId: input.playerView.stateVersion,
+      attackedServerId: "r1",
       phase: "movement",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       successful: true,
     };
   }
   const exposeEvent: PublicGameEvent = {
-    eventId: "evt-expose-trap",
+    eventId: 2,
     type: "resolve_choice",
     stateVersionBefore: 0,
     stateVersionAfter: 1,
@@ -1086,9 +1092,9 @@ function installedTrapFixture(options: {
       actor: "runner",
       actionType: "resolve_choice",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "onr_v1_345_trap",
-      exposedCardDefinitionId: "onr_v1_345_trap",
-      exposedServerId: "remote_1",
+      publicRevealDefinitionId: 557,
+      exposedCardDefinitionId: 557,
+      exposedServerId: "r1",
       exposedArea: "root",
       exposedIndex: 0,
       exposedPositionKey: "root:0",
@@ -1111,7 +1117,7 @@ function installedTrapFixture(options: {
         "trigger-trap",
         trap.instanceId,
         trap.definitionId!,
-        "remote_1",
+        "r1",
       ),
       actionType: "trigger_ability",
       semanticActionType: "card_ability.trigger",
@@ -1123,7 +1129,7 @@ function installedTrapFixture(options: {
     previous: {
       instances: [
         {
-          instanceId: "plan:corp.ambush_and_bluff:trap-installed",
+          instanceId: "p5k7k9hn2wkixgyrwlb5nrbcav",
           moduleId: "corp.ambush_and_bluff",
           viability: "ready",
           moduleState: {
@@ -1134,7 +1140,7 @@ function installedTrapFixture(options: {
               sourceDefinitionId: trap.definitionId,
               sourceInstanceId: trap.instanceId,
               actionIds: [],
-              serverId: "remote_1",
+              serverId: "r1",
               phase: "trigger",
               patternKind: "access_ambush",
               assignedDomainPlanIds: ["corp.ambush_bluff"],
@@ -1155,8 +1161,8 @@ function installedTrapFixture(options: {
 function ambushInstallCandidate(
   actionId: string,
   sourceInstanceId: string,
-  sourceDefinitionId: string,
-  serverId: "remote_1",
+  sourceDefinitionId: number,
+  serverId: "r1",
 ): ActionSemanticCandidate {
   return {
     actionId,

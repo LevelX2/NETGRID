@@ -1,7 +1,7 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
-import { visibleRunnerTraceThreatOnServer } from "../runner/hand-development/runner-persistent-install-evaluation";
+import { visibleRunnerTraceThreatOnServer } from "../runner/visible-runner-threat";
 export function runnerCardRunHasVisibleDifferentialPayoff(
   input: PlanSchedulerContext["input"],
   candidate: ActionSemanticCandidate,
@@ -44,7 +44,9 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
     }
     if (target === "run.temporary_credits") {
       const fundedRun = runTargetEvaluations?.find(
-        (evaluation) => evaluation.actionId === candidate.actionId,
+        (evaluation) =>
+          evaluation.actionId === candidate.actionId &&
+          evaluation.targetServerId === serverId,
       );
       if (
         !fundedRun ||
@@ -73,7 +75,9 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
     if (target === "bypass_first_ice") {
       if (server.ice.length === 0) return false;
       const bypassEvaluation = runTargetEvaluations?.find(
-        (evaluation) => evaluation.actionId === candidate.actionId,
+        (evaluation) =>
+          evaluation.actionId === candidate.actionId &&
+          evaluation.targetServerId === serverId,
       );
       if (!bypassEvaluation) return true;
       const directRunDominates = runTargetEvaluations?.some(

@@ -1,116 +1,21 @@
 import type {
-  ActionPrimaryProjectionStatus,
   ActionProjectionIssue,
   ActionSemanticCandidate,
-  ActionSemanticSourceKind,
 } from "../action-semantic-candidate";
+import {
+  ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION,
+  ACTION_SEMANTIC_COVERAGE_GROUPS,
+  ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES,
+  type ActionSemanticCandidateCoverageRow,
+  type ActionSemanticCandidateCoverageSourceInput,
+  type ActionSemanticCandidateCoverageSourceSummary,
+  type ActionSemanticCandidateCoverageSummary,
+  type ActionSemanticCoverageGroup,
+  type ActionSemanticTargetContextStatus,
+} from "./action-semantic-coverage-contracts";
 
-export const ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION =
-  "action-semantic-candidate-coverage-v1" as const;
-
-export const ACTION_SEMANTIC_COVERAGE_GROUPS = [
-  "basic_action",
-  "game_rule",
-  "runner_card_action",
-  "corp_card_action",
-  "choice_resolution",
-  "run_action",
-  "access_action",
-  "corp_window_action",
-  "score_action",
-  "install_action",
-  "advance_action",
-  "rez_action",
-] as const;
-
-export type ActionSemanticCoverageGroup =
-  (typeof ACTION_SEMANTIC_COVERAGE_GROUPS)[number];
-
-export type ActionSemanticTargetContextStatus =
-  | "engine_provided"
-  | "not_available"
-  | "target_context_unavailable"
-  | "missing";
-
-export const ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES = [
-  "engine_provided",
-  "not_available",
-  "target_context_unavailable",
-  "missing",
-] as const satisfies readonly ActionSemanticTargetContextStatus[];
-
-export type ActionSemanticCandidateCoverageRow = {
-  actionType: string;
-  semanticActionType: string;
-  primaryProjectionStatus: ActionPrimaryProjectionStatus;
-  sourceKind: ActionSemanticSourceKind;
-  hasSourceCardId: boolean;
-  hasAbilityId: boolean;
-  hasPrimitiveKind: boolean;
-  hasEffectKind: boolean;
-  hasCostProfile: boolean;
-  hasTimingProfile: boolean;
-  hasTargetContext: boolean;
-  targetContextStatus: ActionSemanticTargetContextStatus;
-  hiddenInfoBlocked: boolean;
-  usesNeutralFallback: boolean;
-  redactionSafe: boolean;
-  projectionIssues: ActionProjectionIssue[];
-  groups: ActionSemanticCoverageGroup[];
-};
-
-export type ActionSemanticCandidateCoverageSummary = {
-  version: typeof ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION;
-  totalCandidates: number;
-  redactionSafe: boolean;
-  redactionUnsafeRows: number;
-  forbiddenMarkers: string[];
-  hiddenInfoBlockers: number;
-  schemaGapRows: number;
-  fieldCoverage: {
-    hasSourceCardId: number;
-    hasAbilityId: number;
-    hasPrimitiveKind: number;
-    hasEffectKind: number;
-    hasCostProfile: number;
-    hasTimingProfile: number;
-    hasTargetContext: number;
-    usesNeutralFallback: number;
-    redactionSafe: number;
-  };
-  actionTypes: Record<string, number>;
-  semanticActionTypes: Record<string, number>;
-  primaryProjectionStatuses: Record<string, number>;
-  sourceKinds: Record<string, number>;
-  projectionIssues: Record<string, number>;
-  schemaGaps: Record<string, number>;
-  targetContextStatuses: Record<string, number>;
-  targetContextByGroup: Record<
-    ActionSemanticCoverageGroup,
-    Record<ActionSemanticTargetContextStatus, number>
-  >;
-  groups: Record<ActionSemanticCoverageGroup, number>;
-  rows: ActionSemanticCandidateCoverageRow[];
-};
-
-export type ActionSemanticCandidateCoverageSourceInput = {
-  syntheticCandidates: readonly ActionSemanticCandidate[];
-  engineBackedCandidates: readonly ActionSemanticCandidate[];
-};
-
-export type ActionSemanticCandidateCoverageSourceSummary = {
-  syntheticCandidates: number;
-  engineBackedCandidates: number;
-  sourceResolvedRate: number;
-  abilityResolvedRate: number;
-  targetContextRate: number;
-  costKnownRate: number;
-  timingKnownRate: number;
-  hiddenInfoBlockedCount: number;
-  schemaGapCount: number;
-  hiddenInfoLeaks: 0;
-  legalActionGenerationChanges: 0;
-};
+export * from "./action-semantic-coverage-contracts";
+export { formatActionSemanticCandidateCoverageReport } from "./action-semantic-coverage-report";
 
 const FORBIDDEN_REPORT_MARKERS = [
   "cardInstances",
@@ -139,7 +44,8 @@ export function summarizeActionSemanticCandidateCoverage(
     redactionUnsafeRows: rows.filter((row) => !row.redactionSafe).length,
     forbiddenMarkers: [] as string[],
     hiddenInfoBlockers: rows.filter((row) => row.hiddenInfoBlocked).length,
-    schemaGapRows: rows.filter((row) => row.projectionIssues.length > 0).length,
+    schemaGapRows: rows.filter((row) => row.projectionIssues.some(isSchemaGap))
+      .length,
     fieldCoverage: {
       hasSourceCardId: countRows(rows, "hasSourceCardId"),
       hasAbilityId: countRows(rows, "hasAbilityId"),
@@ -163,9 +69,7 @@ export function summarizeActionSemanticCandidateCoverage(
       (issue) => issue,
     ),
     schemaGaps: countBy(
-      rows.flatMap((row) =>
-        row.projectionIssues.filter((issue) => issue !== "hidden_info_blocked"),
-      ),
+      rows.flatMap((row) => row.projectionIssues.filter(isSchemaGap)),
       (issue) => issue,
     ),
     targetContextStatuses: countBy(rows, (row) => row.targetContextStatus),
@@ -178,9 +82,6 @@ export function summarizeActionSemanticCandidateCoverage(
     ...summaryWithoutSafety,
     redactionSafe:
       summaryWithoutSafety.redactionSafe && forbiddenMarkers.length === 0,
-    redactionUnsafeRows:
-      summaryWithoutSafety.redactionUnsafeRows +
-      (forbiddenMarkers.length > 0 ? 1 : 0),
     forbiddenMarkers,
   };
 }
@@ -207,76 +108,14 @@ export function summarizeActionSemanticCandidateCoverageSources(
     costKnownRate: ratio(countRows(rows, "hasCostProfile"), total),
     timingKnownRate: ratio(countRows(rows, "hasTimingProfile"), total),
     hiddenInfoBlockedCount: rows.filter((row) => row.hiddenInfoBlocked).length,
-    schemaGapCount: rows.filter((row) => row.projectionIssues.length > 0)
+    schemaGapCount: rows.filter((row) => row.projectionIssues.some(isSchemaGap))
       .length,
-    hiddenInfoLeaks: 0,
-    legalActionGenerationChanges: 0,
+    redactionUnsafeRows: rows.filter((row) => !row.redactionSafe).length,
   };
 }
 
-export function formatActionSemanticCandidateCoverageReport(
-  summary: ActionSemanticCandidateCoverageSummary,
-): string {
-  const fieldRows = Object.entries(summary.fieldCoverage).map(
-    ([field, count]) => `| ${field} | ${count} |`,
-  );
-  const groupRows = ACTION_SEMANTIC_COVERAGE_GROUPS.map(
-    (group) => `| ${group} | ${summary.groups[group]} |`,
-  );
-  const targetContextByGroupRows = ACTION_SEMANTIC_COVERAGE_GROUPS.map(
-    (group) =>
-      `| ${group} | ${ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES.map(
-        (status) => summary.targetContextByGroup[group][status],
-      ).join(" | ")} |`,
-  );
-  return [
-    "# Action Semantic Candidate Coverage Report",
-    "",
-    `Version: ${summary.version}`,
-    `Candidates: ${summary.totalCandidates}`,
-    `Redaction safe: ${summary.redactionSafe ? 1 : 0}`,
-    `Forbidden markers: ${summary.forbiddenMarkers.length > 0 ? summary.forbiddenMarkers.join(", ") : "none"}`,
-    `Hidden-info blockers: ${summary.hiddenInfoBlockers}`,
-    `Schema-gap rows: ${summary.schemaGapRows}`,
-    "",
-    "## Field Coverage",
-    "",
-    "| Field | Count |",
-    "| --- | ---: |",
-    ...fieldRows,
-    "",
-    "## Coverage Groups",
-    "",
-    "| Group | Count |",
-    "| --- | ---: |",
-    ...groupRows,
-    "",
-    "## Projection Statuses",
-    "",
-    countMapTable(summary.primaryProjectionStatuses),
-    "",
-    "## Source Kinds",
-    "",
-    countMapTable(summary.sourceKinds),
-    "",
-    "## Projection Issues",
-    "",
-    countMapTable(summary.projectionIssues),
-    "",
-    "## Schema Gaps",
-    "",
-    countMapTable(summary.schemaGaps),
-    "",
-    "## Target Context",
-    "",
-    countMapTable(summary.targetContextStatuses),
-    "",
-    "## Target Context By Group",
-    "",
-    `| Group | ${ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES.join(" | ")} |`,
-    `| --- | ${ACTION_SEMANTIC_TARGET_CONTEXT_STATUSES.map(() => "---:").join(" | ")} |`,
-    ...targetContextByGroupRows,
-  ].join("\n");
+function isSchemaGap(issue: ActionProjectionIssue): boolean {
+  return issue !== "hidden_info_blocked";
 }
 
 function actionSemanticCandidateCoverageRow(
@@ -442,33 +281,27 @@ function targetContextCountsByGroup(
   return counts;
 }
 
-function countMapTable(counts: Record<string, number>): string {
-  const rows = Object.entries(counts).map(
-    ([key, count]) => `| ${key} | ${count} |`,
-  );
-  return ["| Value | Count |", "| --- | ---: |", ...rows].join("\n");
-}
+const forbiddenMarkerTokens = FORBIDDEN_REPORT_MARKERS.map((marker) => ({
+  marker,
+  tokens: forbiddenReportMarkerTokens(marker),
+}));
 
 function forbiddenMarkersIn(value: unknown): string[] {
-  const serialized = JSON.stringify(value);
-  const tokens = forbiddenReportMarkerTokens(serialized);
-  return FORBIDDEN_REPORT_MARKERS.filter((marker) =>
-    forbiddenReportTokensContainMarker(
-      tokens,
-      forbiddenReportMarkerTokens(marker),
-    ),
-  );
+  const tokens = forbiddenReportMarkerTokens(JSON.stringify(value));
+  const tokenSet = new Set(tokens);
+  return forbiddenMarkerTokens
+    .filter(({ tokens: markerTokens }) =>
+      markerTokens.length === 1
+        ? tokenSet.has(markerTokens[0]!)
+        : forbiddenReportTokensContainMarker(tokens, markerTokens),
+    )
+    .map(({ marker }) => marker);
 }
 
 function forbiddenReportTokensContainMarker(
   tokens: readonly string[],
   markerTokens: readonly string[],
 ): boolean {
-  if (markerTokens.length === 0) return false;
-  if (markerTokens.length === 1) {
-    const tokenSet = new Set(tokens);
-    return tokenSet.has(markerTokens[0]!);
-  }
   for (
     let index = 0;
     index <= tokens.length - markerTokens.length;

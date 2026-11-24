@@ -17,7 +17,7 @@ describe("corp tactical goals", () => {
         ? {
             ...candidate,
             sourceKind: "card",
-            sourceDefinitionId: "onr_v1_237_data-wall",
+            sourceDefinitionId: 449,
             targetContext: {
               selectedTargets: [
                 {
@@ -65,7 +65,7 @@ describe("corp tactical goals", () => {
     frame.actionCandidates = frame.actionCandidates.map((candidate) => ({
       ...candidate,
       sourceKind: "card",
-      sourceDefinitionId: "onr_v1_347_vapor-ops",
+      sourceDefinitionId: 559,
     }));
 
     expect(buildCorpTacticalGoals(frame).map((goal) => goal.goalId)).toEqual([
@@ -173,15 +173,15 @@ describe("corp tactical goals", () => {
       targetContext: {
         selectedTargets: [
           {
-            targetId: "server:remote-1",
+            targetId: "server:r1",
             targetKind: "server",
             targetSide: "corp",
             visibilityScope: "public",
-            evidence: ["server:remote-1"],
+            evidence: ["server:r1"],
           },
         ],
         targetKind: "server",
-        targetZones: ["remote_1"],
+        targetZones: ["r1"],
         targetSide: "corp",
         hiddenInfoPolicy: "engine_provided_targets_only",
         availableTargetsStatus: "engine_provided",
@@ -192,7 +192,7 @@ describe("corp tactical goals", () => {
 
     expect(buildCorpTacticalGoals(frame)[0]).toMatchObject({
       goalId: "corp.tactical.prepare_remote",
-      targetServerId: "remote_1",
+      targetServerId: "r1",
     });
 
     frame.actionCandidates = frame.actionCandidates.map((candidate) => ({

@@ -200,6 +200,13 @@ auch vor einem gemeinsamen Beschleunigungsschritt erhalten. Andere
 Zielagenden bleiben verfügbar; ein zur Asseterhaltung benötigter neuer
 Remote wird nicht verdrängt.
 
+Bei einer vollständig finanzierten Installation mit Wertung im selben Zug
+darf der vorbereitete Remote den neuen nur verdrängen, wenn dieselbe Agenda
+dort ebenfalls in diesem Zug für mindestens gleich viele Punkte gewertet
+werden kann. Würde die Installation den benötigten Markenspender trashen,
+erhält die Planwahl die belegte Wertungsroute im neuen Remote. Der
+Score-Owner prüft anschließend die Reserven für die gesamte Route (SP-883).
+
 Vor dem Erhalt einer vorbereiteten Agenda-/Remotebindung vergleicht der
 Score-Owner bereits zugelassene terminale HQ-Agendas für denselben Remote.
 Eine bereits zugelassene siegbringende HQ-Agenda verdrängt auch die
@@ -435,7 +442,10 @@ terminalen Agenda-Schutzprüfung die aktuell validierte Advance-Action.
 Verbraucht dieser Advance die letzte erforderliche Rezreserve, bleibt er
 unter `corp.score_agenda` ausdrücklich zurückgestellt. Ein bereits vollständig
 finanzierter Schutz mit Funding-Gap null macht den Advance nicht ownerlos;
-nur der verfügbare Überschuss darf Fortschritt finanzieren (Paarung 458, D304).
+nur der verfügbare Überschuss darf Fortschritt finanzieren. Paarung 458 D304
+belegt den gebundenen Advance bei leerem Stack als Gegenprobe. Im nativen
+Zustand kann die öffentliche Programmsuche die Rez-Pfade offenlassen. Dann
+belegt die Quote keine finanzierte Verteidigung.
 
 Eine vollständig gequotete leere Kostenliste zertifiziert null Klicks und
 Credits. Ein nur mit Klickkosten ausgewiesener Advance kostet null Credits;
@@ -683,6 +693,12 @@ Ein tatsächlicher sofortiger Sieg oder eine exakt vorhandene kostenlose
 Scorefolge zum Sieg bleibt zulässig. Zusätzliche Draws und gegnerische
 Folgeaktionen sind damit nicht als harmlos bewiesen.
 
+Für die allgemeine Score-Machbarkeit liefert die aktuelle Corp-PlayerView
+die Pflichtzieh-Untergrenze aus gewerteten Agendas und wirksamen Viruscountern.
+Optionale Draws aus früheren Zügen fließen in diese Quote nicht ein. Der
+Runner-Virus-Purge bewertet verbleibende Corp-Züge nach Wegfall der gequoteten
+Virus-Draws. So verwenden Score-Owner und Purge-Bewertung denselben Engine-Stand.
+
 Vor einem nichtterminalen Same-Turn-Score berücksichtigt der Score-Owner bedingte
 Creditwirkungen aus dem kanonischen strukturierten Scoreprofil. Ist die Agenda
 bereits kostenlos scorebar und ihre Bonusschwelle mit den verbleibenden,
@@ -862,6 +878,14 @@ Die Ausnahme verspricht keinen sicheren Score über den Runnerzug.
   nach einem aktuell materialisierten Install- oder Advance-Head;
 - `score-choice-continuation.ts` und `score-choice-binding.ts`: Bindung und
   Vervollständigung der ausgewählten Advancement-/Agenda-/Folge-Choices.
+
+Bei Advancement bindet `score-choice-binding.ts` die vorausgehende
+Ausführungsabsicht an die aktuelle Engine-Choice und die LegalAction
+derselben StateVersion. Der gebundene Move oder die vollständige Menge
+gebundener Placements muss zu genau einer angebotenen Option passen.
+Bei Placements darf nur die Reihenfolge der kanonischen Zielsegmente
+abweichen. Fehlende, mehrdeutige oder abweichende Optionen scheitern
+strukturiert.
 
 Die Runtime entdeckt zuerst direkte Scorevorhaben, gibt deren Reserven an
 Ambush und reicht die entdeckten Ambush-Fakten zur Score-Reconciliation zurück.
@@ -1213,8 +1237,11 @@ Ohne diesen Beleg wird die kombinierte Linie mit einer Diagnose verworfen;
 die eigenständigen Score- und gebundenen Vorbereitungsrouten bleiben separat
 bewertet.
 
-Die Remote-Reife verwendet den Engine-zertifizierten geordneten Runpfad und
-trennt aktuell finanzierbare von nur gestagten Rez-Teilmengen. Allgemeine,
+Das Scoring-Remote-Projekt prüft Doctrine und Eröffnungsgrenze vor der
+Schutzbewertung. Nach der Zielbindung wird die Remote-Reife für dieses
+Fort berechnet. Sie verwendet den Engine-zertifizierten geordneten
+Runpfad mit dem veröffentlichten Trace-Profil und trennt aktuell
+finanzierbare von nur gestagten Rez-Teilmengen. Allgemeine,
 Breaker-, Stealth-, Hosted- und weitere eingeschränkte Runner-Credits bleiben
 getrennte Größen. Blockierung, unvermeidbarer Schaden, Tags, Program-Trash,
 Action-Tax und Break-Verhinderung erfüllen ausschließlich ihre versionierten
@@ -1223,6 +1250,10 @@ auf die nächste Begegnung zählen nur, wenn im geordneten Pfad tatsächlich ein
 weiteres ICE folgt. Unvollständige Einzelpfade löschen keine unabhängig
 bekannten Teilmengen; ohne mindestens einen bekannten Pfad lautet der Status
 `assessment_unknown`.
+
+Die Remote-Contest-Quote hält das allgemeine Guthaben und die sichtbaren
+Breaker-Pools auch bei der Vorfinanzierung getrennt. Für Trashkosten nach
+dem Zugriff zählt das verbleibende allgemeine Guthaben des gequoteten Pfads.
 
 Bei `new_remote` darf nur eine exakt an Parent und Need gebundene
 Defense-Route genau eine aktuelle ICE-Install-`LegalAction` verwenden. Die
@@ -1260,6 +1291,15 @@ erneuten Härtung resident.
 
 Fortschritt wird über effektiven Schutz und Nutzbarkeit gemessen, nicht über
 ICE-Anzahl allein.
+
+Ein für die Wertung vorgesehenes Fort kann bis zum tragfähigen Agendaeinbau
+eine auszahlbare Wirtschaftskarte schützen. Die begrenzte Nutzung eines
+endlichen Pools ist beim [Economy-Owner](#6-corpeconomy) beschrieben. Beim
+Vergleich zwischen sofortigem Advance und verdeckter Installation mit
+Finanzierung bleibt eine weitergehende Bewertungsfrage offen. Sichtbare
+Marker verändern die Angriffswahl des Runners, ein späterer Advance kostet
+Zeit und eine in HQ gehaltene Agenda bleibt dort angreifbar. Der Vergleich
+dieser Wege gehört zu den bestehenden Ownern und zum TurnPlanner.
 
 Ein vorbereitetes Zielremote bleibt über Economy-, Draw-, Punish- und
 Central-Responses erhalten. Remote-Optionswert, Defense-Wert, Fundingwert und
@@ -1374,6 +1414,17 @@ Score und die aktuellen Defense-Needs in derselben Reihenfolge wie die bisherige
 Runtime. `defense-memory.ts` bindet Draw-Versuche und HQ-Halteentscheidungen.
 `defense-run-response.ts` besitzt aktuelle Rez- und Encounterbewertungen;
 Choice-Signale, Fortsetzungen und Payload-Bindungen liegen ebenfalls hier.
+`defense-current-route-quotes.ts` bindet die Installations- und Rez-Routen an
+die aktuelle LegalAction, den relevanten Server, den ICE-Typ, den Punktestand
+und die exakte Quotenvariante. `defense-plan-module.ts` vergleicht die
+fachlichen Routen und trifft die Allokationsentscheidung.
+Die Defense-Zuglinie übernimmt nur das aktuelle Installationsangebot mit
+dem ausgewählten Fort der Route. Einnahmen für vollständiges oder
+teilweises Funding benötigen dieselbe garantierte aktuelle Liquiditätsquote.
+`defense-validation.ts` verlangt je Rez-Routenart ihren zugehörigen
+Nachweis und für die Programm-Trash-Phase eine konkrete Choice-Bindung.
+Die Gleichheit ausgewählter Rez-Kosten umfasst die konkrete Variante
+für Stärke, Subroutinen oder Subtypen.
 
 Die aktuelle Installationsroute bindet neben Credits auch obligatorische
 Rez-Punktkosten an die vollständige Engine-Quote, die ausgewählten ICE und
@@ -1386,8 +1437,10 @@ Paarung 525 G2 D268 belegt den zuvor verworfenen finanzierten Glacier-RD-Pfad
 mit zwei Punkten; die reale spätere Rez verbraucht genau einen Punkt.
 
 Für den an einen Agenda-Score gebundenen kostenlosen ICE-Rez bestimmt
-`scored-agenda-free-rez-defense-target.ts` das installierte Ziel vor dem
-Score. Bei mehreren Zielservern steht ihre aktuelle erwartete
+`scored-agenda-free-rez-defense-target.ts` nach einem nichtterminalen
+Score-Ausblick das installierte Ziel vor dem Score. Einen exakt ausgewählten,
+spielentscheidenden Score führt der Score-Executor ohne Gratis-Rez-Zielbindung
+aus. Die Engine beendet das Spiel mit der Wertung. Bei mehreren Zielservern steht ihre aktuelle erwartete
 Agendapunkt-Exposition vor der ersparten normalen Rez-Zahlung. HQ/R&D
 konsumieren die bestehenden zentralen Defense-Fakten; eigene übrige
 Agenden und der öffentliche Runnerpfad liefern den Remote-/Archivesbedarf.
@@ -1410,8 +1463,28 @@ Score, Remote und Ambush liefern weiterhin ihre typisierten Projekte und Bedarfe
 Die Live-Runtime komponiert diese Schritte; sie importiert den Owner, der keine
 Runtime-Dispatcher oder Planregistries zurückimportiert. Geteilte Defense- und
 Funding-Vertragstypen bleiben unter `plans/`, reine Engine-Quote-/Pfadprojektionen
-bleiben wiederverwendbare Dienste. Die 25 registrierten Module, Prioritäten und
-Entscheidungsregeln bleiben unverändert.
+bleiben wiederverwendbare Dienste. Die 25 registrierten Module folgen dem
+gemeinsamen Prioritätsvertrag.
+
+Im selben P3-Band erhält die Verbesserung einer wiederholt erfolgreich
+angegriffenen Zentrale Vorrang vor einem weiteren Schutzschritt am leeren
+Scoring-Remote. Die Engine-gebundene Installation muss die reale
+Zugriffsroute verbessern, sichtbare Agendaexposition adressieren und ihre
+Rez-Zahlung samt bestehenden Reserven decken. Das delegierte
+Scoring-Projekt bleibt bei bereits hinreichendem Schutz oder aktiver Agenda
+eigenständig. D30 und D33 aus `match_d09dda4456c9eefc` binden den Wechsel
+zu HQ. Eine einzelne frühere HQ-Sichtung und unmittelbar wirksamer
+Remote-Schutz prüfen die Grenzen der Priorisierung.
+
+Bei zwei öffentlich belegten Eingängen zum selben spielentscheidenden
+Zentralzugriff vergleicht Defense die tatsächlich leichter erreichbare
+Route. Ein finanzierter Ausbau des schwächeren Eingangs ist vorzuziehen,
+wenn er dessen Zugriffsquote oder Breakkosten nachweislich verbessert und
+die bisher finanzierte Deckung des anderen Eingangs aus der gemeinsamen
+Bank erhalten bleibt. Die verfügbare Restbank und Agendapunkte für andere
+Schutzbedarfe dürfen dabei gegenüber dem direkten Ausbau nicht sinken.
+P742 G11/D277 prüft die über Archives umgeleitete HQ-Route mit und ohne
+sichtbare Umleitung.
 
 Vor einer ausgewählten ICE-Installation kann Defense eine kostenlose Root-Rez
 als exakt gebundene Kostenvorbereitung ausführen. Die Engine veröffentlicht
@@ -1569,6 +1642,22 @@ besitzt. Ohne diesen begrenzten Nachweis bleibt die Reserve bindend; die
 Choice-Auflösung übernimmt nur das gewählte, stategebundene Ziel. Paarung 475,
 Kontrolllauf 7, G39 D318 belegt zwei vorhandene Credits für zwei Credits
 Umleitung von Theorem bei vier Runnerpunkten auf den agendafreien Remote.
+
+Eine Umleitung kann Defense schon im Corp-Zug vorbereiten. Der Plan bindet
+die legale Root-Installation einer sofort gerezzten Quelle an einen leeren
+Remote. Die zentrale Allokation muss einen erreichbaren Agendaverlust in HQ
+oder R&D ausweisen. Der Plan prüft den Installationspreis einschließlich des
+Pflicht-Rez, die Kosten einer ersten Umleitung und die bestehenden Wertungs-
+und ICE-Reserven. Ein für eine Wertung reservierter Remote und eine bereits
+aktive Umleitungsquelle begrenzen weitere Installationen. Das tatsächliche
+Run-Ziel und die Entscheidung über die Zahlung bleiben bis zum Runbeginn offen.
+
+Für die Umleitung zu Beginn eines Runs bewertet Defense die von der Engine
+angebotenen Quellen und ihre Kosten. Der offene Run, die gerezzte Quellkarte
+und deren Server binden das Ziel. Defense vergleicht die gefährdeten
+Karten mit denen am Ziel und lässt die Umleitung aus, wenn sie die
+Wertungsreserve aufbrauchen würde oder HQ keine Agenda enthält. Bei der
+Ausführung müssen Run, Fenster, Options-ID, Ziel und Preis weiter passen.
 Umleitungsziele werden am tatsächlich betretenen äußersten bereits gerezzten
 ICE bewertet; ungerezzt darüberliegende ICE sind keine Encounter-Protektion.
 Ein exakt belegter unmittelbarer Stop darf die statische Agendaexposition des
@@ -1932,6 +2021,12 @@ Liquiditätsbindung oder unvermeidbarem Damage-, Tag- oder Aktionsdruck. Damit
 bleibt die Schutzentscheidung beim Score-Parent und wird weder durch reine
 ICE-Anzahl noch durch gedruckte Kartenwerte ersetzt.
 
+Die Expositionsrechnung für einen Score verwendet das Runner-Aktionsbudget
+für allgemeine Credits. Wiederholbare Auszahlungen und die tatsächlich
+sichtbaren Bit-Bestände installierter Quellen gehen gemeinsam ein. Eine
+endliche Auszahlung ersetzt nur so viele Basiscredit-Aktionen, wie dafür
+Aktionen und Guthaben verfügbar sind.
+
 Ein jüngster öffentlicher Zugriff sperrt die erneute Agendaallokation nur,
 solange keine aktuelle Schutz-Neuquote denselben Score-Parent und Server
 zertifiziert. Für ein reifes Projekt über mehrere Züge müssen sowohl dessen
@@ -1941,10 +2036,11 @@ bekannte ICE, reale Rez-/Agendapunktkosten und die vollständige Creditreserve
 bleiben bindend. Die normale Same-Turn-Klickreserve wird dadurch nicht
 abgeschwächt. Projekterkennung und Schwesterprojektverdrängung konsumieren
 diesen selben Nachweis; veraltete, falsch gebundene, ungeschützte oder
-unfinanzierte Projekte bleiben gesperrt. Paarung 512 G23 D400–401 sichert die
-erneute Allokation nach dem tatsächlichen Pflichtziehen ohne erneutes Laden
-des residenten Portfolios; der bestehende ungeschützte Reprotection-Gegenfall
-bleibt erhalten.
+unfinanzierte Projekte bleiben gesperrt. Paarung 512 G23 D400–401 verwendet
+nach dem tatsächlichen Pflichtziehen die neu erzeugte Engine-Sicht und das
+residente Portfolio. Die öffentliche Programmsuche hält die Reichweite im
+nativen Zustand offen. Die Gegenprobe ohne verfügbare Suche belegt die erneute
+Allokation am selben Fort und prüft veraltete sowie falsch gebundene Quotes.
 
 Die Vorfinanzierungsregel bleibt symmetrisch und begrenzt: Wenn die erste
 Schutzschicht eines langfristigen Scoreprojekts unter den makrostrategischen
@@ -1985,6 +2081,8 @@ Das residuale Corp-Deckinventar folgt dem sichtbaren Kartenbesitzer, nicht
 dem Controller einer Zone: Runner-eigene Bonuspunktkarten im Runner-Scorebereich
 werden nicht vom Corp-Snapshot abgezogen. Corp-eigene Karten im öffentlichen
 Runner-Rig oder Runner-Scorebereich werden dagegen genau einmal berücksichtigt.
+In sichtbaren Sonderzonen wie Set Aside und Removed from Game werden nur
+bekannte Karten mit Corp als Besitzer vom Corp-Inventar abgezogen.
 Unbekannte Karten, doppelte Instanzen und eine nicht aufgehende R&D-Restmenge
 bleiben Gründe für eine unbekannte Inventarbewertung.
 
@@ -2287,6 +2385,18 @@ Allokation sind der zusätzliche Schutz am gemeinsamen Zugriffsziel, die
 Rezreserve, die Breakkosten des Runners und seine bezahlbaren Ausweichrouten
 gemeinsam zu prüfen.
 
+Für einen offenen, legalen Eintritt zu einer unmittelbar siegbringenden
+Zentralagenda kann eine einzelne feste Trace-ICE-Schicht den direkten
+Zugriffsschutz verbessern. Dazu muss die gebundene Engine-Quote einen
+Run-Stopp bei erfolgreicher Trace belegen. Im unterstützten Modern-Open-Fall
+liegt die Trace-Stärke bereits ohne Corp-Gebot über der maximalen sichtbaren
+Runner-Stärke nach Vorbereitung. Der Runner kann die Subroutine mit seinem
+sichtbaren Rig und Budget auch nicht brechen. Der Defense-Owner berücksichtigt
+den vollständigen Rezpreis sowie die bekannten Reserven an den Zentralen.
+P751 G19 D134 sichert die legale Installationsroute und den ausgewählten
+Defense-Step. Die Projektion reicht bis zum nächsten sichtbaren Zugriffspfad.
+Spätere Informationen und neu vorbereitete Antworten öffnen eine neue Quote.
+
 Qualitative ICE-Installationsfreigaben für zentrale Deckung, HQ-Kapazität,
 projektgebundenes Staging und Score-Schutz verwenden denselben aktuellen,
 instanz-, fort- und versionsgebundenen Engine-Subroutinenstand. Gedrucktes
@@ -2385,6 +2495,10 @@ auf Jenny übertragen werden; weitere Karten derselben groben Effektfamilie
 benötigen ebenfalls ein eigenes Modell.
 
 Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
+Defense und Payload-Erzeugung prüfen denselben Choice-Vertrag. Aktueller
+Timingpunkt, StateVersion, angegriffener Server und auswählbare Options-IDs
+müssen mit dem LegalAction-Angebot übereinstimmen. Defense prüft diese Bindung,
+bevor es eine ICE-Option oder das auswählbare Decline in den Plan übernimmt.
 Bei einer exponierten eigenen Agenda im angegriffenen Fort oder HQ und
 mehreren vollständig quotierten produktiven Optionen vergleicht derselbe
 Owner die aktuelle sichtbare Runner-Breakantwort. Die
@@ -2445,8 +2559,8 @@ die fachliche Zielwahl nicht zu einer automatischen Engine-Fensterentscheidung.
 `program-trash-coverage.ts` vergleicht pro bereits gerezztem, bekanntem ICE
 die vorhandene sichtbare Runner-Antwort vor und nach Entfernung jedes legalen
 Programmziels. Es verwendet den bestehenden Run-Pfaddienst mit Engine-Quotes,
-dem aktuellen Runner-Creditbestand, sichtbaren Breaker-Creditpools und den
-Root-Modifikatoren des jeweiligen Forts. Neu unbezahlbare Antworten stehen
+dem aktuellen Runner-Creditbestand, sichtbaren Breaker-Creditpools, dem
+veröffentlichten Trace-Profil und den Root-Modifikatoren des jeweiligen Forts. Neu unbezahlbare Antworten stehen
 vor bloß verteuerten Antworten; bei gleicher Wirkung entscheiden wie bisher
 Breaker-Rolle, Counter, Installationskosten und Speicherbedarf, zuletzt die
 Options-ID. Die Breaker-Rolle stammt exakt aus dem kompilierten Hint
@@ -2563,6 +2677,14 @@ oder sicheren Ertrag. Der Trash des ursprünglichen Virusprogramms löscht
 gemeinsame Counter nicht; maßgeblich bleibt der tatsächliche globale
 Engine-Dispatcher.
 
+Für verbrauchbare zentrale Counter aus einer aktivierten Konversion liefert
+`quoteConvertibleCentralCounterAmount` die aus allen Zentralpools bezahlbare Menge
+pro Countertyp. Socket-Counter werden wirksam, sobald das öffentlich installierte
+Quellprogramm und die vollständige Finanzierung aus allen erforderlichen
+Zentralpools sichtbar vorliegen. Einzelne Socket-Counter und unvollständige
+Gruppen zählen für den aktuellen Purge-Wert als Vorbereitung. Bereits erzeugte
+Pipe-Counter bleiben ein eigener Effekt des gemeinsamen Corp-Pools.
+
 **Klasse:** `urgent_response` oder `bounded_sequence`
 **Rolle:** Vordergrund/Urgent Response
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
@@ -2576,6 +2698,12 @@ Verantwortung:
 - nach Wirkung zum vorherigen Root-Foreground zurückkehren.
 
 Der Purge folgt der aktuellen Engine-LegalAction samt Action-Debt-Quote.
+Der Basis-Purge und der Runner-Virus-Purge erhalten pro aktueller
+LegalAction einen eigenen Beleg mit StateVersion, Kosten, Counterbereich
+und Nutzen. Der Basis-Purge bewertet die sichtbaren betroffenen
+Kartencounter. Der Runner-Virus-Purge bewertet die sichtbaren
+Corp- und Serverpools der Runner-Viren. Owner-Erkennung, Disposition
+und Materialisierung verwenden nur die Aktion des jeweiligen Signals.
 Das Modul erzeugt keine eigene Purge-Legalität. Die Nutzenbewertung trennt
 Counter-Zahl von Effekt: Ein einzelner Pipe-Counter verursacht bereits
 wiederkehrenden Aktionsverlust. Dessen Beseitigung wird gegen die Purge-Kosten
@@ -2589,6 +2717,9 @@ klassifizieren.
 ## 6. `corp.economy`
 
 Die Implementierung liegt unter `packages/ai/src/corp/economy/`.
+Engine-Quotes für Hosted-Bank- und Free-Rez-Pfade eines Parent-Fundings
+liegen im gemeinsamen `fundingRouteAssessment`. Discovery, Routenbindung
+und Revalidierung beziehen sich auf diesen Beleg.
 `economy-discovery.ts` komponiert die aktuellen endlichen Needs und bindet
 ihre Funding-Routen; `economy-signals.ts` besitzt Investitionen, Auszahlungen,
 Operationen und die Übernahme konkreter Parent-Bedarfe.
@@ -2596,6 +2727,10 @@ Operationen und die Übernahme konkreter Parent-Bedarfe.
 Assessment und Materialisierung aus. `economy-routes.ts` bindet aktuelle
 Actions, Kosten und Auszahlungen; Asset-Payback und installierte Erträge
 liegen ebenfalls im Owner. Typen stehen in `economy-types.ts`.
+Die Zulassung verlangt das aktuelle Corp-Angebot mit passendem Timingpunkt
+und passender StateVersion. Eine ICE-Liquidation verwendet den Schutzbeleg
+von Defense einmal pro Funding-Kandidat und verlangt nach der Ausführung
+eine neue Boardbewertung.
 
 Eine vollständig Engine-gequotete unmittelbare Auszahlung mit bekannten
 Agenda-Punktkosten behält ihren vorhandenen Economy-Owner. Die nachfolgende
@@ -2610,6 +2745,55 @@ Score-Reserve und Defense-Funding bleiben fremde Fachverträge in
 und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
+
+Die Wirtschaftlichkeitsprüfung einer Kampagne mit endlichem Pool bilanziert
+die tatsächlichen Restklicks und den privaten Engine-Ausblick für die zwei
+folgenden Korp-Züge. Bereits gebundene Advances einer residenten
+Score-Fortsetzung mindern die freie Kapazität. Sichtbar angreifbare und
+ungeklärte Forts erhalten nur das aktuelle Auszahlungsfenster. Der Restpool,
+der früheste Leerungszug und dessen verbleibende Klicks bleiben vom
+liquiden Ertrag getrennt. Spätere Auszahlungen bleiben ein Ausblick, der am
+realen Folgezustand neu bewertet wird.
+
+Eine ausführbare Scorefolge oder Frist schützt den Platz für ihre Agenda.
+Economy kann eine vorübergehend freie Root eines gegenwärtig
+unterfinanzierten Scoreprojekts für eine automatisch selbst abräumende
+Kampagne verwenden, wenn sie den konkreten Fehlbetrag deckt und nach der
+Leerung noch ein Installationsklick verbleibt. Ein aktuell legaler
+Score, eine bindende Frist oder ein bereits belegter Platz schließt diese
+Zulassung aus. Die Engine revalidiert Installation, Rez und jeden Abruf.
+
+Ein kostenlos installierbarer, kostenlos rezzbarer endlicher Pool kann auch
+vor seiner vollständigen Leerung Platz für die Agenda machen. Für diese
+Zwischennutzung muss der finanzierte Pfad des Fortprojekts im aktuellen
+Zustand mindestens leichten Schutz bieten. Alle Agenda-Projekte am selben
+Ort müssen nach dem erreichbaren Ertrag dieses Zuges weiterhin an einer
+bekannten Finanzierungs- oder Schutzlücke scheitern. Ein fehlender Schutz-
+oder Finanzierungsbeleg, eine nahe Frist oder eine ausführbare Folge hält
+den Platz frei. Economy rechnet die verbleibenden Abrufe dieses Zuges gegen
+die investierten Klicks. Den Restpool darf die Corp bei einer später legalen
+Agenda-Installation aufgeben. Bei gleichem Auszahlungsertrag bevorzugt die
+gebundene Finanzierungsroute das zugelassene geschützte Fort gegenüber dem
+Neubau. Der konkrete Rez und jeder Abruf werden erneut gegen die übrigen
+Vorhaben abgewogen.
+
+Ein bereits rezzter endlicher Pool kann vor einer sicher geschützten
+Agenda-Installation im selben Zug geleert werden. Score stellt die
+Installation bis zum Abruf zurück, wenn diese Folge denselben
+gequoteten Scoretermin erhält. Economy materialisiert den aktuellen
+Abruf. Ein letzter Abruf mit einem Credit erhält dadurch ebenfalls einen
+konkreten Zweck. Nach dem Engine-Ereignis für den Trash prüft Score den
+freien Platz und die nächste LegalAction. Der letzte Klick kann dann
+eine zertifizierte, geschützte Agenda-Installation tragen. Ein bereits
+ausführbarer Sofortsieg hat Vorrang vor dem Abruf.
+
+Direkt nach der bestätigten Leerung schützt eine ausführbare oder
+fristgebundene Scorefolge das Fort weiterhin. Eine bloß wartende
+Scoreoption darf den freien Platz in diesem Fenster für aktuelle
+Economy-, ICE-Support- und Ambush-Angebote freigeben. Jeder dieser Pläne
+prüft sein eigenes Ziel und seine LegalActions. Der native Rockerboy-Test
+belegt die Installation im letzten Klick, 3+2 Auszahlungen, die folgende
+Agenda im selben Fort und einen identischen StateHash bei Wiederholung.
 
 Ein bereits zugelassener Defense-Finanzierungsparent darf seinen aktuellen
 Basic-Credit-Schritt durch die kostenlose Vorbereitung einer besseren
@@ -2653,6 +2837,18 @@ kostenlosen Rez und zwei Auszahlungen: vier statt drei Credits bei drei
 normalen Aktionen, durchgehend mit demselben Parent und Engine-Replay.
 G12 D211 erhält zwei Basiskredite und Accounts Receivable mit sechs Credits
 Nettozufluss statt des schwächeren Bankaufbaus.
+
+Bei mindestens vier HQ-Karten konkurriert eine freiwillige Basis-Ziehaktion
+für zusätzlichen Fortschutz mit der konkreten Finanzierung desselben
+mehrzügigen P4-Scoreprojekts. Economy bindet einen bereits installierten
+endlichen Pool im Zielfort. Es zählt der aktuell legale Abruf oder der
+kostenlose Rez mit bestätigter Auszahlungskapazität. Die Ziehzulassung stellt
+die Suche zurück, wenn ihr Klick eine unmittelbar erreichbare Rez- oder
+Wertungsschwelle verfehlt oder die Auszahlung im quotierten Ein-Zug-Horizont
+verkleinert. Jeder Abruf wird neu gebunden. Dringende Schutz- und
+Wertungsentscheidungen behalten ihre Priorität. Im rekonstruierten Seed 8
+der Paarung 846 ergeben zwei Abrufe bei fünf HQ-Karten acht Credits. Damit
+ist der Rez von Haunting Inquisition für den folgenden Angriff bezahlbar.
 
 Ein bereits zugelassener P2-Rezreservebedarf für vorhandenes, ungeresstes ICE
 darf denselben kostenlosen aktuellen Aufbau nutzen, wenn sein absolutes Ziel
@@ -2798,8 +2994,12 @@ seine Installationsbewertung. Nur ein aktuell vollständig Engine-gequoteter,
 bezahlbarer und nachweislich wirkungsloser erster Layer gibt das Fenster frei.
 Ein nützlicher oder unvollständig bewerteter Pfad bleibt ausdrücklich unknown
 und reserviert die Klicks. Paarung 576 G25/D280 belegt zwei wirkungslose
-Angebote gegen das öffentliche Runner-Rig; fehlende Runquotes bleiben gesperrt. Credit-Needs des Remotes und andere benötigte Finanzierung bleiben
-ebenfalls gesperrt. Die fünf nativen Zustände aus Paarung 542 werden in
+Angebote für ein neues Remote. Im vollständigen Zustand bleiben zugleich
+Installationspfade in HQ und einem bestehenden Remote unbewertet. Economy
+zahlt in diesem Fall den vorhandenen Vorrat aus. Die Gegenprobe mit den
+exakt gebundenen neuen Remote-Angeboten gibt den Restzugzyklus frei.
+Fehlende Runquotes, Credit-Needs und andere benötigte Finanzierung behalten
+ihr Veto. Die fünf nativen Zustände aus Paarung 542 werden in
 `meta-543-department-remote-window.test.ts` samt positiven Remote-Gegenfällen
 geprüft; sie liefern keine zusätzliche Ausführungsautorität außerhalb von
 Scheduler und TurnPlanner.
@@ -2824,6 +3024,20 @@ unbekannte Installationsfenster. Vorhandene Agenden in HQ oder Remotes,
 ausführbare Score-/Advanceköpfe, Ambush-/Punishfenster und anderes sofortiges
 Einkommen schließen sie aus. Die Meilensteinquote und der exklusive
 Bankpool-Claim gelten auch unter diesem Fundingparent.
+Discovery und die erneute Prüfung im Economy-Modul verwenden für die
+geplante ICE-Installation denselben aktuellen Defense-Kontext. Das gilt
+auch dann, wenn die Auszahlung den gesamten Installations- und Rezbedarf
+deckt. In P863 G10/D130 decken zwei Ladungen und eine Auszahlung die
+sechs fehlenden Credits für Liche am HQ. Der Scheduler kann weiterhin
+eine andere zugelassene Kampagne wählen.
+
+Für die Finanzierung einer Wertung gilt derselbe Pflichtzieh-Horizont
+wie für die Aktionsklassifikation. Eine Operation mit Kartenziehen darf
+die geschützte R&D-Reserve nur für eine ausführbare siegbringende Wertung
+im laufenden Zug verbrauchen. Die Wertung im nächsten Corp-Zug liegt
+hinter dessen Pflichtziehung. P860 G24/D450 prüft diese Grenze für eine
+bereits installierte Agenda.
+
 Paarung 576 R3/G13/D238 bestätigt nach der bereits ausgeführten wichtigen
 Installation Laden plus Auszahlung: zehn statt neun Endcredits bei gleicher
 Hand und gleichem Brett. Die 32-Credit-Schutzlinie bleibt ein Fundingziel;
@@ -2838,9 +3052,10 @@ StateVersion-gebundene Claims verhindern diese Doppelzählung. Nach dem
 aktuellen nativen Kopf endet die unterstützte Projektion: Geänderte
 Bankcounter benötigen eine neue Engine-Quote und aktuelle LegalActions.
 Die Liquidität des späteren Meilensteins wird nicht als bereits vorhandenes
-Geld ausgegeben. Der native Gegenfall 576 G25/D280 wählt dadurch Laden und
-anschließend sechs Credits Auszahlung statt drei Credits und einem
-Basiscredit. Score-, Defense- und sonstige Prioritäten bleiben beim
+Geld ausgegeben. Der native Gegenfall zu 576 G25/D280 wählt mit den isolierten neuen Remote-Angeboten
+Laden und anschließend sechs Credits Auszahlung. Bei offenen Pfaden in den
+bestehenden Servern bleiben Laden und sofortige Auszahlung verschiedene
+aktuelle Angebote. Score-, Defense- und sonstige Prioritäten bleiben beim
 bestehenden Scheduler.
 
 Ein verbrauchter optionaler Defense-Suchversuch reserviert keine weitere
@@ -2892,7 +3107,10 @@ gewöhnlicher Liquiditätsbedarf darf ihn nicht auszahlen und danach erneut
 aufbauen. Eine höher priorisierte aktuelle Konversion darf eine fremde
 Investition freigeben, aber dieselben Counter niemals zugleich als Transfer-
 und Creditquelle beanspruchen. Unsichere, nicht anderweitig gebundene Banken
-behalten ihre Liquidationsroute.
+behalten ihre Liquidationsroute. Eine ausdrückliche Counter-Kostenangabe
+muss eine nichtnegative sichere Ganzzahl sein und zur Quellenkarte,
+Timingphase und StateVersion der aktuellen Corp-LegalAction gehören.
+Widersprüche scheitern mit einer strukturierten Regeldiagnose.
 
 Der residente Ambush-Owner beendet neue Advancement- und Support-Investitionen,
 wenn die Karte dem Runner exakt bekannt ist und die kanonische Access-Projektion
@@ -2994,6 +3212,13 @@ Materialisierung des Roots. Typen und Routenkriterien werden innerhalb der
 Familie mit dem Ausführungs-Owner geteilt. Gemeinsame side-sichere Karten-,
 Ziel- und Kostenfakten liegen in `runtime/visible-action-facts.ts`.
 
+Der entscheidungslokale Quote-Adapter fragt Routen im Corp-Hauptfenster an.
+Fachlich unvollständige Engine-Quotes bleiben auswertbar und können neben
+zertifizierten Routen stehen. Ein technischer Aufruffehler, eine abgelehnte
+Anfrage oder eine ungültige Antwortbindung beendet die betroffene Entscheidung
+mit `engine_quote_contract_failed`. Die strukturierte Diagnose nennt die
+gebundene Anfrage und den technischen Grund ohne den Rohfehler des Anbieters.
+
 **Klasse:** `strategic_campaign` oder `development_project`
 **Rolle:** dormant/Background/Vordergrund
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
@@ -3061,6 +3286,17 @@ Score-Zone, exakte Capability, aktuellen LegalAction-Head und Kosten; sie
 verwendet denselben side-sicheren Trace-/Präventionsvertrag wie für Operationen.
 Eine Agenda in HQ ist keine aktivierbare Quelle. Verdeckte Runnerreaktionen
 bleiben unbekannt und werden nicht durch den Quelltypwechsel aufgewertet.
+
+Die Engine-Schadensquote erhält die öffentlichen Zustände nach dem
+Tagfenster eines einzelnen direkten Tag- oder Trace-Heads. In jedem Zweig
+kann eine sichtbare, durch Trash bezahlte Vollprävention einen passenden
+Schadenstreffer abfangen. Eine im Tagfenster geopferte Instanz entfällt,
+eine erhaltene darf bewusst für einen späteren, größeren Treffer warten.
+Die Vorschau verwendet die kanonischen Präventionskandidaten der Engine
+und veröffentlicht nur aggregierte Grenzen. Der bestehende Punish-Owner
+bewertet dieselbe Quote und bindet nach der tatsächlichen Antwort erneut.
+Kombinationen mit zusätzlichen Tagquellen, gekoppelten Präventions- oder
+Ersatzwirkungen behalten ihre ausdrückliche Quote-Grenze.
 
 Auch getaggtenabhängiger Meat-Schaden aus einer gescorten Agenda gehört in
 diese Quote-Anfragen. Die kanonische aktivierte Corp-Main-Fähigkeit liefert
@@ -3154,7 +3390,10 @@ Fortschrittsbegriffe nicht mehr sinnvoll gemeinsam modellierbar sind.
 Kindplan. `punish-plan-support.ts` bindet aktuelle Head-Kandidaten und
 beobachtungsabhängige Fortsetzungen; `punish-route-quote-input.ts` erzeugt
 begrenzte Quote-Anfragen und `punish-trace-binding.ts` bindet das bereits
-gequotete Gebot an die aktuelle private Engine-Choice. Der Root bleibt
+gequotete Gebot an die aktuelle private Engine-Choice. Angebot und Choice
+müssen in Seite, Timing, StateVersion und Optionsmenge übereinstimmen.
+Das bereits gequotete Gebot muss genau einer auswählbaren Option entsprechen.
+Der Root bleibt
 `corp.punish_campaign`; Funding-Need, Execution-Need und Plan-IDs ändern sich
 durch diese Quellcodestruktur nicht.
 
@@ -3380,7 +3619,7 @@ Der Owner liegt unter `packages/ai/src/corp/ambush/`:
 - `ambush-plan-module.ts`: Parent, Setup-Step, Priorität, Needs und aktuelle Routen;
 - `corp-ambush-plan-signals.ts`: Intent- und Quellenbindung, Köder, Fortsetzung und Disposition;
 - `corp-access-zone-preparation.ts`: begrenzte Install-/Halte-/Rückmischfolge und Zugriffszonenwert;
-- `corp-access-payment-choice.ts`: Bewertung und Bindung bezahlter Zugriffseffekte;
+- `corp-access-payment-choice.ts` prüft und bindet den indexierten Engine-Zugriffseffekt samt Zone, Quelle, Kosten und Version. Diese Bindung wird bei der Payload-Auflösung erneut geprüft.
 - `corp-access-installed-trash-choice.ts`: Bewertung und typisierte Bindung öffentlicher Programm-/Hardware-Trash-Ziele beim Zugriff;
 - `ambush-choice-binding.ts`: exakte Vervollständigung der gewählten Payment-/Bounce-/Trash-Choice.
 
@@ -3425,6 +3664,9 @@ mehrere geordnete Optionen nicht als erzwungen übernehmen (SP-513).
 Der Owner liegt unter `packages/ai/src/corp/hand-management/`.
 `hand-development-signals.ts` komponiert Kartenentwicklung und den endlichen
 Overflow-Parent; `hand-overflow.ts` revalidiert dessen konkrete Konversionen.
+Eine gewöhnliche Operationskonversion verlangt die garantierte unmittelbare
+Handreduktion um genau eine Karte aus dem aktuellen Angebot. Der Auswahlbeleg
+erwartet dieselbe Reduktion.
 Der endliche Konversionsrest zählt ausschließlich ausgewählte Schritte
 dieses Owners. Handverkleinerung oder Klickverbrauch durch Score/Economy
 begrenzen das aktuelle Angebot, verbrauchen aber keinen Overflow-Schritt.
@@ -3568,6 +3810,9 @@ Nach dem Archives-Schutz und konkreten Score-/Defense-Bindungen zählt der
 begrenzte Wert der Handoptionen. Der Punish-Owner bewertet dafür feste
 Tag- und Meat-Damage-Operationen gemeinsam: unterschiedliche Auslöser,
 sichtbare Reaktionen, verfügbares Geld und die drei regulären Corp-Aktionen.
+Sichtbare Tag-Vermeidung verbraucht ein gemeinsames Runner-Creditbudget.
+Wegwerfreaktionen stehen je installierter Karte einmal zur Verfügung.
+Der Haltewert verwendet die verbleibenden Tags für den Schaden.
 Gleich viel Schaden wie Handkarten leert die Grip nur. Mehr Schaden erhält
 einen höheren Retentionswert, aber keine Zusage eines künftigen Flatlines.
 Ein einzelner passender Draw zählt schwächer und nur bei abgeglichener

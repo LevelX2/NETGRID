@@ -38,8 +38,10 @@ it("projects a known agenda payment on the native zero-click ACME payout route",
     fallbackUsed: false,
   });
   expect(
-    decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toMatch(/^plan:corp\.economy:/);
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.economy");
 });
 
 it("preserves the current payment reserve when an unfinished score needs funding", () => {
@@ -55,13 +57,17 @@ it("preserves the current payment reserve when an unfinished score needs funding
   );
   const decision = chooseAiAction(input);
   expect(decision).toMatchObject({
-    actionId: "corp.gain_credit",
+    actionId: "cb",
     fallbackUsed: false,
   });
   expect(
-    decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toMatch(/^plan:corp\.economy:/);
-  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toMatch(
-    /^plan:corp\.score_agenda:/,
-  );
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    )?.moduleId,
+  ).toBe("corp.economy");
+  expect(
+    decision.decisionDebug?.planFirstDecision?.portfolio.find(
+      (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    )?.moduleId,
+  ).toBe("corp.score_agenda");
 });

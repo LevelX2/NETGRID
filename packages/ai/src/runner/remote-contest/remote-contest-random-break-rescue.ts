@@ -3,6 +3,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import type { RunnerRunOrigin } from "../../plans/runner-run-origin-contract";
 import type { RunnerRunRiskContractSignal } from "../../plans/runner-tactical-plan-contracts";
@@ -36,9 +37,10 @@ export function terminalRandomBreakRescueForRun(
     input.playerView.own.stackOrRdCount !== 0 ||
     input.playerView.own.tags !== 0 ||
     !input.playerView.own.rig ||
-    action?.type !== "start_run" ||
+    !actionMatchesCurrentDecision(input, action) ||
+    action.type !== "start_run" ||
     action.source !== "basic_action" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.payload?.serverId !== evaluation.targetServerId ||
     action.costs.some((cost) => (cost.credits ?? 0) !== 0) ||
     evaluation.targetKind !== "remote" ||
     !evaluation.scoreThreat ||
@@ -196,7 +198,7 @@ export function boundTerminalRandomBreakRescueBreak(
     ice.effectiveRunQuote?.subroutines[index]?.id ===
       proof.targetSubroutineId &&
     ice.effectiveRunQuote.subroutines[index]?.type === "end_the_run" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    actionMatchesCurrentDecision(input, action) &&
     action.costs.every((cost) => (cost.credits ?? 0) === 0)
   );
 }

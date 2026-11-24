@@ -16,9 +16,9 @@ import {
   selectAiDecisionSideForState,
 } from "./ai-decision-input";
 
-const REMAP = "onr_classic_001_data-fort-remapping";
-const THEOREM = "onr_classic_004_theorem-proof";
-const DEAD = "onr_classic_008_deadeye";
+const REMAP = 5;
+const THEOREM = 8;
+const DEAD = 12;
 const extra = [REMAP, THEOREM, DEAD];
 const corpDeck = {
   ...DEMO_DECKS.demo_corp_001,
@@ -152,7 +152,7 @@ it.each([false, true])(
     expect(d.fallbackUsed).toBe(false);
     const pf = d.decisionDebug?.planFirstDecision;
     expect(pf?.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     expect(pf?.leafExecutorInstanceId).toBe(pf?.rootPlanInstanceId);
     expect(pf?.route).toMatchObject({

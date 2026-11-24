@@ -14,6 +14,7 @@ export function visibleSourceDefinitionsByInstanceId(
     ...playerView.own.heapOrArchives,
     ...playerView.own.scoreArea,
     ...(playerView.own.rig ?? []),
+    ...(playerView.specialZones?.setAside ?? []),
     ...(playerView.run?.accessedCard ? [playerView.run.accessedCard] : []),
     ...playerView.servers.flatMap((server) => [...server.ice, ...server.root]),
   ];

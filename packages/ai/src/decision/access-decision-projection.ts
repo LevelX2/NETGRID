@@ -39,7 +39,7 @@ export type AccessDecisionProjectionTargetChoiceWouldSelect = {
 export type AccessDecisionProjection = {
   source: AccessDecisionProjectionSource;
   serverId: string;
-  knownRootDefinitionId?: string;
+  knownRootDefinitionId?: number;
   target: AccessDecisionProjectionTarget;
   intendedAccessAction: AccessDecisionProjectionAction;
   projections: AccessDecisionProjectionKind[];
@@ -50,7 +50,7 @@ export type AccessDecisionProjection = {
 export function projectAccessDecision(params: {
   source: AccessDecisionProjectionSource;
   serverId: string;
-  knownRootDefinitionId?: string;
+  knownRootDefinitionId?: number;
   target: AccessDecisionProjectionTarget;
   intendedAccessAction: AccessDecisionProjectionAction;
   trashCost?: number;

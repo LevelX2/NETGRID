@@ -1,3 +1,4 @@
+import { serializedDefinitionReferences } from "../../test-fixtures/serialized-definition-references";
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
@@ -189,11 +190,11 @@ describe("V1.9.2 Mechanikpaket K", () => {
     expect(ONR_V1_9_2_FINAL_CARD_IDS).toHaveLength(7);
     for (const definitionId of ONR_V1_9_2_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /trace|tag|damage_prevention|v2|matchmaking|ranking/,
       );
     }
@@ -213,20 +214,20 @@ describe("V1.9.2 Mechanikpaket K", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_013_cockroach"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[225]).toBeDefined();
   });
 
   it("grants an All-Nighter bonus run via LegalActions without spending a click on the bonus run", () => {
     let state = toRunnerTurn(v192CardReleaseGame("v192-all-nighter"));
     state.runner.credits = 30;
-    moveRunnerCardToGrip(state, "onr_v1_076_all-nighter");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    moveRunnerCardToGrip(state, 288);
+    putCorpCardOnTopOfRd(state, 596);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_076_all-nighter" &&
+        sourceDefinition(state, action) === 288 &&
         action.payload?.serverId === "rd",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -255,15 +256,15 @@ describe("V1.9.2 Mechanikpaket K", () => {
 
     let hqState = toRunnerTurn(v192CardReleaseGame("v192-all-nighter-hq"));
     hqState.runner.credits = 30;
-    moveRunnerCardToGrip(hqState, "onr_v1_076_all-nighter");
-    const hqCard = moveCorpCardToHq(hqState, "simple_economy_operation");
+    moveRunnerCardToGrip(hqState, 288);
+    const hqCard = moveCorpCardToHq(hqState, 596);
     keepOnlyCorpHqCard(hqState, hqCard);
     hqState = apply(
       hqState,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(hqState, action) === "onr_v1_076_all-nighter" &&
+        sourceDefinition(hqState, action) === 288 &&
         action.payload?.serverId === "hq",
     );
     hqState = apply(
@@ -283,15 +284,15 @@ describe("V1.9.2 Mechanikpaket K", () => {
     let state = toRunnerTurn(v192CardReleaseGame("v192-kilroy-romp"));
     state.runner.credits = 20;
 
-    moveRunnerCardToGrip(state, "onr_v1_096_kilroy-was-here");
-    const kilroyAgendaId = putCorpCardOnTopOfRd(state, "simple_agenda");
+    moveRunnerCardToGrip(state, 308);
+    const kilroyAgendaId = putCorpCardOnTopOfRd(state, 588);
     const creditsBeforeKilroy = state.runner.credits;
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_096_kilroy-was-here",
+        sourceDefinition(state, action) === 308,
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
@@ -306,15 +307,15 @@ describe("V1.9.2 Mechanikpaket K", () => {
     expect(state.corp.archives).toContain(kilroyAgendaId);
     expect(state.runner.scoreArea).not.toContain(kilroyAgendaId);
 
-    moveRunnerCardToGrip(state, "onr_v1_107_romp-through-hq");
-    const rompAgendaId = moveCorpCardToHq(state, "simple_agenda");
+    moveRunnerCardToGrip(state, 319);
+    const rompAgendaId = moveCorpCardToHq(state, 588);
     keepOnlyCorpHqCard(state, rompAgendaId);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(state, action) === "onr_v1_107_romp-through-hq",
+        sourceDefinition(state, action) === 319,
     );
     const creditsBeforeRompTrash = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -340,13 +341,13 @@ describe("V1.9.2 Mechanikpaket K", () => {
   it("applies Top Runners' Conference credits at start of turn and trashes it when a run starts", () => {
     let state = toRunnerTurn(v192CardReleaseGame("v192-top-runners"));
     state.runner.credits = 5;
-    moveRunnerCardToGrip(state, "onr_v1_184_top-runners-conference");
+    moveRunnerCardToGrip(state, 396);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_184_top-runners-conference",
+        sourceDefinition(state, action) === 396,
     );
     const creditsAfterInstall = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -359,7 +360,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
           side: "runner",
           amount: 2,
           reason: "start_of_turn",
-          sourceDefinitionId: "onr_v1_184_top-runners-conference",
+          sourceDefinitionId: 396,
           sourceTitle: "Top Runners' Conference",
           visibility: "public",
         }),
@@ -369,7 +370,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
     const conferenceId = state.runner.rig.resources.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
-        "onr_v1_184_top-runners-conference",
+        396,
     );
     expect(conferenceId).toBeDefined();
     if (!conferenceId) return;
@@ -385,7 +386,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
       expect.objectContaining({
         kind: "trash_source",
         reason: "run_start",
-        sourceDefinitionId: "onr_v1_184_top-runners-conference",
+        sourceDefinitionId: 396,
       }),
     );
   });
@@ -397,11 +398,11 @@ describe("V1.9.2 Mechanikpaket K", () => {
 
     const polymerAgendaId = moveCorpCardToHq(
       state,
-      "onr_v1_211_polymer-breakthrough",
+      423,
     );
     const cfoAgendaId = moveCorpCardToHq(
       state,
-      "onr_v1_188_ai-chief-financial-officer",
+      400,
     );
     removeEverywhere(state, polymerAgendaId);
     removeEverywhere(state, cfoAgendaId);
@@ -429,7 +430,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
           side: "corp",
           amount: 1,
           reason: "start_of_turn",
-          sourceDefinitionId: "onr_v1_211_polymer-breakthrough",
+          sourceDefinitionId: 423,
           sourceTitle: "Polymer Breakthrough",
           visibility: "public",
         }),
@@ -439,8 +440,8 @@ describe("V1.9.2 Mechanikpaket K", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     expect(state.corp.credits).toBe(corpCreditsBeforeMandatory);
 
-    moveCorpCardToHq(state, "simple_economy_operation");
-    moveCorpCardToArchives(state, "onr_v1_279_wall-of-static", false);
+    moveCorpCardToHq(state, 596);
+    moveCorpCardToArchives(state, 491, false);
     state = apply(
       state,
       "corp",
@@ -454,20 +455,20 @@ describe("V1.9.2 Mechanikpaket K", () => {
     });
 
     state = toRunnerTurnFromCorpMain(state);
-    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    moveRunnerCardToGrip(state, 233);
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_021_dwarf",
+        sourceDefinition(state, action) === 233,
     );
     const dwarfId = state.runner.rig.programs.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_021_dwarf",
+      (id) => state.cardInstances[id]?.definitionId === 233,
     );
     expect(dwarfId).toBeDefined();
     if (!dwarfId) return;
-    putCorpIceOnServer(state, "rd", "onr_v1_235_data-naga");
+    putCorpIceOnServer(state, "rd", 447);
     state.corp.credits = 20;
     state = apply(
       state,
@@ -480,7 +481,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_235_data-naga",
+        sourceDefinition(state, action) === 447,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", `card_${dwarfId}`);
@@ -495,11 +496,11 @@ describe("V1.9.3 Mechanikpaket L", () => {
     expect(ONR_V1_9_3_FINAL_CARD_IDS).toHaveLength(4);
     for (const definitionId of ONR_V1_9_3_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
       expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /damage_prevention|replacement|v2|matchmaking|ranking/,
       );
     }
@@ -519,7 +520,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_235_data-naga"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[447]).toBeDefined();
   });
 
   it("starts V1.9.3 agenda trace actions and keeps Jack Attack jack-out lock active for the run", () => {
@@ -529,11 +530,11 @@ describe("V1.9.3 Mechanikpaket L", () => {
 
     const netwatchAgendaId = moveCorpCardToHq(
       state,
-      "onr_v1_207_netwatch-operations-office",
+      419,
     );
     const privatePoliceAgendaId = moveCorpCardToHq(
       state,
-      "onr_v1_213_private-cybernet-police",
+      425,
     );
     removeEverywhere(state, netwatchAgendaId);
     removeEverywhere(state, privatePoliceAgendaId);
@@ -561,7 +562,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
       (action) =>
         action.type === "activated_card_ability" &&
         sourceDefinition(state, action) ===
-          "onr_v1_207_netwatch-operations-office",
+          419,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -592,7 +593,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
-      cardDefinitionId: "onr_v1_207_netwatch-operations-office",
+      cardDefinitionId: 419,
       traceStarted: true,
       traceLimit: 2,
     });
@@ -607,7 +608,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
       (action) =>
         action.type === "activated_card_ability" &&
         sourceDefinition(state, action) ===
-          "onr_v1_213_private-cybernet-police",
+          425,
     );
     expect(state.trace).toMatchObject({
       status: "corp_bid",
@@ -617,8 +618,8 @@ describe("V1.9.3 Mechanikpaket L", () => {
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(2);
 
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
-    putCorpIceOnServer(state, "rd", "onr_v1_251_jack-attack");
+    putCorpCardOnTopOfRd(state, 596);
+    putCorpIceOnServer(state, "rd", 463);
     state = toRunnerTurnFromCorpMain(state);
     state.runner.clicks = 3;
     state = apply(
@@ -632,7 +633,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_251_jack-attack",
+        sourceDefinition(state, action) === 463,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.run?.jackOutLockedForRun).toBe(true);
@@ -646,7 +647,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
     let tkoState = toRunnerTurn(v193CardReleaseGame("v193-tko-next-action"));
     tkoState.runner.credits = 20;
     tkoState.corp.credits = 20;
-    putCorpIceOnServer(tkoState, "rd", "onr_v1_271_tko-2-0");
+    putCorpIceOnServer(tkoState, "rd", 483);
     tkoState = apply(
       tkoState,
       "runner",
@@ -658,7 +659,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(tkoState, action) === "onr_v1_271_tko-2-0",
+        sourceDefinition(tkoState, action) === 483,
     );
     const clicksBeforeTkoSubroutine = tkoState.runner.clicks;
     tkoState = apply(
@@ -680,7 +681,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
         ),
     ).toEqual(
       expect.objectContaining({
-        sourceDefinitionId: "onr_v1_271_tko-2-0",
+        sourceDefinitionId: 483,
         runnerForgoneActionOrdinal: 2,
       }),
     );
@@ -692,14 +693,14 @@ describe("V1.9.4 Mechanikpaket M", () => {
     expect(ONR_V1_9_4_FINAL_CARD_IDS).toHaveLength(2);
     for (const definitionId of ONR_V1_9_4_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).toMatch(
         /runner_is_tagged/,
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage/);
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).toMatch(/damage/);
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /v2|matchmaking|ranking/,
       );
     }
@@ -719,7 +720,7 @@ describe("V1.9.4 Mechanikpaket M", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_251_jack-attack"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID[463]).toBeDefined();
   });
 
   it("resolves On-Call Solo Team and Strike Force Kali damage actions only while Runner is tagged", () => {
@@ -729,11 +730,11 @@ describe("V1.9.4 Mechanikpaket M", () => {
 
     const onCallAgendaId = moveCorpCardToHq(
       state,
-      "onr_v1_208_on-call-solo-team",
+      420,
     );
     const kaliAgendaId = moveCorpCardToHq(
       state,
-      "onr_v1_217_strike-force-kali",
+      429,
     );
     removeEverywhere(state, onCallAgendaId);
     removeEverywhere(state, kaliAgendaId);
@@ -763,7 +764,7 @@ describe("V1.9.4 Mechanikpaket M", () => {
       "corp",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(state, action) === "onr_v1_208_on-call-solo-team" &&
+        sourceDefinition(state, action) === 420 &&
         action.payload?.cardId === onCallAgendaId,
     );
     expect(state.runner.grip.length).toBeLessThan(gripBeforeOnCall);
@@ -774,7 +775,7 @@ describe("V1.9.4 Mechanikpaket M", () => {
       "corp",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(state, action) === "onr_v1_217_strike-force-kali" &&
+        sourceDefinition(state, action) === 429 &&
         action.payload?.cardId === kaliAgendaId,
     );
     expect(state.runner.grip.length).toBeLessThan(gripBeforeKali);
@@ -797,25 +798,25 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(ONR_V1_9_5_FINAL_CARD_IDS).toHaveLength(2);
     for (const definitionId of ONR_V1_9_5_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      expect(definition?.implementationStatus, definitionId).toBe(
+      expect(definition?.implementationStatus, String(definitionId)).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
+      expect(definition?.mechanics.join(" "), String(definitionId)).not.toMatch(
         /v2|matchmaking|ranking/,
       );
     }
     expect(
       CARD_DEFINITIONS_BY_ID[
-        "onr_v1_219_superior-net-barriers"
+        431
       ]?.mechanics.join(" "),
     ).toMatch(/ice_strength|strength_modifier/);
     expect(
       CARD_DEFINITIONS_BY_ID[
-        "onr_v1_219_superior-net-barriers"
+        431
       ]?.mechanics.join(" "),
     ).toMatch(/strength/);
     expect(
-      cardImplementationForDefinitionId("onr_v1_308_acme-savings-and-loan")
+      cardImplementationForDefinitionId(520)
         ?.remainingReplacementLongtail?.kind,
     ).toBe("obligation_debt");
   });
@@ -843,7 +844,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
 
     const superiorId = moveCorpCardToHq(
       state,
-      "onr_v1_219_superior-net-barriers",
+      431,
     );
     removeEverywhere(state, superiorId);
     state.corp.scoreArea.push(superiorId);
@@ -853,7 +854,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       faceup: true,
       rezzed: true,
     };
-    const wallId = putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    const wallId = putCorpIceOnServer(state, "rd", 491);
     state.cardInstances[wallId] = {
       ...state.cardInstances[wallId]!,
       faceup: true,
@@ -863,14 +864,14 @@ describe("V1.9.5 Mechanikpaket N", () => {
       .servers.find((server) => server.id === "rd")
       ?.ice.find((ice) => ice.instanceId === wallId);
     expect(rdWall?.strength).toBe(
-      (CARD_DEFINITIONS_BY_ID["onr_v1_279_wall-of-static"]?.strength ?? 0) + 1,
+      (CARD_DEFINITIONS_BY_ID[491]?.strength ?? 0) + 1,
     );
 
     const scoredAgendaId = scoreCorpAgendaForTest(
       state,
-      "onr_v1_203_hostile-takeover",
+      415,
     );
-    const acmeId = moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    const acmeId = moveCorpCardToHq(state, 520);
     state.activeSide = "corp";
     state.phase = "corp_action_phase";
     state.timingPoint = "corp_action.main";
@@ -880,7 +881,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
     state.corp.credits = 10;
     const beforeAcmeRez = structuredClone(state);
@@ -890,7 +891,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
     expect(state.corp.credits).toBe(22);
     expect(state.corp.scoreArea).toContain(scoredAgendaId);
@@ -902,9 +903,9 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.activeObligationDebtCount).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_card",
-      cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
+      cardDefinitionId: 520,
       agendaPointCost: 1,
-      spentAgendaDefinitionIds: "onr_v1_203_hostile-takeover",
+      spentAgendaDefinitionIds: String(415),
       gainedCredits: 12,
       selfTrashed: true,
       obligationDebtCountAfter: 1,
@@ -937,14 +938,14 @@ describe("V1.9.5 Mechanikpaket N", () => {
           id: "onr_v1_9_5_corp_acme_tycho_spend",
           cards: [
             ...ONR_V1_9_5_CORP_DECK.cards,
-            { id: "onr_v1_220_tycho-extension", quantity: 1 },
+            { id: 432, quantity: 1 },
           ],
         },
         agendaPointsToWin: 7,
       }),
     );
-    const tychoId = scoreCorpAgendaForTest(state, "onr_v1_220_tycho-extension");
-    const acmeId = moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    const tychoId = scoreCorpAgendaForTest(state, 432);
+    const acmeId = moveCorpCardToHq(state, 520);
     state.activeSide = "corp";
     state.phase = "corp_action_phase";
     state.timingPoint = "corp_action.main";
@@ -956,7 +957,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
     state.corp.credits = 0;
     state = apply(
@@ -964,7 +965,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
 
     expect(state.corp.scoreArea).toContain(tychoId);
@@ -974,10 +975,10 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.corp.archives).toContain(acmeId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_card",
-      cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
+      cardDefinitionId: 520,
       agendaPointCost: 1,
       agendaPointCostPaid: 1,
-      spentAgendaDefinitionIds: "onr_v1_220_tycho-extension",
+      spentAgendaDefinitionIds: String(432),
       gainedCredits: 12,
     });
   });
@@ -990,10 +991,10 @@ describe("V1.9.5 Mechanikpaket N", () => {
         ...ONR_V1_9_5_CORP_DECK,
         cards: [
           ...ONR_V1_9_5_CORP_DECK.cards,
-          { id: "onr_v1_232_crystal-wall", quantity: 1 },
-          { id: "onr_v1_237_data-wall", quantity: 1 },
-          { id: "onr_proteus_013_caryatid", quantity: 1 },
-          { id: "onr_proteus_040_sumo-2008", quantity: 1 },
+          { id: 444, quantity: 1 },
+          { id: 449, quantity: 1 },
+          { id: 71, quantity: 1 },
+          { id: 98, quantity: 1 },
         ],
       },
       agendaPointsToWin: 7,
@@ -1002,9 +1003,9 @@ describe("V1.9.5 Mechanikpaket N", () => {
     state.corp.credits = 20;
     state.corp.clicks = 20;
     state.corp.maxHandSize = 100;
-    moveCorpCardToHq(state, "onr_v1_219_superior-net-barriers");
+    moveCorpCardToHq(state, 431);
     state.corp.servers.push({
-      id: "remote_1",
+      id: "r1",
       kind: "remote",
       label: "Remote 1",
       ice: [],
@@ -1013,32 +1014,32 @@ describe("V1.9.5 Mechanikpaket N", () => {
     const firstHiddenWallId = putCorpIceOnServer(
       state,
       "rd",
-      "onr_v1_279_wall-of-static",
+      491,
     );
     const secondHiddenWallId = putCorpIceOnServer(
       state,
       "hq",
-      "onr_v1_232_crystal-wall",
+      444,
     );
     const rezzedWallId = putCorpIceOnServer(
       state,
-      "remote_1",
-      "onr_v1_237_data-wall",
+      "r1",
+      449,
     );
     const codeGateId = putCorpIceOnServer(
       state,
-      "remote_1",
-      "simple_code_gate_ice",
+      "r1",
+      590,
     );
     const printedWallAsCodeGateId = putCorpIceOnServer(
       state,
-      "remote_1",
-      "onr_proteus_013_caryatid",
+      "r1",
+      71,
     );
     const printedSentryAsWallId = putCorpIceOnServer(
       state,
-      "remote_1",
-      "onr_proteus_040_sumo-2008",
+      "r1",
+      98,
     );
     state.cardInstances[rezzedWallId] = {
       ...state.cardInstances[rezzedWallId]!,
@@ -1073,7 +1074,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_219_superior-net-barriers",
+        sourceDefinition(state, action) === 431,
     );
     for (let index = 0; index < 6; index += 1) {
       state = apply(
@@ -1082,7 +1083,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
         (action) =>
           action.type === "advance_card" &&
           sourceDefinition(state, action) ===
-            "onr_v1_219_superior-net-barriers",
+            431,
       );
     }
     state = apply(
@@ -1090,7 +1091,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "corp",
       (action) =>
         action.type === "score_agenda" &&
-        sourceDefinition(state, action) === "onr_v1_219_superior-net-barriers",
+        sourceDefinition(state, action) === 431,
     );
 
     expect(state.pendingChoice).toMatchObject({
@@ -1110,23 +1111,23 @@ describe("V1.9.5 Mechanikpaket N", () => {
     ]);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     const rezzedWallView = getPlayerView(state, "runner")
-      .servers.find((server) => server.id === "remote_1")
+      .servers.find((server) => server.id === "r1")
       ?.ice.find((ice) => ice.instanceId === rezzedWallId);
     expect(rezzedWallView?.strength).toBe(
-      (CARD_DEFINITIONS_BY_ID["onr_v1_237_data-wall"]?.strength ?? 0) + 1,
+      (CARD_DEFINITIONS_BY_ID[449]?.strength ?? 0) + 1,
     );
     const remoteIce = getPlayerView(state, "runner").servers.find(
-      (server) => server.id === "remote_1",
+      (server) => server.id === "r1",
     )?.ice;
     expect(
       remoteIce?.find((ice) => ice.instanceId === printedWallAsCodeGateId)
         ?.strength,
-    ).toBe(CARD_DEFINITIONS_BY_ID["onr_proteus_013_caryatid"]?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID[71]?.strength);
     expect(
       remoteIce?.find((ice) => ice.instanceId === printedSentryAsWallId)
         ?.strength,
     ).toBe(
-      (CARD_DEFINITIONS_BY_ID["onr_proteus_040_sumo-2008"]?.strength ?? 0) + 1,
+      (CARD_DEFINITIONS_BY_ID[98]?.strength ?? 0) + 1,
     );
 
     const beforeChoiceCredits = state.corp.credits;
@@ -1169,9 +1170,9 @@ describe("V1.9.5 Mechanikpaket N", () => {
     });
     expect(
       String(state.eventLog.at(-1)?.publicPayload.publicRevealDefinitionIds),
-    ).toContain("onr_v1_279_wall-of-static");
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "simple_code_gate_ice",
+    ).toContain(491);
+    expect(serializedDefinitionReferences(JSON.stringify(state.eventLog.at(-1)?.publicPayload))).not.toContain(
+      590,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -1185,13 +1186,13 @@ describe("V1.9.5 Mechanikpaket N", () => {
       (action) => action.type === "mandatory_draw",
     );
     state.corp.credits = 20;
-    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    moveCorpCardToHq(state, 520);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
 
     expect(
@@ -1199,7 +1200,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
         (action) =>
           action.type === "rez_card" &&
           sourceDefinition(state, action) ===
-            "onr_v1_308_acme-savings-and-loan",
+            520,
       ),
     ).toBe(false);
   });
@@ -1212,12 +1213,12 @@ describe("V1.9.5 Mechanikpaket N", () => {
     state.corp.credits = 20;
     const acmeId = putCorpRootInRemote(
       state,
-      "onr_v1_308_acme-savings-and-loan",
+      520,
     );
     const iceId = putCorpIceOnServer(
       state,
-      "remote_1",
-      "onr_v1_279_wall-of-static",
+      "r1",
+      491,
     );
     state.cardInstances[iceId] = {
       ...state.cardInstances[iceId]!,
@@ -1229,7 +1230,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "r1",
     );
 
     expect(state).toMatchObject({
@@ -1256,21 +1257,21 @@ describe("V1.9.5 Mechanikpaket N", () => {
       (action) => action.type === "mandatory_draw",
     );
     state.corp.credits = 20;
-    scoreCorpAgendaForTest(state, "onr_v1_203_hostile-takeover");
-    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    scoreCorpAgendaForTest(state, 415);
+    moveCorpCardToHq(state, 520);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
 
     state.corp.credits = 0;
@@ -1296,21 +1297,21 @@ describe("V1.9.5 Mechanikpaket N", () => {
       (action) => action.type === "mandatory_draw",
     );
     state.corp.credits = 20;
-    scoreCorpAgendaForTest(state, "onr_v1_203_hostile-takeover");
-    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    scoreCorpAgendaForTest(state, 415);
+    moveCorpCardToHq(state, 520);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -1347,21 +1348,21 @@ describe("V1.9.5 Mechanikpaket N", () => {
       (action) => action.type === "mandatory_draw",
     );
     state.corp.credits = 20;
-    scoreCorpAgendaForTest(state, "onr_v1_203_hostile-takeover");
-    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    scoreCorpAgendaForTest(state, 415);
+    moveCorpCardToHq(state, 520);
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+        sourceDefinition(state, action) === 520,
     );
     const removeAction = mustAction(
       state,
@@ -1409,7 +1410,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
 describe("V1.9.6 Mechanikpaket O", () => {
   it("adds the V1.9.6 Data Raven core card and validates smoke decks", () => {
     expect(ONR_V1_9_6_FINAL_CARD_IDS).toHaveLength(1);
-    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_236_data-raven"];
+    const definition = CARD_DEFINITIONS_BY_ID[448];
     expect(definition?.implementationStatus).toBe("playable_mvp");
     expect(definition?.mechanics.join(" ")).toMatch(/trace/);
     expect(definition?.mechanics.join(" ")).toMatch(/counter/);
@@ -1432,7 +1433,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     let state = toRunnerTurn(v196CardReleaseGame("v196-data-raven"));
     state.runner.credits = 20;
     state.corp.credits = 20;
-    putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
+    putCorpIceOnServer(state, "rd", 448);
 
     state = apply(
       state,
@@ -1445,7 +1446,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_236_data-raven",
+        sourceDefinition(state, action) === 448,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     const corpBid = state.pendingChoice?.options
@@ -1485,7 +1486,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
           ...ONR_V1_9_6_RUNNER_DECK,
           id: "v196_data_raven_tag_before_counter_runner",
           cards: [
-            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            { id: 373, quantity: 1 },
             ...ONR_V1_9_6_RUNNER_DECK.cards,
           ],
         },
@@ -1493,10 +1494,10 @@ describe("V1.9.6 Mechanikpaket O", () => {
         agendaPointsToWin: 7,
       }),
     );
-    installRunnerResourceForTest(state, "onr_v1_161_fall-guy");
+    installRunnerResourceForTest(state, 373);
     state.runner.credits = 20;
     state.corp.credits = 20;
-    putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
+    putCorpIceOnServer(state, "rd", 448);
 
     state = apply(
       state,
@@ -1517,7 +1518,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     ).toBe(0);
     expect(state.pendingAddTagContinuation).toMatchObject({
       kind: "trace_add_counter",
-      sourceDefinitionId: "onr_v1_236_data-raven",
+      sourceDefinitionId: 448,
       counterType: "trace_tag_counter",
       counterAmount: 1,
     });
@@ -1537,7 +1538,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
           ...ONR_V1_9_6_RUNNER_DECK,
           id: "v196_data_raven_fall_guy_runner",
           cards: [
-            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            { id: 373, quantity: 1 },
             ...ONR_V1_9_6_RUNNER_DECK.cards,
           ],
         },
@@ -1547,7 +1548,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     );
     const fallGuyId = installRunnerResourceForTest(
       state,
-      "onr_v1_161_fall-guy",
+      373,
     );
     setCardCounterForTest(state, state.runner.identity, "trace_tag_counter", 1);
     state.activeSide = "corp";
@@ -1562,7 +1563,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     expect(state.runner.tags).toBe(0);
     expect(state.pendingAddTagContinuation).toMatchObject({
       kind: "runner_start_turn",
-      sourceDefinitionId: "onr_v1_236_data-raven",
+      sourceDefinitionId: 448,
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",

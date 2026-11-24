@@ -1,4 +1,4 @@
-import { rolesMatch } from "./role-match";
+import { rolesMatch } from "../role-match";
 
 const BREAKER_ROLE_NEEDLES = [
   "breaker_fracter",

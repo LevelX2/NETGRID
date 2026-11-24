@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import {
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
@@ -26,13 +27,13 @@ const CAMPAIGN_ID = "tag-and-bag";
 const CHANCE_ROUTE_ID = "chance-observation-4-2";
 const FOUR_DAMAGE_ROUTE_ID = "chance-observation-4";
 const AUDIT_ROUTE_ID = "audit-call-records-4-2";
-const CHANCE_DEFINITION_ID = "onr_v1_284_chance-observation";
-const AUDIT_DEFINITION_ID = "onr_v1_283_audit-of-call-records";
-const SCORCHED_DEFINITION_ID = "onr_v1_302_scorched-earth";
-const PUNITIVE_DEFINITION_ID = "onr_v1_301_punitive-counterstrike";
-const CLOSED_ACCOUNTS_DEFINITION_ID = "onr_v1_285_closed-accounts";
-const URBAN_RENEWAL_DEFINITION_ID = "onr_v1_307_urban-renewal";
-const AGENDA_DEFINITION_ID = "onr_v1_203_hostile-takeover";
+const CHANCE_DEFINITION_ID = 496;
+const AUDIT_DEFINITION_ID = 495;
+const SCORCHED_DEFINITION_ID = 514;
+const PUNITIVE_DEFINITION_ID = 513;
+const CLOSED_ACCOUNTS_DEFINITION_ID = 497;
+const URBAN_RENEWAL_DEFINITION_ID = 519;
+const AGENDA_DEFINITION_ID = 415;
 
 const chooseCorpAction = (input: AiDecisionInput) => {
   bindSyntheticAgendaInstallQuotes(input);
@@ -383,7 +384,10 @@ describe("plan-first coupled Corp punish sequence contract", () => {
             kind: "meat_damage",
             sourceCardInstanceId: urban.instanceId,
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId: `${URBAN_RENEWAL_DEFINITION_ID}:abilities_on_play_damage`,
+            sourceCapabilityId: canonicalCapabilityId(
+              URBAN_RENEWAL_DEFINITION_ID,
+              capabilityKey("abilities_on_play_damage"),
+            ),
           },
         ],
       },
@@ -781,7 +785,7 @@ function coupledPunishInput(params: {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1"),
+    server("r1"),
   ];
   input.playerView.legalActions = actions;
   input.legalActions = actions;
@@ -1117,10 +1121,14 @@ function punishStep(params: {
     sourceCardInstanceId: params.card.instanceId,
     sourceCardDefinitionId: params.card.definitionId!,
     sourceCapabilityBindingKind: "card_spec_capability_key",
-    sourceCapabilityId:
-      params.kind === "trace_tag"
-        ? `${params.card.definitionId!}:abilities_on_play_trace`
-        : `${params.card.definitionId!}:abilities_on_play_damage`,
+    sourceCapabilityId: canonicalCapabilityId(
+      params.card.definitionId!,
+      capabilityKey(
+        params.kind === "trace_tag"
+          ? "abilities_on_play_trace"
+          : "abilities_on_play_damage",
+      ),
+    ),
     clicks: 1,
     credits: params.credits,
     ...(params.currentLegalAction
@@ -1294,7 +1302,7 @@ function installAgenda(card: VisibleCard, stateVersion: number): LegalAction {
         payload: {
           cardId: card.instanceId,
           sourceDefinitionId: card.definitionId!,
-          serverId: "remote_1",
+          serverId: "r1",
           placement: "root",
         },
       },
@@ -1400,7 +1408,7 @@ function closedAccountsCard(): VisibleCard {
 
 function operationCard(
   instanceId: string,
-  definitionId: string,
+  definitionId: number,
   title: string,
   credits: number,
 ): VisibleCard {
@@ -1423,7 +1431,7 @@ function scoreAgendaCard(): VisibleCard {
 
 function fullBodyConversionCard(): VisibleCard {
   return visibleCard("full-body-conversion", "runner", "hardware", {
-    definitionId: "onr_v1_127_full-body-conversion",
+    definitionId: 339,
     title: "Full Body Conversion",
   });
 }

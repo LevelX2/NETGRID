@@ -53,9 +53,18 @@ export function corpRestrictedRezDefenseSignals(
       },
     });
     if (!reserve.preservesReserve) continue;
+    const gap =
+      consumer.creditCost +
+      funding.payoutGeneralCreditCost -
+      input.playerView.own.credits;
+    if (!Number.isSafeInteger(gap) || gap <= 0) continue;
     const defenseId = `restricted-rez:${block.runId}:${consumer.serverId}:${consumer.sourceCardInstanceId}`;
     const previous = signals.get(defenseId);
     if (previous?.restrictedRezFunding) {
+      previous.restrictedRezFunding.gap = Math.min(
+        previous.restrictedRezFunding.gap,
+        gap,
+      );
       previous.restrictedRezFunding.quotes.push(funding);
       continue;
     }
@@ -71,10 +80,7 @@ export function corpRestrictedRezDefenseSignals(
       rezWindowVerdict: "productive",
       value: 1,
       restrictedRezFunding: {
-        gap:
-          consumer.creditCost +
-          funding.payoutGeneralCreditCost -
-          input.playerView.own.credits,
+        gap,
         quotes: [funding],
       },
       evidenceCode: "corp_restricted_funding_exact_current_access_block",

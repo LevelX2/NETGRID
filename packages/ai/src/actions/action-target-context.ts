@@ -1,4 +1,7 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { cardDefinitionIdValue } from "../card-definition-id-input";
 import type { LegalAction } from "@netgrid/shared";
+import { breakSubroutineIndexesForAction } from "../runtime/subroutine-indexes";
 import type {
   ActionProjectionIssue,
   ActionRunProjectionSummary,
@@ -55,7 +58,7 @@ export function applyTargetContextProjection(
         requirementTargets.length > 0 ||
         choiceOptionTargets.length > 0
       ? uniqueLegalTargetSummaries([
-          ...(availableTargets?.map(cloneLegalTargetSummary) ?? []),
+          ...(availableTargets ?? []),
           ...requirementTargets,
           ...choiceOptionTargets,
         ])
@@ -127,17 +130,18 @@ function targetProjectionStatusForAction(
   return candidate.primaryProjectionStatus;
 }
 
+const PARTIAL_PROJECTION_COMPLETION_ACTIONS = new Set<LegalAction["type"]>([
+  "resolve_choice",
+  "trash_accessed_card",
+  "trash_resource",
+  "rez_ice",
+  "rez_card",
+  "advance_card",
+  "score_agenda",
+]);
+
 function targetContextCompletesPartialProjection(action: LegalAction): boolean {
-  const partialProjectionCompletionActionTypeSet = new Set([
-    "resolve_choice",
-    "trash_accessed_card",
-    "trash_resource",
-    "rez_ice",
-    "rez_card",
-    "advance_card",
-    "score_agenda",
-  ]);
-  return partialProjectionCompletionActionTypeSet.has(action.type);
+  return PARTIAL_PROJECTION_COMPLETION_ACTIONS.has(action.type);
 }
 
 function normalizeServerId(value: unknown): string | undefined {
@@ -150,7 +154,7 @@ function normalizeServerId(value: unknown): string | undefined {
   if (normalized === "rd") return "rd";
   if (normalized === "archives") return "archives";
   if (normalized === "new_remote") return "new_remote";
-  if (normalized.startsWith("remote_")) return normalized;
+  if (isRemoteServerId(normalized)) return normalized;
   return undefined;
 }
 
@@ -177,7 +181,7 @@ function serverKindForId(
   if (serverId === "hq") return "hq";
   if (serverId === "rd") return "rd";
   if (serverId === "archives") return "archives";
-  if (serverId.startsWith("remote_")) return "remote";
+  if (isRemoteServerId(serverId)) return "remote";
   return undefined;
 }
 
@@ -191,14 +195,23 @@ function runProjectionSummaryFromAction(
       `run_projection_summary_payload_server:${payloadServerId}`,
     ]);
   }
-  const targetServerId = [
-    ...(targetContext?.selectedTargets ?? []),
-    ...(targetContext?.availableTargets ?? []),
-  ]
-    .filter((target) => target.targetKind === "server")
-    .map((target) => normalizeServerId(target.targetId))
-    .find((serverId): serverId is string => serverId !== undefined);
-  if (!targetServerId) return undefined;
+  const serverIds = (targets: readonly LegalTargetSummary[] = []) =>
+    new Set(
+      targets.flatMap((target) => {
+        const id =
+          target.targetKind === "server"
+            ? normalizeServerId(target.targetId)
+            : undefined;
+        return id === undefined ? [] : [id];
+      }),
+    );
+  const selectedIds = serverIds(targetContext?.selectedTargets);
+  const ids =
+    selectedIds.size > 0
+      ? selectedIds
+      : serverIds(targetContext?.availableTargets);
+  const [targetServerId] = ids;
+  if (ids.size !== 1 || targetServerId === undefined) return undefined;
   return buildRunProjectionSummary(targetServerId, "target_context", [
     `run_projection_summary_target_context:${targetServerId}`,
   ]);
@@ -369,11 +382,9 @@ function payloadTargetsForAction(action: LegalAction): LegalTargetSummary[] {
   );
   if (cardTarget !== undefined) targets.push(cardTarget);
 
-  const iceTarget = icePayloadTargetForAction(
-    action,
-    stringPayload(action, "iceId"),
+  targets.push(
+    ...icePayloadTargetsForAction(action, stringPayload(action, "iceId")),
   );
-  if (iceTarget !== undefined) targets.push(iceTarget);
 
   const installTarget = selectedInstallCardTargetForAction(action);
   if (installTarget !== undefined) targets.push(installTarget);
@@ -458,7 +469,7 @@ function cardPayloadTargetForAction(
     action.type === "trigger_ability" &&
     typeof action.payload?.delayedInstallAbility === "string"
   ) {
-    const targetDefinitionId = stringPayload(action, "targetCardDefinitionId");
+    const targetDefinitionId = cardDefinitionIdValue(action.payload?.targetCardDefinitionId);
     return {
       targetId: cardId,
       targetKind: "card",
@@ -470,36 +481,32 @@ function cardPayloadTargetForAction(
   return undefined;
 }
 
-function icePayloadTargetForAction(
+function icePayloadTargetsForAction(
   action: LegalAction,
   iceId: string | undefined,
-): LegalTargetSummary | undefined {
-  if (iceId === undefined) return undefined;
+): LegalTargetSummary[] {
+  if (iceId === undefined) return [];
   if (action.type === "break_subroutine") {
-    const subroutineIndex = numberPayload(action, "subroutineIndex");
-    return {
-      targetId:
-        subroutineIndex !== undefined
-          ? `${iceId}:subroutine:${subroutineIndex}`
-          : iceId,
+    return [...breakSubroutineIndexesForAction(action)].map((index) => ({
+      targetId: iceId + ":subroutine:" + index,
       targetKind: "subroutine",
       targetSide: "corp",
       evidence: [
-        subroutineIndex !== undefined
-          ? `AI039 legal action payload subroutine target: ${iceId}:${subroutineIndex}`
-          : `AI039 legal action payload subroutine target ice: ${iceId}`,
+        "AI039 legal action payload subroutine target: " + iceId + ":" + index,
       ],
-    };
+    }));
   }
   if (action.type === "rez_ice") {
-    return {
-      targetId: iceId,
-      targetKind: "ice",
-      targetSide: "corp",
-      evidence: [`AI039 legal action payload ice target: ${iceId}`],
-    };
+    return [
+      {
+        targetId: iceId,
+        targetKind: "ice",
+        targetSide: "corp",
+        evidence: ["AI039 legal action payload ice target: " + iceId],
+      },
+    ];
   }
-  return undefined;
+  return [];
 }
 
 function uniqueLegalTargetSummaries(

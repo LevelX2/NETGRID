@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -6,7 +7,6 @@ import type {
 import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -75,7 +75,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
 
     input.playerView.opponent.rig = [
       visibleCard("visible-runner-program", "runner", "program", {
-        definitionId: "onr_v1_011_cloak",
+        definitionId: 223,
         title: "Cloak",
       }),
     ];
@@ -110,13 +110,13 @@ describe("plan-first Corp ambush preplanning contract", () => {
       ),
     ).toBe(false);
     expect(portfolio?.rootForegroundInstanceId).not.toBe(
-      "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+      "p9nfdowy6hsws4i18318bwy4m2",
     );
     expect(
       portfolio?.instances.find(
         (instance) =>
           instance.instanceId ===
-          "plan:corp.score_agenda:agenda%3Afetal-ai%3Anew_remote",
+          "p5303hosjbkv04sci8pl08mf26",
       ),
     ).toMatchObject({
       moduleId: "corp.score_agenda",
@@ -161,12 +161,12 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
-        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
+        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:62:new_remote:assigned_domain_plan",
+        `plan_first_executor:${planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: "ambush:fetal-ai:setup:new_remote" })}`,
       ]),
     );
     expect(residentPlanPortfolioSnapshot(input)?.rootForegroundInstanceId).toBe(
-      "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+      "p9nfdowy6hsws4i18318bwy4m2",
     );
   });
 
@@ -223,7 +223,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       portfolio?.instances.find(
         (instance) =>
           instance.instanceId ===
-          "plan:corp.score_agenda:agenda%3Afetal-ai%3Anew_remote",
+          "p5303hosjbkv04sci8pl08mf26",
       ),
     ).toMatchObject({
       moduleId: "corp.score_agenda",
@@ -291,10 +291,10 @@ describe("plan-first Corp ambush preplanning contract", () => {
       "install-fetal-ai-new",
     );
     const installPrepared = {
-      ...installAmbush(trap, "remote_1", "install-fetal-ai-prepared"),
+      ...installAmbush(trap, "r1", "install-fetal-ai-prepared"),
       payload: {
         cardId: trap.instanceId,
-        serverId: "remote_1",
+        serverId: "r1",
         placement: "root",
         rootReplacement: "asset_to_agenda",
       },
@@ -310,11 +310,11 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [],
         [
           visibleCard("existing-remote-asset", "corp", "asset", {
-            definitionId: "onr_v1_309_bbs-whispering-campaign",
+            definitionId: 521,
             title: "BBS Whispering Campaign",
           }),
         ],
@@ -331,20 +331,20 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
-        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
+        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:62:new_remote:assigned_domain_plan",
+        `plan_first_executor:${planInstanceIdForProposal({ moduleId: "corp.ambush_and_bluff", dedupeKey: "ambush:fetal-ai:setup:new_remote" })}`,
       ]),
     );
 
     const portfolio = residentPlanPortfolioSnapshot(input);
     expect(portfolio?.rootForegroundInstanceId).toBe(
-      "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+      "p9nfdowy6hsws4i18318bwy4m2",
     );
     expect(
       portfolio?.instances.some(
         (instance) =>
           instance.instanceId ===
-          "plan:corp.score_agenda:agenda%3Afetal-ai%3Aremote_1",
+          "pb9ymwmx93vxr8ol9tp2l0jfxm",
       ),
     ).toBe(true);
   });
@@ -354,7 +354,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
       trap,
-      "remote_1",
+      "r1",
       "install-trap-protected",
     );
     const installNew = installAmbush(trap, "new_remote", "install-trap-new");
@@ -366,10 +366,10 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [
           visibleCard("remote-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
@@ -396,10 +396,10 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [
           visibleCard("remote-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
@@ -410,7 +410,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const advance = advanceAmbush(installedTrap);
     input.legalActions = [advance, gain].map((action) => ({
       ...action,
-      expiresAtStateVersion: 3,
+      expiresAtStateVersion: input.playerView.stateVersion,
     }));
     input.playerView.legalActions = input.legalActions;
 
@@ -424,12 +424,12 @@ describe("plan-first Corp ambush preplanning contract", () => {
   it("keeps TRAP! exclusively in the Ambush plan instead of also routing it through a generic punish campaign [legacy_compare]", () => {
     resetResidentPlanPortfolioMemory();
     const trap = visibleCard("trap", "corp", "asset", {
-      definitionId: "onr_v1_345_trap",
+      definitionId: 557,
       title: "TRAP!",
     });
     const installProtected = installAmbush(
       trap,
-      "remote_1",
+      "r1",
       "install-trap-protected",
     );
     const installNew = installAmbush(trap, "new_remote", "install-trap-new");
@@ -443,10 +443,10 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [
           visibleCard("remote-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
@@ -467,7 +467,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
       trap,
-      "remote_1",
+      "r1",
       "install-trap-protected",
     );
     const gain = gainCredit();
@@ -477,7 +477,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], []),
+      server("r1", [], []),
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -494,11 +494,11 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [installedTrap]),
+      server("r1", [], [installedTrap]),
     ];
     input.legalActions = [advance, gain].map((action) => ({
       ...action,
-      expiresAtStateVersion: 3,
+      expiresAtStateVersion: input.playerView.stateVersion,
     }));
     input.playerView.legalActions = input.legalActions;
 
@@ -514,20 +514,29 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [developedTrap]),
+      server("r1", [], [developedTrap]),
     ];
     const end = endTurn();
     input.legalActions = [advanceAmbush(developedTrap), gain, end].map(
       (action) => ({
         ...action,
-        expiresAtStateVersion: 4,
+        expiresAtStateVersion: input.playerView.stateVersion,
       }),
     );
     input.playerView.legalActions = input.legalActions;
 
-    expect(() =>
-      liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError(PlanResolutionFailure);
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    const actionId = advanceAmbush(developedTrap).actionId;
+    expect(decision.actionId).not.toBe(actionId);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).toContainEqual(
+      expect.objectContaining({
+        actionId,
+        ownerModuleId: "corp.ambush_and_bluff",
+        disposition: "explicitly_nonproductive",
+        evidenceCode: "corp_ambush_advance_target_already_reached:vacant-soulkiller:1",
+      }),
+    );
   });
 
   it("abandons the resident Ambush normally after access or trash moves its source to Archives [legacy_compare]", () => {
@@ -535,7 +544,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
       trap,
-      "remote_1",
+      "r1",
       "install-trap-protected",
     );
     const gain = gainCredit();
@@ -545,7 +554,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], []),
+      server("r1", [], []),
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -557,7 +566,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     input.actionNumber = 2;
     input.playerView.own.gripOrHq = [];
     const scoringAgenda = visibleCard("scoring-agenda", "corp", "agenda", {
-      definitionId: "onr_v1_189_artificial-security-directors",
+      definitionId: 401,
       title: "Artificial Security Directors",
       advancementCounters: 1,
       advancementRequirement: 3,
@@ -567,19 +576,19 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives", [], [trap]),
-      server("remote_1", [], []),
-      server("remote_2", [], [scoringAgenda]),
+      server("r1", [], []),
+      server("r2", [], [scoringAgenda]),
     ];
     const end = endTurn();
     const advanceScore = {
       ...advanceAmbush(scoringAgenda),
       actionId: "advance-scoring-agenda",
-      expiresAtStateVersion: 3,
+      expiresAtStateVersion: input.playerView.stateVersion,
     };
     input.legalActions = [
       advanceScore,
-      { ...gain, expiresAtStateVersion: 3 },
-      { ...end, expiresAtStateVersion: 3 },
+      { ...gain, expiresAtStateVersion: input.playerView.stateVersion },
+      { ...end, expiresAtStateVersion: input.playerView.stateVersion },
     ];
     input.playerView.legalActions = input.legalActions;
 
@@ -597,7 +606,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     expect(portfolio?.transitions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          instanceId: "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller",
+          instanceId: "pepll3z56vr7jpwjh7qempjvwz",
           reason: "target_disappeared",
           detailCode: "proposal_missing_target_contract",
         }),
@@ -610,7 +619,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
       trap,
-      "remote_1",
+      "r1",
       "install-trap-protected",
     );
     const gain = gainCredit();
@@ -620,7 +629,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], []),
+      server("r1", [], []),
     ];
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
@@ -636,8 +645,8 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], []),
-      server("remote_2", [], [trap]),
+      server("r1", [], []),
+      server("r2", [], [trap]),
     ];
     input.legalActions = [
       { ...gain, expiresAtStateVersion: 2 },
@@ -662,7 +671,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
       trap,
-      "remote_1",
+      "r1",
       "install-trap-protected",
     );
     const input = corpInput([installProtected, gainCredit()], [trap]);
@@ -672,10 +681,10 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("rd"),
       server("archives"),
       server(
-        "remote_1",
+        "r1",
         [
           visibleCard("remote-ice", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
+            definitionId: 449,
             title: "Data Wall",
             rezzed: true,
           }),
@@ -690,7 +699,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
 
     const mandatoryDraw = legalAction(
-      "corp.mandatory_draw",
+      "ce",
       "corp",
       "mandatory_draw",
       "Pflichtkarte ziehen",
@@ -704,7 +713,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], []),
+      server("r1", [], []),
     ];
     input.legalActions = [
       {
@@ -726,12 +735,12 @@ describe("plan-first Corp ambush preplanning contract", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const lesley = visibleCard("lesley-major", "corp", "upgrade", {
-      definitionId: "onr_proteus_062_lesley-major",
+      definitionId: 120,
       title: "Lesley Major",
     });
     const installTrap = installAmbush(
       trap,
-      "remote_1",
+      "r1",
       "install-scalable-ambush",
     );
     const gain = gainCredit();
@@ -741,7 +750,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], []),
+      server("r1", [], []),
     ];
     setCorpIntent(input, true);
 
@@ -750,7 +759,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       reasonCode: "plan_first.corp.ambush_and_bluff",
     });
     const rootInstanceId =
-      "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller";
+      "pepll3z56vr7jpwjh7qempjvwz";
     expect(residentPlanPortfolioSnapshot(input)?.rootForegroundInstanceId).toBe(
       rootInstanceId,
     );
@@ -758,7 +767,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const installedTrap = { ...trap, advancementCounters: 0 };
     const installLesley = installAmbush(
       lesley,
-      "remote_1",
+      "r1",
       "install-lesley-beside-ambush",
     );
     input.playerView.stateVersion = 2;
@@ -768,7 +777,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [installedTrap]),
+      server("r1", [], [installedTrap]),
     ];
     input.legalActions = [installLesley, gain].map((action) => ({
       ...action,
@@ -800,7 +809,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
           sourceDefinitionId: lesley.definitionId!,
           targetCardId: installedTrap.instanceId,
           targetCardDefinitionId: installedTrap.definitionId!,
-          serverId: "remote_1",
+          serverId: "r1",
           fortRunWindowAbility:
             "add_advancement_counters_after_passing_last_ice_on_this_fort",
         },
@@ -814,13 +823,13 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [installedTrap, installedLesley]),
+      server("r1", [], [installedTrap, installedLesley]),
     ];
     input.playerView.run = {
-      runId: "run-lesley-ambush",
-      attackedServerId: "remote_1",
+      runId: 1,
+      attackedServerId: "r1",
       phase: "movement",
-      position: { kind: "server", serverId: "remote_1" },
+      position: { kind: "server", serverId: "r1" },
       successful: false,
     };
     input.legalActions = [triggerLesley].map((action) => ({
@@ -844,21 +853,21 @@ describe("plan-first Corp ambush preplanning contract", () => {
 
 function vacantSoulkiller(): VisibleCard {
   return visibleCard("vacant-soulkiller", "corp", "asset", {
-    definitionId: "onr_v1_346_vacant-soulkiller",
+    definitionId: 558,
     title: "Vacant Soulkiller",
   });
 }
 
 function experimentalAi(): VisibleCard {
   return visibleCard("experimental-ai", "corp", "asset", {
-    definitionId: "onr_v1_323_experimental-ai",
+    definitionId: 535,
     title: "Experimental AI",
   });
 }
 
 function fetalAi(): VisibleCard {
   return visibleCard("fetal-ai", "corp", "agenda", {
-    definitionId: "onr_proteus_004_fetal-ai",
+    definitionId: 62,
     title: "Fetal AI",
     advancementCounters: 0,
     advancementRequirement: 5,
@@ -868,7 +877,7 @@ function fetalAi(): VisibleCard {
 
 function installAmbush(
   card: VisibleCard,
-  serverId: "new_remote" | "remote_1",
+  serverId: "new_remote" | "r1",
   actionId: string,
 ): LegalAction {
   return legalAction(

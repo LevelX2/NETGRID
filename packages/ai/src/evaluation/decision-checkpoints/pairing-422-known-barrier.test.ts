@@ -17,25 +17,25 @@ it("does not waive a known break lock and ETR as a last-chance damage floor", ()
   resetResidentPlanPortfolioMemory();
   restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, runtime);
   const target = evaluateRunnerRunTargets({ input }).find(
-    (entry) => entry.actionId === "runner.start_run.remote_2",
+    (entry) => entry.actionId === "rs.r2",
   );
   expect(target).toMatchObject({
     pathPassability: "blocked_unbreakable",
     routeQuote: { reachability: "no_access", noAccessReason: "harmful_unbroken_run_effect" },
   });
   const decision = chooseAiAction(input);
-  expect(decision.actionId).not.toBe("runner.start_run.remote_2");
+  expect(decision.actionId).not.toBe("rs.r2");
   expect(decision.fallbackUsed).toBe(false);
   expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
   expect(decision.decisionDebug?.planFirstDecision?.dispositions).toContainEqual(
-    expect.objectContaining({ actionId: "runner.start_run.remote_2", ownerModuleId: "runner.contest_remote", disposition: "explicitly_nonproductive" }),
+    expect.objectContaining({ actionId: "rs.r2", ownerModuleId: "runner.contest_remote", disposition: "explicitly_nonproductive" }),
   );
 });
 
 it("continues past direct damage to preserve a later known ETR barrier", () => {
   const input = checkpointJson.input as unknown as AiDecisionInputWithDeckCapabilities;
-  const wall = input.playerView.servers.find((server) => server.id === "remote_2")!.ice.find(
-    (card) => card.definitionId === "onr_v1_278_wall-of-ice",
+  const wall = input.playerView.servers.find((server) => server.id === "r2")!.ice.find(
+    (card) => card.definitionId === 490,
   )!;
   const path = assessKnownRezzedIcePath([wall, damageOnlyIce()], [], 4);
   expect(path).toMatchObject({
@@ -64,7 +64,7 @@ it("certifies the damage-only exception after every known encounter is checked",
 function damageOnlyIce(): VisibleCard {
   return {
     instanceId: "known-data-darts",
-    definitionId: "onr_v1_234_data-darts",
+    definitionId: 446,
     title: "Data Darts",
     known: true,
     rezzed: true,
@@ -76,11 +76,11 @@ function damageOnlyIce(): VisibleCard {
     advancementCounters: 0,
     effectiveRunQuote: {
       iceInstanceId: "known-data-darts",
-      iceDefinitionId: "onr_v1_234_data-darts",
+      iceDefinitionId: 446,
       effectiveStrength: 3,
       subroutines: [
-        { id: "damage", type: "do_damage", damageType: "net", amount: 3, sourceDefinitionId: "onr_v1_234_data-darts", unbrokenRunEffect: { causesDamageOrProgramTrash: true } },
-        { id: "next-break-lock", type: "set_next_encounter_no_break_subroutines", sourceDefinitionId: "onr_v1_234_data-darts", unbrokenRunEffect: { preventsFutureBreaking: true } },
+        { id: "damage", type: "do_damage", damageType: "net", amount: 3, sourceDefinitionId: 446, unbrokenRunEffect: { causesDamageOrProgramTrash: true } },
+        { id: "next-break-lock", type: "set_next_encounter_no_break_subroutines", sourceDefinitionId: 446, unbrokenRunEffect: { preventsFutureBreaking: true } },
       ],
     },
   };

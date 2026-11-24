@@ -1,3 +1,5 @@
+import { planInstanceIdForProposal } from "../plans/plan-instance";
+import { isRemoteServerId } from "@netgrid/shared";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
@@ -51,7 +53,7 @@ export function runnerRunLockReleaseRoutes(
         "A legal run-lock release must have an exact semantic candidate before it can be bound to its parent Run plan.",
     });
   }
-  const remote = projection.serverId.startsWith("remote_");
+  const remote = isRemoteServerId(projection.serverId);
   const dedupeKey = remote
     ? `remote:${projection.serverId}`
     : `central:${projection.serverId}`;
@@ -72,7 +74,7 @@ export function runnerRunLockReleaseRoutes(
       targetCredits: projection.targetCredits,
       fundingGap: projection.fundingGap,
       ...(supportNeedId ? { supportNeedId } : {}),
-      parentPlanInstanceId: `plan:${parentModule}:${encodeURIComponent(dedupeKey)}`,
+      parentPlanInstanceId: planInstanceIdForProposal({ moduleId: parentModule, dedupeKey: dedupeKey }),
       evidenceCode: projection.terminal
         ? "runner_matchpoint_run_lock_release"
         : "runner_viable_followup_run_lock_release",

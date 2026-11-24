@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import {
   applyAction,
@@ -23,9 +24,9 @@ import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
 afterEach(resetResidentPlanPortfolioMemory);
-const shortCircuit = "onr_v1_177_the-short-circuit";
-const armageddon = "onr_proteus_078_armageddon";
-const krash = "onr_v1_039_krash";
+const shortCircuit = 389;
+const armageddon = 136;
+const krash = 251;
 
 function fixture() {
   const runner = catalog.decks.find(
@@ -87,15 +88,15 @@ function phases() {
   const { state: initial, snapshot } = fixture();
   RealEngineFixtureBuilder.forState(initial)
     .withRunnerCardInGrip(shortCircuit)
-    .withRunnerCardInGrip("onr_proteus_099_viral-pipeline")
-    .withRunnerProgramInstalled("onr_v1_014_codecracker")
-    .withRunnerProgramInstalled("onr_proteus_083_corrosion");
+    .withRunnerCardInGrip(157)
+    .withRunnerProgramInstalled(226)
+    .withRunnerProgramInstalled(141);
   initial.runner.memoryUsed = 2;
   let state = take(
     initial,
     "runner",
     (a) =>
-      a.type === "install_card" && a.source?.includes("short-circuit") === true,
+      a.type === "install_card" && referencesDefaultDeckCard(a.source, 389) === true,
   );
   const input = () =>
     buildAiDecisionInput(state, "runner", {
@@ -125,7 +126,7 @@ function phases() {
     "runner",
     (a) =>
       a.type === "install_card" &&
-      a.source?.includes("krash") === true &&
+      referencesDefaultDeckCard(a.source, 251) === true &&
       a.payload?.runnerProgramTrashBeforeInstall !== true,
   );
   const installed = input();
@@ -181,7 +182,7 @@ function counterAccess() {
     initial,
     "runner",
     (a) =>
-      a.type === "install_card" && a.source?.includes("armageddon") === true,
+      a.type === "install_card" && referencesDefaultDeckCard(a.source, 136) === true,
   );
   const ready = buildAiDecisionInput(state, "runner", {
     difficulty: "hard",

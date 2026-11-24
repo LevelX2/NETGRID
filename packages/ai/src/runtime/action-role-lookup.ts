@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -9,7 +10,7 @@ export type ActionRoleLookupDependencies = {
     input: AiDecisionInput,
     instanceId: string,
   ) => VisibleCard | undefined;
-  readonly rolesForCardId: (cardId: string | undefined) => string[];
+  readonly rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
 };
 
 export function rolesForAction(
@@ -17,8 +18,14 @@ export function rolesForAction(
   action: LegalAction,
   dependencies: ActionRoleLookupDependencies,
 ): string[] {
-  if (action.source === "basic_action" || action.source === "game_rule")
+  if (
+    action.side !== input.side ||
+    action.source === "basic_action" ||
+    action.source === "game_rule"
+  )
     return [];
   const visible = dependencies.findVisibleCard(input, action.source);
-  return dependencies.rolesForCardId(visible?.definitionId);
+  return visible?.known
+    ? dependencies.rolesForCardId(visible.definitionId)
+    : [];
 }

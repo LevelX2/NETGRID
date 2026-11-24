@@ -6,13 +6,13 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("corp Highlighter purge pressure checkpoint", () => {
   it("keeps exact score-defense draw above noncritical virus pressure", () => {
     const result = runAiDecisionCheckpoint(
-      structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+      structuredClone(checkpointJson) as unknown as AiDecisionCheckpointV1,
     );
 
     expect(result).toMatchObject({
       ok: true,
       decision: {
-        actionId: "corp.draw_card",
+        actionId: "c8",
         reasonCode: "plan_first.corp.defend_servers",
       },
     });

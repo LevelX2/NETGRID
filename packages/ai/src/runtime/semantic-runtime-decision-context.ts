@@ -4,7 +4,7 @@ import {
   choosePlanFirstLiveAction,
   type PlanFirstLiveDependencies,
 } from "./plan-first-live-runtime";
-import { withDecisionDerivedCache } from "./decision-derived-cache";
+import { withDecisionDerivedCache } from "../decision-derived-cache";
 
 export type SemanticRuntimeDecisionContextDependencies =
   PlanFirstLiveDependencies;

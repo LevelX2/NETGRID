@@ -1,352 +1,183 @@
 import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
-import {
-  hasMeaningfulProgressWithin,
-  nextEntriesForSide,
-} from "./plan-conversion-predicates";
+import { nextEntriesForSide } from "./plan-conversion-predicates";
 import { progressionEntriesWithRunTargets } from "./progression-action-sequence";
 
-export type RunnerSetupAttributionMetricKey =
-  | "runnerStarvedEconomySkipWindows"
-  | "runnerStarvedEconomySkipChosenRun"
-  | "runnerStarvedEconomySkipChosenDraw"
-  | "runnerStarvedEconomySkipChosenInstall"
-  | "runnerStarvedEconomySkipChosenSearchRecovery"
-  | "runnerStarvedEconomySkipChosenTrash"
-  | "runnerStarvedEconomySkipChosenEndTurn"
-  | "runnerStarvedEconomySkipChosenUnknown"
-  | "runnerStarvedEconomySkipThenUnaffordableRun"
-  | "runnerStarvedEconomySkipThenFailedRun"
-  | "runnerStarvedEconomySkipThenNoProgress"
-  | "runnerStarvedEconomySkipThenEconomyNextDecision"
-  | "runnerStarvedEconomySkipThenReserveRecovered"
-  | "runnerStarvedEconomySkipThenProgress"
-  | "runnerStarvedEconomySkipThenActionLimit"
-  | "runnerStarvedEconomySkipPlausiblePressure"
-  | "runnerStarvedEconomySkipPlausibleRemoteContest"
-  | "runnerStarvedEconomySkipPlausibleCriticalSetup"
-  | "runnerStarvedEconomySkipPlausibleTrash"
-  | "runnerStarvedEconomySkipSuspiciousLowValueRun"
-  | "runnerStarvedEconomySkipSuspiciousDraw"
-  | "runnerStarvedEconomySkipSuspiciousEndTurn"
-  | "runnerStarvedEconomySkipSuspiciousUnknown"
-  | "runnerEconomyFixGateAttributionEligible"
-  | "runnerEconomyFixGateAttributionBlocked"
-  | "runnerEconomyFixGateAttributionSuspicious"
-  | "runnerSearchRecoveryFixGateWindows"
-  | "runnerSearchRecoveryFixGateLegalSearch"
-  | "runnerSearchRecoveryFixGateLegalRecovery"
-  | "runnerSearchRecoveryFixGateMissingWall"
-  | "runnerSearchRecoveryFixGateMissingCodeGate"
-  | "runnerSearchRecoveryFixGateMissingSentry"
-  | "runnerSearchRecoveryFixGateMissingUniversal"
-  | "runnerSearchRecoveryFixGateMissingSpecial"
-  | "runnerSearchRecoveryAttributionWindows"
-  | "runnerSearchRecoveryAttributionLegalSearch"
-  | "runnerSearchRecoveryAttributionLegalRecovery"
-  | "runnerSearchRecoveryAttributionMissingWall"
-  | "runnerSearchRecoveryAttributionMissingCodeGate"
-  | "runnerSearchRecoveryAttributionMissingSentry"
-  | "runnerSearchRecoveryAttributionMissingUniversal"
-  | "runnerSearchRecoveryAttributionMissingSpecial"
-  | "runnerSearchRecoveryAttributionSearchTaken"
-  | "runnerSearchRecoveryAttributionRecoveryTaken"
-  | "runnerSearchRecoveryAttributionSkipped"
-  | "runnerSearchRecoverySkipChosenEconomy"
-  | "runnerSearchRecoverySkipChosenRun"
-  | "runnerSearchRecoverySkipChosenDraw"
-  | "runnerSearchRecoverySkipChosenInstall"
-  | "runnerSearchRecoverySkipChosenTrash"
-  | "runnerSearchRecoverySkipChosenEndTurn"
-  | "runnerSearchRecoverySkipChosenUnknown"
-  | "runnerSearchRecoverySkipThenInstallFollowup"
-  | "runnerSearchRecoverySkipThenCoverageResolved"
-  | "runnerSearchRecoverySkipThenCoverageStillMissing"
-  | "runnerSearchRecoverySkipThenKnownUnaffordableRun"
-  | "runnerSearchRecoverySkipThenNoProgress"
-  | "runnerSearchRecoverySkipThenActionLimit"
-  | "runnerSearchRecoveryWindowWithNoInstallFollowup"
-  | "runnerSearchRecoverySkipPlausibleEconomyReserve"
-  | "runnerSearchRecoverySkipPlausiblePressure"
-  | "runnerSearchRecoverySkipPlausibleRemoteContest"
-  | "runnerSearchRecoverySkipPlausibleCurrentRigEnough"
-  | "runnerSearchRecoverySkipSuspiciousCoverageStillMissing"
-  | "runnerSearchRecoverySkipSuspiciousNoProgress"
-  | "runnerSearchRecoverySkipSuspiciousKnownUnbreakableRun"
-  | "runnerSearchRecoverySkipUnclassified"
-  | "runnerSearchRecoveryFixGateAttributionEligible"
-  | "runnerSearchRecoveryFixGateAttributionBlocked"
-  | "runnerSearchRecoveryFixGateAttributionSuspicious"
-  | "runnerMemoryFixGateWindows"
-  | "runnerHandSizeFixGateWindows"
-  | "runnerMemoryFixGateLegalSupport"
-  | "runnerHandSizeFixGateLegalSupport"
-  | "runnerMemoryFixGateSkipped"
-  | "runnerHandSizeFixGateSkipped"
-  | "runnerMemoryAttributionWindows"
-  | "runnerHandSizeAttributionWindows"
-  | "runnerMemoryAttributionLegalSupport"
-  | "runnerHandSizeAttributionLegalSupport"
-  | "runnerMemoryAttributionSupportTaken"
-  | "runnerHandSizeAttributionSupportTaken"
-  | "runnerMemoryAttributionSkipped"
-  | "runnerHandSizeAttributionSkipped"
-  | "runnerMemorySkipChosenEconomy"
-  | "runnerMemorySkipChosenRun"
-  | "runnerMemorySkipChosenDraw"
-  | "runnerMemorySkipChosenInstallNonMemory"
-  | "runnerMemorySkipChosenSearchRecovery"
-  | "runnerMemorySkipChosenEndTurn"
-  | "runnerMemorySkipChosenUnknown"
-  | "runnerMemorySkipThenMemoryInstalled"
-  | "runnerMemorySkipThenProgramInstallBlocked"
-  | "runnerMemorySkipThenCoverageStillMissing"
-  | "runnerMemorySkipThenNoProgress"
-  | "runnerMemorySkipThenActionLimit"
-  | "runnerHandSizeSkipThenDamageRiskWindow"
-  | "runnerHandSizeSkipThenDiscardOrDamagePressure"
-  | "runnerMemorySkipPlausibleEconomyReserve"
-  | "runnerMemorySkipPlausiblePressure"
-  | "runnerMemorySkipPlausibleRemoteContest"
-  | "runnerMemorySkipPlausibleNoProgramPressure"
-  | "runnerMemorySkipSuspiciousRigBlocked"
-  | "runnerMemorySkipSuspiciousCoverageStillMissing"
-  | "runnerMemorySkipSuspiciousNoProgress"
-  | "runnerMemorySkipUnclassified"
-  | "runnerMemoryFixGateAttributionEligible"
-  | "runnerMemoryFixGateAttributionBlocked"
-  | "runnerMemoryFixGateAttributionSuspicious"
-  | "runnerHandSizeFixGateAttributionEligible"
-  | "runnerHandSizeFixGateAttributionBlocked"
-  | "runnerHandSizeFixGateAttributionSuspicious"
-  | "runnerSearchRecoveryNormalizedWindows"
-  | "runnerSearchRecoveryNormalizedTaken"
-  | "runnerSearchRecoveryNormalizedSkipped"
-  | "runnerSearchRecoveryNormalizedBlocked"
-  | "runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest"
-  | "runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve"
-  | "runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough"
-  | "runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup"
-  | "runnerSearchRecoveryNormalizedMetricArtifact"
-  | "runnerSearchRecoveryNormalizedUnclassified"
-  | "runnerSearchRecoveryNormalizedSuspicious"
-  | "runnerSearchRecoveryNormalizedTrueMissedCoverage"
-  | "runnerSearchRecoveryNormalizedFixGateEligible"
-  | "runnerMemoryNormalizedWindows"
-  | "runnerMemoryNormalizedTaken"
-  | "runnerMemoryNormalizedSkipped"
-  | "runnerMemoryNormalizedBlocked"
-  | "runnerMemoryNormalizedBlockedByPressureOrRemoteContest"
-  | "runnerMemoryNormalizedBlockedByEconomyOrReserve"
-  | "runnerMemoryNormalizedBlockedByNoProgramPressure"
-  | "runnerMemoryNormalizedMetricArtifact"
-  | "runnerMemoryNormalizedUnclassified"
-  | "runnerMemoryNormalizedSuspicious"
-  | "runnerMemoryNormalizedTrueRigBottleneck"
-  | "runnerMemoryNormalizedFixGateEligible"
-  | "runnerHandSizeNormalizedWindows"
-  | "runnerHandSizeNormalizedTaken"
-  | "runnerHandSizeNormalizedSkipped"
-  | "runnerHandSizeNormalizedBlocked"
-  | "runnerHandSizeNormalizedSuspicious"
-  | "runnerHandSizeNormalizedMetricArtifact"
-  | "runnerSetupNormalizedWindows"
-  | "runnerSetupNormalizedSuspicious"
-  | "runnerSetupNormalizedBlocked"
-  | "runnerSetupNormalizedMetricArtifact"
-  | "runnerSetupNormalizedUnclassified"
-  | "runnerSetupNormalizedFixGateEligible"
-  | "runnerSetupNormalizedRecommendedFixKindNone"
-  | "runnerSetupNormalizedRecommendedFixKindSearchRecovery"
-  | "runnerSetupNormalizedRecommendedFixKindMemory"
-  | "runnerSetupNormalizedRecommendedFixKindHandSize"
-  | "runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis"
-  | "runnerSetupAttributionWindows"
-  | "runnerSetupAttributionSuspicious"
-  | "runnerSetupAttributionBlocked"
-  | "runnerSetupAttributionUnclassified"
-  | "runnerSetupAttributionByKindStarvedEconomy"
-  | "runnerSetupAttributionByKindSearchRecovery"
-  | "runnerSetupAttributionByKindMemory"
-  | "runnerSetupAttributionByKindHandSize"
-  | "runnerSetupRecommendedFixKindNone"
-  | "runnerSetupRecommendedFixKindEconomyStarvedSkip"
-  | "runnerSetupRecommendedFixKindSearchRecovery"
-  | "runnerSetupRecommendedFixKindMemorySetup"
-  | "runnerSetupRecommendedFixKindHandSizeSetup"
-  | "runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis";
+export const RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS = [
+  "runnerStarvedEconomySkipWindows",
+  "runnerStarvedEconomySkipChosenRun",
+  "runnerStarvedEconomySkipChosenDraw",
+  "runnerStarvedEconomySkipChosenInstall",
+  "runnerStarvedEconomySkipChosenSearchRecovery",
+  "runnerStarvedEconomySkipChosenTrash",
+  "runnerStarvedEconomySkipChosenEndTurn",
+  "runnerStarvedEconomySkipChosenUnknown",
+  "runnerStarvedEconomySkipThenUnaffordableRun",
+  "runnerStarvedEconomySkipThenFailedRun",
+  "runnerStarvedEconomySkipThenNoProgress",
+  "runnerStarvedEconomySkipThenEconomyNextDecision",
+  "runnerStarvedEconomySkipThenReserveRecovered",
+  "runnerStarvedEconomySkipThenProgress",
+  "runnerStarvedEconomySkipThenActionLimit",
+  "runnerStarvedEconomySkipPlausiblePressure",
+  "runnerStarvedEconomySkipPlausibleRemoteContest",
+  "runnerStarvedEconomySkipPlausibleCriticalSetup",
+  "runnerStarvedEconomySkipPlausibleTrash",
+  "runnerStarvedEconomySkipSuspiciousLowValueRun",
+  "runnerStarvedEconomySkipSuspiciousDraw",
+  "runnerStarvedEconomySkipSuspiciousEndTurn",
+  "runnerStarvedEconomySkipSuspiciousUnknown",
+  "runnerEconomyFixGateAttributionEligible",
+  "runnerEconomyFixGateAttributionBlocked",
+  "runnerEconomyFixGateAttributionSuspicious",
+  "runnerSearchRecoveryFixGateWindows",
+  "runnerSearchRecoveryFixGateLegalSearch",
+  "runnerSearchRecoveryFixGateLegalRecovery",
+  "runnerSearchRecoveryFixGateMissingWall",
+  "runnerSearchRecoveryFixGateMissingCodeGate",
+  "runnerSearchRecoveryFixGateMissingSentry",
+  "runnerSearchRecoveryFixGateMissingUniversal",
+  "runnerSearchRecoveryFixGateMissingSpecial",
+  "runnerSearchRecoveryAttributionWindows",
+  "runnerSearchRecoveryAttributionLegalSearch",
+  "runnerSearchRecoveryAttributionLegalRecovery",
+  "runnerSearchRecoveryAttributionMissingWall",
+  "runnerSearchRecoveryAttributionMissingCodeGate",
+  "runnerSearchRecoveryAttributionMissingSentry",
+  "runnerSearchRecoveryAttributionMissingUniversal",
+  "runnerSearchRecoveryAttributionMissingSpecial",
+  "runnerSearchRecoveryAttributionSearchTaken",
+  "runnerSearchRecoveryAttributionRecoveryTaken",
+  "runnerSearchRecoveryAttributionSkipped",
+  "runnerSearchRecoverySkipChosenEconomy",
+  "runnerSearchRecoverySkipChosenRun",
+  "runnerSearchRecoverySkipChosenDraw",
+  "runnerSearchRecoverySkipChosenInstall",
+  "runnerSearchRecoverySkipChosenTrash",
+  "runnerSearchRecoverySkipChosenEndTurn",
+  "runnerSearchRecoverySkipChosenUnknown",
+  "runnerSearchRecoverySkipThenInstallFollowup",
+  "runnerSearchRecoverySkipThenCoverageResolved",
+  "runnerSearchRecoverySkipThenCoverageStillMissing",
+  "runnerSearchRecoverySkipThenKnownUnaffordableRun",
+  "runnerSearchRecoverySkipThenNoProgress",
+  "runnerSearchRecoverySkipThenActionLimit",
+  "runnerSearchRecoveryWindowWithNoInstallFollowup",
+  "runnerSearchRecoverySkipPlausibleEconomyReserve",
+  "runnerSearchRecoverySkipPlausiblePressure",
+  "runnerSearchRecoverySkipPlausibleRemoteContest",
+  "runnerSearchRecoverySkipPlausibleCurrentRigEnough",
+  "runnerSearchRecoverySkipSuspiciousCoverageStillMissing",
+  "runnerSearchRecoverySkipSuspiciousNoProgress",
+  "runnerSearchRecoverySkipSuspiciousKnownUnbreakableRun",
+  "runnerSearchRecoverySkipUnclassified",
+  "runnerSearchRecoveryFixGateAttributionEligible",
+  "runnerSearchRecoveryFixGateAttributionBlocked",
+  "runnerSearchRecoveryFixGateAttributionSuspicious",
+  "runnerMemoryFixGateWindows",
+  "runnerHandSizeFixGateWindows",
+  "runnerMemoryFixGateLegalSupport",
+  "runnerHandSizeFixGateLegalSupport",
+  "runnerMemoryFixGateSkipped",
+  "runnerHandSizeFixGateSkipped",
+  "runnerMemoryAttributionWindows",
+  "runnerHandSizeAttributionWindows",
+  "runnerMemoryAttributionLegalSupport",
+  "runnerHandSizeAttributionLegalSupport",
+  "runnerMemoryAttributionSupportTaken",
+  "runnerHandSizeAttributionSupportTaken",
+  "runnerMemoryAttributionSkipped",
+  "runnerHandSizeAttributionSkipped",
+  "runnerMemorySkipChosenEconomy",
+  "runnerMemorySkipChosenRun",
+  "runnerMemorySkipChosenDraw",
+  "runnerMemorySkipChosenInstallNonMemory",
+  "runnerMemorySkipChosenSearchRecovery",
+  "runnerMemorySkipChosenEndTurn",
+  "runnerMemorySkipChosenUnknown",
+  "runnerMemorySkipThenMemoryInstalled",
+  "runnerMemorySkipThenProgramInstallBlocked",
+  "runnerMemorySkipThenCoverageStillMissing",
+  "runnerMemorySkipThenNoProgress",
+  "runnerMemorySkipThenActionLimit",
+  "runnerHandSizeSkipThenDamageRiskWindow",
+  "runnerHandSizeSkipThenDiscardOrDamagePressure",
+  "runnerMemorySkipPlausibleEconomyReserve",
+  "runnerMemorySkipPlausiblePressure",
+  "runnerMemorySkipPlausibleRemoteContest",
+  "runnerMemorySkipPlausibleNoProgramPressure",
+  "runnerMemorySkipSuspiciousRigBlocked",
+  "runnerMemorySkipSuspiciousCoverageStillMissing",
+  "runnerMemorySkipSuspiciousNoProgress",
+  "runnerMemorySkipUnclassified",
+  "runnerMemoryFixGateAttributionEligible",
+  "runnerMemoryFixGateAttributionBlocked",
+  "runnerMemoryFixGateAttributionSuspicious",
+  "runnerHandSizeFixGateAttributionEligible",
+  "runnerHandSizeFixGateAttributionBlocked",
+  "runnerHandSizeFixGateAttributionSuspicious",
+  "runnerSearchRecoveryNormalizedWindows",
+  "runnerSearchRecoveryNormalizedTaken",
+  "runnerSearchRecoveryNormalizedSkipped",
+  "runnerSearchRecoveryNormalizedBlocked",
+  "runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest",
+  "runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve",
+  "runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough",
+  "runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup",
+  "runnerSearchRecoveryNormalizedMetricArtifact",
+  "runnerSearchRecoveryNormalizedUnclassified",
+  "runnerSearchRecoveryNormalizedSuspicious",
+  "runnerSearchRecoveryNormalizedTrueMissedCoverage",
+  "runnerSearchRecoveryNormalizedFixGateEligible",
+  "runnerMemoryNormalizedWindows",
+  "runnerMemoryNormalizedTaken",
+  "runnerMemoryNormalizedSkipped",
+  "runnerMemoryNormalizedBlocked",
+  "runnerMemoryNormalizedBlockedByPressureOrRemoteContest",
+  "runnerMemoryNormalizedBlockedByEconomyOrReserve",
+  "runnerMemoryNormalizedBlockedByNoProgramPressure",
+  "runnerMemoryNormalizedMetricArtifact",
+  "runnerMemoryNormalizedUnclassified",
+  "runnerMemoryNormalizedSuspicious",
+  "runnerMemoryNormalizedTrueRigBottleneck",
+  "runnerMemoryNormalizedFixGateEligible",
+  "runnerHandSizeNormalizedWindows",
+  "runnerHandSizeNormalizedTaken",
+  "runnerHandSizeNormalizedSkipped",
+  "runnerHandSizeNormalizedBlocked",
+  "runnerHandSizeNormalizedSuspicious",
+  "runnerHandSizeNormalizedMetricArtifact",
+  "runnerSetupNormalizedWindows",
+  "runnerSetupNormalizedSuspicious",
+  "runnerSetupNormalizedBlocked",
+  "runnerSetupNormalizedMetricArtifact",
+  "runnerSetupNormalizedUnclassified",
+  "runnerSetupNormalizedFixGateEligible",
+  "runnerSetupNormalizedRecommendedFixKindNone",
+  "runnerSetupNormalizedRecommendedFixKindSearchRecovery",
+  "runnerSetupNormalizedRecommendedFixKindMemory",
+  "runnerSetupNormalizedRecommendedFixKindHandSize",
+  "runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis",
+  "runnerSetupAttributionWindows",
+  "runnerSetupAttributionSuspicious",
+  "runnerSetupAttributionBlocked",
+  "runnerSetupAttributionUnclassified",
+  "runnerSetupAttributionByKindStarvedEconomy",
+  "runnerSetupAttributionByKindSearchRecovery",
+  "runnerSetupAttributionByKindMemory",
+  "runnerSetupAttributionByKindHandSize",
+  "runnerSetupRecommendedFixKindNone",
+  "runnerSetupRecommendedFixKindEconomyStarvedSkip",
+  "runnerSetupRecommendedFixKindSearchRecovery",
+  "runnerSetupRecommendedFixKindMemorySetup",
+  "runnerSetupRecommendedFixKindHandSizeSetup",
+  "runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis",
+] as const;
 
-export const RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS: RunnerSetupAttributionMetricKey[] =
-  [
-    "runnerStarvedEconomySkipWindows",
-    "runnerStarvedEconomySkipChosenRun",
-    "runnerStarvedEconomySkipChosenDraw",
-    "runnerStarvedEconomySkipChosenInstall",
-    "runnerStarvedEconomySkipChosenSearchRecovery",
-    "runnerStarvedEconomySkipChosenTrash",
-    "runnerStarvedEconomySkipChosenEndTurn",
-    "runnerStarvedEconomySkipChosenUnknown",
-    "runnerStarvedEconomySkipThenUnaffordableRun",
-    "runnerStarvedEconomySkipThenFailedRun",
-    "runnerStarvedEconomySkipThenNoProgress",
-    "runnerStarvedEconomySkipThenEconomyNextDecision",
-    "runnerStarvedEconomySkipThenReserveRecovered",
-    "runnerStarvedEconomySkipThenProgress",
-    "runnerStarvedEconomySkipThenActionLimit",
-    "runnerStarvedEconomySkipPlausiblePressure",
-    "runnerStarvedEconomySkipPlausibleRemoteContest",
-    "runnerStarvedEconomySkipPlausibleCriticalSetup",
-    "runnerStarvedEconomySkipPlausibleTrash",
-    "runnerStarvedEconomySkipSuspiciousLowValueRun",
-    "runnerStarvedEconomySkipSuspiciousDraw",
-    "runnerStarvedEconomySkipSuspiciousEndTurn",
-    "runnerStarvedEconomySkipSuspiciousUnknown",
-    "runnerEconomyFixGateAttributionEligible",
-    "runnerEconomyFixGateAttributionBlocked",
-    "runnerEconomyFixGateAttributionSuspicious",
-    "runnerSearchRecoveryFixGateWindows",
-    "runnerSearchRecoveryFixGateLegalSearch",
-    "runnerSearchRecoveryFixGateLegalRecovery",
-    "runnerSearchRecoveryFixGateMissingWall",
-    "runnerSearchRecoveryFixGateMissingCodeGate",
-    "runnerSearchRecoveryFixGateMissingSentry",
-    "runnerSearchRecoveryFixGateMissingUniversal",
-    "runnerSearchRecoveryFixGateMissingSpecial",
-    "runnerSearchRecoveryAttributionWindows",
-    "runnerSearchRecoveryAttributionLegalSearch",
-    "runnerSearchRecoveryAttributionLegalRecovery",
-    "runnerSearchRecoveryAttributionMissingWall",
-    "runnerSearchRecoveryAttributionMissingCodeGate",
-    "runnerSearchRecoveryAttributionMissingSentry",
-    "runnerSearchRecoveryAttributionMissingUniversal",
-    "runnerSearchRecoveryAttributionMissingSpecial",
-    "runnerSearchRecoveryAttributionSearchTaken",
-    "runnerSearchRecoveryAttributionRecoveryTaken",
-    "runnerSearchRecoveryAttributionSkipped",
-    "runnerSearchRecoverySkipChosenEconomy",
-    "runnerSearchRecoverySkipChosenRun",
-    "runnerSearchRecoverySkipChosenDraw",
-    "runnerSearchRecoverySkipChosenInstall",
-    "runnerSearchRecoverySkipChosenTrash",
-    "runnerSearchRecoverySkipChosenEndTurn",
-    "runnerSearchRecoverySkipChosenUnknown",
-    "runnerSearchRecoverySkipThenInstallFollowup",
-    "runnerSearchRecoverySkipThenCoverageResolved",
-    "runnerSearchRecoverySkipThenCoverageStillMissing",
-    "runnerSearchRecoverySkipThenKnownUnaffordableRun",
-    "runnerSearchRecoverySkipThenNoProgress",
-    "runnerSearchRecoverySkipThenActionLimit",
-    "runnerSearchRecoveryWindowWithNoInstallFollowup",
-    "runnerSearchRecoverySkipPlausibleEconomyReserve",
-    "runnerSearchRecoverySkipPlausiblePressure",
-    "runnerSearchRecoverySkipPlausibleRemoteContest",
-    "runnerSearchRecoverySkipPlausibleCurrentRigEnough",
-    "runnerSearchRecoverySkipSuspiciousCoverageStillMissing",
-    "runnerSearchRecoverySkipSuspiciousNoProgress",
-    "runnerSearchRecoverySkipSuspiciousKnownUnbreakableRun",
-    "runnerSearchRecoverySkipUnclassified",
-    "runnerSearchRecoveryFixGateAttributionEligible",
-    "runnerSearchRecoveryFixGateAttributionBlocked",
-    "runnerSearchRecoveryFixGateAttributionSuspicious",
-    "runnerMemoryFixGateWindows",
-    "runnerHandSizeFixGateWindows",
-    "runnerMemoryFixGateLegalSupport",
-    "runnerHandSizeFixGateLegalSupport",
-    "runnerMemoryFixGateSkipped",
-    "runnerHandSizeFixGateSkipped",
-    "runnerMemoryAttributionWindows",
-    "runnerHandSizeAttributionWindows",
-    "runnerMemoryAttributionLegalSupport",
-    "runnerHandSizeAttributionLegalSupport",
-    "runnerMemoryAttributionSupportTaken",
-    "runnerHandSizeAttributionSupportTaken",
-    "runnerMemoryAttributionSkipped",
-    "runnerHandSizeAttributionSkipped",
-    "runnerMemorySkipChosenEconomy",
-    "runnerMemorySkipChosenRun",
-    "runnerMemorySkipChosenDraw",
-    "runnerMemorySkipChosenInstallNonMemory",
-    "runnerMemorySkipChosenSearchRecovery",
-    "runnerMemorySkipChosenEndTurn",
-    "runnerMemorySkipChosenUnknown",
-    "runnerMemorySkipThenMemoryInstalled",
-    "runnerMemorySkipThenProgramInstallBlocked",
-    "runnerMemorySkipThenCoverageStillMissing",
-    "runnerMemorySkipThenNoProgress",
-    "runnerMemorySkipThenActionLimit",
-    "runnerHandSizeSkipThenDamageRiskWindow",
-    "runnerHandSizeSkipThenDiscardOrDamagePressure",
-    "runnerMemorySkipPlausibleEconomyReserve",
-    "runnerMemorySkipPlausiblePressure",
-    "runnerMemorySkipPlausibleRemoteContest",
-    "runnerMemorySkipPlausibleNoProgramPressure",
-    "runnerMemorySkipSuspiciousRigBlocked",
-    "runnerMemorySkipSuspiciousCoverageStillMissing",
-    "runnerMemorySkipSuspiciousNoProgress",
-    "runnerMemorySkipUnclassified",
-    "runnerMemoryFixGateAttributionEligible",
-    "runnerMemoryFixGateAttributionBlocked",
-    "runnerMemoryFixGateAttributionSuspicious",
-    "runnerHandSizeFixGateAttributionEligible",
-    "runnerHandSizeFixGateAttributionBlocked",
-    "runnerHandSizeFixGateAttributionSuspicious",
-    "runnerSearchRecoveryNormalizedWindows",
-    "runnerSearchRecoveryNormalizedTaken",
-    "runnerSearchRecoveryNormalizedSkipped",
-    "runnerSearchRecoveryNormalizedBlocked",
-    "runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest",
-    "runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve",
-    "runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough",
-    "runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup",
-    "runnerSearchRecoveryNormalizedMetricArtifact",
-    "runnerSearchRecoveryNormalizedUnclassified",
-    "runnerSearchRecoveryNormalizedSuspicious",
-    "runnerSearchRecoveryNormalizedTrueMissedCoverage",
-    "runnerSearchRecoveryNormalizedFixGateEligible",
-    "runnerMemoryNormalizedWindows",
-    "runnerMemoryNormalizedTaken",
-    "runnerMemoryNormalizedSkipped",
-    "runnerMemoryNormalizedBlocked",
-    "runnerMemoryNormalizedBlockedByPressureOrRemoteContest",
-    "runnerMemoryNormalizedBlockedByEconomyOrReserve",
-    "runnerMemoryNormalizedBlockedByNoProgramPressure",
-    "runnerMemoryNormalizedMetricArtifact",
-    "runnerMemoryNormalizedUnclassified",
-    "runnerMemoryNormalizedSuspicious",
-    "runnerMemoryNormalizedTrueRigBottleneck",
-    "runnerMemoryNormalizedFixGateEligible",
-    "runnerHandSizeNormalizedWindows",
-    "runnerHandSizeNormalizedTaken",
-    "runnerHandSizeNormalizedSkipped",
-    "runnerHandSizeNormalizedBlocked",
-    "runnerHandSizeNormalizedSuspicious",
-    "runnerHandSizeNormalizedMetricArtifact",
-    "runnerSetupNormalizedWindows",
-    "runnerSetupNormalizedSuspicious",
-    "runnerSetupNormalizedBlocked",
-    "runnerSetupNormalizedMetricArtifact",
-    "runnerSetupNormalizedUnclassified",
-    "runnerSetupNormalizedFixGateEligible",
-    "runnerSetupNormalizedRecommendedFixKindNone",
-    "runnerSetupNormalizedRecommendedFixKindSearchRecovery",
-    "runnerSetupNormalizedRecommendedFixKindMemory",
-    "runnerSetupNormalizedRecommendedFixKindHandSize",
-    "runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis",
-    "runnerSetupAttributionWindows",
-    "runnerSetupAttributionSuspicious",
-    "runnerSetupAttributionBlocked",
-    "runnerSetupAttributionUnclassified",
-    "runnerSetupAttributionByKindStarvedEconomy",
-    "runnerSetupAttributionByKindSearchRecovery",
-    "runnerSetupAttributionByKindMemory",
-    "runnerSetupAttributionByKindHandSize",
-    "runnerSetupRecommendedFixKindNone",
-    "runnerSetupRecommendedFixKindEconomyStarvedSkip",
-    "runnerSetupRecommendedFixKindSearchRecovery",
-    "runnerSetupRecommendedFixKindMemorySetup",
-    "runnerSetupRecommendedFixKindHandSizeSetup",
-    "runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis",
-  ];
+export type RunnerSetupAttributionMetricKey =
+  (typeof RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS)[number];
+
+const RUNNER_FOLLOWUP_WINDOW = 5;
 
 export type RunnerSetupChosenFamily =
   | "economy"
@@ -484,7 +315,12 @@ export function attributeStarvedEconomySkip(
   metrics.runnerStarvedEconomySkipWindows += 1;
   metrics.runnerSetupAttributionByKindStarvedEconomy += 1;
   incrementChosenFamily(metrics, "runnerStarvedEconomySkip", entry);
-  const next = nextEntriesForSide(sequence, index, "runner", 5);
+  const next = nextEntriesForSide(
+    sequence,
+    index,
+    "runner",
+    RUNNER_FOLLOWUP_WINDOW,
+  );
   if (
     entry.runStartedAgainstKnownUnaffordablePath === true ||
     next.some((candidate) => candidate.runStartedAgainstKnownUnaffordablePath)
@@ -500,12 +336,8 @@ export function attributeStarvedEconomySkip(
     )
   )
     metrics.runnerStarvedEconomySkipThenFailedRun += 1;
-  const progressed = hasMeaningfulProgressWithin(
-    sequence,
-    index,
-    5,
-    isMeaningfulBoardProgress,
-  );
+  const progressed =
+    isMeaningfulBoardProgress(entry) || next.some(isMeaningfulBoardProgress);
   if (!progressed) metrics.runnerStarvedEconomySkipThenNoProgress += 1;
   const economyNextDecision = next[0]?.runnerEconomyTaken === true;
   if (economyNextDecision)
@@ -519,7 +351,10 @@ export function attributeStarvedEconomySkip(
   if (reserveRecovered)
     metrics.runnerStarvedEconomySkipThenReserveRecovered += 1;
   if (progressed) metrics.runnerStarvedEconomySkipThenProgress += 1;
-  if (summary.terminationKind === "action_limit")
+  if (
+    summary.terminationKind === "action_limit" &&
+    next.length < RUNNER_FOLLOWUP_WINDOW
+  )
     metrics.runnerStarvedEconomySkipThenActionLimit += 1;
 
   const blocked =
@@ -568,6 +403,7 @@ export function attributeStarvedEconomySkip(
   metrics.runnerEconomyFixGateAttributionEligible += 1;
   if (blocked) metrics.runnerEconomyFixGateAttributionBlocked += 1;
   if (suspicious) metrics.runnerEconomyFixGateAttributionSuspicious += 1;
+  if (!blocked && !suspicious) metrics.runnerSetupAttributionUnclassified += 1;
 }
 
 export function attributeNormalizedSearchRecoverySkip(
@@ -675,7 +511,12 @@ export function attributeSearchRecoverySkip(
     metrics.runnerSearchRecoveryAttributionRecoveryTaken += 1;
   incrementCoverageTypes(metrics, entry);
   incrementChosenFamily(metrics, "runnerSearchRecoverySkip", entry);
-  const next = nextEntriesForSide(sequence, index, "runner", 5);
+  const next = nextEntriesForSide(
+    sequence,
+    index,
+    "runner",
+    RUNNER_FOLLOWUP_WINDOW,
+  );
   const installFollowup = next.some(
     (candidate) => candidate.actionType === "install_card",
   );
@@ -685,13 +526,13 @@ export function attributeSearchRecoverySkip(
   const knownUnaffordableRun = next.some(
     (candidate) => candidate.runStartedAgainstKnownUnaffordablePath === true,
   );
-  const noProgress = !hasMeaningfulProgressWithin(
-    sequence,
-    index,
-    5,
-    isMeaningfulBoardProgress,
+  const noProgress = !(
+    isMeaningfulBoardProgress(entry) || next.some(isMeaningfulBoardProgress)
   );
-  const actionLimit = summary.terminationKind === "action_limit" && noProgress;
+  const actionLimit =
+    summary.terminationKind === "action_limit" &&
+    next.length < RUNNER_FOLLOWUP_WINDOW &&
+    noProgress;
   if (installFollowup) metrics.runnerSearchRecoverySkipThenInstallFollowup += 1;
   if (coverageResolved)
     metrics.runnerSearchRecoverySkipThenCoverageResolved += 1;
@@ -730,8 +571,10 @@ export function attributeSearchRecoverySkip(
   if (knownUnaffordableRun)
     metrics.runnerSearchRecoverySkipSuspiciousKnownUnbreakableRun += 1;
   const suspicious = suspiciousCoverage || noProgress || knownUnaffordableRun;
-  if (!blocked && !suspicious)
+  if (!blocked && !suspicious) {
     metrics.runnerSearchRecoverySkipUnclassified += 1;
+    metrics.runnerSetupAttributionUnclassified += 1;
+  }
   metrics.runnerSearchRecoveryFixGateAttributionEligible += 1;
   if (blocked) metrics.runnerSearchRecoveryFixGateAttributionBlocked += 1;
   if (suspicious) metrics.runnerSearchRecoveryFixGateAttributionSuspicious += 1;
@@ -750,7 +593,12 @@ export function attributeHandSizeSkip(
   index: number,
 ): void {
   const entry = sequence[index]!;
-  const next = nextEntriesForSide(sequence, index, "runner", 5);
+  const next = nextEntriesForSide(
+    sequence,
+    index,
+    "runner",
+    RUNNER_FOLLOWUP_WINDOW,
+  );
   metrics.runnerHandSizeFixGateWindows += 1;
   metrics.runnerSetupAttributionByKindHandSize += 1;
   metrics.runnerHandSizeFixGateLegalSupport += 1;
@@ -771,6 +619,7 @@ export function attributeHandSizeSkip(
   );
   if (suspicious) metrics.runnerHandSizeSkipThenDiscardOrDamagePressure += 1;
   if (suspicious) metrics.runnerHandSizeFixGateAttributionSuspicious += 1;
+  if (!blocked && !suspicious) metrics.runnerSetupAttributionUnclassified += 1;
   attributeNormalizedHandSizeSkip(metrics, entry, { blocked, suspicious });
 }
 
@@ -886,7 +735,12 @@ export function attributeMemorySkip(
   metrics.runnerMemoryFixGateSkipped += 1;
   metrics.runnerMemoryAttributionSkipped += 1;
   incrementChosenFamily(metrics, "runnerMemorySkip", entry);
-  const next = nextEntriesForSide(sequence, index, "runner", 5);
+  const next = nextEntriesForSide(
+    sequence,
+    index,
+    "runner",
+    RUNNER_FOLLOWUP_WINDOW,
+  );
   const memoryInstalled = next.some(
     (candidate) => candidate.runnerMemoryHardwareTaken === true,
   );
@@ -900,13 +754,13 @@ export function attributeMemorySkip(
         candidate.runnerPathBlockedByMissingCoverage === true ||
         candidate.runnerSetupFixGateEligibleSearchRecoverySkip === true,
     );
-  const noProgress = !hasMeaningfulProgressWithin(
-    sequence,
-    index,
-    5,
-    isMeaningfulBoardProgress,
+  const noProgress = !(
+    isMeaningfulBoardProgress(entry) || next.some(isMeaningfulBoardProgress)
   );
-  const actionLimit = summary.terminationKind === "action_limit" && noProgress;
+  const actionLimit =
+    summary.terminationKind === "action_limit" &&
+    next.length < RUNNER_FOLLOWUP_WINDOW &&
+    noProgress;
   if (memoryInstalled) metrics.runnerMemorySkipThenMemoryInstalled += 1;
   if (programBlocked) metrics.runnerMemorySkipThenProgramInstallBlocked += 1;
   if (coverageStillMissing)
@@ -936,7 +790,10 @@ export function attributeMemorySkip(
     metrics.runnerMemorySkipSuspiciousCoverageStillMissing += 1;
   if (noProgress) metrics.runnerMemorySkipSuspiciousNoProgress += 1;
   const suspicious = suspiciousRig || noProgress;
-  if (!blocked && !suspicious) metrics.runnerMemorySkipUnclassified += 1;
+  if (!blocked && !suspicious) {
+    metrics.runnerMemorySkipUnclassified += 1;
+    metrics.runnerSetupAttributionUnclassified += 1;
+  }
   metrics.runnerMemoryFixGateAttributionEligible += 1;
   if (blocked) metrics.runnerMemoryFixGateAttributionBlocked += 1;
   if (suspicious) metrics.runnerMemoryFixGateAttributionSuspicious += 1;
@@ -1006,12 +863,6 @@ export function summarizeRunnerSetupAttributionMetrics(
     metrics.runnerSearchRecoveryFixGateAttributionBlocked +
     metrics.runnerMemoryFixGateAttributionBlocked +
     metrics.runnerHandSizeFixGateAttributionBlocked;
-  metrics.runnerSetupAttributionUnclassified = Math.max(
-    0,
-    metrics.runnerSetupAttributionWindows -
-      metrics.runnerSetupAttributionSuspicious -
-      metrics.runnerSetupAttributionBlocked,
-  );
   metrics.runnerSetupNormalizedWindows =
     metrics.runnerSearchRecoveryNormalizedWindows +
     metrics.runnerMemoryNormalizedWindows +

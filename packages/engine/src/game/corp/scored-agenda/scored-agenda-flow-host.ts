@@ -77,7 +77,7 @@ export type ScoredAgendaFlowHost = {
     ) => void;
     appendScoredAgendaStartDrawChoiceEffect: (
       cardId: CardInstanceId,
-      sourceDefinitionId: string,
+      sourceDefinitionId: number,
       drawnCount: number,
     ) => void;
   };
@@ -99,7 +99,7 @@ export type ScoredAgendaFlowResult = {
   handled: boolean;
   stateChanged?: boolean;
   agendaInstanceId?: CardInstanceId;
-  agendaDefinitionId?: string;
+  agendaDefinitionId?: number;
   agendaPointsScored?: number;
   bonusAgendaPoints?: number;
   overadvancedBy?: number;

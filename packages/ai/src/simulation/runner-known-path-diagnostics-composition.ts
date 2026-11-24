@@ -83,7 +83,6 @@ export function createRunnerKnownPathDiagnosticsComposition(
   });
 
   const {
-    runnerRunKnownPathCost,
     runnerHasKnownUnaffordableLegalRun,
     runnerVisibleMissingBreakerCoverage,
     runnerMissingCoverageTypesForInput,
@@ -139,7 +138,6 @@ export function createRunnerKnownPathDiagnosticsComposition(
     encounterBreakReserveContext,
     breakAccessPathAssessment,
     pumpViabilityAssessment,
-    runnerRunKnownPathCost,
     runnerHasKnownUnaffordableLegalRun,
     runnerVisibleMissingBreakerCoverage,
     runnerMissingCoverageTypesForInput,

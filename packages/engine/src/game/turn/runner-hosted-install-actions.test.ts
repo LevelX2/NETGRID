@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type { CardDefinition, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
@@ -9,7 +10,7 @@ function runnerProgramDefinition(
   installCost: number,
 ): CardDefinition {
   return {
-    id,
+    id: typeof id === "number" ? id : syntheticCardDefinitionId(id),
     title,
     side: "runner",
     type: "program",
@@ -47,7 +48,7 @@ describe("runner hosted install action builders", () => {
 
       expect(action).toMatchObject({
         actionId:
-          "runner.install_card.runner_hosted_program.runner_hosted_program.runner_daemon_host",
+          "rc.runner_hosted_program.runner_hosted_program.runner_daemon_host",
         side: "runner",
         type: "install_card",
         label: "Hosted Program in Daemon Host hosten",

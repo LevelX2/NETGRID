@@ -31,6 +31,69 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 
 ## Engine und Karten
 
+Als Standarddecks stehen „Amt für Umleitungen“ 0.3.0 (Corp),
+„Redaktionsschluss“ 0.2.0 (Runner) und „Doppelte Buchführung“ 0.1.0 (Corp)
+mit je 45 Karten zur Verfügung. Im gepaarten Vergleich der beiden
+ursprünglichen Decks vom 19.11.2026 spielte jede Fassung auf schwerer KI-Stufe fünf
+Seeds gegen jeweils dieselben zehn zufällig gezogenen Standardgegner. Alle
+200 Partien endeten regulär und wurden per Replay bestätigt
+(Evidence-Registry, Paarungen 783–822).
+
+Das Amt gewann mit Red Herrings, einem dritten Quandary und Corporate
+Downsizing neun von 50 Partien, die Erstfassung sieben. Die eigenen
+Agendapunkte stiegen im Mittel von 2,42 auf 3,26. Aus HQ stahlen die
+Runner 65 Agenden, zuvor 51. Redaktionsschluss gewann
+mit zwei Identity Donor 45 von 50 Partien, zuvor 42. Die drei Flatlines
+der Erstfassung durch Fleischschaden im Corp-Zug standen einer Flatline
+durch Netzschaden bei einem Zugriff auf Setup! gegenüber. Ein Einsatz von
+Identity Donor gegen Dead Channel ist im Spielverlauf belegt.
+
+Im Siren-Nachtest spielte das unveränderte Amt 0.2.0 mit der überarbeiteten
+Corp-KI dieselben 50 Seeds. Die reguläre Installation stieg von einem auf
+35 Spiele. Zuvor kam der einzige Einbau aus dem Handmanagement, als die
+Corp keine Agenda in HQ und nach dem Pflicht-Rez keinen Credit mehr hatte.
+Mit der neuen Vorbereitung sank die Zahl der aus HQ gestohlenen Agenden
+von 65 auf 56, die verlorenen Agendapunkte von 141 auf 127. In beiden
+Serien kam es in 33 Spielen zu mindestens einem Diebstahl aus HQ.
+Von 50 ins Spiel gekommenen Siren trashte der Runner 48 beim Zugriff auf
+ihren Remote. Die beiden bezahlten Umleitungen betrafen R&D. Runs auf HQ
+gingen von 206 auf 188 zurück. Gegen R&D Express gingen sieben Agenden
+weniger verloren. Die Bilanz des
+Amts stieg von neun auf 13 Siege. Alle Nachspiele endeten regulär mit
+geprüftem Replay (Paarungen 823–832, SP-880, KI-Stand `0f2028ed6`).
+
+Für Amt 0.3.0 ersetzen zwei Simon Francisco und ein Rasmin Bridger die beiden
+Namatoki Plaza und den Falsified-Transactions Expert. Am 20.11.2026 spielten
+beide Amtsfassungen dieselben 50 Seeds auf Stand `981d5ab17`. Alle 100 Replays
+waren gültig, alle 50 Kontrollspiele von 0.2.0 reproduzierten den früheren
+Endzustand. Mit 0.3.0 sanken die HQ-Diebstähle von 56 auf 54, die daraus
+verlorenen Agendapunkte von 127 auf 118 und die Zahl der betroffenen Partien
+von 33 auf 29. Die Runner stahlen 50 statt 44 Agenden aus Remotes, die Corp
+gewann 12 statt 13 Partien. Simon kürzte zwei HQ-Zugriffe um je eine Karte.
+Rasmin kostete die Runner im HQ acht Credits und beendete drei HQ-Runs
+(Paarungen 833–842, SP-881/882).
+
+„Doppelte Buchführung“ kombiniert drei Falsified-Transactions Expert mit
+Virus Test Site als Markenspender. Eine mit dem Standarddeck gespielte
+Regelsequenz bestätigt die Übertragung von drei Entwicklungsmarkern auf ein
+frisch installiertes Project Zurich und die Wertung für zwei Punkte im selben
+Zug. In zehn KI-Partien gegen R&D Interface Dig und Bit-Denial Lock kam
+der Expert in jeder Partie auf die Hand. Nur in einer Partie lagen ein
+entwickelter Spender und ein anderes entwickelbares Ziel aus, als die Corp
+den Expert spielen konnte. Die KI spielte ihn keinmal und gewann eine der
+zehn Partien (Paarungen 843–844).
+
+Seit `a7180a402` installiert die Corp in dieser Kontrollstellung auch
+Project Zurich selbst. Der Score-Owner erhält die einzige finanzierte
+Wertungsroute, wenn die Agenda im vorhandenen Remote ihren Markenspender
+verdrängen würde (SP-883). Die zehn freien Vergleichsspiele gegen dieselben
+Gegner mit denselben Seeds endeten mit identischen Endzustands-Hashes.
+Der Expert war in allen zehn Spielen auf der Hand, wurde keinmal gespielt
+und die Corp gewann erneut eine Partie (Paarungen 850–851). In der vierten
+Partie gegen Bit-Denial Lock hätte die erste berechnete Umbuchung die
+Verteidigungsreserve unterschritten. Bei der zweiten Gelegenheit wertete die
+Corp den Markenspender Employee Empowerment direkt für drei Punkte.
+
 „Dr. Dreffs letzte Visite“ ist als Standarddeck mit 45 Karten,
 20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.3.0
 enthält je ein Reclamation Project und Corporate Shuffle sowie neu Red
@@ -83,10 +146,11 @@ liegen im separaten aktiven Systemset. Produktive Engine-, Server- und KI-Defaul
 verwenden echte Originalset-Decks, während die synthetischen Demo-Decks nur
 noch als explizite Mechanik-Fixtures in internen Tests bestehen.
 
-Der CardSpec-Migrationsprozess CS00 bis CS13 ist abgeschlossen und integriert. Aktuell gilt:
+Für die zentrale CardSpec-Registry gelten diese Paketgrenzen.
 
 - `@netgrid/cards` ist die zentrale kartenspezifische Autoren- und Projektionsschicht;
 - `@netgrid/cards/engine` liefert der Engine mechanische CardImplementation-, Runtime- und Source-Ref-Projektionen;
+- `@netgrid/cards/planning` liefert der KI unveränderliche Regelfakten und Annotationen;
 - `packages/engine/src/card-implementations/registry.ts` besitzt keine zweite manuelle Autorenregistry;
 - Coverage ist Metadaten-/Auditlogik und bezieht Implementierungs-, Runtime- und Source-Informationen aus CardSpec;
 - die Rules Engine bleibt alleinige Autorität für Legalität und Ausführung.
@@ -376,6 +440,9 @@ Führend ist
 
 ## Aktuelle Arbeit
 
+- [Planung für GitHub-Fehlermeldungen aus NETGRID](../architecture/live-match/github-bug-reporting-plan.md)
+  mit lokalem ZIP-Fehlerbericht auf Basis der kompakten Laufzeit-IDs und
+  manuell eingereichtem GitHub-Issue als Meldeweg für V1.0.
 - `docs/activities/inbox/`: offene kleine Findings und Nacharbeiten.
 - `docs/activities/in-progress/`: aktuell beanspruchte Pakete.
 - `docs/activities/done/`: nur kurzlebiger Abschluss-Slot; abgeschlossene Einzelpakete werden nach Rückführung des Ergebnisses entfernt.

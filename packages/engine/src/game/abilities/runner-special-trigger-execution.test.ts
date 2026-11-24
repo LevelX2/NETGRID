@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -25,9 +26,9 @@ import {
   type RunnerSpecialTriggerExecutionHost,
 } from "./runner-special-trigger-execution";
 
-const JUNKYARD_BBS_ID = "junkyard_bbs";
-const SHELL_TRADERS_ID = "shell_traders";
-const SELF_MODIFYING_CODE_ID = "self_modifying_code";
+const JUNKYARD_BBS_ID = 661417577;
+const SHELL_TRADERS_ID = 3684526583;
+const SELF_MODIFYING_CODE_ID = 553111022;
 
 describe("runner special trigger execution", () => {
   it("returns unhandled for actions outside the runner-special boundary", () => {
@@ -69,13 +70,13 @@ describe("runner special trigger execution", () => {
     );
     state.cardInstances[heapId] = instance(
       heapId,
-      "heap_card",
+      3123514382,
       "runner",
       "heap",
     );
     const host = testHost(state, {
       [JUNKYARD_BBS_ID]: definition(JUNKYARD_BBS_ID, "resource"),
-      heap_card: definition("heap_card", "program"),
+      3123514382: definition(3123514382, "program"),
     });
     const action = triggerAction(
       state,
@@ -83,7 +84,7 @@ describe("runner special trigger execution", () => {
         cardId: sourceId,
         resourceAbility: "return_top_heap_card",
         targetCardId: heapId,
-        targetCardDefinitionId: "heap_card",
+        targetCardDefinitionId: 3123514382,
       },
       [{ clicks: 1, credits: 1 }],
     );
@@ -109,13 +110,13 @@ describe("runner special trigger execution", () => {
     );
     state.cardInstances[targetId] = instance(
       targetId,
-      "program_a",
+      3126340663,
       "runner",
       "grip",
     );
     const host = testHost(state, {
       [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
-      program_a: definition("program_a", "program", {
+      3126340663: definition(3126340663, "program", {
         installCost: 3,
         memoryCost: 1,
       }),
@@ -126,7 +127,7 @@ describe("runner special trigger execution", () => {
         cardId: sourceId,
         delayedInstallAbility: "set_aside_from_grip",
         targetCardId: targetId,
-        targetCardDefinitionId: "program_a",
+        targetCardDefinitionId: 3126340663,
         shellCounterAmount: 3,
       },
       [{ clicks: 1 }],
@@ -147,7 +148,7 @@ describe("runner special trigger execution", () => {
     expect(action.payload).toMatchObject({
       hiddenZoneAction: "delayed_install_set_aside",
       sourceDefinitionId: SHELL_TRADERS_ID,
-      targetCardDefinitionId: "program_a",
+      targetCardDefinitionId: 3126340663,
       counterType: "shell",
       addedCounterAmount: 3,
       remainingCounters: 3,
@@ -169,7 +170,7 @@ describe("runner special trigger execution", () => {
       "rig",
     );
     state.cardInstances[targetId] = {
-      ...instance(targetId, "program_a", "runner", "set_aside"),
+      ...instance(targetId, 3126340663, "runner", "set_aside"),
       zone: {
         side: "special",
         zone: "set_aside",
@@ -180,7 +181,7 @@ describe("runner special trigger execution", () => {
     setCounter(state, targetId, "shell", 1);
     const host = testHost(state, {
       [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
-      program_a: definition("program_a", "program", {
+      3126340663: definition(3126340663, "program", {
         installCost: 1,
         memoryCost: 1,
       }),
@@ -191,7 +192,7 @@ describe("runner special trigger execution", () => {
         cardId: sourceId,
         delayedInstallAbility: "remove_shell_counter",
         targetCardId: targetId,
-        targetCardDefinitionId: "program_a",
+        targetCardDefinitionId: 3126340663,
       },
       [{ credits: 1 }],
     );
@@ -218,7 +219,7 @@ describe("runner special trigger execution", () => {
     state.phase = "run";
     state.timingPoint = "run.encounter_ice";
     state.run = {
-      runId: "run_shell",
+      runId: 632195,
       attackedServerId: "rd",
       phase: "encounter",
       position: { kind: "ice", iceId: "ice_1", serverId: "rd" },
@@ -233,7 +234,7 @@ describe("runner special trigger execution", () => {
       "rig",
     );
     state.cardInstances[targetId] = {
-      ...instance(targetId, "hardware_run", "runner", "set_aside"),
+      ...instance(targetId, 2838917315, "runner", "set_aside"),
       zone: {
         side: "special",
         zone: "set_aside",
@@ -243,7 +244,7 @@ describe("runner special trigger execution", () => {
     setCounter(state, targetId, "shell", 2);
     const host = testHost(state, {
       [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
-      hardware_run: definition("hardware_run", "hardware", { installCost: 2 }),
+      2838917315: definition(2838917315, "hardware", { installCost: 2 }),
     });
 
     handleRunnerSpecialTriggerExecution(
@@ -254,7 +255,7 @@ describe("runner special trigger execution", () => {
           cardId: sourceId,
           delayedInstallAbility: "remove_shell_counter",
           targetCardId: targetId,
-          targetCardDefinitionId: "hardware_run",
+          targetCardDefinitionId: 2838917315,
         },
         [{ credits: 1 }],
       ),
@@ -262,7 +263,7 @@ describe("runner special trigger execution", () => {
 
     expect(counter(state, targetId, "shell")).toBe(1);
     expect(state.runner.credits).toBe(0);
-    expect(state.run?.runId).toBe("run_shell");
+    expect(state.run?.runId).toBe(632195);
   });
 
   it("pays additional install costs on the final Shell counter or removes the target from the game", () => {
@@ -282,12 +283,7 @@ describe("runner special trigger execution", () => {
         "rig",
       );
       state.cardInstances[targetId] = {
-        ...instance(
-          targetId,
-          "additional_cost_hardware",
-          "runner",
-          "set_aside",
-        ),
+        ...instance(targetId, 508061845, "runner", "set_aside"),
         zone: {
           side: "special",
           zone: "set_aside",
@@ -296,7 +292,7 @@ describe("runner special trigger execution", () => {
       } as unknown as CardInstance;
       state.cardInstances[agendaId] = {
         id: agendaId,
-        definitionId: "agenda_cost_source",
+        definitionId: 5056917,
         owner: "runner",
         controller: "runner",
         zone: { side: "runner", zone: "scoreArea" },
@@ -309,12 +305,8 @@ describe("runner special trigger execution", () => {
         state,
         {
           [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
-          additional_cost_hardware: definition(
-            "additional_cost_hardware",
-            "hardware",
-            { installCost: 4 },
-          ),
-          agenda_cost_source: definition("agenda_cost_source", "agenda"),
+          508061845: definition(508061845, "hardware", { installCost: 4 }),
+          5056917: definition(5056917, "agenda"),
         },
         {
           additionalAgendaPointInstallCost: () => 1,
@@ -330,7 +322,7 @@ describe("runner special trigger execution", () => {
           cardId: sourceId,
           delayedInstallAbility: "remove_shell_counter",
           targetCardId: targetId,
-          targetCardDefinitionId: "additional_cost_hardware",
+          targetCardDefinitionId: 508061845,
         },
         [{ credits: 1 }],
       );
@@ -363,7 +355,7 @@ describe("runner special trigger execution", () => {
   it("does not add a generic Virus counter when Shell Traders installs Pattel's Virus", () => {
     const sourceId = "shell_1" as CardInstanceId;
     const targetId = "prepared_pattel" as CardInstanceId;
-    const pattelId = "onr_v1_046_pattels-virus";
+    const pattelId = 258;
     const state = baseState();
     state.runner.rig.resources = [sourceId];
     state.specialZones = { setAside: [targetId] } as SpecialZoneState;
@@ -424,7 +416,7 @@ describe("runner special trigger execution", () => {
       "rig",
     );
     state.cardInstances[targetId] = {
-      ...instance(targetId, "program_a", "runner", "set_aside"),
+      ...instance(targetId, 3126340663, "runner", "set_aside"),
       zone: {
         side: "special",
         zone: "set_aside",
@@ -435,7 +427,7 @@ describe("runner special trigger execution", () => {
     setCounter(state, targetId, "shell", 1);
     const host = testHost(state, {
       [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
-      program_a: definition("program_a", "program", {
+      3126340663: definition(3126340663, "program", {
         installCost: 1,
         memoryCost: 1,
       }),
@@ -467,7 +459,7 @@ describe("runner special trigger execution", () => {
       "rig",
     );
     state.cardInstances[targetId] = {
-      ...instance(targetId, "program_a", "runner", "set_aside"),
+      ...instance(targetId, 3126340663, "runner", "set_aside"),
       zone: {
         side: "special",
         zone: "set_aside",
@@ -478,7 +470,7 @@ describe("runner special trigger execution", () => {
     setCounter(state, targetId, "shell", 2);
     const host = testHost(state, {
       [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
-      program_a: definition("program_a", "program", {
+      3126340663: definition(3126340663, "program", {
         installCost: 2,
         memoryCost: 1,
       }),
@@ -523,7 +515,12 @@ describe("runner special trigger execution", () => {
       [secondTargetId, "program_beta"],
     ] as const) {
       state.cardInstances[cardId] = {
-        ...instance(cardId, definitionId, "runner", "set_aside"),
+        ...instance(
+          cardId,
+          syntheticCardDefinitionId(definitionId),
+          "runner",
+          "set_aside",
+        ),
         zone: {
           side: "special",
           zone: "set_aside",
@@ -536,12 +533,12 @@ describe("runner special trigger execution", () => {
     setCounter(state, secondTargetId, "shell", 3);
     const host = testHost(state, {
       [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
-      program_alpha: definition("program_alpha", "program", {
+      3649366512: definition(3649366512, "program", {
         title: "Alpha Program",
         installCost: 2,
         memoryCost: 1,
       }),
-      program_beta: definition("program_beta", "program", {
+      1174217470: definition(1174217470, "program", {
         title: "Beta Program",
         installCost: 3,
         memoryCost: 1,
@@ -619,14 +616,14 @@ describe("runner special trigger execution", () => {
     expect(legalAction.payload).toMatchObject({
       delayedInstallAbility: "start_turn_remove_shell_counter",
       sourceDefinitionId: SHELL_TRADERS_ID,
-      targetCardDefinitionId: "program_beta",
+      targetCardDefinitionId: 1174217470,
       removedCounterAmount: 1,
       remainingCounters: 2,
     });
     expect(effects).toEqual([
       expect.objectContaining({
         reason: "start_of_turn",
-        cardDefinitionId: "program_beta",
+        cardDefinitionId: 1174217470,
         removedCounterAmount: 1,
         remainingCounters: 2,
       }),
@@ -647,7 +644,7 @@ describe("runner special trigger execution", () => {
     const state = baseState();
     state.timingPoint = "run.encounter_ice";
     state.run = {
-      runId: "run_1",
+      runId: 1,
       attackedServerId: "rd",
       encounteredIceId: "ice_1" as CardInstanceId,
     } as any;
@@ -661,7 +658,7 @@ describe("runner special trigger execution", () => {
     );
     state.cardInstances[stackProgramId] = instance(
       stackProgramId,
-      "stack_program_def",
+      2547400688,
       "runner",
       "stack",
     );
@@ -670,7 +667,7 @@ describe("runner special trigger execution", () => {
       state,
       {
         [SELF_MODIFYING_CODE_ID]: definition(SELF_MODIFYING_CODE_ID, "program"),
-        stack_program_def: definition("stack_program_def", "program"),
+        2547400688: definition(2547400688, "program"),
       },
       {
         startHiddenStackProgramInstallActivation: (sourceCardId) => {
@@ -907,7 +904,7 @@ function setCounter(
 
 function instance(
   id: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
   zone: "grip" | "heap" | "rig" | "set_aside" | "stack",
 ): CardInstance {

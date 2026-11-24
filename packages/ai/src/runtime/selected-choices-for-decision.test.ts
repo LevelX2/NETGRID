@@ -1,3 +1,6 @@
+import { instantiatePlanProposal } from "../plans/plan-instance";
+import type { PlanInstance, PlanModuleId } from "../plans/plan-kernel-types";
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import {
   applyAction,
   createGameAfterSetup,
@@ -6,6 +9,8 @@ import {
 } from "@netgrid/engine";
 import type {
   AiDecisionInput,
+  CanonicalCapabilityId,
+  CardDefinitionId,
   CorpOptionalRezChoiceQuote,
   GameState,
   LegalAction,
@@ -35,13 +40,13 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("orders two identical AI Boon run-start strength sources without changing the action", () => {
-    const firstId = "runner_onr_v1_002_ai-boon_1";
-    const secondId = "runner_onr_v1_002_ai-boon_2";
+    const firstId = "c1bl";
+    const secondId = "c1bm";
     const input = inputWithChoice(
       {
         choiceId: "runner_run_start_order_7",
         kind: "select_cards",
-        source: "runner_run_start.order:run_7",
+        source: "runner_run_start.order:7",
         minSelections: 1,
         maxSelections: 1,
         options: [secondId, firstId].map((instanceId) => ({
@@ -54,7 +59,7 @@ describe("selectedChoicesForDecision", () => {
         side: "runner",
         rig: [firstId, secondId].map((instanceId) => ({
           instanceId,
-          definitionId: "onr_v1_002_ai-boon",
+          definitionId: 214,
           known: true,
           type: "program",
         })) as never,
@@ -74,8 +79,8 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("orders two identical Employee Empowerment sources without deciding the later draws", () => {
-    const firstId = "corp_onr_v1_199_employee-empowerment_1";
-    const secondId = "corp_onr_v1_199_employee-empowerment_2";
+    const firstId = "c2jh";
+    const secondId = "c2ji";
     const input = inputWithChoice(
       {
         choiceId: "corp_start_order_7",
@@ -93,7 +98,7 @@ describe("selectedChoicesForDecision", () => {
         side: "corp",
         scoreArea: [firstId, secondId].map((instanceId) => ({
           instanceId,
-          definitionId: "onr_v1_199_employee-empowerment",
+          definitionId: 411,
           known: true,
           type: "agenda",
         })) as never,
@@ -142,7 +147,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             instanceId: sourceCardId,
-            definitionId: "onr_proteus_006_please-dont-choke-anyone",
+            definitionId: 64,
             known: true,
             type: "agenda",
           },
@@ -185,7 +190,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             instanceId: sourceCardId,
-            definitionId: "onr_proteus_006_please-dont-choke-anyone",
+            definitionId: 64,
             known: true,
             type: "agenda",
           },
@@ -208,9 +213,9 @@ describe("selectedChoicesForDecision", () => {
         source: `runner_program_trash_before_install:${sourceCardInstanceId}:7:payment=ids=runner_installer_1;amounts=0`,
         continuation: {
           family: "runner_program_trash_before_install",
-          originActionId: `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
+          originActionId: `rc.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
           sourceCardInstanceId,
-          sourceCardDefinitionId: "onr_v1_059_self-modifying-code",
+          sourceCardDefinitionId: 271,
           createdAtStateVersion: 7,
         },
         minSelections: 0,
@@ -236,12 +241,12 @@ describe("selectedChoicesForDecision", () => {
       side: "runner",
       stateVersion: 6,
       rootForegroundInstanceId:
-        "plan:runner.rig_and_coverage:breaker_code_gate",
-      executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+        "p66rnks1vkgcw2d11pnxw6kb2w",
+      executorInstanceId: "p66rnks1vkgcw2d11pnxw6kb2w",
       selectedActionOrigin: {
-        rootPlanInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
-        executorInstanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
-        selectedActionId: `runner.install_card.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
+        rootPlanInstanceId: "p66rnks1vkgcw2d11pnxw6kb2w",
+        executorInstanceId: "p66rnks1vkgcw2d11pnxw6kb2w",
+        selectedActionId: `rc.${sourceCardInstanceId}.${sourceCardInstanceId}.runner_program_trash_before_install.runner_installer_1.0`,
         selectedAtStateVersion: 6,
         immediateChoicePolicy: "resolve_runner_program_trash_before_install",
         sourceCardInstanceId,
@@ -253,7 +258,8 @@ describe("selectedChoicesForDecision", () => {
       },
       instances: [
         {
-          instanceId: "plan:runner.rig_and_coverage:breaker_code_gate",
+ ...choicePlanFixture("runner.rig_and_coverage", "breaker_code_gate", 6),
+          instanceId: "p66rnks1vkgcw2d11pnxw6kb2w",
           moduleId: "runner.rig_and_coverage",
           executionState: "executor",
           moduleState: {
@@ -330,7 +336,7 @@ describe("selectedChoicesForDecision", () => {
           targetAgendaId,
           "0",
           encodeURIComponent(
-            `runner.steal_agenda.${targetAgendaId}.${targetAgendaId}`,
+            `rt.${targetAgendaId}.${targetAgendaId}`,
           ),
           encodeURIComponent(
             `access.agenda_install_as_runner_program:${targetAgendaId}:2`,
@@ -356,14 +362,14 @@ describe("selectedChoicesForDecision", () => {
         rig: [
           {
             instanceId: retainedProgramId,
-            definitionId: "runner-program-definition",
+            definitionId: syntheticCardDefinitionId("runner-program-definition"),
             known: true,
             type: "program",
             controller: "runner",
           },
           {
             instanceId: installedAgendaProgramId,
-            definitionId: "onr_classic_004_theorem-proof",
+            definitionId: 8,
             known: true,
             type: "agenda",
             controller: "runner",
@@ -391,15 +397,15 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("materializes delegated hidden-search memory only for the exact parent need", () => {
-    const rootId = "plan:runner.contest_remote:remote%3Aremote_2";
+    const rootId = "p1p4x83h7yolw2hjtvi0ud06dm";
     const executorId =
-      "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
+      "p5s1qdgqrafrs3n2kss1t9ct7m";
     const needId = "coverage:breaker_code_gate";
-    const searchActionId = "runner.play_event.sneak_3.sneak_3.install_program";
+    const searchActionId = "rh.sneak_3.sneak_3.install_program";
     const targetCardId = "rent_i_con_3";
     const sacrificeCardId = "invisibility_1";
     const sourceCardId = "sneak_3";
-    const sourceDefinitionId = "onr_v1_110_sneak-preview";
+    const sourceDefinitionId = 322;
     const input = inputWithChoice(
       {
         kind: "select_cards",
@@ -421,7 +427,7 @@ describe("selectedChoicesForDecision", () => {
         rig: [
           {
             instanceId: sacrificeCardId,
-            definitionId: "onr_v1_035_invisibility",
+            definitionId: 247,
             known: true,
             type: "program",
             memoryCost: 1,
@@ -434,7 +440,7 @@ describe("selectedChoicesForDecision", () => {
     input.playerView.own.heapOrArchives = [
       {
         instanceId: targetCardId,
-        definitionId: "onr_classic_031_rent-i-con",
+        definitionId: 35,
         known: true,
         type: "program",
         memoryCost: 1,
@@ -448,16 +454,18 @@ describe("selectedChoicesForDecision", () => {
       executorInstanceId: executorId,
       instances: [
         {
+ ...choicePlanFixture("runner.contest_remote", "remote:r2", 6),
           instanceId: rootId,
           moduleId: "runner.contest_remote",
           portfolioRole: "foreground",
-          executionState: "observer",
+          executionState: "idle",
           openNeedIds: [needId],
         },
         {
+ ...choicePlanFixture("runner.rig_and_coverage", "coverage:breaker_code_gate", 6),
           instanceId: executorId,
           moduleId: "runner.rig_and_coverage",
-          portfolioRole: "support",
+          portfolioRole: "background",
           executionState: "executor",
           parentInstanceId: rootId,
           parentNeedId: needId,
@@ -475,7 +483,7 @@ describe("selectedChoicesForDecision", () => {
                   sourceCardInstanceId: sourceCardId,
                   sourceDefinitionId,
                   targetCardInstanceId: targetCardId,
-                  targetDefinitionId: "onr_classic_031_rent-i-con",
+                  targetDefinitionId: 35,
                   installMemorySacrificeBinding: {
                     targetCardInstanceId: targetCardId,
                     targetMemoryCost: 1,
@@ -524,7 +532,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("routes checkpoint memory cleanup to the dedicated minimal selector", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_cards",
@@ -538,7 +546,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
         selectedRunnerMemoryCheckpointTrashOptionIds: () => ["program_b"],
@@ -552,7 +559,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("routes a Shell Traders MU choice through the qualitative program replacement selector", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_cards",
@@ -571,7 +578,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
         selectedRunnerProgramInstallTrashOptionIds: () => ["card_redundant"],
@@ -585,11 +591,11 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("spends a useful Priority Wreck amount while keeping a small reserve", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
-          source: "successful_run.credit_loss_spend:run_85:85",
+          source: "successful_run.credit_loss_spend:85:85",
           minSelections: 1,
           maxSelections: 1,
           options: Array.from({ length: 8 }, (_, amount) => ({
@@ -600,7 +606,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner", credits: 7, opponentCredits: 7 },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -611,11 +616,11 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("does not spend more on Priority Wreck than the Corp can lose", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
-          source: "successful_run.credit_loss_spend:run_129:129",
+          source: "successful_run.credit_loss_spend:129:129",
           minSelections: 1,
           maxSelections: 1,
           options: Array.from({ length: 18 }, (_, amount) => ({
@@ -626,7 +631,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner", credits: 17, opponentCredits: 12 },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -634,7 +638,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("pays the current City Surveillance draw tax when the option is legal", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -648,7 +652,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -659,7 +662,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("takes the City Surveillance tag when no payment option is legal", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -670,7 +673,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner", credits: 0 },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -698,7 +700,7 @@ describe("selectedChoicesForDecision", () => {
   it("fails closed when the Satellite Monitors source is not the exact rezzed card", () => {
     const input = satelliteMonitorsChoiceInput();
     input.playerView.servers[0]!.root[0]!.definitionId =
-      "onr_classic_022_wrong-card";
+      syntheticCardDefinitionId("wrong-satellite-monitors-card");
 
     expect(() =>
       selectedChoicesForDecision(
@@ -715,7 +717,7 @@ describe("selectedChoicesForDecision", () => {
 
   it("rejects a Corp rez-or-trash ICE payload without its defense executor binding", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice(
           {
             kind: "select_option",
@@ -730,7 +732,6 @@ describe("selectedChoicesForDecision", () => {
           },
           { side: "corp" },
         ),
-        resolveChoiceAction("corp"),
         unusedDependencies(),
       ),
     ).toThrowError(expect.objectContaining({ code: "window_origin_missing" }));
@@ -761,7 +762,7 @@ describe("selectedChoicesForDecision", () => {
     if (!accessedCardId) throw new Error("Missing R&D access fixture card.");
     state.cardInstances[accessedCardId] = {
       ...state.cardInstances[accessedCardId]!,
-      definitionId: "onr_v1_345_trap",
+      definitionId: 557,
     };
     state.corp.credits = 10;
     state = applyRealAction(
@@ -876,7 +877,7 @@ describe("selectedChoicesForDecision", () => {
     };
     input.eventTail = [
       {
-        eventId: "access-payment-without-quote",
+        eventId: 13,
         type: "action_applied",
         stateVersionBefore: 11,
         stateVersionAfter: 12,
@@ -890,11 +891,7 @@ describe("selectedChoicesForDecision", () => {
     ];
 
     expect(() =>
-      selectedChoicesForDecision(
-        input,
-        resolveChoiceAction("corp"),
-        unusedDependencies(),
-      ),
+      resolveFixtureChoice(input, unusedDependencies()),
     ).toThrowError(
       expect.objectContaining({
         code: "window_origin_missing",
@@ -931,7 +928,7 @@ describe("selectedChoicesForDecision", () => {
     };
     input.eventTail = [
       {
-        eventId: "access-payment-unsafe-effect-index",
+        eventId: 13,
         type: "action_applied",
         stateVersionBefore: 11,
         stateVersionAfter: 12,
@@ -945,16 +942,12 @@ describe("selectedChoicesForDecision", () => {
     ];
 
     expect(() =>
-      selectedChoicesForDecision(
-        input,
-        resolveChoiceAction("corp"),
-        unusedDependencies(),
-      ),
+      resolveFixtureChoice(input, unusedDependencies()),
     ).toThrowError(expect.objectContaining({ code: "window_origin_missing" }));
   });
 
   it("rezes an affordable City Surveillance before passing the draw window", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice({
         kind: "select_option",
         source: "runner_draw.draw_tax_rez:12",
@@ -965,7 +958,6 @@ describe("selectedChoicesForDecision", () => {
           { id: "pass", label: "Passen" },
         ],
       }),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -976,7 +968,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("uses a legal Runner tag-avoidance source instead of passing", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -993,7 +985,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -1004,7 +995,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("keeps pass when no legal Runner tag-avoidance source is selectable", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -1015,7 +1006,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -1026,7 +1016,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("keeps pass in a damage window without a legal prevention source", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -1037,7 +1027,6 @@ describe("selectedChoicesForDecision", () => {
         },
         { side: "runner" },
       ),
-      resolveChoiceAction("runner"),
       unusedDependencies(),
     );
 
@@ -1049,7 +1038,7 @@ describe("selectedChoicesForDecision", () => {
 
   it("fails closed when an intentional damage-window pass has no Engine pass option", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice(
           {
             kind: "select_option",
@@ -1072,7 +1061,6 @@ describe("selectedChoicesForDecision", () => {
             })),
           },
         ),
-        resolveChoiceAction("runner"),
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
@@ -1081,11 +1069,11 @@ describe("selectedChoicesForDecision", () => {
   it("uses the first legal Runner damage-prevention source instead of passing", () => {
     const forceShield = {
       instanceId: "runner_force_shield_1",
-      definitionId: "onr_v1_028_force-shield",
+      definitionId: 240,
       known: true,
       type: "program",
     } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -1097,6 +1085,7 @@ describe("selectedChoicesForDecision", () => {
             {
               id: "card_implementation_damage_prevent_runner_force_shield_1_0_1",
               label: "Force Shield: 1 Schaden verhindern",
+              metadata: { optionKind: "prevent_damage", amount: 1 },
             },
           ],
         },
@@ -1110,7 +1099,6 @@ describe("selectedChoicesForDecision", () => {
           rig: [forceShield],
         },
       ),
-      resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
         rolesForCardId: () => [],
@@ -1128,11 +1116,11 @@ describe("selectedChoicesForDecision", () => {
   it("does not treat legacy prevention roles as a structured prevention fact", () => {
     const oneShot = {
       instanceId: "runner_one_shot_1",
-      definitionId: "runner_one_shot",
+      definitionId: syntheticCardDefinitionId("runner_one_shot"),
       known: true,
       type: "program",
     } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_option",
@@ -1158,7 +1146,6 @@ describe("selectedChoicesForDecision", () => {
           rig: [oneShot],
         },
       ),
-      resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
         rolesForCardId: () => ["damage_prevention", "rig_defense"],
@@ -1173,23 +1160,22 @@ describe("selectedChoicesForDecision", () => {
 
   it("fails closed for an ambiguous mandatory choice without a resolver", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice({
           kind: "select_option",
           minSelections: 2,
           maxSelections: 2,
         }),
-        resolveChoiceAction(),
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
   });
 
   it("completes only the Classic Deflector option bound by corp.defend_servers", () => {
+    const sourceDefinitionId = syntheticCardDefinitionId("generic_deflector");
     const input = inputWithChoice({
       kind: "select_option",
-      source:
-        "card_implementation.classic_deflector:run_8:deflector_ice:0:generic_deflector:generic_deflector.subroutine.1.deflect_run:any_data_fort:2:0",
+      source: `card_implementation.classic_deflector:8:deflector_ice:0:${sourceDefinitionId}:generic_deflector.subroutine.1.deflect_run:any_data_fort:2:0`,
       minSelections: 1,
       maxSelections: 1,
       options: [
@@ -1200,7 +1186,7 @@ describe("selectedChoicesForDecision", () => {
       ],
     });
     input.playerView.pendingChoice!.visibility = "public";
-    rememberClassicDeflectorDefenseChoice(input, {
+    rememberClassicDeflectorDefenseChoice(input, sourceDefinitionId, {
       selectedOptionId: "server_archives",
       selectedServerId: "archives",
       disposition: "redirect",
@@ -1220,7 +1206,9 @@ describe("selectedChoicesForDecision", () => {
 
   it("materializes the exact positively quoted installed-card liquidation", () => {
     const sourceResourceInstanceId = "liquidation-source";
-    const sourceResourceDefinitionId = "generic-liquidation-resource";
+    const sourceResourceDefinitionId = syntheticCardDefinitionId(
+      "generic-liquidation-resource",
+    );
     const targetInstanceId = "installed-target";
     const input = inputWithChoice(
       {
@@ -1248,7 +1236,7 @@ describe("selectedChoicesForDecision", () => {
           },
           {
             instanceId: targetInstanceId,
-            definitionId: "generic-installed-target",
+            definitionId: syntheticCardDefinitionId("generic-installed-target"),
             known: true,
             type: "hardware",
           },
@@ -1282,7 +1270,10 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("recognizes the current Engine source for the existing random-dice split resolver", () => {
+  it.each([
+    { highestSelectable: true, expected: "4" },
+    { highestSelectable: false, expected: "3" },
+  ])("ranks selectable random-dice splits when the highest is selectable=$highestSelectable", ({ highestSelectable, expected }) => {
     const input = inputWithChoice(
       {
         kind: "select_option",
@@ -1291,9 +1282,10 @@ describe("selectedChoicesForDecision", () => {
         minSelections: 1,
         maxSelections: 1,
         options: [0, 1, 2, 3].map((gainedCredits) => ({
-          id: `gain_${gainedCredits}_set_aside_${3 - gainedCredits}`,
+          id: String(gainedCredits + 1),
           label: `${gainedCredits} credits`,
           value: gainedCredits,
+          ...(gainedCredits === 3 ? { selectable: highestSelectable } : {}),
         })),
       },
       { side: "runner" },
@@ -1308,7 +1300,7 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["gain_3_set_aside_0"],
+      selectedOptionIds: [expected],
     });
   });
 
@@ -1445,21 +1437,20 @@ describe("selectedChoicesForDecision", () => {
 
   it("fails closed for an optional unknown choice instead of picking first", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice({
           kind: "select_option",
           minSelections: 0,
           maxSelections: 1,
           options: [{ id: "only_option", label: "Only option" }],
         }),
-        resolveChoiceAction(),
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
   });
 
   it("resolves an unknown mandatory choice when exactly one option is selectable", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice({
         kind: "select_option",
         minSelections: 1,
@@ -1469,7 +1460,6 @@ describe("selectedChoicesForDecision", () => {
           { id: "unavailable", label: "Unavailable", selectable: false },
         ],
       }),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -1480,7 +1470,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("resolves a mandatory choice only when every selectable option is forced", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice({
         kind: "select_option",
         minSelections: 2,
@@ -1490,7 +1480,6 @@ describe("selectedChoicesForDecision", () => {
           { id: "ice_b_hq", label: "ICE B HQ", value: "ice_b|hq" },
         ],
       }),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -1502,7 +1491,7 @@ describe("selectedChoicesForDecision", () => {
 
   it("rejects an invalid selection returned by a registered resolver", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice(
           {
             kind: "select_cards",
@@ -1515,7 +1504,6 @@ describe("selectedChoicesForDecision", () => {
           },
           { side: "runner" },
         ),
-        resolveChoiceAction("runner"),
         {
           ...unusedDependencies(),
           selectedRunnerMemoryCheckpointTrashOptionIds: () => [
@@ -1527,7 +1515,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("selects Corporate Negotiating Center HQ agenda options when revealing agendas", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice({
         kind: "select_cards",
         source: "v1917.corp_hq_agenda_reveal:cnc_source:8",
@@ -1538,7 +1526,6 @@ describe("selectedChoicesForDecision", () => {
           { id: "card_hq_agenda_2", label: "HQ-Agenda", value: "hq_agenda_2" },
         ],
       }),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -1583,7 +1570,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             ...visibleCard("downsizing_source", "agenda"),
-            definitionId: "onr_v1_194_corporate-downsizing",
+            definitionId: 406,
           },
         ],
       },
@@ -1636,7 +1623,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [visibleCard(sourceAgendaId, "agenda")],
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: [
               { ...visibleCard("code-gate-1", "ice"), rezzed: false },
@@ -1668,9 +1655,9 @@ describe("selectedChoicesForDecision", () => {
   it("completes a scored-agenda free-rez payload only for the exact ICE variant prebound by the resident score plan", () => {
     const sourceAgendaId = "priority-requisition";
     const targetCardId = "credit-blocks";
-    const targetDefinitionId = "onr_proteus_017_credit-blocks";
+    const targetDefinitionId = 75;
     const sourceProfile = corpScoredAgendaFreeRezProfile(
-      "onr_v1_212_priority-requisition",
+      424,
     )!;
     const input = inputWithChoice(
       {
@@ -1702,7 +1689,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             ...visibleCard(sourceAgendaId, "agenda"),
-            definitionId: "onr_v1_212_priority-requisition",
+            definitionId: 424,
           },
         ],
         servers: [
@@ -1718,7 +1705,7 @@ describe("selectedChoicesForDecision", () => {
               },
               {
                 ...visibleCard("cheaper-ice", "ice"),
-                definitionId: "onr_v1_279_wall-of-static",
+                definitionId: 491,
                 rezzed: false,
                 rezCost: 5,
               },
@@ -1757,9 +1744,9 @@ describe("selectedChoicesForDecision", () => {
 
   it("completes a scored-agenda ICE-mark payload only for the exact Defense target prebound by the resident score plan", () => {
     const sourceAgendaId = "ice-transmutation";
-    const sourceDefinitionId = "onr_v1_204_ice-transmutation";
+    const sourceDefinitionId = 416;
     const targetCardId = "hq-data-wall";
-    const targetDefinitionId = "onr_v1_238_data-wall-2-0";
+    const targetDefinitionId = 450;
     const sourceProfile = corpScoredAgendaIceMarkProfile(sourceDefinitionId)!;
     const input = inputWithChoice(
       {
@@ -1803,12 +1790,12 @@ describe("selectedChoicesForDecision", () => {
             root: [],
           },
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: [
               {
                 ...visibleCard("empty-remote-wall", "ice"),
-                definitionId: "onr_v1_279_wall-of-static",
+                definitionId: 491,
                 rezzed: true,
               },
             ],
@@ -1905,7 +1892,7 @@ describe("selectedChoicesForDecision", () => {
         scoreArea: [
           {
             ...visibleCard("employee", "agenda"),
-            definitionId: "onr_v1_199_employee-empowerment",
+            definitionId: 411,
           },
         ],
       },
@@ -1914,7 +1901,7 @@ describe("selectedChoicesForDecision", () => {
     input.playerView.pendingChoice!.visibility = "public";
     input.playerView.own.stackOrRdCount = rdCount;
     const action = resolveChoiceActionForInput(input);
-    const instanceId = "test:hand-start-draw";
+    const instanceId = "p8ljpo2dae6w0g0kk0949fplay";
     rememberResidentPlanPortfolio(input, {
       schemaVersion: "resident-plan-portfolio-v2",
       side: "corp",
@@ -1923,6 +1910,7 @@ describe("selectedChoicesForDecision", () => {
       executorInstanceId: instanceId,
       instances: [
         {
+ ...choicePlanFixture("corp.hand_and_agenda_management", "test:hand-start-draw", input.playerView.stateVersion),
           instanceId,
           moduleId: "corp.hand_and_agenda_management",
           executionState: "executor",
@@ -2101,7 +2089,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("builds a valid Data Fort Reclamation selection instead of taking every HQ option", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_cards",
@@ -2127,7 +2115,6 @@ describe("selectedChoicesForDecision", () => {
           ],
         },
       ),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -2138,7 +2125,7 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("does not install agendas through a Data Fort Reclamation fallback choice", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       inputWithChoice(
         {
           kind: "select_cards",
@@ -2158,7 +2145,6 @@ describe("selectedChoicesForDecision", () => {
           ],
         },
       ),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -2169,9 +2155,8 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("selects an affordable Data Fort Reclamation rez only from its exact Engine quote", () => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       optionalRezInput(optionalRezQuote()),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -2203,9 +2188,8 @@ describe("selectedChoicesForDecision", () => {
       } as CorpOptionalRezChoiceQuote,
     ],
   ])("declines an %s Engine-quoted optional rez", (_label, quote) => {
-    const decision = selectedChoicesForDecision(
+    const decision = resolveFixtureChoice(
       optionalRezInput(quote),
-      resolveChoiceAction(),
       unusedDependencies(),
     );
 
@@ -2243,21 +2227,22 @@ describe("selectedChoicesForDecision", () => {
       "duplicate modifier ids",
       {
         ...optionalRezQuote(),
-        reductionSourceDefinitionIds: ["modifier-a", "modifier-a"],
+        reductionSourceDefinitionIds: [syntheticCardDefinitionId("modifier-a"), syntheticCardDefinitionId("modifier-a")],
       },
     ],
     [
       "non-canonical modifier ids",
       {
         ...optionalRezQuote(),
-        reductionSourceDefinitionIds: ["modifier-b", "modifier-a"],
+        reductionSourceDefinitionIds: [
+          ...optionalRezQuote().reductionSourceDefinitionIds!,
+        ].reverse(),
       },
     ],
   ])("fails closed for an optional rez with %s", (_label, quote) => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         optionalRezInput(quote as CorpOptionalRezChoiceQuote | undefined),
-        resolveChoiceAction(),
         unusedDependencies(),
       ),
     ).toThrowError(
@@ -2270,14 +2255,13 @@ describe("selectedChoicesForDecision", () => {
   it.each([
     ["option value", { optionValue: "different-card" }],
     ["visible card id", { optionCardId: "different-card" }],
-    ["visible definition", { optionDefinitionId: "different-definition" }],
+    ["visible definition", { optionDefinitionId: syntheticCardDefinitionId("different-definition") }],
   ])(
     "fails closed for an optional rez with mismatched %s",
     (_label, options) => {
       expect(() =>
-        selectedChoicesForDecision(
+        resolveFixtureChoice(
           optionalRezInput(optionalRezQuote(), options),
-          resolveChoiceAction(),
           unusedDependencies(),
         ),
       ).toThrowError(
@@ -2307,11 +2291,7 @@ describe("selectedChoicesForDecision", () => {
     const input = optionalRezInput(optionalRezQuote());
     mutate(input);
     expect(() =>
-      selectedChoicesForDecision(
-        input,
-        resolveChoiceAction(),
-        unusedDependencies(),
-      ),
+      resolveFixtureChoice(input, unusedDependencies()),
     ).toThrowError(
       expect.objectContaining({
         code: "window_origin_missing",
@@ -2327,18 +2307,14 @@ describe("selectedChoicesForDecision", () => {
       value: "unquoted-card",
       card: {
         instanceId: "unquoted-card",
-        definitionId: "unquoted-definition",
+        definitionId: syntheticCardDefinitionId("unquoted-definition"),
         known: true,
         type: "ice",
         rezzed: false,
       },
     });
     expect(() =>
-      selectedChoicesForDecision(
-        input,
-        resolveChoiceAction(),
-        unusedDependencies(),
-      ),
+      resolveFixtureChoice(input, unusedDependencies()),
     ).toThrowError(
       expect.objectContaining({
         code: "window_origin_missing",
@@ -2349,13 +2325,13 @@ describe("selectedChoicesForDecision", () => {
   it("routes advancement move choices through the Corp score chooser", () => {
     const agenda = {
       ...visibleCard("agenda_1", "agenda"),
-      definitionId: "simple_agenda",
+      definitionId: 588,
       advancementRequirement: 3,
       advancementCounters: 1,
     };
     const vapor = {
       ...visibleCard("vapor_1", "asset"),
-      definitionId: "onr_v1_347_vapor-ops",
+      definitionId: 559,
       advancementCounters: 2,
     };
     const input = inputWithChoice(
@@ -2391,7 +2367,7 @@ describe("selectedChoicesForDecision", () => {
       {
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: [],
             root: [
@@ -2411,7 +2387,7 @@ describe("selectedChoicesForDecision", () => {
     );
     const decision = selectedChoicesForDecision(
       input,
-      resolveChoiceAction(),
+      resolveChoiceActionForInput(input),
       unusedDependencies(),
     );
 
@@ -2423,7 +2399,7 @@ describe("selectedChoicesForDecision", () => {
 
   it("fails a Corp advancement choice without an exact resident score continuation", () => {
     expect(() =>
-      selectedChoicesForDecision(
+      resolveFixtureChoice(
         inputWithChoice({
           kind: "select_option",
           source:
@@ -2438,7 +2414,6 @@ describe("selectedChoicesForDecision", () => {
             },
           ],
         }),
-        resolveChoiceAction(),
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
@@ -2467,11 +2442,68 @@ describe("selectedChoicesForDecision", () => {
     rememberResidentScoreChoiceContinuation(input, "different_agenda");
 
     expect(() =>
+      resolveFixtureChoice(input, unusedDependencies()),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it("selects the exact multi-target Corp advancement placement", () => {
+    const input = advancementPlacementInput([
+      { id: "malformed", label: "Invalid", value: "agenda_1:1:extra|bank_1:1" },
+      { id: "agenda_only", label: "Agenda", value: "agenda_1:1" },
+      { id: "both", label: "Both", value: "bank_1:1|agenda_1:1" },
+    ]);
+    const action = resolveChoiceActionForInput(input);
+    input.legalActions = [action];
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({ choiceId: "choice_multi", selectedOptionIds: ["both"] });
+
+    expect(() =>
       selectedChoicesForDecision(
         input,
-        resolveChoiceAction(),
+        { ...action, expiresAtStateVersion: input.playerView.stateVersion - 1 },
         unusedDependencies(),
       ),
+    ).toThrowError("window_origin_missing");
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        {
+          ...action,
+          choiceRequirements: [
+            { ...action.choiceRequirements![0]!, optionIds: ["agenda_only"] },
+          ],
+        },
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it.each([
+    "agenda_1:1:extra|bank_1:1",
+    "agenda_1:01|bank_1:1",
+    "agenda_1:1|bank_1:1|",
+    "agenda_1:1|agenda_1:1",
+  ])("rejects a mismatched Corp advancement placement %s", (value) => {
+    const input = advancementPlacementInput([
+      { id: "wrong", label: "Wrong", value },
+    ]);
+    const action = resolveChoiceActionForInput(input);
+    input.legalActions = [action];
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it("rejects two equally bound Corp advancement options", () => {
+    const input = advancementPlacementInput([
+      { id: "first", label: "First", value: "agenda_1:1|bank_1:1" },
+      { id: "second", label: "Second", value: "bank_1:1|agenda_1:1" },
+    ]);
+    const action = resolveChoiceActionForInput(input);
+    input.legalActions = [action];
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
     ).toThrowError("window_origin_missing");
   });
 
@@ -2527,7 +2559,7 @@ describe("selectedChoicesForDecision", () => {
   it("uses the Engine-quoted Corp Trace allocation with the most specialized credits", () => {
     const input = inputWithChoice({
       kind: "select_option",
-      source: "trace:trace_1:corp_payment",
+      source: "trace:1:corp_payment",
       minSelections: 1,
       maxSelections: 1,
       options: [
@@ -2569,7 +2601,7 @@ describe("selectedChoicesForDecision", () => {
     const input = inputWithChoice(
       {
         kind: "select_option",
-        source: "trace_runner_bid_payment:trace_1:link_pool",
+        source: "trace_runner_bid_payment:1:link_pool",
         minSelections: 1,
         maxSelections: 1,
         options: [
@@ -2596,7 +2628,7 @@ describe("selectedChoicesForDecision", () => {
   it("fails closed on a malformed Corp Trace payment allocation", () => {
     const input = inputWithChoice({
       kind: "select_option",
-      source: "trace:trace_1:corp_payment",
+      source: "trace:1:corp_payment",
       minSelections: 1,
       maxSelections: 1,
       options: [
@@ -2661,16 +2693,18 @@ describe("selectedChoicesForDecision", () => {
         gripOrHq: [
           {
             ...visibleCard("runner_low", "asset"),
-            definitionId: "low",
+            definitionId: syntheticCardDefinitionId("low"),
           },
           {
             ...visibleCard("runner_high", "asset"),
-            definitionId: "high",
+            definitionId: syntheticCardDefinitionId("high"),
           },
         ],
       },
     );
     const action = resolveChoiceActionForInput(input);
+    input.playerView.activeSide = "runner";
+    input.legalActions = [action];
     rememberResidentRunnerDiscardBinding(input, action.actionId, [
       "discard_low",
     ]);
@@ -2695,7 +2729,7 @@ describe("selectedChoicesForDecision", () => {
       {
         side: "runner",
         gripOrHq: [
-          { ...visibleCard("runner_low", "asset"), definitionId: "low" },
+          { ...visibleCard("runner_low", "asset"), definitionId: syntheticCardDefinitionId("low") },
         ],
       },
     );
@@ -2725,6 +2759,9 @@ function inputWithChoice(
       label: string;
       value?: string | number;
       selectable?: boolean;
+      metadata?: NonNullable<
+        AiDecisionInput["playerView"]["pendingChoice"]
+      >["options"][number]["metadata"];
       card?: NonNullable<
         AiDecisionInput["playerView"]["pendingChoice"]
       >["options"][number]["card"];
@@ -2811,7 +2848,7 @@ function scoredAgendaCleanupInput(): AiDecisionInput {
       scoreArea: [
         {
           ...visibleCard("downsizing_source", "agenda"),
-          definitionId: "onr_v1_194_corporate-downsizing",
+          definitionId: 406,
         },
       ],
     },
@@ -2834,13 +2871,13 @@ function satelliteMonitorsChoiceInput(): AiDecisionInput {
       side: "corp",
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [],
           root: [
             {
               instanceId: "satellite_monitors_1",
-              definitionId: "onr_classic_021_satellite-monitors",
+              definitionId: 25,
               known: true,
               type: "asset",
               rezzed: true,
@@ -2854,29 +2891,61 @@ function satelliteMonitorsChoiceInput(): AiDecisionInput {
   return input;
 }
 
+function advancementPlacementInput(
+  options: Array<{ id: string; label: string; value: string }>,
+): AiDecisionInput {
+  const input = inputWithChoice({
+    kind: "select_option",
+    source:
+      "p3_34.distribute_advancement:team_restructuring:source_1:2:up_to_distinct_targets_one_each:7",
+    continuation: {
+      family: "corp_advancement_counter",
+      originActionId: "corp.score-conversion",
+      createdAtStateVersion: 7,
+    },
+    minSelections: 1,
+    maxSelections: 1,
+    options,
+  });
+  rememberResidentScoreChoiceContinuation(
+    input,
+    "agenda_1",
+    "corp_advancement_counter",
+    {
+      placements: [
+        { targetCardId: "agenda_1", amount: 1 },
+        { targetCardId: "bank_1", amount: 1 },
+      ],
+    },
+  );
+  return input;
+}
+
 function rememberResidentScoreChoiceContinuation(
   input: AiDecisionInput,
   targetCardId: string,
   family:
     | "corp_advancement_counter"
     | "corp_scored_agenda_on_score" = "corp_advancement_counter",
-  move?: { sourceCardId: string; amount: number },
+  advancement?:
+    | { sourceCardId: string; amount: number }
+    | { placements: Array<{ targetCardId: string; amount: number }> },
   freeRezChoiceBinding?: {
-    sourceCapabilityId: string;
+    sourceCapabilityId: CanonicalCapabilityId;
     targetPurpose: "rez_best_defensive_ice";
     targetCardId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
     selectedVariantId: string;
     selectedOptionId: string;
   },
   iceMarkChoiceBinding?: {
-    sourceCapabilityId: string;
+    sourceCapabilityId: CanonicalCapabilityId;
     targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
     targetCardId: string;
-    targetDefinitionId: string;
+    targetDefinitionId: number;
   },
   hqAgendaShuffleChoiceBinding?: {
-    sourceCapabilityId: string;
+    sourceCapabilityId: CanonicalCapabilityId;
     creditPerAgendaPoint: number;
     selectedCardInstanceIds: string[];
   },
@@ -2888,11 +2957,12 @@ function rememberResidentScoreChoiceContinuation(
     schemaVersion: "resident-plan-portfolio-v2",
     side: "corp",
     stateVersion: priorInput.playerView.stateVersion,
-    rootForegroundInstanceId: "corp.score_agenda:score-project",
-    executorInstanceId: "corp.score_agenda:score-project",
+    rootForegroundInstanceId: "pb4o6zfj4sjlu8h0yt4k1k7hs2",
+    executorInstanceId: "pb4o6zfj4sjlu8h0yt4k1k7hs2",
     instances: [
       {
-        instanceId: "corp.score_agenda:score-project",
+ ...choicePlanFixture("corp.score_agenda", "score-project", priorInput.playerView.stateVersion),
+        instanceId: "pb4o6zfj4sjlu8h0yt4k1k7hs2",
         moduleId: "corp.score_agenda",
         executionState: "executor",
         moduleState: {
@@ -2903,9 +2973,7 @@ function rememberResidentScoreChoiceContinuation(
             selectedActionId: "corp.score-conversion",
             selectedAtStateVersion: priorInput.playerView.stateVersion,
             targetCardId,
-            ...(move
-              ? { sourceCardId: move.sourceCardId, amount: move.amount }
-              : {}),
+            ...advancement,
             ...(freeRezChoiceBinding ? { freeRezChoiceBinding } : {}),
             ...(iceMarkChoiceBinding ? { iceMarkChoiceBinding } : {}),
             ...(hqAgendaShuffleChoiceBinding
@@ -2922,7 +2990,7 @@ function rememberResidentScoreChoiceContinuation(
 
 function downsizingChoiceBinding(selectedCardInstanceIds: string[]) {
   const profile = corpScoredAgendaHqShuffleProfile(
-    "onr_v1_194_corporate-downsizing",
+    406,
   )!;
   return {
     sourceCapabilityId: profile.sourceCapabilityId,
@@ -2940,11 +3008,12 @@ function rememberAgendaPurgeDefenseChoice(
     side: "corp",
     stateVersion: input.playerView.stateVersion,
     rootForegroundInstanceId:
-      "plan:corp.defend_servers:server-defense-portfolio",
-    executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
+    executorInstanceId: "penw02zfrkklof54c2nuye5att",
     instances: [
       {
-        instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+ ...choicePlanFixture("corp.defend_servers", "server-defense-portfolio", input.playerView.stateVersion),
+        instanceId: "penw02zfrkklof54c2nuye5att",
         moduleId: "corp.defend_servers",
         executionState: "executor",
         moduleState: {
@@ -2953,7 +3022,7 @@ function rememberAgendaPurgeDefenseChoice(
             {
               kind: "generic",
               phase: "resolve_install_targets",
-              actionIds: ["corp.resolve_choice"],
+              actionIds: ["cn"],
               choiceResolution: {
                 kind: "agenda_purge_install_targets",
                 choiceId: "choice_multi",
@@ -2974,6 +3043,7 @@ function rememberAgendaPurgeDefenseChoice(
 
 function rememberClassicDeflectorDefenseChoice(
   input: AiDecisionInput,
+  sourceDefinitionId: CardDefinitionId,
   selection:
     | {
         selectedOptionId: string;
@@ -2987,11 +3057,12 @@ function rememberClassicDeflectorDefenseChoice(
     side: "corp",
     stateVersion: input.playerView.stateVersion,
     rootForegroundInstanceId:
-      "plan:corp.defend_servers:server-defense-portfolio",
-    executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
+    executorInstanceId: "penw02zfrkklof54c2nuye5att",
     instances: [
       {
-        instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+ ...choicePlanFixture("corp.defend_servers", "server-defense-portfolio", input.playerView.stateVersion),
+        instanceId: "penw02zfrkklof54c2nuye5att",
         moduleId: "corp.defend_servers",
         executionState: "executor",
         moduleState: {
@@ -3000,14 +3071,14 @@ function rememberClassicDeflectorDefenseChoice(
             {
               kind: "generic",
               phase: "resolve_run_redirect",
-              actionIds: ["corp.resolve_choice"],
+              actionIds: ["cn"],
               choiceResolution: {
                 kind: "classic_deflector_redirect",
                 choiceId: "choice_multi",
                 sourceStateVersion: input.playerView.stateVersion,
-                runId: "run_8",
+                runId: 8,
                 sourceIceInstanceId: "deflector_ice",
-                sourceDefinitionId: "generic_deflector",
+                sourceDefinitionId,
                 subroutineIndex: 0,
                 subroutineId: "generic_deflector.subroutine.1.deflect_run",
                 targetProfile: "any_data_fort",
@@ -3029,7 +3100,7 @@ function rememberRunnerInstalledCardLiquidationChoice(
   input: AiDecisionInput,
   source: {
     sourceResourceInstanceId: string;
-    sourceResourceDefinitionId: string;
+    sourceResourceDefinitionId: number;
     selectedOptionId: string;
     selectedCardInstanceId?: string;
     disposition:
@@ -3049,13 +3120,14 @@ function rememberRunnerInstalledCardLiquidationChoice(
     side: "runner",
     stateVersion: input.playerView.stateVersion,
     rootForegroundInstanceId:
-      "plan:runner.economy:installed-card-liquidation%3Achoice_multi",
+      "pf0rzh5qwfe09ph3fb36iwxlpz",
     executorInstanceId:
-      "plan:runner.economy:installed-card-liquidation%3Achoice_multi",
+      "pf0rzh5qwfe09ph3fb36iwxlpz",
     instances: [
       {
+ ...choicePlanFixture("runner.economy", "installed-card-liquidation:choice_multi", input.playerView.stateVersion),
         instanceId:
-          "plan:runner.economy:installed-card-liquidation%3Achoice_multi",
+          "pf0rzh5qwfe09ph3fb36iwxlpz",
         moduleId: "runner.economy",
         executionState: "executor",
         moduleState: {
@@ -3063,7 +3135,7 @@ function rememberRunnerInstalledCardLiquidationChoice(
           signal: {
             conversionId: "installed-card-liquidation:choice_multi",
             ...source,
-            actionId: "runner.resolve_choice",
+            actionId: "rn",
             choiceId: "choice_multi",
             sourceStateVersion: input.playerView.stateVersion,
             selectedOptionId: source.selectedOptionId,
@@ -3096,8 +3168,8 @@ function corpDiscardChoiceInput(): AiDecisionInput {
     {
       side: "corp",
       gripOrHq: [
-        { ...visibleCard("corp_low", "asset"), definitionId: "low" },
-        { ...visibleCard("corp_high", "agenda"), definitionId: "high" },
+        { ...visibleCard("corp_low", "asset"), definitionId: syntheticCardDefinitionId("low") },
+        { ...visibleCard("corp_high", "agenda"), definitionId: syntheticCardDefinitionId("high") },
       ],
     },
   );
@@ -3118,8 +3190,8 @@ function corpStrategicPlanningGroupChoiceInput(): AiDecisionInput {
     {
       side: "corp",
       gripOrHq: [
-        { ...visibleCard("corp_low", "asset"), definitionId: "low" },
-        { ...visibleCard("corp_high", "agenda"), definitionId: "high" },
+        { ...visibleCard("corp_low", "asset"), definitionId: syntheticCardDefinitionId("low") },
+        { ...visibleCard("corp_high", "agenda"), definitionId: syntheticCardDefinitionId("high") },
       ],
     },
   );
@@ -3140,8 +3212,8 @@ function corpCorporateShuffleChoiceInput(): AiDecisionInput {
     {
       side: "corp",
       gripOrHq: [
-        { ...visibleCard("corp_low", "asset"), definitionId: "low" },
-        { ...visibleCard("corp_high", "agenda"), definitionId: "high" },
+        { ...visibleCard("corp_low", "asset"), definitionId: syntheticCardDefinitionId("low") },
+        { ...visibleCard("corp_high", "agenda"), definitionId: syntheticCardDefinitionId("high") },
       ],
     },
   );
@@ -3152,7 +3224,7 @@ function rememberResidentCorpDiscardBinding(
   actionId: string,
   selectedOptionIds: string[],
 ): void {
-  const instanceId = "plan:corp.hand_and_agenda_management:discard-window";
+  const instanceId = "p1cpecpxyrmqcpnm1t963w5xd8";
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "corp",
@@ -3161,6 +3233,7 @@ function rememberResidentCorpDiscardBinding(
     executorInstanceId: instanceId,
     instances: [
       {
+ ...choicePlanFixture("corp.hand_and_agenda_management", "discard-window", input.playerView.stateVersion),
         instanceId,
         moduleId: "corp.hand_and_agenda_management",
         executionState: "executor",
@@ -3191,7 +3264,7 @@ function rememberResidentRunnerDiscardBinding(
   actionId: string,
   selectedOptionIds: string[],
 ): void {
-  const instanceId = "plan:runner.defense_and_recovery:runner";
+  const instanceId = "p1gzjb6yfcv4zbzow512kexs33";
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "runner",
@@ -3200,6 +3273,7 @@ function rememberResidentRunnerDiscardBinding(
     executorInstanceId: instanceId,
     instances: [
       {
+ ...choicePlanFixture("runner.defense_and_recovery", "runner", input.playerView.stateVersion),
         instanceId,
         moduleId: "runner.defense_and_recovery",
         executionState: "executor",
@@ -3227,7 +3301,7 @@ function rememberResidentCorpDrawFilterBinding(
   actionId: string,
   selectedOptionIds: string[],
 ): void {
-  const instanceId = "plan:corp.hand_and_agenda_management:spg-draw-filter";
+  const instanceId = "pes7wja511pbpylt1kyyr0qjg7";
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "corp",
@@ -3236,6 +3310,7 @@ function rememberResidentCorpDrawFilterBinding(
     executorInstanceId: instanceId,
     instances: [
       {
+ ...choicePlanFixture("corp.hand_and_agenda_management", "spg-draw-filter", input.playerView.stateVersion),
         instanceId,
         moduleId: "corp.hand_and_agenda_management",
         executionState: "executor",
@@ -3266,7 +3341,7 @@ function rememberResidentCorpHqShuffleBinding(
   actionId: string,
   selectedOptionIds: string[],
 ): void {
-  const instanceId = "plan:corp.hand_and_agenda_management:hq-shuffle";
+  const instanceId = "p2fpe9ixdc55kgyrp1d902661i";
   rememberResidentPlanPortfolio(input, {
     schemaVersion: "resident-plan-portfolio-v2",
     side: "corp",
@@ -3275,6 +3350,7 @@ function rememberResidentCorpHqShuffleBinding(
     executorInstanceId: instanceId,
     instances: [
       {
+ ...choicePlanFixture("corp.hand_and_agenda_management", "hq-shuffle", input.playerView.stateVersion),
         instanceId,
         moduleId: "corp.hand_and_agenda_management",
         executionState: "executor",
@@ -3312,8 +3388,8 @@ function optionalRezQuote(): Extract<
     optionId: "rez_option",
     sourceAgendaId: "data-fort-agenda",
     cardId: "engine-certified-card",
-    cardDefinitionId: "engine-certified-definition",
-    targetServerId: "remote_1",
+    cardDefinitionId: syntheticCardDefinitionId("engine-certified-definition"),
+    targetServerId: "r1",
     installedZone: "serverIce",
     sequencePosition: 1,
     stateVersion: 7,
@@ -3322,7 +3398,10 @@ function optionalRezQuote(): Extract<
     baseCredits: 8,
     finalCredits: 8,
     mandatoryAdditionalCosts: { agendaPoints: 0 },
-    reductionSourceDefinitionIds: ["modifier-a", "modifier-b"],
+    reductionSourceDefinitionIds: [
+      syntheticCardDefinitionId("modifier-a"),
+      syntheticCardDefinitionId("modifier-b"),
+    ].sort((left, right) => left - right),
     temporaryCreditsAvailable: 5,
     temporaryCreditsApplied: 5,
     regularCreditsAvailable: 5,
@@ -3362,7 +3441,7 @@ function optionalRezInput(
   options: {
     optionValue?: string;
     optionCardId?: string;
-    optionDefinitionId?: string;
+    optionDefinitionId?: number;
   } = {},
 ): AiDecisionInput {
   const input = inputWithChoice(
@@ -3380,7 +3459,8 @@ function optionalRezInput(
           card: {
             instanceId: options.optionCardId ?? "engine-certified-card",
             definitionId:
-              options.optionDefinitionId ?? "engine-certified-definition",
+              options.optionDefinitionId ??
+              syntheticCardDefinitionId("engine-certified-definition"),
             known: true,
             type: "ice",
             rezzed: false,
@@ -3394,12 +3474,12 @@ function optionalRezInput(
       scoreArea: [visibleCard("data-fort-agenda", "agenda")],
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [
             {
               instanceId: "engine-certified-card",
-              definitionId: "engine-certified-definition",
+              definitionId: syntheticCardDefinitionId("engine-certified-definition"),
               known: true,
               type: "ice",
               rezzed: false,
@@ -3427,7 +3507,7 @@ function visibleCard(
 
 function resolveChoiceAction(side: "corp" | "runner" = "corp"): LegalAction {
   return {
-    actionId: `${side}.resolve_choice`,
+    actionId: side === "corp" ? "cn" : "rn",
     side,
     type: "resolve_choice",
     label: "Resolve choice",
@@ -3439,8 +3519,10 @@ function resolveChoiceAction(side: "corp" | "runner" = "corp"): LegalAction {
 function resolveChoiceActionForInput(input: AiDecisionInput): LegalAction {
   const choice = input.playerView.pendingChoice;
   if (!choice) throw new Error("Missing pending choice.");
-  return {
+  const action: LegalAction = {
     ...resolveChoiceAction(input.side),
+    targetRequirements: [],
+    visibility: "private_to_actor",
     timingPoint: input.playerView.timingPoint,
     expiresAtStateVersion: input.playerView.stateVersion,
     choiceRequirements: [
@@ -3452,6 +3534,21 @@ function resolveChoiceActionForInput(input: AiDecisionInput): LegalAction {
       },
     ],
   };
+  input.legalActions = [action];
+  input.playerView.legalActions = [action];
+  return action;
+}
+function resolveFixtureChoice(
+  input: AiDecisionInput,
+  dependencies: Parameters<typeof selectedChoicesForDecision>[2],
+  portfolio?: Parameters<typeof selectedChoicesForDecision>[3],
+) {
+  return selectedChoicesForDecision(
+    input,
+    resolveChoiceActionForInput(input),
+    dependencies,
+    portfolio,
+  );
 }
 
 function applyRealAction(
@@ -3492,4 +3589,19 @@ function unusedDependencies(): Parameters<
     rolesForCardId: () => [],
     effectsForCardId: () => [],
   };
+}
+
+function choicePlanFixture(moduleId: PlanModuleId, dedupeKey: string, stateVersion: number): PlanInstance {
+  return instantiatePlanProposal({
+    moduleId, moduleVersion: "1", dedupeKey,
+    side: moduleId.startsWith("corp.") ? "corp" : "runner",
+    strategyLineIds: [], executionClass: "bounded_sequence",
+    initialViability: "ready", persistencePolicy: "locked_sequence",
+    retentionPolicy: {
+      blockedStateVersionTtl: 8, dormantStateVersionTtl: 4, completedHistoryStateVersionTtl: 2,
+      abandonWhenTargetMissing: true, protectedWhileNeedOpen: true, protectedWhileCommitted: true,
+    },
+    phase: "resolve_bound_choice", milestone: "bound_choice_resolved", moduleState: {},
+    blockers: [], resumeConditions: [], completionConditions: [], abandonmentConditions: [], evidenceRefs: [],
+  }, stateVersion);
 }

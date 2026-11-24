@@ -78,6 +78,7 @@ describe("Trace bid efficiency", () => {
       traceValue: 8,
       runnerLink: 0,
       corpBid: 3,
+      traceRulesProfile: "classic_blind_corp_ties",
     });
 
     expect(selection).toEqual({
@@ -100,6 +101,7 @@ describe("Trace bid efficiency", () => {
       traceValue: 3,
       runnerLink: 0,
       corpBid: 1,
+      traceRulesProfile: "classic_blind_corp_ties",
     });
 
     expect(selection).toEqual({
@@ -122,6 +124,7 @@ describe("Trace bid efficiency", () => {
       traceValue: 3,
       runnerLink: 1,
       corpBid: 1,
+      traceRulesProfile: "classic_blind_corp_ties",
     });
 
     expect(selection).toEqual({
@@ -201,6 +204,7 @@ describe("Trace bid efficiency", () => {
       fallbackOptionId: "trace_link_signpost",
       traceValue: 5,
       runnerStrength: 6,
+      traceRulesProfile: "modern_open",
     });
 
     expect(selection).toEqual({
@@ -228,6 +232,7 @@ describe("Trace bid efficiency", () => {
       traceValue: 1,
       runnerLink: 0,
       runnerBid: 0,
+      traceRulesProfile: "classic_blind_corp_ties",
     });
 
     expect(selection).toEqual({
@@ -250,6 +255,7 @@ describe("Trace bid efficiency", () => {
       traceValue: 2,
       runnerLink: 0,
       runnerBid: 0,
+      traceRulesProfile: "classic_blind_corp_ties",
     });
 
     expect(selection).toEqual({
@@ -272,11 +278,30 @@ describe("Trace bid efficiency", () => {
       traceValue: 5,
       runnerLink: 0,
       runnerBid: 0,
+      traceRulesProfile: "classic_blind_corp_ties",
     });
 
     expect(selection).toEqual({
       option: { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
       reason: "post_bid_link_no_outcome_delta",
+    });
+  });
+
+  it("keeps the selected legal bid if the tie rule is unknown", () => {
+    expect(
+      selectEfficientTraceBidOption({
+        side: "runner",
+        bidOptions: [
+          { id: "tie", amount: 2 },
+          { id: "clear", amount: 3 },
+        ],
+        desiredAmount: 3,
+        traceValue: 2,
+        runnerLink: 0,
+      }),
+    ).toMatchObject({
+      option: { id: "clear" },
+      reason: "trace_bid_unknown_context",
     });
   });
 

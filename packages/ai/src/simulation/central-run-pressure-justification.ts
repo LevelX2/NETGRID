@@ -1,10 +1,7 @@
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { rolesMatch } from "../runtime/role-match";
-import {
-  runnerRunPathCreditBudgetWithVisiblePools,
-  type KnownRezzedIcePathAssessment,
-  type RunnerRunPathCreditBudget,
-} from "../visible-run-analysis";
+import { quoteVisibleRunnerPathForMetrics } from "./visible-run-path-for-metrics";
+import type { AiDecisionInput } from "@netgrid/shared";
+import { rolesMatch } from "../role-match";
+import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import {
   centralPressureTargetsForCard,
   isCentralPressureCardForMetrics,
@@ -13,17 +10,12 @@ import {
 type CentralServerTarget = "hq" | "rd" | "archives";
 
 type CentralRunPressureJustificationDependencies = {
-  assessKnownRezzedIcePath: (
-    iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-    rigCards: VisibleCard[],
-    runnerCredits: number | RunnerRunPathCreditBudget,
-    rootCards?: AiDecisionInput["playerView"]["servers"][number]["root"],
-  ) => KnownRezzedIcePathAssessment;
+  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   recentCentralRunSameTargetWithoutRefresh: (
     input: AiDecisionInput,
     target: CentralServerTarget,
   ) => boolean;
-  rolesForCardId: (definitionId: string | undefined) => string[];
+  rolesForCardId: (definitionId: number | undefined) => string[];
   runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
   trueCentralCloseoutProfileForMetrics: (
     input: AiDecisionInput,
@@ -119,14 +111,11 @@ export function runnerCentralRunPressureJustificationReasons(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === centralTarget,
   );
-  const assessment = dependencies.assessKnownRezzedIcePath(
-    server?.ice ?? [],
-    input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
-    server?.root ?? [],
+  if (!server) return [];
+  const assessment = quoteVisibleRunnerPathForMetrics(
+    input,
+    server,
+    dependencies.assessKnownRezzedIcePath,
   );
   if (assessment.blocked) return [];
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;
@@ -142,7 +131,7 @@ export function runnerCentralRunPressureJustificationReasons(
   const hasMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
     rolesMatch(dependencies.rolesForCardId(card.definitionId), ["multiaccess"]),
   );
-  const openOrCheap = visibleBreakCost <= 1 || (server?.ice.length ?? 0) === 0;
+  const openOrCheap = visibleBreakCost <= 1 || server.ice.length === 0;
   const preservesReserve =
     assessment.creditsAfterPath >=
     dependencies.runnerCreditReserveTargetForInput(input);
@@ -192,16 +181,13 @@ export function runnerCentralRunBurnsRemoteContestReserve(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === targetServerId,
   );
-  const assessment = dependencies.assessKnownRezzedIcePath(
-    server?.ice ?? [],
-    input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      input.playerView.own.credits,
-      input.playerView.own.rig ?? [],
-    ),
-    server?.root ?? [],
+  if (!server || contestableProfiles.length === 0) return false;
+  const assessment = quoteVisibleRunnerPathForMetrics(
+    input,
+    server,
+    dependencies.assessKnownRezzedIcePath,
   );
-  if (assessment.blocked || contestableProfiles.length === 0) return false;
+  if (assessment.blocked) return false;
   const creditsAfterPath = assessment.creditsAfterPath;
   const requiredReserve = Math.max(
     ...contestableProfiles.map((profile) => profile.postRunReserveTarget),

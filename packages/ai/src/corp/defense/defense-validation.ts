@@ -1,3 +1,6 @@
+import { isRemoteServerId, isRunId, isTraceId } from "@netgrid/shared";
+import { isCardDefinitionId } from "@netgrid/shared";
+import { parseOptionalCardDefinitionIdCsv } from "../../card-definition-id-input";
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
 import { validCorpRezOrTrashChoiceResolution } from "./rez-or-trash-choice";
 import {
@@ -33,16 +36,47 @@ export function selectedRezCostSetsEqual(
   );
   return (
     rightByInstanceId.size === right.length &&
+    new Set(left.map((cost) => cost.iceInstanceId)).size === left.length &&
     left.every((cost) => {
       const matching = rightByInstanceId.get(cost.iceInstanceId);
       return (
         matching?.iceDefinitionId === cost.iceDefinitionId &&
         matching.credits === cost.credits &&
         (matching.agendaPoints ?? 0) === (cost.agendaPoints ?? 0) &&
-        matching.source === cost.source
+        matching.source === cost.source &&
+        variableRezChoicesEqual(
+          matching.variableRezChoice,
+          cost.variableRezChoice,
+        )
       );
     })
   );
+}
+
+function variableRezChoicesEqual(left: unknown, right: unknown): boolean {
+  const leftKey = variableRezChoiceKey(left);
+  return leftKey !== undefined && leftKey === variableRezChoiceKey(right);
+}
+
+function variableRezChoiceKey(value: unknown): string | undefined {
+  if (value === undefined) return "fixed";
+  const choice = defenseRecord(value);
+  switch (choice?.kind) {
+    case "x_strength":
+      return knownNonNegativeInteger(choice.value)
+        ? `x_strength:${choice.value}`
+        : undefined;
+    case "paid_end_the_run_subroutines":
+      return knownPositiveInteger(choice.subroutineCount)
+        ? `paid_end_the_run_subroutines:${choice.subroutineCount}`
+        : undefined;
+    case "alternate_subtype": {
+      const subtypes = canonicalSubtypeArray(choice.selectedSubtypes);
+      return subtypes ? `alternate_subtype:${subtypes.join(",")}` : undefined;
+    }
+    default:
+      return undefined;
+  }
 }
 
 const POST_INSTALL_VARIABLE_REZ_FIELDS = [
@@ -328,22 +362,10 @@ export function selectedRezAgendaPointCost(
   return total;
 }
 
-export function validDefinitionIdArray(value: unknown): boolean {
-  if (value === undefined) return true;
-  return (
-    Array.isArray(value) &&
-    value.every(
-      (id, index) =>
-        typeof id === "string" &&
-        id.length > 0 &&
-        (index === 0 || value[index - 1]! < id),
-    )
-  );
-}
 
 export function definitionIdListsAreDisjoint(
-  left: readonly string[],
-  right: readonly string[],
+  left: readonly number[],
+  right: readonly number[],
 ): boolean {
   const leftIds = new Set(left);
   return right.every((id) => !leftIds.has(id));
@@ -352,10 +374,10 @@ export function definitionIdListsAreDisjoint(
 export function validPostInstallRezQuoteModifiers(
   payload: NonNullable<AiDecisionInput["legalActions"][number]["payload"]>,
 ): boolean {
-  const reductionIds = commaSeparatedDefinitionIds(
+  const reductionIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteReductionSourceDefinitionIds,
   );
-  const increaseIds = commaSeparatedDefinitionIds(
+  const increaseIds = parseOptionalCardDefinitionIdCsv(
     payload.postInstallRezQuoteIncreaseSourceDefinitionIds,
   );
   if (reductionIds === undefined || increaseIds === undefined) return false;
@@ -373,24 +395,10 @@ export function validPostInstallProjectedServerBinding(
 ): boolean {
   return targetServerId === "new_remote"
     ? typeof projectedServerId === "string" &&
-        /^remote_[1-9]\d*$/.test(projectedServerId)
+        /^r[1-9]\d*$/.test(projectedServerId)
     : projectedServerId === targetServerId;
 }
 
-function validCommaSeparatedDefinitionIds(value: unknown): boolean {
-  if (value === undefined) return true;
-  if (typeof value !== "string" || value.length === 0) return false;
-  const ids = value.split(",");
-  return ids.every(
-    (id, index) => id.length > 0 && (index === 0 || ids[index - 1]! < id),
-  );
-}
-
-function commaSeparatedDefinitionIds(value: unknown): string[] | undefined {
-  if (value === undefined) return [];
-  if (!validCommaSeparatedDefinitionIds(value)) return undefined;
-  return (value as string).split(",");
-}
 
 export function knownExactInstallRouteCreditCost(
   projection: KnownCorpFundedIceInstallRouteProjection,
@@ -411,8 +419,11 @@ export function validDefenseSignals(
   signals: readonly CorpDefenseSignal[],
   context: PlanSchedulerContext,
 ): CorpDefenseSignal[] {
-  const invalid = signals.find((signal) => !isValidDefenseSignal(signal));
-  if (!invalid) return [...signals];
+  const invalidIndex = signals.findIndex(
+    (signal) => !isValidDefenseSignal(signal),
+  );
+  if (invalidIndex === -1) return [...signals];
+  const invalid = signals[invalidIndex]!;
   throw new PlanResolutionFailure("missing_plan_module_coverage", {
     side: context.input.side,
     stateVersion: context.input.playerView.stateVersion,
@@ -421,7 +432,7 @@ export function validDefenseSignals(
     unresolvedActionIds: defenseSignalActionIds(invalid),
     owner: "plan_module",
     removalCondition: `Replace incomplete or legacy Corp defense signal ${String(
-      (invalid as { defenseId?: unknown }).defenseId ?? "unknown",
+      defenseRecord(invalid)?.defenseId ?? "unknown",
     )} with a complete discriminated defense contract.`,
   });
 }
@@ -515,9 +526,9 @@ export function validClassicDeflectorDefenseChoiceResolution(
     resolution.kind === "classic_deflector_redirect" &&
     nonEmptyString(resolution.choiceId) &&
     knownNonNegativeInteger(resolution.sourceStateVersion) &&
-    nonEmptyString(resolution.runId) &&
+    isRunId(resolution.runId) &&
     nonEmptyString(resolution.sourceIceInstanceId) &&
-    nonEmptyString(resolution.sourceDefinitionId) &&
+    isCardDefinitionId(resolution.sourceDefinitionId) &&
     knownNonNegativeInteger(resolution.subroutineIndex) &&
     nonEmptyString(resolution.subroutineId) &&
     (resolution.targetProfile === "archives" ||
@@ -670,7 +681,7 @@ export function validKnownInstallProjection(
       projection.effect === "satisfied") &&
     nonEmptyString(projection.actionId) &&
     nonEmptyString(projection.sourceCardInstanceId) &&
-    nonEmptyString(projection.sourceDefinitionId) &&
+    isCardDefinitionId(projection.sourceDefinitionId) &&
     nonEmptyString(projection.targetServerId) &&
     before?.knowledge === "known" &&
     after?.knowledge === "known" &&
@@ -685,11 +696,12 @@ export function validKnownInstallProjection(
       const rezCost = selected as Record<string, unknown>;
       return (
         nonEmptyString(rezCost.iceInstanceId) &&
-        nonEmptyString(rezCost.iceDefinitionId) &&
+        isCardDefinitionId(rezCost.iceDefinitionId) &&
         knownNonNegativeInteger(rezCost.credits) &&
         (rezCost.agendaPoints === undefined ||
           knownNonNegativeInteger(rezCost.agendaPoints)) &&
-        rezCost.source === "engine_rez_cost_quote"
+        rezCost.source === "engine_rez_cost_quote" &&
+        variableRezChoiceKey(rezCost.variableRezChoice) !== undefined
       );
     }) &&
     knownNonNegativeInteger(projection.creditsAfterDefense) &&
@@ -705,28 +717,32 @@ export function validKnownInstallProjection(
 }
 
 export function validExactIceRezRoute(value: unknown): boolean {
-  if (!value || typeof value !== "object") return false;
-  const route = value as Record<string, unknown>;
-  const quote = route.quote as Record<string, unknown> | undefined;
-  const before = route.before as Record<string, unknown> | undefined;
-  const after = route.after as Record<string, unknown> | undefined;
-  const resourceExchange = route.resourceExchange as
-    | Record<string, unknown>
-    | undefined;
+  const route = defenseRecord(value);
+  if (!route) return false;
+  const quote = defenseRecord(route.quote);
+  const before = defenseRecord(route.before);
+  const after = defenseRecord(route.after);
+  const resourceExchange = defenseRecord(route.resourceExchange);
   const hasKnownHolisticAssessment =
     before?.knowledge === "known" &&
     after?.knowledge === "known" &&
     validExactProbability(before.runnerAccessSuccessProbability) &&
     validExactProbability(after.runnerAccessSuccessProbability);
   const hasExactResourceExchange =
-    route.routeKind === "exact_resource_exchange" &&
     resourceExchange !== undefined &&
     knownNonNegativeInteger(resourceExchange.runnerRequiredCredits) &&
     knownNonNegativeInteger(resourceExchange.runnerPumpCredits) &&
     knownNonNegativeInteger(resourceExchange.runnerBreakCredits) &&
     knownNonNegativeInteger(resourceExchange.runnerBreakUses) &&
+    knownNonNegativeInteger(resourceExchange.runnerNormalCreditsRequired) &&
+    knownNonNegativeInteger(
+      resourceExchange.runnerNonNormalRunCreditsApplied,
+    ) &&
+    knownNonNegativeInteger(
+      resourceExchange.runnerNormalCreditsLostOnAccessPath,
+    ) &&
     nonEmptyString(resourceExchange.runnerBreakerInstanceId) &&
-    nonEmptyString(resourceExchange.runnerBreakerDefinitionId) &&
+    isCardDefinitionId(resourceExchange.runnerBreakerDefinitionId) &&
     Array.isArray(resourceExchange.runnerConsumedCardInstanceIds) &&
     resourceExchange.runnerConsumedCardInstanceIds.every(nonEmptyString) &&
     (resourceExchange.layeredCentralPathTax === undefined ||
@@ -741,7 +757,7 @@ export function validExactIceRezRoute(value: unknown): boolean {
           return (
             consequence.kind === "post_encounter_self_trash_check" &&
             nonEmptyString(consequence.cardId) &&
-            nonEmptyString(consequence.definitionId) &&
+            isCardDefinitionId(consequence.definitionId) &&
             knownNonNegativeInteger(consequence.numerator) &&
             (consequence.numerator as number) > 0 &&
             knownNonNegativeInteger(consequence.denominator) &&
@@ -749,23 +765,21 @@ export function validExactIceRezRoute(value: unknown): boolean {
               (consequence.numerator as number)
           );
         })));
-  const accessBlock = route.accessBlock as Record<string, unknown> | undefined;
+  const accessBlock = defenseRecord(route.accessBlock);
   const hasExactAccessBlock =
-    route.routeKind === "access_reduction" &&
     accessBlock !== undefined &&
     knownNonNegativeInteger(accessBlock.hardEndTheRunSubroutineCount) &&
     (accessBlock.hardEndTheRunSubroutineCount as number) > 0 &&
     (accessBlock.reason === "no_visible_eligible_breaker" ||
       accessBlock.reason === "visible_break_route_unaffordable");
-  const trace = route.traceAccessBlock as Record<string, unknown> | undefined;
+  const trace = defenseRecord(route.traceAccessBlock);
   const hasExactTraceBlock =
-    route.routeKind === "trace_access_block" &&
     trace !== undefined &&
     trace.actionId === route.actionId &&
     trace.sourceCardInstanceId === route.sourceCardInstanceId &&
     trace.targetServerId === route.targetServerId &&
     trace.stateVersion === quote?.expiresAtStateVersion &&
-    nonEmptyString(trace.runId) &&
+    isRunId(trace.runId) &&
     trace.rezCredits === quote?.finalCredits &&
     (quote?.costKind === "variable"
       ? knownNonNegativeInteger(trace.variableValue)
@@ -776,11 +790,7 @@ export function validExactIceRezRoute(value: unknown): boolean {
     trace.corpTraceStrength > trace.maximumRunnerTraceStrength &&
     trace.runnerCanBreak === false &&
     trace.guaranteedRunEnd === true;
-  const hasExactMarginalDefenseThreat =
-    route.routeKind === "qualitative_encounter_defense" &&
-    (route.marginalDefenseThreat === "visible_agenda_remote" ||
-      route.marginalDefenseThreat === "terminal_central_access");
-  const bluff = route.bluffDefenseNeed as Record<string, unknown> | undefined;
+  const bluff = defenseRecord(route.bluffDefenseNeed);
   const hasBoundBluffDefense =
     bluff !== undefined &&
     bluff.serverId === route.targetServerId &&
@@ -793,20 +803,80 @@ export function validExactIceRezRoute(value: unknown): boolean {
     (bluff.outcome === "access_cost" ||
       bluff.outcome === "visible_stop" ||
       bluff.outcome === "paid_encounter_opportunity");
-  const currentEncounterDefense = route.currentEncounterDefense as
-    | Record<string, unknown>
-    | undefined;
+  const currentEncounterDefense = defenseRecord(route.currentEncounterDefense);
   const hasExactCurrentEncounterDefense =
-    route.routeKind === "qualitative_encounter_defense" &&
     currentEncounterDefense?.effect ===
       "meaningful_tax_or_damage_or_disruption" &&
     currentEncounterDefense.evidenceSource ===
       "visible_corp_ice_defense_profile" &&
     knownNonNegativeInteger(currentEncounterDefense.activationCredits);
+  const routeKind = route.routeKind;
+  if (
+    ((route.before !== undefined || route.after !== undefined) &&
+      !hasKnownHolisticAssessment) ||
+    (route.resourceExchange !== undefined &&
+      (routeKind !== "exact_resource_exchange" || !hasExactResourceExchange)) ||
+    (route.accessBlock !== undefined &&
+      (routeKind !== "access_reduction" || !hasExactAccessBlock)) ||
+    (route.traceAccessBlock !== undefined &&
+      (routeKind !== "trace_access_block" || !hasExactTraceBlock)) ||
+    (route.currentEncounterDefense !== undefined &&
+      (routeKind !== "qualitative_encounter_defense" ||
+        !hasExactCurrentEncounterDefense)) ||
+    (route.knownAccessPathTax !== undefined &&
+      (routeKind !== "known_access_path_tax" ||
+        !knownPositiveInteger(route.knownAccessPathTax))) ||
+    (route.bluffDefenseNeed !== undefined && !hasBoundBluffDefense) ||
+    (route.marginalDefenseThreat !== undefined &&
+      route.marginalDefenseThreat !== "visible_agenda_remote" &&
+      route.marginalDefenseThreat !== "terminal_central_access") ||
+    (route.immediateCorpCreditGain !== undefined &&
+      (!knownPositiveInteger(route.immediateCorpCreditGain) ||
+        route.totalRezCredits !== 0)) ||
+    (route.continuationRezCredits !== undefined &&
+      !knownPositiveInteger(route.continuationRezCredits))
+  ) {
+    return false;
+  }
+
+  let hasRouteEvidence: boolean;
+  switch (routeKind) {
+    case "access_reduction":
+      hasRouteEvidence = hasExactAccessBlock || hasKnownHolisticAssessment;
+      break;
+    case "exact_resource_exchange":
+      hasRouteEvidence = hasExactResourceExchange;
+      break;
+    case "trace_access_block":
+      hasRouteEvidence = hasExactTraceBlock && route.effect === "satisfied";
+      break;
+    case "qualitative_encounter_defense":
+      hasRouteEvidence = hasExactCurrentEncounterDefense;
+      break;
+    case "known_access_path_tax":
+      hasRouteEvidence =
+        hasKnownHolisticAssessment &&
+        knownPositiveInteger(route.knownAccessPathTax);
+      break;
+    case "free_persistent_defense":
+      hasRouteEvidence =
+        hasKnownHolisticAssessment && route.totalRezCredits === 0;
+      break;
+    case "costless_immediate_credit_gain":
+      hasRouteEvidence =
+        knownPositiveInteger(route.immediateCorpCreditGain) &&
+        route.totalRezCredits === 0 &&
+        route.effect === "progress";
+      break;
+    default:
+      return false;
+  }
+
   return (
+    hasRouteEvidence &&
     nonEmptyString(route.actionId) &&
     nonEmptyString(route.sourceCardInstanceId) &&
-    nonEmptyString(route.sourceDefinitionId) &&
+    isCardDefinitionId(route.sourceDefinitionId) &&
     nonEmptyString(route.targetServerId) &&
     quote?.context === "installed" &&
     quote.complete === true &&
@@ -814,13 +884,6 @@ export function validExactIceRezRoute(value: unknown): boolean {
     quote.targetServerId === route.targetServerId &&
     knownNonNegativeInteger(quote.expiresAtStateVersion) &&
     knownNonNegativeInteger(quote.finalCredits) &&
-    (hasKnownHolisticAssessment ||
-      hasExactResourceExchange ||
-      hasExactAccessBlock ||
-      hasExactTraceBlock ||
-      hasBoundBluffDefense ||
-      hasExactMarginalDefenseThreat ||
-      hasExactCurrentEncounterDefense) &&
     (route.effect === "progress" || route.effect === "satisfied") &&
     knownNonNegativeInteger(route.totalRezCredits) &&
     quote.finalCredits === route.totalRezCredits
@@ -904,6 +967,7 @@ export const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "urgent",
   "visibleAgendaExposureDefense",
   "centralPressure",
+  "protectedCentralServerId",
   "immediateInstallSupport",
   "iceInstallCostSupportActionId",
   "rezWindowVerdict",
@@ -1010,7 +1074,8 @@ export function exactInstallRouteCreditCost(
 }
 
 export function defenseSignalActionIds(signal: CorpDefenseSignal): string[] {
-  const value = signal as unknown as Record<string, unknown>;
+  const value = defenseRecord(signal);
+  if (!value) return [];
   if (
     (value.kind === "score_protection_terminal_install" ||
       value.kind === "score_protection_install" ||
@@ -1028,8 +1093,9 @@ export function defenseSignalActionIds(signal: CorpDefenseSignal): string[] {
 export function isValidDefenseSignal(
   signal: CorpDefenseSignal,
 ): signal is CorpDefenseSignal {
-  const value = signal as unknown as Record<string, unknown>;
+  const value = defenseRecord(signal);
   if (
+    !value ||
     !nonEmptyString(value.defenseId) ||
     !nonEmptyString(value.serverId) ||
     !nonEmptyString(value.evidenceCode)
@@ -1046,6 +1112,16 @@ export function isValidDefenseSignal(
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
+      (value.protectedCentralServerId === undefined ||
+        ((value.protectedCentralServerId === "hq" ||
+          value.protectedCentralServerId === "rd") &&
+          value.phase === "install_defense_support" &&
+          value.centralPressure !== undefined &&
+          (value.serverId === "new_remote" || isRemoteServerId(value.serverId)) &&
+          Array.isArray(value.actionIds) &&
+          value.actionIds.length === 1 &&
+          Array.isArray(value.sourceDefinitionIds) &&
+          value.sourceDefinitionIds.length === 1)) &&
       (value.visibleAgendaExposureDefense === undefined ||
         (value.visibleAgendaExposureDefense === true &&
           value.serverId === "archives" &&
@@ -1080,7 +1156,7 @@ export function isValidDefenseSignal(
           ) &&
           signal.actionIds?.length === 0)) &&
       Array.isArray(value.sourceDefinitionIds) &&
-      value.sourceDefinitionIds.every(nonEmptyString) &&
+      value.sourceDefinitionIds.every(isCardDefinitionId) &&
       (value.actionIds === undefined ||
         (Array.isArray(value.actionIds) &&
           value.actionIds.every(nonEmptyString))) &&
@@ -1123,27 +1199,7 @@ export function isValidDefenseSignal(
           value.centralPressure === "terminal" &&
           value.urgent === true
         : value.rezReserveNeed === undefined) &&
-      (value.choiceResolution === undefined ||
-        (value.phase === "resolve_rez_or_trash" &&
-          validCorpRezOrTrashChoiceResolution(value.choiceResolution, value)) ||
-        (value.phase === "resolve_hardware_trash" &&
-          validTraceHardwareTrashResolution(value.choiceResolution)) ||
-        (value.phase === "resolve_program_trash" &&
-          validProgramTrashResolution(value.choiceResolution)) ||
-        (value.phase === "resolve_install_targets" &&
-          validAgendaPurgeDefenseChoiceResolution(
-            value.choiceResolution,
-            value,
-          )) ||
-        (value.phase === "resolve_run_redirect" &&
-          validClassicDeflectorDefenseChoiceResolution(
-            value.choiceResolution,
-            value,
-          ))) &&
-      (value.phase !== "resolve_hardware_trash" ||
-        validTraceHardwareTrashResolution(value.choiceResolution)) &&
-      (value.phase !== "resolve_rez_or_trash" ||
-        validCorpRezOrTrashChoiceResolution(value.choiceResolution, value)) &&
+      validDefenseChoiceResolution(value) &&
       (value.phase !== "resolve_post_pass_ice_lifecycle" ||
         (value.sourceDefinitionIds.length === 1 &&
           Array.isArray(value.actionIds) &&
@@ -1176,7 +1232,7 @@ export function isValidDefenseSignal(
       scorePriorityClass(value.delegatedPriorityClass) &&
       nonEmptyString(value.actionId) &&
       nonEmptyString(value.sourceCardInstanceId) &&
-      nonEmptyString(value.sourceDefinitionId) &&
+      isCardDefinitionId(value.sourceDefinitionId) &&
       (value.effect === "progress" || value.effect === "satisfied") &&
       validExactProbability(value.runnerAccessSuccessProbability) &&
       knownNonNegativeInteger(value.totalInstallAndRezCredits) &&
@@ -1219,7 +1275,7 @@ export function isValidDefenseSignal(
       scorePriorityClass(value.delegatedPriorityClass) &&
       nonEmptyString(value.actionId) &&
       nonEmptyString(value.sourceCardInstanceId) &&
-      nonEmptyString(value.sourceDefinitionId)
+      isCardDefinitionId(value.sourceDefinitionId)
     );
   }
   if (value.kind === "score_protection_draw") {
@@ -1246,6 +1302,83 @@ export function isValidDefenseSignal(
   return false;
 }
 
+function validDefenseChoiceResolution(
+  signal: Record<string, unknown>,
+): boolean {
+  const resolution = signal.choiceResolution;
+  switch (signal.phase) {
+    case "resolve_rez_or_trash":
+      return validCorpRezOrTrashChoiceResolution(resolution, signal);
+    case "resolve_hardware_trash":
+      return validTraceHardwareTrashResolution(resolution);
+    case "resolve_program_trash":
+      return (
+        Array.isArray(signal.actionIds) &&
+        signal.actionIds.length === 1 &&
+        validProgramTrashResolution(resolution)
+      );
+    case "resolve_install_targets":
+      return validAgendaPurgeDefenseChoiceResolution(resolution, signal);
+    case "resolve_run_redirect": {
+      const resolution = defenseRecord(signal.choiceResolution);
+      if (resolution?.kind === "start_run_redirect") {
+        const target = defenseRecord(resolution.target);
+        return (
+          hasOnlyKeys(
+            resolution,
+            new Set([
+              "kind",
+              "choiceId",
+              "sourceStateVersion",
+              "runId",
+              "originalServerId",
+              "selectedOptionId",
+              "target",
+            ]),
+          ) &&
+          nonEmptyString(resolution.choiceId) &&
+          knownNonNegativeInteger(resolution.sourceStateVersion) &&
+          isRunId(resolution.runId) &&
+          nonEmptyString(resolution.originalServerId) &&
+          Array.isArray(signal.actionIds) &&
+          signal.actionIds.length === 1 &&
+          nonEmptyString(signal.actionIds[0]) &&
+          (resolution.target === undefined
+            ? resolution.selectedOptionId === "pass" &&
+              signal.serverId === resolution.originalServerId
+            : target !== undefined &&
+              hasOnlyKeys(
+                target,
+                new Set([
+                  "sourceCardInstanceId",
+                  "sourceDefinitionId",
+                  "serverId",
+                  "creditCost",
+                ]),
+              ) &&
+              nonEmptyString(target.sourceCardInstanceId) &&
+              isCardDefinitionId(target.sourceDefinitionId) &&
+              nonEmptyString(target.serverId) &&
+              target.serverId !== resolution.originalServerId &&
+              target.serverId === signal.serverId &&
+              knownNonNegativeInteger(target.creditCost) &&
+              resolution.selectedOptionId ===
+                `redirect_${target.sourceCardInstanceId}`)
+        );
+      }
+      return validClassicDeflectorDefenseChoiceResolution(resolution, signal);
+    }
+    default:
+      return resolution === undefined;
+  }
+}
+
+function defenseRecord(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
 function validTraceHardwareTrashResolution(value: unknown): boolean {
   if (!value || typeof value !== "object") return false;
   const r = value as Record<string, unknown>;
@@ -1269,19 +1402,17 @@ function validTraceHardwareTrashResolution(value: unknown): boolean {
     r.kind === "trace_hardware_trash" &&
     knownNonNegativeInteger(r.sourceStateVersion) &&
     knownNonNegativeInteger(r.subroutineIndex) &&
+    isRunId(r.runId) &&
+    isTraceId(r.traceId) &&
+    isCardDefinitionId(r.sourceDefinitionId) &&
     [
       r.choiceId,
       r.choiceSource,
-      r.traceId,
-      r.runId,
       r.sourceIceInstanceId,
-      r.sourceDefinitionId,
       r.selectedOptionId,
       r.targetCardInstanceId,
     ].every(nonEmptyString) &&
     r.choiceSource === `trace_success.hardware_wrecker:${r.traceId}` &&
-    r.traceId ===
-      `${r.runId}.${r.sourceIceInstanceId}.${r.subroutineIndex}.trace` &&
     r.choiceId ===
       `trace_hardware_wrecker_${r.traceId}_${r.sourceStateVersion}` &&
     r.selectedOptionId === `hardware_${r.targetCardInstanceId}`
@@ -1295,8 +1426,8 @@ function validProgramTrashResolution(value: unknown): boolean {
   return (
     r.kind === "program_trash" &&
     !!origin &&
-    ((origin.kind === "encounter" && nonEmptyString(origin.runId)) ||
-      (origin.kind === "trace_success" && nonEmptyString(origin.traceId))) &&
+    ((origin.kind === "encounter" && isRunId(origin.runId)) ||
+      (origin.kind === "trace_success" && isTraceId(origin.traceId))) &&
     knownNonNegativeInteger(r.sourceStateVersion) &&
     [
       r.choiceId,

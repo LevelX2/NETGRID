@@ -45,7 +45,7 @@ type RunnerEconomySetupActionClassCompositionDependencies = {
   sourceDefinitionIdForSimulationAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => string | undefined;
+  ) => number | undefined;
 };
 
 export type RunnerSimulationDiagnosticsCompositionDependencies =
@@ -92,8 +92,7 @@ export function createRunnerSimulationDiagnosticsComposition(
         dependencies.hasRunnerPlayableEconomyAction,
       hasRunnerInstallableBreakerAction:
         dependencies.hasRunnerInstallableBreakerAction,
-      hasRunnerRunnablePressureAction:
-        dependencies.hasRunnerRunnablePressureAction,
+      hasRunnerPlayablePressureCard: dependencies.hasRunnerPlayablePressureCard,
       hasRunnerRemoteTrashAction: dependencies.hasRunnerRemoteTrashAction,
       runnerDiscardChoiceRoles: dependencies.runnerDiscardChoiceRoles,
       isRunnerDuplicateInstall: dependencies.isRunnerDuplicateInstall,
@@ -126,6 +125,8 @@ export function createRunnerSimulationDiagnosticsComposition(
   const runnerEconomySetupDiagnosticsForSimulationAction =
     createRunnerEconomySetupDiagnosticsForSimulationAction({
       runnerEconomySetupActionClass,
+      rolesForAction: dependencies.rolesForAction,
+      isRunnerPressureAction: dependencies.isRunnerPressureAction,
       runnerCreditReserveTargetForInput:
         dependencies.runnerCreditReserveTargetForInput,
       runnerHasKnownUnaffordableLegalRun:
@@ -147,7 +148,6 @@ export function createRunnerSimulationDiagnosticsComposition(
       runnerMissingCoverageTypesForInput:
         dependencies.runnerMissingCoverageTypesForInput,
       definitionForSimulationAction: dependencies.definitionForSimulationAction,
-      runnerRunKnownPathCost: dependencies.runnerRunKnownPathCost,
       runnerSetupChosenFamilyForEntry:
         dependencies.runnerSetupChosenFamilyForEntry,
     });

@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "./compact-card-reference.test-support";
 import { corpIceInstallPositionEffect } from "../../corp/defense/corp-defense-domain-signals";
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
@@ -94,8 +95,8 @@ describe("position-bound ICE installation", () => {
       expect(action.type).toBe("install_card");
       expect(action.payload.placement).toBe("ice");
       const expected = name.includes("g26")
-        ? "onr_v1_225_canis-major"
-        : "onr_v1_258_neural-blade";
+        ? 437
+        : 470;
       expect(
         f.input.playerView.own.gripOrHq.find(
           (c: { instanceId: string }) => c.instanceId === action.source,
@@ -118,7 +119,7 @@ describe("position-bound ICE installation", () => {
       input = f.input;
     const action = input.legalActions.find(
       (a: any) =>
-        a.payload?.serverId === "hq" && a.source.includes("canis-major"),
+        a.payload?.serverId === "hq" && referencesDefaultDeckCard(a.source, 437),
     );
     const source = input.playerView.own.gripOrHq.find(
       (c: any) => c.instanceId === action.source,
@@ -157,7 +158,7 @@ describe("position-bound ICE installation", () => {
       input = f.input;
     const action = input.legalActions.find(
       (a: any) =>
-        a.payload?.serverId === "hq" && a.source.includes("canis-major"),
+        a.payload?.serverId === "hq" && referencesDefaultDeckCard(a.source, 437),
     );
     const source = input.playerView.own.gripOrHq.find(
       (c: any) => c.instanceId === action.source,
@@ -174,7 +175,7 @@ describe("position-bound ICE installation", () => {
       input = f.input;
     const action = input.legalActions.find(
       (a: any) =>
-        a.payload?.serverId === "hq" && a.source.includes("canis-major"),
+        a.payload?.serverId === "hq" && referencesDefaultDeckCard(a.source, 437),
     );
     const source = input.playerView.own.gripOrHq.find(
       (c: any) => c.instanceId === action.source,

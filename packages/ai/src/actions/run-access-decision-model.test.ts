@@ -13,14 +13,14 @@ describe("run/access decision model", () => {
           "access.corp_net_damage_ambush",
           "access.additional_access",
         ],
-        serverId: "remote_1",
+        serverId: "r1",
       }),
-      action("start_run", { serverId: "remote_1", bypassFirstIce: true }),
+      action("start_run", { serverId: "r1", bypassFirstIce: true }),
     );
 
     expect(model).toMatchObject({
       coverageStatus: "covered",
-      serverId: "remote_1",
+      serverId: "r1",
       modifiers: expect.arrayContaining([
         "bypass_ice",
         "additional_subroutines",

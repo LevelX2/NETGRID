@@ -1,9 +1,27 @@
+import { actionClickCost, actionCreditCost } from "../runtime/action-cost";
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   costProfileForAction,
   timingProfileForAction,
 } from "./action-cost-timing";
+
+it("takes a free action and split formal costs directly from the Engine offer", () => {
+  const freeRun = {
+    ...action("start_run", { bonusRunNoClick: true }),
+    costs: [],
+  };
+  expect(actionClickCost(freeRun)).toBe(0);
+  const splitCost = {
+    ...freeRun,
+    costs: [{ clicks: 0, credits: 1 }, { credits: 2 }],
+  };
+  expect(actionCreditCost(splitCost)).toBe(3);
+  expect(actionClickCost(splitCost)).toBe(0);
+  expect(() =>
+    actionCreditCost({ ...freeRun, costs: [{ credits: -1 }] }),
+  ).toThrow(/invalid_legal_action_cost/);
+});
 
 describe("action cost and timing profiles", () => {
   it.each([0, 1, 4])(
@@ -79,9 +97,9 @@ describe("action cost and timing profiles", () => {
       costProfileForAction({ ...bound, costs: [{ credits: 6 }] })
         .additionalCosts,
     ).toContain("variableRezKind");
-    expect(costProfileForAction({ ...bound, costs: [] }).additionalCosts).toContain(
-      "variableRezKind",
-    );
+    expect(
+      costProfileForAction({ ...bound, costs: [] }).additionalCosts,
+    ).toContain("variableRezKind");
     expect(
       costProfileForAction({
         ...bound,

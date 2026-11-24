@@ -5,8 +5,10 @@ import type {
   ActionTargetContext,
   TargetProfileMatch,
 } from "../action-semantic-candidate-types";
-import type { AiHintActionCapacityProfile } from "../hint-ontology";
-import type { AiHintStructuredEffect } from "../hint-ontology";
+import type {
+  AiHintActionCapacityProfile,
+  AiHintStructuredEffect,
+} from "../hint-ontology";
 import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 
 export function applyCardSemanticJoin(
@@ -371,6 +373,14 @@ function uniqueFunctionalEffects(
       effect.amountKind ?? null,
       effect.economyMode ?? null,
       effect.target ?? null,
+      effect.counterRemoval
+        ? [
+            effect.counterRemoval.counterType,
+            effect.counterRemoval.credits,
+            effect.counterRemoval.clicks,
+            effect.counterRemoval.amount,
+          ]
+        : null,
       effect.repeatable ?? null,
       effect.finite ?? null,
     ]);
@@ -435,22 +445,24 @@ function actionBoundFunctionalEffects(
   return [];
 }
 
+const HINT_EFFECT_KINDS_BY_ENGINE_EFFECT: Readonly<Record<string, readonly string[]>> = {
+  search_stack_to_grip: ["search"],
+  move_top_trash_to_grip: ["card_recovery", "search"],
+  make_run: ["future_run_effect"],
+  distribute_advancement_counters: [
+    "advance",
+    "advance_burst",
+    "score_acceleration",
+  ],
+  move_advancement_counters: ["advance", "score_acceleration"],
+  remove_tags: ["tag_prevention"],
+};
+
 function engineEffectKindMatchesHintEffect(
   engineEffectKind: string,
   hintEffectKind: AiHintStructuredEffect["kind"],
 ): boolean {
   if (engineEffectKind === hintEffectKind) return true;
-  const mappedKinds: Readonly<Record<string, readonly string[]>> = {
-    search_stack_to_grip: ["search"],
-    move_top_trash_to_grip: ["card_recovery", "search"],
-    make_run: ["future_run_effect"],
-    distribute_advancement_counters: [
-      "advance",
-      "advance_burst",
-      "score_acceleration",
-    ],
-    move_advancement_counters: ["advance", "score_acceleration"],
-    remove_tags: ["tag_prevention"],
-  };
-  return mappedKinds[engineEffectKind]?.includes(hintEffectKind) === true;
+
+  return HINT_EFFECT_KINDS_BY_ENGINE_EFFECT[engineEffectKind]?.includes(hintEffectKind) === true;
 }

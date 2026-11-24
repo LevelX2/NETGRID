@@ -77,7 +77,7 @@ describe("match 9f8cecdd78b35d0e Corp defense allocation D39", () => {
     const rd = checkpointDefenseCandidate("d39-install-rd", "rd", "d39-rd");
     const remote = checkpointDefenseCandidate(
       "d39-install-remote-1",
-      "remote_1",
+      "r1",
       "d39-remote",
     );
     const remoteNeedId = "remote-hardening:strategic-score-remote:4";
@@ -134,7 +134,7 @@ describe("match 9f8cecdd78b35d0e Corp defense allocation D39", () => {
     );
     expect(materialized).toEqual(new Set([rd.actionId]));
     const remoteSignal = defenseNeeds.find(
-      (signal) => signal.serverId === "remote_1",
+      (signal) => signal.serverId === "r1",
     );
     expect(remoteSignal).toMatchObject({
       parentKind: "remote",

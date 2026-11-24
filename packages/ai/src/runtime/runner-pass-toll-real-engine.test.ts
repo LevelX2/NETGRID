@@ -52,45 +52,46 @@ function fixture(
   credits: number,
   lethalRemainingIce = false,
   withKnownSentry = false,
+  runnerDeck = decks.runner!,
 ) {
   let s = createGameAfterSetup({
     seed: "runner-current-pass-toll",
     corpDeck: decks.corp!,
-    runnerDeck: decks.runner!,
+    runnerDeck,
     traceRulesProfile: "modern_open",
   });
-  s = apply(s, "corp", "corp.mandatory_draw");
+  s = apply(s, "corp", "ce");
   const f = RealEngineFixtureBuilder.forState(s)
     .withCorpHqSize(0)
-    .withCorpCardInHq("onr_proteus_004_fetal-ai")
-    .withCorpCardInHq("onr_proteus_005_marked-accounts")
+    .withCorpCardInHq(62)
+    .withCorpCardInHq(63)
     .withRunnerCredits(credits)
-    .withCorpRemoteRoot("hq", "onr_proteus_070_rasmin-bridger", 0, {
+    .withCorpRemoteRoot("hq", 128, 0, {
       rezzed: true,
       faceup: true,
     });
   if (lethalRemainingIce)
     f.withRunnerGripSize(0).withRezzedCorpIceOnServer(
       "hq",
-      "onr_proteus_033_mobile-barricade",
+      91,
     );
   if (withKnownSentry)
     f.withRunnerProgramInstalled(
-      "onr_proteus_080_black-widow",
-    ).withRezzedCorpIceOnServer("hq", "onr_proteus_040_sumo-2008");
-  f.withCorpIceOnServer("hq", "onr_proteus_017_credit-blocks");
+      138,
+    ).withRezzedCorpIceOnServer("hq", 98);
+  f.withCorpIceOnServer("hq", 75);
   if (withKnownSentry) {
     const breakerId = s.runner.rig.programs.find(
       (id) =>
-        s.cardInstances[id]?.definitionId === "onr_proteus_080_black-widow",
+        s.cardInstances[id]?.definitionId === 138,
     )!;
     s.cardInstances[breakerId]!.selectedCardId = s.corp.servers
       .find((server) => server.id === "hq")!
       .ice.at(-1)!;
   }
   s.corp.clicks = 0;
-  s = apply(s, "corp", "corp.end_turn");
-  s = apply(s, "runner", "runner.start_run.hq");
+  s = apply(s, "corp", "c9");
+  s = apply(s, "runner", "rs.hq");
   for (let i = 0; !s.run?.postPassPayOrEndRun && i < 10; i++) {
     const selection = selectAiDecisionSideForState(s);
     if (selection.terminal || !selection.side)
@@ -104,13 +105,13 @@ function fixture(
   expect(s.run?.postPassPayOrEndRun?.amount).toBe(1);
   return s;
 }
-function input(s: GameState) {
+function input(s: GameState, runnerDeck = decks.runner!) {
   return buildAiDecisionInput(s, "runner", {
     difficulty: "hard",
     ownDeckSnapshot: {
-      deckSnapshotId: decks.runner!.id,
+      deckSnapshotId: runnerDeck.id,
       side: "runner",
-      cards: decks.runner!.cards.map((c) => ({
+      cards: runnerDeck.cards.map((c) => ({
         cardId: c.id,
         quantity: c.quantity,
       })),
@@ -154,6 +155,44 @@ it("pays an affordable current fort toll under the run owner and really preserve
   const replay = replayEvents(initial, s.eventLog.slice(start));
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(s));
+});
+
+it("keeps a selected fort toll bound while the bank payment window resolves", () => {
+  const runnerDeck = {
+    ...decks.runner!,
+    cards: [...decks.runner!.cards, { id: 191, quantity: 1 }],
+  };
+  let state = fixture(10, false, false, runnerDeck);
+  RealEngineFixtureBuilder.forState(state).withRunnerResourceInstalled(191);
+  const initial = structuredClone(state);
+  const toll = chooseRunnerAction(input(state, runnerDeck));
+  expect(toll.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+    "runner.convert_run_window",
+  );
+  state = apply(state, "runner", toll.actionId);
+  const window = state.runnerCostPenaltySupportWindow;
+  expect(window?.originalActionId).toBe(toll.actionId);
+  const offers = getLegalActions(state, "runner");
+  expect(offers.some((a) => a.payload?.decision === "end_run")).toBe(false);
+  const next = chooseRunnerAction(input(state, runnerDeck));
+  const chosen = offers.find((a) => a.actionId === next.actionId)!;
+  if (chosen.type === "activated_card_ability") {
+    expect(chosen.payload?.costPenaltySupportOriginalActionId).toBe(toll.actionId);
+    state = apply(state, "runner", chosen.actionId);
+    const resume = chooseRunnerAction(input(state, runnerDeck));
+    expect(resume.actionId).toBe(toll.actionId);
+    state = apply(state, "runner", resume.actionId);
+  } else {
+    expect(chosen.actionId).toBe(toll.actionId);
+    expect(chosen.payload?.runnerCostPenaltySupportContinuation).toBe(true);
+    state = apply(state, "runner", chosen.actionId);
+  }
+  expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+  expect(state.run).toBeDefined();
+  expect(state.run?.postPassPayOrEndRun).toBeUndefined();
+  const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+  expect(replay.ok).toBe(true);
+  expect(hashState(replay.state)).toBe(hashState(state));
 });
 
 it("uses the available toll exit instead of paying into known lethal remaining ICE", () => {

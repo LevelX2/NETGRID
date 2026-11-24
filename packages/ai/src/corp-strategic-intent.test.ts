@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import { describe, expect, it } from "vitest";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
@@ -362,7 +363,7 @@ function score(params: {
       params.anchor > 0
         ? [
             {
-              cardId: "fixture-anchor",
+              cardId: syntheticCardDefinitionId("fixture-anchor"),
               quantity: 1,
               source: "derivedStrategyAnchor",
               strategyId: "fixture.strategy",
@@ -374,7 +375,7 @@ function score(params: {
       params.support > 0
         ? [
             {
-              cardId: "fixture-support",
+              cardId: syntheticCardDefinitionId("fixture-support"),
               quantity: 1,
               source: "functionSignal",
               signal: "fixture.support",

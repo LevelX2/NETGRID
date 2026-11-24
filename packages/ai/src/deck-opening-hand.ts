@@ -1,14 +1,13 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
 import {
   deckDoctrineRoleIsAgenda,
   deckDoctrineRoleIsBreaker,
   deckDoctrineRoleIsIce,
   rolesForDeckDoctrineCard,
 } from "./deck-doctrine-card-roles";
-import { rolesMatch } from "./runtime/role-match";
-
-const AI_HINTS_BY_CARD = createAiHintsByCard();
+import { rolesMatch } from "./role-match";
+import type { AiDecisionInputWithDeckCapabilities } from "./runtime/ai-decision-input";
 
 export type OpeningHandEvaluation = {
   decision: "keep" | "mulligan";
@@ -131,8 +130,8 @@ type CorpOpeningStrategyAssessment = {
 };
 
 function corpOpeningCard(card: VisibleCard): CorpOpeningCard {
-  const hint = AI_HINTS_BY_CARD.get(card.definitionId ?? "");
-  const roles = rolesForDeckDoctrineCard(card.definitionId ?? "");
+  const hint = card.definitionId === undefined ? undefined : AI_HINTS_BY_CARD.get(card.definitionId);
+  const roles = rolesForDeckDoctrineCard(card.definitionId);
   const type = card.type ?? hint?.cardType ?? openingTypeFromExactRoles(roles);
   return {
     card,
@@ -303,7 +302,7 @@ export function evaluateRunnerOpeningHand(
 ): RunnerOpeningHandEvaluation {
   const handCards = input.playerView.own.gripOrHq;
   const handRoleGroups = handCards.map((card) =>
-    rolesForDeckDoctrineCard(card.definitionId ?? ""),
+    rolesForDeckDoctrineCard(card.definitionId),
   );
   const capabilityBreakerDefinitionIds =
     runnerOpeningCapabilityBreakerDefinitionIds(input);
@@ -433,7 +432,7 @@ function runnerExecutableDrawEconomyOpeningCount(
   input: AiDecisionInput,
 ): number {
   return input.playerView.own.gripOrHq.filter((card) => {
-    const hint = AI_HINTS_BY_CARD.get(card.definitionId ?? "");
+    const hint = card.definitionId === undefined ? undefined : AI_HINTS_BY_CARD.get(card.definitionId);
     if (!hint) return false;
     const immediateCost =
       card.type === "event" ? card.cost : (card.installCost ?? card.cost);
@@ -472,30 +471,10 @@ type OpeningSemanticContext = {
   capabilityConfidence?: string;
 };
 
-type RunnerOpeningCapabilities = {
-  economyBankTools?: readonly unknown[];
-  breakerInventory?: ReadonlyArray<{
-    cardId?: string;
-    coverage?: readonly string[];
-    locations?: readonly string[];
-    confidence?: string;
-  }>;
-  searchAccess?: {
-    tools?: ReadonlyArray<{
-      cardId: string;
-      status?: string;
-      canSearchBreakers?: boolean;
-      confidence?: string;
-    }>;
-  };
-};
-
 function runnerOpeningCapabilityBreakerDefinitionIds(
   input: AiDecisionInput,
-): Set<string> {
-  const semanticInput = input as AiDecisionInput & {
-    ownDeckCapabilities?: { runner?: RunnerOpeningCapabilities };
-  };
+): Set<number> {
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
   return new Set(
     (semanticInput.ownDeckCapabilities?.runner?.breakerInventory ?? [])
       .filter(
@@ -512,22 +491,7 @@ function runnerOpeningCapabilityBreakerDefinitionIds(
 function openingSemanticContext(
   input: AiDecisionInput,
 ): OpeningSemanticContext {
-  const semanticInput = input as AiDecisionInput & {
-    ownDeckStrategyProfile?: {
-      primaryStrategies: string[];
-      secondaryStrategies: string[];
-      warnings: string[];
-    };
-    ownDeckCapabilities?: {
-      confidence?: string;
-      runner?: RunnerOpeningCapabilities;
-      corp?: {
-        remotePlanProfile?: {
-          remoteProtectionToolsKnown?: number;
-        };
-      };
-    };
-  };
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
   const strategyProfile = semanticInput.ownDeckStrategyProfile;
   const strategies = sortedUnique([
     ...(strategyProfile?.primaryStrategies ?? []),
@@ -561,9 +525,7 @@ function openingSemanticContext(
 
 function openingExecutableBreakerSearchToolCount(
   input: AiDecisionInput,
-  semanticInput: AiDecisionInput & {
-    ownDeckCapabilities?: { runner?: RunnerOpeningCapabilities };
-  },
+  semanticInput: AiDecisionInputWithDeckCapabilities,
 ): number {
   const runnerCapabilities = semanticInput.ownDeckCapabilities?.runner;
   const hasKnownStandardCoverage =

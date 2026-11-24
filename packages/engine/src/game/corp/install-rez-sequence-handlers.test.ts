@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -22,8 +23,7 @@ import {
   type CorpInstallRezSequenceHandlerHost,
 } from "./install-rez-sequence-handlers";
 
-const DATA_FORT_RECLAMATION_DEFINITION_ID =
-  "onr_v1_197_data-fort-reclamation" as CardDefinitionId;
+const DATA_FORT_RECLAMATION_DEFINITION_ID = 409 as CardDefinitionId;
 const DATA_FORT_RECLAMATION_CAPABILITY_KEY = "hq_to_new_remote_install_rez";
 
 const DATA_FORT_SEQUENCE = {
@@ -43,16 +43,16 @@ const DATA_FORT_SEQUENCE = {
 } as const;
 
 function definition(
-  id: string,
+  id: number,
   type: CardDefinition["type"],
-  title = id,
+  title = String(id),
   rezCost = 0,
   subtypes: string[] = [],
 ): CardDefinition {
   return {
     id: id as CardDefinitionId,
     type,
-    title,
+    title: String(title),
     rezCost,
     subtypes,
   } as CardDefinition;
@@ -143,18 +143,14 @@ function makeHost(
       "agenda",
       "Data Fort Reclamation",
     ),
-    priority_agenda: definition(
-      "scored_agenda_free_rez",
-      "agenda",
-      "Priority Requisition",
-    ),
-    agenda_purge_agenda: definition("agenda_purge", "agenda", "Security Purge"),
-    ice_1: definition("ice_1_def", "ice", "ICE 1", 3),
-    ice_2: definition("ice_2_def", "ice", "ICE 2", 4),
-    asset_1: definition("asset_1_def", "asset", "Asset 1", 6),
-    asset_2: definition("asset_2_def", "asset", "Asset 2", 1),
-    upgrade_1: definition("upgrade_1_def", "upgrade", "Upgrade 1", 2),
-    operation_1: definition("operation_1_def", "operation", "Operation 1"),
+    priority_agenda: definition(1143930169, "agenda", "Priority Requisition"),
+    agenda_purge_agenda: definition(542401969, "agenda", "Security Purge"),
+    ice_1: definition(3274351864, "ice", "ICE 1", 3),
+    ice_2: definition(2099279373, "ice", "ICE 2", 4),
+    asset_1: definition(832702815, "asset", "Asset 1", 6),
+    asset_2: definition(972225774, "asset", "Asset 2", 1),
+    upgrade_1: definition(3164290067, "upgrade", "Upgrade 1", 2),
+    operation_1: definition(1990551442, "operation", "Operation 1"),
     ...input.definitions,
   };
   const servers = input.servers ?? [];
@@ -208,7 +204,8 @@ function makeHost(
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
     cards: {
       definitionFor: (cardId) =>
-        definitions[cardId] ?? definition(cardId, "operation"),
+        definitions[cardId] ??
+        definition(syntheticCardDefinitionId(cardId), "operation"),
       mustInstance: (cardId) => {
         const found = cardInstances[cardId];
         if (!found) throw new Error(`missing instance ${cardId}`);
@@ -248,7 +245,7 @@ function makeHost(
         cardDefinition.subtypes?.includes("region") ?? false,
       rootInstallRezzesOnInstall: (cardDefinition) =>
         (cardDefinition.subtypes?.includes("region") ?? false) ||
-        cardDefinition.id === "forced_rez_root_def",
+        cardDefinition.id === 3874383631,
       isScoredAgendaFreeRezCandidate: (cardId) => {
         const cardInstance = cardInstances[cardId];
         return (
@@ -284,7 +281,7 @@ function makeHost(
           state.corp.servers.filter((server) => server.kind === "remote")
             .length + 1;
         const server = {
-          id: `remote_${nextRemoteNumber}` as Exclude<ServerId, "new_remote">,
+          id: `r${nextRemoteNumber}` as Exclude<ServerId, "new_remote">,
           label: `Remote ${nextRemoteNumber}`,
           kind: "remote",
           ice: [],
@@ -396,7 +393,7 @@ function makeHost(
           if (
             !cardDefinition ||
             (!cardDefinition.subtypes?.includes("region") &&
-              cardDefinition.id !== "forced_rez_root_def")
+              cardDefinition.id !== 3874383631)
           )
             continue;
           const finalCredits = cardDefinition.rezCost ?? 0;
@@ -585,8 +582,7 @@ function zoneFor(
 
 function expectCanonicalDataFortPrimitiveIdentity(payload: unknown): void {
   expect(payload).toMatchObject({
-    cardImplementationAbilityId:
-      "onr_v1_197_data-fort-reclamation:hq_to_new_remote_install_rez",
+    cardImplementationAbilityId: 487,
     cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
     cardImplementationCapabilityBindingKind: "card_spec_capability_key",
     sourceDefinitionId: DATA_FORT_RECLAMATION_DEFINITION_ID,
@@ -601,7 +597,8 @@ function expectCanonicalDataFortPrimitiveIdentity(payload: unknown): void {
 describe("corp install rez sequence handlers", () => {
   it("starts Data Fort Reclamation with stable HQ install candidates", () => {
     const host = makeHost({
-      hq: ["operation_1", "asset_1", "ice_1"] as CardInstanceId[],
+      hq: ["operation_1", "asset_1", "ice_1", "trapdoor"] as CardInstanceId[],
+      definitions: { trapdoor: definition(18, "ice", "Trapdoor") },
     });
 
     startHqToNewRemoteInstallRezChoice(
@@ -616,8 +613,7 @@ describe("corp install rez sequence handlers", () => {
       host.state.pendingChoice?.options.map((option) => option.value),
     ).toEqual(["asset_1", "ice_1"]);
     expect(host.legalAction.payload).toMatchObject({
-      cardImplementationAbilityId:
-        "onr_v1_197_data-fort-reclamation:hq_to_new_remote_install_rez",
+      cardImplementationAbilityId: 487,
       cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind:
@@ -663,7 +659,7 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.corp.servers[0]?.ice).toEqual(["ice_1"]);
     expect(host.state.corp.servers[0]?.root).toEqual([]);
     expect(host.state.pendingChoice?.source).toBe(
-      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:ice_1:1:8",
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:r1:ice_1:1:8",
     );
     expect(host.state.pendingChoice?.prompt).toBe(
       "Data Fort Reclamation: Karte 1 von 2 rezzen (10 temporäre Credits verfügbar).",
@@ -686,8 +682,8 @@ describe("corp install rez sequence handlers", () => {
       selectedCount: 2,
       installedIceCount: 1,
       installedRootCount: 0,
-      createdServerId: "remote_1",
-      cardImplementationSequenceCreatedServerId: "remote_1",
+      createdServerId: "r1",
+      cardImplementationSequenceCreatedServerId: "r1",
       cardImplementationTemporaryCreditBudget: 10,
       temporaryCreditsProvided: 10,
       temporaryCreditsRemaining: 10,
@@ -703,7 +699,7 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.corp.hq).toEqual(["upgrade_1"]);
     expect(host.state.corp.servers[0]?.root).toEqual(["asset_1"]);
     expect(host.state.pendingChoice?.source).toBe(
-      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:asset_1:2:8",
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:r1:asset_1:2:8",
     );
   });
 
@@ -781,6 +777,27 @@ describe("corp install rez sequence handlers", () => {
     expect(host.legalAction.payload).not.toHaveProperty(
       "cardImplementationSequenceCreatedServerId",
     );
+  });
+
+  it("rejects central-only ICE in a stale Reclamation selection before creating a fort", () => {
+    const host = makeHost({
+      hq: ["ice_1", "trapdoor"],
+      definitions: { trapdoor: definition(18, "ice", "Trapdoor") },
+      scoreArea: ["data_fort_agenda"],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["ice_1", "trapdoor"],
+      ),
+      playerAction: playerAction(["card_ice_1", "card_trapdoor"]),
+    });
+    const before = structuredClone(host.state);
+    expect(() => handleCorpInstallRezSequenceChoice(host)).toThrow(
+      "corp_ice_install_restriction_violation",
+    );
+    expect(host.state).toEqual(before);
   });
 
   it("rejects invalid Data Fort Reclamation root selections without partial mutation", () => {
@@ -870,18 +887,9 @@ describe("corp install rez sequence handlers", () => {
         data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
       },
       definitions: {
-        region_1: definition("region_1_def", "upgrade", "Region 1", 2, [
-          "region",
-        ]),
-        forced_rez_root: definition(
-          "forced_rez_root_def",
-          "asset",
-          "Forced Rez Root",
-          3,
-        ),
-        region_2: definition("region_2_def", "upgrade", "Region 2", 4, [
-          "region",
-        ]),
+        region_1: definition(2849531429, "upgrade", "Region 1", 2, ["region"]),
+        forced_rez_root: definition(3874383631, "asset", "Forced Rez Root", 3),
+        region_2: definition(2950836304, "upgrade", "Region 2", 4, ["region"]),
       },
       pendingChoice: selectCardsChoice(
         "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
@@ -918,7 +926,7 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.cardInstances.region_2).toMatchObject({
       faceup: true,
       rezzed: true,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
     expect(rezRootCalls).toEqual(["region_1", "forced_rez_root", "region_2"]);
     expect(host.state.pendingChoice).toBeUndefined();
@@ -943,12 +951,8 @@ describe("corp install rez sequence handlers", () => {
         data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
       },
       definitions: {
-        region_1: definition("region_1_def", "upgrade", "Region 1", 10, [
-          "region",
-        ]),
-        region_2: definition("region_2_def", "upgrade", "Region 2", 10, [
-          "region",
-        ]),
+        region_1: definition(2849531429, "upgrade", "Region 1", 10, ["region"]),
+        region_2: definition(2950836304, "upgrade", "Region 2", 10, ["region"]),
       },
       pendingChoice: selectCardsChoice(
         "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
@@ -995,11 +999,11 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.corp.servers[0]?.ice).toEqual([]);
     expect(host.state.cardInstances.asset_1).toMatchObject({
       rezzed: false,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
     expect(host.state.pendingChoice).toMatchObject({
       source:
-        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:asset_1:1:8",
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:r1:asset_1:1:8",
       visibility: "hidden_info_barrier",
       minSelections: 0,
       maxSelections: 1,
@@ -1041,11 +1045,11 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.hqInstallRezSequence).toBeUndefined();
     expect(host.state.cardInstances.ice_1).toMatchObject({
       rezzed: true,
-      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverIce", serverId: "r1" },
     });
     expect(host.state.cardInstances.upgrade_1).toMatchObject({
       rezzed: false,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      zone: { side: "corp", zone: "serverRoot", serverId: "r1" },
     });
   });
 
@@ -1116,7 +1120,7 @@ describe("corp install rez sequence handlers", () => {
       cardImplementationEffectKind: "install_rez_sequence",
       sourceAgendaId: "data_fort_agenda",
       hiddenZoneAction: "hq_to_new_remote_rez_sequence",
-      cardImplementationSequenceCreatedServerId: "remote_1",
+      cardImplementationSequenceCreatedServerId: "r1",
       cardImplementationTemporaryCreditBudget: 10,
       selectedCount: 2,
       rezzedCount: 1,
@@ -1142,7 +1146,7 @@ describe("corp install rez sequence handlers", () => {
         root: [],
       },
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         kind: "remote",
         ice: [],
@@ -1195,7 +1199,7 @@ describe("corp install rez sequence handlers", () => {
       agendaPurgeInstallContract: "corp_server_choice_per_ice",
       agendaPurgeRunnerReviewOpened: true,
       agendaPurgeTargetChoiceOpened: false,
-      publicRevealDefinitionIds: "ice_1_def,operation_1_def,ice_2_def",
+      publicRevealDefinitionIds: "3274351864,1990551442,2099279373",
     });
 
     host.playerAction = playerAction(["done"]);
@@ -1221,12 +1225,12 @@ describe("corp install rez sequence handlers", () => {
       "ice_1|hq|fixed",
       "ice_1|rd|fixed",
       "ice_1|archives|fixed",
-      "ice_1|remote_1|fixed",
+      "ice_1|r1|fixed",
       "ice_1|new_remote|fixed",
       "ice_2|hq|fixed",
       "ice_2|rd|fixed",
       "ice_2|archives|fixed",
-      "ice_2|remote_1|fixed",
+      "ice_2|r1|fixed",
       "ice_2|new_remote|fixed",
     ]);
     expect(host.legalAction.payload).toMatchObject({
@@ -1248,7 +1252,7 @@ describe("corp install rez sequence handlers", () => {
         root: [],
       },
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         kind: "remote",
         ice: [],
@@ -1293,7 +1297,7 @@ describe("corp install rez sequence handlers", () => {
       host.state.corp.servers.find((server) => server.id === "rd")?.ice,
     ).toEqual(["ice_1"]);
     expect(
-      host.state.corp.servers.find((server) => server.id === "remote_2")?.ice,
+      host.state.corp.servers.find((server) => server.id === "r2")?.ice,
     ).toEqual(["ice_2"]);
     expect(host.state.cardInstances.ice_1?.rezzed).toBe(true);
     expect(host.state.cardInstances.ice_1?.zone).toEqual({
@@ -1305,7 +1309,7 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.cardInstances.ice_2?.zone).toEqual({
       side: "corp",
       zone: "serverIce",
-      serverId: "remote_2",
+      serverId: "r2",
     });
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "agenda_purge_install_targets",
@@ -1316,10 +1320,10 @@ describe("corp install rez sequence handlers", () => {
       agendaPurgeInstallContract: "corp_server_choice_per_ice",
       agendaPurgeRunnerReviewResolved: true,
       agendaPurgeTargetChoiceResolved: true,
-      publicRevealDefinitionIds: "ice_1_def,operation_1_def,ice_2_def",
-      installedIceDefinitionIds: "ice_1_def,ice_2_def",
+      publicRevealDefinitionIds: "3274351864,1990551442,2099279373",
+      installedIceDefinitionIds: "3274351864,2099279373",
       installedIceServerLabels: "R&D,Remote 2",
-      trashedDefinitionIds: "operation_1_def",
+      trashedDefinitionIds: "1990551442",
     });
   });
 
@@ -1367,7 +1371,7 @@ describe("corp install rez sequence handlers", () => {
       revealedIceCount: 0,
       installedIceCount: 0,
       trashedCount: 3,
-      trashedDefinitionIds: "operation_1_def,asset_1_def,upgrade_1_def",
+      trashedDefinitionIds: "1990551442,832702815,3164290067",
     });
   });
 
@@ -1403,7 +1407,7 @@ describe("corp install rez sequence handlers", () => {
 
   it("starts and resolves Priority Requisition free rez without normal rez cost", () => {
     const server = {
-      id: "remote_1" as Exclude<ServerId, "new_remote">,
+      id: "r1" as Exclude<ServerId, "new_remote">,
       label: "Remote 1",
       kind: "remote",
       ice: ["ice_1" as CardInstanceId],
@@ -1432,7 +1436,7 @@ describe("corp install rez sequence handlers", () => {
       hiddenZoneAction: "scored_agenda_free_rez",
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTarget: "ice_1",
-      scoredAgendaFreeRezTargetDefinitionId: "ice_1_def",
+      scoredAgendaFreeRezTargetDefinitionId: 3274351864,
       rezBaseCreditCostWaived: 3,
       rezAdditionalCreditsPaid: 0,
       rezAgendaPointsPaid: 0,
@@ -1441,7 +1445,7 @@ describe("corp install rez sequence handlers", () => {
 
   it("rejects Priority Requisition non-rezzable targets", () => {
     const server = {
-      id: "remote_1" as Exclude<ServerId, "new_remote">,
+      id: "r1" as Exclude<ServerId, "new_remote">,
       label: "Remote 1",
       kind: "remote",
       ice: [],

@@ -1,3 +1,4 @@
+import type { CardDefinitionId } from "@netgrid/shared";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -13,14 +14,14 @@ export type RoleContextDependencies = {
     input: AiDecisionInput,
     instanceId: string,
   ) => VisibleCard | undefined;
-  aiHints: ReadonlyMap<string, AiCardHint>;
+  aiHints: ReadonlyMap<CardDefinitionId, AiCardHint>;
 };
 
 export function createRoleContext(dependencies: RoleContextDependencies): {
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  rolesForCardId: (cardId: string | undefined) => string[];
+  rolesForCardId: (cardId: CardDefinitionId | undefined) => string[];
 } {
-  const rolesForCardId = (cardId: string | undefined): string[] =>
+  const rolesForCardId = (cardId: CardDefinitionId | undefined): string[] =>
     cardRolesForIdRuntime(cardId, dependencies.aiHints);
 
   const rolesForAction = (

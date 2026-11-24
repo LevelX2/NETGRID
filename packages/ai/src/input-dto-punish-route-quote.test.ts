@@ -1,3 +1,4 @@
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards";
 import { corpPunishRouteRequestFingerprint } from "@netgrid/engine";
 import type {
   CorpPunishRouteQuoteRequest,
@@ -10,6 +11,10 @@ import {
   aiInput,
   legalAction,
 } from "./semantic-ai-runtime-cutover.test-support";
+
+const tagCapabilityId = canonicalCapabilityId(106, capabilityKey("on_play_tag_after_runner_trashed_node"));
+const damageFourCapabilityId = canonicalCapabilityId(514, capabilityKey("abilities_on_play_damage"));
+const damageTwoCapabilityId = canonicalCapabilityId(554, capabilityKey("abilities_activated_corp_main_damage"));
 
 describe("AI input DTO Corp punish-route quote contract", () => {
   it("preserves a valid Corp-only quote and only the current head LegalAction", () => {
@@ -38,7 +43,7 @@ describe("AI input DTO Corp punish-route quote contract", () => {
       routes: [
         {
           routeId: "route:tag-4-2",
-          campaignId: "campaign:tag-and-bag",
+          campaignId: "k6ctec1rdjn8s4n6f5c03kakmm",
           campaignIdOrigin: "request_binding",
           totalClicks: 3,
           totalActionCredits: 5,
@@ -57,6 +62,28 @@ describe("AI input DTO Corp punish-route quote contract", () => {
     expect(
       dto.playerView.corpPunishRouteQuoteSet?.routes[0]?.steps[1],
     ).not.toHaveProperty("currentLegalAction");
+  });
+
+  it("projects only declared fields from nested actor-private quote facts", () => {
+    const action = damageAction("tag-source", "tag-action");
+    const input = aiInput("corp", [action]);
+    const quoteSet = completeQuoteSet(action);
+    const route = quoteSet.routes[0]!;
+    for (const object of [
+      route.requestEcho.steps[0]!,
+      route.tagTrigger,
+      route.tagOutcomeEnvelope!.projectedRunnerTags,
+      route.responsePaymentEnvelope.totalCorpCredits,
+      route.damageEnvelope.rawDamage,
+      route.damageEnvelope.visiblePiercing.creditCost,
+    ]) {
+      Object.assign(object, { privatePayload: "unprojected-entry" });
+    }
+    input.playerView.corpPunishRouteQuoteSet = quoteSet;
+
+    const result = dtoFor(input.playerView, [action]).corpPunishRouteQuoteSet;
+    expect(result?.routes[0]?.routeId).toBe(route.routeId);
+    expect(JSON.stringify(result)).not.toContain("unprojected-entry");
   });
 
   it("drops stale or non-Corp actor-private quote sets", () => {
@@ -206,7 +233,7 @@ describe("AI input DTO Corp punish-route quote contract", () => {
       "request echo capability-owner drift",
       (quote) => {
         quote.routes[0]!.requestEcho.steps[0]!.sourceCapabilityId =
-          "different-definition:tag";
+          damageFourCapabilityId;
       },
     ],
     [
@@ -315,7 +342,7 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
     side: "corp",
     stateVersion: 1,
     timingPoint: "corp_action.main",
-    campaignId: "campaign:tag-and-bag",
+    campaignId: "k6ctec1rdjn8s4n6f5c03kakmm",
     routeId: "route:tag-4-2",
     steps: [
       {
@@ -324,7 +351,7 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
         kind: "tag",
         sourceCardInstanceId: "tag-source",
         sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: "tag-definition:tag",
+        sourceCapabilityId: tagCapabilityId,
       },
       {
         stepId: "damage-4",
@@ -332,7 +359,7 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
         kind: "meat_damage",
         sourceCardInstanceId: "damage-source",
         sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: "damage-definition:damage",
+        sourceCapabilityId: damageFourCapabilityId,
       },
       {
         stepId: "damage-2",
@@ -340,7 +367,7 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
         kind: "meat_damage",
         sourceCardInstanceId: "damage-source-2",
         sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: "damage-definition-2:damage",
+        sourceCapabilityId: damageTwoCapabilityId,
       },
     ],
   };
@@ -362,7 +389,7 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
         matchId: request.matchId,
         side: "corp",
         routeId: "route:tag-4-2",
-        campaignId: "campaign:tag-and-bag",
+        campaignId: "k6ctec1rdjn8s4n6f5c03kakmm",
         campaignIdOrigin: "request_binding",
         stateVersion: 1,
         timingPoint: "corp_action.main",
@@ -376,9 +403,9 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
             order: 0,
             kind: "tag",
             sourceCardInstanceId: "tag-source",
-            sourceCardDefinitionId: "tag-definition",
+            sourceCardDefinitionId: 106,
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId: "tag-definition:tag",
+            sourceCapabilityId: tagCapabilityId,
             clicks: 1,
             credits: 2,
             currentLegalAction: head,
@@ -388,9 +415,9 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
             order: 1,
             kind: "meat_damage",
             sourceCardInstanceId: "damage-source",
-            sourceCardDefinitionId: "damage-definition",
+            sourceCardDefinitionId: 514,
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId: "damage-definition:damage",
+            sourceCapabilityId: damageFourCapabilityId,
             clicks: 1,
             credits: 3,
           },
@@ -399,9 +426,9 @@ function completeQuoteSet(head: LegalAction): CorpPunishRouteQuoteSet {
             order: 2,
             kind: "meat_damage",
             sourceCardInstanceId: "damage-source-2",
-            sourceCardDefinitionId: "damage-definition-2",
+            sourceCardDefinitionId: 554,
             sourceCapabilityBindingKind: "card_spec_capability_key",
-            sourceCapabilityId: "damage-definition-2:damage",
+            sourceCapabilityId: damageTwoCapabilityId,
             clicks: 1,
             credits: 0,
           },

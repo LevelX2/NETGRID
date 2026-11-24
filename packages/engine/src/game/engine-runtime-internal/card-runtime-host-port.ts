@@ -95,7 +95,7 @@ export type CardRuntimeHostPort = {
       definitionFor: (cardId: CardInstanceId) => CardDefinition;
       runnerInstalledCardIds: () => string[];
       cardImplementationForDefinitionId: (
-        definitionId: string,
+        definitionId: number,
       ) =>
         | import("../../card-implementations/types").CardImplementationDefinition
         | undefined;

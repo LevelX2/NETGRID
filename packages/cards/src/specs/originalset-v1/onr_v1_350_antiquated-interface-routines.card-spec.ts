@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId(
-      "onr_v1_350_antiquated-interface-routines",
+      562,
     ),
     title: "Antiquated Interface Routines",
     side: "corp",

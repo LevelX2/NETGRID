@@ -16,19 +16,19 @@ describe("catalog card presentations", () => {
   it("projects only sanitized title data and retains catalog identities", () => {
     const sourceRows = [
       {
-        catalogCardId: "runner_identity_001",
+        catalogCardId: 587,
         title: "Runner Identity",
         type: "identity",
         rulesText: "must not cross the presentation boundary",
       },
       {
-        catalogCardId: "simple_fracter",
+        catalogCardId: 597,
         title: "Simple Fracter",
         type: "program",
         engine: { hidden: true },
       },
       {
-        catalogCardId: "onr_classic_038_gypsytm-schedule-analyzer",
+        catalogCardId: 42,
         title: "Gypsy™ Schedule Analyzer",
         type: "hardware",
         planningAnnotations: { hidden: true },
@@ -37,9 +37,9 @@ describe("catalog card presentations", () => {
     const presentations = catalogCardPresentationsFor(sourceRows);
 
     expect(presentations).toEqual({
-      runner_identity_001: { title: "Runner Identity", type: "identity" },
-      simple_fracter: { title: "Simple Fracter", type: "program" },
-      "onr_classic_038_gypsytm-schedule-analyzer": {
+      587: { title: "Runner Identity", type: "identity" },
+      597: { title: "Simple Fracter", type: "program" },
+      42: {
         title: "Gypsy™ Schedule Analyzer",
         type: "hardware",
       },
@@ -47,22 +47,22 @@ describe("catalog card presentations", () => {
   });
 
   it("keeps migrated cards fail-closed without the injected DTO", () => {
-    expect(publicCardTitle("simple_fracter")).toBeUndefined();
-    expect(publicCardPresentation("simple_fracter")).toBeUndefined();
+    expect(publicCardTitle(597)).toBeUndefined();
+    expect(publicCardPresentation(597)).toBeUndefined();
     expect(
-      publicCardTitle("onr_classic_038_gypsytm-schedule-analyzer"),
+      publicCardTitle(42),
     ).toBeUndefined();
     expect(
-      publicCardPresentation("onr_classic_038_gypsytm-schedule-analyzer"),
+      publicCardPresentation(42),
     ).toBeUndefined();
     expect(
-      publicCardTitle("simple_fracter", {
-        simple_fracter: { title: "Simple Fracter", type: "program" },
+      publicCardTitle(597, {
+        597: { title: "Simple Fracter", type: "program" },
       }),
     ).toBe("Simple Fracter");
     expect(
-      publicCardTitle("onr_classic_038_gypsytm-schedule-analyzer", {
-        "onr_classic_038_gypsytm-schedule-analyzer": {
+      publicCardTitle(42, {
+        42: {
           title: "Gypsy™ Schedule Analyzer",
           type: "hardware",
         },
@@ -76,7 +76,7 @@ describe("catalog card presentations", () => {
       return createElement(
         "span",
         null,
-        publicCardTitle("simple_fracter", presentations),
+        publicCardTitle(597, presentations),
       );
     }
 
@@ -85,7 +85,7 @@ describe("catalog card presentations", () => {
       renderToStaticMarkup(
         createElement(CatalogCardPresentationsProvider, {
           value: {
-            simple_fracter: {
+            597: {
               title: "Simple Fracter",
               type: "program",
             },

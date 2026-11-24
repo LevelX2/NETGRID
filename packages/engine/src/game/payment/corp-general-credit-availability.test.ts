@@ -10,7 +10,7 @@ function state(total: number, reserved?: number): GameState {
       : {
           corpTemporaryInstallRezCredits: {
             sourceCardInstanceId: "source",
-            sourceDefinitionId: "source-definition",
+            sourceDefinitionId: 2130352946,
             remaining: reserved,
             usableFor: "corp_install_or_rez",
             returnUnusedAtTurnEnd: true,

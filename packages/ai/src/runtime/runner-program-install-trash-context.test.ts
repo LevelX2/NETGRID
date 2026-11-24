@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -65,13 +66,13 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
     expect(
       context.runnerProgramInstallTrashAssessmentForAction(input, {
         actionId:
-          "runner.install_card.krash.krash.runner_program_trash_before_install.installer.0.0",
+          "rc.krash.krash.runner_program_trash_before_install.installer.0.0",
         side: "runner",
         type: "install_card",
         source: {
           kind: "card",
           sourceCardInstanceId: "krash",
-          sourceDefinitionId: "krash",
+          sourceDefinitionId: syntheticCardDefinitionId("krash"),
         },
         timingPoint: "runner_action.main",
         costs: [],
@@ -169,7 +170,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
       visibleBreakerRoles: (card) =>
         card.instanceId === "only_fracter" ? ["breaker_fracter"] : [],
       rolesForCardId: (definitionId) =>
-        definitionId === "only_fracter" ? ["breaker_fracter"] : [],
+        definitionId === syntheticCardDefinitionId("only_fracter") ? ["breaker_fracter"] : [],
       isRunnerPressureRole: () => false,
       isRunnerEconomyRole: () => false,
       visibleCounterValue: () => 0,
@@ -319,7 +320,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
         input,
         {
           source:
-            "runner.program_install_memory:access:theorem_proof:0:runner.steal_agenda.theorem_proof.theorem_proof:access.agenda_install_as_runner_program%3Atheorem_proof%3A2",
+            "runner.program_install_memory:access:theorem_proof:0:rt.theorem_proof.theorem_proof:access.agenda_install_as_runner_program%3Atheorem_proof%3A2",
         } as never,
         options,
       ),
@@ -330,7 +331,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
 function program(instanceId: string, memoryCost: number): VisibleCard {
   return {
     instanceId,
-    definitionId: instanceId,
+    definitionId: syntheticCardDefinitionId(instanceId),
     title: instanceId,
     type: "program",
     known: true,
@@ -341,14 +342,14 @@ function program(instanceId: string, memoryCost: number): VisibleCard {
 describe("installed program loss with hosted descendants", () => {
   function contextFor(rig: VisibleCard[]) {
     const roles = (card: VisibleCard) =>
-      card.definitionId === "onr_v1_047_pile-driver" ||
-      card.definitionId === "onr_v1_021_dwarf" ||
-      (card.definitionId === "onr_proteus_092_morphing-tool" &&
+      card.definitionId === 259 ||
+      card.definitionId === 233 ||
+      (card.definitionId === 150 &&
         card.selectedSubtype === "wall")
         ? ["breaker_wall"]
-        : card.definitionId === "onr_v1_023_evil-twin"
+        : card.definitionId === 235
           ? ["breaker_sentry"]
-          : card.definitionId === "onr_v1_016_cyfermaster"
+          : card.definitionId === 228
             ? ["breaker_gate"]
             : [];
     return createRunnerProgramInstallTrashContext({
@@ -365,7 +366,7 @@ describe("installed program loss with hosted descendants", () => {
       },
       visibleBreakerRoles: roles,
       rolesForCardId: (id) =>
-        id === "onr_v1_075_zetatech-software-installer" ? ["build_rig"] : [],
+        id === 287 ? ["build_rig"] : [],
       isRunnerPressureRole: () => false,
       isRunnerEconomyRole: () => false,
       visibleCounterValue: (card) => card?.counters?.virus ?? 0,
@@ -374,7 +375,7 @@ describe("installed program loss with hosted descendants", () => {
   }
   const ownProgram = (
     id: string,
-    definitionId: string,
+    definitionId: number,
     hostedOn?: string,
   ): VisibleCard => ({
     ...program(id, 1),
@@ -396,8 +397,8 @@ describe("installed program loss with hosted descendants", () => {
     }) as unknown as AiDecisionInput;
 
   it("counts the exact incoming copy when replacing an installed breaker", () => {
-    const wall = ownProgram("wall", "onr_v1_047_pile-driver");
-    const installer = ownProgram("installer", "onr_v1_075_zetatech-software-installer");
+    const wall = ownProgram("wall", 259);
+    const installer = ownProgram("installer", 287);
     const rig = [wall, installer], input = inputFor(rig);
     const incoming = ownProgram("incoming", wall.definitionId!);
     const assessment = contextFor(rig).runnerProgramInstallTrashAssessmentForCard(input, incoming);
@@ -409,11 +410,11 @@ describe("installed program loss with hosted descendants", () => {
   });
 
   it("does not treat a different incoming breaker as an identical replacement", () => {
-    const wall = ownProgram("wall", "onr_v1_047_pile-driver");
-    const installer = ownProgram("installer", "onr_v1_075_zetatech-software-installer");
+    const wall = ownProgram("wall", 259);
+    const installer = ownProgram("installer", 287);
     const rig = [wall, installer], input = inputFor(rig);
     const assessment = contextFor(rig).runnerProgramInstallTrashAssessmentForCard(
-      input, ownProgram("incoming", "onr_v1_021_dwarf"),
+      input, ownProgram("incoming", 233),
     );
     expect(assessment.candidates.find(c => c.card?.instanceId === "wall")).toMatchObject({
       protectedRole: true,
@@ -422,8 +423,8 @@ describe("installed program loss with hosted descendants", () => {
   });
 
   it("preserves a configured installed role when the incoming copy has no matching mode", () => {
-    const wall = { ...ownProgram("wall", "onr_proteus_092_morphing-tool"), selectedSubtype: "wall" };
-    const installer = ownProgram("installer", "onr_v1_075_zetatech-software-installer");
+    const wall = { ...ownProgram("wall", 150), selectedSubtype: "wall" };
+    const installer = ownProgram("installer", 287);
     const rig = [wall, installer], input = inputFor(rig);
     const assessment = contextFor(rig).runnerProgramInstallTrashAssessmentForCard(
       input, ownProgram("incoming", wall.definitionId!),
@@ -435,9 +436,9 @@ describe("installed program loss with hosted descendants", () => {
   });
 
   it("does not replace hosted children merely by installing another copy of their host", () => {
-    const host = ownProgram("host", "onr_v1_001_afreet");
-    const child = ownProgram("child", "onr_v1_023_evil-twin", host.instanceId);
-    const installer = ownProgram("installer", "onr_v1_075_zetatech-software-installer");
+    const host = ownProgram("host", 213);
+    const child = ownProgram("child", 235, host.instanceId);
+    const installer = ownProgram("installer", 287);
     const rig = [host, child, installer], input = inputFor(rig);
     const assessment = contextFor(rig).runnerProgramInstallTrashAssessmentForCard(
       input, ownProgram("incoming", host.definitionId!),
@@ -450,13 +451,13 @@ describe("installed program loss with hosted descendants", () => {
   });
 
   it("preserves a daemon's actual hosted coverage instead of preferring its cheap printed host", () => {
-    const host = ownProgram("host", "onr_v1_001_afreet");
+    const host = ownProgram("host", 213);
     const installer = ownProgram(
       "installer",
-      "onr_v1_075_zetatech-software-installer",
+      287,
     );
-    const wall = ownProgram("wall", "onr_v1_047_pile-driver", "host");
-    const sentry = ownProgram("sentry", "onr_v1_023_evil-twin", "host");
+    const wall = ownProgram("wall", 259, "host");
+    const sentry = ownProgram("sentry", 235, "host");
     const rig = [host, installer, wall, sentry];
     const context = contextFor(rig),
       input = inputFor(rig);
@@ -505,9 +506,9 @@ describe("installed program loss with hosted descendants", () => {
   });
 
   it("protects a role even when both copies are lost under the same host", () => {
-    const host = ownProgram("host", "onr_v1_001_afreet");
-    const first = ownProgram("wall-a", "onr_v1_021_dwarf", "host");
-    const second = ownProgram("wall-b", "onr_v1_021_dwarf", "host");
+    const host = ownProgram("host", 213);
+    const first = ownProgram("wall-a", 233, "host");
+    const second = ownProgram("wall-b", 233, "host");
     const input = inputFor([host, first, second], 1);
     const assessment = contextFor([
       host,
@@ -526,9 +527,9 @@ describe("installed program loss with hosted descendants", () => {
   });
 
   it("does not attribute another host's children to an empty daemon", () => {
-    const empty = ownProgram("empty", "onr_v1_001_afreet");
-    const full = ownProgram("full", "onr_v1_069_succubus");
-    const wall = ownProgram("wall", "onr_v1_047_pile-driver", "full");
+    const empty = ownProgram("empty", 213);
+    const full = ownProgram("full", 281);
+    const wall = ownProgram("wall", 259, "full");
     const rig = [empty, full, wall],
       input = inputFor(rig);
     const assessment = contextFor(
@@ -546,10 +547,10 @@ describe("installed program loss with hosted descendants", () => {
   });
 
   it("keeps printed MU for a program hosted on a non-daemon", () => {
-    const host = ownProgram("ordinary-host", "onr_v1_003_baedekers-net-map");
+    const host = ownProgram("ordinary-host", 215);
     const child = ownProgram(
       "child",
-      "onr_v1_047_pile-driver",
+      259,
       host.instanceId,
     );
     const rig = [host, child],
@@ -575,7 +576,7 @@ describe("installed program loss with hosted descendants", () => {
         originalType: "agenda",
       },
     } as VisibleCard;
-    const rig = [converted, ownProgram("wall", "onr_v1_047_pile-driver")];
+    const rig = [converted, ownProgram("wall", 259)];
     const context = contextFor(rig),
       input = inputFor(rig, 3);
     const assessment = context.runnerProgramInstallTrashAssessmentForCard(
@@ -623,7 +624,7 @@ describe("installed program loss with hosted descendants", () => {
     (kind) => {
       const broken = ownProgram(
         "broken",
-        "onr_v1_001_afreet",
+        213,
         kind === "cycle" ? "broken" : "absent",
       );
       const rig = [broken],

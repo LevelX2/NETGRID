@@ -1,3 +1,4 @@
+import { cardDefinitionIdValue, parseCardDefinitionId } from "./card-definition-id-input";
 export type TargetRefRedactionPolicy =
   | "public"
   | "actor_private"
@@ -51,7 +52,7 @@ export type TargetRefInput =
     }
   | {
       kind: "abilitySource";
-      sourceDefinitionId: string;
+      sourceDefinitionId: number;
       abilityId: string;
       evidence?: readonly string[];
     }
@@ -75,7 +76,7 @@ const HIDDEN_INFO_MARKERS = [
   "decklist",
   "deckorder",
 ] as const;
-const SERVER_PATTERN = /^(hq|rd|archives|remote_\d+|new_remote)$/;
+const SERVER_PATTERN = /^(hq|rd|archives|r\d+|new_remote)$/;
 const ID_PATTERN = /^[a-zA-Z0-9_.:-]+$/;
 
 export function buildTargetRef(input: TargetRefInput): TargetRef {
@@ -172,7 +173,7 @@ export function buildTargetRef(input: TargetRefInput): TargetRef {
     );
   }
   if (input.kind === "abilitySource") {
-    const sourceDefinitionId = sanitizeId(input.sourceDefinitionId);
+    const sourceDefinitionId = cardDefinitionIdValue(input.sourceDefinitionId);
     const abilityId = sanitizeId(input.abilityId);
     if (!sourceDefinitionId || !abilityId) {
       return unknownTargetRef(
@@ -277,9 +278,13 @@ export function targetRefFromIdentity(
     });
   }
   if (parts[0] === "ability" || parts[0] === "abilitySource") {
+    const sourceDefinitionId = parseCardDefinitionId(parts[1] ?? "");
+    if (sourceDefinitionId === undefined) {
+      return unknownTargetRef("ability_source_missing", evidence, "abilitySource");
+    }
     return buildTargetRef({
       kind: "abilitySource",
-      sourceDefinitionId: parts[1] ?? "",
+      sourceDefinitionId,
       abilityId: parts.slice(2).join(":"),
       evidence,
     });

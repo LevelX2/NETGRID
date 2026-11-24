@@ -56,9 +56,13 @@ export function buildRunnerRunWindowSignals({
   >;
   runTargets: readonly RunnerRunTargetEvaluation[];
 }) {
-  const hasRunWindowCandidate = candidates.some((candidate) =>
-    isRunnerRunWindowCandidate(input, candidate),
+  const actionsById = new Map(
+    input.legalActions.map((action) => [action.actionId, action]),
   );
+  const windowCandidates = candidates.filter((candidate) =>
+    isRunnerRunWindowCandidate(input, candidate, actionsById),
+  );
+  const hasRunWindowCandidate = windowCandidates.length > 0;
   const accessWindowCommitment = currentAccessWindowCommitment(
     input,
     economy,
@@ -121,7 +125,8 @@ export function buildRunnerRunWindowSignals({
           );
         const exactPhaseActionIds = runnerExactRunWindowPhaseActionIds(
           input,
-          candidates,
+          windowCandidates,
+          actionsById,
           runWindowActionAssessments,
           safetyAssessment !== undefined,
           currentEncounterRequiresDamageBreak ||
@@ -135,26 +140,21 @@ export function buildRunnerRunWindowSignals({
           runWindowActionAssessments,
           exactPhaseActionIds,
         );
-        const restrictedRunSequenceActions = candidates.flatMap((candidate) => {
-          const action = runnerRestrictedRunSequenceAction(input, candidate);
-          return action ? [action] : [];
-        });
-        const restrictedRunSequenceServerIds = [
-          ...new Set(
-            restrictedRunSequenceActions.flatMap((action) =>
-              typeof action.payload?.serverId === "string"
-                ? [action.payload.serverId]
-                : [],
-            ),
-          ),
-        ];
+        const restrictedRunSequenceActions = windowCandidates.flatMap(
+          (candidate) => {
+            const action = runnerRestrictedRunSequenceAction(
+              input,
+              candidate,
+              actionsById,
+            );
+            return action ? [action] : [];
+          },
+        );
         const restrictedRunSequence =
           !input.playerView.run && restrictedRunSequenceActions.length > 0;
-        const windowServerId =
-          input.playerView.run?.attackedServerId ??
-          (restrictedRunSequenceServerIds.length === 1
-            ? restrictedRunSequenceServerIds[0]
-            : undefined);
+        // Restricted runs attach their server to the exact action signal below.
+        // The remaining window actions, such as decline, have no run target.
+        const windowServerId = input.playerView.run?.attackedServerId;
         const signal = {
           windowId: `run:${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
           ...(windowServerId ? { serverId: windowServerId } : {}),
@@ -163,14 +163,10 @@ export function buildRunnerRunWindowSignals({
             (restrictedRunSequence
               ? "rules.restricted_action_sequence"
               : "rules.access_window"),
-          leafPlanInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
+          leafPlanInstanceId: planInstanceIdForProposal({ moduleId: "runner.convert_run_window", dedupeKey: `run:${input.playerView.run?.runId ?? input.playerView.stateVersion}` }),
           semanticActionTypes: [
             ...new Set(
-              candidates
-                .filter((candidate) =>
-                  isRunnerRunWindowCandidate(input, candidate),
-                )
-                .map((candidate) => candidate.semanticActionType),
+              windowCandidates.map((candidate) => candidate.semanticActionType),
             ),
           ],
           purposeCode: restrictedRunSequence

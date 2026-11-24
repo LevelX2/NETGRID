@@ -30,14 +30,14 @@ it.each([false, true])(
       input.playerView.own.rig!.push({
         ...input.playerView.own.rig![0]!,
         instanceId: "current-hq-interface",
-        definitionId: "onr_v1_129_hq-interface",
+        definitionId: 341,
         title: "HQ Interface",
         type: "hardware",
         subtypes: [],
       });
     }
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.hq",
+      (e) => e.actionId === "rs.hq",
     )!;
     expect(target).toMatchObject({
       accessPayoff: passiveMultiaccess ? "access_bonus" : "unknown",
@@ -46,7 +46,7 @@ it.each([false, true])(
       routeQuote: { reachability: "conditional_access" },
     });
     expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toContain(
-      "free_stop_already_observed:hq:evt_62",
+      "free_stop_already_observed:hq:63",
     );
     restoreAiRuntimeCheckpoint(
       input,
@@ -65,7 +65,7 @@ it.each(["guaranteed_access", "known_agenda", "new_installation"])(
     const cp = fixture();
     const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
     const target = evaluateRunnerRunTargets({ input }).find(
-      (e) => e.actionId === "runner.start_run.hq",
+      (e) => e.actionId === "rs.hq",
     )!;
     if (condition === "guaranteed_access")
       target.routeQuote!.reachability = "guaranteed_access";
@@ -73,7 +73,7 @@ it.each(["guaranteed_access", "known_agenda", "new_installation"])(
     if (condition === "new_installation")
       input.eventTail.push({
         ...input.eventTail.at(-1)!,
-        eventId: "new-tools",
+        eventId: 64,
         stateVersionAfter: 63,
         publicPayload: { actor: "runner", actionType: "install_card" },
       });

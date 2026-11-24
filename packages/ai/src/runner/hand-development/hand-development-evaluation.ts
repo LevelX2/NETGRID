@@ -1,3 +1,4 @@
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -13,7 +14,7 @@ import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent
 import { RUNTIME_CARDS } from "../../ai-hints";
 import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import {
-  actionDevelopsPersistentCardNow,
+  actionAppliesPersistentInstallFitNow,
   persistentDevelopmentActionProjection,
 } from "../../actions/persistent-development-action";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
@@ -147,10 +148,12 @@ import {
   sortedUnique,
   stackabilityClassForPersistentInstall,
   visibleOrRuntimeNumber,
+} from "./runner-persistent-install-evaluation";
+import {
   visibleRunnerTagThreat,
   visibleRunnerTraceThreat,
   visibleRunnerThreat,
-} from "./runner-persistent-install-evaluation";
+} from "../visible-runner-threat";
 import {
   runnerEffectsProvideCorpForcedDraw,
   runnerEffectsHaveOnlyTagClearCreditPool,
@@ -225,7 +228,7 @@ export function evaluateRunnerHandDevelopment(
       const installAction = params.input.legalActions.find(
         (a) => a.actionId === investment.actionId,
       )!;
-      const installCost = actionCreditCost(installAction)!;
+      const installCost = nonNegativeActionCreditCost(installAction);
       return {
         ...readyEvaluation,
         hostedBreakerDevelopment: investment,
@@ -631,15 +634,25 @@ function buildCardContext(
       undefined,
     ) ??
     matchingCandidates
+      .filter((candidate) => candidate.sourceCardInstanceId === card.instanceId)
       .map((candidate) =>
         params.input.legalActions.find(
-          (action) => action.actionId === candidate.actionId,
+          (action) =>
+            action.actionId === candidate.actionId &&
+            action.side === params.input.side &&
+            action.expiresAtStateVersion ===
+              params.input.playerView.stateVersion,
         ),
       )
       .find((action): action is LegalAction => action !== undefined);
   const signals = signalsForCard(card, matchingCandidates);
+  // A preparation offer can move the card now while leaving its installation cost due.
   const actionCost =
-    legalAction !== undefined ? actionCreditCost(legalAction) : undefined;
+    legalAction === undefined
+      ? undefined
+      : legalAction.type === "install_card" || legalAction.type === "play_event"
+        ? nonNegativeActionCreditCost(legalAction)
+        : actionCreditCost(legalAction);
   const installOrPlayCost =
     actionCost ??
     visibleOrRuntimeNumber(card, "installCost") ??
@@ -680,10 +693,7 @@ function buildCardContext(
 
 function runnerHandDevelopmentActionRouteRank(action: LegalAction): number {
   if (action.type !== "install_card") return 1;
-  if (
-    action.payload?.runnerProgramTrashBeforeInstall === true ||
-    action.actionId.endsWith(".runner_program_trash_before_install")
-  ) {
+  if (action.payload?.runnerProgramTrashBeforeInstall === true) {
     return 0;
   }
   return typeof action.payload?.hostOnCardId === "string" ? 2 : 3;
@@ -754,7 +764,9 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
     return "access_payoff";
   if (cardProvidesTraceDefense(context)) return "defense_support";
   if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
-  if (runnerEffectsHaveOnlyTagClearCreditPool(context.signals.structuredEffects))
+  if (
+    runnerEffectsHaveOnlyTagClearCreditPool(context.signals.structuredEffects)
+  )
     return "defense_support";
   if (looksLikeBankTool(text)) return "bank_tool";
   if (looksLikeEconomyTool(text)) return "economy_engine";
@@ -1006,7 +1018,7 @@ function doctrineSupportsProspectiveRecoveryInfrastructure(
   const installedProviderIds = new Set(
     (params.input.playerView.own.rig ?? [])
       .map((card) => card.definitionId)
-      .filter((entry): entry is string => entry !== undefined),
+      .filter((entry) => entry !== undefined),
   );
   return !params.strategicIntent.engineProviders?.some(
     (entry) =>
@@ -1133,7 +1145,7 @@ function recoveryOnlySearchHasNoVisibleTarget(
   if (!recoveryOnly) return false;
   const boundRecoveryTarget =
     typeof context.legalAction?.payload?.targetCardId === "string" ||
-    typeof context.legalAction?.payload?.targetCardDefinitionId === "string";
+    typeof context.legalAction?.payload?.targetCardDefinitionId === "number";
   if (context.card.type === "event" && !boundRecoveryTarget) return true;
   return input.playerView.own.heapOrArchives.length === 0;
 }
@@ -1179,7 +1191,7 @@ function evaluateRunnerPersistentInstall(
   currentNeed: RunnerHandDevelopmentCurrentNeed,
 ): RunnerPersistentInstallEvaluation | undefined {
   const action = context.legalAction;
-  if (!action || !actionDevelopsPersistentCardNow(action)) return undefined;
+  if (!action || !actionAppliesPersistentInstallFitNow(action)) return undefined;
   if (!isPersistentRunnerCard(context.card)) return undefined;
 
   const profile = persistentFunctionalProfileForCard(

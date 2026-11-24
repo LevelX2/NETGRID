@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import type { CardDefinitionId } from "@netgrid/shared";
 
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 
@@ -33,26 +34,26 @@ describe("AI card hint full-inventory closeout", () => {
 
   it("keeps synthetic fixtures free of unrelated strategy roles", () => {
     const hints = hintById();
-    const plans = (cardId: string) => hints.get(cardId)?.planRoles;
+    const plans = (cardId: CardDefinitionId) => hints.get(cardId)?.planRoles;
 
-    expect(plans("corp_identity_001")).toEqual([]);
-    expect(plans("runner_identity_001")).toEqual([]);
-    expect(plans("simple_run_event")).toEqual([]);
-    expect(plans("v08_overclock_run_event")).toEqual(["recover_economy"]);
-    expect(plans("simple_setup_hardware")).toEqual([]);
-    expect(plans("v08_memory_chip")).toEqual([]);
-    expect(plans("simple_draw_operation")).toEqual([
+    expect(plans(3)).toEqual([]);
+    expect(plans(587)).toEqual([]);
+    expect(plans(600)).toEqual([]);
+    expect(plans(615)).toEqual(["recover_economy"]);
+    expect(plans(602)).toEqual([]);
+    expect(plans(614)).toEqual([]);
+    expect(plans(593)).toEqual([
       "draw_for_answers",
       "setup",
     ]);
-    expect(plans("v08_archive_planning_operation")).toEqual([
+    expect(plans(608)).toEqual([
       "draw_for_answers",
       "setup",
     ]);
-    expect(plans("simple_tag_punishment_operation")).toEqual([
+    expect(plans(604)).toEqual([
       "punish_tagged_runner",
     ]);
-    expect(plans("simple_upgrade")).toEqual([]);
+    expect(plans(606)).toEqual([]);
   });
 
   it("contains neither deprecated aliases nor stale review dependencies", () => {

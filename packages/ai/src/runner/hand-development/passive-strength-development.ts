@@ -1,5 +1,6 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { projectVisibleIceAfterPassiveRunnerInstall } from "@netgrid/engine";
+import { runnerInvestmentTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import { buildDeckCapabilityProfileFromInput } from "../../deck-capabilities";
 import { breakerCardBlocksAccessReachability } from "../../breaker-ontology-consumer";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -14,7 +15,7 @@ import {
  */
 export function assessPassiveStrengthDevelopment(
   input: AiDecisionInput,
-  definitionId: string,
+  definitionId: number,
   memoryCost: number,
   installCredits: number,
   installClicks: number,
@@ -114,6 +115,7 @@ export function assessPassiveStrengthDevelopment(
           projectVisibleIceAfterPassiveRunnerInstall(definitionId, c),
         );
         if (after.some((c) => !c)) return [];
+        const traceContext = runnerInvestmentTraceContext(input, ice);
         const cost = (cards: readonly VisibleCard[]) => {
           const path = assessKnownRezzedIcePath(
             [...cards],
@@ -121,6 +123,7 @@ export function assessPassiveStrengthDevelopment(
             runnerRunPathCreditBudgetWithVisiblePools(cash, rig),
             server.root,
             input.playerView.opponent.credits,
+            traceContext,
           );
           if (
             !path.canReachAccess ||

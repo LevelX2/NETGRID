@@ -1,11 +1,13 @@
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import type { CardDefinitionId } from "@netgrid/shared";
+import { ORIGINALSET_V1_CARD_IDS } from "@netgrid/catalog";
+import { listPlanningCardsWithFacts } from "@netgrid/cards/planning";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
-function cardStrategyEntry(cardId: string) {
-  const entry = cardSpecPlanningCards().find(
-    (candidate) => candidate.definition.id === cardId,
+function cardStrategyEntry(cardId: CardDefinitionId) {
+  const entry = listPlanningCardsWithFacts().find(
+    (candidate) => candidate.facts.id === cardId,
   );
   if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
   return {
@@ -26,8 +28,8 @@ function cardStrategyEntry(cardId: string) {
 
 describe("CardSpec card-level strategy typed evidence", () => {
   it("compiles all 148 Originalset bindings from typed Engine evidence", () => {
-    const entries = cardSpecPlanningCards().filter((entry) =>
-      entry.definition.id.startsWith("onr_v1_"),
+    const entries = listPlanningCardsWithFacts().filter((entry) =>
+      ORIGINALSET_V1_CARD_IDS.includes(entry.facts.id),
     );
     expect(
       entries.reduce(
@@ -48,25 +50,25 @@ describe("CardSpec card-level strategy typed evidence", () => {
       )
         continue;
       expect(() =>
-        deriveCardSpecAiHint(cardStrategyEntry(entry.definition.id)),
+        deriveCardSpecAiHint(cardStrategyEntry(entry.facts.id)),
       ).not.toThrow();
     }
   });
 
   it("covers every missing card-level strategy cluster with a typed witness", () => {
     const witnesses = [
-      ["onr_v1_188_ai-chief-financial-officer", "deck.corp_recycle"],
-      ["onr_v1_190_bioweapons-engineering", "damage.corp_meat_amplifier"],
-      ["onr_v1_194_corporate-downsizing", "hq.corp_agenda_flood_control"],
-      ["onr_v1_199_employee-empowerment", "draw.corp_recurring"],
-      ["onr_v1_214_project-babylon", "score.overadvance_bonus"],
-      ["onr_proteus_007_project-venice", "action.corp_recurring_extra_action"],
-      ["onr_v1_271_tko-2-0", "corp_ice.encounter_tax"],
-      ["onr_v1_292_management-shake-up", "advance.counter_manipulation"],
-      ["onr_v1_309_bbs-whispering-campaign", "economy.corp_installed_engine"],
-      ["onr_v1_323_experimental-ai", "remote.ambush"],
-      ["onr_v1_361_namatoki-plaza", "score.remote_capacity"],
-      ["onr_v1_207_netwatch-operations-office", "tag.source"],
+      [400, "deck.corp_recycle"],
+      [402, "damage.corp_meat_amplifier"],
+      [406, "hq.corp_agenda_flood_control"],
+      [411, "draw.corp_recurring"],
+      [426, "score.overadvance_bonus"],
+      [65, "action.corp_recurring_extra_action"],
+      [483, "corp_ice.encounter_tax"],
+      [504, "advance.counter_manipulation"],
+      [521, "economy.corp_installed_engine"],
+      [535, "remote.ambush"],
+      [573, "score.remote_capacity"],
+      [419, "tag.source"],
     ] as const;
 
     for (const [cardId, evidence] of witnesses)
@@ -82,7 +84,7 @@ describe("CardSpec card-level strategy typed evidence", () => {
   });
 
   it("rejects near-matching mechanics without the asserted strategy evidence", () => {
-    const forged = (cardId: string, engine: Record<string, unknown>) => {
+    const forged = (cardId: CardDefinitionId, engine: Record<string, unknown>) => {
       const entry = cardStrategyEntry(cardId);
       return () =>
         deriveCardSpecAiHint({
@@ -95,7 +97,7 @@ describe("CardSpec card-level strategy typed evidence", () => {
     };
 
     expect(
-      forged("onr_v1_188_ai-chief-financial-officer", {
+      forged(400, {
         scoredAgenda: {
           kind: "gain_credits_on_score",
           recipient: "corp",
@@ -105,9 +107,9 @@ describe("CardSpec card-level strategy typed evidence", () => {
       }),
     ).toThrow("card_spec_strategy_support_evidence_missing");
 
-    const damageEntry = cardStrategyEntry("onr_v1_208_on-call-solo-team");
+    const damageEntry = cardStrategyEntry(420);
     expect(
-      forged("onr_v1_208_on-call-solo-team", {
+      forged(420, {
         abilities: damageEntry.planning.engine.abilities?.map((ability) => ({
           ...ability,
           condition: undefined,
@@ -116,10 +118,10 @@ describe("CardSpec card-level strategy typed evidence", () => {
     ).toThrow("card_spec_strategy_support_evidence_missing");
 
     const traceEntry = cardStrategyEntry(
-      "onr_v1_207_netwatch-operations-office",
+      419,
     );
     expect(
-      forged("onr_v1_207_netwatch-operations-office", {
+      forged(419, {
         abilities: traceEntry.planning.engine.abilities?.map((ability) => ({
           ...ability,
           effects: ability.effects.map((effect) =>
@@ -130,7 +132,7 @@ describe("CardSpec card-level strategy typed evidence", () => {
     ).toThrow("card_spec_strategy_support_evidence_missing");
 
     expect(
-      forged("onr_v1_361_namatoki-plaza", {
+      forged(573, {
         fortCapacityModifiers: undefined,
       }),
     ).toThrow("card_spec_strategy_support_evidence_missing");

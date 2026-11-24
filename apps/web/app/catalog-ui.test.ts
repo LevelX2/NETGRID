@@ -55,8 +55,8 @@ const noTypes: CatalogTypeFilterState = {
 describe("catalog UI filtering", () => {
   it("does not select a card when status results are excluded by the active type filters", () => {
     const cards = [
-      { catalogCardId: "implemented_event", type: "event", subtypes: [] },
-      { catalogCardId: "implemented_ice", type: "ice", subtypes: [] },
+      { catalogCardId: 9155, type: "event", subtypes: [] },
+      { catalogCardId: 9156, type: "ice", subtypes: [] },
     ];
 
     expect(nextCatalogSelection(null, cards, noTypes)).toBeNull();
@@ -64,30 +64,30 @@ describe("catalog UI filtering", () => {
 
   it("keeps or picks only cards visible through type filters", () => {
     const cards = [
-      { catalogCardId: "implemented_event", type: "event", subtypes: [] },
-      { catalogCardId: "implemented_ice", type: "ice", subtypes: [] },
+      { catalogCardId: 9155, type: "event", subtypes: [] },
+      { catalogCardId: 9156, type: "ice", subtypes: [] },
     ];
     const onlyIce = { ...noTypes, ice: true };
 
-    expect(nextCatalogSelection("implemented_event", cards, onlyIce)).toBe(
-      "implemented_ice",
+    expect(nextCatalogSelection(9155, cards, onlyIce)).toBe(
+      9156,
     );
-    expect(nextCatalogSelection("implemented_ice", cards, onlyIce)).toBe(
-      "implemented_ice",
+    expect(nextCatalogSelection(9156, cards, onlyIce)).toBe(
+      9156,
     );
     expect(nextCatalogSelection(null, cards, allTypes)).toBe(
-      "implemented_event",
+      9155,
     );
   });
 
   it("separates original cards from local test cards in the deck editor source filter", () => {
     const cards = [
-      { catalogCardId: "onr", setId: "onr-v1-limited-private-local" },
-      { catalogCardId: "originalset", setId: "originalset-v1" },
-      { catalogCardId: "testset", setId: "testset-v1" },
-      { catalogCardId: "demo", setId: "mvp-0.8-demo" },
-      { catalogCardId: "proteus", setId: "proteus-v1" },
-      { catalogCardId: "future", setId: "future-private-set" },
+      { catalogCardId: 9157, setId: "onr-v1-limited-private-local" },
+      { catalogCardId: 9158, setId: "originalset-v1" },
+      { catalogCardId: 9159, setId: "testset-v1" },
+      { catalogCardId: 9160, setId: "mvp-0.8-demo" },
+      { catalogCardId: 9188, setId: "proteus-v1" },
+      { catalogCardId: 9162, setId: "future-private-set" },
     ];
 
     expect(catalogSetKeyForCard(cards[0]!)).toBe("original");
@@ -100,10 +100,10 @@ describe("catalog UI filtering", () => {
       filterCatalogCardsBySet(cards, "original").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["onr", "originalset"]);
+    ).toEqual([9157, 9158]);
     expect(
       filterCatalogCardsBySet(cards, "test").map((card) => card.catalogCardId),
-    ).toEqual(["testset", "demo"]);
+    ).toEqual([9159, 9160]);
     expect(summarizeCatalogSetFilters(cards)).toEqual({
       all: 6,
       original: 2,
@@ -115,28 +115,28 @@ describe("catalog UI filtering", () => {
   it("keeps originalset filtering composable with search and type filters", () => {
     const cards = [
       {
-        catalogCardId: "original_ice",
+        catalogCardId: 9163,
         title: "Original Ice",
         setId: "originalset-v1",
         type: "ice",
         subtypes: [],
       },
       {
-        catalogCardId: "original_event",
+        catalogCardId: 9164,
         title: "Original Event",
         setId: "originalset-v1",
         type: "event",
         subtypes: [],
       },
       {
-        catalogCardId: "test_ice",
+        catalogCardId: 9165,
         title: "Original Test Ice",
         setId: "testset-v1",
         type: "ice",
         subtypes: [],
       },
       {
-        catalogCardId: "proteus_ice",
+        catalogCardId: 9166,
         title: "Original Proteus Ice",
         setId: "proteus-v1",
         type: "ice",
@@ -153,16 +153,16 @@ describe("catalog UI filtering", () => {
       filterCatalogCardsByType(searchedCards, onlyIce).map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["original_ice"]);
+    ).toEqual([9163]);
   });
 
   it("filters Originalset, Classic and Proteus independently", () => {
     const cards = [
-      { catalogCardId: "original", setId: "originalset-v1" },
-      { catalogCardId: "classic", setId: "classic-v1" },
-      { catalogCardId: "proteus", setId: "proteus-v1" },
-      { catalogCardId: "test", setId: "testset-v1" },
-      { catalogCardId: "unknown", setId: "future-private-set" },
+      { catalogCardId: 9187, setId: "originalset-v1" },
+      { catalogCardId: 9186, setId: "classic-v1" },
+      { catalogCardId: 9188, setId: "proteus-v1" },
+      { catalogCardId: 9177, setId: "testset-v1" },
+      { catalogCardId: 9181, setId: "future-private-set" },
     ];
 
     expect(cards.map(catalogProductSetKeyForCard)).toEqual([
@@ -178,28 +178,28 @@ describe("catalog UI filtering", () => {
         classic: false,
         proteus: false,
       }).map((card) => card.catalogCardId),
-    ).toEqual(["original"]);
+    ).toEqual([9187]);
     expect(
       filterCatalogCardsByProductSets(cards, {
         original: true,
         classic: true,
         proteus: false,
       }).map((card) => card.catalogCardId),
-    ).toEqual(["original", "classic"]);
+    ).toEqual([9187, 9186]);
     expect(
       filterCatalogCardsByProductSets(cards, {
         original: true,
         classic: true,
         proteus: true,
       }).map((card) => card.catalogCardId),
-    ).toEqual(["original", "classic", "proteus"]);
+    ).toEqual([9187, 9186, 9188]);
     expect(
       filterCatalogCardsByProductSets(cards, {
         original: false,
         classic: false,
         proteus: true,
       }).map((card) => card.catalogCardId),
-    ).toEqual(["proteus"]);
+    ).toEqual([9188]);
     expect(summarizeCatalogProductSets(cards)).toEqual({
       original: 1,
       classic: 1,
@@ -210,12 +210,12 @@ describe("catalog UI filtering", () => {
 
   it("builds dynamic catalog set filters from concrete set ids", () => {
     const cards = [
-      { catalogCardId: "original", setId: "originalset-v1" },
-      { catalogCardId: "proteus_a", setId: "proteus" },
-      { catalogCardId: "proteus_b", setId: "proteus" },
-      { catalogCardId: "classic", setId: "classic-v1" },
-      { catalogCardId: "custom", setId: "android-custom-alpha" },
-      { catalogCardId: "test", setId: "testset" },
+      { catalogCardId: 9187, setId: "originalset-v1" },
+      { catalogCardId: 9173, setId: "proteus" },
+      { catalogCardId: 9174, setId: "proteus" },
+      { catalogCardId: 9186, setId: "classic-v1" },
+      { catalogCardId: 9176, setId: "android-custom-alpha" },
+      { catalogCardId: 9177, setId: "testset" },
     ];
 
     expect(catalogSetFilterOptions(cards)).toEqual([
@@ -230,7 +230,7 @@ describe("catalog UI filtering", () => {
       filterCatalogCardsBySetId(cards, "proteus").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["proteus_a", "proteus_b"]);
+    ).toEqual([9173, 9174]);
     expect(filterCatalogCardsBySetId(cards, "all")).toEqual(cards);
   });
 
@@ -262,32 +262,32 @@ describe("catalog UI filtering", () => {
   it("filters and summarizes rarity metadata without breaking cards that have no rarity", () => {
     const cards = [
       {
-        catalogCardId: "common",
+        catalogCardId: 9178,
         rarity: { code: "common", labelDe: "Common from payload" },
       },
       {
-        catalogCardId: "rare",
+        catalogCardId: 9179,
         rarity: { code: "rare", labelDe: "Rare from payload" },
       },
-      { catalogCardId: "missing" },
-      { catalogCardId: "unknown", rarity: { code: "promo", labelDe: "Promo" } },
+      { catalogCardId: 9180 },
+      { catalogCardId: 9181, rarity: { code: "promo", labelDe: "Promo" } },
     ];
 
     expect(
       filterCatalogCardsByRarity(cards, "common").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["common"]);
+    ).toEqual([9178]);
     expect(
       filterCatalogCardsByRarity(cards, "rare").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["rare"]);
+    ).toEqual([9179]);
     expect(
       filterCatalogCardsByRarity(cards, "all").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["common", "rare", "missing", "unknown"]);
+    ).toEqual([9178, 9179, 9180, 9181]);
     expect(summarizeCatalogRarityFilters(cards)).toEqual({
       all: 4,
       common: 1,
@@ -303,7 +303,7 @@ describe("catalog UI filtering", () => {
   it("filters cards by AI hint inspector coverage", () => {
     const cards = [
       {
-        catalogCardId: "new",
+        catalogCardId: 9182,
         aiInspectorSummary: {
           available: true,
           aiSupportStatus: "ai_supported",
@@ -314,7 +314,7 @@ describe("catalog UI filtering", () => {
         },
       },
       {
-        catalogCardId: "reviewed",
+        catalogCardId: 9183,
         aiInspectorSummary: {
           available: true,
           aiSupportStatus: "ai_supported",
@@ -325,7 +325,7 @@ describe("catalog UI filtering", () => {
         },
       },
       {
-        catalogCardId: "legacy-only",
+        catalogCardId: 9184,
         aiInspectorSummary: {
           available: true,
           aiSupportStatus: "ai_supported",
@@ -335,24 +335,24 @@ describe("catalog UI filtering", () => {
           hasWarnings: false,
         },
       },
-      { catalogCardId: "blocked", aiInspectorSummary: null },
+      { catalogCardId: 9185, aiInspectorSummary: null },
     ];
 
     expect(
       filterCatalogCardsByAiHint(cards, "new_facts").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["new", "reviewed"]);
+    ).toEqual([9182, 9183]);
     expect(
       filterCatalogCardsByAiHint(cards, "warnings").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["reviewed"]);
+    ).toEqual([9183]);
     expect(
       filterCatalogCardsByAiHint(cards, "missing").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["blocked"]);
+    ).toEqual([9185]);
     expect(summarizeCatalogAiHintFilters(cards)).toEqual({
       all: 4,
       new_facts: 2,
@@ -369,26 +369,26 @@ describe("catalog UI filtering", () => {
 
   it("filters cards by block status", () => {
     const cards = [
-      { catalogCardId: "classic", statuses: { blocked: true } },
-      { catalogCardId: "original", statuses: { blocked: false } },
-      { catalogCardId: "proteus", statuses: { blocked: false } },
+      { catalogCardId: 9186, statuses: { blocked: true } },
+      { catalogCardId: 9187, statuses: { blocked: false } },
+      { catalogCardId: 9188, statuses: { blocked: false } },
     ];
 
     expect(
       filterCatalogCardsByBlockStatus(cards, "all").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["classic", "original", "proteus"]);
+    ).toEqual([9186, 9187, 9188]);
     expect(
       filterCatalogCardsByBlockStatus(cards, "blocked").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["classic"]);
+    ).toEqual([9186]);
     expect(
       filterCatalogCardsByBlockStatus(cards, "not_blocked").map(
         (card) => card.catalogCardId,
       ),
-    ).toEqual(["original", "proteus"]);
+    ).toEqual([9187, 9188]);
     expect(summarizeCatalogBlockStatusFilters(cards)).toEqual({
       all: 3,
       not_blocked: 2,

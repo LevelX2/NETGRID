@@ -1,3 +1,4 @@
+import { isRemoteServerId } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   candidateTargets,
@@ -8,15 +9,18 @@ import type {
   PlanMaterialization,
   PlanSchedulerContext,
 } from "../../plans/plan-scheduler";
-import { CorpPunishCampaignSignal, PunishState } from "./punish-types";
+import type { CorpPunishCampaignSignal, PunishState } from "./punish-types";
 
 export function corpPunishCampaignOwnsCandidate(
   signal: CorpPunishCampaignSignal,
   candidate: ActionSemanticCandidate,
 ): boolean {
+  if (candidate.actorSide !== "corp") return false;
+  const sourceDefinitionId = candidate.sourceDefinitionId;
   if (signal.routeContract) {
     return (
       signal.routeContract.quoteStatus === "complete" &&
+      signal.routeContract.quoteStateVersion === candidate.stateVersion &&
       signal.routeContract.horizon === "execute" &&
       signal.routeContract.currentHeadActionId === candidate.actionId &&
       signal.feasible &&
@@ -24,7 +28,8 @@ export function corpPunishCampaignOwnsCandidate(
         candidate.semanticActionType,
       ) &&
       (signal.sourceDefinitionIds.length === 0 ||
-        signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? ""))
+        (sourceDefinitionId !== undefined &&
+          signal.sourceDefinitionIds.includes(sourceDefinitionId)))
     );
   }
   if (
@@ -40,7 +45,8 @@ export function corpPunishCampaignOwnsCandidate(
   return (
     signal.sourceDefinitionIds.length === 0 ||
     candidate.semanticActionType === "choice.resolve" ||
-    signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
+    (sourceDefinitionId !== undefined &&
+      signal.sourceDefinitionIds.includes(sourceDefinitionId))
   );
 }
 
@@ -154,7 +160,7 @@ function corpPrepareTargetValue(
 ): number {
   if (candidate.semanticActionType !== "install.card") return 0;
   const target = candidateTargets(candidate).find(
-    (targetId) => targetId === "new_remote" || targetId.startsWith("remote_"),
+    (targetId) => targetId === "new_remote" || isRemoteServerId(targetId),
   );
   if (!target || target === "new_remote") return 0;
   const server = context.input.playerView.servers.find(

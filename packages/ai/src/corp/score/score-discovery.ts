@@ -17,7 +17,10 @@ import { visibleCardIsAgenda } from "../../runtime/visible-action-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
 import { withCorpCounterBankReplacementPreparation } from "./score-counter-bank-replacement";
-import { corpAssetPreservingSameTurnScoreRoutes } from "./score-asset-preservation";
+import {
+  corpAssetPreservingSameTurnScoreRoutes,
+  withCorpCampaignSlotRelease,
+} from "./score-asset-preservation";
 import { corpConditionalScoreCreditFunding } from "./score-conditional-credit-funding";
 import { withCorpSameTurnScoreDefenseReserve } from "./score-reserve-restoration";
 import {
@@ -52,6 +55,7 @@ export function discoverCorpDirectScoreProjects({
   centralDefenseAllocation: CorpCentralDefenseAllocation;
 }): {
   directScoreProjects: CorpScoreProjectSignal[];
+  nextTurnScoreContinuationProjects: CorpScoreProjectSignal[];
   recentlyCompromisedRemoteIds: Set<string>;
   residentScoreDefenseBinding: ReturnType<
     typeof corpResidentScoreDefenseBinding
@@ -70,8 +74,10 @@ export function discoverCorpDirectScoreProjects({
   );
   const preferredDeckoutAgendaRecycleRouteAvailable =
     corpPreferredDeckoutAgendaRecycleRouteAvailable(input, candidates);
+  const nextTurnScoreContinuationProjects =
+    corpNextTurnScoreContinuationProjects(input, candidates);
   const preparedScoreContinuationAvailable =
-    corpNextTurnScoreContinuationProjects(input, candidates).some((project) => {
+    nextTurnScoreContinuationProjects.some((project) => {
       // An installed agenda that can finish now also dominates opening an
       // unfunded emergency project, even below the winning point threshold.
       // The producer has already quoted every advance and funding click.
@@ -105,6 +111,7 @@ export function discoverCorpDirectScoreProjects({
   );
   return {
     directScoreProjects,
+    nextTurnScoreContinuationProjects,
     recentlyCompromisedRemoteIds,
     residentScoreDefenseBinding,
     residentScoreAgendaInstanceId,
@@ -116,6 +123,7 @@ export function reconcileCorpScoreProjects({
   candidates,
   proposedAmbushes,
   directScoreProjects,
+  nextTurnScoreContinuationProjects,
   recentlyCompromisedRemoteIds,
   residentScoreDefenseBinding,
   residentScoreAgendaInstanceId,
@@ -125,6 +133,7 @@ export function reconcileCorpScoreProjects({
   candidates: readonly ActionSemanticCandidate[];
   proposedAmbushes: CorpPlanDomain["ambushes"];
   directScoreProjects: CorpScoreProjectSignal[];
+  nextTurnScoreContinuationProjects: CorpScoreProjectSignal[];
   recentlyCompromisedRemoteIds: ReadonlySet<string>;
   residentScoreDefenseBinding: ReturnType<
     typeof corpResidentScoreDefenseBinding
@@ -148,8 +157,6 @@ export function reconcileCorpScoreProjects({
   const remoteCreationUnlockScoreProjects = candidates.flatMap((candidate) =>
     corpRemoteCreationUnlockScoreProjects(input, candidate),
   );
-  const nextTurnScoreContinuationProjects =
-    corpNextTurnScoreContinuationProjects(input, candidates);
   const currentInstalledScore = nextTurnScoreContinuationProjects.find(
     (project) => project.sameTurnCloseout,
   );
@@ -324,6 +331,18 @@ export function reconcileCorpScoreProjects({
       )
       .map((project) => project.agendaInstanceId!),
   );
+  const isFundedSameTurnInstall = (project: CorpScoreProjectSignal) =>
+    project.phase === "install_agenda" &&
+    project.feasible &&
+    project.sameTurnCloseout &&
+    project.sameTurnConversionProof === "engine_quoted_path";
+  const preparedSameTurnInstalls = proposedScoreProjects.filter(
+    (project) =>
+      isFundedSameTurnInstall(project) &&
+      project.serverId !== undefined &&
+      project.serverId !== "new_remote" &&
+      !requiresReprotection(project),
+  );
   const concreteScoreProjectsBeforeOpeningRush = uniqueScoreProjects(
     proposedScoreProjects.filter(
       (project) =>
@@ -332,6 +351,14 @@ export function reconcileCorpScoreProjects({
           project.serverId === "new_remote" &&
           !assetPreservation.preservingProjectIds.has(project.projectId) &&
           project.agendaInstanceId !== undefined &&
+          // A prepared fort can replace a funded install-and-score only if
+          // this agenda can also finish there before the Runner acts.
+          (!isFundedSameTurnInstall(project) ||
+            preparedSameTurnInstalls.some(
+              (other) =>
+                other.agendaInstanceId === project.agendaInstanceId &&
+                other.agendaPoints >= project.agendaPoints,
+            )) &&
           (residentScoreDefenseBinding?.agendaInstanceId ===
             project.agendaInstanceId ||
             agendaInstancesWithEngineQuotedReusableRemote.has(
@@ -466,7 +493,7 @@ export function reconcileCorpScoreProjects({
         ),
       ),
     ),
-  ];
+  ].map((project) => withCorpCampaignSlotRelease(input, candidates, project));
   const deferredLastClickScoreProject =
     corpKnownDeferredLastClickScoreProject(scoreProjects);
   const exactLastClickLiquidityHeadAvailable =

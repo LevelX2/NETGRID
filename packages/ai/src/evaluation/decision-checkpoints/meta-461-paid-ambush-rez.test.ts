@@ -27,7 +27,7 @@ function fixture(name = "g31-d69") {
   const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
   const source = input.playerView.servers
     .flatMap((s) => s.root)
-    .find((c) => c.definitionId === "onr_v1_323_experimental-ai")!;
+    .find((c) => c.definitionId === 535)!;
   const rez = input.legalActions.find(
     (a) => a.type === "rez_card" && a.source === source.instanceId,
   )!;
@@ -74,8 +74,10 @@ describe("meta461 paid access ambush rez", () => {
       expect(decision.actionId).toBe(f.rez.actionId);
       expect(decision.fallbackUsed).toBe(false);
       expect(
-        decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
-      ).toContain("corp.ambush_and_bluff");
+        decision.decisionDebug?.planFirstDecision?.portfolio.find(
+          (instance) => instance.instanceId === decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        )?.moduleId,
+      ).toBe("corp.ambush_and_bluff");
     },
   );
   it("admits exactly affordable rez and rejects an unfunded quoted cost", () => {
@@ -103,11 +105,11 @@ describe("meta461 paid access ambush rez", () => {
     const f = fixture();
     f.input.playerView.run!.position = {
       kind: "ice",
-      serverId: "remote_1",
+      serverId: "r1",
       iceIndex: 0,
     };
     expect(signals(f)[0]?.actionIds).toEqual([]);
-    f.input.playerView.run!.position = { kind: "server", serverId: "remote_1" };
+    f.input.playerView.run!.position = { kind: "server", serverId: "r1" };
     f.input.playerView.run!.attackedServerId = "rd";
     expect(signals(f)[0]?.actionIds).toEqual([]);
   });

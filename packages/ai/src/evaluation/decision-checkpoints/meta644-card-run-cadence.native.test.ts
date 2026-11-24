@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import type { CreateGameConfig, PlayerAction } from "@netgrid/shared";
-import { applyAction, createGame, getPlayerView } from "@netgrid/engine";
+import { applyAction, createGame, getPlayerView, hashState } from "@netgrid/engine";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
@@ -12,6 +12,7 @@ import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
+import { applyPostSetupDeckOrder, type PostSetupDeckOrder } from "./post-setup-deck-order.test-support";
 
 const fixture = JSON.parse(
   readFileSync(
@@ -21,6 +22,10 @@ const fixture = JSON.parse(
 ) as {
   config: CreateGameConfig;
   actions: PlayerAction[];
+  setupArrangement: PostSetupDeckOrder;
+  initialStateHash: string;
+  finalStateHash: string;
+  prefixStateHashes: string[];
   checkpoint: {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
@@ -31,18 +36,22 @@ afterEach(resetResidentPlanPortfolioMemory);
 
 function replayInput() {
   let state = createGame(fixture.config);
-  for (const action of fixture.actions) {
+  expect(hashState(state)).toBe(fixture.initialStateHash);
+  expect(fixture.prefixStateHashes).toHaveLength(fixture.actions.length);
+  for (const [index, action] of fixture.actions.entries()) {
     const next = applyAction(state, action);
     if (!next.ok)
       throw new Error(
         `native_prefix_rejected:${action.actionId}:${next.error.code}`,
       );
     state = next.state;
+    if (index === 1) applyPostSetupDeckOrder(state, fixture.setupArrangement);
+    expect(hashState(state)).toBe(fixture.prefixStateHashes[index]);
   }
+  expect(hashState(state)).toBe(fixture.finalStateHash);
   const playerView = getPlayerView(state, "runner");
   const captured = structuredClone(fixture.checkpoint.input);
-  // Engine replay regenerates public facts. No recorded event is patched or
-  // assigned the old checkpoint hash: AI turn-plan receipts are not replayed.
+  // The replayed PlayerView supplies the public bindings to the AI DTO.
   const input = {
     ...captured,
     ...buildAiDecisionInputDto({
@@ -53,7 +62,7 @@ function replayInput() {
     }),
   };
   input.planningStateIdentity = buildPlanningStateIdentity(input);
-  expect(input.playerView.stateVersion).toBe(52);
+  expect(input.playerView.stateVersion).toBe(47);
   expect(input.playerView.own.credits).toBe(6);
   expect(input.playerView.own.clicks).toBe(2);
   expect(input.playerView.own.gripOrHq.map((c) => c.instanceId)).toEqual(
@@ -76,7 +85,7 @@ it("publishes nested run starts and actual redirected access through the AI DTO"
         kind: "start_run",
         serverId: "rd",
         accessServerId: "rd",
-        runId: expect.any(String),
+        runId: expect.any(Number),
       }),
       expect.objectContaining({ kind: "trash_source", reason: "run_start" }),
     ]),
@@ -92,15 +101,15 @@ it("publishes nested run starts and actual redirected access through the AI DTO"
         kind: "start_run",
         serverId: "hq",
         accessServerId: "rd",
-        runId: expect.any(String),
+        runId: expect.any(Number),
       }),
     ]),
   });
   expect(
-    events.find((e) => e.stateVersionAfter === 51)?.publicPayload.serverId,
+    events.find((e) => e.stateVersionAfter === 46)?.publicPayload.serverId,
   ).toBe("rd");
   expect(
-    events.find((e) => e.stateVersionAfter === 52)?.publicPayload.serverId,
+    events.find((e) => e.stateVersionAfter === 47)?.publicPayload.serverId,
   ).toBe("rd");
   expect(runnerCentralPressureCadence(input, "rd")).toMatchObject({
     routeAvailable: true,
@@ -128,9 +137,9 @@ it("keeps central-pressure ownership for the native affordable known-agenda run"
     timeoutUsed: false,
     decisionDebug: {
       planFirstDecision: {
-        rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
-        leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ard",
-        route: { actionId: action!.actionId, stateVersion: 52 },
+        rootPlanInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+        leafExecutorInstanceId: "pa90fufw9vc5bkshp96ztlryxl",
+        route: { actionId: action!.actionId, stateVersion: 47 },
       },
     },
   });
@@ -139,7 +148,7 @@ it("keeps central-pressure ownership for the native affordable known-agenda run"
 it("counts redirected access against R&D, not the attacked HQ", () => {
   const input = replayInput();
   input.playerView.publicEvents = input.playerView.publicEvents.filter(
-    (e) => e.stateVersionAfter !== 52,
+    (e) => e.stateVersionAfter !== 47,
   );
   input.eventTail = input.playerView.publicEvents;
   expect(runnerCentralPressureCadence(input, "rd")).toMatchObject({

@@ -38,7 +38,7 @@ it.each(["g8d11", "g10d105"])(
     const result = chooseAiAction(input);
     expect(JSON.stringify(input)).toBe(before);
     expect(result).toMatchObject({
-      actionId: "runner.trigger_ability.decline_optional_bonus_run",
+      actionId: "rx.decline_optional_bonus_run",
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       timeoutUsed: false,

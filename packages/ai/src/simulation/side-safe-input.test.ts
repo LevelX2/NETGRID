@@ -32,7 +32,7 @@ describe("assertAiInputIsSideSafe", () => {
 
   it("scans shared history objects once without weakening marker checks", () => {
     const publicEvent = {
-      eventId: "safe-event",
+      eventId: 1,
       publicPayload: { note: "visible" },
     };
     expect(
@@ -43,7 +43,7 @@ describe("assertAiInputIsSideSafe", () => {
     ).toBe(true);
 
     const forbiddenEvent = {
-      eventId: "unsafe-event",
+      eventId: 2,
       publicPayload: { note: "sessionToken" },
     };
     expect(

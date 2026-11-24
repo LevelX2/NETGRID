@@ -1,3 +1,4 @@
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -20,8 +21,8 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
-const parentId = "plan:runner.contest_remote:remote%3Aremote_1";
-const needId = "run-support:remote:remote_1";
+const parentId = "p1p4xezjcxov79rno40lq3f7rv";
+const needId = "run-support:remote:r1";
 
 function capture() {
   const f = JSON.parse(
@@ -43,7 +44,7 @@ function capture() {
 function facts(input: AiDecisionInputWithDeckCapabilities) {
   const deckCapabilities = buildDeckCapabilityProfileFromInput(input);
   const target = evaluateRunnerRunTargets({ input, deckCapabilities }).find(
-    (t) => t.actionId === "runner.start_run.remote_1",
+    (t) => t.actionId === "rs.r1",
   )!;
   const banks = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -121,7 +122,7 @@ describe("terminal known-path bank support", () => {
     expect(result.fallbackUsed).toBe(false);
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: parentId,
-      leafExecutorInstanceId: `plan:runner.credit_bank:${action.source}`,
+      leafExecutorInstanceId: planInstanceIdForProposal({ moduleId: "runner.credit_bank", dedupeKey: action.source }),
       selectedStep: { parentInstanceId: parentId, needId },
       route: {
         actionId: action.actionId,
@@ -137,7 +138,7 @@ describe("terminal known-path bank support", () => {
         runFunding: {
           parentPlanInstanceId: parentId,
           needId,
-          runActionId: "runner.start_run.remote_1",
+          runActionId: "rs.r1",
           stateVersion: input.playerView.stateVersion,
           // The admitted current path is short two credits, as proved above.
           // The full six-credit cashout still needs its funded consumer quote.
@@ -161,10 +162,11 @@ describe("terminal known-path bank support", () => {
   ] as const)("does not bind an incomplete cashout route: %s", (boundary) => {
     const { input, runtime } = capture();
     if (boundary === "no_run_click") input.playerView.own.clicks = 1;
-    if (boundary === "missing_cashout")
-      input.legalActions = input.legalActions.filter(
-        (a) => !a.actionId.includes("withdraw_credits"),
-      );
+    if (boundary === "missing_cashout") {
+      const { banks } = facts(input);
+      expect(banks).toHaveLength(1);
+      input.legalActions = input.legalActions.filter((a) => a.actionId !== banks[0]!.actionId);
+    }
     if (boundary === "insufficient_liquidity") input.playerView.own.credits = 0;
     restoreAiRuntimeCheckpoint(
       input,

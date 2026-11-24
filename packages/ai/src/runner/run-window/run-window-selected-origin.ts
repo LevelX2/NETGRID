@@ -22,21 +22,23 @@ export function bindSelectedPlanActionOrigin(
   runTargets: readonly RunnerRunTargetEvaluation[] = [],
 ): void {
   if (input.side !== "runner" || result.lane !== "plan") return;
+  const { route } = result;
+  const stateVersion = input.playerView.stateVersion;
   const rootPlanInstanceId = result.portfolio.rootForegroundInstanceId;
   const executorInstanceId = result.portfolio.executorInstanceId;
   const selectedAction = input.legalActions.find(
-    (action) => action.actionId === result.route.head.actionId,
+    (action) => action.actionId === route.head.actionId,
   );
   const selectedCandidate = candidates.find(
-    (candidate) => candidate.actionId === result.route.head.actionId,
+    (candidate) => candidate.actionId === route.head.actionId,
   );
   const canOpenRunnerDrawReplacement =
-    selectedAction?.type === "draw_card" ||
+    route.head.actionType === "draw_card" ||
     selectedCandidate?.functionalEffects?.some(
       (effect) => effect.kind === "draw",
     ) === true;
   const canOpenRunnerRunStartOrder =
-    selectedAction?.type === "start_run" ||
+    route.head.actionType === "start_run" ||
     (selectedAction?.type === "play_event" &&
       runnerEventStartsRunAfterProgramSearch(
         selectedCandidate?.sourceDefinitionId,
@@ -50,10 +52,10 @@ export function bindSelectedPlanActionOrigin(
           "secret_spend_guess_then_targeted_bypass_run"));
   const canOpenRunnerVacuumLinkRewind =
     selectedAction?.type === "continue_run" &&
-    selectedAction.payload?.sourceDefinitionId === "onr_v1_275_vacuum-link" &&
+    selectedAction.payload?.sourceDefinitionId === 487 &&
     Number(selectedAction.payload?.unbrokenSubroutineCount) > 0 &&
     input.playerView.run?.encounteredIce?.definitionId ===
-      "onr_v1_275_vacuum-link";
+      487;
   const postBreakStealthLoss = selectedAction
     ? runnerPostBreakStealthLossChoiceBinding(input, selectedAction)
     : undefined;
@@ -67,12 +69,19 @@ export function bindSelectedPlanActionOrigin(
   const selectedRunTarget = canOpenRunnerRunStartOrder
     ? runTargets.find((target) => target.actionId === selectedAction?.actionId)
     : undefined;
-  const invalidCurrentPlanAction =
+  const exactCurrentAction =
+    selectedAction !== undefined &&
+    selectedAction.side === "runner" &&
+    selectedAction.timingPoint === input.playerView.timingPoint &&
+    selectedAction.expiresAtStateVersion === stateVersion &&
+    selectedAction.type === route.head.actionType &&
+    route.head.stateVersion === stateVersion &&
+    route.head.planInstanceId === route.planInstanceId &&
+    route.head.stepId === route.step.stepId;
+  const missingPlanOrigin =
     !rootPlanInstanceId ||
     !executorInstanceId ||
-    !selectedAction ||
-    selectedAction.side !== "runner" ||
-    selectedAction.expiresAtStateVersion !== input.playerView.stateVersion ||
+    route.planInstanceId !== executorInstanceId ||
     !result.portfolio.instances.some(
       (instance) =>
         instance.instanceId === rootPlanInstanceId &&
@@ -84,10 +93,12 @@ export function bindSelectedPlanActionOrigin(
         instance.executionState === "executor" &&
         instance.side === "runner",
     );
-  if (invalidCurrentPlanAction) {
+  if (!exactCurrentAction || missingPlanOrigin) {
     if (
+      exactCurrentAction &&
       (canOpenRunnerRunStartOrder || canOpenRunnerVacuumLinkRewind) &&
       !canOpenRunnerDrawReplacement &&
+      !postBreakStealthLoss &&
       !selectedRunTarget?.fortIceTrashObjective
     )
       return;
@@ -96,7 +107,7 @@ export function bindSelectedPlanActionOrigin(
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [result.route.head.actionId],
+      unresolvedActionIds: [route.head.actionId],
       owner: "continuation",
       removalCondition:
         "Persist a Runner action continuation only with the exact selected current action, root plan and leaf executor.",
@@ -148,7 +159,7 @@ export function bindSelectedPlanActionOrigin(
         selectedActionId: selectedAction.actionId,
         selectedAtStateVersion: input.playerView.stateVersion,
         immediateChoicePolicy: "resolve_runner_post_break_stealth_loss",
-        sourceStepId: result.route.step.stepId,
+        sourceStepId: route.step.stepId,
         sourceActionType: "break_subroutine",
         breakerInstanceId: postBreakStealthLoss.breakerInstanceId,
         requiredLoss: postBreakStealthLoss.requiredLoss,
@@ -169,11 +180,11 @@ export function bindSelectedPlanActionOrigin(
             selectedActionId: selectedAction.actionId,
             selectedAtStateVersion: input.playerView.stateVersion,
             immediateChoicePolicy: "resolve_runner_vacuum_link_rewind",
-            sourceStepId: result.route.step.stepId,
+            sourceStepId: route.step.stepId,
             sourceActionType: "continue_run",
             sourceCardInstanceId:
               input.playerView.run!.encounteredIce!.instanceId,
-            sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+            sourceCardDefinitionId: 487,
           }
         : {
             rootPlanInstanceId,
@@ -181,7 +192,7 @@ export function bindSelectedPlanActionOrigin(
             selectedActionId: selectedAction.actionId,
             selectedAtStateVersion: input.playerView.stateVersion,
             immediateChoicePolicy: "resolve_runner_run_start_order",
-            sourceStepId: result.route.step.stepId,
+            sourceStepId: route.step.stepId,
             sourceActionType:
               selectedAction.type === "activated_card_ability"
                 ? "activated_card_ability"

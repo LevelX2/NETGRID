@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { capabilityKey, canonicalCapabilityId } from "@netgrid/cards";
 
 import checkpointJson from "../../../data/scenarios/ai-decision-checkpoints/cp-d153-12-cashout-for-rd-d185.json";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
@@ -9,8 +10,10 @@ import { bindHistoricalRunEventCadence } from "./evaluation/decision-checkpoints
 import type { AiDecisionCheckpointV1 } from "./evaluation/decision-checkpoints/checkpoint-types";
 import { runAiDecisionCheckpoint } from "./evaluation/decision-checkpoints/checkpoint-runner";
 
-const BROKER = "onr_v1_154_broker";
-const JUNKYARD = "onr_v1_165_junkyard-bbs";
+const BROKER = 366;
+const JUNKYARD = 377;
+const storeCredits = canonicalCapabilityId(BROKER, capabilityKey("store_credits"));
+const withdrawCredits = canonicalCapabilityId(BROKER, capabilityKey("withdraw_credits"));
 
 describe("match D153 card hint consumer contract", () => {
   it("keeps Broker's static hint aligned with its bank semantics", () => {
@@ -53,7 +56,7 @@ describe("match D153 card hint consumer contract", () => {
 
   it("binds every visible Broker instance before selecting its matching payout", () => {
     const checkpoint = bindHistoricalRunEventCadence(
-      structuredClone(checkpointJson) as AiDecisionCheckpointV1,
+      structuredClone(checkpointJson) as unknown as AiDecisionCheckpointV1,
     );
     checkpoint.expectation.planExecution!.requiredAssessmentEvidence = [
       "runner_credit_bank_complete_known_run_after_cashout",
@@ -89,26 +92,34 @@ describe("match D153 card hint consumer contract", () => {
       .map((action) => action.actionId)
       .sort();
 
+    const brokerCards = result.input.playerView.own.rig!
+      .filter((card) => card.definitionId === BROKER)
+      .sort((left, right) => left.instanceId.localeCompare(right.instanceId));
+    expect(brokerCards).toHaveLength(2);
+    const [empty, funded] = brokerCards;
+    const offeredAbility = (instanceId: string, abilityId: number) => {
+      const action = result.input.legalActions.find(
+        (offer) => offer.abilityRef?.sourceCardInstanceId === instanceId &&
+          offer.abilityRef.sourceAbilityId === abilityId,
+      );
+      expect(action).toBeDefined();
+      return action!.actionId;
+    };
+    const cashOut = offeredAbility(funded!.instanceId, withdrawCredits);
     expect(brokers).toEqual([
       expect.objectContaining({
-        sourceCardInstanceId: "runner_onr_v1_154_broker_1",
-        buildActionIds: [
-          "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
-        ],
+        sourceCardInstanceId: empty!.instanceId,
+        buildActionIds: [offeredAbility(empty!.instanceId, storeCredits)],
         cashOutActionIds: [],
       }),
       expect.objectContaining({
-        sourceCardInstanceId: "runner_onr_v1_154_broker_2",
+        sourceCardInstanceId: funded!.instanceId,
         currentBankAmount: 12,
         currentBankAmounts: [12],
         portfolioStoredAmount: 12,
         estimatedPayout: 12,
-        buildActionIds: [
-          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
-        ],
-        cashOutActionIds: [
-          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
-        ],
+        buildActionIds: [offeredAbility(funded!.instanceId, storeCredits)],
+        cashOutActionIds: [cashOut],
       }),
     ]);
     expect(brokers.flatMap((tool) => tool.buildActionIds).sort()).toEqual(
@@ -123,9 +134,7 @@ describe("match D153 card hint consumer contract", () => {
         (tool) => tool.cardId === JUNKYARD,
       ),
     ).toBe(false);
-    expect(result.decision?.actionId).toBe(
-      "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
-    );
+    expect(result.decision?.actionId).toBe(cashOut);
     expect(result.decision?.fallbackUsed).toBe(false);
     expect(result.decision?.decisionDebug?.planKind).toBe("runner.credit_bank");
     expect(result.decision?.evidence).toEqual(

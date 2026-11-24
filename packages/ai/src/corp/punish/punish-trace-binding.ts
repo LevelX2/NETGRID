@@ -4,6 +4,8 @@ import type { PlanExecutionOrigin } from "../../plans/plan-continuation";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import type {
   EngineWindowResolution,
   PlanSchedulerContext,
@@ -28,15 +30,15 @@ export function resolveCorpPunishTraceWindow(
   if (!leaf?.parentInstanceId || !signal?.routeContract?.traceBidBinding)
     return undefined;
   const action = input.legalActions.find(
-    (action) => action.type === "resolve_choice",
+    (offer) => offer.type === "resolve_choice",
   );
-  if (!action) return undefined;
+  if (!action) throw invalidPricedPunishTrace(input, leaf.instanceId);
   const origin: PlanExecutionOrigin = {
     rootPlanInstanceId: leaf.parentInstanceId,
     leafPlanInstanceId: leaf.instanceId,
     side: "corp",
     windowKind: "trace",
-    windowId: input.playerView.trace.traceId,
+    windowId: String(input.playerView.trace.traceId),
     stateVersion: input.playerView.stateVersion,
     timingPoint: input.playerView.timingPoint,
   };
@@ -57,8 +59,7 @@ export function boundCorpPunishTraceChoices(
 ): { choiceId: string; selectedOptionIds: string[] } | undefined {
   const trace = input.playerView.trace;
   const choice = input.playerView.pendingChoice;
-  if (input.side !== "corp" || trace?.phase !== "corp_bid" || !choice)
-    return undefined;
+  if (input.side !== "corp" || trace?.phase !== "corp_bid") return undefined;
   const leaf = portfolio?.instances.find(
     (instance) => instance.instanceId === origin.leafPlanInstanceId,
   );
@@ -67,12 +68,12 @@ export function boundCorpPunishTraceChoices(
     .signal;
   const binding = signal?.routeContract?.traceBidBinding;
   if (!binding) return undefined;
-  const option = choice.options.find(
-    (option) => option.value === binding.amount,
-  );
-  const requirement = action.choiceRequirements?.find(
-    (requirement) => requirement.choiceId === choice.choiceId,
-  );
+  const options = choice
+    ? selectableChoiceOptions(choice.options).filter(
+        (option) => option.value === binding.amount,
+      )
+    : [];
+  const [option] = options;
   const root = portfolio?.instances.find(
     (instance) => instance.instanceId === origin.rootPlanInstanceId,
   );
@@ -82,39 +83,40 @@ export function boundCorpPunishTraceChoices(
     origin.stateVersion !== input.playerView.stateVersion ||
     origin.timingPoint !== input.playerView.timingPoint ||
     origin.windowKind !== "trace" ||
-    origin.windowId !== trace.traceId ||
+    origin.windowId !== String(trace.traceId) ||
     !root ||
     !Number.isSafeInteger(binding.amount) ||
     binding.amount < 0 ||
-    !requirement ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1 ||
+    exactCurrentChoiceAction(input, choice) !== action ||
+    options.length !== 1 ||
     !option ||
-    !requirement.optionIds.includes(option.id) ||
-    action.type !== "resolve_choice" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     binding.quotedAtStateVersion + 1 !== input.playerView.stateVersion ||
     trace.sourceCardInstanceId !== binding.sourceCardInstanceId ||
     trace.sourceDefinitionId !== binding.sourceDefinitionId ||
-    choice.side !== "corp" ||
-    choice.kind !== "bid_amount" ||
+    choice?.kind !== "bid_amount" ||
     choice.source !== `trace:${trace.traceId}` ||
-    choice.stateVersion !== input.playerView.stateVersion ||
     choice.minSelections !== 1 ||
-    choice.maxSelections !== 1 ||
-    !option
+    choice.maxSelections !== 1
   ) {
-    throw new PlanResolutionFailure("invalid_support_graph", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((legal) => legal.type),
-      owner: "continuation",
-      planInstanceId: leaf.instanceId,
-      unresolvedActionIds: [action.actionId],
-      removalCondition:
-        "The priced Punish bid must bind the same source, immediate Engine window, parent, executor and current bid option.",
-    });
+    throw invalidPricedPunishTrace(input, leaf.instanceId, action.actionId);
   }
   return { choiceId: choice.choiceId, selectedOptionIds: [option.id] };
+}
+
+function invalidPricedPunishTrace(
+  input: AiDecisionInput,
+  planInstanceId: string,
+  actionId?: string,
+): PlanResolutionFailure {
+  return new PlanResolutionFailure("invalid_support_graph", {
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    legalActionTypes: input.legalActions.map((legal) => legal.type),
+    owner: "continuation",
+    planInstanceId,
+    unresolvedActionIds: actionId ? [actionId] : [],
+    removalCondition:
+      "The priced Punish bid must bind the same source, immediate Engine window, parent, executor and current selectable bid option.",
+  });
 }

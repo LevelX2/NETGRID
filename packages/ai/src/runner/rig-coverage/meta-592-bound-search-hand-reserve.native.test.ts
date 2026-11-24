@@ -1,3 +1,4 @@
+import { referencesDefaultDeckCard } from "../../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import fs from "node:fs";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -31,7 +32,7 @@ it("does not require a fifth card for another R&D run before the bound four-card
     z = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(before);
   expect(z.fallbackUsed || z.timeoutUsed).toBe(false);
-  expect(z.actionId).toContain("sneak-preview");
+  expect(referencesDefaultDeckCard(z.actionId, 322)).toBe(true);
   expect(z.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "runner.rig_and_coverage",
   );
@@ -39,7 +40,7 @@ it("does not require a fifth card for another R&D run before the bound four-card
     gap = p.instances
       .filter((x) => x.moduleId === "runner.rig_and_coverage")
       .map((x) => (x.moduleState as any).gap)
-      .find((x) => x.targetRunActionId === "runner.start_run.remote_3");
+      .find((x) => x.targetRunActionId === "rs.r3");
   expect(gap.priorityClass).toBe("P2");
   expect(gap.directSearchActionIds).toContain(z.actionId);
 });
@@ -123,9 +124,9 @@ it("uses the bound hand reserve through actual Sneak, Heap, Rent and Remote Engi
       winner: state.winner,
     });
   }
-  expect(proofs[0].steps[0].action).toContain("sneak-preview");
+  expect(referencesDefaultDeckCard(proofs[0].steps[0].action, 322)).toBe(true);
   expect(
-    proofs[0].steps.some((s: any) => s.action === "runner.start_run.remote_3"),
+    proofs[0].steps.some((s: any) => s.action === "rs.r3"),
   ).toBe(true);
   expect(proofs.map((x) => x.runnerPoints)).toEqual([6, 6]);
   expect(proofs[0].hash).toBe(proofs[1].hash);
@@ -143,7 +144,7 @@ it("retains the actual Remote and confirmed damage hand floor when no draw remai
     ),
     state = structuredClone(cp.engineOrigin.state),
     card = cp.input.playerView.own.gripOrHq.find(
-      (c: any) => c.definitionId === "onr_proteus_133_chiba-bank-account",
+      (c: any) => c.definitionId === 191,
     ),
     action = getLegalActions(state, "runner").find(
       (a) => a.type === "install_card" && a.source === card.instanceId,
@@ -169,7 +170,7 @@ it("retains the actual Remote and confirmed damage hand floor when no draw remai
     z = chooseAiAction(input);
   expect(JSON.stringify(input)).toBe(before);
   expect(z.fallbackUsed || z.timeoutUsed).toBe(false);
-  expect(z.actionId).not.toContain("sneak-preview");
+  expect(referencesDefaultDeckCard(z.actionId, 322)).toBe(false);
   const p = residentPlanPortfolioSnapshot(input)!,
     gaps = p.instances
       .filter((x) => x.moduleId === "runner.rig_and_coverage")
@@ -177,7 +178,7 @@ it("retains the actual Remote and confirmed damage hand floor when no draw remai
   expect(
     gaps.some(
       (g) =>
-        g.targetRunActionId === "runner.start_run.remote_3" &&
+        g.targetRunActionId === "rs.r3" &&
         g.recoveryEvidenceCodes?.some((s: string) =>
           s.endsWith("search_run_and_hand_preparation_do_not_fit"),
         ),

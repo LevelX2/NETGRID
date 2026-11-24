@@ -1,4 +1,8 @@
-import type { PublicGameEvent } from "@netgrid/shared";
+import type {
+  PublicCreditChange,
+  PublicGameEvent,
+  Side,
+} from "@netgrid/shared";
 
 /**
  * Collapses a purely presentational sequence of AI breaker pumps. The original
@@ -31,6 +35,7 @@ export function coalesceAiPumpPresentationEvents(
       const nextPump = aiPumpPresentationFacts(next);
       if (
         !nextPump ||
+        next.eventId !== last.eventId + 1 ||
         nextPump.actor !== firstPump.actor ||
         nextPump.breakerId !== firstPump.breakerId ||
         nextPump.strengthAfter - nextPump.amount !== lastPump.strengthAfter
@@ -55,6 +60,7 @@ export function coalesceAiPumpPresentationEvents(
       stateHashAfter: last.stateHashAfter,
       publicPayload: {
         ...first.publicPayload,
+        creditChanges: combinedCreditChanges(events.slice(index, nextIndex)),
         aiPumpPresentation: true,
         pumpCount: count,
         pumpStrengthStart: firstPump.strengthAfter - firstPump.amount,
@@ -67,6 +73,22 @@ export function coalesceAiPumpPresentationEvents(
   }
 
   return coalesced;
+}
+
+function combinedCreditChanges(events: readonly PublicGameEvent[]) {
+  const changes = new Map<Side, PublicCreditChange>();
+  for (const event of events) {
+    for (const change of event.publicPayload.creditChanges ?? []) {
+      const first = changes.get(change.side);
+      changes.set(change.side, {
+        ...change,
+        before: first ? first.before : change.before,
+      });
+    }
+  }
+  return [...changes.values()].filter(
+    (change) => change.before !== change.after,
+  );
 }
 
 type AiPumpPresentationFacts = {

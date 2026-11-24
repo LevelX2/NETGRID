@@ -1,6 +1,6 @@
 import {
-  cardSpecPlanningCardByDefinitionId,
-  cardSpecPlanningCards,
+  planningCardByDefinitionId,
+  planningCards,
 } from "@netgrid/cards/planning";
 import { traceRulesDefinition } from "@netgrid/engine";
 import type {
@@ -10,7 +10,7 @@ import type {
 } from "@netgrid/shared";
 import { reconstructBeliefState } from "../../belief-state";
 import { visibleRunnerTraceSupport } from "../../run-analysis/visible-run-hazards";
-import { decisionDerivedValue } from "../../runtime/decision-derived-cache";
+import { decisionDerivedValue } from "../../decision-derived-cache";
 import {
   fixedTagOperation,
   fixedTaggedDamageOperation,
@@ -28,22 +28,23 @@ type NextCorpTurnThreat = {
   tagPreventionNeeded: boolean;
   incomingMeatDamage: number;
   conditionalMeatDamage: number;
+  observedPayoffMeatDamage?: number;
   conditionalTagPreventionNeeded: boolean;
   postProtectionMeatDamage: number;
   retagsAfterClear: boolean;
   additionalRunEnablesPunish: boolean;
 };
 
-const possibleTagOperations = cardSpecPlanningCards().flatMap(
-  ({ definition }) => {
-    const source = fixedTagOperation(definition.id);
-    return source ? [{ definitionId: definition.id, ...source }] : [];
+const possibleTagOperations = planningCards().flatMap(
+  ({ cardDefinitionId }) => {
+    const source = fixedTagOperation(cardDefinitionId);
+    return source ? [{ definitionId: cardDefinitionId, ...source }] : [];
   },
 );
 
 /**
- * A decision-local risk assessment from Runner-visible HQ memory and own
- * reactions. It is independent of the deck-level flatline and run buffers.
+ * A decision-local risk assessment from Runner-visible card observations
+ * and own reactions. It is independent of deck-level flatline and run buffers.
  */
 export function runnerNextCorpTurnThreat(
   input: AiDecisionInput,
@@ -68,19 +69,24 @@ function assessNextCorpTurn(
   ) {
     return undefined;
   }
-  const knownHq =
-    reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory
-      .knownDefinitions ?? [];
-  if (knownHq.length === 0) return undefined;
-  const tagSources = knownHq.flatMap((id) => {
+  const belief = reconstructBeliefState(input).runnerOpponentModel;
+  const knownHq = belief?.hqHandMemory.knownDefinitions ?? [];
+  const top = belief?.rndTopFreshness;
+  const knownNextDraw =
+    top?.knownToRunner && top.freshness !== "invalidated"
+      ? top.knownTopDefinitionId
+      : undefined;
+  const knownOperations = knownNextDraw ? [...knownHq, knownNextDraw] : knownHq;
+  const tagSources = knownOperations.flatMap((id) => {
     const source = fixedTagOperation(id);
     return source ? [source] : [];
   });
-  const payoffs = knownHq.flatMap((id) => {
+  const payoffs = knownOperations.flatMap((id) => {
     const payoff = fixedTaggedDamageOperation(id);
     return payoff ? [payoff] : [];
   });
   if (tagSources.length === 0 && payoffs.length === 0) return undefined;
+  const observedDefinitions = observedOperationDefinitions(input);
   const { runs, stoleAgenda } = publicRunnerTurnObservations(
     input,
     view.turnSerial,
@@ -99,13 +105,23 @@ function assessNextCorpTurn(
             triggerMet(source) &&
             (runs >= 2 ||
               stoleAgenda ||
-              observedTagOperation(input, source.definitionId)),
+              observedDefinitions.has(source.definitionId)),
+        )
+      : [];
+  const hiddenHqCount = Math.max(0, view.opponent.handCount - knownHq.length);
+  const observedTagSources =
+    tagSources.some(triggerMet) && hiddenHqCount >= 2
+      ? possibleTagOperations.filter(
+          (source) =>
+            triggerMet(source) &&
+            observedDefinitions.has(source.definitionId) &&
+            !knownOperations.includes(source.definitionId),
         )
       : [];
   const ownTraceSupport = view.own.runnerTraceSupportQuote;
   const traceDefense =
     ownTraceSupport &&
-    [...tagSources, ...possibleSources].some(
+    [...tagSources, ...possibleSources, ...observedTagSources].some(
       (source) => source.trigger.kind === "run_attempts",
     )
       ? traceDefenseForNextTurn(input, ownTraceSupport)
@@ -114,7 +130,7 @@ function assessNextCorpTurn(
     (card) =>
       staysInstalledForNextCorpTurn(card) &&
       card.definitionId &&
-      cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+      planningCardByDefinitionId(card.definitionId)?.engine
         .runnerUtilityLongtail?.kind === "trace_attempts_auto_success_add_tag",
   );
   const priceTagSource = (source: TagSource) => {
@@ -130,9 +146,13 @@ function assessNextCorpTurn(
   const incoming = pricedSources.filter(triggerMet);
   const handCount = view.own.gripOrHq.length;
   const readyPrevention = readyMeatDamagePrevention(input);
-  const avoidsOneTag = (view.own.rig ?? []).some((card) =>
+  const readyTagProtection = (view.own.rig ?? []).filter((card) =>
     canAvoidOneNextCorpTag(card, view.own.credits),
   );
+  const avoidsOneTag = readyTagProtection.length > 0;
+  const freeTagProtectionCount = readyTagProtection.filter((card) =>
+    canAvoidOneNextCorpTag(card, view.own.credits, true),
+  ).length;
   const damageFor = (source: TagSource, remainingTags: number) =>
     maximumDamage(
       payoffs,
@@ -222,6 +242,31 @@ function assessNextCorpTurn(
     possiblePunishes.every(
       ({ tags, damage }) => tags === 1 || damage <= handCount,
     );
+  // An observed payoff shows the likely scale of one follow-up, but does
+  // not put that card back in HQ. A second uncertain tag must also have
+  // been seen, fit an independent HQ slot and have its public trigger open.
+  const observedPayoffMeatDamage =
+    payoffs.length === 0 && hiddenHqCount > 0 && incoming.length > 0
+      ? assessObservedPayoff({
+          incoming,
+          additionalTags: observedTagSources.flatMap(priceTagSource),
+          payoffs: [...observedDefinitions].flatMap((id) => {
+            const payoff = fixedTaggedDamageOperation(id);
+            return payoff ? [payoff] : [];
+          }),
+          corpCredits: view.opponent.credits,
+          existingTags: view.own.tags,
+          // Independently payable free responses can stack. For credit-paid
+          // reactions this horizon only reserves the payment for one.
+          tagProtectionCount:
+            freeTagProtectionCount +
+            Number(readyTagProtection.length > freeTagProtectionCount),
+          meatPrevention: readyMeatDamagePrevention(
+            input,
+            new Set(readyTagProtection.map((card) => card.instanceId)),
+          ),
+        })
+      : 0;
   const additionalRunEnablesPunish =
     view.own.tags === 0 &&
     incomingMeatDamage <= handCount &&
@@ -236,6 +281,7 @@ function assessNextCorpTurn(
     tagPreventionNeeded,
     incomingMeatDamage: projectedDamage(incomingMeatDamage),
     conditionalMeatDamage,
+    ...(observedPayoffMeatDamage > 0 ? { observedPayoffMeatDamage } : {}),
     conditionalTagPreventionNeeded,
     postProtectionMeatDamage: projectedDamage(repeatTraceDamage),
     retagsAfterClear: projectedDamage(damageAfterRetag) > handCount,
@@ -243,31 +289,83 @@ function assessNextCorpTurn(
   };
 }
 
-function observedTagOperation(
+function assessObservedPayoff({
+  incoming,
+  additionalTags,
+  payoffs,
+  corpCredits,
+  existingTags,
+  tagProtectionCount,
+  meatPrevention,
+}: {
+  incoming: readonly TagSource[];
+  additionalTags: readonly TagSource[];
+  payoffs: readonly DamagePayoff[];
+  corpCredits: number;
+  existingTags: number;
+  tagProtectionCount: number;
+  meatPrevention: number;
+}): number {
+  let damage = 0;
+  for (const [index, first] of incoming.entries()) {
+    const tags = existingTags + Math.max(0, first.tags - tagProtectionCount);
+    damage = Math.max(
+      damage,
+      maximumDamage(payoffs, corpCredits - first.credits, tags, 1),
+    );
+    for (const second of [...incoming.slice(index + 1), ...additionalTags]) {
+      const tags =
+        existingTags +
+        Math.max(0, first.tags + second.tags - tagProtectionCount);
+      damage = Math.max(
+        damage,
+        maximumDamage(
+          payoffs,
+          corpCredits - first.credits - second.credits,
+          tags,
+          1,
+        ),
+      );
+    }
+  }
+  return Math.max(0, damage - meatPrevention);
+}
+
+function observedOperationDefinitions(
   input: AiDecisionInput,
-  definitionId: string,
-): boolean {
-  return [...input.playerView.publicEvents, ...input.eventTail].some(
-    (event) =>
-      event.stateVersionAfter <= input.playerView.stateVersion &&
-      ((event.type === "play_operation" &&
-        event.publicPayload.actor === "corp") ||
-        (event.type === "access_card" &&
-          event.publicPayload.actor === "runner")) &&
-      (event.publicPayload.cardDefinitionId === definitionId ||
-        event.publicPayload.sourceDefinitionId === definitionId),
-  );
+): ReadonlySet<number> {
+  const ids = new Set<number>();
+  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+    if (event.stateVersionAfter > input.playerView.stateVersion) continue;
+    const { actor, cardDefinitionId, sourceDefinitionId } = event.publicPayload;
+    if (
+      (event.type === "play_operation" && actor === "corp") ||
+      (event.type === "access_card" && actor === "runner")
+    ) {
+      if (typeof cardDefinitionId === "number") ids.add(cardDefinitionId);
+      if (typeof sourceDefinitionId === "number") ids.add(sourceDefinitionId);
+    }
+  }
+  return ids;
 }
 
 /** Count a single currently ready, unavoidable prevention source. Other
  * payment windows and combined sources stay with the reaction owner. */
-function readyMeatDamagePrevention(input: AiDecisionInput): number {
+function readyMeatDamagePrevention(
+  input: AiDecisionInput,
+  tagResponseSourceIds?: ReadonlySet<string>,
+): number {
   return Math.max(
     0,
     ...(input.playerView.own.rig ?? []).flatMap((card) => {
-      if (!staysInstalledForNextCorpTurn(card) || !card.definitionId) return [];
+      if (
+        !staysInstalledForNextCorpTurn(card) ||
+        !card.definitionId ||
+        tagResponseSourceIds?.has(card.instanceId)
+      )
+        return [];
       return (
-        cardSpecPlanningCardByDefinitionId(card.definitionId)?.planning.engine
+        planningCardByDefinitionId(card.definitionId)?.engine
           .damagePreventionSources ?? []
       ).flatMap((source) => {
         if (

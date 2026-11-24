@@ -236,12 +236,16 @@ export function executeRunSequenceEffect(
         stoleAgendaThisTurn: false,
         stoleAgendaLastTurn: false,
       });
+      if (!context.sourceDefinitionId || !context.sourceTitle)
+        throw new Error(
+          "Die Run-Sequenz benötigt eine gebundene Kartenquelle.",
+        );
       const sequence: MultiServerSuccessSequenceState = {
         kind: "multi_server_success_sequence",
         sequence: "run_each_data_fort",
         sourceCardId: context.sourceCardId,
-        sourceDefinitionId: context.sourceDefinitionId ?? "card_implementation",
-        sourceTitle: context.sourceTitle ?? "Sequenzquelle",
+        sourceDefinitionId: context.sourceDefinitionId,
+        sourceTitle: context.sourceTitle,
         pendingServerIds,
         successfulServerIds: [],
         anyUnsuccessful: false,

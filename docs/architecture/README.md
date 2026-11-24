@@ -24,6 +24,10 @@ Zu den aktuellen Fachbereichen gehören unter anderem:
   Installer-, Launcher- und Updatezielbild mit sequenziellem Paketprozess;
 - weitere fachlich benannte Bereiche für aktuelle Architekturthemen.
 
+## Laufzeitverträge
+
+- [Kompakte technische Schlüssel in Karten, Spielzustand und Transport](compact-runtime-identifiers.md)
+
 ## Current-State-Regel
 
 Ein Architekturartefakt bleibt, wenn es heute einen Architektur- oder Vertragszustand beschreibt, den Code, Agenten oder Folgeentscheidungen tatsächlich benötigen.

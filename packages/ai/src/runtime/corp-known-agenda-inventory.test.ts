@@ -1,4 +1,4 @@
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import type { CardDefinitionId, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
@@ -44,8 +44,8 @@ function corpInput(): AiDecisionInputWithDeckCapabilities {
       deckSnapshotId: "agenda-inventory-test",
       side: "corp",
       cards: [
-        { cardId: "onr_v1_196_corporate-war", quantity: 3 },
-        { cardId: "onr_v1_252_keeper", quantity: 36 },
+        { cardId: 408, quantity: 3 },
+        { cardId: 464, quantity: 36 },
       ],
     },
     playerView: {
@@ -55,7 +55,7 @@ function corpInput(): AiDecisionInputWithDeckCapabilities {
       activeSide: "corp",
       phase: "corp_action_phase",
       own: {
-        identity: card("corp-identity", "corp-identity", "identity"),
+        identity: card("corp-identity", 3, "identity"),
         credits: 5,
         clicks: 3,
         agendaPoints: 3,
@@ -67,7 +67,7 @@ function corpInput(): AiDecisionInputWithDeckCapabilities {
         tags: 0,
       },
       opponent: {
-        identity: card("runner-identity", "runner-identity", "identity"),
+        identity: card("runner-identity", 587, "identity"),
         credits: 5,
         clicks: 3,
         agendaPoints: 6,
@@ -88,19 +88,19 @@ function corpInput(): AiDecisionInputWithDeckCapabilities {
 }
 
 function agenda(instanceId: string): VisibleCard {
-  return card(instanceId, "onr_v1_196_corporate-war", "agenda", 3);
+  return card(instanceId, 408, "agenda", 3);
 }
 
 function card(
   instanceId: string,
-  definitionId: string,
+  definitionId: CardDefinitionId,
   type: NonNullable<VisibleCard["type"]>,
   agendaPoints?: number,
 ): VisibleCard {
   return {
     instanceId,
     definitionId,
-    title: definitionId,
+    title: instanceId,
     type,
     known: true,
     owner: "corp",

@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -105,6 +106,27 @@ describe("Corp hand inventory facts", () => {
     ).toContain("net_credits=4:net_hand=-1");
   });
 
+  it("does not count a conditional hand release as an exact capacity route", () => {
+    const input = corpInput([card("operation-1", "operation", "operation")]);
+    const uncertain = economyCandidate(
+      "play-conditional",
+      "operation-1",
+      "operation",
+      4,
+    );
+    uncertain.economyProjection!.reliability = "conditional";
+
+    const facts = buildCorpHandInventoryFacts({
+      input,
+      candidates: [uncertain],
+      domainClaims: [],
+      actionDispositions: [],
+    });
+
+    expect(facts?.pressure.exactCapacityReleaseActions).toBe(0);
+    expect(facts?.records[0]?.actionHandDeltas).toEqual([]);
+  });
+
   it("classifies funding, hold, redundant, unsafe and unsupported records conservatively", () => {
     const input = corpInput([
       card("funding", "funding-card", "operation"),
@@ -176,7 +198,7 @@ describe("Corp hand inventory facts", () => {
       facts.records.find((record) => record.sourceInstanceId === "duplicate-a"),
     ).toMatchObject({
       planningDisposition: "redundant",
-      redundancyGroupId: "definition:duplicate-card",
+      redundancyGroupId: `definition:${syntheticCardDefinitionId("duplicate-card")}`,
     });
     expect(facts.pressure).toMatchObject({
       handSize: 6,
@@ -220,9 +242,9 @@ describe("Corp hand inventory facts", () => {
     expect(facts.records).toHaveLength(1);
     expect(facts.records[0]).toMatchObject({
       sourceInstanceId: "unknown-own-card",
-      sourceDefinitionId: "unknown-own-card",
       planningDisposition: "assessment_unknown",
     });
+    expect(facts.records[0]).not.toHaveProperty("sourceDefinitionId");
     expect(facts.cleanupProjection).toMatchObject({
       dispositionCoverageComplete: true,
       assessmentUnknownInstanceIds: ["unknown-own-card"],
@@ -242,7 +264,7 @@ describe("Corp hand inventory facts", () => {
         actionDispositions: [],
       }),
     ).toBeUndefined();
-    expect(corpHandDuplicateCount(runner, "runner-card")).toBe(0);
+    expect(corpHandDuplicateCount(runner, syntheticCardDefinitionId("runner-card"))).toBe(0);
     expect(corpHandPressureAssessment(runner)).toMatchObject({
       handSize: 1,
       maximumHandSize: 5,
@@ -325,13 +347,13 @@ function corpInput(
 
 function card(
   instanceId: string,
-  definitionId: string,
+  fixtureName: string,
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
   return {
     instanceId,
-    definitionId,
-    title: definitionId,
+    definitionId: syntheticCardDefinitionId(fixtureName),
+    title: fixtureName,
     type,
     known: true,
     owner: "corp",
@@ -342,7 +364,7 @@ function card(
 function candidate(
   actionId: string,
   sourceCardInstanceId: string,
-  sourceDefinitionId: string,
+  fixtureName: string,
 ): ActionSemanticCandidate {
   return {
     actionId,
@@ -356,7 +378,7 @@ function candidate(
     },
     sourceKind: "card",
     sourceCardInstanceId,
-    sourceDefinitionId,
+    sourceDefinitionId: syntheticCardDefinitionId(fixtureName),
     abilityBindingMethod: "unresolved",
     semanticActionType: "play.corp_operation",
     cardContextSignals: [],
@@ -389,11 +411,11 @@ function candidate(
 function economyCandidate(
   actionId: string,
   sourceCardInstanceId: string,
-  sourceDefinitionId: string,
+  fixtureName: string,
   netCredits: number,
 ): ActionSemanticCandidate {
   return {
-    ...candidate(actionId, sourceCardInstanceId, sourceDefinitionId),
+    ...candidate(actionId, sourceCardInstanceId, fixtureName),
     semanticActionType: "economy.gain_credit",
     economyProjection: {
       schemaVersion: "action-economy-projection-v1",

@@ -1,16 +1,16 @@
+import { isRemoteServerId } from "@netgrid/shared";
+import { assessVisibleRunnerServerPath } from "../run-analysis/visible-run-server-path";
 import {
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
 import type { KnownPositionMemory } from "../belief-state";
+import { actionCreditCost } from "../runtime/action-cost";
 import { centralServerId } from "../runtime/server-target";
-import {
-  runnerRunPathCreditBudgetWithVisiblePools,
-  type KnownRezzedIcePathAssessment,
-  type RunnerRunPathCreditBudget,
-} from "../visible-run-analysis";
+import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { centralPressureTargetIsGoodForMetrics } from "./central-pressure-card";
 import type {
   RunnerCoveragePressureForMetrics,
@@ -22,25 +22,20 @@ export type RunnerPressureMetricDependencies = {
   runnerStrategicBreakerTargetForMetrics: (
     server: AiDecisionInput["playerView"]["servers"][number],
   ) => boolean;
-  assessKnownRezzedIcePath: (
-    iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-    rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number | RunnerRunPathCreditBudget,
-    rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
-  ) => KnownRezzedIcePathAssessment;
+  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   knownPositionMemoryForInput: (
     input: AiDecisionInput,
   ) => KnownPositionMemory[];
-  definitionTypeForMetrics: (definitionId: string) => string | undefined;
+  definitionTypeForMetrics: (definitionId: number) => string | undefined;
   remoteRootTrashCostForMetrics: (card: VisibleCard) => number | undefined;
   canBreakerDefinitionBreakIce: (
-    breakerDefinitionId: string,
-    iceDefinitionId: string,
+    breakerDefinitionId: number,
+    iceDefinitionId: number,
   ) => boolean;
   runnerVisibleIceCreatesCoverageNeedForMetrics: (
     ice: AiDecisionInput["playerView"]["servers"][number]["ice"][number],
   ) => boolean;
-  runnerMissingBreakerRolesForMetrics: (definitionId: string) => string[];
+  runnerMissingBreakerRolesForMetrics: (definitionId: number) => string[];
   runnerCoverageSearchActionForMetrics: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -67,7 +62,9 @@ export function createRunnerPressureMetricContext(
     const knownMemory = dependencies.knownPositionMemoryForInput(input);
     const knownRemoteEntries = knownMemory.filter(
       (entry) =>
-        entry.zone === server.id && entry.positionKey.startsWith("root:"),
+        entry.zone === server.id &&
+        entry.positionKey.startsWith("root:") &&
+        entry.invalidatedBy.length === 0,
     );
     const knownAgenda = knownRemoteEntries.some(
       (entry) =>
@@ -103,6 +100,7 @@ export function createRunnerPressureMetricContext(
     const seen = new Set<string>();
     for (const action of input.legalActions) {
       if (
+        !actionMatchesCurrentDecision(input, action) ||
         action.type !== "start_run" ||
         typeof action.payload?.serverId !== "string"
       )
@@ -118,16 +116,10 @@ export function createRunnerPressureMetricContext(
         !dependencies.runnerStrategicBreakerTargetForMetrics(server)
       )
         continue;
-      const assessment = dependencies.assessKnownRezzedIcePath(
-        server.ice,
-        input.playerView.own.rig ?? [],
-        runnerRunPathCreditBudgetWithVisiblePools(
-          input.playerView.own.credits,
-          input.playerView.own.rig ?? [],
-        ),
-        server.root,
-      );
-      const creditsAfterPath = assessment.creditsAfterPath;
+      const assessment = assessVisibleRunnerServerPath(input, server, {
+        liquidCredits: input.playerView.own.credits - actionCreditCost(action),
+        assessKnownPath: dependencies.assessKnownRezzedIcePath,
+      });
       if (!assessment.blocked) broadReady = true;
       if (assessment.blocked) {
         blockers.add(
@@ -139,7 +131,11 @@ export function createRunnerPressureMetricContext(
         );
         continue;
       }
-      if (serverId.startsWith("remote_")) {
+      const creditsAfterPath = assessment.creditBudgetAfterPath?.traceEligibleCredits;
+      if (creditsAfterPath === undefined) {
+        throw new Error("runner_pressure_metrics_completed_path_missing_credit_ledger");
+      }
+      if (isRemoteServerId(serverId)) {
         const remoteReady = runnerRemotePressureReadyForMetrics(
           input,
           server,
@@ -182,21 +178,15 @@ export function createRunnerPressureMetricContext(
     const heapCards = input.playerView.own.heapOrArchives.filter(
       (card) => card.known && card.definitionId,
     );
-    const missingIceDefinitionIds = new Set<string>();
+    const missingIceDefinitionIds = new Set<number>();
     const blockedServers = new Set<string>();
     const knownIceBlockedServers = new Set<string>();
     for (const server of input.playerView.servers) {
       if (!dependencies.runnerStrategicBreakerTargetForMetrics(server))
         continue;
-      const assessment = dependencies.assessKnownRezzedIcePath(
-        server.ice,
-        rigCards,
-        runnerRunPathCreditBudgetWithVisiblePools(
-          input.playerView.own.credits,
-          rigCards,
-        ),
-        server.root,
-      );
+      const assessment = assessVisibleRunnerServerPath(input, server, {
+        assessKnownPath: dependencies.assessKnownRezzedIcePath,
+      });
       const rezzedMissing = assessment.blocked
         ? server.ice
             .filter(

@@ -40,7 +40,7 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
       checkpoint.expectation.acceptableActions = [
         {
           actionId:
-            "corp.rez_card.corp_onr_v1_320_encoder-inc_1.remote_1.corp_onr_v1_320_encoder-inc_1",
+            "cp.c3ad.r1.c3ad",
         },
       ];
       checkpoint.expectation.planExecution = {
@@ -51,6 +51,15 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
+    if (
+      json === tychoFalseSameTurnJson &&
+      result.decision?.actionId === "c8"
+    ) {
+      expect(result.decision.reasonCode).toBe("plan_first.corp.defend_servers");
+      expect(result.decision.evidence).toContain(
+        "plan_assessment_evidence:corp_missing_concrete_defense_draw:hq",
+      );
+    }
     if (json === avoidZeroNeedArchivesIceJson) {
       const before = structuredClone(checkpoint.engine.testOnlyGameState);
       before.eventLog = structuredClone(checkpoint.engine.eventPrefix);
@@ -63,7 +72,7 @@ describe("match e653f50a Corp remediation decision checkpoints", () => {
       expect(paid.ok).toBe(true);
       if (!paid.ok) throw Error(JSON.stringify(paid.error));
       expect(
-        paid.state.cardInstances["corp_onr_v1_320_encoder-inc_1"]!.rezzed,
+        paid.state.cardInstances["c3ad"]!.rezzed,
       ).toBe(true);
       expect(paid.state.corp.clicks).toBe(before.corp.clicks);
       expect(paid.state.corp.servers).toEqual(before.corp.servers);

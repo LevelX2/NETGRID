@@ -1,13 +1,14 @@
+import { visibleRunnerPathTraceContext } from "../../run-analysis/trace-rules-profile-planning";
 import {
   runnerCandidateExecutesProgramSearch,
   runnerProgramSearchSourceCardInstanceId,
 } from "../../runtime/runner-program-search-facts";
-import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
 import {
   runnerCandidateSourceDefinitionId,
   runnerInstallSourceInstanceId,
 } from "../../runtime/runner-action-source-facts";
-import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
@@ -35,18 +36,18 @@ export type RunnerBreakerCoverageUpgrade = Readonly<{
   requiredRole: RunnerCoverageGapSignal["requiredRole"];
   visibleAnswer?: VisibleCard;
   deckHasAlternative: true;
-  targetDefinitionId: string;
+  targetDefinitionId: number;
   searchActionId?: string;
   recoveryMode: "install_visible_upgrade" | "search_known_upgrade";
   memorySupportActionId?: string;
-  memorySupportDefinitionId?: string;
+  memorySupportDefinitionId?: number;
   economicQuote: RunnerBreakerUpgradeEconomicQuote;
   evidenceCodes: string[];
 }>;
 
 export type RunnerBreakerUpgradeMemorySupportRoute = Readonly<{
   actionId: string;
-  definitionId: string;
+  definitionId: number;
   additionalMu: number;
   creditCost: number;
   clickCost: number;
@@ -204,6 +205,7 @@ export function runnerBreakerCoverageUpgrade(
         Math.max(evaluation.pathCost, input.playerView.own.credits),
         server.root,
         input.playerView.opponent.credits,
+        visibleRunnerPathTraceContext(input),
       );
       const projectedPathCost = path.visibleBreakCost;
       if (
@@ -286,7 +288,7 @@ export function runnerBreakerCoverageUpgrade(
           right.economicQuote.projectedPathCost ||
         left.economicQuote.totalInvestment -
           right.economicQuote.totalInvestment ||
-        left.targetDefinitionId.localeCompare(right.targetDefinitionId),
+        left.targetDefinitionId - right.targetDefinitionId,
     );
   return upgradeCandidates[0];
 }
@@ -296,7 +298,7 @@ export function runnerBreakerUpgradeSearchRoute(
   candidates: readonly ActionSemanticCandidate[],
   deckCapabilities: DeckCapabilityProfile,
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
-  targetDefinitionId: string,
+  targetDefinitionId: number,
 ):
   | {
       actionId: string;
@@ -351,7 +353,7 @@ export function runnerBreakerUpgradeSearchRoute(
       return [
         {
           actionId: candidate.actionId,
-          creditCost: legalActionCreditCost(action),
+          creditCost: nonNegativeActionCreditCost(action),
           clickCost,
           consumesCard: action.type === "play_event",
         },
@@ -381,15 +383,14 @@ export function runnerVisibleBreakerUpgradeInstallRoute(
       if (
         !action ||
         runnerInstallSourceInstanceId(candidate, action) !== card.instanceId ||
-        action.payload?.runnerProgramTrashBeforeInstall === true ||
-        candidate.actionId.endsWith(".runner_program_trash_before_install")
+        action.payload?.runnerProgramTrashBeforeInstall === true
       ) {
         return [];
       }
       return [
         {
           actionId: candidate.actionId,
-          creditCost: legalActionCreditCost(action),
+          creditCost: nonNegativeActionCreditCost(action),
           clickCost: action.costs.reduce(
             (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
             0,
@@ -420,15 +421,14 @@ export function runnerVisibleBreakerUpgradeMemoryBlockedInstallRoute(
       if (
         !action ||
         runnerInstallSourceInstanceId(candidate, action) !== card.instanceId ||
-        (action.payload?.runnerProgramTrashBeforeInstall !== true &&
-          !candidate.actionId.endsWith(".runner_program_trash_before_install"))
+        action.payload?.runnerProgramTrashBeforeInstall !== true
       ) {
         return [];
       }
       return [
         {
           actionId: candidate.actionId,
-          creditCost: legalActionCreditCost(action),
+          creditCost: nonNegativeActionCreditCost(action),
           clickCost: action.costs.reduce(
             (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
             0,
@@ -466,7 +466,7 @@ export function runnerBreakerUpgradeMemorySupportRoutes(
           entry.known !== false && entry.instanceId === sourceInstanceId,
       );
       const definition = card?.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+        ? planningCardFactsByDefinitionId(card.definitionId)
         : undefined;
       const additionalMu = Math.max(
         0,
@@ -484,7 +484,7 @@ export function runnerBreakerUpgradeMemorySupportRoutes(
           actionId: action.actionId,
           definitionId: card.definitionId,
           additionalMu,
-          creditCost: legalActionCreditCost(action),
+          creditCost: nonNegativeActionCreditCost(action),
           clickCost: action.costs.reduce(
             (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
             0,
@@ -498,7 +498,7 @@ export function runnerBreakerUpgradeMemorySupportRoutes(
           left.clickCost -
           (right.creditCost + right.clickCost) ||
         left.additionalMu - right.additionalMu ||
-        left.definitionId.localeCompare(right.definitionId) ||
+        (left.definitionId - right.definitionId) ||
         left.actionId.localeCompare(right.actionId),
     );
 }

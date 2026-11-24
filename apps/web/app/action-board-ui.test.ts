@@ -10,6 +10,7 @@ import type {
   PublicGameEvent,
   Side,
   VisibleCard,
+  VisibleServerCostModifierStatus,
   VisibleServerStatus,
 } from "@netgrid/shared";
 import {
@@ -127,9 +128,9 @@ import {
 } from "./action-board-ui";
 
 const TEST_CARD_PRESENTATIONS = {
-  simple_fracter: { title: "Simple Fracter", type: "program" },
-  onr_proteus_091_lockjaw: { title: "Lockjaw", type: "program" },
-  onr_v1_036_jackhammer: { title: "Jackhammer", type: "program" },
+  597: { title: "Simple Fracter", type: "program" },
+  149: { title: "Lockjaw", type: "program" },
+  248: { title: "Jackhammer", type: "program" },
 } as const;
 
 const actionButtonLabel: typeof actionButtonLabelWithoutCatalog = (action) =>
@@ -174,11 +175,11 @@ describe("localized action presentation", () => {
                 ["hq", "HQ"],
                 ["rd", "R&D"],
                 ["archives", archives],
-                ["remote_3", remote],
+                ["r3", remote],
                 ["new_remote", newRemote],
               ]
             : [
-                ["remote_3", remote],
+                ["r3", remote],
                 ["new_remote", newRemote],
               ];
         const actions = destinations.map(([serverId]) =>
@@ -224,7 +225,7 @@ describe("localized action presentation", () => {
         "Agenda installieren und Node ersetzen",
         {
           cardId: "agenda",
-          serverId: "remote_3",
+          serverId: "r3",
           placement: "root",
           rootReplacement: "asset_to_agenda",
         },
@@ -248,7 +249,7 @@ describe("localized action presentation", () => {
     const playerView = view("corp", {
       servers: [
         { id: "hq", label: "HQ", ice: [first], root: [] },
-        { id: "remote_3", label: "Remote 3", ice: [coyote, second], root: [] },
+        { id: "r3", label: "Remote 3", ice: [coyote, second], root: [] },
       ],
     });
     const actions = [first, second, coyote].map((target) =>
@@ -303,7 +304,7 @@ describe("localized action presentation", () => {
       const playerView = view("corp", {
         servers: [
           {
-            id: "remote_3",
+            id: "r3",
             label: "Remote 3",
             ice: [
               card("ice_a", "Colonel Failure", "ice"),
@@ -409,7 +410,7 @@ describe("localized action presentation", () => {
       "install_card",
       "runner_card_1",
       "Simple Fracter installieren",
-      { cardDefinitionId: "simple_fracter" },
+      { cardDefinitionId: 597 },
     );
 
     expect(
@@ -507,9 +508,9 @@ describe("localized action presentation", () => {
       "Lockjaw: Jackhammer +2",
       {
         cardId: "lockjaw_1",
-        sourceCardDefinitionId: "onr_proteus_091_lockjaw",
+        sourceCardDefinitionId: 149,
         targetCardId: "jackhammer_1",
-        targetCardDefinitionId: "onr_v1_036_jackhammer",
+        targetCardDefinitionId: 248,
         runnerAbility: "boost_icebreaker_for_run",
         strengthBoostAmount: 2,
       },
@@ -618,7 +619,11 @@ describe("localized action presentation", () => {
       expect(
         choiceOptionPresentationLabel(
           pendingChoice,
-          { id: "guess_2", label: "2", ...(value !== undefined ? { value } : {}) },
+          {
+            id: "guess_2",
+            label: "2",
+            ...(value !== undefined ? { value } : {}),
+          },
           "en",
         ),
       ).toBe("[missing choice option: generic_bid_amount/guess_2]");
@@ -656,12 +661,12 @@ describe("localized action presentation", () => {
       for (const sourceTitle of ["Dr. Dreff", "Jenny Jett"]) {
         const pendingChoice = {
           ...choice("corp"),
-          sourceCardDefinitionId: "source_definition",
+          sourceCardDefinitionId: 11006,
           presentationKey: "delayed_success" as const,
         };
         const before = structuredClone(pendingChoice);
         const label = choicePromptPresentationLabel(pendingChoice, locale, {
-          source_definition: { title: sourceTitle },
+          11006: { title: sourceTitle },
         });
         expect(label).toBe(
           locale === "de"
@@ -978,7 +983,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         cardId: "runner_swiss_1",
         cardImplementationAbilityTiming: "runner_cost_penalty_support",
-        costPenaltySupportWindowId: "runner_cost_penalty_support.217",
+        costPenaltySupportWindowId: 217,
       },
       "runner_action.main",
     );
@@ -991,7 +996,7 @@ describe("V1.0.5 action board UI helpers", () => {
         cardId: "running_interference_1",
         serverId: "hq",
         runnerCostPenaltySupportContinuation: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.217",
+        runnerCostPenaltySupportWindowId: 217,
       },
       "runner_action.main",
     );
@@ -1004,7 +1009,7 @@ describe("V1.0.5 action board UI helpers", () => {
         breakerId: "runner_breaker_1",
         subroutineIndex: 0,
         runnerCostPenaltySupportContinuation: true,
-        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.218",
+        runnerCostPenaltySupportWindowId: 218,
       },
       "run.encounter_ice",
     );
@@ -1025,7 +1030,7 @@ describe("V1.0.5 action board UI helpers", () => {
       runWindowActionButtonLabel(
         view("runner", {
           run: {
-            runId: "run_payment_support",
+            runId: 3,
             attackedServerId: "hq",
             phase: "encounter_ice",
             successful: false,
@@ -1126,7 +1131,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         serverId: "rd",
         bonusRunNoClick: true,
-        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+        bonusRunSource: 335,
       },
       "runner_action.main",
     );
@@ -1137,7 +1142,7 @@ describe("V1.0.5 action board UI helpers", () => {
       "Bodyweight Data Crèche: keinen Bonus-Run starten",
       {
         cardId: "bodyweight_1",
-        sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
+        sourceDefinitionId: 335,
         runnerAbility: "decline_successful_run_extra_run",
         successfulRunExtraRunDecision: "decline",
       },
@@ -1185,7 +1190,7 @@ describe("V1.0.5 action board UI helpers", () => {
       "game_rule",
       "Spy-Counter in Remote 1 entfernen",
       {
-        serverId: "remote_1",
+        serverId: "r1",
         corpAbility: "remove_spy_counter",
         counterType: "spy",
         removedCounterAmount: 1,
@@ -1210,7 +1215,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         cardId: "ice_1",
         oliviaSalazarRezSourceCardId: "olivia_1",
-        oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+        oliviaSalazarRezSourceDefinitionId: 575,
         oliviaSalazarRezCostBase: 4,
         oliviaSalazarTemporaryDerez: true,
         rezCostPaid: 2,
@@ -1237,22 +1242,22 @@ describe("V1.0.5 action board UI helpers", () => {
           type === "ice" ? "rez_ice" : "rez_card",
           target.instanceId,
           `${title} rezzen`,
-          { cardId: target.instanceId, serverId: "remote_1" },
+          { cardId: target.instanceId, serverId: "r1" },
           "run.approach_ice",
         );
         const running = view("corp", {
           servers: [
             {
-              id: "remote_1",
+              id: "r1",
               label: "Remote 1",
               ice: type === "ice" ? [target] : [],
               root: type === "ice" ? [] : [target],
             },
           ],
           run: {
-            attackedServerId: "remote_1",
+            attackedServerId: "r1",
             phase: "approach_ice",
-            position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+            position: { kind: "ice", serverId: "r1", iceIndex: 0 },
             successful: false,
           },
         });
@@ -1457,7 +1462,7 @@ describe("V1.0.5 action board UI helpers", () => {
       phase: "run",
       timingPoint: "run.approach_ice",
       run: {
-        runId: "run_7",
+        runId: 7,
         attackedServerId: "rd",
         phase: "approach_ice",
         position: { kind: "ice", serverId: "rd", iceIndex: 0 },
@@ -1515,7 +1520,7 @@ describe("V1.0.5 action board UI helpers", () => {
     const running = view("corp", {
       phase: "run",
       run: {
-        runId: "run_8",
+        runId: 8,
         attackedServerId: "hq",
         phase: "movement",
         position: { kind: "server", serverId: "hq" },
@@ -1651,7 +1656,7 @@ describe("V1.0.5 action board UI helpers", () => {
     ).toBe("Weiterlaufen: zu ICE 3");
     expect(serverDisplayLabel("rd")).toBe("R&D");
     expect(serverDisplayLabel("archives")).toBe("Archive");
-    expect(serverDisplayLabel("remote_2")).toBe("Remote 2");
+    expect(serverDisplayLabel("r2")).toBe("Remote 2");
     expect(serverDisplayLabel("Remote 3")).toBe("Remote 3");
     expect(
       actionButtonLabel(
@@ -1689,21 +1694,21 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(
       serverTargetIdForAction(
         legalAction("runner", "start_run", "basic_action", "Run auf HQ", {
-          targetServerId: "remote_1",
+          targetServerId: "r1",
           serverId: "hq",
         }),
       ),
-    ).toBe("remote_1");
+    ).toBe("r1");
     expect(
       serverTargetIdForChoiceOption(
         { id: "fort_rd", label: "R&D", value: "rd" },
-        ["hq", "rd", "archives", "remote_1"],
+        ["hq", "rd", "archives", "r1"],
       ),
     ).toBe("rd");
     expect(
       serverTargetIdForChoiceOption(
         { id: "fort_none", label: "Keine Karten exposen", value: "none" },
-        ["hq", "rd", "archives", "remote_1"],
+        ["hq", "rd", "archives", "r1"],
       ),
     ).toBeNull();
   });
@@ -1826,10 +1831,10 @@ describe("V1.0.5 action board UI helpers", () => {
   it("marks ICE in a server with rezzed Tesseract Fort Construction", () => {
     const tesseract = {
       ...card("tesseract_1", "Tesseract Fort Construction", "upgrade", true),
-      definitionId: "onr_v1_370_tesseract-fort-construction",
+      definitionId: 582,
     };
     const server = {
-      id: "remote_1" as const,
+      id: "r1" as const,
       label: "Remote 1",
       ice: [card("ice_1", "Wall of Static", "ice")],
       root: [tesseract],
@@ -2071,16 +2076,16 @@ describe("V1.0.5 action board UI helpers", () => {
         timingPoint: "run.movement_rez_window",
         servers: [
           {
-            id: "remote_1",
+            id: "r1",
             label: "Remote 1",
             ice: [card("inner", "Inner ICE", "ice"), shock],
             root: [],
           },
         ],
         run: {
-          attackedServerId: "remote_1",
+          attackedServerId: "r1",
           phase: "movement",
-          position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+          position: { kind: "ice", serverId: "r1", iceIndex: 1 },
           successful: false,
         },
       });
@@ -2120,13 +2125,17 @@ describe("V1.0.5 action board UI helpers", () => {
 
       running.run!.phase = "movement";
       running.timingPoint = "run.movement_rez_window";
-      running.run!.encounteredIce = card("passed", "Haunting Inquisition", "ice");
+      running.run!.encounteredIce = card(
+        "passed",
+        "Haunting Inquisition",
+        "ice",
+      );
       expect(runHeaderIceTitle(running)).toBe("Shock.r");
       shock.known = false;
       expect(runHeaderTargetLabel(running, messages.Board.run.hiddenIce)).toBe(
         `→ ICE 2 · ${messages.Board.run.hiddenIce}`,
       );
-      running.run!.position = { kind: "server", serverId: "remote_1" };
+      running.run!.position = { kind: "server", serverId: "r1" };
       expect(
         runHeaderTargetLabel(running, messages.Board.run.hiddenIce),
       ).toBeNull();
@@ -2291,10 +2300,10 @@ describe("V1.0.5 action board UI helpers", () => {
         encounterContinue: true,
         encounterWillEndRun: false,
         unbrokenSubroutineCount: 1,
-        payOrEndRunSubroutineIndexes: "0",
         payOrEndRunSubroutinePayment: 1,
       },
       "run.encounter_ice",
+      { payOrEndRunSubroutineIndexes: [0] },
     );
     const payWithDamage = legalAction(
       "runner",
@@ -2305,10 +2314,10 @@ describe("V1.0.5 action board UI helpers", () => {
         encounterContinue: true,
         encounterWillEndRun: false,
         unbrokenSubroutineCount: 2,
-        payOrEndRunSubroutineIndexes: "1",
         payOrEndRunSubroutinePayment: 1,
       },
       "run.encounter_ice",
+      { payOrEndRunSubroutineIndexes: [1] },
     );
     const pump = legalAction(
       "runner",
@@ -2363,14 +2372,14 @@ describe("V1.0.5 action board UI helpers", () => {
       "rez_ice",
       "game_rule",
       "Karte in Remote 1 rezzen",
-      { cardId: "upgrade_1", serverId: "remote_1" },
+      { cardId: "upgrade_1", serverId: "r1" },
     );
     const runIceRez = legalAction(
       "corp",
       "rez_ice",
       "game_rule",
       "ICE rezzen",
-      { cardId: "ice_1", serverId: "remote_1" },
+      { cardId: "ice_1", serverId: "r1" },
       "run.approach_ice",
     );
 
@@ -2596,22 +2605,22 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(showInstalledCorpState("archives", "root")).toBe(false);
     expect(showInstalledCorpState("archives", "ice")).toBe(true);
     expect(showInstalledCorpState("hq", "root")).toBe(true);
-    expect(showInstalledCorpState("remote_1", "root")).toBe(true);
+    expect(showInstalledCorpState("r1", "root")).toBe(true);
   });
 
-  it("renders opponent remote root cards in install order without leaked hidden root types", () => {
+  it("groups open remote roots while hidden cards and private access views keep their slots", () => {
     const leakedUpgradeA: VisibleCard = {
       instanceId: "upgrade_a",
       known: false,
       rezzed: false,
       title: "Simple Upgrade",
-      definitionId: "simple_upgrade",
+      definitionId: 606,
       type: "upgrade",
       trashCost: 4,
     };
-    const rezzedNode = card("node_1", "Simple Economy Asset", "asset", true);
-    const exposedUnrezzedUpgrade = card(
-      "exposed_upgrade",
+    const rezzedNode = card(11007, "Simple Economy Asset", "asset", true);
+    const privatelyViewedUpgrade = card(
+      11008,
       "Simple Upgrade",
       "upgrade",
       false,
@@ -2621,40 +2630,43 @@ describe("V1.0.5 action board UI helpers", () => {
       known: false,
       rezzed: false,
       title: "Simple Upgrade",
-      definitionId: "simple_upgrade",
+      definitionId: 606,
       type: "upgrade",
       trashCost: 4,
     };
 
-    const runnerCards = corpRootCardsForDisplay("runner", "remote_1", [
+    const rezzedUpgrade = card("open_upgrade", "Open Upgrade", "upgrade");
+    const runnerCards = corpRootCardsForDisplay("runner", "r1", [
       leakedUpgradeA,
+      rezzedUpgrade,
       rezzedNode,
-      exposedUnrezzedUpgrade,
+      privatelyViewedUpgrade,
       leakedUpgradeB,
     ]);
 
     expect(runnerCards.map((entry) => entry.instanceId)).toEqual([
-      "upgrade_a",
-      "node_1",
-      "exposed_upgrade",
+      "11007",
       "upgrade_b",
+      "11008",
+      "upgrade_a",
+      "open_upgrade",
     ]);
-    expect(runnerCards[1]).toMatchObject({
+    expect(runnerCards[0]).toMatchObject({
       known: true,
       title: "Simple Economy Asset",
-      definitionId: "node_1",
+      definitionId: 11007,
       type: "asset",
       rezzed: true,
     });
     expect(runnerCards[2]).toMatchObject({
       known: true,
       title: "Simple Upgrade",
-      definitionId: "exposed_upgrade",
+      definitionId: 11008,
       type: "upgrade",
       rezzed: false,
     });
     expect(corpInstalledCardState(runnerCards[2]!)).toBe("unrezzed");
-    for (const hiddenCard of [runnerCards[0], runnerCards[3]]) {
+    for (const hiddenCard of [runnerCards[1], runnerCards[3]]) {
       expect(hiddenCard).toMatchObject({ known: false, rezzed: false });
       expect(hiddenCard).not.toHaveProperty("title");
       expect(hiddenCard).not.toHaveProperty("definitionId");
@@ -2662,9 +2674,59 @@ describe("V1.0.5 action board UI helpers", () => {
       expect(hiddenCard).not.toHaveProperty("trashCost");
     }
 
-    expect(
-      corpRootCardsForDisplay("corp", "remote_1", [leakedUpgradeA]),
-    ).toEqual([leakedUpgradeA]);
+    expect(corpRootCardsForDisplay("corp", "r1", [leakedUpgradeA])).toEqual([
+      leakedUpgradeA,
+    ]);
+  });
+
+  it.each(["upgrade", "agenda", "asset"] as const)(
+    "keeps the newest concealed %s in the same slot for both players when another upgrade is rezzed",
+    (newType) => {
+      const older = card("first", "Older upgrade", "upgrade", false);
+      const middle = card("second", "Another upgrade", "upgrade", false);
+      const newest = card("third", "New installation", newType, false);
+      for (const viewer of ["corp", "runner"] as const) {
+        const concealed = (entry: VisibleCard) =>
+          viewer === "corp"
+            ? entry
+            : { instanceId: entry.instanceId, known: false };
+        const order = (cards: VisibleCard[]) =>
+          corpRootCardsForDisplay(viewer, "r1", cards).map(
+            (entry) => entry.instanceId,
+          );
+        const installations = [older, middle, newest].map(concealed);
+        expect(order(installations)).toEqual(["third", "second", "first"]);
+        expect(
+          order([concealed(older), { ...middle, rezzed: true }, concealed(newest)]),
+        ).toEqual(["third", "first", "second"]);
+        expect(installations.map((entry) => entry.instanceId)).toEqual([
+          "first", "second", "third",
+        ]);
+      }
+    },
+  );
+
+  it("anchors publicly exposed agendas and upgrades even while unrezzed, only in remotes", () => {
+    const openAgenda: VisibleCard = {
+      ...card("a", "Agenda", "agenda", false),
+      publiclyExposedInRoot: true,
+    };
+    const openUpgrade: VisibleCard = {
+      ...card("u", "Upgrade", "upgrade", false),
+      publiclyExposedInRoot: true,
+    };
+    const newerUpgrade = card("u2", "Second upgrade", "upgrade");
+    const cards = [
+      openUpgrade, openAgenda, newerUpgrade, { instanceId: "back", known: false },
+    ];
+    for (const viewer of ["corp", "runner"] as const) {
+      const order = (server: "r1" | "hq" | "rd" | "archives") =>
+        corpRootCardsForDisplay(viewer, server, cards).map((entry) => entry.instanceId);
+      expect(order("r1")).toEqual(["a", "back", "u2", "u"]);
+      for (const central of ["hq", "rd", "archives"] as const) {
+        expect(order(central)).toEqual(["u", "a", "u2", "back"]);
+      }
+    }
   });
 
   it("splits archives into faceup and facedown stacks for runner and corp views", () => {
@@ -2720,8 +2782,9 @@ describe("V1.0.5 action board UI helpers", () => {
       { id: "hq", label: "HQ", ice: [], root: [] },
       { id: "rd", label: "R&D", ice: [], root: [] },
       { id: "archives", label: "Archives", ice: [], root: [] },
-      { id: "remote_2", label: "Remote 2", ice: [], root: [] },
-      { id: "remote_1", label: "Remote 1", ice: [], root: [] },
+      { id: "r10", label: "Remote 10", ice: [], root: [] },
+      { id: "r2", label: "Remote 2", ice: [], root: [] },
+      { id: "r1", label: "Remote 1", ice: [], root: [] },
     ];
 
     expect(
@@ -2731,7 +2794,7 @@ describe("V1.0.5 action board UI helpers", () => {
       ]),
     ).toEqual([
       ["centrals", ["hq", "rd", "archives"]],
-      ["remotes", ["remote_1", "remote_2"]],
+      ["remotes", ["r1", "r2", "r10"]],
     ]);
 
     expect(
@@ -2740,7 +2803,7 @@ describe("V1.0.5 action board UI helpers", () => {
         row.servers.map((server) => server.id),
       ]),
     ).toEqual([
-      ["remotes", ["remote_1", "remote_2"]],
+      ["remotes", ["r1", "r2", "r10"]],
       ["centrals", ["hq", "rd", "archives"]],
     ]);
   });
@@ -2760,21 +2823,21 @@ describe("V1.0.5 action board UI helpers", () => {
       phase: "run",
       timingPoint: "run.jack_out_window",
       run: {
-        runId: "run_9",
-        attackedServerId: "remote_1",
+        runId: 9,
+        attackedServerId: "r1",
         phase: "movement",
-        position: { kind: "server", serverId: "remote_1" },
+        position: { kind: "server", serverId: "r1" },
         successful: false,
       },
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [],
           root: [vaporOps],
         },
         {
-          id: "remote_2",
+          id: "r2",
           label: "Remote 2",
           ice: [],
           root: [remoteTwoVaporOps],
@@ -3177,7 +3240,7 @@ describe("V1.0.5 action board UI helpers", () => {
       ...hqChoice,
       choiceId: "data_fort_reclamation_rez_9",
       source:
-        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:corp_ice_1:1:9",
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:r1:corp_ice_1:1:9",
       prompt:
         "Data Fort Reclamation: Karte 1 von 1 rezzen (10 temporäre Credits verfügbar).",
       maxSelections: 1,
@@ -3185,7 +3248,7 @@ describe("V1.0.5 action board UI helpers", () => {
     const board = view("corp", {
       servers: [
         {
-          id: "remote_1",
+          id: "r1",
           label: "Remote 1",
           ice: [card("corp_ice_1", "ICE", "ice")],
           root: [],
@@ -3213,9 +3276,7 @@ describe("V1.0.5 action board UI helpers", () => {
         ...view("runner").own,
         rig: [runnerProgram],
       },
-      servers: [
-        { id: "remote_1", label: "Remote 1", ice: [ice, ice2], root: [bbs] },
-      ],
+      servers: [{ id: "r1", label: "Remote 1", ice: [ice, ice2], root: [bbs] }],
     });
     const fieldChoice: NonNullable<PlayerView["pendingChoice"]> = {
       choiceId: "hunt_club_bbs_choice",
@@ -3278,17 +3339,15 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 1,
       maxSelections: 1,
     };
-    const hiddenSlot = { ...ice, instanceId: "hidden_ice_slot", known: false };
+    const hiddenSlot = { ...ice, instanceId: "hr1.i0", known: false };
     const hiddenSlotBoard = view("runner", {
-      servers: [
-        { id: "remote_1", label: "Remote 1", ice: [hiddenSlot], root: [] },
-      ],
+      servers: [{ id: "r1", label: "Remote 1", ice: [hiddenSlot], root: [] }],
     });
     const hiddenSlotSingleExposeChoice: NonNullable<
       PlayerView["pendingChoice"]
     > = {
       ...singleExposeChoice,
-      options: [{ id: "card_hidden_ice_slot", label: "Remote 1 ICE 1" }],
+      options: [{ id: "card_hr1.i0", label: "Remote 1 ICE 1" }],
     };
     const reviewChoice: NonNullable<PlayerView["pendingChoice"]> = {
       choiceId: "seeya_expose_review",
@@ -3323,8 +3382,7 @@ describe("V1.0.5 action board UI helpers", () => {
       ...fieldChoice,
       choiceId: "fort_ice_reorder_7",
       side: "corp",
-      source:
-        "corp.start_of_run_redirect.herman_reorder:run_1:herman_1:remote_1",
+      source: "corp.start_of_run_redirect.herman_reorder:run_1:herman_1:r1",
       prompt: "Wähle die ICE in der neuen Reihenfolge vor diesem Server.",
       options: [
         { id: "card_corp_ice_1", label: "Wall", value: "corp_ice_1" },
@@ -3418,7 +3476,7 @@ describe("V1.0.5 action board UI helpers", () => {
         hiddenSlotBoard,
         hiddenSlot,
       )?.id,
-    ).toBe("card_hidden_ice_slot");
+    ).toBe("card_hr1.i0");
     expect(fieldCardChoiceInfo(fieldChoice, ["card_bbs"])).toMatchObject({
       title: "Feldkarten auswählen",
       counterLabel: "1/0-3",
@@ -3573,11 +3631,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
   it("derives bonus-action slot capacity from current turn action history", () => {
     const events = [
-      publicEvent("evt_1", "mandatory_draw", {
+      publicEvent(2, "mandatory_draw", {
         actor: "corp",
         actionType: "mandatory_draw",
       }),
-      publicEvent("evt_2", "play_operation", {
+      publicEvent(3, "play_operation", {
         actor: "corp",
         actionType: "play_operation",
         actionCostClicks: 1,
@@ -3606,41 +3664,41 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
   it("counts a continued payment-support action only once", () => {
     const events = [
-      publicEvent("evt_1", "draw_card", {
+      publicEvent(2, "draw_card", {
         actor: "runner",
         actionType: "draw_card",
         actionCostClicks: 1,
         turnActionOrdinalStart: 1,
         turnActionOrdinalEnd: 1,
       }),
-      publicEvent("evt_2", "install_card", {
+      publicEvent(3, "install_card", {
         actor: "runner",
         actionType: "install_card",
         actionCostClicks: 1,
         turnActionOrdinalStart: 2,
         turnActionOrdinalEnd: 2,
       }),
-      publicEvent("evt_3", "play_event", {
+      publicEvent(4, "play_event", {
         actor: "runner",
         actionType: "play_event",
         actionCostClicks: 1,
         turnActionOrdinalStart: 3,
         turnActionOrdinalEnd: 3,
-        costPenaltySupportWindowId: "runner_cost_penalty_support.227",
+        costPenaltySupportWindowId: 227,
       }),
-      publicEvent("evt_4", "activated_card_ability", {
+      publicEvent(5, "activated_card_ability", {
         actor: "runner",
         actionType: "activated_card_ability",
-        costPenaltySupportWindowId: "runner_cost_penalty_support.227",
+        costPenaltySupportWindowId: 227,
       }),
-      publicEvent("evt_5", "play_event", {
+      publicEvent(6, "play_event", {
         actor: "runner",
         actionType: "play_event",
         actionCostClicks: 1,
         turnActionOrdinalStart: 3,
         turnActionOrdinalEnd: 3,
         runnerCostPenaltySupportContinuation: true,
-        costPenaltySupportWindowId: "runner_cost_penalty_support.227",
+        costPenaltySupportWindowId: 227,
       }),
     ];
 
@@ -3649,7 +3707,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
   it("keeps action-cost history additive when ordinal metadata is absent", () => {
     const events = [
-      publicEvent("evt_1", "play_event", {
+      publicEvent(2, "play_event", {
         actor: "runner",
         actionType: "play_event",
         actionCostClicks: 2,
@@ -3852,7 +3910,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("does not use legacy stored-credit card tables when CounterDisplays are missing", () => {
     const brokerRawOnly: VisibleCard = {
       ...card("broker_legacy", "Broker", "resource"),
-      definitionId: "onr_v1_154_broker",
+      definitionId: 366,
       counters: { bit: 3 },
     };
     const unknownRawOnly: VisibleCard = {
@@ -3867,7 +3925,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("does not select raw counters for board rendering when CounterDisplays are missing", () => {
     const rawOnly: VisibleCard = {
       ...card("broker_raw_only", "Broker", "resource"),
-      definitionId: "onr_v1_154_broker",
+      definitionId: 366,
       counters: { bit: 3, recurring_credit: 2, shell: 1 },
     };
     const displayCard: VisibleCard = {
@@ -3927,17 +3985,17 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("maps CounterDisplay special counters to compact badge models", () => {
     const rawArmoredFridge: VisibleCard = {
       ...card("fridge_1", "Armored Fridge", "hardware"),
-      definitionId: "onr_v1_121_armored-fridge",
+      definitionId: 333,
       counters: { power: 7 },
     };
     const rawEmptyArmoredFridge: VisibleCard = {
       ...card("fridge_1", "Armored Fridge", "hardware"),
-      definitionId: "onr_v1_121_armored-fridge",
+      definitionId: 333,
       counters: { power: 0 },
     };
     const rawDataRaven: VisibleCard = {
       ...card("data_raven_1", "Data Raven", "ice"),
-      definitionId: "onr_v1_236_data-raven",
+      definitionId: 448,
       counters: { power: 2 },
     };
     const rawUnknownPowerCard: VisibleCard = {
@@ -4175,11 +4233,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("maps source-bound effects to generic server status chips", () => {
     const statuses: VisibleServerStatus[] = [
       {
-        id: "server_status:remote_1:run_prohibited:card_7:fort_activity_gate",
+        id: "server_status:r1:run_prohibited:card_7:fort_activity_gate",
         kind: "run_prohibited",
         scope: "target_server",
         reason: "required_corp_activity_during_latest_corp_turn_missing",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "card_7",
         sourceAbilityId: "fort_activity_gate",
         sourceTitle: "Öffentliche Sperrquelle",
@@ -4198,35 +4256,35 @@ describe("V1.0.6 resource and card-display helpers", () => {
         sourceSide: "runner",
       },
       {
-        id: "server_status:remote_1:corp_ice_install:reduce:card_9:0",
+        id: "server_status:r1:corp_ice_install:reduce:card_9:0",
         kind: "cost_modifier",
         scope: "target_server",
         costKind: "corp_ice_install",
         operation: "reduce",
         amount: 1,
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "card_9",
         sourceTitle: "Öffentliche Korp-Kostenquelle",
         sourceSide: "corp",
       },
       {
-        id: "server_status:remote_1:run_payment_restriction:card_10:stealth_bits",
+        id: "server_status:r1:run_payment_restriction:card_10:stealth_bits",
         kind: "run_payment_restriction",
         scope: "target_server",
         restriction: "runner_stealth_bit_payment_sources",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "card_10",
         sourceTitle: "Öffentliche Zahlungsbeschränkung",
         sourceSide: "corp",
       },
       {
-        id: "server_status:remote_1:during_run_ice_rez_support:card_11",
+        id: "server_status:r1:during_run_ice_rez_support:card_11",
         kind: "during_run_ice_rez_support",
         scope: "target_server",
         costModel: "half_rez_cost_rounded_down",
         target: "unrezzed_ice_on_this_fort",
         limit: "once_per_run_per_source",
-        targetServerId: "remote_1",
+        targetServerId: "r1",
         sourceCardInstanceId: "card_11",
         sourceTitle: "Öffentliche Rez-Unterstützung",
         sourceSide: "corp",
@@ -4245,7 +4303,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         tone: "blocking",
       },
       {
-        key: statuses[1]!.id,
+        key: "server_status:rd:corp_ice_install:increase",
         label: "ICE-Install +2",
         ariaLabel:
           "Öffentliche Runner-Kostenquelle: Die Korp muss 2 zusätzliche Credits zahlen, um ICE vor diesem Server zu installieren.",
@@ -4254,7 +4312,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         tone: "cost_increase",
       },
       {
-        key: statuses[2]!.id,
+        key: "server_status:r1:corp_ice_install:reduce",
         label: "ICE-Install −1",
         ariaLabel:
           "Öffentliche Korp-Kostenquelle: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um 1 Credit reduziert.",
@@ -4305,6 +4363,66 @@ describe("V1.0.6 resource and card-display helpers", () => {
         tooltip: expect.stringContaining("2 crédits supplémentaires"),
       },
     ]);
+  });
+
+  it("sums server status cost badges by server, cost kind and direction", () => {
+    const chester: VisibleServerCostModifierStatus = {
+      id: "chester_1_discount",
+      kind: "cost_modifier",
+      scope: "target_server",
+      costKind: "corp_ice_install",
+      operation: "reduce",
+      amount: 2,
+      targetServerId: "r1",
+      sourceCardInstanceId: "chester_1",
+      sourceTitle: "Chester Mix",
+      sourceSide: "corp",
+    };
+    const secondChester = {
+      ...chester,
+      id: "chester_2_discount",
+      sourceCardInstanceId: "chester_2",
+    };
+    const zoning: VisibleServerCostModifierStatus = {
+      ...chester,
+      id: "zoning_surcharge",
+      sourceCardInstanceId: "zoning",
+      sourceTitle: "Restrictive Net Zoning",
+      sourceSide: "runner",
+      operation: "increase",
+    };
+    const chips = serverStatusChips([
+      chester,
+      zoning,
+      {
+        ...chester,
+        targetServerId: "r2",
+        id: "chester_3_discount",
+        sourceCardInstanceId: "chester_3",
+      },
+      secondChester,
+      {
+        ...zoning,
+        id: "other_surcharge",
+        sourceCardInstanceId: "other",
+        sourceTitle: "Zusatzquelle",
+        amount: 1,
+      },
+    ]);
+    const tooltip =
+      "2× Chester Mix: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um 4 Credits reduziert.";
+    expect(chips).toMatchObject([
+      { label: "ICE-Install −4", tone: "cost_reduction", ariaLabel: tooltip, tooltip },
+      {
+        label: "ICE-Install +3",
+        tooltip: expect.stringContaining("Restrictive Net Zoning + Zusatzquelle"),
+      },
+      { label: "ICE-Install −2", tooltip: expect.stringContaining("Chester Mix:") },
+    ]);
+    expect(serverStatusChips([secondChester])).toMatchObject([
+      { key: chips[0]!.key, label: "ICE-Install −2", tooltip: serverStatusTooltip(secondChester) },
+    ]);
+    expect(serverStatusChips([])).toEqual([]);
   });
 
   it("keeps advancement counters as separate gems until ten counters", () => {
@@ -4652,7 +4770,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "play_event",
           "card_1",
           "Expose Event auf Remote 2",
-          { cardId: "card_1", serverId: "remote_2" },
+          { cardId: "card_1", serverId: "r2" },
         ),
       ),
     ).toBe("Spielen auf Remote 2");
@@ -4674,7 +4792,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "score_agenda",
           "agenda_1",
           "Security Net Optimization scoren und Remote 2 wählen",
-          { cardId: "agenda_1", selectedServerId: "remote_2" },
+          { cardId: "agenda_1", selectedServerId: "r2" },
         ),
       ),
     ).toBe("Scoren: Remote 2 wählen");
@@ -4800,7 +4918,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "Karte in Remote 1 installieren",
           {
             cardId: "agenda_1",
-            serverId: "remote_1",
+            serverId: "r1",
             placement: "root",
             rootReplacement: "asset_to_agenda",
           },
@@ -4915,7 +5033,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "install_card",
           "restrictive_1",
           "Restrictive Net Zoning auf Remote 1 ausrichten",
-          { cardId: "restrictive_1", selectedServerId: "remote_1" },
+          { cardId: "restrictive_1", selectedServerId: "r1" },
         ),
       ),
     ).toBe("Auf Remote 1 ausrichten");
@@ -4955,7 +5073,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "install_card",
       "agenda_1",
       "Karte in Remote 1 installieren",
-      { cardId: "agenda_1", serverId: "remote_1", placement: "root" },
+      { cardId: "agenda_1", serverId: "r1", placement: "root" },
     );
 
     expect(orderedCardContextActions([newRemoteIce, hqIce, rdIce])).toEqual([
@@ -5250,7 +5368,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         shellCounterAmount: 2,
       },
     );
@@ -5263,7 +5381,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "remove_shell_counter",
         targetCardId: "simple_fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         counterType: "shell",
         removeCounterAmount: 1,
         remainingCountersBefore: 2,
@@ -5303,7 +5421,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
       },
     );
     const decoder = legalAction(
@@ -5315,7 +5433,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_decoder_1",
-        targetCardDefinitionId: "simple_decoder",
+        targetCardDefinitionId: 591,
       },
     );
 
@@ -5335,7 +5453,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "remove_shell_counter",
         targetCardId: "simple_fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         counterType: "shell",
         removeCounterAmount: 1,
         remainingCountersBefore: 2,
@@ -5350,7 +5468,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "shell_traders_1",
         delayedInstallAbility: "remove_shell_counter",
         targetCardId: "simple_fracter_2",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         counterType: "shell",
         removeCounterAmount: 1,
         remainingCountersBefore: 4,
@@ -5405,7 +5523,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         cardId: "junkyard_1",
         resourceAbility: "junkyard_bbs_return_top_heap",
         targetCardId: "fracter_1",
-        targetCardDefinitionId: "simple_fracter",
+        targetCardDefinitionId: 597,
         sourceZone: "heap",
         destinationZone: "grip",
       },
@@ -5585,11 +5703,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
         {
           breakerId: "pile_driver_1",
           iceId: "ice_1",
-          subroutineIndexes: "0",
           breakSubroutineCount: 1,
           multiBreakSubroutines: true,
         },
         "run.encounter_ice",
+        { subroutineIndexes: [0] },
       ),
       legalAction(
         "runner",
@@ -5599,11 +5717,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
         {
           breakerId: "pile_driver_1",
           iceId: "ice_1",
-          subroutineIndexes: "0,1",
           breakSubroutineCount: 2,
           multiBreakSubroutines: true,
         },
         "run.encounter_ice",
+        { subroutineIndexes: [0,1] },
       ),
       legalAction(
         "runner",
@@ -5613,11 +5731,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
         {
           breakerId: "pile_driver_1",
           iceId: "ice_1",
-          subroutineIndexes: "1",
           breakSubroutineCount: 1,
           multiBreakSubroutines: true,
         },
         "run.encounter_ice",
+        { subroutineIndexes: [1] },
       ),
     ];
     expect(
@@ -5740,12 +5858,12 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("binds break-action tooltips to the visible effective subroutine texts", () => {
     const encounteredIce: VisibleCard = {
       ...card("ice_1", "Bolter Cluster", "ice"),
-      definitionId: "onr_v1_224_bolter-cluster",
+      definitionId: 436,
       rulesText:
         "[Subroutine] Verursache 4 Netzwerkschaden.\n[Subroutine] Der Runner kann keine Subroutinen des nächsten ICE brechen.",
       effectiveRunQuote: {
         iceInstanceId: "ice_1",
-        iceDefinitionId: "onr_v1_224_bolter-cluster",
+        iceDefinitionId: 436,
         effectiveStrength: 4,
         subroutines: [
           { id: "bolter.damage", type: "do_damage", amount: 4 },
@@ -5777,9 +5895,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
       {
         breakerId: "breaker_1",
         iceId: "ice_1",
-        subroutineIndexes: "0,1",
       },
       "run.encounter_ice",
+      { subroutineIndexes: [0, 1] },
     );
 
     expect(breakSubroutineActionTooltip(singleBreak, encounteredIce)).toBe(
@@ -5867,6 +5985,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         choiceKind: "select_option",
       },
       "run.encounter_ice",
+      { subroutineIndexes: [0,1] },
     );
 
     expect(runWindowActions(running, [choiceAction])).toEqual([choiceAction]);
@@ -5889,7 +6008,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       {
         cardId: "remote_asset",
         rootRez: true,
-        serverId: "remote_2",
+        serverId: "r2",
       },
       "run.approach_ice",
     );
@@ -6555,59 +6674,57 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("retains the latest visible access reveal after later cleanup events until it is dismissed", () => {
-    const hqReveal = publicEvent("evt_access", "action", {
+    const hqReveal = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "HQ",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
       title: "Simple Economy Operation",
     });
-    const runCleanup = publicEvent("evt_cleanup", "action", {
+    const runCleanup = publicEvent(101, "action", {
       actionType: "continue_run",
       actor: "runner",
     });
 
     expect(
       retainedAccessRevealEvent([hqReveal, runCleanup], null)?.eventId,
-    ).toBe("evt_access");
-    expect(
-      retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access"),
-    ).toBeNull();
+    ).toBe(100);
+    expect(retainedAccessRevealEvent([hqReveal, runCleanup], 100)).toBeNull();
     expect(
       latestRetainableAccessRevealEvent([hqReveal, runCleanup])?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
   });
 
   it("retains access reveal after an access ambush payment choice resolves", () => {
-    const rdReveal = publicEvent("evt_access", "action", {
+    const rdReveal = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
-      cardDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      cardDefinitionId: 115,
       title: "Doppelganger Antibody",
     });
-    const ambushPayment = publicEvent("evt_ambush", "action", {
+    const ambushPayment = publicEvent(102, "action", {
       actionType: "resolve_choice",
       actor: "corp",
-      ambushDefinitionId: "onr_proteus_057_doppelganger-antibody",
+      ambushDefinitionId: 115,
       ambushPaidCost: 2,
     });
 
     expect(
       latestRetainableAccessRevealEvent([rdReveal, ambushPayment])?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
   });
 
   it("retains a visible access reveal across turn end until it is dismissed", () => {
-    const rdReveal = publicEvent("evt_access", "action", {
+    const rdReveal = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
-      cardDefinitionId: "simple_economy_operation",
+      cardDefinitionId: 596,
       title: "Simple Economy Operation",
     });
     const runnerEndTurn = {
-      ...publicEvent("evt_runner_end", "action", {
+      ...publicEvent(103, "action", {
         actionType: "end_turn",
         actor: "runner",
       }),
@@ -6616,29 +6733,29 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(
       retainedAccessRevealEvent([rdReveal, runnerEndTurn], null)?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
     expect(
-      retainedAccessRevealEvent([rdReveal, runnerEndTurn], "evt_access"),
+      retainedAccessRevealEvent([rdReveal, runnerEndTurn], 100),
     ).toBeNull();
   });
 
   it("retains a visible access reveal across access resolution and automatic turn end until it is dismissed", () => {
-    const remoteReveal = publicEvent("evt_access", "action", {
+    const remoteReveal = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_upgrade",
+      cardDefinitionId: 606,
       title: "Simple Upgrade",
     });
     const declineTrash = {
-      ...publicEvent("evt_decline", "action", {
+      ...publicEvent(104, "action", {
         actionType: "decline_trash",
         actor: "runner",
       }),
       stateVersionAfter: 2,
     };
     const runnerEndTurn = {
-      ...publicEvent("evt_runner_end", "action", {
+      ...publicEvent(103, "action", {
         actionType: "end_turn",
         actor: "runner",
       }),
@@ -6650,32 +6767,32 @@ describe("V1.0.6 resource and card-display helpers", () => {
         [remoteReveal, declineTrash, runnerEndTurn],
         null,
       )?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
     expect(
       retainedAccessRevealEvent(
         [remoteReveal, declineTrash, runnerEndTurn],
-        "evt_access",
+        100,
       ),
     ).toBeNull();
   });
 
   it("does not retain an old access reveal after later turn and Corp action events", () => {
-    const access = publicEvent("evt_access", "action", {
+    const access = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       title: "Simple Agenda",
     });
     const runnerEndTurn = {
-      ...publicEvent("evt_runner_end", "action", {
+      ...publicEvent(103, "action", {
         actionType: "end_turn",
         actor: "runner",
       }),
       stateVersionAfter: 2,
     };
     const corpInstall = {
-      ...publicEvent("evt_corp_install", "action", {
+      ...publicEvent(105, "action", {
         actionType: "install_card",
         actor: "corp",
         serverLabel: "Remote 2",
@@ -6689,14 +6806,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("does not fall back to an older visible reveal after a newer redacted access", () => {
-    const visibleRemoteAccess = publicEvent("evt_remote_access", "action", {
+    const visibleRemoteAccess = publicEvent(106, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_agenda",
+      cardDefinitionId: 588,
       title: "Simple Agenda",
     });
-    const redactedRdAccess = publicEvent("evt_rd_access", "action", {
+    const redactedRdAccess = publicEvent(107, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
@@ -6709,15 +6826,15 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("retains access reveal across same-action public follow-up events", () => {
-    const access = publicEvent("evt_access", "action", {
+    const access = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "Remote 1",
-      cardDefinitionId: "simple_ambush",
+      cardDefinitionId: 11009,
       title: "Simple Ambush",
     });
     const sameActionEffect = {
-      ...publicEvent("evt_effect", "effect", {
+      ...publicEvent(108, "effect", {
         actionType: "net_damage",
         actor: "corp",
       }),
@@ -6726,48 +6843,46 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(
       retainedAccessRevealEvent([access, sameActionEffect], null)?.eventId,
-    ).toBe("evt_access");
+    ).toBe(100);
   });
 
   it("retains expose review events until local dismissal", () => {
-    const expose = publicEvent("evt_expose", "action", {
+    const expose = publicEvent(109, "action", {
       actionType: "resolve_choice",
       actor: "runner",
       publicRevealKind: "expose",
-      publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+      publicRevealDefinitionIds: "591,597",
       exposedServerLabels: "HQ,R&D",
     });
     const followUp = {
-      ...publicEvent("evt_followup", "effect", {
+      ...publicEvent(110, "effect", {
         actionType: "gain_credit",
         actor: "runner",
       }),
       stateVersionAfter: 3,
     };
-    const smarteye = publicEvent("evt_smarteye", "action", {
+    const smarteye = publicEvent(111, "action", {
       actionType: "trigger_ability",
       actor: "runner",
       publicRevealKind: "expose",
       hiddenZoneAction: "approach_ice_expose",
-      publicRevealDefinitionId: "simple_barrier_ice",
+      publicRevealDefinitionId: 589,
     });
-    const smarteyeFinish = publicEvent("evt_smarteye_finish", "action", {
+    const smarteyeFinish = publicEvent(112, "action", {
       actionType: "trigger_ability",
       actor: "runner",
       approachIceExposeViewDecision: "finish",
       hiddenZoneAction: "approach_ice_expose_finish",
     });
-    const jackOut = publicEvent("evt_jack_out", "action", {
+    const jackOut = publicEvent(113, "action", {
       actionType: "jack_out",
       actor: "runner",
     });
 
     expect(retainedExposeReviewEvent([expose, followUp], null)?.eventId).toBe(
-      "evt_expose",
+      109,
     );
-    expect(
-      retainedExposeReviewEvent([expose, followUp], "evt_expose"),
-    ).toBeNull();
+    expect(retainedExposeReviewEvent([expose, followUp], 109)).toBeNull();
     expect(retainedExposeReviewEvent([smarteye], null)).toBeNull();
     expect(
       retainedExposeReviewEvent([expose, smarteyeFinish], null),
@@ -6776,27 +6891,27 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("uses only public instance ids from supported installed-card expose events", () => {
-    const exposed = publicEvent("evt_ice_data", "resolve_choice", {
+    const exposed = publicEvent(114, "resolve_choice", {
       actionType: "resolve_choice",
       actor: "runner",
       hiddenZoneAction: "expose_installed_cards_single_fort",
       publicRevealKind: "expose",
       exposedCardInstanceIds: "ice_1, root_1,ice_1",
     });
-    const unrelated = publicEvent("evt_other", "resolve_choice", {
+    const unrelated = publicEvent(115, "resolve_choice", {
       actionType: "resolve_choice",
       actor: "runner",
       publicRevealKind: "expose",
       exposedCardInstanceIds: "hidden_card",
     });
-    const huntClub = publicEvent("evt_hunt_club", "resolve_choice", {
+    const huntClub = publicEvent(116, "resolve_choice", {
       actionType: "resolve_choice",
       actor: "runner",
       hiddenZoneAction: "multi_expose_installed_corp_cards",
       publicRevealKind: "expose",
       exposedCardInstanceIds: "hq_ice,remote_asset,hq_ice",
     });
-    const schematicsReview = publicEvent("evt_schematics", "action", {
+    const schematicsReview = publicEvent(117, "action", {
       actionType: "access_card",
       actor: "runner",
       hiddenZoneAction:
@@ -6804,17 +6919,13 @@ describe("V1.0.6 resource and card-display helpers", () => {
       publicRevealKind: "expose",
       exposedCardInstanceIds: "remote_asset,hq_ice",
     });
-    const schematicsWithoutReview = publicEvent(
-      "evt_schematics_no_review",
-      "action",
-      {
-        actionType: "access_card",
-        actor: "runner",
-        hiddenZoneAction: "schematics_search_engine_expose_installed_cards",
-        publicRevealKind: "expose",
-        exposedCardInstanceIds: "remote_asset",
-      },
-    );
+    const schematicsWithoutReview = publicEvent(118, "action", {
+      actionType: "access_card",
+      actor: "runner",
+      hiddenZoneAction: "schematics_search_engine_expose_installed_cards",
+      publicRevealKind: "expose",
+      exposedCardInstanceIds: "remote_asset",
+    });
 
     expect(exposedCardInstanceIdsForEvent(exposed)).toEqual([
       "ice_1",
@@ -6861,7 +6972,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("does not retain redacted central-access events without the accessed card identity", () => {
-    const redactedRdAccess = publicEvent("evt_access", "action", {
+    const redactedRdAccess = publicEvent(100, "action", {
       actionType: "access_card",
       actor: "runner",
       serverLabel: "R&D",
@@ -7026,6 +7137,7 @@ function legalAction(
   label: string,
   payload?: LegalAction["payload"],
   timingPoint: LegalAction["timingPoint"] = "corp_action.main",
+  encounter: Pick<LegalAction, "subroutineIndexes" | "payOrEndRunSubroutineIndexes"> = {},
 ): LegalAction {
   return {
     actionId: `${side}.${type}.${source}.${payload?.serverId ?? ""}.${payload?.cardId ?? ""}`,
@@ -7039,27 +7151,28 @@ function legalAction(
     visibility: "public",
     expiresAtStateVersion: 1,
     ...(payload ? { payload } : {}),
+    ...encounter,
   };
 }
 
 function card(
-  instanceId: string,
+  instanceId: string | number,
   title: string,
   type: NonNullable<VisibleCard["type"]>,
   rezzed = true,
 ): VisibleCard {
   return {
-    instanceId,
+    instanceId: String(instanceId),
     known: true,
     title,
-    definitionId: instanceId,
+    ...(typeof instanceId === "number" ? { definitionId: instanceId } : {}),
     type,
     rezzed,
   };
 }
 
 function publicEvent(
-  eventId: string,
+  eventId: number,
   type: string,
   publicPayload: Record<string, unknown>,
 ): PublicGameEvent {

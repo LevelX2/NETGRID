@@ -1,92 +1,85 @@
-import type {
-  AiDecisionInput,
-  AiDecisionScoreComponent,
-  LegalAction,
-} from "@netgrid/shared";
+import { planningCardByDefinitionId } from "@netgrid/cards/planning";
+import type { AiDecisionInput } from "@netgrid/shared";
+import { runnerRunProjectionPreservesNormalAccess } from "../actions/run-action-projection";
+import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import {
   eventMayChangeArchives,
   findLastHistoryIndex,
   isArchivesAccessEvent,
   mergedPublicHistory,
-} from "./public-event-history";
+} from "../public-event-history";
 import { runnerPressureVariationBucket } from "../runner-run-target-guidance";
 
-type RunnerArchivesServer = AiDecisionInput["playerView"]["servers"][number];
-
-type RunnerArchivesEvaluation = {
-  accessServerId: string;
-  pathPassability?: string;
-};
-
-export type RunnerArchivesScoreDependencies = {
-  evaluationForAction: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => RunnerArchivesEvaluation | undefined;
-  definitionType: (definitionId: string) => string | undefined;
-};
-
-export function runnerArchivesScoreComponents(
+/** A visible, currently payable win with no ICE or unresolved Archives effects. */
+export function runnerVisibleArchivesWinningRun(
   input: AiDecisionInput,
-  action: LegalAction,
-  server: RunnerArchivesServer | undefined,
-  dependencies: RunnerArchivesScoreDependencies,
-): AiDecisionScoreComponent[] {
-  if (input.side !== "runner" || action.side !== "runner") return [];
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  const view = input.playerView;
   if (
-    dependencies.evaluationForAction(input, action)?.accessServerId !==
-    "archives"
+    evaluation.targetServerId !== "archives" ||
+    evaluation.accessServerId !== "archives" ||
+    evaluation.runActionProjection.sourceKind !== "basic_action" ||
+    !runnerRunProjectionPreservesNormalAccess(
+      input,
+      evaluation.runActionProjection,
+    ) ||
+    evaluation.pathPassability !== "reachable" ||
+    evaluation.routeQuote?.reachability !== "guaranteed_access" ||
+    evaluation.routeQuote.fundingGap !== 0 ||
+    evaluation.routeQuote.effects.length !== 0 ||
+    (evaluation.routeQuote.conditionalRiskReasons?.length ?? 0) !== 0 ||
+    !input.legalActions.some(
+      (action) =>
+        action.actionId === evaluation.actionId &&
+        action.side === "runner" &&
+        action.type === "start_run" &&
+        action.payload?.serverId === "archives" &&
+        action.expiresAtStateVersion === view.stateVersion,
+    )
   )
-    return [];
-  const root = server?.root ?? [];
-  const knownRoot = root.filter(
-    (card) => card.known && typeof card.definitionId === "string",
-  );
-  const knownAgenda = knownRoot.some((card) => {
-    const definitionId = card.definitionId;
+    return false;
+
+  const archives = view.servers.find((server) => server.id === "archives");
+  const pointsNeeded = view.agendaPointsToWin - view.own.agendaPoints;
+  if (
+    !archives ||
+    archives.ice.length !== 0 ||
+    archives.root.length !== view.opponent.discardCount ||
+    pointsNeeded <= 0 ||
+    archives.root.some((card) => {
+      const definition =
+        card.known && card.definitionId
+          ? planningCardByDefinitionId(card.definitionId)
+          : undefined;
+      return (
+        !definition ||
+        definition.engine.accessEffects?.some(
+          (effect) =>
+            effect.kind === "on_access" &&
+            effect.sourceZones.includes("archives") &&
+            !effect.ignoreIfAccessedFrom?.includes("archives"),
+        ) === true
+      );
+    })
+  )
+    return false;
+
+  return archives.root.some((card) => {
+    const quote = card.effectiveStealCostQuote;
     return (
-      card.type === "agenda" ||
-      (definitionId !== undefined &&
-        dependencies.definitionType(definitionId) === "agenda")
+      card.type === "agenda" &&
+      card.agendaPoints !== undefined &&
+      card.agendaPoints >= pointsNeeded &&
+      quote?.complete === true &&
+      quote.agendaInstanceId === card.instanceId &&
+      quote.serverId === archives.id &&
+      quote.stateVersion === view.stateVersion &&
+      Number.isSafeInteger(quote.creditCost) &&
+      quote.creditCost >= 0 &&
+      quote.creditCost <= evaluation.creditsAfterRun
     );
   });
-  const hiddenArchivesCount = Math.max(
-    0,
-    input.playerView.opponent.discardCount - knownRoot.length,
-  );
-  if (knownAgenda) {
-    return [
-      {
-        key: "runner_archives_visible_agenda",
-        label: "Archives offene Agenda",
-        value: 1250,
-        reason: "known_archives_agenda",
-      },
-    ];
-  }
-  if (hiddenArchivesCount > 0) {
-    const payoff = hiddenArchivesPayoffAssessment(input, hiddenArchivesCount);
-    if (!payoff.qualified) return [];
-    return [
-      {
-        key: "runner_archives_hidden_information",
-        label: "Archives enthält verdeckte Information",
-        value: payoff.value,
-        reason: [
-          `hidden_archives:${hiddenArchivesCount}`,
-          `corp_deck_count:${input.playerView.opponent.deckCount}`,
-          `runner_agenda_points:${input.playerView.own.agendaPoints}`,
-          `archives_corp_deck_pressure:${payoff.corpDeckPressure}`,
-          `archives_runner_matchpoint:${payoff.runnerMatchpoint}`,
-          `archives_random_discard_unseen:${payoff.randomDiscard}`,
-          `archives_hidden_accumulation:${payoff.hiddenAccumulation}`,
-          `archives_seeded_probe:${payoff.speculativeProbe}`,
-          `archives_hidden_information_qualified:${payoff.reason}`,
-        ].join("|"),
-      },
-    ];
-  }
-  return [];
 }
 
 export function runnerArchivesHasQualifiedHiddenPayoff(
@@ -94,7 +87,15 @@ export function runnerArchivesHasQualifiedHiddenPayoff(
 ): boolean {
   if (input.side !== "runner") return false;
   const hiddenArchivesCount = runnerHiddenArchivesCount(input);
-  return hiddenArchivesPayoffAssessment(input, hiddenArchivesCount).qualified;
+  if (hiddenArchivesCount === 0) return false;
+  return (
+    input.playerView.opponent.deckCount <= 6 ||
+    input.playerView.own.agendaPoints >=
+      Math.max(1, input.playerView.agendaPointsToWin - 1) ||
+    hiddenArchivesCount >= 10 ||
+    unresolvedRandomCorpDiscard(input) ||
+    runnerArchivesSpeculativeProbeDisposition(input).admitted
+  );
 }
 
 function runnerHiddenArchivesCount(input: AiDecisionInput): number {
@@ -102,74 +103,9 @@ function runnerHiddenArchivesCount(input: AiDecisionInput): number {
     input.playerView.servers
       .find((server) => server.id === "archives")
       ?.root.filter(
-        (card) => card.known && typeof card.definitionId === "string",
+        (card) => card.known && typeof card.definitionId === "number",
       ).length ?? 0;
   return Math.max(0, input.playerView.opponent.discardCount - knownRootCount);
-}
-
-function hiddenArchivesPayoffAssessment(
-  input: AiDecisionInput,
-  hiddenArchivesCount: number,
-): {
-  qualified: boolean;
-  value: number;
-  reason: string;
-  corpDeckPressure: boolean;
-  runnerMatchpoint: boolean;
-  randomDiscard: boolean;
-  hiddenAccumulation: boolean;
-  speculativeProbe: boolean;
-} {
-  const corpDeckPressure = input.playerView.opponent.deckCount <= 6;
-  const runnerMatchpoint =
-    input.playerView.own.agendaPoints >=
-    Math.max(1, input.playerView.agendaPointsToWin - 1);
-  const randomDiscard = unresolvedRandomCorpDiscard(input);
-  const hiddenAccumulation = hiddenArchivesCount >= 10;
-  const speculativeProbe =
-    !randomDiscard &&
-    !runnerMatchpoint &&
-    !corpDeckPressure &&
-    !hiddenAccumulation &&
-    runnerArchivesSpeculativeProbeDisposition(input).admitted;
-  const reason = randomDiscard
-    ? "unseen_random_discard"
-    : runnerMatchpoint
-      ? "runner_matchpoint"
-      : corpDeckPressure
-        ? "corp_deck_pressure"
-        : hiddenAccumulation
-          ? "large_hidden_accumulation"
-          : speculativeProbe
-            ? "seeded_one_in_eight_probe"
-            : "ordinary_hidden_discard";
-  const value = randomDiscard
-    ? 480
-    : runnerMatchpoint
-      ? 420
-      : corpDeckPressure
-        ? 260
-        : hiddenAccumulation
-          ? 120
-          : speculativeProbe
-            ? 35
-            : 0;
-  return {
-    qualified:
-      hiddenArchivesCount > 0 &&
-      (randomDiscard ||
-        runnerMatchpoint ||
-        corpDeckPressure ||
-        hiddenAccumulation ||
-        speculativeProbe),
-    value,
-    reason,
-    corpDeckPressure,
-    runnerMatchpoint,
-    randomDiscard,
-    hiddenAccumulation,
-    speculativeProbe,
-  };
 }
 
 export function runnerArchivesSpeculativeProbeDisposition(

@@ -14,10 +14,8 @@ import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { runnerCoverageInstallCreditPreparation } from "../../runner/rig-coverage/coverage-install-credit-preparation";
 import { corpInstalledIceHasFreeFullBreak } from "../../corp/defense/corp-free-full-break";
 import { buildCorpDefenseTurnPlanningSlice } from "../../corp/defense/corp-defense-turn-planning";
-import {
-  corpGlobalIceSupportAssetInstallSignal,
-  corpTerminalCentralRezReserveSignals,
-} from "../../corp/defense/defense-discovery-support";
+import { corpTerminalCentralRezReserveSignals } from "../../corp/defense/defense-discovery-support";
+import { corpGlobalIceSupportAssetInstallSignal } from "../../corp/defense/defense-install-discovery";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -107,7 +105,7 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
       const action = input.legalActions.find(
         (a: any) => a.actionId === result.actionId,
       );
-      expect(action.source).toContain("software-installer");
+      expect(f.state.cardInstances[action.source]?.definitionId).toBe(287);
       const plan = result.decisionDebug!.planFirstDecision!;
       expect(plan.selectedPlan?.moduleId).toBe("runner.rig_and_coverage");
       expect(plan.route).toMatchObject({
@@ -125,7 +123,7 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
       expect(gap.installCreditPreparation).toMatchObject({
         actionId: action.actionId,
         savedLiquidCredits: 2,
-        targetDefinitionId: "onr_v1_014_codecracker",
+        targetDefinitionId: 226,
         stateVersion: 8,
       });
       const installed = apply(f.state, action.actionId, "runner");
@@ -200,12 +198,12 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
     const hand = native.input.playerView.own.gripOrHq;
     expect(
       visibleRunnerInitialProgramInstallCredits(
-        hand.find((c: any) => c.definitionId.includes("software-installer")),
+        hand.find((c: any) => c.definitionId === 287),
       ),
     ).toBe(2);
     expect(
       visibleRunnerInitialProgramInstallCredits(
-        hand.find((c: any) => c.definitionId.includes("codecracker")),
+        hand.find((c: any) => c.definitionId === 226),
       ),
     ).toBe(0);
   });
@@ -257,7 +255,7 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
       );
       expect(action).toMatchObject({
         type: "install_card",
-        source: "corp_onr_v1_317_data-masons_1",
+        source: "c39p",
         payload: { serverId: "new_remote" },
       });
       expect(
@@ -276,14 +274,14 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
           (c) =>
             c.sourceCardInstanceId === action.source &&
             input.legalActions.find((a: any) => a.actionId === c.actionId)
-              ?.payload?.serverId === "remote_1",
+              ?.payload?.serverId === "r1",
         )!;
       expect(
         corpGlobalIceSupportAssetInstallSignal(input, old, projects, all),
       ).toBeUndefined();
       expect(
         corpGlobalIceSupportAssetInstallSignal(input, old, [], all),
-      ).toMatchObject({ serverId: "remote_1" });
+      ).toMatchObject({ serverId: "r1" });
       let current = apply(state, action.actionId, "corp");
       for (let i = 0; i < 3 && current.activeSide === "corp"; i++) {
         const nextInput = {
@@ -322,12 +320,12 @@ describe("pairing 560: purpose-bound preparation and honest protection facts", (
         s.defenseId.startsWith("terminal-central-rez-reserve:rd:"),
       ),
     ).toBe(false);
-    expect(result.actionId).toBe("corp.draw_card");
+    expect(result.actionId).toBe("c8");
     expect(
       result.decisionDebug!.planFirstDecision!.priority?.effectiveClass,
     ).toBe("P2");
     input.playerView.opponent.rig = input.playerView.opponent.rig.filter(
-      (c: any) => !c.definitionId.includes("worm"),
+      (c: any) => ![31, 286, 321].includes(c.definitionId),
     );
     expect(corpInstalledIceHasFreeFullBreak(input, ice, "rd")).toBe(false);
     expect(

@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { chronicleCardTooltipContentMode } from "../chronicle/chronicle-card-tooltip-model";
 import { publicChronicleCardDefinitionIds } from "../chronicle/chronicle-public-card-ids";
 
-const SYSTEMATIC_LAYOFFS = "onr_v1_304_systematic-layoffs";
+const SYSTEMATIC_LAYOFFS = 516;
 const replayPageSource = readFileSync(
   new URL("../../app/replays/page.tsx", import.meta.url),
   "utf8",
@@ -23,18 +23,18 @@ describe("replay chronicle card tooltips", () => {
   it("loads only definition identities present in the public replay payload", () => {
     const event = replayEvent({
       sourceDefinitionId: SYSTEMATIC_LAYOFFS,
-      targetCardDefinitionIds: "public_target_a,public_target_b",
+      targetCardDefinitionIds: "11040,11041",
       resolvedEffects: [
-        { sourceDefinitionId: "public_effect_source" },
+        { sourceDefinitionId: 11042 },
         { hiddenTargetCardId: "private_instance_must_not_be_loaded" },
       ],
     });
 
     expect(publicChronicleCardDefinitionIds(event)).toEqual([
       SYSTEMATIC_LAYOFFS,
-      "public_target_a",
-      "public_target_b",
-      "public_effect_source",
+      11040,
+      11041,
+      11042,
     ]);
   });
 
@@ -75,7 +75,7 @@ describe("replay chronicle card tooltips", () => {
 
 function replayEvent(payload: Record<string, unknown>): PublicGameEvent {
   return {
-    eventId: "evt_replay_systematic_layoffs",
+    eventId: 100,
     type: "play_operation",
     stateVersionBefore: 4,
     stateVersionAfter: 5,

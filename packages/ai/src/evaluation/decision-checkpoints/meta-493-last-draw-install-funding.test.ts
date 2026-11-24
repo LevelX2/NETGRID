@@ -83,10 +83,15 @@ it("funds the financeable terminal last-draw parent before installation instead 
   });
   const result = decide(cp),
     plan = result.decisionDebug!.planFirstDecision!;
-  expect(result.actionId).toBe("corp.gain_credit");
-  expect(plan.rootPlanInstanceId).toContain(
-    "corp.score_agenda:agenda%3Acorp_onr_v1_214_project-babylon_1",
-  );
+  expect(result.actionId).toBe("cb");
+  expect(
+    plan?.portfolio.find(
+      (instance) => instance.instanceId === plan.rootPlanInstanceId,
+    ),
+  ).toMatchObject({
+    moduleId: "corp.score_agenda",
+    dedupeKey: expect.stringContaining("agenda:c2mt"),
+  });
   expect(plan.selectedPlan?.moduleId).toBe("corp.economy");
   expect(plan.priority?.effectiveClass).toBe("P2");
   expect(plan.rootPlanInstanceId).not.toBe(plan.selectedPlan?.instanceId);
@@ -94,13 +99,13 @@ it("funds the financeable terminal last-draw parent before installation instead 
   const projects = currentProjects(cp.input);
   expect(
     projects
-      .filter((p) => p.agendaDefinitionId?.includes("corporate-coup"))
+      .filter((p) => p.agendaDefinitionId === 405)
       .every((p) => p.lastDrawScoreSurvival !== true),
   ).toBe(true);
   expect(
     projects.some(
       (p) =>
-        p.agendaDefinitionId?.includes("project-babylon") &&
+        p.agendaDefinitionId === 426 &&
         p.lastDrawScoreSurvival === true,
     ),
   ).toBe(true);
@@ -109,9 +114,10 @@ it("installs the exact terminal Babylon route after its full three-credit floor 
   const cp = checkpoint();
   cp.input.playerView.own.credits = 3;
   const result = decide(cp);
-  expect(result.actionId).toContain(
-    "install_card.corp_onr_v1_214_project-babylon_1",
-  );
+  expect(cp.input.legalActions.find((action) => action.actionId === result.actionId)).toMatchObject({
+    type: "install_card",
+    source: "c2mt",
+  });
   expect(result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "corp.score_agenda",
   );
@@ -122,7 +128,7 @@ it("retains the five-advance terminal admission once its whole credit reserve is
   expect(
     currentProjects(cp.input).some(
       (p) =>
-        p.agendaDefinitionId?.includes("corporate-coup") &&
+        p.agendaDefinitionId === 405 &&
         p.lastDrawScoreSurvival === true,
     ),
   ).toBe(true);

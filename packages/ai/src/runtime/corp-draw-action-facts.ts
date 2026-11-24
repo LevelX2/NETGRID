@@ -1,3 +1,5 @@
+import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
+import { costProfileForAction } from "../actions/action-cost-timing";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { corpZoneTransitionProjectionStatus } from "../actions/action-economy-projection";
@@ -37,6 +39,7 @@ export function exactCurrentCorpDrawAdmissionProjection(
     projection.confidence !== "high" ||
     !Number.isSafeInteger(projection.cardsDrawn) ||
     (projection.cardsDrawn ?? 0) <= 0 ||
+    !Number.isSafeInteger(projection.netDrawPileDelta) ||
     !Number.isSafeInteger(projection.netHandDelta) ||
     (projection.netHandDelta ?? -1) < 0 ||
     !Number.isSafeInteger(candidate.costProfile.clickCost) ||
@@ -46,10 +49,7 @@ export function exactCurrentCorpDrawAdmissionProjection(
   }
   return {
     cardsDrawn: projection.cardsDrawn!,
-    netDeckConsumption:
-      projection.netDrawPileDelta !== undefined
-        ? -projection.netDrawPileDelta
-        : projection.cardsDrawn!,
+    netDeckConsumption: -projection.netDrawPileDelta!,
     netHandDelta: projection.netHandDelta,
     selfContainedDispositionCount:
       zoneTransition.status === "guaranteed"
@@ -87,12 +87,17 @@ export function corpCandidatePreservesVoluntaryDrawHorizon(
       : candidate.economyProjection?.netDrawPileDelta !== undefined
         ? -candidate.economyProjection.netDrawPileDelta
         : undefined;
-  if (!Number.isSafeInteger(cardsDrawn) || (cardsDrawn ?? 0) <= 0) {
-    return true;
-  }
-  if (!Number.isSafeInteger(netDeckConsumption)) return false;
+  if (!corpCandidateProjectsCardDraw(candidate)) return true;
+  if (
+    !Number.isSafeInteger(cardsDrawn) ||
+    (cardsDrawn ?? 0) <= 0 ||
+    !Number.isSafeInteger(netDeckConsumption)
+  )
+    return false;
   return !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
     remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
+    mandatoryBaseDrawCount:
+      input.playerView.corpMandatoryBaseDrawQuote?.baseCount,
     netDeckConsumption: netDeckConsumption!,
     terminalNeedBeforeMandatoryDraw,
   });
@@ -116,23 +121,26 @@ export function exactCurrentBasicCorpDrawCandidate(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
   if (
-    action?.side !== "corp" ||
+    input.side !== "corp" ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.type !== "draw_card" ||
     action.source !== "basic_action" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.targetRequirements.length > 0 ||
     (action.choiceRequirements?.length ?? 0) > 0
   ) {
     return false;
   }
-  const totalClicks = action.costs.reduce(
-    (sum, cost) => sum + (cost.clicks ?? 0),
-    0,
-  );
-  const totalCredits = action.costs.reduce(
-    (sum, cost) => sum + (cost.credits ?? 0),
-    0,
-  );
+  const {
+    clickCost: totalClicks,
+    creditCost: totalCredits,
+    additionalCosts,
+  } = costProfileForAction(action);
+  if (
+    totalClicks === undefined ||
+    totalCredits === undefined ||
+    additionalCosts.length > 0
+  )
+    return false;
   return (
     totalClicks === 1 &&
     totalCredits === 0 &&
@@ -162,8 +170,8 @@ function exactCurrentCorpScoreMaterialDrawCandidate(
   const clickCost = candidate.costProfile.clickCost;
   const creditCost = candidate.costProfile.creditCost;
   if (
-    action?.side !== "corp" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    input.side !== "corp" ||
+    !actionMatchesCurrentDecision(input, action) ||
     action.targetRequirements.length > 0 ||
     (action.choiceRequirements?.length ?? 0) > 0 ||
     projection?.timing !== "immediate" ||
@@ -179,14 +187,17 @@ function exactCurrentCorpScoreMaterialDrawCandidate(
   ) {
     return false;
   }
-  const totalClicks = action.costs.reduce(
-    (sum, cost) => sum + (cost.clicks ?? 0),
-    0,
-  );
-  const totalCredits = action.costs.reduce(
-    (sum, cost) => sum + (cost.credits ?? 0),
-    0,
-  );
+  const {
+    clickCost: totalClicks,
+    creditCost: totalCredits,
+    additionalCosts,
+  } = costProfileForAction(action);
+  if (
+    totalClicks === undefined ||
+    totalCredits === undefined ||
+    additionalCosts.length > 0
+  )
+    return false;
   return (
     totalClicks === clickCost &&
     totalCredits === creditCost &&

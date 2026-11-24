@@ -1,3 +1,4 @@
+import { syntheticCardDefinitionId } from "@netgrid/engine/test-fixtures/synthetic-card-definition-id";
 import type { CorpScoreProjectSignal } from "../plans/corp-score-contracts";
 import { describe, expect, it } from "vitest";
 import {
@@ -22,7 +23,7 @@ function remoteRun() {
     "start_run",
     "Run",
     { credits: 0, clicks: 1 },
-    { payload: { serverId: "remote_1" } },
+    { payload: { serverId: "r1" } },
   );
   const input = aiInput("runner", [action]);
   input.playerView.own.credits = 15;
@@ -30,11 +31,11 @@ function remoteRun() {
   input.playerView.opponent.deckCount = 20;
   input.playerView.servers = [
     server(
-      "remote_1",
+      "r1",
       [],
       [
         visibleCard("known-root", "corp", "upgrade", {
-          definitionId: "onr_v1_358_dr-dreff",
+          definitionId: 570,
           title: "Dr. Dreff",
           rezzed: true,
           trashCost: 3,
@@ -54,7 +55,7 @@ describe("typed Runner access facts", () => {
       actionId: "run-remote",
       accessPayoff: "trash_affordable",
       accessFacts: {
-        knownTargetDefinitionIds: ["onr_v1_358_dr-dreff"],
+        knownTargetDefinitionIds: [570],
         trashBudget: 3,
       },
     });
@@ -105,9 +106,9 @@ describe("typed Runner access facts", () => {
   it.each([
     undefined,
     { knownTargetDefinitionIds: [], trashBudget: 3 },
-    { knownTargetDefinitionIds: ["target"], trashBudget: "unknown" },
-    { knownTargetDefinitionIds: ["target"], trashBudget: -1 },
-    { knownTargetDefinitionIds: ["target"], trashBudget: Number.NaN },
+    { knownTargetDefinitionIds: [syntheticCardDefinitionId("target")], trashBudget: "unknown" },
+    { knownTargetDefinitionIds: [syntheticCardDefinitionId("target")], trashBudget: -1 },
+    { knownTargetDefinitionIds: [syntheticCardDefinitionId("target")], trashBudget: Number.NaN },
   ])(
     "rejects missing or invalid trash facts even if evidence claims a valid budget: %j",
     (facts) => {
@@ -145,10 +146,10 @@ function project(
   overrides: Partial<CorpScoreProjectSignal> = {},
 ): CorpScoreProjectSignal {
   return {
-    projectId: "agenda:agenda-1:remote_1",
+    projectId: "agenda:agenda-1:r1",
     agendaInstanceId: "agenda-1",
     agendaPoints: 2,
-    serverId: "remote_1",
+    serverId: "r1",
     phase: "install_agenda",
     actionIds: ["install-agenda"],
     routeSemanticActionTypes: ["install.card"],
@@ -179,7 +180,7 @@ describe("typed Corp protection and score proof", () => {
       ).toBe(true);
       expect(
         corpScoreProjectNeedsProtectionMaturity(
-          project({ evidenceCode: `${routeAssessment}:remote_1` }),
+          project({ evidenceCode: `${routeAssessment}:r1` }),
         ),
       ).toBe(false);
     },
@@ -253,8 +254,8 @@ describe("typed Corp protection and score proof", () => {
       actionIds: ["a"],
       protectionNeed: {
         needId: "protect-agenda-1",
-        parentProjectId: "agenda:agenda-1:remote_1",
-        targetServerId: "remote_1",
+        parentProjectId: "agenda:agenda-1:r1",
+        targetServerId: "r1",
         observedAtStateVersion: 1,
         objective: {
           kind: "funded_remote_access_risk",

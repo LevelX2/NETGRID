@@ -24,11 +24,11 @@ import {
   type Side,
 } from "@netgrid/shared";
 
-const HIJACK = "onr_proteus_110_hijack";
-const TEST_SPIN = "onr_proteus_126_test-spin";
-const TYCHO_MEM_CHIP = "onr_v1_144_tycho-mem-chip";
-const JACKHAMMER = "onr_v1_036_jackhammer";
-const ANONYMOUS_TIP = "onr_v1_077_anonymous-tip";
+const HIJACK = 168;
+const TEST_SPIN = 184;
+const TYCHO_MEM_CHIP = 356;
+const JACKHAMMER = 248;
+const ANONYMOUS_TIP = 289;
 
 function baseState(seed: string): GameState {
   const state = toRunnerTurn(
@@ -56,7 +56,7 @@ function baseState(seed: string): GameState {
 
 function addRunnerGrip(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -71,7 +71,7 @@ function addRunnerGrip(
 
 function addRunnerStack(
   state: GameState,
-  definitionId: string,
+  definitionId: number,
   id: string,
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
@@ -88,7 +88,7 @@ function installSyntheticRunnerProgram(
   state: GameState,
   id: string,
 ): CardInstanceId {
-  const cardId = addRunnerGrip(state, "simple_decoder", id);
+  const cardId = addRunnerGrip(state, 591, id);
   state.runner.grip = state.runner.grip.filter(
     (candidate) => candidate !== cardId,
   );
@@ -105,7 +105,7 @@ function installSyntheticRunnerProgram(
 
 function cardInstance(
   cardId: CardInstanceId,
-  definitionId: string,
+  definitionId: number,
   owner: Side,
   zone: GameState["cardInstances"][CardInstanceId]["zone"],
 ): GameState["cardInstances"][CardInstanceId] {

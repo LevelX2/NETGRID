@@ -8,7 +8,7 @@ describe("Corp draw admission turn-coherence red contract", () => {
       assessCorpDrawAdmission({
         routeId: "red-last-click-overflow",
         ownerModuleId: "corp.hand_and_agenda_management",
-        actionId: "corp.draw_card",
+        actionId: "c8",
         purpose: "score_material_search",
         priorityClass: "P4",
         remainingAttempts: 1,

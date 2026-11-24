@@ -1,3 +1,5 @@
+import type { CanonicalCapabilityId, CardDefinitionId, RunId } from "./index";
+
 export const CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION =
   "corp-restricted-credit-route-v1" as const;
 
@@ -47,7 +49,7 @@ export type CorpRestrictedCreditRouteQuote = {
   schemaVersion: typeof CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION;
   request: CorpRestrictedCreditRouteRequest;
   payoutSourceCardInstanceId: string;
-  payoutSourceAbilityId: string;
+  payoutSourceAbilityId: CanonicalCapabilityId;
   payoutCredits: number;
   /** Exact same-window payouts needed before this consumer becomes legal. */
   payoutCount: number;
@@ -56,7 +58,7 @@ export type CorpRestrictedCreditRouteQuote = {
   payoutAdvancementCounterCost: number;
   consumer: CorpRestrictedCreditConsumer & {
     availableBeforePayout: boolean;
-    sourceCardDefinitionId: string;
+    sourceCardDefinitionId: CardDefinitionId;
     clickCost: number;
     creditCost: number;
     restrictedCreditsApplied: number;
@@ -65,7 +67,7 @@ export type CorpRestrictedCreditRouteQuote = {
     generalCreditsRemainingAfterConsumer: number;
     /** Current visible break route only, not a guarantee against later Runner choices. */
     currentRunAccessBlock?: {
-      runId: string;
+      runId: RunId;
       hardEndTheRunSubroutineCount: number;
       reason:
         | "no_visible_eligible_breaker"

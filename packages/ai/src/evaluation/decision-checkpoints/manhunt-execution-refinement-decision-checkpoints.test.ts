@@ -47,14 +47,14 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
         acceptableActions: [
           {
             type: "install_card",
-            sourceDefinitionId: "onr_v1_313_city-surveillance",
+            sourceDefinitionId: 525,
           },
         ],
         planExecution: {
           acceptablePlanKinds: ["corp.punish_campaign"],
           acceptableCapabilities: ["punish_prepare"],
           requiredAssessmentEvidence: [
-            "tag_punish_ontology_prepare:onr_v1_313_city-surveillance",
+            "tag_punish_ontology_prepare:525",
           ],
         },
       };
@@ -107,12 +107,17 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const liveAgendaInventory = mutateFixture(cp05Json, (current) => {
       restoreCorpScoredAgendaToHq(current);
       current.expectation = {
-        acceptableActions: [{ actionId: "corp.gain_credit" }],
+        acceptableActions: [{
+          type: "install_card",
+          sourceDefinitionId: 408,
+          targetServerId: "r1",
+        }],
+        forbiddenActions: [{ type: "install_card", targetServerId: "hq" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.economy"],
-          acceptableCapabilities: ["develop_or_convert_corp_economy"],
+          acceptablePlanKinds: ["corp.score_agenda"],
+          acceptableCapabilities: ["install_score_agenda"],
           requiredAssessmentEvidence: [
-            "corp_engine_certified_basic_liquidity_development",
+            "corp_same_turn_score_conversion_prevents_terminal_steal:install_score_target",
           ],
         },
       };
@@ -121,7 +126,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(liveAgendaInventory);
 
     expect(result.ok, diagnostic(result)).toBe(true);
-    expect(result.decision?.decisionDebug?.planKind).toBe("corp.economy");
+    expect(result.decision?.decisionDebug?.planKind).toBe("corp.score_agenda");
   });
 
   it("bids zero when the trace has no visible punish conversion", () => {
@@ -164,10 +169,10 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
   });
 });
 
-const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";
-const CLOSED_ACCOUNTS = "onr_v1_285_closed-accounts";
-const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
-const URBAN_RENEWAL = "onr_v1_307_urban-renewal";
+const CHANCE_OBSERVATION = 496;
+const CLOSED_ACCOUNTS = 497;
+const SCORCHED_EARTH = 514;
+const URBAN_RENEWAL = 519;
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return structuredClone(value) as AiDecisionCheckpointV1;
@@ -185,7 +190,7 @@ function mutateFixture(
 
 function moveFirstCorpCardToHq(
   current: AiDecisionCheckpointV1,
-  definitionId: string,
+  definitionId: number,
 ): void {
   const state = current.engine.testOnlyGameState;
   const instanceId = Object.values(state.cardInstances).find(
@@ -217,7 +222,7 @@ function moveFirstCorpCardToHq(
 
 function moveFirstCorpCardToArchives(
   current: AiDecisionCheckpointV1,
-  definitionId: string,
+  definitionId: number,
 ): void {
   const state = current.engine.testOnlyGameState;
   const instanceId = state.corp.hq.find(

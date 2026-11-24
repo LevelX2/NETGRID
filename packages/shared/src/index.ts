@@ -1,3 +1,6 @@
+import type { DamageRandomSource } from "./damage-random-source";
+export * from "./random-purpose";
+import type { RandomDrawRecord, RandomPurposeCode } from "./random-purpose";
 export {
   CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION,
   type CorpRestrictedCreditConsumer,
@@ -15,7 +18,10 @@ export {
   type AbilityPayloadDiscriminatorField,
   type AbilityPayloadDiscriminators,
 } from "./ability-payload";
+export * from "./match-offer-contracts";
 import type { AbilityPayloadDiscriminators } from "./ability-payload";
+import type { ServerId } from "./server-ids";
+export { isRemoteServerId, type RemoteServerId, type ServerId } from "./server-ids";
 export type {
   ApiAccountActivePublicMatchIds,
   ApiAccountMatchHistory,
@@ -170,8 +176,33 @@ export type CardType =
   | "asset"
   | "upgrade"
   | "ice";
-export type CardDefinitionId = string;
+export type CardDefinitionId = number;
+
+export function isCardDefinitionId(value: unknown): value is CardDefinitionId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export type CardInstanceId = string;
+export type RunId = number;
+export type TraceId = number;
+
+export function isRunId(value: unknown): value is RunId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
+export function parseRunIdToken(value: string | undefined): RunId | undefined {
+  const id = Number(value);
+  return isRunId(id) && String(id) === value ? id : undefined;
+}
+export function isTraceId(value: unknown): value is TraceId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
+export function parseTraceIdToken(value: string | undefined): TraceId | undefined {
+  const id = Number(value);
+  return isTraceId(id) && String(id) === value ? id : undefined;
+}
+
 export type FixedPlayCostDefinition = {
   kind: "fixed";
   credits: number;
@@ -187,12 +218,6 @@ export type VariableXPlayCostDefinition = {
 export type PlayCostDefinition =
   | FixedPlayCostDefinition
   | VariableXPlayCostDefinition;
-export type ServerId =
-  | "hq"
-  | "rd"
-  | "archives"
-  | `remote_${number}`
-  | "new_remote";
 export type StateHash = string;
 export type Winner = Side | "draw";
 export type GameEndReason =
@@ -318,8 +343,16 @@ export type SubroutineType =
   | "deflect_run"
   | "rewind_run_to_rezzed_ice_by_die";
 
+export type SubroutineProvenance =
+  | readonly ["p" | "v" | "t", CardDefinitionId, number]
+  | readonly ["a", CardDefinitionId, CardInstanceId, number, number?]
+  | readonly ["e" | "c" | "r", CardDefinitionId, CardInstanceId, number]
+  | readonly ["m", SubroutineProvenance, number];
+
 export type SubroutineDefinition = {
   id: string;
+  /** Stable internal origin, independent of its current encounter slot. */
+  provenance?: SubroutineProvenance;
   type: SubroutineType;
   amount?: number;
   derivedAmount?: {
@@ -419,7 +452,7 @@ export type TurnBoundExtraActionOffer = {
   restriction: RestrictedActionFamily;
   optional: boolean;
   dieRoll?: number;
-  randomPurpose?: string;
+  randomPurpose?: RandomPurposeCode;
   createdAtStateVersion: number;
   createdDuringTurnSerial?: number;
 };
@@ -488,6 +521,12 @@ export type RunnerVirusPurgeWindowState = {
   timingFamily: "run_special_effect" | "corp_start_of_turn_between_effects";
 };
 
+export type RunnerPaymentWindowId = number;
+
+export function isRunnerPaymentWindowId(value: unknown): value is RunnerPaymentWindowId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export type ResolvedGameEffectKind =
   | "start_run"
   | "gain_credits"
@@ -512,8 +551,8 @@ export type ResolvedGameEffectKind =
   | "pay_credits_or_lose_game"
   | "resolve_subroutine";
 
-export type ResolvedGameEffect = {
-  effectId: string;
+export type ResolvedGameEffect<Id extends string | number = string> = {
+  effectId: Id;
   kind: ResolvedGameEffectKind;
   visibility: EventVisibilityClass;
   side?: Side;
@@ -532,7 +571,7 @@ export type ResolvedGameEffect = {
   dieRoll?: number;
   dieSize?: number;
   dieRolls?: string;
-  randomPurpose?: string;
+  randomPurpose?: RandomPurposeCode;
   randomCounterAfter?: number;
   randomDamageApplied?: boolean;
   randomEffectOutcome?: string;
@@ -560,7 +599,7 @@ export type ResolvedGameEffect = {
   cardDefinitionId?: CardDefinitionId;
   cardTitle?: string;
   /** Public binding for a run started inside another action or choice. */
-  runId?: string;
+  runId?: RunId;
   /** Actual access destination; serverId remains the attacked server. */
   accessServerId?: Exclude<ServerId, "new_remote">;
   serverId?: ServerId;
@@ -649,6 +688,19 @@ export type PublicCounterThresholdVisibilityTransition = {
   cards: PublicInstalledCorpCardIdentity[];
 };
 
+/** The effect ID is its zero-based position in the originating public event. */
+export type PublicResolvedGameEffect = ResolvedGameEffect<number>;
+
+export function isPublicResolvedGameEffectId(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+export type PublicCreditChange = {
+  side: Side;
+  before: number;
+  after: number;
+};
+
 /**
  * Side-safe fields shared by Chronicle, replay, AI and server projections.
  * Event-specific fields remain possible, but common semantics must use these
@@ -661,17 +713,23 @@ export type PublicCounterThresholdVisibilityTransition = {
  */
 export type PublicEventPayload = Record<string, unknown> & {
   actor?: Side;
+  traceId?: TraceId;
+  traceSourceRunId?: RunId;
+  traceSourceCardInstanceId?: CardInstanceId;
+  traceSourceSubroutineIndex?: number;
   actionType?: string;
   label?: string;
   abilityFamily?: PublicAbilityFamily;
   abilityId?: string;
   effectKind?: string;
   sourceCardInstanceId?: CardInstanceId;
-  sourceDefinitionId?: string;
+  sourceDefinitionId?: CardDefinitionId;
   amounts?: Record<string, number>;
   targets?: Record<string, string | number | boolean>;
   visibility?: PublicAbilityVisibility;
-  resolvedEffects?: ResolvedGameEffect[];
+  resolvedEffects?: PublicResolvedGameEffect[];
+  /** Actual changes to the players' public credit pools over this transition. */
+  creditChanges?: PublicCreditChange[];
   /** Canonically ordered aggregate mutations from this engine transition. */
   counterMutations?: PublicCounterMutation[];
   publicVisibilityTransitions?: PublicCounterThresholdVisibilityTransition[];
@@ -681,13 +739,20 @@ export type PublicEventPayload = Record<string, unknown> & {
   hiddenZoneOrderChanged?: boolean;
   hiddenZoneChangesHq?: boolean;
   hiddenZoneChangesRd?: boolean;
+  /** Public HQ sizes at the boundaries of this event, with no hand identities. */
+  corpHqCountBefore?: number;
+  corpHqCountAfter?: number;
+  /** Proven movement of a top R&D prefix into HQ by this completed draw. */
+  corpRdDrawnToHqCount?: number;
+  /** A draw opened a choice or did not certify movement of a contiguous prefix. */
+  corpRdDrawOrderUnresolved?: true;
   /** Actor-safe canonical location of an installed Corp card. */
   serverId?: ServerId;
   installPlacement?: "ice" | "root";
   /** Opaque stable anchor; never a CardInstanceId or card definition. */
   installedPositionKey?: string;
   runnerCostPenaltySupportWindowOpened?: boolean;
-  runnerCostPenaltySupportWindowId?: string;
+  runnerCostPenaltySupportWindowId?: RunnerPaymentWindowId;
   runnerCostPenaltySupportOriginalActionId?: string;
 };
 
@@ -727,10 +792,15 @@ export type ModifierDefinition = {
   sourceAbilityId?: string;
 };
 
+export type CanonicalCapabilityId = number;
+
+export function isCanonicalCapabilityId(value: unknown): value is CanonicalCapabilityId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export type AbilityRef = {
   sourceCardInstanceId: CardInstanceId;
-  /** Canonical <cardDefinitionId>:<capabilityKey> identity. */
-  sourceAbilityId: string;
+  sourceAbilityId: CanonicalCapabilityId;
 };
 
 export type EffectSource =
@@ -750,6 +820,12 @@ export type EventModificationKind =
   | "increase";
 export type ReplacementEventType = ImminentEventType | "prevent_damage";
 
+export type EventWindowId = number;
+
+export function isEventWindowId(value: unknown): value is EventWindowId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
+
 export type ImminentEvent = {
   eventId: string;
   eventType: ImminentEventType;
@@ -763,7 +839,7 @@ export type ImminentEvent = {
   payload: Record<string, unknown>;
   visibility: EventVisibilityClass;
   createdAtStateVersion: number;
-  modificationWindowId?: string;
+  modificationWindowId?: EventWindowId;
 };
 
 export type EventModificationCandidate = {
@@ -804,7 +880,7 @@ export type EventModificationCandidate = {
 };
 
 export type EventModificationWindow = {
-  windowId: string;
+  windowId: EventWindowId;
   eventId: string;
   eventType: ImminentEventType;
   kind: EventModificationKind;
@@ -833,7 +909,7 @@ export type ReplacementCandidate = {
 };
 
 export type ReplacementWindow = {
-  windowId: string;
+  windowId: EventWindowId;
   originalEventId: string;
   eventType: ImminentEventType;
   candidates: ReplacementCandidate[];
@@ -893,6 +969,7 @@ export type EffectCommand =
       damageType: DamageType;
       amount: number;
       source?: string;
+      randomSource: DamageRandomSource;
     }
   | { type: "remove_tag"; amount: number }
   | {
@@ -1523,7 +1600,7 @@ export type MultiServerSuccessSequenceState = {
 };
 
 export type RunState = {
-  runId: string;
+  runId: RunId;
   /** Continuous runner action ordinal that initiated this run, if any. */
   runnerActionOrdinal?: number;
   attackedServerId: Exclude<ServerId, "new_remote">;
@@ -1713,7 +1790,7 @@ export type RunState = {
     sourceDefinitionId: CardDefinitionId;
     sourceTitle: string;
     targetIceId?: CardInstanceId;
-    originalSubroutineId?: string;
+    originalSubroutineProvenance?: SubroutineProvenance;
     subroutineKind: SubroutineType;
     amount?: number;
     copiedSubroutine?: SubroutineDefinition;
@@ -1787,7 +1864,7 @@ export type RunState = {
     brokenSubroutineBreakerByIndex?: Partial<Record<number, CardInstanceId>>;
     pendingFreeBreaks: Array<{
       sourceBreakerInstanceId: CardInstanceId;
-      sourceAbilityId: string;
+      sourceAbilityId: CanonicalCapabilityId;
       iceSubtype: "sentry";
       remainingUses: number;
       mustBeNextEncounteredIce: true;
@@ -1940,7 +2017,9 @@ export type TraceRunnerBidPaymentCommitment = {
 };
 
 export type TraceState = {
-  traceId: string;
+  traceId: TraceId;
+  /** Present only for a trace initiated by a printed encounter subroutine. */
+  sourceRunId?: RunId;
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
   traceRulesProfile?: TraceRulesProfile;
@@ -2008,14 +2087,14 @@ export type TraceState = {
   };
 };
 
-export type RandomDrawRecord = {
-  counter: number;
-  purpose: string;
-  value: number;
-};
+export type MatchEventId = number;
+
+export function isMatchEventId(value: unknown): value is MatchEventId {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+}
 
 export type PublicGameEvent = {
-  eventId: string;
+  eventId: MatchEventId;
   type: string;
   stateVersionBefore: number;
   stateVersionAfter: number;
@@ -2032,7 +2111,7 @@ export type GameEvent = PublicGameEvent & {
 };
 
 export type RunnerDrawSequence = {
-  sequenceId: string;
+  sequenceId: number;
   originActionId: string;
   remainingDrawCount: number;
   drawnCardIds: CardInstanceId[];
@@ -2058,7 +2137,7 @@ export type CorpDrawContinuation =
       kind: "card_effect_activated";
       sourceCardId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;
-      sourceAbilityId: string;
+      sourceAbilityId: CanonicalCapabilityId;
       drawEffectIndex: number;
       nextEffectIndex: number;
       creditGainOrdinal: number;
@@ -2096,7 +2175,7 @@ export type CardCreditGainContinuation =
       kind: "card_effect_activated";
       sourceCardId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;
-      sourceAbilityId: string;
+      sourceAbilityId: CanonicalCapabilityId;
       nextEffectIndex: number;
       creditGainOrdinal: number;
       originalActionPayload: LegalActionPayload;
@@ -2117,7 +2196,7 @@ export type CardCreditGainContinuation =
     };
 
 export type CorpDrawTransaction = {
-  transactionId: string;
+  transactionId: number;
   baseDrawCount: number;
   replacementDrawCount: number;
   drawnCardIds: CardInstanceId[];
@@ -2151,7 +2230,7 @@ export type PendingAddTagContinuation =
     }
   | {
       kind: "runner_draw_tax";
-      sequenceId: string;
+      sequenceId: number;
       sourceCardId: CardInstanceId;
       sourceIndex: number;
       runnerTagsBefore: number;
@@ -2189,12 +2268,12 @@ export type PendingAddTagContinuation =
     }
   | {
       kind: "successful_run_access_replacement";
-      runId: string;
+      runId: RunId;
       runnerTagsBefore: number;
     }
   | {
       kind: "run_end_cleanup";
-      runId: string;
+      runId: RunId;
       successful: boolean;
       runnerTagsBefore: number;
     }
@@ -2280,20 +2359,20 @@ export type GameState = {
     accessZone: "installed" | "hq" | "rd" | "archives";
   };
   pendingTraceProgramTrashContinuation?: {
-    traceId: string;
+    traceId: TraceId;
     traceStep: "runner_bid" | "post_bid_link";
     additionalTagAmount?: number;
   };
   pendingTraceHardwareWreckerContinuation?: {
     sourceDefinitionId: CardDefinitionId;
     sourceCardInstanceId: CardInstanceId;
-    traceId: string;
+    traceId: TraceId;
     damageAmount: number;
     stage: "select_hardware" | "trash_prevention";
     targetHardwareId?: CardInstanceId;
   };
   pendingRunStartDamageContinuation?: {
-    runId: string;
+    runId: RunId;
     counterEffectIndex: number;
     nextCounterOrdinal: number;
     counterCount: number;
@@ -2323,7 +2402,7 @@ export type GameState = {
     continuation?: CardCreditGainContinuation;
   };
   pendingRunStartSourceOrder?: {
-    runId: string;
+    runId: RunId;
     remaining: Array<{
       kind: "card_implementation" | "random_strength";
       sourceCardId: CardInstanceId;
@@ -2334,11 +2413,11 @@ export type GameState = {
     sourceCardId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
     targetCardId: CardInstanceId;
-    runId: string;
+    runId: RunId;
     amount: number;
   };
   pendingRunEndTrashContinuation?: {
-    runId: string;
+    runId: RunId;
     deferActionDebtConsumption: boolean;
     remainingSourceCardIds: CardInstanceId[];
     activeSourceCardId?: CardInstanceId;
@@ -2411,7 +2490,7 @@ export type GameState = {
   runnerPermanentMeatDamagePrevention?: boolean;
   eventModificationHarness?: EventModificationTestHarness;
   runnerCostPenaltySupportWindow?: {
-    windowId: string;
+    windowId: RunnerPaymentWindowId;
     originalActionId: string;
     amountDue: number;
     kind: "cost" | "penalty";
@@ -2460,7 +2539,7 @@ export type GameState = {
   }>;
   secretSpendComparison?: {
     source: "secret_spend_compare";
-    runId: string;
+    runId: RunId;
     sourceIceId: CardInstanceId;
     subroutineIndex: number;
     corpSpend?: number;
@@ -2623,7 +2702,16 @@ export type TargetRequirement = {
   allowedSides?: Side[];
 };
 
-export type LegalAction = {
+/** The exact encounter scope and array indexes in the current offer. */
+export type EncounterActionTargets = {
+  encounterSubroutineIds?: readonly string[];
+  encounterRemainingSubroutineIds?: readonly string[];
+  subroutineIndexes?: readonly number[];
+  payOrEndRunSubroutineIndexes?: readonly number[];
+  payOrTrashProgramSubroutineIndexes?: readonly number[];
+};
+
+export type LegalAction = EncounterActionTargets & {
   /** Actor-private Engine quote for recovery of unconditional score support. */
   corpScoreRecoveryQuote?: import("./corp-score-recovery-quote").CorpScoreRecoveryQuote;
   actionId: string;
@@ -2746,7 +2834,7 @@ export type CorpRootRezDiscountedIceQuote = {
   sourceCardInstanceId: CardInstanceId;
   targetServerId: Exclude<ServerId, "new_remote">;
   targetIceInstanceId: CardInstanceId;
-  runId: string;
+  runId: RunId;
   stateVersion: number;
   ordinaryCredits: number;
   discountedCredits: number;
@@ -2764,8 +2852,8 @@ export type CorpHostedCreditBankCycleQuote = {
   sourceServerId: Exclude<ServerId, "new_remote">;
   stateVersion: number;
   headKind: "rez" | "load";
-  loadAbilityId: string;
-  cashoutAbilityId: string;
+  loadAbilityId: CanonicalCapabilityId;
+  cashoutAbilityId: CanonicalCapabilityId;
   currentCredits: number;
   currentClicks: number;
   currentHostedCredits: number;
@@ -2791,7 +2879,7 @@ export const RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION =
 /** Runner-private binding of a mandatory, currently active run replacement. */
 export type RunnerSuccessfulRunFortIceTrashQuote = {
   schemaVersion: typeof RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION;
-  runId: string;
+  runId: RunId;
   stateVersion: number;
   serverId: Exclude<ServerId, "new_remote">;
   sourceCardInstanceId: CardInstanceId;
@@ -2955,7 +3043,7 @@ export type EngineRandomizedTraceBidCandidate = {
 };
 
 export type EngineRandomizedTraceBidAssessment = {
-  traceId: string;
+  traceId: TraceId;
   traceRulesProfile: TraceRulesProfile;
   printedTrace: number;
   effectiveTraceLimit: number;
@@ -3355,7 +3443,7 @@ export type VisibleEffectiveSubroutine = {
   deflectorTarget?: "archives" | "any_data_fort" | "subsidiary_data_fort";
   deflectorCost?: number;
   deflectorAutoBreakIfNoTarget?: boolean;
-  breakTags?: string[];
+  breakTags?: readonly string[];
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
   dynamicSourceKind?:
@@ -3434,7 +3522,7 @@ export type VisibleCorpIcePostRezRunQuote =
       effectiveRunQuote: VisibleEffectiveIceRunQuote;
       /** Fixed inner-ICE continuation after this run's outer bypass soak. */
       bypassContinuation?: {
-        runId: string;
+        runId: RunId;
         outerIceId: CardInstanceId;
         rezCredits: number;
       };
@@ -3671,7 +3759,7 @@ export type VisibleCorpTraceIceRezQuote = {
   sourceCardInstanceId: CardInstanceId;
   targetServerId: Exclude<ServerId, "new_remote">;
   stateVersion: number;
-  runId: string;
+  runId: RunId;
   rezCredits: number;
   variableValue?: number;
   corpBid: 0;
@@ -3686,7 +3774,7 @@ export type VisibleCorpPassTaxRezQuote = {
   sourceCardInstanceId: CardInstanceId;
   targetServerId: Exclude<ServerId, "new_remote">;
   stateVersion: number;
-  runId: string;
+  runId: RunId;
   rezCredits: number;
   creditsPerPass: number;
   remainingPasses: number;
@@ -3827,7 +3915,7 @@ export type VisibleRunStartRandomStrengthState =
     };
 
 export type VisibleRunnerPaymentSupportAbility = {
-  sourceAbilityId: string;
+  sourceAbilityId: CanonicalCapabilityId;
   capabilityKey: string;
   timing: "runner_cost_penalty_support";
   label: string;
@@ -3917,7 +4005,7 @@ export type CorpPunishRouteStepRequest = {
   kind: CorpPunishRouteStepKind;
   sourceCardInstanceId: CardInstanceId;
   sourceCapabilityBindingKind: "card_spec_capability_key";
-  sourceCapabilityId: string;
+  sourceCapabilityId: CanonicalCapabilityId;
   /**
    * Exact current head action selected by the caller when multiple legal
    * variants exist. Omitted only when asking the Engine to certify a
@@ -3955,7 +4043,7 @@ export type CorpPunishRouteStepQuote = {
   sourceCardInstanceId: CardInstanceId;
   sourceCardDefinitionId: CardDefinitionId;
   sourceCapabilityBindingKind: "card_spec_capability_key";
-  sourceCapabilityId: string;
+  sourceCapabilityId: CanonicalCapabilityId;
   clicks: number;
   credits: number;
   agendaPointCost?: number;
@@ -4179,8 +4267,12 @@ export type VisibleCard = {
   rezCost?: number;
   baseLink?: number;
   rezzed?: boolean;
+  /** Unrezzed remote root visible to both players while faceup or under persistent fort exposure. */
+  publiclyExposedInRoot?: true;
   advancementCounters?: number;
   advancementRequirement?: number;
+  /** Effective requirement minus printed requirement. Present for known remote-root agendas with a nonzero change. */
+  agendaDifficultyModifier?: number;
   overadvanceThreshold?: number;
   overadvanceReward?:
     | "agenda_points"
@@ -4242,8 +4334,10 @@ export type VisibleCard = {
 };
 
 export type VisibleTraceState = {
-  traceId: string;
+  traceId: TraceId;
+  sourceRunId?: RunId;
   sourceCardInstanceId?: CardInstanceId;
+  sourceSubroutineIndex?: number;
   /** Public Engine fact: neither bid changes success or the fixed effect amount. */
   bidEffect?:
     | "automatic_success_fixed_effect"
@@ -4259,7 +4353,7 @@ export type VisibleTraceState = {
   runnerBidCommitted: boolean;
   /** Corp-only current choice whose fixed run lock defeats every visible response. */
   currentRunLockBidQuote?: {
-    runId: string;
+    runId: RunId;
     stateVersion: number;
     actionId: string;
     choiceId: string;
@@ -4319,6 +4413,8 @@ export type PlayerView = {
     tags: number;
     /** Runner-private, currently available free Net/Core prevention. */
     freeNetOrCoreDamagePreventionRemaining?: number;
+    /** Corp-private flexible clicks for the next two Corp turns from currently known grants and debt. */
+    corpFutureFlexibleClicks?: [number, number];
     /** Corp-private current mandatory payment; insufficient credits lose the game. */
     corpEndTurnCreditObligation?: {
       creditsDue: number;
@@ -4371,10 +4467,15 @@ export type PlayerView = {
   };
   /** Present only in the Corp's own PlayerView; never a Runner-information surface. */
   corpCentralAccessQuotes?: CorpCentralAccessQuote[];
+  /** Required base draws under the current Corp-visible position. Optional draws are excluded. */
+  corpMandatoryBaseDrawQuote?: {
+    baseCount: number;
+    virusDrawCount: number;
+  };
   /** Present only in the Corp's own PlayerView; never a Runner-information surface. */
   corpPunishRouteQuoteSet?: CorpPunishRouteQuoteSet;
   run?: {
-    runId?: string;
+    runId?: RunId;
     /** Public Engine fact; a run opportunity, not a guarantee of legality or access. */
     followupRunOpportunity?: "after_run" | "after_successful_run";
     /** Remaining runs of public event sequences, independent of run success. */
@@ -4979,7 +5080,7 @@ export type AiTurnPlanningDebug = {
     reactionReasonCode: string;
     publicOutcomes: Array<{
       outcomeId: string;
-      eventId: string;
+      eventId: MatchEventId;
       eventType: string;
       stateVersionAfter: number;
       kind:
@@ -5938,11 +6039,11 @@ function isAiTurnPlanningCampaigns(value: unknown): boolean {
         ]) &&
         [
           "outcomeId",
-          "eventId",
           "eventType",
           "milestoneId",
           "evidenceCode",
         ].every((field) => typeof record[field] === "string") &&
+        isMatchEventId(record.eventId) &&
         typeof record.stateVersionAfter === "number" &&
         Number.isFinite(record.stateVersionAfter) &&
         [
@@ -7183,3 +7284,4 @@ export {
   type ServerBuildInfo,
 } from "./product-version";
 export type { CorpScoreRecoveryQuote } from "./corp-score-recovery-quote";
+export { isDamageRandomSource, isSubroutineProvenance, type DamageRandomSource } from "./damage-random-source";

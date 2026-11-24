@@ -9,7 +9,7 @@ import type {
   PlanModule,
   PlanSchedulerContext,
 } from "../../plans/plan-scheduler";
-import { CorpHandManagementSignal } from "./hand-management-types";
+import type { CorpHandManagementSignal } from "./hand-management-types";
 
 export type HandState = { kind: "hand"; signal: CorpHandManagementSignal };
 
@@ -35,7 +35,7 @@ export function handModule(): PlanModule {
             handCandidates(context, signal),
             signal.evidenceCode,
             signal.sourceDefinitionIds?.[0]
-              ? { kind: "card", id: signal.sourceDefinitionIds[0] }
+              ? { kind: "card", id: String(signal.sourceDefinitionIds[0]) }
               : { kind: "player", id: "corp" },
             signal.parentPlanInstanceId && signal.parentNeedId
               ? "flexible_support"
@@ -63,12 +63,20 @@ export function handModule(): PlanModule {
     },
     materialize: (instance, _assessment, context) => {
       const current = state<HandState>(instance);
+      const candidates = handCandidates(context, current.signal);
       return {
         step: {
           stepId: `${instance.instanceId}:${current.signal.phase}`,
           capability: {
             capabilityId: current.signal.phase,
-            semanticActionTypes: handStepSemanticTypes(context, current.signal),
+            semanticActionTypes: [
+              ...new Set([
+                ...handSemanticTypes(current.signal.phase),
+                ...candidates.map(
+                  ({ candidate }) => candidate.semanticActionType,
+                ),
+              ]),
+            ],
             ...(current.signal.sourceDefinitionIds
               ? {
                   requiredSourceDefinitionIds:
@@ -78,7 +86,7 @@ export function handModule(): PlanModule {
           },
           purpose: current.signal.concretePurposeCode,
         },
-        candidates: handCandidates(context, current.signal),
+        candidates,
       };
     },
   };
@@ -155,28 +163,6 @@ function handCandidates(
               5
           : 0),
     }));
-}
-
-function handStepSemanticTypes(
-  context: PlanSchedulerContext,
-  signal: CorpHandManagementSignal,
-): string[] {
-  const semanticActionTypes = handSemanticTypes(signal.phase);
-  if (
-    (signal.phase !== "draw_for_plan" && signal.exactActionRoute !== true) ||
-    !signal.actionIds
-  ) {
-    return semanticActionTypes;
-  }
-  const exactProjectedDrawTypes = context.actionCandidates
-    .filter(
-      (candidate) =>
-        signal.actionIds?.includes(candidate.actionId) === true &&
-        (signal.exactActionRoute === true ||
-          (candidate.economyProjection?.cardsDrawn ?? 0) > 0),
-    )
-    .map((candidate) => candidate.semanticActionType);
-  return [...new Set([...semanticActionTypes, ...exactProjectedDrawTypes])];
 }
 
 export function corpHandPriorityClass(

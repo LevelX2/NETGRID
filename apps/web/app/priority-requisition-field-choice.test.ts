@@ -113,7 +113,6 @@ function card(instanceId: string, title: string): VisibleCard {
     instanceId,
     known: true,
     title,
-    definitionId: instanceId,
     type: "ice",
     rezzed: false,
   };
@@ -124,7 +123,7 @@ function view(hqIce: VisibleCard[], remoteIce: VisibleCard[]): PlayerView {
     instanceId: `${side}_identity`,
     known: true,
     title: `${side} identity`,
-    definitionId: `${side}_identity`,
+    definitionId: side === "corp" ? 3 : 587,
     type: "identity",
     rezzed: true,
   });
@@ -163,7 +162,7 @@ function view(hqIce: VisibleCard[], remoteIce: VisibleCard[]): PlayerView {
     servers: [
       { id: "hq", label: "HQ", ice: hqIce, root: [] },
       {
-        id: "remote_1",
+        id: "r1",
         label: "Remote 1",
         ice: remoteIce,
         root: [],

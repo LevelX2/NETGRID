@@ -37,7 +37,7 @@ function checkpoint() {
 function assessment(input: AiDecisionInputWithDeckCapabilities) {
   const server = input.playerView.servers.find((s) => s.id === "rd")!;
   const sourceCard = server.ice.find(
-    (c) => c.definitionId === "onr_v1_245_fire-wall",
+    (c) => c.definitionId === 457,
   )!;
   const candidates = buildActionSemanticCandidates({
     legalActions: input.legalActions,
@@ -84,14 +84,14 @@ describe("pairing 474: reserve the best funded partial terminal defense", () => 
         runnerCreditsRemainingOnBestAccessPath: 0,
       },
       selectedRezCosts: [
-        { iceInstanceId: "corp_onr_v1_252_keeper_1", credits: 4 },
+        { iceInstanceId: "c2v9", credits: 4 },
       ],
     });
     expect(reserve).toMatchObject({
       preservesReserve: false,
       availableCreditsAfterRez: 2,
       requiredCreditsAfterRez: 4,
-      immediateRezIceIds: ["corp_onr_v1_252_keeper_1"],
+      immediateRezIceIds: ["c2v9"],
     });
   });
 
@@ -104,7 +104,7 @@ describe("pairing 474: reserve the best funded partial terminal defense", () => 
     );
     const decision = chooseAiAction(input);
     expect(decision).toMatchObject({
-      actionId: "corp.decline_rez",
+      actionId: "c6",
       fallbackUsed: false,
       timeoutUsed: false,
     });
@@ -113,7 +113,7 @@ describe("pairing 474: reserve the best funded partial terminal defense", () => 
     ).toBe(true);
     const plan = decision.decisionDebug!.planFirstDecision!;
     expect(plan.rootPlanInstanceId).toBe(
-      "plan:corp.defend_servers:server-defense-portfolio",
+      "penw02zfrkklof54c2nuye5att",
     );
     expect(plan.leafExecutorInstanceId).toBe(plan.rootPlanInstanceId);
     expect(plan.selectedStep!.planInstanceId).toBe(plan.rootPlanInstanceId);
