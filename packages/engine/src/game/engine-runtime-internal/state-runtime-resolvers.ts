@@ -72,7 +72,7 @@ import {
   type RunnerInstallCreditSpendResult,
 } from "../install/runner-program-install-payment";
 import { hiddenRunnerResourceSlotId, isConcealedRunnerResource } from "../view/card-view";
-import { publicServerLabel } from "../../public-context";
+import { publicServerLabel } from "../view/server-view";
 import type {
   AutomaticEffectCollector,
   RuntimeDeps,

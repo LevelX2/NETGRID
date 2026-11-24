@@ -10,9 +10,9 @@ export function createActionRuntimeHosts(
   const runtime = {} as RuntimeDeps;
   Object.assign(
     runtime,
-    createScoredEconomyRuntimeHosts(deps, runtime),
+    createScoredEconomyRuntimeHosts(deps),
     createApplyActionRuntimeHosts(deps, runtime),
-    createPlayBoardRuntimeHosts(deps, runtime),
+    createPlayBoardRuntimeHosts(deps),
     createLegalActionRuntimeHosts(deps, runtime),
   );
   return runtime;

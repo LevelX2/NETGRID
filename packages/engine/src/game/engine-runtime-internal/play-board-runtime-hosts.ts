@@ -40,7 +40,6 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createPlayBoardRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: RuntimeDeps = {} as RuntimeDeps,
 ): Pick<
   import("./action-runtime-port").ActionRuntimePort,
   | "playCardExecutionHost"

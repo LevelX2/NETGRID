@@ -7,7 +7,7 @@ import type {
   MatchActionSubmission,
   PlayerAction,
 } from "@netgrid/shared";
-import { validateChoiceAction } from "./choices/choice-validation";
+import { MissingChoiceResolverError, validateChoiceAction } from "./choices/choice-validation";
 import { buildEvent } from "./events/build-event";
 import { getLegalActions } from "./legal-actions";
 import { cloneGameStateForAction } from "./apply-action-state";
@@ -16,6 +16,7 @@ import { bindMatchActionOffer } from "./player-offer";
 import { withActionRandomHistory } from "./state/draw-random";
 import { validateGameState } from "./validation";
 import { toPublicEvent } from "./view/public-event-view";
+import { UnsafeEventPayloadError } from "./view/surface-policy";
 import { checkWinConditions } from "./win-conditions";
 
 export type ApplyActionCoreHost = {
@@ -165,6 +166,8 @@ function applyLegalAction(
       );
     }
   } catch (error) {
+    if (error instanceof MissingChoiceResolverError)
+      return fail(state, "ERR_INVALID_CHOICE", error.message);
     return fail(
       state,
       "ERR_INVALID_TARGET",
@@ -186,16 +189,21 @@ function applyLegalAction(
   );
   next.eventLog.push(event);
 
-  return {
-    ok: true,
-    state: next,
-    event,
-    publicEvents:
-      options.publicEventsMode === "latest"
-        ? [toPublicEvent(event)]
-        : next.eventLog.map(toPublicEvent),
-    stateHash,
-  };
+  try {
+    return {
+      ok: true,
+      state: next,
+      event,
+      publicEvents:
+        options.publicEventsMode === "latest"
+          ? [toPublicEvent(event)]
+          : next.eventLog.map(toPublicEvent),
+      stateHash,
+    };
+  } catch (error) {
+    if (!(error instanceof UnsafeEventPayloadError)) throw error;
+    return fail(state, "ERR_INVARIANT_FAILED", "Das Spielereignis konnte nicht sicher veröffentlicht werden.");
+  }
 }
 
 function choiceContinuation(

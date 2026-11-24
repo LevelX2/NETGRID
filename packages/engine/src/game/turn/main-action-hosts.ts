@@ -54,226 +54,38 @@ export function createMainActionHostComposition(
   const specialZones = requiredGroup(host.specialZones, "specialZones");
   const callbacks = requiredGroup(host.callbacks, "callbacks");
 
+  // These services are supplied at bootstrap. Only the state varies by call.
+  const corpServices = {
+    actions,
+    cards,
+    agenda: {
+      ...scored,
+      serverChoiceDisplayLabel: callbacks.serverChoiceDisplayLabel,
+    },
+    counters,
+    corp,
+    runner,
+    install,
+    rez,
+    abilities: cardImplementation,
+    specialZones,
+  } satisfies Omit<CorpMainActionGenerationHost, "state">;
+  const runnerServices = {
+    actions,
+    cards,
+    runner,
+    servers: callbacks,
+    run,
+    install,
+    memory: callbacks,
+    counters,
+    specialZones,
+    cardImplementation,
+  } satisfies Omit<RunnerMainActionGenerationHost, "state">;
+
   return {
-    corpMainActionGenerationHost: (state) => ({
-      state,
-      actions: {
-        buildLegalAction: actions.buildLegalAction,
-        makeActionId: actions.makeActionId,
-        buildEndTurnAction: actions.buildEndTurnAction,
-        buildForgoActionDebtAction: actions.buildForgoActionDebtAction,
-        buildPurgeableRunnerVirusPurgeAction:
-          actions.buildPurgeableRunnerVirusPurgeAction,
-        buildPurgeVirusAction: actions.buildPurgeVirusAction,
-        buildGainCreditAction: actions.buildGainCreditAction,
-        buildDrawAction: actions.buildDrawAction,
-        buildTrashNewDataFortCreationLockActions:
-          actions.buildTrashNewDataFortCreationLockActions,
-        buildNewRemoteIceInstallAction: actions.buildNewRemoteIceInstallAction,
-        buildServerIceInstallAction: actions.buildServerIceInstallAction,
-        buildNewRemoteRootInstallAction:
-          actions.buildNewRemoteRootInstallAction,
-        buildServerRootInstallAction: actions.buildServerRootInstallAction,
-      },
-      cards: {
-        definitionFor: cards.definitionFor,
-        mustInstance: cards.mustInstance,
-        isUniqueCard: cards.isUniqueCard,
-        hasInstalledUniqueCardDefinition:
-          cards.hasInstalledUniqueCardDefinition,
-        cardImplementationForDefinitionId:
-          cards.cardImplementationForDefinitionId,
-        rezzedCorpRootCardIds: cards.rezzedCorpRootCardIds,
-        corpInstalledCardIds: cards.corpInstalledCardIds,
-      },
-      agenda: {
-        effectiveAgendaDifficulty: scored.effectiveAgendaDifficulty,
-        effectiveAgendaDifficultyDeps: scored.effectiveAgendaDifficultyDeps,
-        scoredAgendaKindForDefinition: scored.scoredAgendaKindForDefinition,
-        serverChoiceDisplayLabel: callbacks.serverChoiceDisplayLabel,
-        scoredAgendaAbilityHost: scored.scoredAgendaAbilityHost,
-        buildScoredAgendaAbilityActionsForCard:
-          scored.buildScoredAgendaAbilityActionsForCard,
-      },
-      counters: {
-        totalCounters: counters.totalCounters,
-        purgeableRunnerVirusCounterTotal:
-          counters.purgeableRunnerVirusCounterTotal,
-        spyCountersForServer: counters.spyCountersForServer,
-      },
-      corp: {
-        corpActionDebtPending: corp.corpActionDebtPending,
-        activeObligationCount: corp.activeObligationCount,
-        canPlayCorpOperation: corp.canPlayCorpOperation,
-        cardImplementationOperationLegalActions:
-          corp.cardImplementationOperationLegalActions,
-        corpUtilityImplementationForDefinition:
-          corp.corpUtilityImplementationForDefinition,
-        hardwareTrashByCounterLegalActions:
-          corp.hardwareTrashByCounterLegalActions,
-        corpAgendaPointTotal: corp.corpAgendaPointTotal,
-        hasCorpUtilityKind: corp.hasCorpUtilityKind,
-        ...(corp.filterActionsForRestrictedExtraActions
-          ? {
-              filterActionsForRestrictedExtraActions:
-                corp.filterActionsForRestrictedExtraActions,
-            }
-          : {}),
-      },
-      runner: {
-        isConcealedRunnerResource: runner.isConcealedRunnerResource,
-        hiddenRunnerResourceSlotId: runner.hiddenRunnerResourceSlotId,
-      },
-      install: {
-        corpNewDataFortCreationLocked: install.corpNewDataFortCreationLocked,
-        corpIceInstallTotalCost: install.corpIceInstallTotalCost,
-        canInstallCorpRootCardInServer: install.canInstallCorpRootCardInServer,
-        canInstallCorpRootCardInNewRemote:
-          install.canInstallCorpRootCardInNewRemote,
-        isRegionUpgrade: install.isRegionUpgrade,
-        corpRegionUpgradeIdsInServer: install.corpRegionUpgradeIdsInServer,
-        corpRootAgendaOrNodeCapacityInServer:
-          install.corpRootAgendaOrNodeCapacityInServer,
-        corpRootAssetIdsInServer: install.corpRootAssetIdsInServer,
-        corpRootMainCardIdsInServer: install.corpRootMainCardIdsInServer,
-        isInstalledCorpCardAdvanceable: install.isInstalledCorpCardAdvanceable,
-      },
-      rez: {
-        rootInstallRezzesOnInstall: rez.rootInstallRezzesOnInstall,
-        rezCostForCard: rez.rezCostForCard,
-        quoteCorpRootRezCost: rez.quoteCorpRootRezCost,
-        rezCostReductionSourceDefinitionIdsFor:
-          rez.rezCostReductionSourceDefinitionIdsFor,
-        isObligationDebtDefinition: rez.isObligationDebtDefinition,
-      },
-      abilities: {
-        corpTraceDamageAbilityHost:
-          cardImplementation.corpTraceDamageAbilityHost,
-        corpSpecialDamageAbilityHost:
-          cardImplementation.corpSpecialDamageAbilityHost,
-        pushCorpTraceDamageOrCardImplementationActions:
-          cardImplementation.pushCorpTraceDamageOrCardImplementationActions,
-        buildCorpSpecialDamageAbilityActionsForCard:
-          cardImplementation.buildCorpSpecialDamageAbilityActionsForCard,
-      },
-      specialZones: {
-        specialZoneHarnessActions: specialZones.specialZoneHarnessActions,
-        edgerunnerTempsInstallActionsRemaining:
-          specialZones.edgerunnerTempsInstallActionsRemaining,
-      },
-    }),
-    runnerMainActionGenerationHost: (state) => ({
-      state,
-      actions: {
-        buildLegalAction: actions.buildLegalAction,
-        buildRunnerEndTurnAction: actions.buildRunnerEndTurnAction,
-        buildRunnerGainCreditAction: actions.buildRunnerGainCreditAction,
-        buildRunnerRemoveTagAction: actions.buildRunnerRemoveTagAction,
-        buildRunnerDrawCardActions: actions.buildRunnerDrawCardActions,
-        buildRunnerProgramInstallAction:
-          actions.buildRunnerProgramInstallAction,
-        buildRunnerProgramTrashBeforeInstallAction:
-          actions.buildRunnerProgramTrashBeforeInstallAction,
-        buildRunnerHostedProgramInstallAction:
-          actions.buildRunnerHostedProgramInstallAction,
-        buildRunnerAgendaPointInstallAction:
-          actions.buildRunnerAgendaPointInstallAction,
-        buildRunnerHardwareInstallAction:
-          actions.buildRunnerHardwareInstallAction,
-        buildRunnerSelectedServerInstallAction:
-          actions.buildRunnerSelectedServerInstallAction,
-        buildRunnerResourceInstallAction:
-          actions.buildRunnerResourceInstallAction,
-        buildRunnerValuPakInstallAction:
-          actions.buildRunnerValuPakInstallAction,
-        buildRunnerValuPakSequenceEndAction:
-          actions.buildRunnerValuPakSequenceEndAction,
-        buildRunnerDelayedInstallSetAsideAction:
-          actions.buildRunnerDelayedInstallSetAsideAction,
-        buildRunnerDelayedInstallRemoveCounterAction:
-          actions.buildRunnerDelayedInstallRemoveCounterAction,
-      },
-      cards: {
-        definitionFor: cards.definitionFor,
-        isUniqueCard: cards.isUniqueCard,
-        hasInstalledUniqueCardDefinition:
-          cards.hasInstalledUniqueCardDefinition,
-      },
-      runner: {
-        availableRunnerTagRemovalCredits:
-          runner.availableRunnerTagRemovalCredits,
-        availableRunnerProgramInstallCredits:
-          runner.availableRunnerProgramInstallCredits,
-        runnerCostPenaltySupportCreditCapacity:
-          runner.runnerCostPenaltySupportCreditCapacity,
-        availableRunnerRunStartCredits: runner.availableRunnerRunStartCredits,
-        runnerDrawActionContext: runner.runnerDrawActionContext,
-        runnerUtilityLongtailKindForCard:
-          runner.runnerUtilityLongtailKindForCard,
-        uniqueDirectLongtailImplementationForCard:
-          runner.uniqueDirectLongtailImplementationForCard,
-        ...(runner.filterActionsForRestrictedExtraActions
-          ? {
-              filterActionsForRestrictedExtraActions:
-                runner.filterActionsForRestrictedExtraActions,
-            }
-          : {}),
-      },
-      servers: {
-        mustServer: callbacks.mustServer,
-        serverChoiceDisplayLabel: callbacks.serverChoiceDisplayLabel,
-      },
-      run: {
-        activeRunActionSpendingCapSourceIds:
-          run.activeRunActionSpendingCapSourceIds,
-        runDurationPaymentHost: run.runDurationPaymentHost,
-        runStartCreditLossForServer: run.runStartCreditLossForServer,
-        runStartTaxForCorpRootAssets: run.runStartTaxForCorpRootAssets,
-      },
-      install: {
-        shouldOfferRunnerProgramTrashBeforeInstall:
-          install.shouldOfferRunnerProgramTrashBeforeInstall,
-        canHostProgramOnDaemon: install.canHostProgramOnDaemon,
-        cardImplementationAgendaPointInstallCost:
-          install.cardImplementationAgendaPointInstallCost,
-        pickRunnerAgendaForAgendaPointCost:
-          install.pickRunnerAgendaForAgendaPointCost,
-        requiresDataFortInstallTarget: install.requiresDataFortInstallTarget,
-      },
-      memory: {
-        runnerMemoryLimit: callbacks.runnerMemoryLimit,
-      },
-      counters: {
-        cardCounter: counters.cardCounter,
-        runnerTraceCounterEffectDefinitions:
-          counters.runnerTraceCounterEffectDefinitions,
-        runnerCounterDisplayName: counters.runnerCounterDisplayName,
-      },
-      specialZones: {
-        valuPakProgramInstallActionsRemaining:
-          specialZones.valuPakProgramInstallActionsRemaining,
-        runnerInstallableProgramIdsForValuPak:
-          specialZones.runnerInstallableProgramIdsForValuPak,
-        specialZoneHarnessActions: specialZones.specialZoneHarnessActions,
-        delayedInstallPrepareTargetIds:
-          specialZones.delayedInstallPrepareTargetIds,
-        delayedInstallCounterCost: specialZones.delayedInstallCounterCost,
-        delayedInstallPreparedTargetIds:
-          specialZones.delayedInstallPreparedTargetIds,
-      },
-      cardImplementation: {
-        runtimeDeps: cardImplementation.runtimeDeps,
-        cardImplementationForDefinitionId:
-          cardImplementation.cardImplementationForDefinitionId,
-        pushEndOfRunnerTurnActions:
-          cardImplementation.pushEndOfRunnerTurnActions,
-        canPlayPrintedCostOnPlayImplementation:
-          cardImplementation.canPlayPrintedCostOnPlayImplementation,
-        runnerEventResolver: cardImplementation.runnerEventResolver,
-        printedCostMakeRunEffect: cardImplementation.printedCostMakeRunEffect,
-        pushActivatedActions: cardImplementation.pushActivatedActions,
-      },
-    }),
+    corpMainActionGenerationHost: (state) => ({ state, ...corpServices }),
+    runnerMainActionGenerationHost: (state) => ({ state, ...runnerServices }),
   };
 }
 

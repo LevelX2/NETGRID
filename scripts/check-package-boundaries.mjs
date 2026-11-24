@@ -171,6 +171,8 @@ function boundaryFindings(file, source) {
 }
 
 function allowedWorkspaceSubpath(file, specifier) {
+  if (specifier === "@netgrid/engine/test-fixtures/rules-scenarios")
+    return file.startsWith("packages/engine/") && /\.test\.ts$/.test(file);
   if (
     specifier === "@netgrid/engine/test-fixtures/synthetic-card-definition-id"
   )

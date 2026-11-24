@@ -38,7 +38,7 @@ export function createChoiceHiddenZoneResolvers(
           : `HQ ansehen (${cardIds.length})`,
       kind: "select_cards",
       options: [
-        ...cardIds.map((cardId, index) => ({
+        ...cardIds.map((cardId) => ({
           id: `card_${cardId}`,
           label: definitionFor(state, cardId).title,
           publicLabel: "Verdeckte Korp-Karte",

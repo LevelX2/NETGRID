@@ -47,7 +47,6 @@ import {
 } from "@netgrid/decks";
 import {
   applyAction,
-  applyEffectCommands,
   applyRandomizedTraceBidSelection,
   buildMatchPlayerOffer,
   checkWinConditions,
@@ -15191,7 +15190,10 @@ describe("MVP 0.2 multiplayer service", () => {
     initial.corp.credits = 5;
     putCorpRootInRemoteForTest(initial, 594);
     putCorpIceOnServerForTest(initial, "r1", 589);
-    initial.eventLog[0]!.stateHashAfter = hashState(initial);
+    initial.eventLog[0] = {
+      ...initial.eventLog[0]!,
+      stateHashAfter: hashState(initial),
+    };
     let gameState = toRunnerTurnEngine(initial);
     gameState = applyEngineAction(
       gameState,

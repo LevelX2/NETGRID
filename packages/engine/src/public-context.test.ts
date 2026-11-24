@@ -1,10 +1,8 @@
 import type { GameState, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { eventVisibilityForAction } from "./game/events/build-event";
-import {
-  publicContextForAction,
-  publicInstalledPositionContext,
-} from "./public-context";
+import { publicInstalledPositionContext } from "./game/events/public-installed-position-context";
+import { publicContextForAction } from "./public-context";
 
 describe("publicContextForAction", () => {
   it("does not report a Blind Trace start as a bid commitment", () => {

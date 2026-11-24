@@ -91,7 +91,7 @@ import {
 } from "../apply/apply-action-hosts";
 import { hiddenRunnerResourceSlotId, isConcealedRunnerResource } from "../view/card-view";
 import { effectiveAgendaDifficulty, runnerMemoryLimit } from "../../ability-engine/effective-values";
-import { serverChoiceDisplayLabel } from "../../public-context";
+import { serverChoiceDisplayLabel } from "../view/server-view";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   canPlayPrintedCostOnPlayImplementation,
@@ -156,12 +156,19 @@ export function configureActionRuntimeBootstrap({
       corpInstalledCardIds,
     },
     scored: {
-      effectiveAgendaDifficulty,
-      effectiveAgendaDifficultyDeps,
+      effectiveAgendaDifficulty: (state, agendaId) =>
+        effectiveAgendaDifficulty(
+          effectiveAgendaDifficultyDeps,
+          state,
+          agendaId,
+        ),
       scoredAgendaKindForDefinition: runtimePorts.scoredAgendaKindForDefinition,
       serverChoiceDisplayLabel,
-      scoredAgendaAbilityHost: runtimePorts.scoredAgendaAbilityHost,
-      buildScoredAgendaAbilityActionsForCard,
+      bindScoredAgendaAbilityActions: (state) => {
+        const host = runtimePorts.scoredAgendaAbilityHost(state);
+        return (agendaId) =>
+          buildScoredAgendaAbilityActionsForCard(host, agendaId);
+      },
     },
     counters: {
       totalCounters: runtimePorts.totalCounters,
@@ -262,21 +269,54 @@ export function configureActionRuntimeBootstrap({
       isObligationDebtDefinition: runtimePorts.isObligationDebtDefinition,
     },
     cardImplementation: {
-      corpTraceDamageAbilityHost: runtimePorts.corpTraceDamageAbilityHost,
-      corpSpecialDamageAbilityHost: runtimePorts.corpSpecialDamageAbilityHost,
-      pushCorpTraceDamageOrCardImplementationActions:
-        runtimePorts.pushCorpTraceDamageOrCardImplementationActions,
-      buildCorpSpecialDamageAbilityActionsForCard,
-      runtimeDeps: cardImplementationRuntimeDeps,
+      bindTraceDamageActions: (state) => {
+        const host = runtimePorts.corpTraceDamageAbilityHost(state);
+        return (actions, cardId) =>
+          runtimePorts.pushCorpTraceDamageOrCardImplementationActions(
+            state,
+            actions,
+            cardId,
+            host,
+          );
+      },
+      bindSpecialDamageActions: (state) => {
+        const host = runtimePorts.corpSpecialDamageAbilityHost(state);
+        return (cardId) =>
+          buildCorpSpecialDamageAbilityActionsForCard(host, cardId);
+      },
       cardImplementationForDefinitionId,
-      pushEndOfRunnerTurnActions: pushCardImplementationEndOfRunnerTurnActions,
-      canPlayPrintedCostOnPlayImplementation,
+      pushEndOfRunnerTurnActions: (state, actions) =>
+        pushCardImplementationEndOfRunnerTurnActions(
+          cardImplementationRuntimeDeps,
+          state,
+          actions,
+        ),
+      canPlayPrintedCostOnPlayImplementation: (state, definition) =>
+        canPlayPrintedCostOnPlayImplementation(
+          cardImplementationRuntimeDeps,
+          state,
+          definition,
+        ),
       runnerEventResolver: runtimePorts.cardImplementationRunnerEventResolver,
-      runnerEventInstallChoiceActionPayload:
-        runtimePorts.runnerEventInstallChoiceActionPayload,
       printedCostMakeRunEffect:
         runtimePorts.printedCostCardImplementationMakeRunEffect,
-      pushActivatedActions: pushActivatedCardImplementationActions,
+      pushActivatedActions: (
+        state,
+        actions,
+        side,
+        cardId,
+        definition,
+        options,
+      ) =>
+        pushActivatedCardImplementationActions(
+          cardImplementationRuntimeDeps,
+          state,
+          actions,
+          side,
+          cardId,
+          definition,
+          options,
+        ),
     },
     specialZones: {
       specialZoneHarnessActions: runtimePorts.specialZoneHarnessActions,

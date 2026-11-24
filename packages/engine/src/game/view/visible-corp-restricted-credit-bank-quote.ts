@@ -86,7 +86,7 @@ function currentTurnSetupRoutes(
   )
     return [];
   const routes: NonNullable<CorpRestrictedCreditBankQuote["setupRoutes"]> = [];
-  let projected = structuredClone(state);
+  let projected = state;
   let firstAdvanceId: string | undefined;
   for (let advances = 0; advances <= 4; advances++) {
     const actions = getLegalActions(projected, "corp");
@@ -103,7 +103,7 @@ function currentTurnSetupRoutes(
         side: "corp",
         actionId: rez.actionId,
         clientKnownStateVersion: projected.stateVersion,
-      });
+      }, { publicEventsMode: "latest" });
       if (!result.ok)
         throw new Error("corp_restricted_bank_legal_rez_projection_failed");
       if (
@@ -139,7 +139,7 @@ function currentTurnSetupRoutes(
       side: "corp",
       actionId: advance.actionId,
       clientKnownStateVersion: projected.stateVersion,
-    });
+    }, { publicEventsMode: "latest" });
     if (!result.ok)
       throw new Error("corp_restricted_bank_legal_advance_projection_failed");
     if (

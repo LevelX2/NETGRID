@@ -6,6 +6,7 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it, vi } from "vitest";
 import { createGame } from "../create-game";
+import { applyAction, getLegalActions } from "../../index";
 import {
   resolvePendingChoice,
   type PendingChoiceResolutionHost,
@@ -117,16 +118,40 @@ describe("pending choice resolution", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
-  it("preserves the fallback behavior for unhandled open choices", () => {
-    const state = stateWithChoice("fallback_choice", "unhandled.source");
+  it("keeps an open choice intact when no resolver owns it", () => {
+    const state = stateWithChoice("unhandled_choice", "unhandled.source");
+    const before = state.pendingChoice;
 
-    resolvePendingChoice(
-      pendingChoiceHost(state),
-      choiceAction("fallback_choice"),
-      playerChoice("fallback_choice", ["decline"]),
-    );
+    expect(() =>
+      resolvePendingChoice(
+        pendingChoiceHost(state),
+        choiceAction("unhandled_choice"),
+        playerChoice("unhandled_choice", ["decline"]),
+      ),
+    ).toThrow(expect.objectContaining({ choiceSource: "unhandled.source" }));
 
-    expect(state.pendingChoice).toBeUndefined();
+    expect(state.pendingChoice).toBe(before);
+  });
+
+  it("rejects an unresolved choice through the public action entry point", () => {
+    const state = stateWithChoice("unhandled_choice", "unhandled.source");
+    const before = structuredClone(state);
+    const offered = getLegalActions(state, "runner").find((action) => action.type === "resolve_choice");
+    expect(offered).toBeDefined();
+
+    const result = applyAction(state, {
+      ...playerChoice("unhandled_choice", ["target"]),
+      matchId: state.matchId,
+      actionId: offered!.actionId,
+      side: "runner",
+      clientKnownStateVersion: state.stateVersion,
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: { code: "ERR_INVALID_CHOICE", message: "Diese Auswahl kann nicht aufgelöst werden." },
+    });
+    expect(state).toEqual(before);
   });
 
   it("dispatches Schematics multi-expose review choices through the expose resolver", () => {
@@ -344,17 +369,13 @@ function pendingChoiceHost(
     },
     hiddenZone: {
       handleHiddenZoneArrangeChoice: unhandled,
-      hiddenZoneArrangeChoiceHandlerHost: () => ({}),
       handleHiddenZoneNonSearchChoice: unhandled,
-      hiddenZoneNonSearchChoiceHandlerHost: () => ({}),
       handleCorpZoneChoice: unhandled,
-      corpZoneChoiceHandlerHost: () => ({}),
-      isP358HiddenReplacementCompatibilityChoiceSource: () => false,
+      isHiddenZoneChoiceSource: () => false,
       resolveP358HiddenReplacementChoice: unexpected(
         "resolveP358HiddenReplacementChoice",
       ),
       handleHiddenZoneSearchChoice: unhandled,
-      hiddenZoneSearchChoiceHandlerHost: () => ({}),
       resolveMultiExposeInstalledCorpCardsChoice: unexpected(
         "resolveMultiExposeInstalledCorpCardsChoice",
       ),
@@ -431,13 +452,12 @@ function pendingChoiceHost(
       resolveSenatorialFieldTripChoice: unexpected(
         "resolveSenatorialFieldTripChoice",
       ),
+      resolveFortHqReplacementChoice: unexpected("resolveFortHqReplacementChoice"),
       ...overrides.hiddenZone,
     },
     corp: {
       handleCorpInstallRezSequenceChoice: unhandled,
-      corpInstallRezSequenceHandlerHost: () => ({}),
       handleScoredAgendaFlowChoice: unhandled,
-      scoredAgendaFlowHost: () => ({}),
     },
     runner: {
       resolveRunnerProgramTrashBeforeInstallChoice: unexpected(
@@ -456,37 +476,30 @@ function pendingChoiceHost(
     },
     run: {
       resolveHqIceSwapChoice: unexpected("resolveHqIceSwapChoice"),
-      fortPassWindowHostForState: () => ({}),
       resolveSecretSpendCompareChoiceInRunModule: unexpected(
         "resolveSecretSpendCompareChoiceInRunModule",
       ),
-      encounterSpecialWindowHostForState: () => ({}),
       resolveHammerStealthLossChoice: unexpected(
         "resolveHammerStealthLossChoice",
       ),
-      fortRunSideFamiliesHostForState: () => ({}),
       resolveActiveIceProgramTrashChoiceInRunModule: unexpected(
         "resolveActiveIceProgramTrashChoiceInRunModule",
       ),
-      encounterResolutionHostForState: () => ({}),
       resolvePassRezzedIceProgramTrashChoiceInRunModule: unexpected(
         "resolvePassRezzedIceProgramTrashChoiceInRunModule",
       ),
       resolveRezInterruptJackOutChoice: unexpected(
         "resolveRezInterruptJackOutChoice",
       ),
-      runRezWindowHostForState: () => ({}),
       resolveBrokenIceVirusCounterChoice: unexpected(
         "resolveBrokenIceVirusCounterChoice",
       ),
-      runEndCleanupHost: () => ({}),
       resolveAardvarkInterceptionChoice: unexpected(
         "resolveAardvarkInterceptionChoice",
       ),
       resolveSuccessfulRunInterventionChoiceInRunModule: unexpected(
         "resolveSuccessfulRunInterventionChoiceInRunModule",
       ),
-      successfulRunInterventionHost: () => ({}),
       resolvePostMeatDamageHiddenResourceChoice: unexpected(
         "resolvePostMeatDamageHiddenResourceChoice",
       ),
@@ -510,6 +523,7 @@ function pendingChoiceHost(
         "resumeRunnerTraceCounterRunStartEffects",
       ),
       resumeRunStart: unexpected("resumeRunStart"),
+      resumeRunEndTrashUsedBreakers: unexpected("resumeRunEndTrashUsedBreakers"),
       resolveRunnerRunStartOrderChoice: unexpected(
         "resolveRunnerRunStartOrderChoice",
       ),
@@ -530,7 +544,7 @@ function pendingChoiceHost(
       resolveSuccessfulRunCreditLossSpendChoice: unexpected(
         "resolveSuccessfulRunCreditLossSpendChoice",
       ),
-      runAccessTransitionHost: () => ({}),
+      resolveRevealRdUntilAgendaStoreInHqChoice: unexpected("resolveRevealRdUntilAgendaStoreInHqChoice"),
       resolvePreAccessTopRdReorderChoice: unexpected(
         "resolvePreAccessTopRdReorderChoice",
       ),

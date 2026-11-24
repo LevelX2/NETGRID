@@ -78,6 +78,26 @@ describe("surface policy", () => {
     ).toThrow(/hidden card data/i);
   });
 
+  it.each(["public_event", "replay_public"] as const)(
+    "checks nested fields on %s while allowing public labels",
+    (surfaceKind) => {
+      const visible = { resolvedEffects: [{ label: "Public effect" }] };
+      expect(sanitizeEventPayloadForSurface(visible, surfaceKind)).toEqual(visible);
+      expect(() =>
+        sanitizeEventPayloadForSurface(
+          { resolvedEffects: [{ targets: { hiddenHqCardIds: ["hidden"] } }] },
+          surfaceKind,
+        ),
+      ).toThrow(/hidden card data/);
+      expect(() =>
+        sanitizeEventPayloadForSurface(
+          { resolvedEffects: [{ actorPrivateLabel: "Private effect" }] },
+          surfaceKind,
+        ),
+      ).toThrow(/actor-private labels/);
+    },
+  );
+
   it("applies payload-family specific primitive contracts", () => {
     expect(
       sanitizePayloadForSurface(

@@ -1,10 +1,39 @@
 import type {
   CardDefinition,
+  CardDefinitionId,
   CardInstanceId,
+  CorpServer,
+  CounterType,
   GameState,
   LegalAction,
+  Side,
 } from "@netgrid/shared";
-import type { CardCorpUtilityImplementation } from "../../ability-engine/definition-types";
+import type {
+  CardCorpUtilityImplementation,
+  CardScoredAgendaImplementation,
+} from "../../ability-engine/definition-types";
+import type { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import type { ScoredAgendaAbilityLegalActionResult } from "../corp/scored-agenda-abilities";
+import type { CorpSpecialDamageAbilityLegalActionResult } from "../corp/special-damage-abilities";
+import type { CostQuote } from "../payment/cost-quote";
+import type { definitionFor, mustInstance } from "../state/card-server-lookup";
+import type { purgeableRunnerVirusCounterTotal } from "./turn-basic-execution";
+import type { serverChoiceDisplayLabel } from "../view/server-view";
+import type { buildLegalAction, makeActionId } from "./action-builders";
+import type {
+  buildCorpDrawAction,
+  buildCorpEndTurnAction,
+  buildCorpGainCreditAction,
+  buildCorpPurgeVirusAction,
+} from "./corp-basic-actions";
+import type { buildCorpTrashNewDataFortCreationLockActions } from "./corp-data-fort-lock";
+import type {
+  buildCorpNewRemoteIceInstallAction,
+  buildCorpNewRemoteRootInstallAction,
+  buildCorpServerIceInstallAction,
+  buildCorpServerRootInstallAction,
+  CorpIceInstallCostDetails,
+} from "./corp-install-actions";
 import { deterministicOnPlayResourcePayload } from "../../ability-engine/card-implementation-runtime-shared";
 import {
   onPlayAbilityBindingForDefinition,
@@ -37,101 +66,162 @@ import { corpScoreMandatoryDrawHorizonPayload } from "../corp/score-mandatory-dr
 import { corpScoreCreditOutcomeQuotePayload } from "../corp/scored-agenda/score-credit-outcome";
 import { operationFreeRezRunQuotePayload } from "../view/visible-post-rez-run-quote";
 
-type HostFn<T = unknown> = (...args: any[]) => T;
-
 export type CorpMainActionGenerationHost = {
   state: GameState;
   actions: {
-    buildLegalAction: HostFn<LegalAction>;
-    makeActionId: HostFn<string>;
-    buildEndTurnAction: HostFn<LegalAction>;
-    buildForgoActionDebtAction: HostFn<LegalAction>;
-    buildPurgeableRunnerVirusPurgeAction: HostFn<LegalAction>;
-    buildPurgeVirusAction: HostFn<LegalAction>;
-    buildGainCreditAction: HostFn<LegalAction>;
-    buildDrawAction: HostFn<LegalAction>;
-    buildTrashNewDataFortCreationLockActions: HostFn<LegalAction[]>;
-    buildNewRemoteIceInstallAction: HostFn<LegalAction>;
-    buildServerIceInstallAction: HostFn<LegalAction>;
-    buildNewRemoteRootInstallAction: HostFn<LegalAction>;
-    buildServerRootInstallAction: HostFn<LegalAction>;
+    buildLegalAction: typeof buildLegalAction;
+    makeActionId: typeof makeActionId;
+    buildEndTurnAction: typeof buildCorpEndTurnAction;
+    buildForgoActionDebtAction: (state: GameState) => LegalAction;
+    buildPurgeableRunnerVirusPurgeAction: (state: GameState) => LegalAction;
+    buildPurgeVirusAction: typeof buildCorpPurgeVirusAction;
+    buildGainCreditAction: typeof buildCorpGainCreditAction;
+    buildDrawAction: typeof buildCorpDrawAction;
+    buildTrashNewDataFortCreationLockActions: typeof buildCorpTrashNewDataFortCreationLockActions;
+    buildNewRemoteIceInstallAction: typeof buildCorpNewRemoteIceInstallAction;
+    buildServerIceInstallAction: typeof buildCorpServerIceInstallAction;
+    buildNewRemoteRootInstallAction: typeof buildCorpNewRemoteRootInstallAction;
+    buildServerRootInstallAction: typeof buildCorpServerRootInstallAction;
   };
   cards: {
-    definitionFor: HostFn<any>;
-    mustInstance: HostFn<any>;
-    isUniqueCard: HostFn<boolean>;
-    hasInstalledUniqueCardDefinition: HostFn<boolean>;
-    cardImplementationForDefinitionId: HostFn<any>;
-    rezzedCorpRootCardIds: HostFn<string[]>;
-    corpInstalledCardIds: HostFn<string[]>;
+    definitionFor: typeof definitionFor;
+    mustInstance: typeof mustInstance;
+    isUniqueCard: (definition: CardDefinition) => boolean;
+    hasInstalledUniqueCardDefinition: (
+      state: GameState,
+      side: Side,
+      definitionId: CardDefinitionId,
+    ) => boolean;
+    cardImplementationForDefinitionId: typeof cardImplementationForDefinitionId;
+    rezzedCorpRootCardIds: (state: GameState) => CardInstanceId[];
+    corpInstalledCardIds: (state: GameState) => CardInstanceId[];
   };
   agenda: {
-    effectiveAgendaDifficulty: HostFn<number>;
-    effectiveAgendaDifficultyDeps: unknown;
-    scoredAgendaKindForDefinition: HostFn<string | undefined>;
-    serverChoiceDisplayLabel: HostFn<string>;
-    scoredAgendaAbilityHost: HostFn<unknown>;
-    buildScoredAgendaAbilityActionsForCard: HostFn<{
-      handled: boolean;
-      actions: LegalAction[];
-    }>;
+    effectiveAgendaDifficulty: (
+      state: GameState,
+      agendaId: CardInstanceId,
+    ) => number;
+    scoredAgendaKindForDefinition: (
+      definition: CardDefinition,
+    ) => CardScoredAgendaImplementation["kind"] | undefined;
+    serverChoiceDisplayLabel: typeof serverChoiceDisplayLabel;
+    bindScoredAgendaAbilityActions: (
+      state: GameState,
+    ) => (agendaId: CardInstanceId) => ScoredAgendaAbilityLegalActionResult;
   };
   counters: {
-    totalCounters: HostFn<number>;
-    purgeableRunnerVirusCounterTotal: HostFn<number>;
-    spyCountersForServer: HostFn<number>;
+    totalCounters: (state: GameState, counterType: CounterType) => number;
+    purgeableRunnerVirusCounterTotal: typeof purgeableRunnerVirusCounterTotal;
+    spyCountersForServer: (
+      state: GameState,
+      serverId: CorpServer["id"],
+    ) => number;
   };
   corp: {
-    corpActionDebtPending: HostFn<number>;
-    filterActionsForRestrictedExtraActions?: HostFn<LegalAction[]>;
-    activeObligationCount: HostFn<number>;
-    canPlayCorpOperation: HostFn<boolean>;
-    cardImplementationOperationLegalActions: HostFn<LegalAction[]>;
-    corpUtilityImplementationForDefinition: HostFn<
-      CardCorpUtilityImplementation | undefined
-    >;
-    hardwareTrashByCounterLegalActions: HostFn<LegalAction[]>;
-    corpAgendaPointTotal: HostFn<number>;
-    hasCorpUtilityKind: HostFn<boolean>;
+    corpActionDebtPending: (state: GameState) => number;
+    filterActionsForRestrictedExtraActions?: (
+      state: GameState,
+      side: Side,
+      actions: LegalAction[],
+    ) => LegalAction[];
+    activeObligationCount: (state: GameState) => number;
+    canPlayCorpOperation: (
+      state: GameState,
+      definition: CardDefinition,
+    ) => boolean;
+    cardImplementationOperationLegalActions: (
+      state: GameState,
+      cardId: CardInstanceId,
+      definition: CardDefinition,
+    ) => LegalAction[];
+    corpUtilityImplementationForDefinition: (
+      definitionId: CardDefinitionId,
+    ) => CardCorpUtilityImplementation | undefined;
+    hardwareTrashByCounterLegalActions: (
+      state: GameState,
+      cardId: CardInstanceId,
+      definition: CardDefinition,
+    ) => LegalAction[];
+    corpAgendaPointTotal: (state: GameState) => number;
+    hasCorpUtilityKind: (
+      state: GameState,
+      cardId: CardInstanceId,
+      kind: CardCorpUtilityImplementation["kind"],
+    ) => boolean;
   };
   runner: {
-    isConcealedRunnerResource: HostFn<boolean>;
+    isConcealedRunnerResource: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => boolean;
     hiddenRunnerResourceSlotId: (
       state: GameState,
       cardId: CardInstanceId,
     ) => CardInstanceId;
   };
   install: {
-    corpNewDataFortCreationLocked: HostFn<boolean>;
-    corpIceInstallTotalCost: HostFn<any>;
-    canInstallCorpRootCardInServer: HostFn<boolean>;
-    canInstallCorpRootCardInNewRemote: HostFn<boolean>;
-    isRegionUpgrade: HostFn<boolean>;
-    corpRegionUpgradeIdsInServer: HostFn<string[]>;
-    corpRootAgendaOrNodeCapacityInServer: HostFn<number>;
-    corpRootAssetIdsInServer: HostFn<string[]>;
-    corpRootMainCardIdsInServer: HostFn<string[]>;
-    isInstalledCorpCardAdvanceable: HostFn<boolean>;
+    corpNewDataFortCreationLocked: (state: GameState) => boolean;
+    corpIceInstallTotalCost: (
+      state: GameState,
+      cardId: CardInstanceId,
+      server: CorpServer,
+    ) => CorpIceInstallCostDetails;
+    canInstallCorpRootCardInServer: (
+      state: GameState,
+      definition: CardDefinition,
+      server: CorpServer,
+    ) => boolean;
+    canInstallCorpRootCardInNewRemote: (definition: CardDefinition) => boolean;
+    isRegionUpgrade: (definition: CardDefinition) => boolean;
+    corpRegionUpgradeIdsInServer: (
+      state: GameState,
+      server: CorpServer,
+    ) => CardInstanceId[];
+    corpRootAgendaOrNodeCapacityInServer: (
+      state: GameState,
+      server: CorpServer,
+    ) => number;
+    corpRootAssetIdsInServer: (
+      state: GameState,
+      server: CorpServer,
+    ) => CardInstanceId[];
+    corpRootMainCardIdsInServer: (
+      state: GameState,
+      server: CorpServer,
+    ) => CardInstanceId[];
+    isInstalledCorpCardAdvanceable: (
+      state: GameState,
+      cardId: CardInstanceId,
+      definition?: CardDefinition,
+    ) => boolean;
   };
   rez: {
-    rootInstallRezzesOnInstall: HostFn<boolean>;
-    rezCostForCard: HostFn<number>;
-    quoteCorpRootRezCost: HostFn<any>;
-    rezCostReductionSourceDefinitionIdsFor: HostFn<CardDefinition["id"][]>;
-    isObligationDebtDefinition: HostFn<boolean>;
+    rootInstallRezzesOnInstall: (definition: CardDefinition) => boolean;
+    rezCostForCard: (state: GameState, cardId: CardInstanceId) => number;
+    quoteCorpRootRezCost: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => CostQuote;
+    rezCostReductionSourceDefinitionIdsFor: (
+      state: GameState,
+      cardId: CardInstanceId,
+      definition: CardDefinition,
+    ) => CardDefinitionId[];
+    isObligationDebtDefinition: (definitionId: CardDefinitionId) => boolean;
   };
   abilities: {
-    corpTraceDamageAbilityHost: HostFn<unknown>;
-    corpSpecialDamageAbilityHost: HostFn<unknown>;
-    pushCorpTraceDamageOrCardImplementationActions: HostFn<void>;
-    buildCorpSpecialDamageAbilityActionsForCard: HostFn<{
-      handled: boolean;
-      actions: LegalAction[];
-    }>;
+    bindTraceDamageActions: (
+      state: GameState,
+    ) => (actions: LegalAction[], sourceCardId: CardInstanceId) => void;
+    bindSpecialDamageActions: (
+      state: GameState,
+    ) => (
+      sourceCardId: CardInstanceId,
+    ) => CorpSpecialDamageAbilityLegalActionResult;
   };
   specialZones: {
-    specialZoneHarnessActions: HostFn<LegalAction[]>;
-    edgerunnerTempsInstallActionsRemaining: HostFn<number>;
+    specialZoneHarnessActions: (state: GameState, side: Side) => LegalAction[];
+    edgerunnerTempsInstallActionsRemaining: (state: GameState) => number;
   };
 };
 
@@ -186,17 +276,10 @@ export function buildCorpMainActions(
     host.cards.hasInstalledUniqueCardDefinition;
   const cardImplementationForDefinitionId =
     host.cards.cardImplementationForDefinitionId;
-  const rezzedCorpRootCardIds = host.cards.rezzedCorpRootCardIds;
-  const corpInstalledCardIds = host.cards.corpInstalledCardIds;
   const effectiveAgendaDifficulty = host.agenda.effectiveAgendaDifficulty;
-  const effectiveAgendaDifficultyDeps =
-    host.agenda.effectiveAgendaDifficultyDeps;
   const scoredAgendaKindForDefinition =
     host.agenda.scoredAgendaKindForDefinition;
   const serverChoiceDisplayLabel = host.agenda.serverChoiceDisplayLabel;
-  const scoredAgendaAbilityHost = host.agenda.scoredAgendaAbilityHost;
-  const buildScoredAgendaAbilityActionsForCard =
-    host.agenda.buildScoredAgendaAbilityActionsForCard;
   const totalCounters = host.counters.totalCounters;
   const purgeableRunnerVirusCounterTotal =
     host.counters.purgeableRunnerVirusCounterTotal;
@@ -212,7 +295,6 @@ export function buildCorpMainActions(
     host.corp.corpUtilityImplementationForDefinition;
   const hardwareTrashByCounterLegalActions =
     host.corp.hardwareTrashByCounterLegalActions;
-  const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
   const isConcealedRunnerResource = host.runner.isConcealedRunnerResource;
   const hiddenRunnerResourceSlotId = host.runner.hiddenRunnerResourceSlotId;
   const corpNewDataFortCreationLocked =
@@ -232,13 +314,6 @@ export function buildCorpMainActions(
   const rootInstallRezzesOnInstall = host.rez.rootInstallRezzesOnInstall;
   const rezCostForCard = host.rez.rezCostForCard;
   const quoteCorpRootRezCost = host.rez.quoteCorpRootRezCost;
-  const corpTraceDamageAbilityHost = host.abilities.corpTraceDamageAbilityHost;
-  const corpSpecialDamageAbilityHost =
-    host.abilities.corpSpecialDamageAbilityHost;
-  const pushCorpTraceDamageOrCardImplementationActions =
-    host.abilities.pushCorpTraceDamageOrCardImplementationActions;
-  const buildCorpSpecialDamageAbilityActionsForCard =
-    host.abilities.buildCorpSpecialDamageAbilityActionsForCard;
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
   const edgerunnerTempsInstallActionsRemaining =
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
@@ -246,8 +321,8 @@ export function buildCorpMainActions(
   const rootRezAction = (
     id: CardInstanceId,
     serverLabel: string,
+    definition = definitionFor(state, id),
   ): LegalAction | undefined => {
-    const definition = definitionFor(state, id);
     if (
       (definition.type !== "asset" && definition.type !== "upgrade") ||
       mustInstance(state.cardInstances, id).rezzed
@@ -333,7 +408,7 @@ export function buildCorpMainActions(
       const definition = definitionFor(state, id);
       if (
         definition.type === "agenda" &&
-        effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, id) <=
+        effectiveAgendaDifficulty(state, id) <=
           mustInstance(state.cardInstances, id).advancementCounters
       ) {
         if (
@@ -742,95 +817,11 @@ export function buildCorpMainActions(
             ),
           );
       }
-      const rezAction = rootRezAction(id, server.label);
+      const rezAction = rootRezAction(id, server.label, definition);
       if (rezAction) actions.push(rezAction);
     }
   }
-  const corpTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
-  const corpSpecialDamageAbilityActionsHost =
-    corpSpecialDamageAbilityHost(state);
-  for (const assetId of rezzedCorpRootCardIds(state).sort()) {
-    const definition = definitionFor(state, assetId);
-    pushCorpTraceDamageOrCardImplementationActions(
-      state,
-      actions,
-      assetId,
-      corpTraceDamageAbilityActionsHost,
-    );
-    const specialDamageActions = buildCorpSpecialDamageAbilityActionsForCard(
-      corpSpecialDamageAbilityActionsHost,
-      assetId,
-    );
-    if (specialDamageActions.handled)
-      actions.push(...specialDamageActions.actions);
-    if (
-      hasCorpUtilityKind(
-        state,
-        assetId,
-        "shuffle_hq_into_rd_then_draw_same_count",
-      )
-    ) {
-      const shuffleRedrawAction = action(
-        state,
-        "corp",
-        "gain_credit",
-        `${definition.title}: HQ in R&D mischen und ziehen`,
-        assetId,
-        [{ clicks: 1 }],
-        { cardId: assetId, v1917AssetAbility: "rescheduler_hq_shuffle_draw" },
-      );
-      const quote = quoteHqShuffleRedrawZoneTransition(
-        state,
-        shuffleRedrawAction,
-        assetId,
-        definition.id,
-      );
-      shuffleRedrawAction.payload = {
-        ...(shuffleRedrawAction.payload ?? {}),
-        ...corpZoneTransitionProjectionPayload(quote),
-      };
-      actions.push(shuffleRedrawAction);
-    }
-    if (hasCorpUtilityKind(state, assetId, "move_installed_corp_card_to_hq")) {
-      for (const targetCardId of corpInstalledCardIds(state).sort()) {
-        const targetDefinition = definitionFor(state, targetCardId);
-        actions.push(
-          action(
-            state,
-            "corp",
-            "gain_credit",
-            `${definition.title}: ${targetDefinition.title} nach HQ nehmen`,
-            assetId,
-            [{ clicks: 1 }],
-            {
-              cardId: assetId,
-              v1951CorpUtilityAbility: "corp_installed_card_to_hq",
-              targetCardId,
-            },
-          ),
-        );
-      }
-    }
-  }
-  const scoredAgendaAbilityActionsHost = scoredAgendaAbilityHost(state);
-  const scoredAgendaTraceDamageAbilityActionsHost =
-    corpTraceDamageAbilityHost(state);
-  for (const agendaId of state.corp.scoreArea.slice().sort()) {
-    const scoredAgendaAbilityActions = buildScoredAgendaAbilityActionsForCard(
-      scoredAgendaAbilityActionsHost,
-      agendaId,
-    );
-    if (scoredAgendaAbilityActions.handled) {
-      actions.push(...scoredAgendaAbilityActions.actions);
-      continue;
-    }
-    pushCorpTraceDamageOrCardImplementationActions(
-      state,
-      actions,
-      agendaId,
-      scoredAgendaTraceDamageAbilityActionsHost,
-    );
-  }
+  appendCorpInstalledAbilityActions(host, actions);
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(buildCorpEndTurnAction(state));
   if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
@@ -940,6 +931,94 @@ export function buildCorpMainActions(
         : candidate;
     },
   );
+}
+
+function appendCorpInstalledAbilityActions(
+  host: CorpMainActionGenerationHost,
+  actions: LegalAction[],
+): void {
+  const state = host.state;
+  const action = host.actions.buildLegalAction;
+  const definitionFor = host.cards.definitionFor;
+  const rezzedCorpRootCardIds = host.cards.rezzedCorpRootCardIds;
+  const corpInstalledCardIds = host.cards.corpInstalledCardIds;
+  const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
+  const rezzedRootIds = rezzedCorpRootCardIds(state);
+  if (rezzedRootIds.length === 0 && state.corp.scoreArea.length === 0) return;
+  const pushTraceDamageActions = host.abilities.bindTraceDamageActions(state);
+  let buildSpecialDamageActions:
+    | ReturnType<
+        CorpMainActionGenerationHost["abilities"]["bindSpecialDamageActions"]
+      >
+    | undefined;
+  for (const assetId of rezzedRootIds.sort()) {
+    const definition = definitionFor(state, assetId);
+    pushTraceDamageActions(actions, assetId);
+    buildSpecialDamageActions ??=
+      host.abilities.bindSpecialDamageActions(state);
+    const specialDamageActions = buildSpecialDamageActions(assetId);
+    if (specialDamageActions.handled)
+      actions.push(...specialDamageActions.actions);
+    if (
+      hasCorpUtilityKind(
+        state,
+        assetId,
+        "shuffle_hq_into_rd_then_draw_same_count",
+      )
+    ) {
+      const shuffleRedrawAction = action(
+        state,
+        "corp",
+        "gain_credit",
+        `${definition.title}: HQ in R&D mischen und ziehen`,
+        assetId,
+        [{ clicks: 1 }],
+        { cardId: assetId, v1917AssetAbility: "rescheduler_hq_shuffle_draw" },
+      );
+      const quote = quoteHqShuffleRedrawZoneTransition(
+        state,
+        shuffleRedrawAction,
+        assetId,
+        definition.id,
+      );
+      shuffleRedrawAction.payload = {
+        ...(shuffleRedrawAction.payload ?? {}),
+        ...corpZoneTransitionProjectionPayload(quote),
+      };
+      actions.push(shuffleRedrawAction);
+    }
+    if (hasCorpUtilityKind(state, assetId, "move_installed_corp_card_to_hq")) {
+      for (const targetCardId of corpInstalledCardIds(state).sort()) {
+        const targetDefinition = definitionFor(state, targetCardId);
+        actions.push(
+          action(
+            state,
+            "corp",
+            "gain_credit",
+            `${definition.title}: ${targetDefinition.title} nach HQ nehmen`,
+            assetId,
+            [{ clicks: 1 }],
+            {
+              cardId: assetId,
+              v1951CorpUtilityAbility: "corp_installed_card_to_hq",
+              targetCardId,
+            },
+          ),
+        );
+      }
+    }
+  }
+  if (state.corp.scoreArea.length === 0) return;
+  const buildScoredAgendaActions =
+    host.agenda.bindScoredAgendaAbilityActions(state);
+  for (const agendaId of state.corp.scoreArea.slice().sort()) {
+    const scoredAgendaAbilityActions = buildScoredAgendaActions(agendaId);
+    if (scoredAgendaAbilityActions.handled) {
+      actions.push(...scoredAgendaAbilityActions.actions);
+      continue;
+    }
+    pushTraceDamageActions(actions, agendaId);
+  }
 }
 
 function optionalExtraActionOfferProjection(

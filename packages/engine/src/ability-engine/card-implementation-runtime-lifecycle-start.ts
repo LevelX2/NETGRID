@@ -46,8 +46,7 @@ export function cardImplementationRunnerInstalledSourceIds(
   return deps.runnerInstalledCardIds(state).slice().sort();
 }
 
-export function isActiveCardImplementationStartOfCorpTurnSource(
-  deps: CardImplementationRuntimeDependencies,
+function isActiveCardImplementationStartOfCorpTurnSource(
   state: GameState,
   cardId: CardInstanceId,
   definition: CardDefinition,
@@ -157,7 +156,6 @@ export function hasDueCardImplementationStartOfCorpTurnAbility(
   const definition = deps.definitionFor(state, cardId);
   if (
     !isActiveCardImplementationStartOfCorpTurnSource(
-      deps,
       state,
       cardId,
       definition,
@@ -195,7 +193,6 @@ export function executeCardImplementationStartOfCorpTurnEffects(
     if (startAbilities.length === 0) continue;
     if (
       !isActiveCardImplementationStartOfCorpTurnSource(
-        deps,
         state,
         cardId,
         definition,
@@ -254,7 +251,6 @@ export function executeCardImplementationStartOfCorpTurnEffects(
       effects?.push(...result.resolvedEffects);
       if (
         !isActiveCardImplementationStartOfCorpTurnSource(
-          deps,
           state,
           cardId,
           definition,

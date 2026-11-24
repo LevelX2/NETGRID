@@ -1,90 +1,53 @@
 import type {
-  AbilityPayloadDiscriminatorField,
   EngineRandomizedIceInstallSelectionCommand,
   EngineRandomizedTurnPlanSelectionCommand,
   EngineRandomizedTraceBidSelectionCommand,
   PlayerAction,
+  ReplayableEngineAction,
 } from "@netgrid/shared";
 import { ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION } from "@netgrid/shared";
 import { ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION } from "@netgrid/shared";
 import { ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION } from "@netgrid/shared";
 
-// Only current execution discriminators that contribute to Action IDs belong
-// here. The order is deterministic because replay and stale-action validation
-// compare generated IDs inside the current build.
-export const ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS = [
-  "v1911HiddenZoneAbility",
-  "v1917AssetAbility",
-  "v1918UpgradeAbility",
-  "v1919OperationAbility",
-  "v1919RunnerProgramAbility",
-  "v1919RunnerEventAbility",
-  "v1920AssetAbility",
-  "v1921AssetAbility",
-  "v1921UpgradeAbility",
-  "v1921RunnerProgramAbility",
-  "v1921RunnerResourceAbility",
-  "resourceAbility",
-  "runnerAbility",
-  "delayedInstallAbility",
-  "obligationDebtAbility",
-  "agendaAbility",
-] as const satisfies readonly AbilityPayloadDiscriminatorField[];
-
-const P358_HIDDEN_REPLACEMENT_CHOICE_PREFIX = "hidden_zone.";
-const P358_SUCCESSFUL_RUN_FORT_ICE_REORDER_CHOICE_PREFIX =
-  "hidden_zone.successful_run_fort_ice_reorder:";
-const SECRET_SPEND_GUESS_TARGETED_BYPASS_RUN_CHOICE_PREFIX =
-  "hidden_zone.secret_spend_guess_then_targeted_bypass_run.";
-const P358_CONCEAL_AND_REORDER_INSTALLED_ICE_CHOICE_PREFIX =
-  "hidden_zone.conceal_and_reorder_installed_ice:";
-
-// Hidden replacement choices use functional source prefixes; card files may
-// name cards, but runtime replay/stale guards should describe the reusable path.
-export function isP358HiddenReplacementCompatibilityChoiceSource(
-  source: string,
-): boolean {
-  return source.startsWith(P358_HIDDEN_REPLACEMENT_CHOICE_PREFIX);
-}
-
-export function isP358SuccessfulRunFortIceReorderChoiceSource(
-  source: string,
-): boolean {
-  return source.startsWith(P358_SUCCESSFUL_RUN_FORT_ICE_REORDER_CHOICE_PREFIX);
-}
-
-export function isSecretSpendGuessTargetedBypassRunChoiceSource(
-  source: string,
-): boolean {
-  return source.startsWith(
-    SECRET_SPEND_GUESS_TARGETED_BYPASS_RUN_CHOICE_PREFIX,
-  );
-}
-
-export function isP358ConcealAndReorderInstalledIceChoiceSource(
-  source: string,
-): boolean {
-  return source.startsWith(
-    P358_CONCEAL_AND_REORDER_INSTALLED_ICE_CHOICE_PREFIX,
-  );
+export function replayActionFromPayload(
+  value: unknown,
+): ReplayableEngineAction | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return undefined;
+  if (!("kind" in value))
+    return isStoredPlayerAction(value) ? value : undefined;
+  switch (value.kind) {
+    case "engine_randomized_ice_install_selection":
+      return isReplayRandomizedIceInstallSelectionCommand(value)
+        ? value
+        : undefined;
+    case "engine_randomized_turn_plan_selection":
+      return isReplayRandomizedTurnPlanSelectionCommand(value)
+        ? value
+        : undefined;
+    case "engine_randomized_trace_bid_selection":
+      return isReplayRandomizedTraceBidSelectionCommand(value)
+        ? value
+        : undefined;
+    default:
+      return undefined;
+  }
 }
 
 // Replay stores the original PlayerAction payload. This structural guard is
 // intentionally narrow and must remain independent of newer action subtypes.
-export function isReplayCompatibilityActionPayload(
-  value: unknown,
-): value is PlayerAction {
+function isStoredPlayerAction(value: unknown): value is PlayerAction {
   if (!value || typeof value !== "object") return false;
   const record = value as Partial<PlayerAction>;
   return (
     typeof record.matchId === "string" &&
-    typeof record.side === "string" &&
+    (record.side === "corp" || record.side === "runner") &&
     typeof record.actionId === "string" &&
     typeof record.clientKnownStateVersion === "number"
   );
 }
 
-export function isReplayRandomizedIceInstallSelectionCommand(
+function isReplayRandomizedIceInstallSelectionCommand(
   value: unknown,
 ): value is EngineRandomizedIceInstallSelectionCommand {
   if (!value || typeof value !== "object") return false;
@@ -113,7 +76,7 @@ export function isReplayRandomizedIceInstallSelectionCommand(
   );
 }
 
-export function isReplayRandomizedTurnPlanSelectionCommand(
+function isReplayRandomizedTurnPlanSelectionCommand(
   value: unknown,
 ): value is EngineRandomizedTurnPlanSelectionCommand {
   if (!value || typeof value !== "object") return false;
@@ -137,7 +100,7 @@ export function isReplayRandomizedTurnPlanSelectionCommand(
   );
 }
 
-export function isReplayRandomizedTraceBidSelectionCommand(
+function isReplayRandomizedTraceBidSelectionCommand(
   value: unknown,
 ): value is EngineRandomizedTraceBidSelectionCommand {
   if (!value || typeof value !== "object") return false;

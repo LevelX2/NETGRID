@@ -82,7 +82,7 @@ import {
   restrictedHostedCreditSourceIds,
   runDurationPaymentHost,
 } from "../run/run-duration-payment";
-import { isSupportedEncounterTraceSuccessEffect } from "../run/encounter-printed-effects";
+import { isSupportedTraceSuccessEffect } from "../trace/trace-success-effect-validation";
 import { isActivityGatedFortRunBlocked } from "../run/fort-run-side-families";
 import {
   createRunAccessLegalActionHostComposition,
@@ -90,7 +90,7 @@ import {
 } from "../run/run-access-legal-action-hosts";
 import { resumePaidRunnerBreakerAction } from "../run/runner-breaker-action-execution";
 import { corpUtilityImplementationForDefinition } from "../play/corp-operation-resolution";
-import { publicServerLabel } from "../../public-context";
+import { publicServerLabel } from "../view/server-view";
 import { traceSuccessEffectForCardImplementation } from "../../ability-engine/trace-implementations";
 import { type RuntimeIcebreakerAbility } from "../../ability-engine/icebreaker-abilities";
 import {
@@ -107,7 +107,6 @@ import {
   finishRun,
   recurringTraceCreditPoolTotal,
 } from "./runtime-bootstrap-support";
-import type { RuntimeDeps } from "./runtime-shared";
 
 function accessSourceDefinitionIdsForRuntime(): {
   setup: CardDefinitionId;
@@ -295,9 +294,7 @@ export function isInstalledNetDamageUpgrade(
   );
 }
 
-export function configureFlowRuntimeBootstrap({
-  cardImplementationRuntimeDeps,
-}: Pick<RuntimeDeps, "cardImplementationRuntimeDeps">) {
+export function configureFlowRuntimeBootstrap() {
   const accessSourceDefinitionIds = accessSourceDefinitionIdsForRuntime();
   function utilityInstalledOnFort(
     state: GameState,
@@ -918,7 +915,7 @@ export function configureFlowRuntimeBootstrap({
           resolveTraceTrashRunnerResourceSuccess:
             runtimePorts.resolveTraceTrashRunnerResourceSuccess,
           supportsTraceSuccessEffect: (effect) =>
-            isSupportedEncounterTraceSuccessEffect(
+            isSupportedTraceSuccessEffect(
               effect,
               runtimePorts.traceCounterEffectDefinitionFor,
             ),

@@ -27,10 +27,10 @@ describe("action payload ability compatibility", () => {
       actionHasAbility(
         {
           payload: {
-            v1911HiddenZoneAbility: "self_modifying_code_install_program",
+            v1917AssetAbility: "rescheduler_hq_shuffle_draw",
           },
         },
-        "self_modifying_code_install_program",
+        "rescheduler_hq_shuffle_draw",
       ),
     ).toBe(true);
     expect(

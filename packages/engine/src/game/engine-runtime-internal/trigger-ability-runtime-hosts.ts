@@ -43,14 +43,13 @@ import {
   startHqIceSwapChoice,
 } from "../run/fort-pass-window";
 import { runnerMemoryLimit } from "../../ability-engine/effective-values";
-import { publicServerLabel } from "../../public-context";
+import { publicServerLabel } from "../view/server-view";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { executeCardImplementationLifecycleEffects } from "../../ability-engine/card-implementation-runtime";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createTriggerAbilityRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: RuntimeDeps,
 ): Pick<
   import("./card-runtime-host-port").CardRuntimeHostPort,
   | "runnerSpecialTriggerExecutionHost"

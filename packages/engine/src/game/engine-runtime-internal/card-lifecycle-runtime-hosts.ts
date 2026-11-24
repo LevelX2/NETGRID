@@ -57,14 +57,13 @@ import { passApproachedIce } from "../run/run-movement";
 import { onPlayCardImplementationEffects } from "../play/corp-operation-resolution";
 import { hiddenRunnerResourceSlotId } from "../view/card-view";
 import { runnerMemoryLimit } from "../../ability-engine/effective-values";
-import { serverChoiceDisplayLabel } from "../../public-context";
+import { serverChoiceDisplayLabel } from "../view/server-view";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { executeCardImplementationLifecycleEffects } from "../../ability-engine/card-implementation-runtime";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createCardLifecycleRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: RuntimeDeps,
 ): Pick<
   import("./card-runtime-host-port").CardRuntimeHostPort,
   | "installCardHost"

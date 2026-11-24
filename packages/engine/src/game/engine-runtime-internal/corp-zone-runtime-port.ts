@@ -118,10 +118,6 @@ export type CorpZoneRuntimePort = {
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ) => void;
-  resolveScoredAgendaCorpRdTopReveal: (
-    state: GameState,
-    legalAction: LegalAction,
-  ) => void;
   shuffleCorpCardIntoRd: (
     state: GameState,
     cardId: CardInstanceId,

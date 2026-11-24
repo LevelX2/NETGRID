@@ -100,7 +100,6 @@ export function openReplacementWindow(
   state.pendingChoice = replacementChoice(
     state,
     window,
-    state.imminentEvent,
     state.stateVersion + 1,
   );
   legalAction.payload = {
@@ -267,7 +266,6 @@ export function isCorpTurnDamageWindow(state: GameState): boolean {
 export function replacementChoice(
   state: GameState,
   window: ReplacementWindow,
-  event: ImminentEvent,
   stateVersion: number,
 ): ChoiceRequest {
   const candidate = mustArrayValue(

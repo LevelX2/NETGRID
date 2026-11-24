@@ -125,7 +125,7 @@ describe("game replay facade", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state2));
   });
 
-  it("keeps replay compatibility payload rejection stable", () => {
+  it("rejects malformed replay action payloads", () => {
     const initial = createGame({
       seed: "arch-58-replay-invalid-payload",
       setupMode: "completed",
@@ -146,6 +146,22 @@ describe("game replay facade", () => {
     expect(replay.errors).toEqual([
       "Event 2 has no replayable action.",
     ]);
+  });
+
+  it("rejects a private replay action bound to a different actor", () => {
+    const initial = createGame({ seed: "replay-actor-mismatch" });
+    const action = replayAction(initial, "corp", "unused");
+    const event = {
+      ...replayEvent(action, nextReplayState(initial, 1)),
+      publicPayload: { actor: "runner" as const },
+      privatePayload: { runner: { action } },
+    };
+
+    const replay = replayGameEvents(initial, [event]);
+
+    expect(replay.ok).toBe(false);
+    expect(replay.errors).toEqual(["Actor mismatch at event 2."]);
+    expect(replay.state.stateVersion).toBe(initial.stateVersion);
   });
 
   it("rejects events whose ID does not match the state version", () => {

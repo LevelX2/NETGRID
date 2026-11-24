@@ -37,8 +37,6 @@ export {
   hashState,
   validateGameState,
   validateGameStateForDebug,
-  validateDeckDefinition,
-  applyEffectCommands,
   CARD_DEFINITIONS,
   CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,

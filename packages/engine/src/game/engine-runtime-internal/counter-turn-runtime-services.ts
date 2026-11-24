@@ -6,10 +6,8 @@ import {
 import { mustInstance } from "../state/card-server-lookup";
 import { CARD_IMPLEMENTATIONS } from "../../card-implementations/registry";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
-import type { RuntimeDeps } from "./runtime-shared";
 
 export function createCounterTurnRuntimeServices(
-  deps: RuntimeDeps,
   runtime: Pick<
     import("./lookup-runtime-port").LookupRuntimePort,
     | "installedVirusCounterTotalForDefinition"

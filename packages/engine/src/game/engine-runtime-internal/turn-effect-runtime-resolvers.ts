@@ -7,7 +7,7 @@ import {
   type ResolvedGameEffect,
   type Side,
 } from "@netgrid/shared";
-import type { AutomaticEffectCollector, RuntimeDeps } from "./runtime-shared";
+import type { AutomaticEffectCollector } from "./runtime-shared";
 
 type TurnRuntimePort = import("./turn-runtime-port").TurnRuntimePort;
 type TurnEffectRuntimeResolvers = Pick<
@@ -23,15 +23,8 @@ type TurnEffectRuntimeResolvers = Pick<
   | "publicCardTitle"
 >;
 
-/**
- * Owns automatic turn-effect collection and public effect metadata.
- * Cross-domain links are read only when a resolver runs, after the aggregate
- * turn runtime has been composed.
- */
-export function createTurnEffectRuntimeResolvers(
-  deps: RuntimeDeps,
-  links: TurnRuntimePort,
-): TurnEffectRuntimeResolvers {
+/** Owns automatic turn-effect collection and public effect metadata. */
+export function createTurnEffectRuntimeResolvers(): TurnEffectRuntimeResolvers {
   function appendResolvedEffectsToPayload(
     legalAction: LegalAction | undefined,
     effects: AutomaticEffectCollector,

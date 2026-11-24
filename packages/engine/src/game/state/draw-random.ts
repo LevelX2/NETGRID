@@ -1,6 +1,7 @@
 import {
   isRandomPurpose,
   isRandomHistory,
+  type AiTurnPlanRandomDrawRecord,
   type RandomPurpose,
   type RandomDrawRecord,
   type RandomDomain,
@@ -148,17 +149,60 @@ export function randomHqAccess(state: GameState): CardInstanceId | undefined {
 }
 
 export function nextRandom(state: GameState, purpose: RandomPurpose): number {
+  const record = engineRandomDraw(state, purpose);
+  appendRandomRecord(state.randomDrawRecords, record);
+  state.randomCounter += 1;
+  return record.value;
+}
+
+function engineRandomDraw(state: GameState, purpose: RandomPurpose): RandomDrawRecord {
   assertRandomCursor(state.randomCounter, state.randomDrawRecords);
   assertRandomPurpose(purpose);
-  const record = createRandomDraw(
+  return createRandomDraw(
     state.seed,
     purpose,
     state.randomCounter,
     "engine",
   );
-  appendRandomRecord(state.randomDrawRecords, record);
-  state.randomCounter += 1;
-  return record.value;
+}
+
+// The ordinary action application owns the full mutable state copy. A selection
+// prepares only the private RNG cursor before choosing that action.
+export function prepareEngineSelectionDraw(
+  state: GameState,
+  purpose: RandomPurpose,
+): { state: GameState; record: RandomDrawRecord } {
+  const record = engineRandomDraw(state, purpose);
+  return {
+    state: {
+      ...state,
+      randomCounter: record.counter + 1,
+      randomDrawRecords: [...state.randomDrawRecords, record],
+    },
+    record,
+  };
+}
+
+export function prepareAiSelectionDraw(
+  state: GameState,
+  purpose: RandomPurpose,
+): { state: GameState; record: AiTurnPlanRandomDrawRecord } | undefined {
+  const counter = state.aiTurnPlanRandomCounter;
+  const history = state.aiTurnPlanRandomDrawRecords;
+  if (counter === undefined || !history || !isRandomHistory(counter, history, "ai_turn_plan_selection"))
+    return undefined;
+  const record: AiTurnPlanRandomDrawRecord = {
+    ...createRandomDraw(state.seed, purpose, counter, "ai_turn_plan_selection"),
+    domain: "ai_turn_plan_selection",
+  };
+  return {
+    state: {
+      ...state,
+      aiTurnPlanRandomCounter: counter + 1,
+      aiTurnPlanRandomDrawRecords: [...history, record],
+    },
+    record,
+  };
 }
 
 export function rollDeterministicDie(

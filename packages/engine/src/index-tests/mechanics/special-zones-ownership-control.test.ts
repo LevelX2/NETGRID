@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
-  applyEffectCommands,
   checkWinConditions,
   createGame,
   CARD_DEFINITIONS_BY_ID,
@@ -13,7 +12,6 @@ import {
   isHiddenInfoBarrierEvent,
   quoteCorpRezCost,
   replayEvents,
-  validateDeckDefinition,
   validateGameState,
 } from "../../index";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";

@@ -1,6 +1,13 @@
+import "./runtime-bootstrap";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import * as runtimePorts from "./runtime-port-bindings";
-import type { DeckDefinition, EffectCommand, GameState, Side, ValidationResult } from "@netgrid/shared";
+import type {
+  DeckDefinition,
+  EffectCommand,
+  GameState,
+  Side,
+  ValidationResult,
+} from "@netgrid/shared";
 import { validateGameState } from "../validation";
 
 import { cloneState } from "./runtime-bootstrap-support";

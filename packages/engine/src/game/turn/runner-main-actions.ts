@@ -3,11 +3,17 @@ import {
   type CardDefinition,
   type CardDefinitionId,
   type CardInstanceId,
+  type CorpServer,
+  type CounterType,
   type GameState,
   type LegalAction,
   type MultiServerSuccessSequenceState,
+  type Side,
 } from "@netgrid/shared";
-import { canonicalCapabilityId } from "@netgrid/cards/engine";
+import {
+  canonicalCapabilityId,
+  engineCardByDefinitionId,
+} from "@netgrid/cards/engine";
 import {
   deterministicOnPlayResourcePayload,
   isPrintedCostOnPlayAbility,
@@ -26,99 +32,184 @@ import {
 } from "./runner-fort-ice-trash-quote";
 import { withRunnerPostBreakTrashQuote } from "./runner-post-break-trash-quote";
 
-type HostFn<T = unknown> = (...args: any[]) => T;
+import type {
+  CardRunnerUtilityLongtailImplementation,
+  CardUniqueDirectLongtailImplementation,
+  MakeRunEffectImplementation,
+} from "../../ability-engine/definition-types";
+import type { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import type { RunnerEventResolver } from "../play/runner-event-contract";
+import type {
+  activeRunActionSpendingCapSourceIds,
+  availableRunnerRunStartCredits,
+  runDurationPaymentHost,
+  RunDurationPaymentHost,
+} from "../run/run-duration-payment";
+import type { definitionFor, mustServer } from "../state/card-server-lookup";
+import type { serverChoiceDisplayLabel } from "../view/server-view";
+import type { buildLegalAction } from "./action-builders";
+import type {
+  buildRunnerEndTurnAction,
+  buildRunnerGainCreditAction,
+  buildRunnerRemoveTagAction,
+} from "./runner-basic-actions";
+import type {
+  buildRunnerDrawCardActions,
+  RunnerDrawActionContext,
+} from "./runner-draw-actions";
+import type { buildRunnerHostedProgramInstallAction } from "./runner-hosted-install-actions";
+import type {
+  buildRunnerHardwareInstallAction,
+  buildRunnerProgramInstallAction,
+  buildRunnerResourceInstallAction,
+} from "./runner-install-actions";
+import type {
+  buildRunnerAgendaPointInstallAction,
+  buildRunnerSelectedServerInstallAction,
+} from "./runner-install-context-actions";
+import type { buildRunnerProgramTrashBeforeInstallAction } from "./runner-program-trash-install-actions";
+import type {
+  buildRunnerDelayedInstallRemoveCounterAction,
+  buildRunnerDelayedInstallSetAsideAction,
+  buildRunnerValuPakInstallAction,
+  buildRunnerValuPakSequenceEndAction,
+} from "./runner-special-zone-install-actions";
 
 export type RunnerMainActionGenerationHost = {
   state: GameState;
   actions: {
-    buildLegalAction: HostFn<LegalAction>;
-    buildRunnerEndTurnAction: HostFn<LegalAction>;
-    buildRunnerGainCreditAction: HostFn<LegalAction>;
-    buildRunnerRemoveTagAction: HostFn<LegalAction>;
-    buildRunnerDrawCardActions: HostFn<LegalAction[]>;
-    buildRunnerProgramInstallAction: HostFn<LegalAction>;
-    buildRunnerProgramTrashBeforeInstallAction: HostFn<LegalAction>;
-    buildRunnerHostedProgramInstallAction: HostFn<LegalAction>;
-    buildRunnerAgendaPointInstallAction: HostFn<LegalAction>;
-    buildRunnerHardwareInstallAction: HostFn<LegalAction>;
-    buildRunnerSelectedServerInstallAction: HostFn<LegalAction>;
-    buildRunnerResourceInstallAction: HostFn<LegalAction>;
-    buildRunnerValuPakInstallAction: HostFn<LegalAction>;
-    buildRunnerValuPakSequenceEndAction: HostFn<LegalAction>;
-    buildRunnerDelayedInstallSetAsideAction: HostFn<LegalAction>;
-    buildRunnerDelayedInstallRemoveCounterAction: HostFn<LegalAction>;
+    buildLegalAction: typeof buildLegalAction;
+    buildRunnerEndTurnAction: typeof buildRunnerEndTurnAction;
+    buildRunnerGainCreditAction: typeof buildRunnerGainCreditAction;
+    buildRunnerRemoveTagAction: typeof buildRunnerRemoveTagAction;
+    buildRunnerDrawCardActions: typeof buildRunnerDrawCardActions;
+    buildRunnerProgramInstallAction: typeof buildRunnerProgramInstallAction;
+    buildRunnerProgramTrashBeforeInstallAction: typeof buildRunnerProgramTrashBeforeInstallAction;
+    buildRunnerHostedProgramInstallAction: typeof buildRunnerHostedProgramInstallAction;
+    buildRunnerAgendaPointInstallAction: typeof buildRunnerAgendaPointInstallAction;
+    buildRunnerHardwareInstallAction: typeof buildRunnerHardwareInstallAction;
+    buildRunnerSelectedServerInstallAction: typeof buildRunnerSelectedServerInstallAction;
+    buildRunnerResourceInstallAction: typeof buildRunnerResourceInstallAction;
+    buildRunnerValuPakInstallAction: typeof buildRunnerValuPakInstallAction;
+    buildRunnerValuPakSequenceEndAction: typeof buildRunnerValuPakSequenceEndAction;
+    buildRunnerDelayedInstallSetAsideAction: typeof buildRunnerDelayedInstallSetAsideAction;
+    buildRunnerDelayedInstallRemoveCounterAction: typeof buildRunnerDelayedInstallRemoveCounterAction;
   };
   cards: {
-    definitionFor: HostFn<any>;
-    isUniqueCard: HostFn<boolean>;
-    hasInstalledUniqueCardDefinition: HostFn<boolean>;
+    definitionFor: typeof definitionFor;
+    isUniqueCard: (definition: CardDefinition) => boolean;
+    hasInstalledUniqueCardDefinition: (
+      state: GameState,
+      side: Side,
+      definitionId: CardDefinitionId,
+    ) => boolean;
   };
   runner: {
-    filterActionsForRestrictedExtraActions?: HostFn<LegalAction[]>;
-    availableRunnerTagRemovalCredits: HostFn<number>;
-    availableRunnerProgramInstallCredits: HostFn<number>;
-    runnerCostPenaltySupportCreditCapacity: HostFn<number>;
-    availableRunnerRunStartCredits: HostFn<number>;
-    runnerDrawActionContext: HostFn<any>;
-    runnerUtilityLongtailKindForCard: HostFn<string | undefined>;
-    uniqueDirectLongtailImplementationForCard: HostFn<any>;
+    filterActionsForRestrictedExtraActions?: (
+      state: GameState,
+      side: Side,
+      actions: LegalAction[],
+    ) => LegalAction[];
+    availableRunnerTagRemovalCredits: (state: GameState) => number;
+    availableRunnerProgramInstallCredits: (state: GameState) => number;
+    runnerCostPenaltySupportCreditCapacity: (state: GameState) => number;
+    availableRunnerRunStartCredits: typeof availableRunnerRunStartCredits;
+    runnerDrawActionContext: (state: GameState) => RunnerDrawActionContext;
+    runnerUtilityLongtailKindForCard: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => CardRunnerUtilityLongtailImplementation["kind"] | undefined;
+    uniqueDirectLongtailImplementationForCard: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => CardUniqueDirectLongtailImplementation | undefined;
   };
   servers: {
-    mustServer: HostFn<any>;
-    serverChoiceDisplayLabel: HostFn<string>;
+    mustServer: typeof mustServer;
+    serverChoiceDisplayLabel: typeof serverChoiceDisplayLabel;
   };
   run: {
-    activeRunActionSpendingCapSourceIds: HostFn<string[]>;
-    runDurationPaymentHost: HostFn<unknown>;
-    runStartCreditLossForServer: HostFn<{
+    activeRunActionSpendingCapSourceIds: typeof activeRunActionSpendingCapSourceIds;
+    runDurationPaymentHost: typeof runDurationPaymentHost;
+    runStartCreditLossForServer: (
+      state: GameState,
+      serverId: CorpServer["id"],
+    ) => { amount: number; sourceDefinitionIds: CardDefinitionId[] };
+    runStartTaxForCorpRootAssets: (state: GameState) => {
       amount: number;
-      sourceDefinitionIds: number[];
-    }>;
-    runStartTaxForCorpRootAssets: HostFn<{
-      amount: number;
-      sourceDefinitionIds: number[];
-    }>;
+      sourceDefinitionIds: CardDefinitionId[];
+    };
   };
   install: {
-    shouldOfferRunnerProgramTrashBeforeInstall: HostFn<boolean>;
-    canHostProgramOnDaemon: HostFn<boolean>;
-    cardImplementationAgendaPointInstallCost: HostFn<number>;
-    pickRunnerAgendaForAgendaPointCost: HostFn<string | undefined>;
-    requiresDataFortInstallTarget: HostFn<boolean>;
+    shouldOfferRunnerProgramTrashBeforeInstall: (
+      state: GameState,
+      definition: CardDefinition,
+    ) => boolean;
+    canHostProgramOnDaemon: (
+      state: GameState,
+      hostId: CardInstanceId,
+      definition: CardDefinition,
+    ) => boolean;
+    cardImplementationAgendaPointInstallCost: (
+      definition: CardDefinition,
+    ) => number;
+    pickRunnerAgendaForAgendaPointCost: (
+      state: GameState,
+    ) => CardInstanceId | undefined;
+    requiresDataFortInstallTarget: (definition: CardDefinition) => boolean;
   };
   memory: {
-    runnerMemoryLimit: HostFn<number>;
+    runnerMemoryLimit: (state: GameState) => number;
   };
   counters: {
-    cardCounter: HostFn<number>;
-    runnerTraceCounterEffectDefinitions: HostFn<any[]>;
-    runnerCounterDisplayName: HostFn<string>;
+    cardCounter: (
+      state: GameState,
+      cardId: CardInstanceId,
+      counterType: CounterType,
+    ) => number;
+    runnerTraceCounterEffectDefinitions: () => readonly RunnerTraceCounterEffect[];
+    runnerCounterDisplayName: (counterType: CounterType) => string;
   };
   specialZones: {
-    valuPakProgramInstallActionsRemaining: HostFn<number>;
-    runnerInstallableProgramIdsForValuPak: HostFn<string[]>;
-    specialZoneHarnessActions: HostFn<LegalAction[]>;
-    delayedInstallPrepareTargetIds: HostFn<string[]>;
-    delayedInstallCounterCost: HostFn<number>;
-    delayedInstallPreparedTargetIds: HostFn<string[]>;
+    valuPakProgramInstallActionsRemaining: (state: GameState) => number;
+    runnerInstallableProgramIdsForValuPak: (
+      state: GameState,
+    ) => CardInstanceId[];
+    specialZoneHarnessActions: (state: GameState, side: Side) => LegalAction[];
+    delayedInstallPrepareTargetIds: (state: GameState) => CardInstanceId[];
+    delayedInstallCounterCost: (definition: CardDefinition) => number;
+    delayedInstallPreparedTargetIds: (state: GameState) => CardInstanceId[];
   };
   cardImplementation: {
-    runtimeDeps: unknown;
-    cardImplementationForDefinitionId: HostFn<any>;
-    pushEndOfRunnerTurnActions: HostFn<void>;
-    canPlayPrintedCostOnPlayImplementation: HostFn<boolean>;
-    runnerEventResolver: HostFn<any>;
-    runnerEventInstallChoiceActionPayload?: HostFn<
-      NonNullable<LegalAction["payload"]> | undefined
-    >;
-    printedCostMakeRunEffect: HostFn<any>;
-    pushActivatedActions: HostFn<void>;
+    cardImplementationForDefinitionId: typeof cardImplementationForDefinitionId;
+    pushEndOfRunnerTurnActions: (
+      state: GameState,
+      actions: LegalAction[],
+    ) => void;
+    canPlayPrintedCostOnPlayImplementation: (
+      state: GameState,
+      definition: CardDefinition,
+    ) => boolean;
+    runnerEventResolver: (
+      definition: CardDefinition,
+    ) => RunnerEventResolver | undefined;
+    printedCostMakeRunEffect: (
+      definition: CardDefinition,
+    ) => MakeRunEffectImplementation | undefined;
+    pushActivatedActions: (
+      state: GameState,
+      actions: LegalAction[],
+      side: Side,
+      cardId: CardInstanceId,
+      definition: CardDefinition,
+      options: { canStartRun: boolean },
+    ) => void;
   };
 };
 
 function runnerInstallCapabilitiesMet(
   host: RunnerMainActionGenerationHost,
-  definition: any,
+  definition: CardDefinition,
 ): boolean {
   const installCapabilities =
     host.cardImplementation.cardImplementationForDefinitionId(definition.id)
@@ -151,7 +242,7 @@ function runnerEventClickCost(
 }
 
 function runnerEventCapabilityBinding(
-  host: RunnerMainActionGenerationHost,
+  state: GameState,
   definition: CardDefinition,
   sourceCardInstanceId: CardInstanceId,
 ):
@@ -160,9 +251,10 @@ function runnerEventCapabilityBinding(
       payload: NonNullable<LegalAction["payload"]>;
     }
   | undefined {
-  const implementation =
-    host.cardImplementation.cardImplementationForDefinitionId(definition.id);
-  const ability = implementation?.abilities?.find(isPrintedCostOnPlayAbility);
+  const implementation = engineCardByDefinitionId(definition.id)?.engine;
+  const ability = implementation?.abilities?.find(
+    (candidate) => candidate.kind === "on_play",
+  );
   const capability = ability ?? implementation?.hiddenReplacementLongtail;
   if (!capability) return undefined;
   const sourceAbilityId = canonicalCapabilityId(
@@ -183,14 +275,13 @@ function runnerEventCapabilityBinding(
         ? {
             runnerConditionalAgendaPointQuoteSchema:
               "runner-conditional-agenda-point-v1",
-            runnerConditionalAgendaPointQuoteStateVersion:
-              host.state.stateVersion,
+            runnerConditionalAgendaPointQuoteStateVersion: state.stateVersion,
             runnerConditionalAgendaPointQuoteSourceCardInstanceId:
               sourceCardInstanceId,
             runnerConditionalAgendaPointQuoteSourceCapabilityId:
               sourceAbilityId,
             runnerConditionalAgendaPointQuoteAmount:
-              host.state.runnerTurnFlags?.stoleBlackOpsAgendaThisTurn === true
+              state.runnerTurnFlags?.stoleBlackOpsAgendaThisTurn === true
                 ? 1
                 : 0,
           }
@@ -247,12 +338,6 @@ export function buildRunnerMainActions(
       candidateActions);
   const availableRunnerTagRemovalCredits =
     host.runner.availableRunnerTagRemovalCredits;
-  const availableRunnerProgramInstallCredits =
-    host.runner.availableRunnerProgramInstallCredits;
-  const runnerCostPenaltySupportCreditCapacity =
-    host.runner.runnerCostPenaltySupportCreditCapacity;
-  const availableRunnerRunStartCredits =
-    host.runner.availableRunnerRunStartCredits;
   const runnerMemoryLimit = host.memory.runnerMemoryLimit;
   const cardCounter = host.counters.cardCounter;
   const runnerTraceCounterEffectDefinitions =
@@ -270,7 +355,7 @@ export function buildRunnerMainActions(
     host.specialZones.delayedInstallPreparedTargetIds;
   const activeRunActionSpendingCapSourceIds =
     host.run.activeRunActionSpendingCapSourceIds;
-  const runDurationPaymentHost = host.run.runDurationPaymentHost;
+
   const runStartCreditLossForServer = host.run.runStartCreditLossForServer;
   const runStartTaxForCorpRootAssets = host.run.runStartTaxForCorpRootAssets;
   const shouldOfferRunnerProgramTrashBeforeInstall =
@@ -282,16 +367,12 @@ export function buildRunnerMainActions(
     host.install.pickRunnerAgendaForAgendaPointCost;
   const requiresDataFortInstallTarget =
     host.install.requiresDataFortInstallTarget;
-  const cardImplementationRuntimeDeps = host.cardImplementation.runtimeDeps;
   const pushCardImplementationEndOfRunnerTurnActions =
     host.cardImplementation.pushEndOfRunnerTurnActions;
   const canPlayPrintedCostOnPlayImplementation =
     host.cardImplementation.canPlayPrintedCostOnPlayImplementation;
   const cardImplementationRunnerEventResolver =
     host.cardImplementation.runnerEventResolver;
-  const runnerEventInstallChoiceActionPayload =
-    host.cardImplementation.runnerEventInstallChoiceActionPayload ??
-    (() => undefined);
   const printedCostCardImplementationMakeRunEffect =
     host.cardImplementation.printedCostMakeRunEffect;
   const pushActivatedCardImplementationActions =
@@ -303,13 +384,28 @@ export function buildRunnerMainActions(
     host.runner.uniqueDirectLongtailImplementationForCard;
 
   const actions: LegalAction[] = [];
+  const runnerRunPayment = host.run.runDurationPaymentHost(state);
+  // Credit sources do not change while the options for this state are built.
+  let programCredits: number | undefined;
+  let costPenaltyCredits: number | undefined;
+  let runStartCredits: number | undefined;
+  let eventCredits: number | undefined;
+  const availableProgramCredits = () =>
+    (programCredits ??= host.runner.availableRunnerProgramInstallCredits(state));
+  const availableCostPenaltyCredits = () =>
+    (costPenaltyCredits ??= host.runner.runnerCostPenaltySupportCreditCapacity(state));
+  const availableRunCredits = () =>
+    (runStartCredits ??= host.runner.availableRunnerRunStartCredits(runnerRunPayment));
+  const availableEventCredits = () =>
+    (eventCredits ??= state.runner.credits +
+      restrictedHostedCredits(state, "play_events") + availableCostPenaltyCredits());
   const pushRunnerProgramInstallAction = (
     installAction: LegalAction,
     definition: { installCost?: number },
   ) => {
     const installCost = definition.installCost ?? 0;
     const availableProgramInstallCredits =
-      availableRunnerProgramInstallCredits(state);
+      availableProgramCredits();
     const paymentActions = expandRunnerProgramInstallPaymentActions(
       state,
       installAction,
@@ -348,7 +444,7 @@ export function buildRunnerMainActions(
   const canStartRun = runnerCanStartRun(state);
   const hasClicks = state.runner.clicks > 0;
   const unusedRunOnlyActionSourceIds = activeRunActionSpendingCapSourceIds(
-    runDurationPaymentHost(state),
+    runnerRunPayment,
   ).filter(
     (sourceCardId) =>
       !flags?.runOnlyActionUsedSourceIdsThisTurn?.includes(sourceCardId),
@@ -364,7 +460,7 @@ export function buildRunnerMainActions(
       {
         pendingSequence,
         nextSequenceServerId,
-        runDurationPaymentHost: runDurationPaymentHost(state),
+        runDurationPaymentHost: runnerRunPayment,
       },
     );
     if (forcedRunActions.length > 0) return forcedRunActions;
@@ -401,7 +497,6 @@ export function buildRunnerMainActions(
     .slice()
     .sort()) {
     pushActivatedCardImplementationActions(
-      cardImplementationRuntimeDeps,
       state,
       actions,
       "runner",
@@ -416,7 +511,6 @@ export function buildRunnerMainActions(
     unusedRunOnlyActionSourceIds.length === 0
   ) {
     pushCardImplementationEndOfRunnerTurnActions(
-      cardImplementationRuntimeDeps,
       state,
       actions,
     );
@@ -441,7 +535,6 @@ export function buildRunnerMainActions(
       );
     }
     pushCardImplementationEndOfRunnerTurnActions(
-      cardImplementationRuntimeDeps,
       state,
       actions,
     );
@@ -464,7 +557,7 @@ export function buildRunnerMainActions(
     }
     if (
       cardCounter(state, state.runner.identity, "crying") > 0 &&
-      state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >= 2
+      state.runner.credits + availableCostPenaltyCredits() >= 2
     ) {
       actions.push(
         action(
@@ -493,7 +586,7 @@ export function buildRunnerMainActions(
       )
         continue;
       if (
-        state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) <
+        state.runner.credits + availableCostPenaltyCredits() <
         counterEffect.removeCost
       )
         continue;
@@ -531,7 +624,7 @@ export function buildRunnerMainActions(
     for (const subtype of subtypeChange.choices) {
       if (subtype === currentSubtype) continue;
       if (
-        state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) <
+        state.runner.credits + availableCostPenaltyCredits() <
         subtypeChange.cost.credits
       )
         continue;
@@ -570,8 +663,8 @@ export function buildRunnerMainActions(
       hasClicks &&
       definition.type === "program" &&
       !uniqueBlocked &&
-      availableRunnerProgramInstallCredits(state) +
-        runnerCostPenaltySupportCreditCapacity(state) >=
+      availableProgramCredits() +
+        availableCostPenaltyCredits() >=
         (definition.installCost ?? 0) &&
       state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
         runnerMemoryLimit(state)
@@ -637,7 +730,7 @@ export function buildRunnerMainActions(
       hasClicks &&
       definition.type === "program" &&
       !uniqueBlocked &&
-      availableRunnerProgramInstallCredits(state) >=
+      availableProgramCredits() >=
         (definition.installCost ?? 0) &&
       shouldOfferRunnerProgramTrashBeforeInstall(state, definition)
     ) {
@@ -681,7 +774,7 @@ export function buildRunnerMainActions(
       hasClicks &&
       definition.type === "program" &&
       !uniqueBlocked &&
-      availableRunnerProgramInstallCredits(state) >=
+      availableProgramCredits() >=
         (definition.installCost ?? 0)
     ) {
       for (const hostId of [
@@ -705,7 +798,7 @@ export function buildRunnerMainActions(
       hasClicks &&
       definition.type === "hardware" &&
       !uniqueBlocked &&
-      state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+      state.runner.credits + availableCostPenaltyCredits() >=
         (definition.installCost ?? 0)
     ) {
       const installAgendaPointCost =
@@ -730,7 +823,7 @@ export function buildRunnerMainActions(
       hasClicks &&
       definition.type === "resource" &&
       !uniqueBlocked &&
-      state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+      state.runner.credits + availableCostPenaltyCredits() >=
         (definition.installCost ?? 0)
     ) {
       if (!runnerInstallCapabilitiesMet(host, definition)) continue;
@@ -774,13 +867,9 @@ export function buildRunnerMainActions(
       hasClicks &&
       definition.type === "event" &&
       eventPlayCost !== undefined &&
-      state.runner.credits +
-        restrictedHostedCredits(state, "play_events") +
-        runnerCostPenaltySupportCreditCapacity(state) >=
-        eventPlayCost
+      availableEventCredits() >= eventPlayCost
     ) {
       const canPlayCardImplementation = canPlayPrintedCostOnPlayImplementation(
-        cardImplementationRuntimeDeps,
         state,
         definition,
       );
@@ -791,7 +880,7 @@ export function buildRunnerMainActions(
           : {}),
       };
       const eventCapabilityBinding = runnerEventCapabilityBinding(
-        host,
+        state,
         definition,
         id,
       );
@@ -840,13 +929,13 @@ export function buildRunnerMainActions(
           state,
           cardId: id,
           definition,
-        }) ?? runnerEventInstallChoiceActionPayload(state, id, definition);
+        });
       const makeRunEffect = canPlayCardImplementation
         ? printedCostCardImplementationMakeRunEffect(definition)
         : undefined;
       if (!canStartRun && (resolver?.startsRun === true || makeRunEffect))
         continue;
-      if (resolver?.canPlay && !resolver.canPlay(state, definition)) continue;
+      if (resolver?.canPlay && !resolver.canPlay(state)) continue;
       if (resolver?.legalActions) {
         const resolverActions = resolver.legalActions({
           state,
@@ -988,7 +1077,7 @@ export function buildRunnerMainActions(
           onPlaySourceDisposition.decisionTiming === "when_played" &&
           state.runner.credits +
             restrictedHostedCredits(state, "play_events") +
-            runnerCostPenaltySupportCreditCapacity(state) >=
+            availableCostPenaltyCredits() >=
             eventPlayCost + onPlaySourceDisposition.additionalCreditCost
         ) {
           actions.push(
@@ -1120,7 +1209,7 @@ export function buildRunnerMainActions(
         }
         if (
           state.runner.credits +
-            runnerCostPenaltySupportCreditCapacity(state) >=
+            availableCostPenaltyCredits() >=
           1
         ) {
           for (const targetCardId of delayedInstallPreparedTargetIds(state)) {
@@ -1142,6 +1231,7 @@ export function buildRunnerMainActions(
   }
   const { amount: runStartTaxCredits, sourceDefinitionIds: runStartTaxSources } =
     runStartTaxForCorpRootAssets(state);
+  let bonusRunSourceDefinitionId: CardDefinitionId | undefined;
   for (const server of state.corp.servers) {
     const serverRunAllowed = evaluateRunStartEligibility(
       state,
@@ -1173,7 +1263,7 @@ export function buildRunnerMainActions(
     if (hasClicks && serverRunAllowed) {
       if (
         runStartTaxCredits === 0 ||
-        availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
+        availableRunCredits() >=
           runStartTaxCredits
       ) {
         actions.push(
@@ -1197,7 +1287,7 @@ export function buildRunnerMainActions(
       if (
         serverRunAllowed &&
         (runStartTaxCredits === 0 ||
-          availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
+          availableRunCredits() >=
             runStartTaxCredits)
       ) {
         actions.push(
@@ -1236,7 +1326,7 @@ export function buildRunnerMainActions(
       bonusRunPending &&
       (!nextSequenceServerId || nextSequenceServerId === server.id) &&
       (runStartTaxCredits === 0 ||
-        availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
+        availableRunCredits() >=
           runStartTaxCredits)
     ) {
       actions.push(
@@ -1254,12 +1344,10 @@ export function buildRunnerMainActions(
             (bodyweightExtraRunPending && nextSequenceServerId === undefined)
               ? { optionalBonusRun: true }
               : {}),
-            bonusRunSource: nextSequenceServerId
-              ? pendingSequence?.sourceDefinitionId
-              : flags?.successfulRunExtraRunPending === true
-                ? uniqueInstalledSuccessfulRunFollowupOwner(state, host)
-                    .definitionId
-                : uniqueOptionalRunOnPlayOwnerDefinitionId(state, host),
+            bonusRunSource: (bonusRunSourceDefinitionId ??=
+              flags?.successfulRunExtraRunPending === true
+                ? uniqueInstalledSuccessfulRunFollowupOwner(state, host).definitionId
+                : uniqueOptionalRunOnPlayOwnerDefinitionId(state, host)),
             restrictedActionGrantActionType: "start_run",
             restrictedActionGrantCostProfile: "no_click",
             restrictedActionGrantRemainingActions: 1,
@@ -1298,7 +1386,6 @@ export function buildRunnerMainActions(
   }
   actions.push(...specialZoneHarnessActions(state, "runner"));
   pushCardImplementationEndOfRunnerTurnActions(
-    cardImplementationRuntimeDeps,
     state,
     actions,
   );
@@ -1408,10 +1495,7 @@ function uniqueOptionalRunOnPlayOwnerDefinitionId(
           host.cardImplementation
             .cardImplementationForDefinitionId(definitionId)
             ?.abilities?.some(
-              (ability: {
-                kind?: string;
-                effects?: Array<{ kind?: string; followupRunOnEnd?: string }>;
-              }) =>
+              (ability) =>
                 ability.kind === "on_play" &&
                 ability.effects?.some(
                   (effect) =>
@@ -1444,7 +1528,7 @@ function buildMultiServerSuccessSequenceForcedRunActions(
   input: {
     pendingSequence: MultiServerSuccessSequenceState;
     nextSequenceServerId: string;
-    runDurationPaymentHost: unknown;
+    runDurationPaymentHost: RunDurationPaymentHost;
   },
 ): LegalAction[] {
   const state = host.state;
@@ -1521,3 +1605,4 @@ function icebreakerSubtypeLabel(subtype: string): string {
   if (subtype === "wall") return "Wall";
   return subtype;
 }
+import type { RunnerTraceCounterEffect } from "../trace/runner-counter-effects";

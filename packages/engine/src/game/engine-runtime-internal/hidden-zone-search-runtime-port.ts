@@ -70,12 +70,7 @@ export type HiddenZoneSearchRuntimePort = {
     installCost: "normal" | "free",
     legalAction: LegalAction,
   ) => boolean;
-  resolveV1911RunnerHiddenZoneAbility: (
-    state: GameState,
-    legalAction: LegalAction,
-  ) => void;
   revealCorpRdTop: (state: GameState, legalAction: LegalAction) => void;
-  revealRunnerStackTop: (state: GameState, legalAction: LegalAction) => void;
   shuffleRunnerStack: (state: GameState, purpose: RandomPurpose) => void;
   startRunnerProgramFreeMemoryChoice: (
     state: GameState,

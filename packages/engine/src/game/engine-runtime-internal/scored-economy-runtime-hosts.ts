@@ -1,4 +1,5 @@
 import { effectiveCardHasNormalizedSubtype } from "../../ability-engine/card-implementation-modifiers";
+import { cloneGameStateForAction } from "../apply-action-state";
 import {
   type CardInstanceId,
   type CorpServer,
@@ -73,7 +74,6 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createScoredEconomyRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: RuntimeDeps = {} as RuntimeDeps,
 ): Pick<
   import("./action-runtime-port").ActionRuntimePort,
   | "corpInstallRezSequenceHandlerHost"
@@ -395,7 +395,7 @@ export function createScoredEconomyRuntimeHosts(
           selectedCardIds,
           temporaryCreditsAvailable,
         ) => {
-          const previewState = structuredClone(state);
+          const previewState = cloneGameStateForAction(state);
           const previewLegalAction = structuredClone(legalAction);
           const previewHost = corpInstallRezSequenceHandlerHost(
             previewState,
@@ -467,7 +467,7 @@ export function createScoredEconomyRuntimeHosts(
           if (!currentQuote.affordable)
             return { complete: true, executable: false };
 
-          const previewState = structuredClone(state);
+          const previewState = cloneGameStateForAction(state);
           const previewLegalAction = structuredClone(legalAction);
           previewState.stateVersion = choiceStateVersion;
           delete previewState.pendingChoice;
@@ -604,7 +604,7 @@ export function createScoredEconomyRuntimeHosts(
         rezInstalledIceWaivingBaseCost,
         installAndRezIceWaivingBaseCosts,
         preflightInstallAndRezIceWaivingBaseCosts: (entries) => {
-          const previewState = structuredClone(state);
+          const previewState = cloneGameStateForAction(state);
           const previewAction = structuredClone(legalAction);
           const previewHost = corpInstallRezSequenceHandlerHost(
             previewState,

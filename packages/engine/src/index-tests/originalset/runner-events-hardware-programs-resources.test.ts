@@ -7,7 +7,6 @@ import {
 } from "@netgrid/cards/engine";
 import {
   applyAction,
-  applyEffectCommands,
   checkWinConditions,
   createGame,
   createGameAfterSetup,
@@ -20,7 +19,6 @@ import {
   isHiddenInfoBarrierEvent,
   quoteCorpRezCost,
   replayEvents,
-  validateDeckDefinition,
   validateGameState,
 } from "../../index";
 import { collectActiveModifiers } from "../../test-fixtures/active-modifier-inspection";

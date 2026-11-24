@@ -1,3 +1,4 @@
+import { isSupportedTraceSuccessEffect } from "../trace/trace-success-effect-validation";
 import { type CounterType, type GameState, type LegalAction } from "@netgrid/shared";
 import { definitionFor, runnerInstalledCardIds } from "../state/card-server-lookup";
 import { spendCredits } from "../state/economy-mutation";
@@ -16,7 +17,6 @@ import {
 } from "../run/encounter-special-windows";
 import {
   applyPrintedTraceSuccessFollowups,
-  isSupportedEncounterTraceSuccessEffect,
 } from "../run/encounter-printed-effects";
 import { fortTraceBitPoolSource } from "../run/fort-run-side-families";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -27,7 +27,6 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createActivatedCardRuntimeHosts(
   deps: RuntimeDeps,
-  runtime: RuntimeDeps,
 ): Pick<
   import("./card-runtime-host-port").CardRuntimeHostPort,
   "traceOrchestrationHost" | "activatedCardImplementationExecutionHost"
@@ -108,7 +107,7 @@ export function createActivatedCardRuntimeHosts(
       },
       trace: {
         supportsTraceSuccessEffect: (effect) =>
-          isSupportedEncounterTraceSuccessEffect(
+          isSupportedTraceSuccessEffect(
             effect,
             deps.traceCounterEffectDefinitionFor,
           ),

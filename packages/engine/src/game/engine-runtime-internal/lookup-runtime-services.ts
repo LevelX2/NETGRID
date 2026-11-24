@@ -22,11 +22,8 @@ import type {
   CardCorpUtilityImplementation,
   CardVirusCounterImplementation,
 } from "../../ability-engine/definition-types";
-import type { RuntimeDeps } from "./runtime-shared";
 
-export function createLookupRuntimeServices(
-  deps: RuntimeDeps,
-): import("./lookup-runtime-port").LookupRuntimePort {
+export function createLookupRuntimeServices(): import("./lookup-runtime-port").LookupRuntimePort {
   function normalizeSubtypeLabel(subtype: string): string {
     return subtype
       .toLowerCase()

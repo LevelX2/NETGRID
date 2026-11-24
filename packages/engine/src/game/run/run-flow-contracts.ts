@@ -1,3 +1,4 @@
+import type { isSupportedTraceSuccessEffect } from "../trace/trace-success-effect-validation";
 import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
@@ -52,7 +53,6 @@ import {
   type EncounterPrintedNonTraceHost,
 } from "./encounter-printed-nontrace-effects";
 import {
-  isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "./encounter-printed-effects";
 import {
@@ -401,7 +401,7 @@ export type RunFlowHost = {
     applyRunnerForgoNextAction: (state: GameState) => void;
     hasInstalledRunnerApDamageReducerHardware: (state: GameState) => boolean;
     traceCounterEffectDefinitionFor: Parameters<
-      typeof isSupportedEncounterTraceSuccessEffect
+      typeof isSupportedTraceSuccessEffect
     >[1];
     installedRunnerVirusSourceIds: (
       state: GameState,

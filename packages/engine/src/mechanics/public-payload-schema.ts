@@ -8,7 +8,7 @@ import {
   type PublicEventPayload,
 } from "@netgrid/shared";
 
-const RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID =
+export const RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID =
   "runner_program_trash_before_install";
 
 export type PublicAbilitySchemaContext = Pick<

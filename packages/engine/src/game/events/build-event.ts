@@ -16,7 +16,7 @@ import {
   type StateHash,
 } from "@netgrid/shared";
 import type { PublicContextForActionDependencies } from "../../public-context";
-import { publicInstalledPositionContext } from "../../public-context";
+import { publicInstalledPositionContext } from "./public-installed-position-context";
 import {
   buildPublicAbilitySchemaContext,
   abilityPayloadDiscriminatorEntries,

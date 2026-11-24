@@ -350,20 +350,9 @@ describe("game apply-action core", () => {
   it("keeps PendingChoice validation and replay integration stable", () => {
     const state = createGame({
       seed: "arch-61-apply-action-choice",
-      setupMode: "completed",
     });
-    state.pendingChoice = {
-      choiceId: "arch_61_choice",
-      side: "runner",
-      source: "arch_61.choice",
-      kind: "select_option",
-      prompt: "ARCH-61 Test Choice",
-      options: [{ id: "ok", label: "OK" }],
-      minSelections: 1,
-      maxSelections: 1,
-      stateVersion: state.stateVersion,
-      visibility: "public",
-    };
+    const choice = state.pendingChoice;
+    if (!choice) throw new Error("Missing setup choice.");
     const legalAction = getLegalActions(state, "runner").find(
       (action) => action.type === "resolve_choice",
     );
@@ -372,8 +361,8 @@ describe("game apply-action core", () => {
     const action: PlayerAction = {
       ...playerActionFor(state, legalAction),
       selectedChoices: {
-        choiceId: "arch_61_choice",
-        selectedOptionIds: ["ok"],
+        choiceId: choice.choiceId,
+        selectedOptionIds: ["keep"],
       },
     };
 
@@ -381,6 +370,7 @@ describe("game apply-action core", () => {
     expect(result).toEqual(engineApplyAction(state, action));
     expect(result.ok).toBe(true);
     if (!result.ok) return;
+    expect(result.state.pendingChoice?.side).toBe("corp");
     const replay = replayGameEvents(state, [result.event]);
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(result.stateHash);

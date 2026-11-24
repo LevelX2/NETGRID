@@ -11,14 +11,16 @@ import {
   corpTracePaymentPublicPayload,
   payCorpTraceBidQuote,
   payCommittedCorpTraceBidQuote,
-  payRunnerTraceBidQuote,
   quoteCorpTraceBidPayment,
+  type CorpTracePaymentDependencies,
+} from "./corp-trace-payment";
+import {
+  payRunnerTraceBidQuote,
   quotePostBidLinkPayment,
   quoteRunnerTraceBidPayment,
   runnerTracePaymentPublicPayload,
-  type CorpTracePaymentDependencies,
   type RunnerTracePaymentDependencies,
-} from "./trace-payment";
+} from "./runner-trace-payment";
 
 describe("trace payment pools", () => {
   it.each([0, 1, 3])(

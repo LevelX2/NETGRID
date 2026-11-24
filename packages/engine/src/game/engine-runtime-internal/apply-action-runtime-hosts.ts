@@ -22,11 +22,10 @@ import {
 import { uninstallCorpInstalledCardToHq } from "../state/zone-mutation";
 import { type TurnBasicExecutionHost } from "../turn/turn-basic-execution";
 import { type CreditEconomyExecutionHost } from "../economy/credit-economy-execution";
-import { startCorpAssetRdTopReorderChoice } from "../hidden-zone/arrange-choice-handlers";
 import { resolveReschedulerHqShuffleDraw } from "../hidden-zone/corp-zone-choice-handlers";
 import { handleScoredAgendaActivatedAbilityAction } from "../corp/scored-agenda-abilities";
 import { handleCorpSpecialDamageAbilityAction } from "../corp/special-damage-abilities";
-import { publicServerLabelForCard } from "../../public-context";
+import { publicServerLabelForCard } from "../view/server-view";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import type { RuntimeDeps } from "./runtime-shared";
 
@@ -131,14 +130,6 @@ export function createApplyActionRuntimeHosts(
         publicInstalledCardIdentityKnown: publicInstalledCorpCardIdentityKnown,
         uninstallInstalledCardToHq: uninstallCorpInstalledCardToHq,
         trashInstalledCardToArchives: deps.trashCorpInstalledCardToArchives,
-      },
-      hiddenZone: {
-        resolveV1911RunnerHiddenZoneAbility:
-          deps.resolveV1911RunnerHiddenZoneAbility,
-        resolveScoredAgendaCorpRdTopReveal:
-          deps.resolveScoredAgendaCorpRdTopReveal,
-        revealRunnerStackTop: deps.revealRunnerStackTop,
-        revealCorpRdTop: deps.revealCorpRdTop,
         resolveReschedulerHqShuffleDraw: (
           stateForAction,
           legalAction,
@@ -146,18 +137,6 @@ export function createApplyActionRuntimeHosts(
         ) =>
           resolveReschedulerHqShuffleDraw(
             deps.corpZoneChoiceHandlerHost(stateForAction, legalAction),
-            sourceCardId,
-          ),
-        startCorpAssetRdTopReorderChoice: (
-          stateForAction,
-          legalAction,
-          sourceCardId,
-        ) =>
-          startCorpAssetRdTopReorderChoice(
-            deps.hiddenZoneArrangeChoiceHandlerHost(
-              stateForAction,
-              legalAction,
-            ),
             sourceCardId,
           ),
       },

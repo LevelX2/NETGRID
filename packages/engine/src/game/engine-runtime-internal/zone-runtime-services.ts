@@ -9,11 +9,8 @@ import {
 import { quoteCorpIceInstallCost } from "../payment";
 import { assertCorpIceInstallAllowed } from "../install/corp-ice-install-restrictions";
 import { mustServer } from "../state/card-server-lookup";
-import type { RuntimeDeps } from "./runtime-shared";
 
-export function createZoneRuntimeServices(
-  deps: RuntimeDeps,
-): import("./zone-runtime-port").ZoneRuntimePort {
+export function createZoneRuntimeServices(): import("./zone-runtime-port").ZoneRuntimePort {
   function corpIceInstallBaseCost(server: CorpServer): number {
     return Math.max(0, server.ice.length);
   }

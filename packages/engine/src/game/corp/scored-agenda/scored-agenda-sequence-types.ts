@@ -1,5 +1,5 @@
 import type { CardInstanceId, LegalAction } from "@netgrid/shared";
-import { sanitizeCardImplementationSurfacePayload } from "../../view/surface-sanitizer";
+import { sanitizeCardImplementationSurfacePayload } from "../../view/surface-policy";
 import type { CorpInstallRezSequenceHandlerResult } from "./scored-agenda-sequence-host";
 
 export type CorpSequencePayloadValue = string | number | boolean;

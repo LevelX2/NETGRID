@@ -1,11 +1,9 @@
 import {
   randomContextFingerprint,
-  isRandomHistory,
   type RandomPurpose,
 } from "@netgrid/shared";
 import {
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
-  type AiTurnPlanRandomDrawRecord,
   type ApplyActionOptions,
   type EngineError,
   type EngineRandomizedTurnPlanCandidate,
@@ -19,9 +17,8 @@ import {
   type PlayerAction,
 } from "@netgrid/shared";
 import { buildApplyAction, type ApplyActionCoreHost } from "./apply-action";
-import { cloneGameStateForAction } from "./apply-action-state";
 import { getLegalActions } from "./legal-actions";
-import { createRandomDraw } from "./state/draw-random";
+import { prepareAiSelectionDraw } from "./state/draw-random";
 
 let defaultHost: ApplyActionCoreHost | undefined;
 
@@ -165,38 +162,20 @@ export function buildApplyRandomizedTurnPlanSelection(
     );
   }
 
-  const next = cloneGameStateForAction(state);
-  const counter = next.aiTurnPlanRandomCounter;
-  if (
-    counter === undefined ||
-    !isRandomHistory(
-      counter,
-      next.aiTurnPlanRandomDrawRecords,
-      "ai_turn_plan_selection",
-    )
-  ) {
+  const prepared = prepareAiSelectionDraw(state, turnPlanSelectionPurpose(requoted.quote));
+  if (!prepared) {
     return applyFail(
       state,
       "ERR_INVARIANT_FAILED",
       "Der TurnPlan-Zufallszähler ist ungültig.",
     );
   }
-  const purpose = turnPlanSelectionPurpose(requoted.quote);
-  const randomDraw: AiTurnPlanRandomDrawRecord = {
-    ...createRandomDraw(next.seed, purpose, counter, "ai_turn_plan_selection"),
-    domain: "ai_turn_plan_selection",
-  };
-  const value = randomDraw.value;
-  next.aiTurnPlanRandomCounter = counter + 1;
-  next.aiTurnPlanRandomDrawRecords = [
-    ...next.aiTurnPlanRandomDrawRecords!,
-    randomDraw,
-  ];
+  const randomDraw = prepared.record;
   const totalWeight = requoted.quote.candidates.reduce(
     (sum, candidate) => sum + candidate.weight,
     0,
   );
-  let weightedIndex = value * totalWeight;
+  let weightedIndex = randomDraw.value * totalWeight;
   let selectedIndex = requoted.quote.candidates.length - 1;
   for (let index = 0; index < requoted.quote.candidates.length; index += 1) {
     weightedIndex -= requoted.quote.candidates[index]!.weight;
@@ -216,7 +195,7 @@ export function buildApplyRandomizedTurnPlanSelection(
       ? { idempotencyKey: command.idempotencyKey }
       : {}),
   };
-  const applied = buildApplyAction(host, next, action, options);
+  const applied = buildApplyAction(host, prepared.state, action, options);
   if (!applied.ok) return { ok: false, error: applied.error, state };
   const receipt = {
     schemaVersion: ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,

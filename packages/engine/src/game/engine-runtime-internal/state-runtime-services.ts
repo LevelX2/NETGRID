@@ -23,10 +23,10 @@ export function createStateRuntimeServices(
   Object.assign(
     runtime,
     createEconomyRuntimeServices(deps),
-    createLookupRuntimeServices(deps),
+    createLookupRuntimeServices(),
     createCardStrengthCostRuntimeServices(deps, runtime),
-    createCounterTurnRuntimeServices(deps, runtime),
-    createZoneRuntimeServices(deps),
+    createCounterTurnRuntimeServices(runtime),
+    createZoneRuntimeServices(),
   );
   return runtime;
 }

@@ -49,7 +49,6 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createCardRuntimeDepsHosts(
   deps: RuntimeDeps,
-  runtime: RuntimeDeps,
 ): Pick<
   import("./card-runtime-host-port").CardRuntimeHostPort,
   | "selectedServerIcebreakerStrengthCounterBonus"

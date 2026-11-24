@@ -41,9 +41,9 @@ import type {
 } from "../../ability-engine/definition-types";
 import type {
   RunnerDrawSummary,
-  RunnerEventResolver,
   RuntimeDeps,
 } from "./runtime-shared";
+import type { RunnerEventResolver } from "../play/runner-event-contract";
 import {
   runnerInstalledProgramMemoryCost,
   runnerProgramInstallMemoryReachable,
@@ -1122,7 +1122,6 @@ export function createCardRuntimeResolvers(
     runnerEventLongtailForDefinition,
     variableRezForDefinition,
     runnerEventLongtailKindForDefinition,
-    runnerEventInstallChoiceActionPayload,
     hiddenReplacementLongtailForDefinition,
     cardImplementationRunnerEventResolver,
     printedCostCardImplementationMakeRunEffect,

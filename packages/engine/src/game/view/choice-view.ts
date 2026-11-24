@@ -202,7 +202,6 @@ function isCorpRdArrangeChoice(choice: ChoiceRequest): boolean {
   return (
     choice.kind === "select_cards" &&
     (choice.source.startsWith("v1911.corp_rd_arrange_top2") ||
-      choice.source.startsWith("v1917.corp_rd_arrange_top2") ||
       choice.source.startsWith("v1922.corp_rd_arrange_top5"))
   );
 }

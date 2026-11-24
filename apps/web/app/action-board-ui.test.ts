@@ -1925,7 +1925,6 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         cardId: "seeya_1",
         serverId: "hq",
-        v1911HiddenZoneAbility: "expose_server_card",
       },
     );
 
@@ -2021,15 +2020,14 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(contextualCardActionLabel(corporateCoup)).toBe("3 Credits nehmen");
   });
 
-  it("drops the card-name prefix for V1.9.11 hidden-zone card menu actions", () => {
+  it("drops the card-name prefix for a CardSpec card menu action", () => {
     const aujourdOui = legalAction(
       "runner",
-      "gain_credit",
+      "activated_card_ability",
       "aujourdoui_1",
       "Aujourd'Oui: Top 5 nach Programmen prüfen",
       {
         cardId: "aujourdoui_1",
-        v1911HiddenZoneAbility: "search_stack_program_to_grip",
       },
     );
 
@@ -5553,7 +5551,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "Self-Modifying Code: trashen und Programm aus Stack installieren",
       {
         cardId: "smc_1",
-        v1911HiddenZoneAbility: "self_modifying_code_install_program",
+        abilityId: "self_modifying_code_install_program",
         trashOnUse: true,
       },
       "run.encounter_ice",

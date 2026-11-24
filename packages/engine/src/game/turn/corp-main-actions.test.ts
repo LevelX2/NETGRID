@@ -367,16 +367,11 @@ function testCorpMainHost(
     },
     agenda: {
       effectiveAgendaDifficulty: unexpected("effectiveAgendaDifficulty"),
-      effectiveAgendaDifficultyDeps: {},
       scoredAgendaKindForDefinition: unexpected(
         "scoredAgendaKindForDefinition",
       ),
       serverChoiceDisplayLabel: unexpected("serverChoiceDisplayLabel"),
-      scoredAgendaAbilityHost: () => ({}),
-      buildScoredAgendaAbilityActionsForCard: () => ({
-        handled: false,
-        actions: [],
-      }),
+      bindScoredAgendaAbilityActions: () => () => ({ handled: false, actions: [] }),
     },
     counters: {
       totalCounters: () => 0,
@@ -428,13 +423,8 @@ function testCorpMainHost(
       isObligationDebtDefinition: () => false,
     },
     abilities: {
-      corpTraceDamageAbilityHost: () => ({}),
-      corpSpecialDamageAbilityHost: () => ({}),
-      pushCorpTraceDamageOrCardImplementationActions: () => undefined,
-      buildCorpSpecialDamageAbilityActionsForCard: () => ({
-        handled: false,
-        actions: [] as LegalAction[],
-      }),
+      bindTraceDamageActions: () => () => undefined,
+      bindSpecialDamageActions: () => () => ({ handled: false, actions: [] }),
     },
     specialZones: {
       specialZoneHarnessActions: () => [],

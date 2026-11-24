@@ -2,7 +2,6 @@ import { serializedDefinitionReferences } from "../../test-fixtures/serialized-d
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
-  applyEffectCommands,
   checkWinConditions,
   createGame,
   createGameAfterSetup,
@@ -15,7 +14,6 @@ import {
   isHiddenInfoBarrierEvent,
   quoteCorpRezCost,
   replayEvents,
-  validateDeckDefinition,
   validateGameState,
 } from "../../index";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";

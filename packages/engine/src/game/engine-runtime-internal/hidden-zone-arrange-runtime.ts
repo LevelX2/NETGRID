@@ -29,7 +29,6 @@ export function createHiddenZoneArrangeRuntime(
         hiddenReplacementLongtailKind: (definitionId) =>
           deps.cardImplementationForDefinitionId(definitionId)
             ?.hiddenReplacementLongtail?.kind,
-        isHiddenZoneReorderAssetDefinition: () => false,
         hasCorpUtilityKind: (cardId, kind) =>
           deps.hasCorpUtilityKind(
             state,
@@ -41,7 +40,6 @@ export function createHiddenZoneArrangeRuntime(
       },
       zones: {
         removeFromAllZones: (cardId) => deps.removeFromAllZones(state, cardId),
-        rezzedCorpRootCardIds: () => deps.rezzedCorpRootCardIds(state),
       },
       servers: {
         mustServer: (serverId) => deps.mustServer(state, serverId),

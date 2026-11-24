@@ -27,7 +27,6 @@ export function createCorpZoneRuntimeHosts(
   links: ChoiceHiddenZoneRuntimeLinks,
 ): import("./corp-zone-runtime-port").CorpZoneRuntimePort {
   const {
-    revealCorpRdTop,
     selectedChoiceCardIds,
   } = links;
 
@@ -125,24 +124,6 @@ export function createCorpZoneRuntimeHosts(
       if (total >= requiredPoints) return selected;
     }
     return [];
-  }
-
-  function resolveScoredAgendaCorpRdTopReveal(
-    state: GameState,
-    legalAction: LegalAction,
-  ): void {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf diese Scored-Agenda-Aktion nutzen.");
-    const sourceCardId = String(legalAction.payload?.cardId ?? "");
-    if (!state.corp.scoreArea.includes(sourceCardId))
-      throw new Error("Die Scored Agenda ist nicht gescort.");
-    if (
-      deps.scoredAgendaKindForDefinition(
-        deps.definitionFor(state, sourceCardId),
-      ) !== "shuffle_selected_hq_agendas_into_rd_gain_credits"
-    )
-      throw new Error("Die Agenda-Aktion passt nicht zur Scored-Agenda-Art.");
-    revealCorpRdTop(state, legalAction);
   }
 
   function exposedCorpCardInServer(
@@ -1242,7 +1223,6 @@ export function createCorpZoneRuntimeHosts(
     resolveExposePreventionChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveMultiExposeInstalledCorpCardsChoice,
-    resolveScoredAgendaCorpRdTopReveal,
     shuffleCorpCardIntoRd,
     startExposeInstalledCorpCardsChoice,
     startMultiExposeInstalledCorpCardsChoice,

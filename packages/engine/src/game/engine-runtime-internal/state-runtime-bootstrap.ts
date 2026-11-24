@@ -93,9 +93,9 @@ import { type RunAccessLegalActionHostComposition } from "../run/run-access-lega
 import { shuffleRunnerStackAndRefreshZones } from "../hidden-zone/runner-stack-shuffle";
 import { type ApplyActionHostCompositionHost } from "../apply/apply-action-hosts";
 import { maxHandSize, runnerMemoryLimit } from "../../ability-engine/effective-values";
-import { publicServerLabel, publicServerLabelForCard } from "../../public-context";
+import { publicServerLabel, publicServerLabelForCard } from "../view/server-view";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
+import { isHiddenZoneChoiceSource } from "../hidden-zone/choice-sources";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
 import { executeCardImplementationLifecycleEffects } from "../../ability-engine/card-implementation-runtime";
 
@@ -130,10 +130,6 @@ import {
   sanitizeId,
   spendAgendaPointFromScoredCard,
 } from "./runtime-bootstrap-support";
-import {
-  applyEffectCommands,
-  validateDeckDefinition,
-} from "./public-event-runtime-bootstrap";
 export function initializeStateRuntimeBootstrap(
   {
     cardImplementationRuntimeDeps,
@@ -207,7 +203,7 @@ export function initializeStateRuntimeBootstrap(
     hasCardImplementationMemoryUnitModifier,
     hasSuccessfulHqRunThisTurn,
     hostedCardsOn,
-    isP358HiddenReplacementCompatibilityChoiceSource,
+    isHiddenZoneChoiceSource,
     lookTopStackShowToCorpThenInstallMatchingTargets,
     maxHandSize,
     mustArrayValue,
@@ -264,7 +260,6 @@ export function initializeStateRuntimeBootstrap(
     accessFlow,
     addRunnerTagsWithPrevention,
     applyActionHostComposition,
-    applyEffectCommands,
     cardImplementationAgendaPointInstallCost,
     cardImplementationEffectAdapters,
     corpScoredBlackOpsAgendaLastTurn,
@@ -297,7 +292,6 @@ export function initializeStateRuntimeBootstrap(
     runnerTrashedNodeLastTurn,
     spendAgendaPointFromScoredCard,
     traceRuntimeDepsHost,
-    validateDeckDefinition,
   };
 
   Object.assign(runtimeDomainTarget, runtimeDomainDeps);

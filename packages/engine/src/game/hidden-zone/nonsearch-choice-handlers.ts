@@ -12,7 +12,7 @@ import type {
   Side,
 } from "@netgrid/shared";
 import type { CardCorpUtilityImplementation } from "../../ability-engine/definition-types";
-import { isSecretSpendGuessTargetedBypassRunChoiceSource } from "../../compatibility/payload-compatibility";
+import { isSecretSpendGuessTargetedBypassRunChoiceSource } from "./choice-sources";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
 const INVALID_RUNNER_GRIP_TRASH_CHOICE_SOURCE =

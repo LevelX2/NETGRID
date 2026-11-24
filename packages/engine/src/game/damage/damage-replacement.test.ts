@@ -1,6 +1,5 @@
 import type {
   GameState,
-  ImminentEvent,
   ReplacementCandidate,
   ReplacementWindow,
 } from "@netgrid/shared";
@@ -22,14 +21,7 @@ describe("damage replacement choice", () => {
       createdAtStateVersion: 4,
       optional: true,
     } as ReplacementWindow;
-    const event = {
-      eventId: "damage_1",
-      eventType: "damage",
-      affectedSide: "runner",
-      payload: { amount: 5, damageType: "meat" },
-    } as unknown as ImminentEvent;
-
-    const choice = replacementChoice({} as GameState, window, event, 4);
+    const choice = replacementChoice({} as GameState, window, 4);
 
     expect(choice.options.map((option) => option.id)).toEqual([
       "pass",
@@ -48,7 +40,7 @@ describe("damage replacement choice", () => {
       candidates: [source],
     } as ReplacementWindow;
     expect(() =>
-      replacementChoice({} as GameState, window, {} as ImminentEvent, 4),
+      replacementChoice({} as GameState, window, 4),
     ).toThrow(/damage_replacement_source_binding_missing/);
   });
 });

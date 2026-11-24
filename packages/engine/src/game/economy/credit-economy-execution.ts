@@ -13,8 +13,6 @@ import {
   openRunnerCostPenaltySupportWindow,
 } from "../payment/runner-payment-support";
 
-type HostFn<T = unknown> = (...args: any[]) => T;
-
 export type RandomProgramProbeImplementation =
   | {
       family: "icebreakerAbilities";
@@ -136,14 +134,11 @@ export type CreditEconomyExecutionHost = {
       cardId: CardInstanceId,
       legalAction?: LegalAction,
     ) => void;
-  };
-  hiddenZone: {
-    resolveV1911RunnerHiddenZoneAbility: HostFn<void>;
-    resolveScoredAgendaCorpRdTopReveal: HostFn<void>;
-    revealRunnerStackTop: HostFn<void>;
-    revealCorpRdTop: HostFn<void>;
-    resolveReschedulerHqShuffleDraw: HostFn<void>;
-    startCorpAssetRdTopReorderChoice: HostFn<void>;
+    resolveReschedulerHqShuffleDraw: (
+      state: GameState,
+      legalAction: LegalAction,
+      sourceCardId: CardInstanceId,
+    ) => void;
   };
   delegates: {
     shouldOpenCorpInstalledEconomyCreditChoice: (
@@ -195,14 +190,6 @@ export function handleCreditEconomyExecution(
     );
   }
   host.actions.spendClick(state, legalAction.side);
-  if (legalAction.payload?.v1911HiddenZoneAbility) {
-    host.hiddenZone.resolveV1911RunnerHiddenZoneAbility(state, legalAction);
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.agendaAbility === "scored_agenda_reveal_rd_top") {
-    host.hiddenZone.resolveScoredAgendaCorpRdTopReveal(state, legalAction);
-    return handled(legalAction);
-  }
   if (legalAction.payload?.runnerAbility === "remove_crying_counter") {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf Crying-Counter entfernen.");
@@ -256,7 +243,7 @@ export function handleCreditEconomyExecution(
       )
     )
       throw new Error("Die Rescheduler-Faehigkeit passt nicht zur Karte.");
-    host.hiddenZone.resolveReschedulerHqShuffleDraw(
+    host.corp.resolveReschedulerHqShuffleDraw(
       state,
       legalAction,
       sourceCardId,

@@ -7,13 +7,10 @@ import { createTriggerAbilityRuntimeHosts } from "./trigger-ability-runtime-host
 export function createCardRuntimeHosts(
   deps: RuntimeDeps,
 ): import("./card-runtime-host-port").CardRuntimeHostPort {
-  const runtime = {} as RuntimeDeps;
-  Object.assign(
-    runtime,
-    createCardRuntimeDepsHosts(deps, runtime),
-    createTriggerAbilityRuntimeHosts(deps, runtime),
-    createCardLifecycleRuntimeHosts(deps, runtime),
-    createActivatedCardRuntimeHosts(deps, runtime),
-  );
-  return runtime;
+  return {
+    ...createCardRuntimeDepsHosts(deps),
+    ...createTriggerAbilityRuntimeHosts(deps),
+    ...createCardLifecycleRuntimeHosts(deps),
+    ...createActivatedCardRuntimeHosts(deps),
+  };
 }

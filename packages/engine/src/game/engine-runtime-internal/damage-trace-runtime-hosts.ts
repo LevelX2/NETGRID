@@ -13,32 +13,15 @@ import {
   resolveDamageImminentEvent,
   setDamagePayload,
 } from "../damage/damage-core";
-import {
-  CARD_IMPLEMENTATIONS,
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { runnerTraceCounterEffectDefinitions, traceCounterEffectDefinitionFor } from "../trace/runner-counter-effects";
 import type {
   CardRemainingReplacementLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardUniqueDirectLongtailImplementation,
 } from "../../ability-engine/definition-types";
-import type {
-  RunnerTraceCounterEffectRuntime,
-  RuntimeDeps,
-} from "./runtime-shared";
 
-export function createDamageTraceRuntimeHosts(
-  deps: RuntimeDeps,
-): import("./damage-trace-runtime-port").DamageTraceRuntimePort {
-  function runnerTraceCounterEffectDefinitions(): RunnerTraceCounterEffectRuntime[] {
-    return CARD_IMPLEMENTATIONS.flatMap((implementation) =>
-      (implementation.runnerCounterEffects ?? []).map((counterEffect) => ({
-        ...counterEffect,
-        sourceDefinitionId: implementation.cardDefinitionId,
-      })),
-    );
-  }
-
+export function createDamageTraceRuntimeHosts(): import("./damage-trace-runtime-port").DamageTraceRuntimePort {
   function runnerCounterDisplayName(counterType: CounterType): string {
     if (counterType === "trace_tag_counter") return "Data-Raven-Counter";
     if (counterType === "baskerville") return "Baskerville-Counter";
@@ -46,14 +29,6 @@ export function createDamageTraceRuntimeHosts(
     if (counterType === "mastiff") return "Mastiff-Counter";
     if (counterType === "doppelganger") return "Doppelganger-Counter";
     return "Counter";
-  }
-
-  function traceCounterEffectDefinitionFor(
-    counterType: unknown,
-  ): RunnerTraceCounterEffectRuntime | undefined {
-    return runnerTraceCounterEffectDefinitions().find(
-      (effect) => effect.counterType === counterType,
-    );
   }
 
   function runnerUtilityLongtailKindForDefinition(

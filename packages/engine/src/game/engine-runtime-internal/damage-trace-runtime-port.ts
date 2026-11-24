@@ -11,14 +11,14 @@ import type {
   CardRunnerUtilityLongtailImplementation,
   CardUniqueDirectLongtailImplementation,
 } from "../../ability-engine/definition-types";
-import type { RunnerTraceCounterEffectRuntime } from "./runtime-shared";
+import type { RunnerTraceCounterEffect } from "../trace/runner-counter-effects";
 
 export type DamageTraceRuntimePort = {
-  runnerTraceCounterEffectDefinitions: () => RunnerTraceCounterEffectRuntime[];
+  runnerTraceCounterEffectDefinitions: () => readonly RunnerTraceCounterEffect[];
   runnerCounterDisplayName: (counterType: CounterType) => string;
   traceCounterEffectDefinitionFor: (
     counterType: unknown,
-  ) => RunnerTraceCounterEffectRuntime | undefined;
+  ) => RunnerTraceCounterEffect | undefined;
   runnerUtilityLongtailKindForDefinition: (
     definitionId: CardDefinitionId,
   ) => CardRunnerUtilityLongtailImplementation["kind"] | undefined;

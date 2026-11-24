@@ -717,7 +717,7 @@ export function configureCardRuntimeBootstrap() {
         addRunnerTagsWithPrevention,
         addCorpPurgeableRunnerVirusCounter: (
           state,
-          legalAction,
+          _legalAction,
           counterType,
           amount,
           sourceDefinitionId,

@@ -90,9 +90,27 @@ bucht sie die Zahlung erst bei der Aufdeckung beider Gebote.
 
 Aktionen und gebundene Verteidigungsvorschauen, die Effekte ausführen, kopieren
 die Journal-Liste flach und den veränderlichen Kernzustand tief. Beide behandeln
-Journal-Einträge als unveränderlich. Die ICE-Installationsvorschau erzeugt pro
-Angebot eine lokale Projektion der betroffenen Hand, Fortposition und Karte.
-Das Journal und der Zufallsverlauf werden dabei nur gelesen.
+Journal-Einträge als unveränderlich. Zufallsauswahlen bereiten lediglich den
+betroffenen Zufallsverlauf vor. Die nachfolgende Aktionsausführung erstellt die
+einzige vollständige Kopie des veränderlichen Zustands. Vorschauen für Corp-
+Zahlungen und Punish-Routen verwenden dieselbe Aktionsausführung und projizieren
+jeweils nur das neue Ereignis. Vorbereitende Projektionen ändern ausschließlich
+die für die Quote relevanten Felder. So kopiert die ICE-Installationsvorschau
+die betroffene Hand, Fortposition und Karte. Das Journal und der Zufallsverlauf
+werden dabei nur gelesen.
+
+Die Hauptphasen binden den jeweiligen Spielzustand an typisierte Dienste aus
+der Runtime-Komposition. Die LegalAction-Generatoren verwenden dieselbe
+Dienstkonfiguration für aufeinanderfolgende Abfragen. Innerhalb einer
+Runner-Abfrage werden die verfügbaren Credits für Installieren, Runstart,
+Events und Kostensupport jeweils höchstens einmal berechnet. Diese Werte
+gelten nur für die einzelne Abfrage.
+
+Zustandsinvarianten für Board, Run, Trace, Zug und Fenster gehören in ihre
+jeweiligen Prüfmodule unter `game/state-validation`. Die zentrale Prüfung
+führt sie in fester Reihenfolge aus und bündelt ihre Diagnosen. Deckprüfung
+und direkte Effektkommandos sind über
+`@netgrid/engine/test-fixtures/rules-scenarios` für Engine-Tests erreichbar.
 
 ## Pflegeprinzip
 

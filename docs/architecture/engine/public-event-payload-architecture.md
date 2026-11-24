@@ -18,6 +18,12 @@ Ausführungsdiscriminatoren und dem öffentlichen Ereignisvertrag:
 4. Chronicle, Replay-Projektion, Server, Webclient und KI lesen den gemeinsamen
    `PublicEventPayload`-Vertrag.
 
+`publicContextForAction` ruft die fachlichen Projektionen in definierter
+Reihenfolge auf. Run, Installation, Choice, Trace, Schaden, verdeckte Zonen,
+Kartenfähigkeiten, Advancement und öffentliche Kartenpositionen haben eigene
+Projektionsmodule unter `game/events`. Die Module lesen den Zustand und
+schreiben in den Kontext des aktuellen Ereignisses.
+
 Die private Replay-Aktion bleibt unverändert im `privatePayload`. Sie wird beim
 Replay strukturell validiert und darf deshalb nicht mit dem side-sicheren
 öffentlichen Payload verwechselt werden.
@@ -58,6 +64,8 @@ Im Zuge von E10 wurden entfernt:
   `abilityId`.
 - `questForCattekinOutcome`: nur noch ein Test-/UI-Fallback ohne aktuellen
   Producer; `randomEffectOutcome` ist der aktuelle Vertrag.
+- `v1911HiddenZoneAbility`: Die aktuellen Kartenaktionen verwenden ihre
+  CardSpec-Capabilities. Der alte Dispatch und die UI-Auswertung sind entfernt.
 
 Die für Action-IDs relevante Teilmenge heißt
 `ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS`. Ihre Reihenfolge bleibt
@@ -94,11 +102,18 @@ bindet deshalb Match, MatchVersion und Ereignisnummer. Ein Replay prüft die
 Nummer jedes Engine-Ereignisses gegen dessen StateVersion. `game_created` ist
 einmalig am Anfang eines Replays ab Version 0 zulässig. Sein StateHash muss
 zum Startzustand passen. Bei jedem Aktionsereignis müssen Typ und StateHash mit
-der Neuausführung übereinstimmen. Die Engine bricht beim ersten fehlerhaften
-Eintrag ab und vergleicht bei erfolgreichem Durchlauf den berechneten Endhash
-mit dem Journal. Die Replay-Ansicht des Servers verwendet dieselbe Prüfung.
+der Neuausführung übereinstimmen. Der öffentliche Actor muss zur Seite der
+privaten Aktion beziehungsweise der gebundenen Zufallsauswahl passen. Die
+Engine bricht beim ersten fehlerhaften Eintrag ab und vergleicht bei
+erfolgreichem Durchlauf den berechneten Endhash mit dem Journal. Die
+Replay-Ansicht des Servers verwendet dieselbe Prüfung.
 Sie erhält pro geprüftem Ereignis nur die Hashprüfung, einen etwaigen
 Fehlercode und die Grenzen der Engine-Zufallszähler.
+
+Die öffentliche Ereignisprojektion und die Replayprüfung prüfen auch
+verschachtelte Objekte und Listen auf private Labels und verdeckte
+Kartenlisten. Ein unzulässiger Payload in der Aktionsantwort führt zu einem
+Invariantenfehler, bevor der neue Zustand zurückgegeben wird.
 
 Ein innerhalb einer Karte oder Choice neu begonnener Run veröffentlicht einen
 öffentlichen `ResolvedGameEffect` vom Typ `start_run`: `runId`, angegriffene

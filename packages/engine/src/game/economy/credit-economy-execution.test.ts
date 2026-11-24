@@ -318,14 +318,7 @@ function testHost(
       uninstallInstalledCardToHq: () => undefined,
       trashInstalledCardToArchives: (_stateToMutate, cardId) =>
         options.trashCorpInstalledCardToArchives?.(cardId),
-    },
-    hiddenZone: {
-      resolveV1911RunnerHiddenZoneAbility: () => undefined,
-      resolveScoredAgendaCorpRdTopReveal: () => undefined,
-      revealRunnerStackTop: () => undefined,
-      revealCorpRdTop: () => undefined,
       resolveReschedulerHqShuffleDraw: () => undefined,
-      startCorpAssetRdTopReorderChoice: () => undefined,
     },
     delegates: {
       shouldOpenCorpInstalledEconomyCreditChoice: () => false,

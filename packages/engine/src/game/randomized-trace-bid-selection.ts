@@ -6,7 +6,6 @@ import {
 } from "@netgrid/shared";
 import {
   ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION,
-  type AiTurnPlanRandomDrawRecord,
   type ApplyActionOptions,
   type EngineError,
   type EngineRandomizedTraceBidCandidate,
@@ -19,9 +18,8 @@ import {
   type PlayerAction,
 } from "@netgrid/shared";
 import { buildApplyAction, type ApplyActionCoreHost } from "./apply-action";
-import { cloneGameStateForAction } from "./apply-action-state";
 import { getLegalActions } from "./legal-actions";
-import { createRandomDraw, nextRandom } from "./state/draw-random";
+import { prepareAiSelectionDraw, prepareEngineSelectionDraw } from "./state/draw-random";
 
 let defaultHost: ApplyActionCoreHost | undefined;
 
@@ -260,20 +258,18 @@ export function buildApplyRandomizedTraceBidSelection(
     );
   }
 
-  const next = cloneGameStateForAction(state);
   const secretGuess = "kind" in requoted.quote.assessment;
-  const counterBefore = secretGuess
-    ? next.aiTurnPlanRandomCounter!
-    : next.randomCounter;
   const purpose = traceBidSelectionPurpose(requoted.quote);
-  const randomValue = secretGuess
-    ? drawSecretGuess(next, purpose).value
-    : nextRandom(next, purpose);
+  const prepared = secretGuess
+    ? prepareAiSelectionDraw(state, purpose)
+    : prepareEngineSelectionDraw(state, purpose);
+  if (!prepared)
+    return applyFail(state, "ERR_INVARIANT_FAILED", "Der Geheimwahl-Zufallszähler ist ungültig.");
   const totalWeight = requoted.quote.candidates.reduce(
     (sum, candidate) => sum + candidate.weight,
     0,
   );
-  let cursor = randomValue * totalWeight;
+  let cursor = prepared.record.value * totalWeight;
   let selectedCandidate = requoted.quote.candidates.at(-1)!;
   for (const candidate of requoted.quote.candidates) {
     cursor -= candidate.weight;
@@ -295,15 +291,15 @@ export function buildApplyRandomizedTraceBidSelection(
       ? { idempotencyKey: command.idempotencyKey }
       : {}),
   };
-  const applied = buildApplyAction(host, next, playerAction, options);
+  const applied = buildApplyAction(host, prepared.state, playerAction, options);
   if (!applied.ok) return { ok: false, error: applied.error, state };
   const randomDraw = (
     secretGuess
       ? applied.state.aiTurnPlanRandomDrawRecords!
       : applied.state.randomDrawRecords
-  )[counterBefore];
+  )[prepared.record.counter];
   if (
-    randomDraw?.counter !== counterBefore ||
+    randomDraw?.counter !== prepared.record.counter ||
     serializeRandomPurpose(randomDraw.purpose) !== serializeRandomPurpose(purpose)
   ) {
     return applyFail(
@@ -382,23 +378,6 @@ function traceBidSelectionPurpose(
       quote.candidateFingerprint,
     ]),
   ];
-}
-
-function drawSecretGuess(
-  state: GameState,
-  purpose: RandomPurpose,
-): AiTurnPlanRandomDrawRecord {
-  const counter = state.aiTurnPlanRandomCounter!;
-  const record: AiTurnPlanRandomDrawRecord = {
-    ...createRandomDraw(state.seed, purpose, counter, "ai_turn_plan_selection"),
-    domain: "ai_turn_plan_selection",
-  };
-  state.aiTurnPlanRandomCounter = counter + 1;
-  state.aiTurnPlanRandomDrawRecords = [
-    ...state.aiTurnPlanRandomDrawRecords!,
-    record,
-  ];
-  return record;
 }
 
 function encodeParts(parts: readonly string[]): string {

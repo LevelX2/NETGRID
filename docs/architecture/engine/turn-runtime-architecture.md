@@ -46,6 +46,12 @@ aufgerufen und keine Momentaufnahme des unvollständigen Ports angelegt.
 
 ## Invarianten
 
+Eine Pending Choice bindet die Aktion zunächst an ihre aktuelle Choice-ID.
+Die Engine leitet sie an den zuständigen Resolver weiter. Der Schadenspfad
+besitzt eigene Handler für Prävention, Ersatz und Wiederaufnahme. Eine
+Auswahl ohne zuständigen Resolver führt zu `ERR_INVALID_CHOICE`. Auswahl
+und Zustand bleiben dabei erhalten.
+
 Die aktuelle Corp-Score-LegalAction einer Agenda mit verpflichtendem
 Startdraw enthält eine StateVersion-gebundene Quote der bisherigen und
 zusätzlichen Pflichtdraws sowie der tatsächlichen Punkte nach dem Score.

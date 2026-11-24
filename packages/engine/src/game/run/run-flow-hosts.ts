@@ -1,3 +1,4 @@
+import { isSupportedTraceSuccessEffect } from "../trace/trace-success-effect-validation";
 import type {
   CardDefinitionId,
   CounterType,
@@ -58,7 +59,6 @@ import {
 } from "./encounter-printed-nontrace-effects";
 import {
   encounterPrintedEffectHost,
-  isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "./encounter-printed-effects";
 import {
@@ -891,7 +891,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         if (legalAction) host.damage.setDamagePayload(legalAction, summary);
       },
       supportsTraceSuccessEffect: (effect) =>
-        isSupportedEncounterTraceSuccessEffect(
+        isSupportedTraceSuccessEffect(
           effect,
           host.callbacks.traceCounterEffectDefinitionFor,
         ),

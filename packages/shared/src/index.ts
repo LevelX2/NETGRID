@@ -2127,6 +2127,14 @@ export type GameEvent = PublicGameEvent & {
   privatePayload?: Partial<Record<Side, Record<string, unknown>>>;
 };
 
+/** Committed entries may be shared by successive action states. */
+export type GameJournalEvent = Readonly<
+  Omit<GameEvent, "publicPayload" | "privatePayload"> & {
+    publicPayload: Readonly<PublicEventPayload>;
+    privatePayload?: Readonly<Partial<Record<Side, Readonly<Record<string, unknown>>>>>;
+  }
+>;
+
 export type RunnerDrawSequence = {
   sequenceId: number;
   originActionId: string;
@@ -2353,7 +2361,7 @@ export type GameState = {
   runner: RunnerState;
   specialZones?: SpecialZoneState;
   cardInstances: Record<CardInstanceId, CardInstance>;
-  eventLog: GameEvent[];
+  eventLog: GameJournalEvent[];
   winner: Winner | null;
   gameEndReason?: GameEndReason;
   agendaPointsToWin: number;

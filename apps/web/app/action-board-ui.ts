@@ -1885,9 +1885,6 @@ function approachIceExposeActionLabel(action: LegalAction): string {
 }
 
 function installedCardAbilityContextLabel(action: LegalAction): string | null {
-  if (typeof action.payload?.v1911HiddenZoneAbility === "string") {
-    return stripActionSourcePrefix(action.label);
-  }
   if (typeof action.payload?.v1917AssetAbility === "string") {
     switch (action.payload.v1917AssetAbility) {
       case "gain_credits": {
@@ -1906,8 +1903,6 @@ function installedCardAbilityContextLabel(action: LegalAction): string | null {
       }
       case "reveal_rd_top":
         return "R&D-Spitze revealn";
-      case "reorder_rd_top2":
-        return "R&D-Spitze anordnen";
       case "rescheduler_hq_shuffle_draw":
         return "HQ in R&D mischen und ziehen";
       case "meat_damage_1":
@@ -3173,7 +3168,6 @@ function isHiddenZoneReadableCardChoiceSource(source: string): boolean {
     source.startsWith("v098.arrange_stack_top2") ||
     source.startsWith("v1911.arrange_stack_top2") ||
     source.startsWith("v1911.corp_rd_arrange_top2") ||
-    source.startsWith("v1917.corp_rd_arrange_top2") ||
     source.startsWith("v1922.corp_rd_arrange_top5") ||
     source.startsWith("corp.start_of_run_redirect.herman_reorder") ||
     source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest") ||

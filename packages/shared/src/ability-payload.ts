@@ -3,7 +3,6 @@
 // compatibility registry. New generic mechanics should prefer `abilityId` and
 // only add a discriminator when execution dispatch genuinely needs one.
 export const ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS = [
-  "v1911HiddenZoneAbility",
   "v1912CounterAbility",
   "v1915RunnerProgramAbility",
   "v1917AssetAbility",

@@ -13,17 +13,12 @@ import type {
   GameState,
   PlayerAction,
   ReplayResult,
-  Side,
+  ReplayableEngineAction,
   StateHash,
 } from "@netgrid/shared";
-import {
-  isReplayCompatibilityActionPayload,
-  isReplayRandomizedIceInstallSelectionCommand,
-  isReplayRandomizedTurnPlanSelectionCommand,
-  isReplayRandomizedTraceBidSelectionCommand,
-} from "../compatibility/payload-compatibility";
+import { replayActionFromPayload } from "./events/replay-action-payload";
 import { hashState } from "./hash";
-import { sanitizeEventPayloadForSurface } from "./view/surface-policy";
+import { assertSafeEventPayloadForSurface } from "./view/surface-policy";
 
 export type ReplayHost = {
   actions: {
@@ -58,6 +53,7 @@ type ReplayEventFailureReason =
   | "unsafe_replay_public_payload"
   | "state_hash_mismatch"
   | "missing_replay_action"
+  | "replay_actor_mismatch"
   | "missing_replay_application"
   | "event_type_mismatch";
 
@@ -108,7 +104,7 @@ export function buildReplayEvents(
   eventLog: GameEvent[],
   options?: ReplayOptions,
 ): ReplayResult {
-  let current = cloneReplayState({
+  let current = structuredClone({
     ...initialState,
     eventLog: initialState.eventLog.slice(0, 1),
   });
@@ -169,7 +165,7 @@ export function buildReplayEvents(
       break;
     }
     try {
-      sanitizeEventPayloadForSurface(event.publicPayload, "replay_public");
+      assertSafeEventPayloadForSurface(event.publicPayload, "replay_public");
     } catch (error) {
       rejectEvent(
         event,
@@ -201,49 +197,11 @@ export function buildReplayEvents(
       });
       continue;
     }
-    const actionPayload =
-      event.privatePayload?.[event.publicPayload.actor as Side]?.action;
-    const declaresRandomizedIceCommand =
-      typeof actionPayload === "object" &&
-      actionPayload !== null &&
-      "kind" in actionPayload &&
-      actionPayload.kind === "engine_randomized_ice_install_selection";
-    const declaresRandomizedTurnPlanCommand =
-      typeof actionPayload === "object" &&
-      actionPayload !== null &&
-      "kind" in actionPayload &&
-      actionPayload.kind === "engine_randomized_turn_plan_selection";
-    const declaresRandomizedTraceBidCommand =
-      typeof actionPayload === "object" &&
-      actionPayload !== null &&
-      "kind" in actionPayload &&
-      actionPayload.kind === "engine_randomized_trace_bid_selection";
-    const randomizedCommand = isReplayRandomizedIceInstallSelectionCommand(
-      actionPayload,
-    )
-      ? actionPayload
+    const actor = event.publicPayload.actor;
+    const action = actor === "corp" || actor === "runner"
+      ? replayActionFromPayload(event.privatePayload?.[actor]?.action)
       : undefined;
-    const randomizedTurnPlanCommand =
-      isReplayRandomizedTurnPlanSelectionCommand(actionPayload)
-        ? actionPayload
-        : undefined;
-    const randomizedTraceBidCommand =
-      isReplayRandomizedTraceBidSelectionCommand(actionPayload)
-        ? actionPayload
-        : undefined;
-    const playerAction =
-      !declaresRandomizedIceCommand &&
-      !declaresRandomizedTurnPlanCommand &&
-      !declaresRandomizedTraceBidCommand &&
-      isReplayCompatibilityActionPayload(actionPayload)
-        ? actionPayload
-        : undefined;
-    if (
-      !randomizedCommand &&
-      !randomizedTurnPlanCommand &&
-      !randomizedTraceBidCommand &&
-      !playerAction
-    ) {
+    if (!action) {
       rejectEvent(
         event,
         "missing_replay_action",
@@ -251,55 +209,23 @@ export function buildReplayEvents(
       );
       break;
     }
-    if (
-      randomizedTurnPlanCommand &&
-      !host.actions.applyRandomizedTurnPlanSelection
-    ) {
+    if (("kind" in action ? action.quote.side : action.side) !== actor) {
       rejectEvent(
         event,
-        "missing_replay_application",
-        `Event ${event.eventId} has no TurnPlan replay application.`,
+        "replay_actor_mismatch",
+        `Actor mismatch at event ${event.eventId}.`,
       );
       break;
     }
-    if (randomizedCommand && !host.actions.applyRandomizedIceInstallSelection) {
+    const result = applyReplayAction(host, current, action);
+    if (!result) {
       rejectEvent(
         event,
         "missing_replay_application",
-        `Event ${event.eventId} has no randomized replay application.`,
+        `Event ${event.eventId} has no replay application.`,
       );
       break;
     }
-    if (
-      randomizedTraceBidCommand &&
-      !host.actions.applyRandomizedTraceBidSelection
-    ) {
-      rejectEvent(
-        event,
-        "missing_replay_application",
-        `Event ${event.eventId} has no Trace-Bid replay application.`,
-      );
-      break;
-    }
-    const result = randomizedCommand
-      ? host.actions.applyRandomizedIceInstallSelection!(
-          current,
-          randomizedCommand,
-          replayActionOptions,
-        )
-      : randomizedTurnPlanCommand
-        ? host.actions.applyRandomizedTurnPlanSelection!(
-            current,
-            randomizedTurnPlanCommand,
-            replayActionOptions,
-          )
-        : randomizedTraceBidCommand
-          ? host.actions.applyRandomizedTraceBidSelection!(
-              current,
-              randomizedTraceBidCommand,
-              replayActionOptions,
-            )
-          : host.actions.applyAction(current, playerAction!, replayActionOptions);
     if (!result.ok) {
       rejectEvent(
         event,
@@ -354,6 +280,18 @@ export function buildReplayEvents(
   };
 }
 
-function cloneReplayState<T>(state: T): T {
-  return structuredClone(state) as T;
+function applyReplayAction(
+  { actions }: ReplayHost,
+  state: GameState,
+  action: ReplayableEngineAction,
+): EngineResult | undefined {
+  if (!("kind" in action)) return actions.applyAction(state, action, replayActionOptions);
+  switch (action.kind) {
+    case "engine_randomized_ice_install_selection":
+      return actions.applyRandomizedIceInstallSelection?.(state, action, replayActionOptions);
+    case "engine_randomized_turn_plan_selection":
+      return actions.applyRandomizedTurnPlanSelection?.(state, action, replayActionOptions);
+    case "engine_randomized_trace_bid_selection":
+      return actions.applyRandomizedTraceBidSelection?.(state, action, replayActionOptions);
+  }
 }

@@ -34,10 +34,6 @@ export { replayEvents, replayGameEvents } from "../replay";
 export { redactPublicEventForSide } from "../view/public-event-view";
 export { hashGameState, hashState } from "../hash";
 export { validateGameState, validateGameStateForDebug } from "../validation";
-export {
-  validateDeckDefinition,
-  applyEffectCommands,
-} from "./runtime-bootstrap";
 export { DEMO_DECKS, CURRENT_RULES_BASELINE } from "@netgrid/shared";
 export {
   CARD_DEFINITIONS,

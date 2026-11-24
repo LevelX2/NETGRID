@@ -6,6 +6,13 @@ import {
   type PlayerAction,
 } from "@netgrid/shared";
 
+export class MissingChoiceResolverError extends Error {
+  constructor(readonly choiceSource: string) {
+    super("Diese Auswahl kann nicht aufgelöst werden.");
+    this.name = "MissingChoiceResolverError";
+  }
+}
+
 export function validateChoiceAction(
   choice: ChoiceRequest | undefined,
   legalAction: LegalAction,

@@ -545,11 +545,6 @@ function collectCardIdBehaviorFindings(sources) {
   for (const { file, text } of sources) {
     if (isTestOrFixture(file) || isCardImplementationFile(file)) continue;
     if (
-      file.includes("/compatibility/") ||
-      file.includes("payload-compatibility")
-    )
-      continue;
-    if (
       !(
         file.startsWith("packages/engine/src/game/") ||
         file.startsWith("packages/engine/src/mechanics/") ||

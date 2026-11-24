@@ -30,7 +30,6 @@ import { createHiddenZoneNonSearchRuntime } from "./hidden-zone-nonsearch-runtim
 import { createHiddenZoneSearchRuntime } from "./hidden-zone-search-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createPendingChoiceRuntimeHosts } from "./pending-choice-runtime-hosts";
-import { validateDeckDefinition } from "./public-event-runtime-bootstrap";
 import { createStateCorpRuntimeResolvers } from "./state-corp-runtime-resolvers";
 import { initializeStateRuntimeBootstrap } from "./state-runtime-bootstrap";
 import {
@@ -84,7 +83,6 @@ describe("engine runtime internal domains", () => {
       "./action-runtime-bootstrap.ts",
       "./card-runtime-bootstrap.ts",
       "./flow-runtime-bootstrap.ts",
-      "./public-event-runtime-bootstrap.ts",
       "./runtime-bootstrap-support.ts",
       "./state-runtime-bootstrap.ts",
       "./runtime-composition.ts",
@@ -149,18 +147,18 @@ describe("engine runtime internal domains", () => {
       typeof createCorpZoneRuntimeHosts(deps, links).corpZoneChoiceHandlerHost,
     ).toBe("function");
     expect(
-      typeof createCardRuntimeDepsHosts(deps, deps)
+      typeof createCardRuntimeDepsHosts(deps)
         .subroutinesForCurrentEncounter,
     ).toBe("function");
     expect(
-      typeof createTriggerAbilityRuntimeHosts(deps, deps)
+      typeof createTriggerAbilityRuntimeHosts(deps)
         .triggerAbilityExecutionHost,
     ).toBe("function");
     expect(
-      typeof createCardLifecycleRuntimeHosts(deps, deps).installCardHost,
+      typeof createCardLifecycleRuntimeHosts(deps).installCardHost,
     ).toBe("function");
     expect(
-      typeof createActivatedCardRuntimeHosts(deps, deps)
+      typeof createActivatedCardRuntimeHosts(deps)
         .activatedCardImplementationExecutionHost,
     ).toBe("function");
     expect(
@@ -181,7 +179,7 @@ describe("engine runtime internal domains", () => {
         .corpRunnerActionPaidWindowActions,
     ).toBe("function");
     expect(
-      typeof createScoredEconomyRuntimeHosts(deps, deps)
+      typeof createScoredEconomyRuntimeHosts(deps)
         .scoredAgendaAbilityHost,
     ).toBe("function");
     expect(typeof createPlayBoardRuntimeHosts(deps).playCardExecutionHost).toBe(
@@ -208,7 +206,7 @@ describe("engine runtime internal domains", () => {
       "function",
     );
     expect(
-      typeof createDamageTraceRuntimeHosts(deps)
+      typeof createDamageTraceRuntimeHosts()
         .traceCounterEffectDefinitionFor,
     ).toBe("function");
     expect(
@@ -236,16 +234,16 @@ describe("engine runtime internal domains", () => {
         .runnerInstallableProgramIdsForValuPak,
     ).toBe("function");
     expect(
-      typeof createLookupRuntimeServices(deps).canHostProgramOnDaemon,
+      typeof createLookupRuntimeServices().canHostProgramOnDaemon,
     ).toBe("function");
     expect(
       typeof createCardStrengthCostRuntimeServices(deps, deps)
         .breakSubroutineCostBreakdown,
     ).toBe("function");
     expect(
-      typeof createCounterTurnRuntimeServices(deps, deps).cockroachCounterTotal,
+      typeof createCounterTurnRuntimeServices(deps).cockroachCounterTotal,
     ).toBe("function");
-    expect(typeof createZoneRuntimeServices(deps).corpIceInstallTotalCost).toBe(
+    expect(typeof createZoneRuntimeServices().corpIceInstallTotalCost).toBe(
       "function",
     );
     expect(
@@ -256,7 +254,6 @@ describe("engine runtime internal domains", () => {
     expect(typeof configureFlowRuntimeBootstrap).toBe("function");
     expect(typeof configureActionRuntimeBootstrap).toBe("function");
     expect(typeof initializeStateRuntimeBootstrap).toBe("function");
-    expect(typeof validateDeckDefinition).toBe("function");
     expect(typeof delegatedCorpRunnerActionPaidWindowActions).toBe("function");
     expect(typeof delegatedRunMovementHostForState).toBe("function");
     expect(typeof delegatedTriggerAbilityExecutionHost).toBe("function");
