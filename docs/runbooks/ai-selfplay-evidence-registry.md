@@ -93,6 +93,20 @@ Zeitgleiche offene Match-IDs und tatsächlich überlappende KI-Anfragen messen
 verschiedene Arten von Last. Für den Vergleich zählen sowohl der Durchsatz
 aller Spiele als auch die Laufzeit jedes einzelnen Seeds.
 
+Für den Vergleich mit dem normalen Spielbetrieb verwendet der Client
+`aiTraceMode: "off"` und liest das Ergebnis aus der terminalen
+`ai-advance`-Antwort. Eine externe Stichprobe von Prozesszeit,
+Arbeitsspeicher und Dateigrößen braucht keine zusätzlichen Serveranfragen.
+Die KI erzeugt im normalen Entscheidungspfad weiterhin die Planansicht
+`decisionDebug`. Der Modus `off` überspringt den Aufbau historischer
+Entscheidungstraces.
+Nach Ende der Zeitmessung lassen sich die Trace-Zeilenzahl und die
+regulären Engine-Ereignisse an der geschlossenen Testdatenbank prüfen.
+Wird zugleich der Maintenance-Export weggelassen, misst der Zeitvergleich
+den gemeinsamen Einfluss der Änderungen. Die Einzelkosten
+des Tracings erfordern einen getrennten Versuch. Wiederholungen derselben
+Seeds zählen als Messwiederholungen für den Lastvergleich.
+
 ## Kommandos
 
 ```powershell
