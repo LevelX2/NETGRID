@@ -91,6 +91,14 @@ und Französisch; der Aktionstext ist an die Capability
 je Kostenart und Richtung. Zwei aktive Chester Mix ergeben ein Badge „ICE-Install −4“.
 Im Tooltip stehen die beteiligten Karten, gleichnamige Quellen mit ihrer Anzahl.
 
+Im Root eines Remotes stehen öffentliche Agenden und Knoten links, verdeckte
+Karten in der Mitte und öffentliche Upgrades rechts. Innerhalb jeder Gruppe
+steht die neueste Installation links. Beide Spielbretter verwenden dafür
+den Rez-Status sowie `publiclyExposedInRoot` für offen liegende oder durch
+Spy-Counter dauerhaft aufgedeckte Karten. Eine nur kurz angesehene Karte
+behält ihren Platz. Die Engine greift im Remote in Installationsreihenfolge
+zu. Innerhalb jeder Gruppe verläuft der Zugriff daher von rechts nach links.
+
 Unter dem eigenen Corp-Statusblock erscheinen verfügbare Fähigkeiten aus
 der eigenen Agenda-Auslage als Standard-Aktionsbuttons mit Agenda-Symbol.
 Quelle und Vorrat stammen aus dem PlayerView, Effektmenge und Kosten aus

@@ -2608,7 +2608,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(showInstalledCorpState("r1", "root")).toBe(true);
   });
 
-  it("renders opponent remote root cards in install order without leaked hidden root types", () => {
+  it("groups open remote roots while hidden cards and private access views keep their slots", () => {
     const leakedUpgradeA: VisibleCard = {
       instanceId: "upgrade_a",
       known: false,
@@ -2619,7 +2619,7 @@ describe("V1.0.5 action board UI helpers", () => {
       trashCost: 4,
     };
     const rezzedNode = card(11007, "Simple Economy Asset", "asset", true);
-    const exposedUnrezzedUpgrade = card(
+    const privatelyViewedUpgrade = card(
       11008,
       "Simple Upgrade",
       "upgrade",
@@ -2635,20 +2635,23 @@ describe("V1.0.5 action board UI helpers", () => {
       trashCost: 4,
     };
 
+    const rezzedUpgrade = card("open_upgrade", "Open Upgrade", "upgrade");
     const runnerCards = corpRootCardsForDisplay("runner", "r1", [
       leakedUpgradeA,
+      rezzedUpgrade,
       rezzedNode,
-      exposedUnrezzedUpgrade,
+      privatelyViewedUpgrade,
       leakedUpgradeB,
     ]);
 
     expect(runnerCards.map((entry) => entry.instanceId)).toEqual([
-      "upgrade_a",
       "11007",
-      "11008",
       "upgrade_b",
+      "11008",
+      "upgrade_a",
+      "open_upgrade",
     ]);
-    expect(runnerCards[1]).toMatchObject({
+    expect(runnerCards[0]).toMatchObject({
       known: true,
       title: "Simple Economy Asset",
       definitionId: 11007,
@@ -2663,7 +2666,7 @@ describe("V1.0.5 action board UI helpers", () => {
       rezzed: false,
     });
     expect(corpInstalledCardState(runnerCards[2]!)).toBe("unrezzed");
-    for (const hiddenCard of [runnerCards[0], runnerCards[3]]) {
+    for (const hiddenCard of [runnerCards[1], runnerCards[3]]) {
       expect(hiddenCard).toMatchObject({ known: false, rezzed: false });
       expect(hiddenCard).not.toHaveProperty("title");
       expect(hiddenCard).not.toHaveProperty("definitionId");
@@ -2674,6 +2677,56 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(corpRootCardsForDisplay("corp", "r1", [leakedUpgradeA])).toEqual([
       leakedUpgradeA,
     ]);
+  });
+
+  it.each(["upgrade", "agenda", "asset"] as const)(
+    "keeps the newest concealed %s in the same slot for both players when another upgrade is rezzed",
+    (newType) => {
+      const older = card("first", "Older upgrade", "upgrade", false);
+      const middle = card("second", "Another upgrade", "upgrade", false);
+      const newest = card("third", "New installation", newType, false);
+      for (const viewer of ["corp", "runner"] as const) {
+        const concealed = (entry: VisibleCard) =>
+          viewer === "corp"
+            ? entry
+            : { instanceId: entry.instanceId, known: false };
+        const order = (cards: VisibleCard[]) =>
+          corpRootCardsForDisplay(viewer, "r1", cards).map(
+            (entry) => entry.instanceId,
+          );
+        const installations = [older, middle, newest].map(concealed);
+        expect(order(installations)).toEqual(["third", "second", "first"]);
+        expect(
+          order([concealed(older), { ...middle, rezzed: true }, concealed(newest)]),
+        ).toEqual(["third", "first", "second"]);
+        expect(installations.map((entry) => entry.instanceId)).toEqual([
+          "first", "second", "third",
+        ]);
+      }
+    },
+  );
+
+  it("anchors publicly exposed agendas and upgrades even while unrezzed, only in remotes", () => {
+    const openAgenda: VisibleCard = {
+      ...card("a", "Agenda", "agenda", false),
+      publiclyExposedInRoot: true,
+    };
+    const openUpgrade: VisibleCard = {
+      ...card("u", "Upgrade", "upgrade", false),
+      publiclyExposedInRoot: true,
+    };
+    const newerUpgrade = card("u2", "Second upgrade", "upgrade");
+    const cards = [
+      openUpgrade, openAgenda, newerUpgrade, { instanceId: "back", known: false },
+    ];
+    for (const viewer of ["corp", "runner"] as const) {
+      const order = (server: "r1" | "hq" | "rd" | "archives") =>
+        corpRootCardsForDisplay(viewer, server, cards).map((entry) => entry.instanceId);
+      expect(order("r1")).toEqual(["a", "back", "u2", "u"]);
+      for (const central of ["hq", "rd", "archives"] as const) {
+        expect(order(central)).toEqual(["u", "a", "u2", "back"]);
+      }
+    }
   });
 
   it("splits archives into faceup and facedown stacks for runner and corp views", () => {

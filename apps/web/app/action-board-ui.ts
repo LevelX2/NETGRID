@@ -4138,8 +4138,23 @@ export function corpRootCardsForDisplay(
   serverId: PlayerView["servers"][number]["id"],
   cards: VisibleCard[],
 ): VisibleCard[] {
-  if (viewerSide === "corp" || serverId === "archives") return cards;
-  return cards.map(hiddenCorpRootCardForOpponent);
+  if (serverId === "archives") return cards;
+  const visibleCards =
+    viewerSide === "runner" ? cards.map(hiddenCorpRootCardForOpponent) : cards;
+  if (!isRemoteServerId(serverId)) return visibleCards;
+
+  const agendasAndNodes: VisibleCard[] = [];
+  const concealed: VisibleCard[] = [];
+  const upgrades: VisibleCard[] = [];
+  // Root cards arrive in installation order. The newest in each group goes on the left.
+  for (const card of [...visibleCards].reverse()) {
+    const open = card.known && (card.rezzed || card.publiclyExposedInRoot);
+    if (open && card.type === "upgrade") upgrades.push(card);
+    else if (open && (card.type === "asset" || card.type === "agenda"))
+      agendasAndNodes.push(card);
+    else concealed.push(card);
+  }
+  return [...agendasAndNodes, ...concealed, ...upgrades];
 }
 
 export function splitArchiveCardsForDisplay(
