@@ -279,6 +279,11 @@ import { ActiveMatchWorkspaceArea } from "../features/app-shell/ActiveMatchWorks
 import { ActiveMatchTopbar } from "../features/app-shell/ActiveMatchTopbar";
 import { useObservedElementHeight } from "../features/app-shell/useObservedElementHeight";
 import {
+  ActiveMatchChrome,
+  matchViewportTop,
+  observeMatchViewport,
+} from "../features/app-shell/ActiveMatchChrome";
+import {
   ConfirmationDialog,
   type ConfirmationDialogRequest,
 } from "../features/app-shell/ConfirmationDialog";
@@ -3204,7 +3209,7 @@ export default function Page() {
       );
       const stripHeight = resourceStripRef.current?.offsetHeight ?? 0;
       // A returning row counts as visible once it clears the pinned strip.
-      const visibleTop = topOffset + stripHeight;
+      const visibleTop = matchViewportTop() + topOffset + stripHeight;
       setStatusPanelsVisible(
         (current) => resourceRowsBottom > visibleTop + (current ? 0 : 8),
       );
@@ -3213,13 +3218,10 @@ export default function Page() {
       if (animationFrame) return;
       animationFrame = window.requestAnimationFrame(updateVisibility);
     };
-    scheduleUpdate();
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate);
+    const stopObserving = observeMatchViewport(scheduleUpdate);
     return () => {
+      stopObserving();
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
-      window.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
     };
   }, [
     activeMatchIsGame,
@@ -7046,7 +7048,7 @@ export default function Page() {
                   </div>
                 </div>
               ) : null}
-              <div className="activeMatchChrome">
+              <ActiveMatchChrome topbarHeight={topbarHeightPx}>
                 <ActiveMatchTopbar
                   topbarRef={topbarRef}
                   appName={APP_NAME}
@@ -7106,7 +7108,7 @@ export default function Page() {
                     observerMode={isAiVsAiMatch}
                   />
                 ) : null}
-              </div>
+              </ActiveMatchChrome>
 
               {matchDetailsOpen ? (
                 <div

@@ -16,7 +16,7 @@
 .app > .topbar,
 .app > .activeMatchChrome {
   position: sticky;
-  top: 0;
+  top: var(--match-viewport-top, 0px);
   z-index: var(--z-active-match-topbar);
 }
 
@@ -26,7 +26,7 @@
 }
 
 .app.topbarStickyDisabled > .activeMatchChrome {
-  display: contents;
+  top: calc(var(--match-viewport-top, 0px) - var(--match-topbar-height));
 }
 
 .app.topbarStickyDisabled .entryTabs {
@@ -14194,12 +14194,6 @@ select,
 
 .app.resourceStripVisible .matchResourceStrip {
   display: grid;
-}
-
-.app.topbarStickyDisabled > .activeMatchChrome > .matchResourceStrip {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-active-match-topbar);
 }
 
 .resourceStripSide,

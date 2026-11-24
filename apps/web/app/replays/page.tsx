@@ -24,6 +24,8 @@ import {
 } from "../../features/cards/card-display-settings";
 import { usePersistentCardScaleSettings } from "../../features/cards/usePersistentCardScaleSettings";
 import { ActiveMatchResourceStrip } from "../../features/game-board/ResourceStrip";
+import { ActiveMatchChrome } from "../../features/app-shell/ActiveMatchChrome";
+import { useObservedElementHeight } from "../../features/app-shell/useObservedElementHeight";
 import { ReplayBoard } from "../../features/replay/ReplayBoard";
 import {
   DEFAULT_REPLAY_BOARD_SETTINGS,
@@ -92,6 +94,8 @@ type ReplayView = {
 export default function ReplayPage() {
   const t = useTranslations("Replay");
   const [selectedMatchId, setSelectedMatchId] = useState("");
+  const { elementRef: topbarRef, heightPx: topbarHeightPx } =
+    useObservedElementHeight<HTMLElement>(selectedMatchId);
   const [perspective, setPerspective] = useState<Side>("runner");
   const [replay, setReplay] = useState<ReplayView>();
   const [frameIndex, setFrameIndex] = useState(0);
@@ -288,8 +292,8 @@ export default function ReplayPage() {
 
   return (
     <main className={replayClassName} data-theme={boardSettings.colorScheme}>
-      <div className="activeMatchChrome">
-        <header className="topbar replayTopbar">
+      <ActiveMatchChrome topbarHeight={topbarHeightPx}>
+        <header className="topbar replayTopbar" ref={topbarRef}>
           <div className="replayTopbarIdentity">
             <button
               type="button"
@@ -384,7 +388,7 @@ export default function ReplayPage() {
             ariaHidden={!resourceStripVisible}
           />
         ) : null}
-      </div>
+      </ActiveMatchChrome>
 
       {currentFrame ? (
         <div className="matchStrip replayTimelineStrip">
