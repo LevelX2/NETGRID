@@ -617,7 +617,14 @@ function economyDevelopmentStepValue(
     (candidateServer) => candidateServer.id === targetServerId,
   );
   if (!server) return 10;
-  if (server.root.length > 0) return 10;
+  if (
+    server.root.length > 0 &&
+    !(
+      signal.riskAdjustment?.fundedLightProtection &&
+      server.root.every((card) => card.known && card.type === "upgrade")
+    )
+  )
+    return 10;
   return 60 + Math.min(3, server.ice.length) * 10;
 }
 

@@ -33,6 +33,11 @@ export type CorpEconomyFundingRouteAssessment = {
   evidence: string[];
   hostedCreditBankCycle?: import("@netgrid/shared").CorpHostedCreditBankCycleQuote;
   freeRezPayoutPreparation?: CorpFreeRezPayoutPreparation;
+  scoreProtectionDrawDeferral?: {
+    defenseId: string;
+    stateVersion: number;
+    projectedCurrentCredits: number;
+  };
 };
 
 export type CorpFreeRezPayoutPreparation = {
@@ -144,6 +149,7 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   };
   riskAdjustment?: {
     serverId: string;
+    fundedLightProtection?: true;
     protectionState:
       | "unprotected"
       | "protected_contestable"

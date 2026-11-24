@@ -67,6 +67,12 @@ export type ExposeReview = {
   serverLabels: string[];
   title: string;
   description: string;
+  outermostIce?: {
+    stateVersion: number;
+    sourceTitle: string | null;
+    serverIds: string[];
+    positionKeys: string[];
+  };
 };
 
 export function AccessRevealModal({
@@ -460,6 +466,7 @@ export function ExposeReviewModal({
   onDismiss(): void;
 }) {
   const t = useTranslations("Actions.access");
+  const outermostIce = review.outermostIce;
   return (
     <div
       className="accessRevealOverlay exposeReviewOverlay"
@@ -469,24 +476,30 @@ export function ExposeReviewModal({
     >
       <div className="accessRevealBackdrop" aria-hidden="true" />
       <section
-        className={`accessRevealPanel exposeReviewPanel ${interactionAmbienceClassName("access")}`}
+        className={`accessRevealPanel exposeReviewPanel ${outermostIce ? "outermostIceReviewPanel " : ""}${interactionAmbienceClassName("access")}`}
       >
         <div className="accessRevealHeader">
           <div>
-            <p className="eyebrow">{t("view")}</p>
-            <h2 id="expose-review-title">{review.title}</h2>
-            <p>{review.description}</p>
+            <p className="eyebrow">{outermostIce?.sourceTitle ?? t("view")}</p>
+            <h2 id="expose-review-title">
+              {outermostIce
+                ? t("outermostIceExposed", { count: review.cards.length })
+                : review.title}
+            </h2>
+            {outermostIce ? null : <p>{review.description}</p>}
           </div>
           <div className="accessRevealHeaderActions">
             <WindowEventIcon kind="access" side={review.actorSide} />
-            <button
-              className="button iconOnly"
-              onClick={onDismiss}
-              aria-label={t("closeView")}
-              title={t("closeView")}
-            >
-              <X size={16} />
-            </button>
+            {outermostIce ? null : (
+              <button
+                className="button iconOnly"
+                onClick={onDismiss}
+                aria-label={t("closeView")}
+                title={t("closeView")}
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         </div>
         <div className="exposeReviewCards" data-testid="expose-review-cards">
@@ -511,6 +524,7 @@ export function ExposeReviewModal({
           <button
             className="button primary"
             onClick={onDismiss}
+            autoFocus={Boolean(outermostIce)}
             type="button"
             data-testid="expose-review-dismiss"
           >

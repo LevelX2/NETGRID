@@ -78,10 +78,28 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await page
       .getByRole("button", { name: "Zurück zum aktiven Spiel" })
       .click();
+    const creditBalance = page
+      .locator(".sideStatusPanel.side-runner")
+      .getByTestId("credit-badge")
+      .locator(".statValue");
+    const before = Number(await creditBalance.innerText());
     await page
       .locator('[data-testid="action-button"][data-action-type="gain_credit"]')
       .first()
       .click();
+    const change = page.getByTestId("opponent-cue").getByRole("img", {
+      name: `Runner, Kontostand von ${before} auf ${before + 1} Credits`,
+    });
+    await expect(change).toBeVisible();
+    await expect(page.getByTestId("opponent-cue")).toContainText(
+      "1 Credit erhalten",
+    );
+    await expect(page.getByTestId("opponent-cue")).toHaveAttribute(
+      "data-cue-display",
+      "floating",
+    );
+    await expect(change).toContainText("(+1)");
+    await expect(creditBalance).toHaveText(String(before + 1));
     await expect(page.getByTestId("action-availability")).toContainText(
       "noch 3",
     );
@@ -93,7 +111,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       page.getByRole("button", { name: "KI-Schritt" }),
     ).toBeEnabled();
     await page.getByRole("button", { name: "KI-Schritt" }).click();
-    await expect(page.getByTestId("opponent-cue")).toBeVisible();
+    await expect(
+      page.locator('[data-testid="opponent-cue"].actor-corp'),
+    ).toBeVisible();
 
     await exerciseCardDisplayModes(page);
     await expectNoCriticalLayoutOverflow(page);
@@ -374,10 +394,19 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
       await expect(confirmation).toBeHidden();
       await expect(leaveSeries).toBeFocused();
 
+      await page.reload();
+      await expect(
+        result.getByRole("button", { name: "Nächstes Serienspiel", exact: true }),
+      ).toBeVisible();
       await leaveSeries.click();
       await confirmation.getByRole("button", { name: "Serie verlassen" }).click();
       await expect(page.getByTestId("setup-screen")).toBeVisible();
       await expect(result).toBeHidden();
+      await page.reload();
+      await expect(page.getByTestId("setup-screen")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Fortsetzen", exact: true }),
+      ).toHaveCount(0);
     } finally {
       await joiner.context.close();
     }

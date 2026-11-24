@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Choose a piece of ice. The Corp either rezzes that piece of ice or trashes it.",
+      "Choose an unrezzed piece of ice. The Corp either rezzes that piece of ice or trashes it.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,11 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_086_forged-activation-orders",
+      },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Forged Activation Orders",
+        note: "The April 21, 1997 erratum restricts the target to unrezzed ice.",
       },
     ],
   },

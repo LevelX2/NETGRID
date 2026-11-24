@@ -103,7 +103,7 @@ test.describe("Zwei-Browser-Multiplayer", () => {
     }
   });
 
-  test("führt eine Zwei-Spiele-Matchserie mit neuem Join-Link und Seitenwechsel zu Ende", async ({}, testInfo) => {
+  test("setzt eine Zwei-Spiele-Matchserie nach Reload und vom Startbildschirm fort", async ({}, testInfo) => {
     const pair = await launchMultiplayerBrowserPair();
     const browserErrors = captureBrowserErrors(pair);
     try {
@@ -123,7 +123,23 @@ test.describe("Zwei-Browser-Multiplayer", () => {
           .getByRole("dialog")
           .getByRole("region", { name: "Spiel 1 von 2 · Matchpunkte" }),
       ).toBeVisible();
+      await pair.host.reload();
+      await expect(
+        pair.host
+          .getByRole("dialog")
+          .getByRole("region", { name: "Spiel 1 von 2 · Matchpunkte" }),
+      ).toBeVisible();
+      await pair.host.getByRole("button", { name: "Board ansehen" }).click();
+      await pair.host.getByRole("button", { name: "Startbildschirm" }).click();
       await pair.host
+        .getByRole("region", { name: "Gespeichertes Spiel fortsetzen" })
+        .getByRole("button", { name: "Fortsetzen", exact: true })
+        .click();
+      await expect(
+        pair.host.getByRole("button", { name: "Matchserie fortsetzen" }),
+      ).toBeVisible();
+      await pair.host
+        .getByRole("dialog")
         .getByRole("button", { name: "Nächstes Serienspiel", exact: true })
         .click();
       await expect(pair.host.getByTestId("start-lobby")).toBeVisible({
@@ -163,6 +179,11 @@ test.describe("Zwei-Browser-Multiplayer", () => {
         testInfo,
         "two-browser-series-finished",
       );
+      await pair.host.reload();
+      await expect(pair.host.getByTestId("setup-screen")).toBeVisible();
+      await expect(
+        pair.host.getByRole("button", { name: "Fortsetzen", exact: true }),
+      ).toHaveCount(0);
     } finally {
       await pair.close();
     }

@@ -74,7 +74,6 @@ function host(
   input: {
     affordableRezzed?: CardInstanceId[];
     unrezzed?: CardInstanceId[];
-    installed?: CardInstanceId[];
     rezzedBlack?: CardInstanceId[];
     installablePrograms?: CardInstanceId[];
     calls?: string[];
@@ -93,7 +92,6 @@ function host(
         input.affordableRezzed ?? ["rezzed" as CardInstanceId],
       unrezzedInstalledIceIds: () =>
         input.unrezzed ?? ["unrezzed" as CardInstanceId],
-      installedIceIds: () => input.installed ?? ["installed" as CardInstanceId],
       rezzedBlackIceIds: () => input.rezzedBlack ?? ["black" as CardInstanceId],
       startPayRezCostToTrashRezzedIceChoice: () => {
         input.calls?.push("core_command");
@@ -127,7 +125,6 @@ describe("install/rez card implementation runtime deps", () => {
     expect(Object.keys(deps)).toEqual([
       "rezzedIceTargetCount",
       "unrezzedIceTargetCount",
-      "installedIceTargetCount",
       "rezzedBlackIceTargetCount",
       "runnerValuPakInstallableProgramCount",
       "startPayRezCostToTrashRezzedIceChoice",
@@ -143,7 +140,6 @@ describe("install/rez card implementation runtime deps", () => {
       host({
         affordableRezzed: ["a", "b"] as CardInstanceId[],
         unrezzed: ["c"] as CardInstanceId[],
-        installed: ["d", "e", "f"] as CardInstanceId[],
         rezzedBlack: [] as CardInstanceId[],
         installablePrograms: [programId, "program_2" as CardInstanceId],
       }),
@@ -152,7 +148,6 @@ describe("install/rez card implementation runtime deps", () => {
 
     expect(deps.rezzedIceTargetCount(gameState)).toBe(2);
     expect(deps.unrezzedIceTargetCount(gameState)).toBe(1);
-    expect(deps.installedIceTargetCount(gameState)).toBe(3);
     expect(deps.rezzedBlackIceTargetCount(gameState)).toBe(0);
     expect(deps.runnerValuPakInstallableProgramCount(gameState)).toBe(2);
   });

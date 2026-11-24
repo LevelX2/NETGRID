@@ -584,6 +584,7 @@ export function runnerCentralPressureHasMaterialMarginalValue(
 type RunnerCentralPressureCadence = {
   routeAvailable: boolean;
   evidenceCode: string;
+  accessConsumed?: true;
 };
 
 export function runnerCentralPressureCadence(
@@ -729,7 +730,32 @@ export function runnerCentralPressureCadence(
   return {
     routeAvailable: false,
     evidenceCode: `runner_central_pressure_cadence_consumed:${serverId}:${currentTurnSerial}`,
+    accessConsumed: true,
   };
+}
+
+function runnerCanConsiderHqFollowup(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  return (
+    evaluation.targetServerId === "hq" &&
+    evaluation.accessServerId === "hq" &&
+    evaluation.runActionProjection.sourceKind === "basic_action" &&
+    runnerRunProjectionPreservesNormalAccess(
+      input,
+      evaluation.runActionProjection,
+    ) &&
+    evaluation.pathPassability === "reachable" &&
+    evaluation.routeQuote?.reachability === "guaranteed_access" &&
+    evaluation.routeQuote.fundingGap === 0 &&
+    (evaluation.prerunReserveQuote?.status === "not_required" ||
+      evaluation.prerunReserveQuote?.status === "satisfied") &&
+    evaluation.knownAccessState !== "known_no_current_payoff" &&
+    ((evaluation.accessNoveltyRatio ?? 0) > 0 ||
+      evaluation.accessPayoff === "agenda" ||
+      evaluation.accessPayoff === "trash_affordable")
+  );
 }
 
 function corpCentralPressureKnowledgeRefresh(
@@ -898,6 +924,18 @@ export function buildRunnerCentralPressureSignals({
     cadenceByServer.set(serverId, cadence);
     return cadence;
   };
+  const pressureCadenceForRoute = (evaluation: RunnerRunTargetEvaluation) => {
+    const cadence = pressureCadenceForServer(
+      evaluation.targetServerId as "hq" | "rd" | "archives",
+    );
+    return cadence.accessConsumed &&
+      runnerCanConsiderHqFollowup(input, evaluation)
+      ? {
+          routeAvailable: true,
+          evidenceCode: "runner_central_pressure_hq_followup_access",
+        }
+      : cadence;
+  };
   const flatlineRisk = damageThreat.flatlineRisk;
   const confirmedDamageRequiresHandBuffer = (serverId: string) =>
     (flatlineRisk.level === "confirmed" || flatlineRisk.level === "critical") &&
@@ -916,7 +954,7 @@ export function buildRunnerCentralPressureSignals({
         exposedIceExit?.actionId === preferredActionId ||
         recentSafetyAbort?.serverId === serverId ||
         runnerRepeatedFreeStopProbeEvidence(input, preferred) ||
-        !pressureCadenceForServer(serverId).routeAvailable ||
+        !pressureCadenceForRoute(preferred).routeAvailable ||
         !runnerCentralPressureHasMaterialMarginalValue(input, preferred) ||
         runnerCostlyCentralRunIsBelowHandBuffer(
           handSize,
@@ -1049,11 +1087,28 @@ export function buildRunnerCentralPressureSignals({
           const regularRoutes = sameServerEvaluations.filter(
             (candidate) => !probeExclusions.has(candidate.actionId),
           );
+          const cadenceActions = new Set(
+            sameServerEvaluations
+              .filter(
+                (candidate) =>
+                  pressureCadenceForRoute(candidate).routeAvailable,
+              )
+              .map((candidate) => candidate.actionId),
+          );
+          const routesWithCurrentCadence = regularRoutes.filter((candidate) =>
+            cadenceActions.has(candidate.actionId),
+          );
+          // Without an admitted route the existing ranking still describes why
+          // pressure on this server is blocked.
+          const comparableRoutes =
+            routesWithCurrentCadence.length > 0
+              ? routesWithCurrentCadence
+              : regularRoutes;
           const winningArchivesRun = sameServerEvaluations.find((candidate) =>
             runnerVisibleArchivesWinningRun(input, candidate),
           );
           const lastClickRoutes = noPayableRemotePreparation
-            ? regularRoutes.filter(
+            ? comparableRoutes.filter(
                 (candidate) =>
                   !confirmedDamageRequiresHandBuffer(
                     candidate.targetServerId,
@@ -1079,7 +1134,7 @@ export function buildRunnerCentralPressureSignals({
             bestRunTargetsByServer(
               input,
               economy,
-              lastClickRoutes.length > 0 ? lastClickRoutes : regularRoutes,
+              lastClickRoutes.length > 0 ? lastClickRoutes : comparableRoutes,
               candidates,
             )[0] ??
             lastClickRoutes[0] ??
@@ -1097,9 +1152,7 @@ export function buildRunnerCentralPressureSignals({
             evaluation.knownAccessState !== "known_no_current_payoff" &&
             input.playerView.own.agendaPoints >=
               input.playerView.agendaPointsToWin - 1;
-          const ordinaryPressureCadence = pressureCadenceForServer(
-            evaluation.targetServerId as "hq" | "rd" | "archives",
-          );
+          const ordinaryPressureCadence = pressureCadenceForRoute(evaluation);
           const probeExclusion = probeExclusions.get(evaluation.actionId);
           const pressureCadence = winningArchivesRun
             ? {
@@ -1469,6 +1522,7 @@ export function buildRunnerCentralPressureSignals({
                           evaluation.targetServerId,
                         ).filter(
                           (id) =>
+                            cadenceActions.has(id) &&
                             !informationRouteExclusions.has(id) &&
                             !sameAccessExclusions.has(id),
                         ),
@@ -1634,7 +1688,7 @@ export function buildRunnerCentralPressureSignals({
                   !forgoUnsafeRunCapacity &&
                   !candidateCreditFloorBlocked &&
                   (!candidateHasNoPayoff || opensConcreteSetupWindow) &&
-                  pressureCadence.routeAvailable &&
+                  cadenceActions.has(candidate.actionId) &&
                   (materialMarginalValue ||
                     opensConcreteSetupWindow ||
                     terminalRemoteUnreachableCentralLastChance) &&
@@ -1670,8 +1724,8 @@ export function buildRunnerCentralPressureSignals({
                             "run_route_excluded:no_visible_differential_payoff_over_basic_run",
                           ]
                         : []),
-                      ...(!pressureCadence.routeAvailable
-                        ? [pressureCadence.evidenceCode]
+                      ...(!cadenceActions.has(candidate.actionId)
+                        ? [pressureCadenceForRoute(candidate).evidenceCode]
                         : []),
                       ...planSafeRunExclusionEvidence(candidate.evidence),
                       ...(spendLimitBlocked

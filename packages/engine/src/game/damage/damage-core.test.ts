@@ -1,5 +1,5 @@
 import { syntheticCardDefinitionId } from "../../test-fixtures/synthetic-card-definition-id";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import type {
   CardDefinition,
@@ -249,10 +249,11 @@ describe("damage core", () => {
     expect(state.timingPoint).toBe("game.checkpoint");
     expect(state.activeSide).toBe("corp");
     expect(state.run).toBeUndefined();
+    expect(state.randomCounter).toBe(0);
   });
 
   it.each(["net", "meat", "core"] as const)(
-    "reports the actual retained grip after terminal %s damage without inventing discards",
+    "trashes every available grip card on lethal %s damage before ending the game",
     (damageType) => {
       const grip = ["terminal_a", "terminal_b", "terminal_c", "terminal_d"].map(
         (id) => id as CardInstanceId,
@@ -263,22 +264,38 @@ describe("damage core", () => {
         ),
         runnerGrip: grip,
       });
-      configureDamageCoreHost(testHost());
+      const host = testHost();
+      const openReaction = vi.fn(() => false);
+      host.reactions = { openPostMeatDamageReactionWindow: openReaction };
+      configureDamageCoreHost(host);
       const action = actionFor("corp", "play_operation");
 
-      resolveDamageOperation(state, action, damageType, 5, syntheticCardDefinitionId("terminal_source"));
+      resolveDamageOperation(
+        state,
+        action,
+        damageType,
+        5,
+        syntheticCardDefinitionId("terminal_source"),
+      );
 
       expect(state.winner).toBe("corp");
       expect(state.gameEndReason).toBe("flatline");
-      expect(state.runner.grip).toEqual(grip);
-      expect(state.runner.heap).toEqual([]);
-      expect(state.randomCounter).toBe(0);
+      expect(state.runner.grip).toHaveLength(0);
+      expect(state.runner.heap).toEqual(grip);
+      for (const id of grip) {
+        expect(state.cardInstances[id]).toMatchObject({
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        });
+      }
+      expect(state.randomCounter).toBe(grip.length);
+      expect(openReaction).not.toHaveBeenCalled();
       expect(action.payload).toMatchObject({
         flatline: true,
         damageAmount: 5,
-        cardsTrashed: 0,
+        cardsTrashed: 4,
         runnerGripBefore: 4,
-        runnerGripAfter: state.runner.grip.length,
+        runnerGripAfter: 0,
       });
     },
   );

@@ -14,7 +14,6 @@ import {
 export type InstallRezRuntimeDepsKey =
   | "rezzedIceTargetCount"
   | "unrezzedIceTargetCount"
-  | "installedIceTargetCount"
   | "rezzedBlackIceTargetCount"
   | "runnerValuPakInstallableProgramCount"
   | "startPayRezCostToTrashRezzedIceChoice"
@@ -52,7 +51,6 @@ export type InstallRezRuntimeDepsHost = {
       state: RuntimeState,
     ) => CardInstanceId[];
     unrezzedInstalledIceIds: (state: RuntimeState) => CardInstanceId[];
-    installedIceIds: (state: RuntimeState) => CardInstanceId[];
     rezzedBlackIceIds: (state: RuntimeState) => CardInstanceId[];
     startPayRezCostToTrashRezzedIceChoice: (
       state: RuntimeState,
@@ -86,7 +84,6 @@ export function createInstallRezCardImplementationRuntimeDeps(
       host.rez.affordableRezzedInstalledIceIdsForRunner(state).length,
     unrezzedIceTargetCount: (state) =>
       host.rez.unrezzedInstalledIceIds(state).length,
-    installedIceTargetCount: (state) => host.rez.installedIceIds(state).length,
     rezzedBlackIceTargetCount: (state) =>
       host.rez.rezzedBlackIceIds(state).length,
     runnerValuPakInstallableProgramCount: (state) =>

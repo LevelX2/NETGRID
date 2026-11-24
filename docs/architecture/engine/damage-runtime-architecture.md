@@ -50,11 +50,13 @@ Verträge direkt.
 - `doDamage` ist ein Finalresolver. Sein erster Zufallszug darf erst nach allen
   Fenstern stattfinden; dadurch bleiben Seed, `RandomCounter`,
   `RandomDrawRecords`, Replay und StateHash deterministisch.
-- `runnerGripBefore` und `runnerGripAfter` beschreiben die tatsächlichen
-  Zustandsmengen. Bei sofortiger Flatline endet der Resolver vor zufälligen
-  Abwürfen; `cardsTrashed` bleibt null und `runnerGripAfter` erhält die im
-  terminalen Zustand verbleibende Handgröße. Eine Schadenszusammenfassung
-  darf keine tatsächlich nicht ausgeführte Leerung der Grip behaupten.
+- Für jeden Treffer zählt die Handgröße vor dem Abwurf. Übersteigt der
+  unverhinderte Schaden diese Größe, wandern alle vorhandenen Handkarten in
+  zufälliger Reihenfolge offen in den Heap. Unmittelbar danach gewinnt die
+  Korp durch Flatline. Bei Gleichstand überlebt der Runner mit leerer Hand.
+  `damageAmount` gibt den vollen unverhinderten Schaden an, `cardsTrashed`
+  die Zahl der abgelegten Karten. `runnerGripBefore` und `runnerGripAfter`
+  geben die tatsächlichen Handgrößen vor und nach dem Treffer an.
 - Kandidaten werden vor dem Öffnen eines Fensters stabil sortiert und im
   Fensterzustand gespeichert. Choice-Auflösung revalidiert Quelle und Kosten,
   leitet aber die Reihenfolge nicht aus veränderlicher Registry-Iteration neu

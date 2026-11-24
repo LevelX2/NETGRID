@@ -196,10 +196,10 @@ import {
   loadRecentSession,
   loadStoredSession,
   persistSession,
-  rememberRecentSession,
   removeRecentSession,
   storedSessionMatches,
   subscribeToRecoverableSessionChanges,
+  updateSessionRecovery,
   type RecentSessionInfo,
   type SessionInfo,
 } from "./session-recovery";
@@ -278,6 +278,11 @@ import {
 import { ActiveMatchWorkspaceArea } from "../features/app-shell/ActiveMatchWorkspaceArea";
 import { ActiveMatchTopbar } from "../features/app-shell/ActiveMatchTopbar";
 import { useObservedElementHeight } from "../features/app-shell/useObservedElementHeight";
+import {
+  ActiveMatchChrome,
+  matchViewportTop,
+  observeMatchViewport,
+} from "../features/app-shell/ActiveMatchChrome";
 import {
   ConfirmationDialog,
   type ConfirmationDialogRequest,
@@ -418,6 +423,7 @@ import {
   accessRevealFromLatestEvent,
   archivesRevealFromLatestEvent,
   exposeReviewFromLatestEvent,
+  exposedBoardIceForReview,
   gypsyScheduleAnalyzerRevealFromPendingChoice,
   hqAgendaRevealFromLatestEvent,
   retainedArchivesRevealEvent,
@@ -472,12 +478,10 @@ import {
   playerSlotForSide,
   resultReasonLabel,
   seriesStatusText,
-  shouldForgetRecoveryStatus,
 } from "../features/match-start/lobby-format";
 import {
   formatCardCount,
   opponentSide,
-  sideFromPublicPayload,
   sideLabel,
   sideStatusLineForView,
   turnActionHeaderLabel,
@@ -3104,11 +3108,6 @@ export default function Page() {
     accessReveal?.kind === "access" &&
     accessReveal.outcomeStatus,
   );
-  const interactionPresentationBlocked = interactionPresentationBlocksAi({
-    damageOpen: Boolean(currentDamageImpact),
-    accessOutcomeOpen: accessOutcomeAwaitingConfirmation,
-    successfulRunOutcomeOpen: showSuccessfulRunOutcome,
-  });
   const exposeReviewEvent = payload
     ? retainedExposeReviewEvent(
         payload.playerView.publicEvents,
@@ -3137,6 +3136,20 @@ export default function Page() {
     !viewedApproachIceId &&
     !viewedInstalledExposeCardId,
   );
+  const outermostIceReviewOpen = Boolean(
+    activeMatchIsGame && showExposeReview && exposeReview?.outermostIce,
+  );
+  const exposedBoardIce =
+    outermostIceReviewOpen && exposeReview && activeView
+      ? exposedBoardIceForReview(exposeReview, activeView)
+      : null;
+  const interactionPresentationBlocked =
+    outermostIceReviewOpen ||
+    interactionPresentationBlocksAi({
+      damageOpen: Boolean(currentDamageImpact),
+      accessOutcomeOpen: accessOutcomeAwaitingConfirmation,
+      successfulRunOutcomeOpen: showSuccessfulRunOutcome,
+    });
   const showResultModal = overlayPresentation.showResultModal;
   const canReturnToStart = Boolean(
     payload &&
@@ -3204,7 +3217,7 @@ export default function Page() {
       );
       const stripHeight = resourceStripRef.current?.offsetHeight ?? 0;
       // A returning row counts as visible once it clears the pinned strip.
-      const visibleTop = topOffset + stripHeight;
+      const visibleTop = matchViewportTop() + topOffset + stripHeight;
       setStatusPanelsVisible(
         (current) => resourceRowsBottom > visibleTop + (current ? 0 : 8),
       );
@@ -3213,13 +3226,10 @@ export default function Page() {
       if (animationFrame) return;
       animationFrame = window.requestAnimationFrame(updateVisibility);
     };
-    scheduleUpdate();
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate);
+    const stopObserving = observeMatchViewport(scheduleUpdate);
     return () => {
+      stopObserving();
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
-      window.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
     };
   }, [
     activeMatchIsGame,
@@ -3752,6 +3762,7 @@ export default function Page() {
     lastSeenAccessPresentationEventIdRef.current =
       payload?.playerView.publicEvents.at(-1)?.eventId ?? null;
     setDismissedAccessEventIds([]);
+    setDismissedExposeReviewEventId(null);
     setPendingAccessPresentationEvents([]);
     pendingAccessContinuationRef.current = null;
     setDismissedSuccessfulRunOutcomeEventId(null);
@@ -3920,15 +3931,35 @@ export default function Page() {
       // must derive their display from the new history.
       lastSeenCueEventIdRef.current = latestId;
       setCurrentActionCue((current) =>
-        current?.traceTagOutcome ? null : current,
+        current?.traceTagOutcome || current?.creditChanges?.length
+          ? null
+          : current,
       );
-      setActionCueQueue((queue) => queue.filter((cue) => !cue.traceTagOutcome));
+      setActionCueQueue((queue) =>
+        queue.filter(
+          (cue) => !cue.traceTagOutcome && !cue.creditChanges?.length,
+        ),
+      );
       return;
     }
     const newEvents = publicEventsAfter(
       payload.playerView.publicEvents,
       lastSeen,
     );
+    const locallySoundedEventIds = new Set<MatchEventId>();
+    for (const event of newEvents) {
+      if (
+        event.publicPayload.actor === payload.side &&
+        locallyPlayedActionSoundKeysRef.current.delete(
+          localActionSoundKey(
+            payload.side,
+            event.stateVersionBefore,
+            eventActionType(event),
+          ),
+        )
+      )
+        locallySoundedEventIds.add(event.eventId);
+    }
     const contextByEventId = chronicleContextByEventId(
       payload.playerView.publicEvents,
       catalogDetailsById,
@@ -3944,6 +3975,8 @@ export default function Page() {
             playerView: payload.playerView,
             events: payload.playerView.publicEvents,
             lastPresentedEventId: lastSeen,
+            includeOwnCreditChanges: actionCueDisplayMode === "floating",
+            locallySoundedEventIds,
             includeAutomaticEffectCues: automaticEffectCuesEnabled,
             translate: chronicleTranslate,
             contextByEventId,
@@ -3984,21 +4017,17 @@ export default function Page() {
         );
         continue;
       }
-      if (overlayEventIds.has(event.eventId)) continue;
+      if (
+        overlayEventIds.has(event.eventId) ||
+        locallySoundedEventIds.has(event.eventId)
+      )
+        continue;
       const item = formatChronicleEvent(
         event,
         payload.side,
         contextByEventId[event.eventId] ?? {},
       );
       const actionType = eventActionType(event);
-      const actor = sideFromPublicPayload(event.publicPayload.actor);
-      if (
-        actor === payload.side &&
-        locallyPlayedActionSoundKeysRef.current.delete(
-          localActionSoundKey(actor, event.stateVersionBefore, actionType),
-        )
-      )
-        continue;
       const sound = actionSoundForActionType(
         actionType,
         item.visibility,
@@ -4015,6 +4044,7 @@ export default function Page() {
     actionCuesEnabled,
     automaticEffectCuesEnabled,
     audioEnabled,
+    actionCueDisplayMode,
     audioVolume,
     actionCueQueue,
     currentActionCue,
@@ -4426,6 +4456,8 @@ export default function Page() {
         ...(next.joinUrl ? { joinUrl: next.joinUrl } : {}),
       };
       persistSession(nextSession);
+      removeRecentSession(session);
+      sessionRef.current = nextSession;
       setSession(nextSession);
       presentMatchStartLogo(next.matchId);
       setPayload(fromInitialResponse(next, next.hostSide));
@@ -4846,7 +4878,7 @@ export default function Page() {
         reconnectToken: reconnected.reconnectToken,
         webSocketUrl: reconnected.webSocketUrl,
       };
-      persistSession(nextSession);
+      persistSession(nextSession, reconnected);
       setSession(nextSession);
       if (reconnected.lobby || !reconnected.playerView) {
         setPayload(null);
@@ -4880,24 +4912,13 @@ export default function Page() {
       setLobby(remotePayload);
     }
     if (session) {
-      rememberRecentSession(session, remotePayload);
+      updateSessionRecovery(session, remotePayload);
       setRecentSession(loadRecentSession());
     }
     if (isInvalidatingTerminalStatus(remotePayload.matchStatus)) {
-      if (session) {
-        clearStoredSession(session);
-        removeRecentSession(session);
-        setRecentSession(loadRecentSession());
-      } else {
-        clearStoredSession();
-      }
+      if (!session) clearStoredSession();
       closeSocket();
       setConnection("offline");
-    }
-    if (session && shouldForgetRecoveryStatus(remotePayload.matchStatus)) {
-      clearStoredSession(session);
-      removeRecentSession(session);
-      setRecentSession(loadRecentSession());
     }
   }
 
@@ -4929,11 +4950,11 @@ export default function Page() {
     if (bootstrapped && "playerView" in bootstrapped) {
       setPayload(bootstrapped);
       setLobby(null);
-      rememberRecentSession(nextSession, bootstrapped);
+      persistSession(nextSession, bootstrapped);
     } else if (bootstrapped) {
       setPayload(null);
       setLobby(bootstrapped);
-      rememberRecentSession(nextSession, bootstrapped);
+      persistSession(nextSession, bootstrapped);
     } else {
       setNotice(noticeT("recentLoadFailed"));
     }
@@ -4983,6 +5004,7 @@ export default function Page() {
     options: { immediateAudio?: boolean; confirmed?: boolean } = {},
   ): boolean => {
     if (
+      outermostIceReviewOpen ||
       !session ||
       !payload ||
       !isMatchOfferId(action.actionId) ||
@@ -5677,18 +5699,35 @@ export default function Page() {
     });
   };
 
-  const leaveMatch = () => {
-    const leavingSession = session;
+  const clearMatchView = () => {
     closeSocket();
-    clearStoredSession(leavingSession ?? undefined);
-    if (leavingSession) removeRecentSession(leavingSession);
-    setRecentSession(loadRecentSession());
+    sessionRef.current = null;
     setSession(null);
     setPayload(null);
     setLobby(null);
     setConnection("offline");
     setSeriesTransitioning(false);
+    setDismissedResultKey(null);
     setNotice("");
+  };
+
+  const leaveMatch = () => {
+    clearStoredSession(session ?? undefined);
+    if (session) removeRecentSession(session);
+    setRecentSession(loadRecentSession());
+    clearMatchView();
+  };
+
+  const returnToStartFromGame = () => {
+    if (!session || !payload || !canStartNextSeriesGame) {
+      leaveMatch();
+      return;
+    }
+    updateSessionRecovery(session, payload);
+    setRecentSession(loadRecentSession());
+    clearMatchView();
+    setEntryTab("play");
+    selectStartTab("resume");
   };
 
   const copyJoinLink = async () => {
@@ -6246,10 +6285,17 @@ export default function Page() {
 
   function applyServerMessage(message: ServerMessage) {
     if (message.type === "lobby_update") {
-      setLobby(message.payload);
+      const next = message.payload;
+      const activeSession = sessionRef.current;
+      if (
+        !activeSession ||
+        activeSession.matchId !== next.matchId ||
+        activeSession.side !== next.side
+      )
+        return;
+      setLobby(next);
       setPayload(null);
-      if (sessionRef.current)
-        rememberRecentSession(sessionRef.current, message.payload);
+      updateSessionRecovery(activeSession, next);
       return;
     }
     if (message.type === "state_update") {
@@ -6279,9 +6325,8 @@ export default function Page() {
       }
       setPayload((current) => latestSideUpdate(current, next));
       setLobby(null);
-      if (shouldForgetRecoveryStatus(next.matchStatus)) {
-        clearStoredSession(activeSession);
-        removeRecentSession(activeSession);
+      if (next.matchStatus !== "active") {
+        updateSessionRecovery(activeSession, next);
         setRecentSession(loadRecentSession());
       }
       return;
@@ -7046,7 +7091,7 @@ export default function Page() {
                   </div>
                 </div>
               ) : null}
-              <div className="activeMatchChrome">
+              <ActiveMatchChrome topbarHeight={topbarHeightPx}>
                 <ActiveMatchTopbar
                   topbarRef={topbarRef}
                   appName={APP_NAME}
@@ -7080,7 +7125,7 @@ export default function Page() {
                     setMatchDetailsOpen((open) => !open)
                   }
                   onStartNextSeriesGame={startNextSeriesGame}
-                  onLeaveMatch={leaveMatch}
+                  onLeaveMatch={returnToStartFromGame}
                   onRequestForfeitMatch={requestForfeitMatch}
                   onRequestCancelSimulation={requestCancelSimulation}
                   onToggleRightRail={() =>
@@ -7106,7 +7151,7 @@ export default function Page() {
                     observerMode={isAiVsAiMatch}
                   />
                 ) : null}
-              </div>
+              </ActiveMatchChrome>
 
               {matchDetailsOpen ? (
                 <div
@@ -7184,6 +7229,7 @@ export default function Page() {
               !matchEnded &&
               !currentDamageImpact &&
               !showAccessReveal &&
+              !outermostIceReviewOpen &&
               !showSuccessfulRunOutcome ? (
                 <OpponentActionOverlay
                   cue={currentActionCue}
@@ -7617,6 +7663,7 @@ export default function Page() {
                       activeRunIceId={activeRunIceId}
                       viewedApproachIceId={viewedApproachIceId}
                       viewedInstalledExposeCardId={viewedInstalledExposeCardId}
+                      {...(exposedBoardIce ? { exposedBoardIce } : {})}
                       exposedCardHighlightIds={new Set(exposedCardHighlightIds)}
                       selectedActionContext={selectedActionContext}
                       selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}

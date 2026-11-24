@@ -149,8 +149,15 @@ das Goal erst danach als complete.
 - Der Browserkatalog `card-capability-action-translations.ts` deckt alle 46
   kanonischen Fähigkeitsidentitäten der 21 produktiven Mehrfachfähigkeitskarten
   in Englisch und Französisch ab.
-- `action-board-ui.ts` wählt diese Texte ausschließlich über die konsistente
-  kanonische Bindung aus; Deutsch rendert weiterhin das CardSpec-Autorenlabel.
+- `action-board-ui.ts` wählt diese Texte über die kanonische Fähigkeitsbindung
+  aus. Für statische deutsche Ausführungstexte gilt das CardSpec-Autorenlabel.
+- Bei BBS Whispering Campaign zeigen Aktionsliste und Kartenmenü in allen drei
+  Sprachen den Auszahlungsbetrag aus `LegalAction.payload.hostedCreditTakeAmount`.
+  Das Kostensymbol zeigt die dafür benötigte Aktion.
+- Das Kartenmenü öffnet sich mittig an der unteren Kante der gewählten Karte.
+  Reicht der Platz dort für die gerenderte Liste nicht und ist oberhalb mehr
+  Platz, öffnet es sich an der oberen Kante. Lange Listen lassen sich im Menü
+  scrollen.
 - Der Vollständigkeitstest leitet die Mehrfachfähigkeitsmenge direkt aus den
   öffentlichen CardSpec-Projektionen ab und prüft Deckung sowie erhaltene
   Differenzierung pro Locale.

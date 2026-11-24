@@ -793,24 +793,31 @@ describe("semantic chronicle localization", () => {
     },
   );
 
-  it("renders the same public event independently in every locale", () => {
-    const gained = event("gain_credits", { amount: 3 });
-    const de = formatChronicleEvent(gained, "runner", {
-      translate: translate("de"),
-    });
-    const en = formatChronicleEvent(gained, "runner", {
-      translate: translate("en"),
-    });
-    const fr = formatChronicleEvent(gained, "runner", {
-      translate: translate("fr"),
-    });
-
-    expect(de.title).toBe("Du: 3 Credits erhalten.");
-    expect(en.title).toBe("You: gained 3 credits.");
-    expect(fr.title).toBe("Vous : avez gagné 3 crédits.");
-    expect(de.category).toBe(en.category);
-    expect(de.id).toBe(en.id);
-  });
+  it.each([
+    [
+      1,
+      "Du: 1 Credit erhalten.",
+      "You: gained 1 credit.",
+      "Vous : 1 crédit gagné.",
+    ],
+    [
+      3,
+      "Du: 3 Credits erhalten.",
+      "You: gained 3 credits.",
+      "Vous : 3 crédits gagnés.",
+    ],
+  ] as const)(
+    "renders a public gain of %i in every locale",
+    (amount, de, en, fr) => {
+      const gained = event("gain_credits", { amount });
+      const items = (["de", "en", "fr"] as const).map((locale) =>
+        formatChronicleEvent(gained, "runner", { translate: translate(locale) }),
+      );
+      expect(items.map((item) => item.title)).toEqual([de, en, fr]);
+      expect(new Set(items.map((item) => item.category)).size).toBe(1);
+      expect(new Set(items.map((item) => item.id)).size).toBe(1);
+    },
+  );
 
   it("uses the summed strength for a coalesced AI breaker pump", () => {
     const pumpEvents = [1, 2, 3].map((strengthAfter, index) => ({

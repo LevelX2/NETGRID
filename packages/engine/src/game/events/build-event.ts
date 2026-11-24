@@ -141,6 +141,11 @@ export function buildEventWithHost(
     state,
     legalAction,
   );
+  const creditChanges = (["corp", "runner"] as const).flatMap((side) => {
+    const before = previousState[side].credits;
+    const after = state[side].credits;
+    return before === after ? [] : [{ side, before, after }];
+  });
   const publicPayload: PublicEventPayload = {
     actor,
     actionType: publicEventType,
@@ -163,6 +168,7 @@ export function buildEventWithHost(
       visibilityClass,
     ),
     ...(counterMutations.length > 0 ? { counterMutations } : {}),
+    ...(creditChanges.length > 0 ? { creditChanges } : {}),
     ...(resolvedEffects ? { resolvedEffects } : {}),
     ...(legalAction.publicVisibilityTransitions?.length
       ? {

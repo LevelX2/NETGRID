@@ -827,9 +827,22 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     ).not.toMatch(
       /simple_code_gate_ice|Simple Code Gate ICE|"stack"|"rd"|"cardInstances"/,
     );
-    expect(serializedDefinitionReferences(JSON.stringify(getPlayerView(revealState, "runner")))).not.toContain(
-      590,
-    );
+    const revealView = getPlayerView(revealState, "runner");
+    expect(revealView.publicEvents.at(-1)).toMatchObject({
+      stateVersionAfter: revealView.stateVersion,
+      publicPayload: {
+        hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
+        publicRevealDefinitionIds: "589,601",
+        exposedServerIds: "hq,r1",
+        exposedPositionKeys: "ice:0,ice:1",
+        exposedServerLabels: "HQ,Remote 1",
+      },
+    });
+    expect(revealView.servers.find(({ id }) => id === "r1")?.ice).toEqual([
+      expect.objectContaining({ known: false, rezzed: false }),
+      expect.objectContaining({ known: false, rezzed: false }),
+    ]);
+    expect(serializedDefinitionReferences(JSON.stringify(revealView))).not.toContain(590);
     const revealReplay = replayEvents(
       revealInitial,
       revealState.eventLog.slice(revealReplayStart),

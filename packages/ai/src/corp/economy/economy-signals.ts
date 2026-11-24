@@ -11,7 +11,10 @@ import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { corpVisibleLiquidityDemandTarget } from "./economy-domain-signals";
-import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import {
+  corpScoreClosesBeforeMandatoryDraw,
+  type CorpScoreProjectSignal,
+} from "../../plans/corp-score-contracts";
 import { corpScorePriorityClass } from "../score/corp-score-priority";
 import { scoreFundingPreservesCounterBanks } from "../score/score-counter-bank-funding";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
@@ -27,9 +30,11 @@ import { corpDefenseReserveNeeds } from "../defense/corp-defense-funding-facts";
 import { corpCandidatePreservesVoluntaryDrawHorizon } from "../../runtime/corp-draw-action-facts";
 import { corpVoluntaryDrawLeavesUnsafeMandatoryHorizon } from "../../runtime/corp-draw-admission";
 import { assessCorpEconomyAssetPayback } from "./economy-asset-payback";
+import { remotePathMeetsProtectionTarget } from "../../runtime/corp-remote-maturity-assessment";
 import {
   corpReservedScoreServerIds,
   corpScoreProjectReservesSlotAfterCampaign,
+  scoreInstallWaitsBeyondCampaignPayouts,
 } from "../../runtime/corp-scoreline/score-hand-support";
 import { visibleKnownCardType } from "../../runtime/visible-action-facts";
 import { type CorpPunishCampaignSignal } from "../punish/punish-types";
@@ -183,6 +188,7 @@ export function corpEconomyDevelopmentCampaigns(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   scoreProjects: readonly CorpScoreProjectSignal[],
+  remoteProjects: CorpCorePlanDomain["remoteProjects"] = [],
 ): CorpCorePlanDomain["economyNeeds"] {
   const signals: CorpCorePlanDomain["economyNeeds"] = [];
   const reservedScoreServerIds = corpReservedScoreServerIds(
@@ -536,7 +542,7 @@ export function corpEconomyDevelopmentCampaigns(
           );
       if (creditsAfterSetup < corpFundedCentralProtectionReserve(input))
         continue;
-      const payback = assessCorpEconomyAssetPayback({
+      const paybackInput = {
         input,
         serverId: targetServerId,
         cadence,
@@ -555,8 +561,26 @@ export function corpEconomyDevelopmentCampaigns(
         setupActionCost: quote
           ? quote.consumer.clickCost + quote.payoutClickCost
           : (candidate!.costProfile.clickCost as number),
-      });
+      };
+      let payback = assessCorpEconomyAssetPayback(paybackInput);
       if (!payback || payback.projectedNetCredits <= 0) continue;
+      // The fort's funded path already accounts for the Central rez reserve.
+      // A paid setup would change that quote before the Runner gets a turn.
+      const maturity =
+        phase === "install" &&
+        cadence === "finite_pool" &&
+        setupCreditCost === 0
+          ? remoteProjects.find(
+              (project) =>
+                project.target.status === "bound" &&
+                project.target.serverId === targetServerId &&
+                project.maturity.observedAtStateVersion ===
+                  input.playerView.stateVersion,
+            )?.maturity
+          : undefined;
+      const fundedLightProtection =
+        maturity?.knowledge === "known" &&
+        remotePathMeetsProtectionTarget(maturity.fundedPath, "light");
       const reservedFortFunding =
         phase === "install" && reservedScoreServerIds.has(targetServerId);
       if (reservedFortFunding) {
@@ -574,26 +598,58 @@ export function corpEconomyDevelopmentCampaigns(
           cadence !== "finite_pool" ||
           !corpRezHostedCreditPayoutProfile(card.definitionId, true)
             ?.trashesWhenEmpty ||
-          !exhaustion ||
-          exhaustion.remainingFlexibleClicks < 1 ||
-          input.playerView.own.stackOrRdCount <= exhaustion.turnsFromNow + 1 ||
           !remote ||
-          remote.root.some(
-            (entry) => entry.type === "asset" || entry.type === "agenda",
+          !remote.root.every(
+            (entry) => entry.known && entry.type === "upgrade",
           ) ||
           sameFortScores.some(
             (project) =>
               project.feasible ||
               project.deadlinePressure ||
               project.sameTurnCloseout,
-          ) ||
-          !sameFortScores.some((project) => {
+          )
+        )
+          continue;
+        const emptiesBeforeScore =
+          exhaustion !== undefined &&
+          exhaustion.remainingFlexibleClicks >= 1 &&
+          input.playerView.own.stackOrRdCount > exhaustion.turnsFromNow + 1 &&
+          sameFortScores.some((project) => {
             const gap =
               project.fundingMilestone?.remainingGap ?? project.fundingGap;
             return typeof gap === "number" && gap > 0 && gap <= netCash;
-          })
-        ) {
-          continue;
+          });
+        if (!emptiesBeforeScore) {
+          if (
+            !fundedLightProtection ||
+            input.playerView.own.stackOrRdCount <= 1 ||
+            sameFortScores.length === 0
+          )
+            continue;
+          // A later agenda can replace the asset in its ordinary install action.
+          // Credit only the income earned before the next Runner gets priority.
+          const current = assessCorpEconomyAssetPayback({
+            ...paybackInput,
+            baselineHorizonTurns: 1,
+          });
+          if (
+            !current ||
+            current.projectedNetCredits <= 0 ||
+            !sameFortScores.every((project) =>
+              scoreInstallWaitsBeyondCampaignPayouts(
+                project,
+                input.playerView.stateVersion,
+                current.projectedCredits,
+                (!maturity.stagedTargetReached &&
+                  maturity.stagedPath.accessStatus !== "conditional" &&
+                  maturity.stagedPath.accessStatus !== "unknown") ||
+                  (maturity.minimumRezFundingGap !== undefined &&
+                    maturity.minimumRezFundingGap > current.projectedCredits),
+              ),
+            )
+          )
+            continue;
+          payback = current;
         }
       }
       signals.push({
@@ -628,6 +684,9 @@ export function corpEconomyDevelopmentCampaigns(
         },
         riskAdjustment: {
           serverId: payback.serverId,
+          ...(fundedLightProtection
+            ? { fundedLightProtection: true as const }
+            : {}),
           protectionState: payback.protectionState,
           baselineHorizonTurns: payback.baselineHorizonTurns,
           riskAdjustedHorizonTurns: payback.riskAdjustedHorizonTurns,
@@ -1318,10 +1377,13 @@ export function corpRequiredEconomyNeeds(
   immediateFundingActionIds: string[],
   terminalFundingActionIds: string[],
   candidates: readonly ActionSemanticCandidate[],
+  comparedScoreProtectionDrawIds: ReadonlySet<string> = new Set(),
 ): CorpCorePlanDomain["economyNeeds"] {
   const projectsWithCurrentProtectionSupport = new Set(
     defenseNeeds.flatMap((need) =>
       need.kind === "generic" ||
+      (need.kind === "score_protection_draw" &&
+        comparedScoreProtectionDrawIds.has(need.defenseId)) ||
       (need.kind === "score_protection_install" && need.effect === "progress")
         ? []
         : [need.parentProjectId],
@@ -1358,11 +1420,18 @@ export function corpRequiredEconomyNeeds(
               input,
               project,
               scoreProjects,
-              project.sameTurnFundingActionIds ??
-                (project.feasible &&
-                (project.sameTurnCloseout || project.terminalScore)
-                  ? terminalFundingActionIds
-                  : immediateFundingActionIds),
+              project.sameTurnFundingActionIds?.filter((id) =>
+                candidates.some((candidate) =>
+                  candidate.actionId === id &&
+                  corpCandidatePreservesVoluntaryDrawHorizon(
+                    input,
+                    candidate,
+                    corpScoreClosesBeforeMandatoryDraw(project),
+                  ),
+                ),
+              ) ?? (corpScoreClosesBeforeMandatoryDraw(project)
+                ? terminalFundingActionIds
+                : immediateFundingActionIds),
             ),
             parentPlanModuleId: "corp.score_agenda" as const,
             parentPlanInstanceId: planInstanceIdForProposal({

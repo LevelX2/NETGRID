@@ -1292,6 +1292,15 @@ erneuten Härtung resident.
 Fortschritt wird über effektiven Schutz und Nutzbarkeit gemessen, nicht über
 ICE-Anzahl allein.
 
+Ein für die Wertung vorgesehenes Fort kann bis zum tragfähigen Agendaeinbau
+eine auszahlbare Wirtschaftskarte schützen. Die begrenzte Nutzung eines
+endlichen Pools ist beim [Economy-Owner](#6-corpeconomy) beschrieben. Beim
+Vergleich zwischen sofortigem Advance und verdeckter Installation mit
+Finanzierung bleibt eine weitergehende Bewertungsfrage offen. Sichtbare
+Marker verändern die Angriffswahl des Runners, ein späterer Advance kostet
+Zeit und eine in HQ gehaltene Agenda bleibt dort angreifbar. Der Vergleich
+dieser Wege gehört zu den bestehenden Ownern und zum TurnPlanner.
+
 Ein vorbereitetes Zielremote bleibt über Economy-, Draw-, Punish- und
 Central-Responses erhalten. Remote-Optionswert, Defense-Wert, Fundingwert und
 Scorewert werden getrennt zugerechnet.
@@ -2746,6 +2755,20 @@ Leerung noch ein Installationsklick verbleibt. Ein aktuell legaler
 Score, eine bindende Frist oder ein bereits belegter Platz schließt diese
 Zulassung aus. Die Engine revalidiert Installation, Rez und jeden Abruf.
 
+Ein kostenlos installierbarer, kostenlos rezzbarer endlicher Pool kann auch
+vor seiner vollständigen Leerung Platz für die Agenda machen. Für diese
+Zwischennutzung muss der finanzierte Pfad des Fortprojekts im aktuellen
+Zustand mindestens leichten Schutz bieten. Alle Agenda-Projekte am selben
+Ort müssen nach dem erreichbaren Ertrag dieses Zuges weiterhin an einer
+bekannten Finanzierungs- oder Schutzlücke scheitern. Ein fehlender Schutz-
+oder Finanzierungsbeleg, eine nahe Frist oder eine ausführbare Folge hält
+den Platz frei. Economy rechnet die verbleibenden Abrufe dieses Zuges gegen
+die investierten Klicks. Den Restpool darf die Corp bei einer später legalen
+Agenda-Installation aufgeben. Bei gleichem Auszahlungsertrag bevorzugt die
+gebundene Finanzierungsroute das zugelassene geschützte Fort gegenüber dem
+Neubau. Der konkrete Rez und jeder Abruf werden erneut gegen die übrigen
+Vorhaben abgewogen.
+
 Ein bereits rezzter endlicher Pool kann vor einer sicher geschützten
 Agenda-Installation im selben Zug geleert werden. Score stellt die
 Installation bis zum Abruf zurück, wenn diese Folge denselben
@@ -2806,6 +2829,18 @@ kostenlosen Rez und zwei Auszahlungen: vier statt drei Credits bei drei
 normalen Aktionen, durchgehend mit demselben Parent und Engine-Replay.
 G12 D211 erhält zwei Basiskredite und Accounts Receivable mit sechs Credits
 Nettozufluss statt des schwächeren Bankaufbaus.
+
+Bei mindestens vier HQ-Karten konkurriert eine freiwillige Basis-Ziehaktion
+für zusätzlichen Fortschutz mit der konkreten Finanzierung desselben
+mehrzügigen P4-Scoreprojekts. Economy bindet einen bereits installierten
+endlichen Pool im Zielfort. Es zählt der aktuell legale Abruf oder der
+kostenlose Rez mit bestätigter Auszahlungskapazität. Die Ziehzulassung stellt
+die Suche zurück, wenn ihr Klick eine unmittelbar erreichbare Rez- oder
+Wertungsschwelle verfehlt oder die Auszahlung im quotierten Ein-Zug-Horizont
+verkleinert. Jeder Abruf wird neu gebunden. Dringende Schutz- und
+Wertungsentscheidungen behalten ihre Priorität. Im rekonstruierten Seed 8
+der Paarung 846 ergeben zwei Abrufe bei fünf HQ-Karten acht Credits. Damit
+ist der Rez von Haunting Inquisition für den folgenden Angriff bezahlbar.
 
 Ein bereits zugelassener P2-Rezreservebedarf für vorhandenes, ungeresstes ICE
 darf denselben kostenlosen aktuellen Aufbau nutzen, wenn sein absolutes Ziel
@@ -2981,6 +3016,20 @@ unbekannte Installationsfenster. Vorhandene Agenden in HQ oder Remotes,
 ausführbare Score-/Advanceköpfe, Ambush-/Punishfenster und anderes sofortiges
 Einkommen schließen sie aus. Die Meilensteinquote und der exklusive
 Bankpool-Claim gelten auch unter diesem Fundingparent.
+Discovery und die erneute Prüfung im Economy-Modul verwenden für die
+geplante ICE-Installation denselben aktuellen Defense-Kontext. Das gilt
+auch dann, wenn die Auszahlung den gesamten Installations- und Rezbedarf
+deckt. In P863 G10/D130 decken zwei Ladungen und eine Auszahlung die
+sechs fehlenden Credits für Liche am HQ. Der Scheduler kann weiterhin
+eine andere zugelassene Kampagne wählen.
+
+Für die Finanzierung einer Wertung gilt derselbe Pflichtzieh-Horizont
+wie für die Aktionsklassifikation. Eine Operation mit Kartenziehen darf
+die geschützte R&D-Reserve nur für eine ausführbare siegbringende Wertung
+im laufenden Zug verbrauchen. Die Wertung im nächsten Corp-Zug liegt
+hinter dessen Pflichtziehung. P860 G24/D450 prüft diese Grenze für eine
+bereits installierte Agenda.
+
 Paarung 576 R3/G13/D238 bestätigt nach der bereits ausgeführten wichtigen
 Installation Laden plus Auszahlung: zehn statt neun Endcredits bei gleicher
 Hand und gleichem Brett. Die 32-Credit-Schutzlinie bleibt ein Fundingziel;

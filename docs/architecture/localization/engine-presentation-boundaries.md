@@ -43,6 +43,15 @@ Regeln, LegalActions, Sichtbarkeit, RNG, Match-StateHash und Replay bleiben
 unberührt. Snapshot-Validierungsmetadaten sind keine zweite Regelautorität;
 aktuelle V0-Fixtures dürfen bei einer Vertragsumstellung neu erzeugt werden.
 
+## Bestätigung aufgedeckter ICE
+
+Die Bestätigungsansicht für Ice and Data’s Guide to the Net zeigt die
+öffentlichen ICE-Definitionen in der Reihenfolge der aufgedeckten Server.
+Jede Position behält ihre eigene Karte, auch bei gleicher Definition. Auf dem
+Spielbrett werden die öffentlichen Positionen nur während der offenen Ansicht
+und in der zum Ereignis gehörenden Zustandsversion aufgedeckt. „Gesehen“
+bestätigt die Ansicht lokal.
+
 ## Semantische Chronikdetails und Regressionen
 
 `formatChronicleEvent` verwendet bei gesetztem `context.translate` direkt

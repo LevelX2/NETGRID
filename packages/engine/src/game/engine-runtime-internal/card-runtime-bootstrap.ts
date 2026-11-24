@@ -63,7 +63,6 @@ import {
 } from "../choices/pending-choice-resolution";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
-  corpInstalledCardIds,
   corpRootAssetIdsInServer,
   definitionFor,
   mustInstance,
@@ -697,12 +696,6 @@ export function configureCardRuntimeBootstrap() {
         affordableRezzedInstalledIceIdsForRunner:
           runtimePorts.affordableRezzedInstalledIceIdsForRunner,
         unrezzedInstalledIceIds: runtimePorts.unrezzedInstalledIceIds,
-        installedIceIds: (state) =>
-          corpInstalledCardIds(state).filter(
-            (cardId) =>
-              mustInstance(state.cardInstances, cardId).zone.zone ===
-              "serverIce",
-          ),
         rezzedBlackIceIds: runtimePorts.rezzedBlackIceIds,
         startPayRezCostToTrashRezzedIceChoice:
           runtimePorts.startPayRezCostToTrashRezzedIceChoice,

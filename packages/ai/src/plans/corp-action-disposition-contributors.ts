@@ -4,7 +4,10 @@ import { corpReservedScoreServerIds } from "../runtime/corp-scoreline/score-hand
 import { corpEconomyActionIsOwned } from "../corp/economy/economy-routes";
 import { corpHostedBankLoadRejectionEvidence } from "../corp/economy/hosted-credit-bank-facts";
 import { type CorpDefenseSignal } from "./corp-defense-contracts";
-import { type CorpScoreProjectSignal } from "./corp-score-contracts";
+import {
+  corpScoreClosesBeforeMandatoryDraw,
+  type CorpScoreProjectSignal,
+} from "./corp-score-contracts";
 import { corpPunishCampaignOwnsCandidate } from "../corp/punish/punish-plan-support";
 import { type CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type {
@@ -409,6 +412,13 @@ function contributeCorpActionDispositionForCandidate(
     );
   if (
     reservedScoreServerOverflowEvidence &&
+    !domain.economyNeeds.some(
+      (signal) =>
+        signal.kind === "develop_campaign" &&
+        signal.phase === "install" &&
+        signal.cadence.kind === "finite_pool" &&
+        signal.actionIds.includes(candidate.actionId),
+    ) &&
     !facts.corpExactExecutableNonEconomyPlanOwnsAction(domain, candidate)
   ) {
     add(
@@ -1287,11 +1297,7 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
       assessment.terminalNeedBeforeMandatoryDraw,
   );
   const exactTerminalScoreSupport = domain.scoreProjects.some((project) => {
-    if (
-      !project.feasible ||
-      !project.sameTurnCloseout ||
-      !project.terminalScore
-    ) {
+    if (!corpScoreClosesBeforeMandatoryDraw(project)) {
       return false;
     }
     const parentPlanInstanceId = planInstanceIdForProposal({

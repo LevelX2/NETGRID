@@ -1,5 +1,12 @@
 import { cardDefinitionIdValue } from "./card-definition-id";
-import type { CardDefinitionId, MatchEventId, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  MatchEventId,
+  PublicCreditChange,
+  PublicGameEvent,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { PlayerView } from "../lib/presented-player-view";
 import {
   chronicleActionUseByEventId,
@@ -20,7 +27,10 @@ import {
   publicAccessOwnsOutcomeEvent,
 } from "./access-presentation";
 import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
-import { payloadHasAbility } from "./action-payload";
+import {
+  isExposeOutermostIceEachDataFortPayload,
+  payloadHasAbility,
+} from "./action-payload";
 
 export type OpponentActionCue = {
   cueId: string;
@@ -29,6 +39,7 @@ export type OpponentActionCue = {
   actor?: Side;
   actorLabel: string;
   actionUse?: ChronicleActionUse;
+  creditChanges?: PublicCreditChange[];
   opponent: boolean;
   source: "human" | "ai" | "system";
   actionType: string;
@@ -117,6 +128,7 @@ export type ActionSoundKind =
   | "credit"
   | "install_hidden"
   | "install_known"
+  | "advance"
   | "play"
   | "rez"
   | "ice_rez"
@@ -156,6 +168,8 @@ export type CueDerivationInput = {
   events: PublicGameEvent[];
   lastPresentedEventId?: MatchEventId | null;
   includeOwnActions?: boolean;
+  includeOwnCreditChanges?: boolean;
+  locallySoundedEventIds?: ReadonlySet<MatchEventId>;
   includeAutomaticEffectCues?: boolean;
   translate?: ChronicleTranslate;
   contextByEventId?: Record<MatchEventId, Omit<ChronicleContext, "side">>;
@@ -179,6 +193,11 @@ export function deriveOpponentActionCues(
   const cues = presentationEvents.flatMap((event) => {
     const payload = event.publicPayload ?? {};
     const actionType = stringValue(payload.actionType) ?? event.type;
+    if (
+      payload.publicRevealKind === "expose" &&
+      isExposeOutermostIceEachDataFortPayload(payload)
+    )
+      return [];
     if (
       actionType === "access_card" &&
       cardDefinitionIdValue(payload.cardDefinitionId) &&
@@ -210,8 +229,14 @@ export function deriveOpponentActionCues(
     )
       return [];
     if (isSocialEngineeringHiddenAmountSelectionEvent(event)) return [];
+    const creditChanges = payload.creditChanges;
+    const ownCreditCue =
+      input.includeOwnCreditChanges &&
+      actor === input.viewerSide &&
+      creditChanges?.length;
     if (
       !input.includeOwnActions &&
+      !ownCreditCue &&
       !opponent &&
       !systemCue &&
       !forcedPublicEffectCue &&
@@ -254,7 +279,9 @@ export function deriveOpponentActionCues(
       (entry) => entry.tagGain || entry.damage,
     );
     const sound =
-      hasDedicatedImpactEffect || traceTagOutcome?.pending === false
+      hasDedicatedImpactEffect ||
+      traceTagOutcome?.pending === false ||
+      (source === "human" && input.locallySoundedEventIds?.has(event.eventId))
         ? undefined
         : actionSoundForActionType(actionType, visibility);
     const soundCount = sound
@@ -267,6 +294,7 @@ export function deriveOpponentActionCues(
       viewerSide: input.viewerSide,
       ...(actor ? { actor } : {}),
       actorLabel: actorLabel(actor, source, input.translate),
+      ...(creditChanges?.length ? { creditChanges } : {}),
       ...(actionUsesByEventId[event.eventId]
         ? { actionUse: actionUsesByEventId[event.eventId] }
         : {}),
@@ -806,8 +834,9 @@ export function actionSoundForActionType(
     case "gain_credit":
       return "credit";
     case "install_card":
-    case "advance_card":
       return visibility === "redacted" ? "install_hidden" : "install_known";
+    case "advance_card":
+      return "advance";
     case "play_event":
     case "play_operation":
       return "play";
