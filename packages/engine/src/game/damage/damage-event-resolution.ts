@@ -16,12 +16,9 @@ import { selectedChoiceIds } from "../choices/choice-validation";
 import { maxHandSize } from "../../ability-engine/effective-values";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
-  addRunnerFutureActionDebt,
   assertPositiveIntegerAmount,
-  credits,
   damageTypePayload,
   definitionFor,
-  drawRunnerCard,
   ensureRunnerTurnFlags,
   mustArrayValue,
   mustInstance,

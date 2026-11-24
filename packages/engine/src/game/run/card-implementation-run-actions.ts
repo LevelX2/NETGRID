@@ -1,5 +1,6 @@
 import type {
   CardDefinition,
+  CardDefinitionId,
   CardInstance,
   CardInstanceId,
   GameState,
@@ -7,6 +8,7 @@ import type {
   Side,
 } from "@netgrid/shared";
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
+import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { buildLegalAction } from "../turn/action-builders";
 
 export type RunCardImplementationActionHost = {
@@ -15,7 +17,9 @@ export type RunCardImplementationActionHost = {
     cardInstanceFor: (cardId: CardInstanceId) => CardInstance | undefined;
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     runnerInstalledCardIds: () => CardInstanceId[];
-    cardImplementationForDefinitionId?: (definitionId: number) => any;
+    cardImplementationForDefinitionId?: (
+      definitionId: CardDefinitionId,
+    ) => Pick<CardImplementationDefinition, "runnerRunStrengthBoost"> | undefined;
   };
   actions?: {
     buildLegalAction: (

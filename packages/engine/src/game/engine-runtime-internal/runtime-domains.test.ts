@@ -130,7 +130,7 @@ describe("engine runtime internal domains", () => {
         .pendingChoiceResolutionHost,
     ).toBe("function");
     expect(
-      typeof createHiddenZoneSearchRuntime(deps, links)
+      typeof createHiddenZoneSearchRuntime(deps)
         .hiddenZoneSearchChoiceHandlerHost,
     ).toBe("function");
     expect(

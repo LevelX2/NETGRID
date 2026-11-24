@@ -539,7 +539,6 @@ export function continueFromMovement(
   legalAction?: LegalAction,
 ): PostPassIceResult {
   const state = host.state;
-  const run = mustRun(state);
   const postPassPayment = resolvePostPassPayOrEndRun(host, legalAction);
   if (postPassPayment.handled) return postPassPayment;
   if (

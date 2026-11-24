@@ -21,6 +21,7 @@ import type {
   HiddenZoneSearchChoiceHandlerHost,
 } from "../hidden-zone/search-choice-handlers";
 import type { PendingChoiceResolutionHost } from "../choices/pending-choice-resolution";
+import type { buildLegalAction } from "../turn/action-builders";
 import type {
   CardRunnerEventLongtailImplementation,
   RunnerTraceCounterEffectImplementation,
@@ -104,7 +105,7 @@ export type RunnerEventResolver = {
     state: GameState;
     cardId: CardInstanceId;
     definition: CardDefinition;
-    buildAction: (...args: any[]) => LegalAction;
+    buildAction: typeof buildLegalAction;
     clickCost: number;
     creditCost: number;
   }) => LegalAction[];

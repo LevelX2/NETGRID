@@ -393,7 +393,6 @@ function testCorpMainHost(
       hardwareTrashByCounterLegalActions: () => [],
       corpAgendaPointTotal: () => 0,
       hasCorpUtilityKind: () => false,
-      uniqueDirectLongtailKindForDefinition: () => undefined,
     },
     runner: {
       isConcealedRunnerResource: () => false,

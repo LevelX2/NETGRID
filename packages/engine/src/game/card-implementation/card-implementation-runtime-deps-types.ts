@@ -1,7 +1,6 @@
 import type {
   ActionType,
   CardDefinition,
-  CardInstance,
   CardInstanceId,
   GameState,
   LegalAction,

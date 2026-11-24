@@ -2,7 +2,6 @@ import { scoredAgendaPointValue } from "../state/corp-agenda-point-cost";
 import * as runtimePorts from "./runtime-port-bindings";
 import {
   type CardDefinition,
-  type CardDefinitionId,
   type CardInstanceId,
   type GameState,
   type LegalAction,
@@ -300,12 +299,6 @@ export function pickRunnerAgendaForAgendaPointCost(
     .find((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
 }
 
-type CorpAgendaPointCostResult = {
-  paidPoints: number;
-  bonusPointsSpent: number;
-  spentAgendaIds: CardInstanceId[];
-  spentAgendaDefinitionIds: CardDefinitionId[];
-};
 
 export function recurringTraceCreditPoolSourceIds(
   state: GameState,

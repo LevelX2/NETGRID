@@ -7,7 +7,6 @@ import type {
   ServerId,
   SubroutineDefinition,
 } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import { executeCardImplementationEffects } from "./effect-interpreter";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import { payActivatedCardImplementationCosts } from "./card-implementation-runtime-activated-costs";

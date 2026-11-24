@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type {
   CardDefinitionId,
   CardInstanceId,
@@ -7,6 +7,7 @@ import type {
 } from "@netgrid/shared";
 import {
   assertCommittedCorpTraceBidPaymentQuoteValid,
+  corpTraceBidPaymentAllocations,
   corpTracePaymentPublicPayload,
   payCorpTraceBidQuote,
   payCommittedCorpTraceBidQuote,
@@ -120,6 +121,53 @@ describe("trace payment pools", () => {
         3,
       ),
     ).toMatchObject({ canPay: true, corpTraceCountersToPay: 1 });
+  });
+
+  it("reads specialized pools once and lists only affordable Classic allocations in order", () => {
+    const trace = corpBidTrace({
+      traceLimit: 2,
+      traceRulesProfile: "classic_blind",
+    });
+    const state = stateForTrace(trace, { corpCredits: 1 });
+    const bitSource = vi.fn(() => [
+      {
+        kind: "corp_trace_bit_pool" as const,
+        sourceCardInstanceId: "a_krumz" as CardInstanceId,
+        sourceDefinitionId: 542 as CardDefinitionId,
+        available: 2,
+      },
+    ]);
+    const counterSource = vi.fn(() => [
+      {
+        kind: "corp_trace_counter_pool" as const,
+        sourceCardInstanceId: "b_tracker" as CardInstanceId,
+        sourceDefinitionId: 537 as CardDefinitionId,
+        available: 3,
+      },
+    ]);
+    const deps = corpDeps({
+      corpTraceBitPoolSources: bitSource,
+      corpTraceCounterPoolSources: counterSource,
+      corpTraceCounterPoolTotal: () => 3,
+    });
+
+    const allocations = corpTraceBidPaymentAllocations(deps, state, trace, 4);
+
+    expect(bitSource).toHaveBeenCalledTimes(1);
+    expect(counterSource).toHaveBeenCalledTimes(1);
+    expect(
+      allocations.map((allocation) => allocation.map(({ amount }) => amount)),
+    ).toEqual([
+      [0, 3],
+      [1, 2],
+      [1, 3],
+      [2, 2],
+    ]);
+    for (const allocation of allocations) {
+      expect(
+        quoteCorpTraceBidPayment(deps, state, trace, 4, allocation).canPay,
+      ).toBe(true);
+    }
   });
 
   it("does not apply the printed Trace N as a Modern Open bid limit", () => {

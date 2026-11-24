@@ -30,14 +30,58 @@ describe("game replay facade", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    const replayedEvents = result.state.eventLog.slice(initial.eventLog.length);
-    const replay = replayGameEvents(initial, replayedEvents);
+    const replay = replayGameEvents(initial, result.state.eventLog);
 
-    expect(replay).toEqual(engineReplayEvents(initial, replayedEvents));
+    expect(replay).toEqual(engineReplayEvents(initial, [result.event]));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(result.stateHash);
     expect(hashState(replay.state)).toBe(result.stateHash);
   });
+
+  it("rejects a wrong state hash in the creation event", () => {
+    const initial = createGame({ seed: "replay-creation-hash" });
+    const creation = initial.eventLog[0]!;
+    const replay = replayGameEvents(initial, [
+      { ...creation, stateHashAfter: "wrong-hash" },
+    ]);
+
+    expect(replay.ok).toBe(false);
+    expect(replay.errors).toEqual(["StateHash mismatch at 1."]);
+    expect(replay.actualFinalStateHash).toBe(creation.stateHashAfter);
+  });
+
+  it.each(["duplicate creation", "wrong event type"] as const)(
+    "rejects %s in a replay of a successful action",
+    (defect) => {
+      const initial = createGame({
+        seed: "replay-invalid-journal",
+        setupMode: "completed",
+      });
+      const draw = getLegalActions(initial, "corp").find(
+        (action) => action.type === "mandatory_draw",
+      )!;
+      const result = applyAction(
+        initial,
+        replayAction(initial, "corp", draw.actionId),
+      );
+      if (!result.ok) throw new Error(result.error.message);
+
+      const creation = initial.eventLog[0]!;
+      const duplicateCreation = defect === "duplicate creation";
+      const events = duplicateCreation
+        ? [...result.state.eventLog, creation]
+        : [creation, { ...result.event, type: "end_turn" }];
+      const replay = replayGameEvents(initial, events);
+
+      expect(replay.ok).toBe(false);
+      expect(replay.errors).toEqual([
+        duplicateCreation
+          ? "Unexpected game creation at event 1."
+          : "Event type mismatch at 2.",
+      ]);
+      expect(replay.state.stateVersion).toBe(duplicateCreation ? 1 : 0);
+    },
+  );
 
   it("uses the configured ReplayHost action application in event order", () => {
     const initial = createGame({

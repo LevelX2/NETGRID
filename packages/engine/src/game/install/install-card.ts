@@ -166,7 +166,6 @@ export function installCard(
   host: InstallCardHost,
   legalAction: LegalAction,
 ): void {
-  const { state } = host;
   const cardId = String(legalAction.payload?.cardId) as CardInstanceId;
   const definition = host.cards.definitionFor(cardId);
   if (

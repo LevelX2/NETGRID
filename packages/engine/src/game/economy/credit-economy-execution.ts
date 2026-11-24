@@ -154,9 +154,6 @@ export type CreditEconomyExecutionHost = {
       state: GameState,
       legalAction: LegalAction,
     ) => void;
-    handleTraceOrchestrationAction: (legalAction: LegalAction) => {
-      handled: boolean;
-    };
     handleCorpSpecialDamageAbilityAction: (legalAction: LegalAction) => {
       handled: boolean;
     };
@@ -304,9 +301,6 @@ export function handleCreditEconomyExecution(
         ? { movedCardDefinitionId: targetDefinitionId }
         : {}),
     };
-    return handled(legalAction);
-  }
-  if (host.delegates.handleTraceOrchestrationAction(legalAction).handled) {
     return handled(legalAction);
   }
   if (host.delegates.handleCorpSpecialDamageAbilityAction(legalAction).handled)

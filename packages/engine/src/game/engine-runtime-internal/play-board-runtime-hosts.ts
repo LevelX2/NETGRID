@@ -146,7 +146,7 @@ export function createPlayBoardRuntimeHosts(
         unrezzedInstalledIceIds: () =>
           Object.entries(state.cardInstances)
             .filter(
-              ([cardId, instance]: any) =>
+              ([cardId, instance]) =>
                 instance?.controller === "corp" &&
                 instance.zone?.zone === "serverIce" &&
                 instance.rezzed !== true &&

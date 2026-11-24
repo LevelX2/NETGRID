@@ -1111,15 +1111,6 @@ function legalActionPayload(
   };
 }
 
-function ensureRunnerTurnFlags(
-  state: GameState,
-): NonNullable<GameState["runnerTurnFlags"]> {
-  state.runnerTurnFlags ??= {
-    stoleAgendaThisTurn: false,
-    stoleAgendaLastTurn: false,
-  };
-  return state.runnerTurnFlags;
-}
 
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const instance = mustInstance(state.cardInstances, id);

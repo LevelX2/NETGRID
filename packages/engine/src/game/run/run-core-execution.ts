@@ -1,5 +1,4 @@
 import type {
-  CardInstanceId,
   CorpServer,
   GameState,
   LegalAction,

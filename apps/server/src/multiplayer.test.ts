@@ -8909,6 +8909,39 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(replay.finalStateHash).toMatch(/^fnv1a:/);
   });
 
+  it("reports a mismatched journal event type in multiplayer replay diagnostics", async () => {
+    const { service, matchId, corp } = await joinedMatch("replay-event-type");
+    await submit(
+      service,
+      matchId,
+      corp,
+      (action) => action.type === "mandatory_draw",
+      "replay-mandatory",
+    );
+    const { storage } = service as unknown as { storage: MultiplayerStorage };
+    const record = await storage.load(matchId);
+    const event = record?.gameState.eventLog.at(-1);
+    if (!record || !event) throw new Error("Missing replay journal event");
+    record.gameState.eventLog[record.gameState.eventLog.length - 1] = {
+      ...event,
+      type: "end_turn",
+    };
+    await storage.save(record);
+
+    expect(await service.replayMatch(matchId)).toMatchObject({ ok: false });
+    const result = await service.loadReplayDiagnostics(matchId, "runner");
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.replay.metadata.replayOk).toBe(false);
+    expect(result.replay.replayErrors).toEqual([
+      `event_type_mismatch:${event.eventId}`,
+    ]);
+    expect(
+      result.replay.timeline.find((step) => step.eventId === event.eventId),
+    ).toMatchObject({
+      stateHashCheck: { ok: false, reason: "event_type_mismatch" },
+    });
+  });
+
   it("builds V1.5.0 private replay views with timeline checks and redacted export", async () => {
     const match = await joinedMatch("v150-private-replay");
     await submit(
@@ -15957,15 +15990,13 @@ async function forceSetupComplete(
   delete gameState.gameEndReason;
   const event = {
     ...gameState.eventLog[0]!,
-    stateHashAfter: hashState({ ...gameState, eventLog: [] } as GameState),
+    stateHashAfter: hashState(gameState),
     publicPayload: {
       ...gameState.eventLog[0]!.publicPayload,
       setupStatus: "complete",
     },
   };
   gameState.eventLog = [event];
-  event.stateHashAfter = hashState(gameState);
-  gameState.eventLog = [{ ...event, stateHashAfter: hashState(gameState) }];
   record.gameState = gameState;
   record.eventLog = gameState.eventLog.map((entry) =>
     toEventRecordForTest(matchId, entry),
@@ -15982,12 +16013,14 @@ async function forceSetupComplete(
   ];
   delete record.pendingUndo;
   if (sqliteDbPath) {
-    // This fixture substitutes a synthetic game_created state and its snapshot.
+    // Replace the fixture's initial snapshot and both append-only journals together.
     const database = new DatabaseSync(sqliteDbPath);
     try {
       database
         .prepare("DELETE FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?")
         .run(matchId, INITIAL_STATE_SNAPSHOT_ID);
+      database.prepare("DELETE FROM events WHERE match_id = ?").run(matchId);
+      database.prepare("DELETE FROM engine_events WHERE match_id = ?").run(matchId);
     } finally {
       database.close();
     }

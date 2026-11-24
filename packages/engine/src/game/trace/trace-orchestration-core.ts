@@ -18,7 +18,6 @@ import type {
   CancelSuccessfulTraceEffectImplementation,
   IncreaseTraceLinkEffectImplementation,
 } from "../../ability-engine/definition-types";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import { limitRunActionSpendingCapacity } from "../payment/run-action-spending-cap";
 import { credits } from "../state/economy-mutation";
@@ -28,8 +27,8 @@ import {
   assertCorpTraceBidPaymentValid,
   assertRunnerTraceBidPaymentQuoteValid,
   assertRunnerTraceBidPaymentValid,
+  corpTraceBidPaymentAllocations,
   corpTracePaymentPublicPayload,
-  corpTraceSpecializedPaymentSources,
   payCorpTraceBidQuote,
   payCommittedCorpTraceBidQuote,
   payPostBidLinkPaymentQuote,
@@ -43,7 +42,6 @@ import {
   runnerTracePaymentPublicPayload,
   type CorpTracePaymentDependencies,
   type CorpTracePaymentSelection,
-  type RunnerTraceLinkCreditSelection,
   type RunnerTracePaymentDependencies,
   type RunnerTracePaymentQuote,
 } from "../payment";
@@ -288,13 +286,6 @@ export function resolveTraceChoice(
   resolveTraceRunnerBid(host, legalAction, playerAction);
 }
 
-export function handleTraceOrchestrationAction(
-  host: TraceOrchestrationHost,
-  legalAction: LegalAction,
-): { handled: boolean } {
-  return { handled: false };
-}
-
 export function traceBidChoice(
   state: GameState,
   side: Side,
@@ -497,48 +488,14 @@ function startCorpBidPaymentChoice(
   bid: number,
   legalAction: LegalAction,
 ): boolean {
-  if (bid <= 0) return false;
-  const sources = corpTraceSpecializedPaymentSources(
+  const allocations = corpTraceBidPaymentAllocations(
     host.payment.corpTracePaymentDeps,
     host.state,
+    trace,
+    bid,
   );
-  if (sources.length === 0) return false;
-  const allocations: CorpTracePaymentSelection[][] = [];
-  function collect(
-    sourceIndex: number,
-    current: CorpTracePaymentSelection[],
-    allocated: number,
-  ): void {
-    const source = sources[sourceIndex];
-    if (!source) {
-      const quote = quoteCorpTraceBidPayment(
-        host.payment.corpTracePaymentDeps,
-        host.state,
-        trace,
-        bid,
-        current,
-      );
-      if (quote.canPay) allocations.push(current);
-      return;
-    }
-    const max = Math.min(source.available, bid - allocated);
-    for (let amount = 0; amount <= max; amount += 1) {
-      collect(
-        sourceIndex + 1,
-        [
-          ...current,
-          {
-            kind: source.kind,
-            sourceCardInstanceId: source.sourceCardInstanceId,
-            amount,
-          },
-        ],
-        allocated + amount,
-      );
-    }
-  }
-  collect(0, [], 0);
   if (allocations.length <= 1) return false;
+  const sourceTitles = new Map<CardInstanceId, string>();
   host.state.trace = {
     ...trace,
     corpBidPaymentSelection: { bid },
@@ -551,28 +508,29 @@ function startCorpBidPaymentChoice(
     presentationKey: "trace_corp_payment",
     kind: "select_option",
     options: allocations.map((allocation, index) => {
-      const specializedTotal = allocation.reduce(
-        (sum, entry) => sum + entry.amount,
-        0,
-      );
+      let remaining = bid;
+      const labelParts: string[] = [];
+      const paymentSources: Array<{ title?: string; amount: number }> = [];
+      for (const { sourceCardInstanceId, amount } of allocation) {
+        if (amount === 0) continue;
+        let title = sourceTitles.get(sourceCardInstanceId);
+        if (title === undefined) {
+          title = host.cards.definitionFor(sourceCardInstanceId).title;
+          sourceTitles.set(sourceCardInstanceId, title);
+        }
+        remaining -= amount;
+        labelParts.push(`${amount} aus ${title}`);
+        paymentSources.push({ title, amount });
+      }
+      if (remaining > 0) {
+        labelParts.push(`${remaining} übrige Quellen`);
+        paymentSources.push({ amount: remaining });
+      }
       return {
         id: `corp_payment_${index}`,
-        label: corpTraceAllocationLabel(host, allocation, bid),
+        label: labelParts.join(", "),
         value: JSON.stringify(allocation),
-        metadata: {
-          paymentSources: [
-            ...allocation
-              .filter((entry) => entry.amount > 0)
-              .map((entry) => ({
-                title: host.cards.definitionFor(entry.sourceCardInstanceId)
-                  .title,
-                amount: entry.amount,
-              })),
-            ...(bid - specializedTotal > 0
-              ? [{ amount: bid - specializedTotal }]
-              : []),
-          ],
-        },
+        metadata: { paymentSources },
       };
     }),
     minSelections: 1,
@@ -606,29 +564,6 @@ function selectedCorpTracePaymentAllocation(
   if (!Array.isArray(parsed))
     throw new Error("Die Trace-Zahlungsquellen-Auswahl ist ungültig.");
   return parsed;
-}
-
-function corpTraceAllocationLabel(
-  host: TraceOrchestrationHost,
-  allocation: CorpTracePaymentSelection[],
-  bid: number,
-): string {
-  const specialized = allocation
-    .filter((entry) => entry.amount > 0)
-    .map((entry) => {
-      const title = host.cards.definitionFor(entry.sourceCardInstanceId).title;
-      return `${entry.amount} aus ${title}`;
-    });
-  const specializedTotal = allocation.reduce(
-    (sum, entry) => sum + entry.amount,
-    0,
-  );
-  const normal = bid - specializedTotal;
-  return (
-    [...specialized, ...(normal > 0 ? [`${normal} übrige Quellen`] : [])].join(
-      ", ",
-    ) || "Keine Zahlung"
-  );
 }
 
 function startTraceBaseLinkChoice(

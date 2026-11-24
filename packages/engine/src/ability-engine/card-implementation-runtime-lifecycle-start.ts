@@ -31,11 +31,6 @@ export function cardImplementationRunnerRunStartAbilities(
   return lifecycleForDefinition(definition)?.on_runner_run_start ?? [];
 }
 
-function cardImplementationEndOfRunnerTurnAbilities(
-  definition: CardDefinition,
-): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return lifecycleForDefinition(definition)?.end_of_runner_turn ?? [];
-}
 
 export function cardImplementationStartOfCorpTurnSourceIds(
   deps: CardImplementationRuntimeDependencies,

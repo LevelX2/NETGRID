@@ -239,8 +239,12 @@ describe("runner during-run CardImplementation actions", () => {
           definitionId === 1292001620
             ? {
                 runnerRunStrengthBoost: {
+                  timing: "during_ice_encounter",
                   amount: 2,
                   cost: { trashSelf: true },
+                  target: "installed_runner_icebreaker",
+                  duration: "current_run",
+                  visibility: "public",
                 },
               }
             : undefined,

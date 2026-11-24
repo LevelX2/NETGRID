@@ -4,7 +4,6 @@ import type {
   CardDefinitionId,
   CardInstance,
   CardInstanceId,
-  CardType,
   DamageType,
   EventModificationCandidate,
   GameState,

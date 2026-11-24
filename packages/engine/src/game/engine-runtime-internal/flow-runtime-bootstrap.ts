@@ -1095,12 +1095,6 @@ export function configureFlowRuntimeBootstrap({
       badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD,
     },
   });
-  type VisibleCounterPayload = {
-    counterType: CounterType;
-    addedCounterAmount?: number;
-    removedCounterAmount?: number;
-    remainingCounters: number;
-  };
 
   const damageCoreHost: DamageCoreHost = {
     cards: {

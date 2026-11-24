@@ -8,9 +8,6 @@ import type {
   GameState,
   LegalAction,
   PlayerAction,
-  PurgeableRunnerVirusCounterBucket,
-  PurgeableRunnerVirusCounterType,
-  ResolvedGameEffect,
   ServerId,
 } from "@netgrid/shared";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";

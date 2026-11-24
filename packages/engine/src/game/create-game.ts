@@ -432,9 +432,3 @@ function mustInstance(
   if (!instance) throw new Error(`CardInstance fehlt: ${id}`);
   return instance;
 }
-
-function mustArrayValue<T>(values: T[], index: number, message: string): T {
-  const value = values[index];
-  if (value === undefined) throw new Error(message);
-  return value;
-}

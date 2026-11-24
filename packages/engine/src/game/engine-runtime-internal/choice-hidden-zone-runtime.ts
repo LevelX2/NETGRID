@@ -225,7 +225,7 @@ export function createChoiceHiddenZoneRuntime(
   const links = createChoiceHiddenZoneRuntimeLinks(runtime);
   Object.assign(
     runtime,
-    createHiddenZoneSearchRuntime(deps, links),
+    createHiddenZoneSearchRuntime(deps),
     createHiddenZoneArrangeRuntime(deps, links),
     createHiddenZoneNonSearchRuntime(deps, links),
     createHiddenZoneNonSearchDiceLoopRuntime(deps),

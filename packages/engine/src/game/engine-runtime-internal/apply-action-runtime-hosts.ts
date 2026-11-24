@@ -20,7 +20,6 @@ import {
   spendCardCounter,
 } from "../state/turn-flags-counters";
 import { uninstallCorpInstalledCardToHq } from "../state/zone-mutation";
-import { handleTraceOrchestrationAction } from "../trace/trace-orchestration";
 import { type TurnBasicExecutionHost } from "../turn/turn-basic-execution";
 import { type CreditEconomyExecutionHost } from "../economy/credit-economy-execution";
 import { startCorpAssetRdTopReorderChoice } from "../hidden-zone/arrange-choice-handlers";
@@ -167,11 +166,6 @@ export function createApplyActionRuntimeHosts(
           deps.shouldOpenCorpInstalledEconomyCreditChoice,
         startCorpInstalledEconomyCreditChoice:
           deps.startCorpInstalledEconomyCreditChoice,
-        handleTraceOrchestrationAction: (legalAction) =>
-          handleTraceOrchestrationAction(
-            deps.traceOrchestrationHost(state),
-            legalAction,
-          ),
         handleCorpSpecialDamageAbilityAction: (legalAction) =>
           handleCorpSpecialDamageAbilityAction(
             runtime.corpSpecialDamageAbilityHost(state, legalAction),

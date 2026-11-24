@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { quoteTraceBaseLinkChoices } from "./base-link";
 import { describe, expect, it } from "vitest";
 import {
-  handleTraceOrchestrationAction,
   resolveTraceChoice,
   startTraceFromOperation,
   type TraceOrchestrationHost,
@@ -931,38 +930,6 @@ describe("trace orchestration", () => {
     });
   });
 
-  it("does not handle legacy Paris City Grid trace trigger payloads", () => {
-    const sourceId = "paris_1" as CardInstanceId;
-    const sourceDefinition = definition(3963457139, "upgrade");
-    const state = minimalState({
-      cardInstances: {
-        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
-      },
-    });
-    const action = actionFor("corp", "trigger_ability", {
-      cardId: sourceId,
-      v1918UpgradeAbility: "trace_2_tag",
-      traceValue: 2,
-    });
-
-    const result = handleTraceOrchestrationAction(
-      testHost(
-        state,
-        { [sourceDefinition.id]: sourceDefinition },
-        testCalls(),
-        {
-          parisTraceDefinitionId: sourceDefinition.id,
-          rezzedCorpRootCardIds: [sourceId],
-        },
-      ),
-      action,
-    );
-
-    expect(result).toEqual({ handled: false });
-    expect(state.trace).toBeUndefined();
-    expect(state.pendingChoice).toBeUndefined();
-  });
-
   it("does not import from index.ts", () => {
     const source = readFileSync(
       new URL("./trace-orchestration.ts", import.meta.url),
@@ -1160,8 +1127,6 @@ function testHost(
     postBidLinkTap?: boolean;
     postBidLinkRepeatable?: boolean;
     successCancelSourceId?: CardInstanceId;
-    parisTraceDefinitionId?: CardDefinitionId;
-    rezzedCorpRootCardIds?: CardInstanceId[];
     runnerTraceLinkCreditSourceIds?: CardInstanceId[];
     hostedCredits?: Map<CardInstanceId, number>;
     corpSpecializedSources?: CorpTraceSpecializedPaymentSource[];
@@ -1351,7 +1316,7 @@ function testHost(
       ) => 0,
     },
     corp: {
-      rezzedCorpRootCardIds: () => options.rezzedCorpRootCardIds ?? [],
+      rezzedCorpRootCardIds: () => [],
     },
     counters: {
       cardCounter: () => 0,

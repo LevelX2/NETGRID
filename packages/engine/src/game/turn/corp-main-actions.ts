@@ -93,7 +93,6 @@ export type CorpMainActionGenerationHost = {
     hardwareTrashByCounterLegalActions: HostFn<LegalAction[]>;
     corpAgendaPointTotal: HostFn<number>;
     hasCorpUtilityKind: HostFn<boolean>;
-    uniqueDirectLongtailKindForDefinition: HostFn<string | undefined>;
   };
   runner: {
     isConcealedRunnerResource: HostFn<boolean>;
@@ -214,8 +213,6 @@ export function buildCorpMainActions(
   const hardwareTrashByCounterLegalActions =
     host.corp.hardwareTrashByCounterLegalActions;
   const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
-  const uniqueDirectLongtailKindForDefinition =
-    host.corp.uniqueDirectLongtailKindForDefinition;
   const isConcealedRunnerResource = host.runner.isConcealedRunnerResource;
   const hiddenRunnerResourceSlotId = host.runner.hiddenRunnerResourceSlotId;
   const corpNewDataFortCreationLocked =

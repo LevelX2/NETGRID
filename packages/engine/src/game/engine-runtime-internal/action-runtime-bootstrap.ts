@@ -194,8 +194,6 @@ export function configureActionRuntimeBootstrap({
         runtimePorts.hardwareTrashByCounterLegalActions,
       corpAgendaPointTotal: runtimePorts.corpAgendaPointTotal,
       hasCorpUtilityKind: runtimePorts.hasCorpUtilityKind,
-      uniqueDirectLongtailKindForDefinition:
-        runtimePorts.uniqueDirectLongtailKindForDefinition,
       filterActionsForRestrictedExtraActions:
         runtimePorts.filterActionsForRestrictedExtraActions,
     },

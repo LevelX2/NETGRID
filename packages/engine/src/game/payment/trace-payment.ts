@@ -488,27 +488,16 @@ function selectedTraceLinkBreakdowns(
   return breakdown;
 }
 
-export function quoteCorpTraceBidPayment(
+function readCorpTraceBidPaymentPools(
   deps: CorpTracePaymentDependencies,
   state: GameState,
   trace: TraceState,
   bid: number,
-  specializedSelections?: CorpTracePaymentSelection[],
-): CorpTracePaymentQuote {
-  if (!isValidBidAmount(bid)) {
-    return {
-      side: "corp",
-      bid,
-      canPay: false,
-      breakdown: [],
-      normalCreditsToPay: 0,
-      temporaryTraceCreditsToPay: 0,
-      fortTraceBitPoolToPay: 0,
-      corpTraceBitsToPay: 0,
-      corpTraceCountersToPay: 0,
-    };
-  }
-
+): {
+  pools: TracePaymentPool<CorpTracePaymentSourceKind>[];
+  requiredTraceCounters: number;
+  corpTraceCounterPoolAvailable: number;
+} {
   const implementationTemporaryTraceCreditsAvailable =
     validatedTracePaymentPoolAmount(
       trace.corpTemporaryTraceCredits?.remaining ?? 0,
@@ -547,19 +536,62 @@ export function quoteCorpTraceBidPayment(
     "effective_trace_limit"
       ? Math.max(0, bid - effectiveBaseTraceLimit)
       : 0;
-  if (requiredTraceCounters > corpTraceCounterPoolAvailable) {
-    return {
-      side: "corp",
-      bid,
-      canPay: false,
-      breakdown: [],
-      normalCreditsToPay: 0,
-      temporaryTraceCreditsToPay: 0,
-      fortTraceBitPoolToPay: 0,
-      corpTraceBitsToPay: 0,
-      corpTraceCountersToPay: 0,
-    };
-  }
+  const temporarySourceCardId =
+    trace.corpTemporaryTraceCredits?.sourceCardInstanceId ??
+    trace.encounterTemporaryTraceCreditSourceIceId;
+  const temporarySourceDefinitionId =
+    trace.corpTemporaryTraceCredits?.sourceDefinitionId ??
+    trace.encounterTemporaryTraceCreditSourceDefinitionId;
+  return {
+    requiredTraceCounters,
+    corpTraceCounterPoolAvailable,
+    pools: [
+      {
+        kind: "temporary_trace_credit",
+        priority: 10,
+        available:
+          encounterTemporaryTraceCreditsAvailable +
+          implementationTemporaryTraceCreditsAvailable,
+        ...(temporarySourceCardId
+          ? { sourceCardInstanceId: temporarySourceCardId }
+          : {}),
+        ...(temporarySourceDefinitionId
+          ? { sourceDefinitionId: temporarySourceDefinitionId }
+          : {}),
+      },
+      {
+        kind: "fort_trace_bit_pool",
+        priority: 20,
+        available: fortTraceBitPoolAvailable,
+        ...(trace.fortTraceBitPoolSourceCardInstanceId
+          ? { sourceCardInstanceId: trace.fortTraceBitPoolSourceCardInstanceId }
+          : {}),
+        ...(trace.fortTraceBitPoolServerId
+          ? { serverId: trace.fortTraceBitPoolServerId }
+          : {}),
+      },
+      {
+        kind: "corp_credits",
+        priority: 30,
+        available: normalCorpCreditsAvailable,
+      },
+    ],
+  };
+}
+
+export function quoteCorpTraceBidPayment(
+  deps: CorpTracePaymentDependencies,
+  state: GameState,
+  trace: TraceState,
+  bid: number,
+  specializedSelections?: CorpTracePaymentSelection[],
+): CorpTracePaymentQuote {
+  if (!isValidBidAmount(bid)) return emptyCorpTracePaymentQuote(bid);
+  const { pools, requiredTraceCounters, corpTraceCounterPoolAvailable } =
+    readCorpTraceBidPaymentPools(deps, state, trace, bid);
+  if (requiredTraceCounters > corpTraceCounterPoolAvailable)
+    return emptyCorpTracePaymentQuote(bid);
+
   const specializedSources = corpTraceSpecializedPaymentSources(deps, state);
   const selectedSpecialized = specializedSelections
     ? selectedCorpTraceSpecializedBreakdowns(
@@ -570,80 +602,36 @@ export function quoteCorpTraceBidPayment(
     : undefined;
   if (specializedSelections && !selectedSpecialized)
     return emptyCorpTracePaymentQuote(bid);
-  const selectedTraceCounters = (selectedSpecialized ?? [])
-    .filter((entry) => entry.kind === "corp_trace_counter_pool")
-    .reduce((sum, entry) => sum + entry.amount, 0);
+  const selectedTraceCounters = allocatedAmount(
+    selectedSpecialized ?? [],
+    "corp_trace_counter_pool",
+  );
   if (specializedSelections && selectedTraceCounters < requiredTraceCounters)
     return emptyCorpTracePaymentQuote(bid);
   const selectedSpecializedTotal = (selectedSpecialized ?? []).reduce(
     (sum, entry) => sum + entry.amount,
     0,
   );
-  const nonSpecializedBreakdown =
-    allocatedPaymentBreakdowns<CorpTracePaymentSourceKind>(
-      specializedSelections
-        ? bid - selectedSpecializedTotal
-        : bid - requiredTraceCounters,
-      [
-        {
-          kind: "temporary_trace_credit",
-          priority: 10,
-          available:
-            encounterTemporaryTraceCreditsAvailable +
-            implementationTemporaryTraceCreditsAvailable,
-          ...((trace.corpTemporaryTraceCredits?.sourceCardInstanceId ??
-          trace.encounterTemporaryTraceCreditSourceIceId)
-            ? {
-                sourceCardInstanceId:
-                  trace.corpTemporaryTraceCredits?.sourceCardInstanceId ??
-                  trace.encounterTemporaryTraceCreditSourceIceId,
-              }
-            : {}),
-          ...((trace.corpTemporaryTraceCredits?.sourceDefinitionId ??
-          trace.encounterTemporaryTraceCreditSourceDefinitionId)
-            ? {
-                sourceDefinitionId:
-                  trace.corpTemporaryTraceCredits?.sourceDefinitionId ??
-                  trace.encounterTemporaryTraceCreditSourceDefinitionId,
-              }
-            : {}),
-        },
-        {
-          kind: "fort_trace_bit_pool",
-          priority: 20,
-          available: fortTraceBitPoolAvailable,
-          ...(trace.fortTraceBitPoolSourceCardInstanceId
-            ? {
-                sourceCardInstanceId:
-                  trace.fortTraceBitPoolSourceCardInstanceId,
-              }
-            : {}),
-          ...(trace.fortTraceBitPoolServerId
-            ? { serverId: trace.fortTraceBitPoolServerId }
-            : {}),
-        },
-        {
-          kind: "corp_credits",
-          priority: 30,
-          available: normalCorpCreditsAvailable,
-        },
-        ...(specializedSelections
-          ? []
-          : [
-              {
-                kind: "corp_trace_bit_pool" as const,
-                priority: 40,
-                available: deps.corpTraceBitPoolTotal(state),
-              },
-              {
-                kind: "corp_trace_counter_pool" as const,
-                priority: 50,
-                available:
-                  corpTraceCounterPoolAvailable - requiredTraceCounters,
-              },
-            ]),
-      ],
+  if (!specializedSelections) {
+    pools.push(
+      {
+        kind: "corp_trace_bit_pool",
+        priority: 40,
+        available: deps.corpTraceBitPoolTotal(state),
+      },
+      {
+        kind: "corp_trace_counter_pool",
+        priority: 50,
+        available: corpTraceCounterPoolAvailable - requiredTraceCounters,
+      },
     );
+  }
+  const nonSpecializedBreakdown = allocatedPaymentBreakdowns(
+    bid - (specializedSelections
+      ? selectedSpecializedTotal
+      : requiredTraceCounters),
+    pools,
+  );
   const breakdown = [
     ...nonSpecializedBreakdown,
     ...(selectedSpecialized ?? []),
@@ -714,7 +702,57 @@ function emptyCorpTracePaymentQuote(bid: number): CorpTracePaymentQuote {
   };
 }
 
-export function corpTraceSpecializedPaymentSources(
+export function corpTraceBidPaymentAllocations(
+  deps: CorpTracePaymentDependencies,
+  state: GameState,
+  trace: TraceState,
+  bid: number,
+): CorpTracePaymentSelection[][] {
+  if (!isValidBidAmount(bid) || bid === 0) return [];
+  const sources = corpTraceSpecializedPaymentSources(deps, state);
+  if (sources.length === 0) return [];
+  const sourceIds = new Set(sources.map((source) => source.sourceCardInstanceId));
+  if (sourceIds.size !== sources.length) return [];
+
+  const { pools, requiredTraceCounters, corpTraceCounterPoolAvailable } =
+    readCorpTraceBidPaymentPools(deps, state, trace, bid);
+  if (requiredTraceCounters > corpTraceCounterPoolAvailable) return [];
+  const otherCapacity = pools.reduce(
+    (capacity, pool) =>
+      Math.min(
+        bid,
+        capacity + validatedTracePaymentPoolAmount(pool.available, pool.kind),
+      ),
+    0,
+  );
+  const minimumSpecialized = bid - otherCapacity;
+  const allocations: CorpTracePaymentSelection[][] = [];
+  const current: CorpTracePaymentSelection[] = [];
+  function collect(index: number, allocated: number, counters: number): void {
+    const source = sources[index];
+    if (!source) {
+      if (allocated >= minimumSpecialized && counters >= requiredTraceCounters)
+        allocations.push(current.slice());
+      return;
+    }
+    const { kind, sourceCardInstanceId } = source;
+    const isCounter = kind === "corp_trace_counter_pool";
+    const max = Math.min(source.available, bid - allocated);
+    for (let amount = 0; amount <= max; amount += 1) {
+      current.push({ kind, sourceCardInstanceId, amount });
+      collect(
+        index + 1,
+        allocated + amount,
+        counters + (isCounter ? amount : 0),
+      );
+      current.pop();
+    }
+  }
+  collect(0, 0, 0);
+  return allocations;
+}
+
+function corpTraceSpecializedPaymentSources(
   deps: CorpTracePaymentDependencies,
   state: GameState,
 ): CorpTraceSpecializedPaymentSource[] {

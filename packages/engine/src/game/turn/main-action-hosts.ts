@@ -113,8 +113,6 @@ export function createMainActionHostComposition(
           corp.hardwareTrashByCounterLegalActions,
         corpAgendaPointTotal: corp.corpAgendaPointTotal,
         hasCorpUtilityKind: corp.hasCorpUtilityKind,
-        uniqueDirectLongtailKindForDefinition:
-          corp.uniqueDirectLongtailKindForDefinition,
         ...(corp.filterActionsForRestrictedExtraActions
           ? {
               filterActionsForRestrictedExtraActions:

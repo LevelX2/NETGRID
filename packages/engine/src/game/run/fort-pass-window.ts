@@ -1,6 +1,5 @@
 import { parseRunIdToken } from "@netgrid/shared";
 import type {
-  CardDefinition,
   CardInstance,
   CardInstanceId,
   CorpServer,

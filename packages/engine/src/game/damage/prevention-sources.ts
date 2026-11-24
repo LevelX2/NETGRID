@@ -108,7 +108,6 @@ export function collectRuntimeDamagePreventionCandidates(
   event: ImminentEvent,
 ): EventModificationCandidate[] {
   const amount = numberPayload(event, "amount");
-  const damageType = damageTypePayload(event);
   if (amount <= 0 || event.affectedSide !== "runner") return [];
   const installed = [
     ...state.runner.rig.programs,

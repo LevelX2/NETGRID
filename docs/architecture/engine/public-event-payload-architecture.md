@@ -91,7 +91,14 @@ Versionsfelder dieses Ereignisses zeigen den letzten Engine-Zustand.
 Nach einem Undo werden die Ereignisse des verworfenen Spielverlaufs entfernt.
 Neue Aktionen können die freigewordenen Nummern belegen. Eine Undo-Anfrage
 bindet deshalb Match, MatchVersion und Ereignisnummer. Ein Replay prüft die
-Nummer jedes Engine-Ereignisses gegen dessen StateVersion.
+Nummer jedes Engine-Ereignisses gegen dessen StateVersion. `game_created` ist
+einmalig am Anfang eines Replays ab Version 0 zulässig. Sein StateHash muss
+zum Startzustand passen. Bei jedem Aktionsereignis müssen Typ und StateHash mit
+der Neuausführung übereinstimmen. Die Engine bricht beim ersten fehlerhaften
+Eintrag ab und vergleicht bei erfolgreichem Durchlauf den berechneten Endhash
+mit dem Journal. Die Replay-Ansicht des Servers verwendet dieselbe Prüfung.
+Sie erhält pro geprüftem Ereignis nur die Hashprüfung, einen etwaigen
+Fehlercode und die Grenzen der Engine-Zufallszähler.
 
 Ein innerhalb einer Karte oder Choice neu begonnener Run veröffentlicht einen
 öffentlichen `ResolvedGameEffect` vom Typ `start_run`: `runId`, angegriffene

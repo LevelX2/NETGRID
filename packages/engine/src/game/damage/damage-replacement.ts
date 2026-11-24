@@ -1,6 +1,5 @@
 import type {
   CardDefinition,
-  CardInstanceId,
   ChoiceRequest,
   GameState,
   ImminentEvent,
