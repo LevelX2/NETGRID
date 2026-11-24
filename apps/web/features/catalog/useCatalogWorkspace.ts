@@ -54,6 +54,33 @@ const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   program: false,
 };
 
+type CatalogResult =
+  | { status: "ready"; data: CatalogListResponse }
+  | { status: "error" };
+
+const EMPTY_CARDS: CatalogCardSummary[] = [];
+
+async function loadCatalog(
+  query: string,
+  signal: AbortSignal,
+): Promise<CatalogResult> {
+  try {
+    const response = await fetch(
+      query ? `/api/cards/catalog?${query}` : "/api/cards/catalog",
+      {
+        cache: "no-store",
+        signal,
+      },
+    );
+    if (!response.ok) return { status: "error" };
+    const data = (await response.json()) as CatalogListResponse;
+    if (!Array.isArray(data.cards) || !data.filters) return { status: "error" };
+    return { status: "ready", data };
+  } catch {
+    return { status: "error" };
+  }
+}
+
 export function useCatalogWorkspace(playerView: PlayerView | undefined) {
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
@@ -68,27 +95,52 @@ export function useCatalogWorkspace(playerView: PlayerView | undefined) {
   const [catalogFiltersOpen, setCatalogFiltersOpen] = useState(false);
   const [catalogRarityFilter, setCatalogRarityFilter] =
     useState<CatalogRarityFilterKey>("all");
-  const [catalogCards, setCatalogCards] = useState<CatalogCardSummary[]>([]);
-  const [catalogFilters, setCatalogFilters] = useState<
-    CatalogListResponse["filters"] | null
-  >(null);
-  const [selectedCatalogId, setSelectedCatalogId] = useState<CardDefinitionId | null>(
-    null,
-  );
-  const [catalogDetail, setCatalogDetail] = useState<CatalogCardDetail | null>(
-    null,
-  );
-  const [allCatalogCards, setAllCatalogCards] = useState<CatalogCardSummary[]>(
-    [],
-  );
-  const [catalogCardPresentationsById, setCatalogCardPresentationsById] =
-    useState<PublicCardPresentationsById>({});
+  const [baseCatalog, setBaseCatalog] = useState<CatalogResult>();
+  const [searchedCatalog, setSearchedCatalog] = useState<{
+    query: string;
+    result: CatalogResult;
+  }>();
+  const [selectedCatalogId, setSelectedCatalogId] =
+    useState<CardDefinitionId | null>(null);
   const [catalogDetailsById, setCatalogDetailsById] = useState<
     Record<string, CatalogCardDetail>
   >({});
   const catalogDetailsByIdRef = useRef(catalogDetailsById);
   const catalogDetailRequestCoordinatorRef = useRef(
     new CatalogDetailRequestCoordinator(),
+  );
+
+  const params = new URLSearchParams();
+  if (catalogSearch.trim()) params.set("q", catalogSearch.trim());
+  if (catalogSide !== "all") params.set("side", catalogSide);
+  const query = params.toString();
+  const currentCatalog = query
+    ? searchedCatalog?.query === query
+      ? searchedCatalog.result
+      : undefined
+    : baseCatalog;
+  const resultStatus: "loading" | CatalogResult["status"] =
+    currentCatalog?.status ?? "loading";
+  const allCatalogCards = useMemo(
+    () =>
+      baseCatalog?.status === "ready"
+        ? baseCatalog.data.cards.filter(isCatalogVisibleCard)
+        : EMPTY_CARDS,
+    [baseCatalog],
+  );
+  const catalogCardPresentationsById = useMemo<PublicCardPresentationsById>(
+    () =>
+      baseCatalog?.status === "ready"
+        ? catalogCardPresentationsFor(baseCatalog.data.cards)
+        : {},
+    [baseCatalog],
+  );
+  const catalogCards = useMemo(
+    () =>
+      currentCatalog?.status === "ready"
+        ? currentCatalog.data.cards.filter(isCatalogVisibleCard)
+        : EMPTY_CARDS,
+    [currentCatalog],
   );
 
   const catalogSetCounts = useMemo(
@@ -146,57 +198,32 @@ export function useCatalogWorkspace(playerView: PlayerView | undefined) {
   );
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (catalogSearch.trim()) params.set("q", catalogSearch.trim());
-    if (catalogSide !== "all") params.set("side", catalogSide);
-    void fetch(`/api/cards/catalog?${params.toString()}`, { cache: "no-store" })
-      .then((response) => response.json() as Promise<CatalogListResponse>)
-      .then((data) => {
-        const visibleCards = (data.cards ?? []).filter(isCatalogVisibleCard);
-        setCatalogCards(visibleCards);
-        setCatalogFilters(data.filters ?? null);
-        setSelectedCatalogId((current) =>
-          nextCatalogSelection(current, visibleCards, catalogTypeFilters),
-        );
-      })
-      .catch(() => {
-        setCatalogCards([]);
-        setCatalogFilters(null);
-        setSelectedCatalogId(null);
-      });
-  }, [catalogSearch, catalogSide]);
+    const request = new AbortController();
+    void loadCatalog("", request.signal).then((result) => {
+      if (!request.signal.aborted) setBaseCatalog(result);
+    });
+    return () => request.abort();
+  }, []);
 
   useEffect(() => {
+    if (!query) return;
+    const request = new AbortController();
+    void loadCatalog(query, request.signal).then((result) => {
+      if (!request.signal.aborted) setSearchedCatalog({ query, result });
+    });
+    return () => request.abort();
+  }, [query]);
+
+  useEffect(() => {
+    if (currentCatalog?.status !== "ready") return;
     setSelectedCatalogId((current) =>
-      current &&
-      filteredCatalogCards.some((card) => card.catalogCardId === current)
-        ? current
-        : (filteredCatalogCards[0]?.catalogCardId ?? null),
+      nextCatalogSelection(current, filteredCatalogCards),
     );
-  }, [filteredCatalogCards]);
+  }, [currentCatalog, filteredCatalogCards]);
 
   useEffect(() => {
-    if (!selectedCatalogId) {
-      setCatalogDetail(null);
-      return;
-    }
-    let ignore = false;
-    void fetch(`/api/cards/catalog/${encodeURIComponent(selectedCatalogId)}`, {
-      cache: "no-store",
-    })
-      .then(
-        (response) => response.json() as Promise<{ card?: CatalogCardDetail }>,
-      )
-      .then((data) => {
-        if (!ignore) setCatalogDetail(data.card ?? null);
-      })
-      .catch(() => {
-        if (!ignore) setCatalogDetail(null);
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [selectedCatalogId]);
+    if (selectedCatalogId) void ensureCatalogDetails([selectedCatalogId]);
+  }, [selectedCatalogId, ensureCatalogDetails]);
 
   useEffect(() => {
     const eventIds = (playerView?.publicEvents ?? []).flatMap(
@@ -206,20 +233,6 @@ export function useCatalogWorkspace(playerView: PlayerView | undefined) {
     void ensureCatalogDetails([...eventIds, ...visibleIds]);
   }, [playerView, ensureCatalogDetails]);
 
-  useEffect(() => {
-    void fetch("/api/cards/catalog", { cache: "no-store" })
-      .then((response) => response.json() as Promise<CatalogListResponse>)
-      .then((data) => {
-        const cards = data.cards ?? [];
-        setAllCatalogCards(cards.filter(isCatalogVisibleCard));
-        setCatalogCardPresentationsById(catalogCardPresentationsFor(cards));
-      })
-      .catch(() => {
-        setAllCatalogCards([]);
-        setCatalogCardPresentationsById({});
-      });
-  }, []);
-
   return {
     allCatalogCards,
     catalogCardPresentationsById,
@@ -227,8 +240,16 @@ export function useCatalogWorkspace(playerView: PlayerView | undefined) {
     ensureCatalogDetails,
     catalogPanelProps: {
       cards: filteredCatalogCards,
-      detail: catalogDetail,
-      filters: catalogFilters,
+      detail:
+        selectedCatalogId &&
+        filteredCatalogCards.some(
+          (card) => card.catalogCardId === selectedCatalogId,
+        )
+          ? (catalogDetailsById[selectedCatalogId] ?? null)
+          : null,
+      filters:
+        currentCatalog?.status === "ready" ? currentCatalog.data.filters : null,
+      resultStatus,
       search: catalogSearch,
       side: catalogSide,
       setAddons: catalogSetAddons,

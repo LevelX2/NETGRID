@@ -32,6 +32,7 @@ import {
   type ActionContext,
 } from "../../app/action-board-ui";
 import { ActionSlotMeter } from "../game-board/ResourceStrip";
+import { actionSlotSideForView } from "../game-board/board-view-helpers";
 import {
   ActionPanelFloatButton,
   OverflowAwareActionButton,
@@ -480,7 +481,7 @@ function TurnActionHeader({
   showControls?: boolean;
 }) {
   const t = useTranslations("Actions.panel");
-  const currentTurnSide = turnSideForView(view) ?? view.activeSide;
+  const currentTurnSide = actionSlotSideForView(view);
   const currentTurnClicks =
     currentTurnSide === view.side ? view.own.clicks : view.opponent.clicks;
   const currentTurnCapacity = actionCapacities[currentTurnSide];
@@ -532,14 +533,6 @@ function TurnActionHeader({
       </div>
     </div>
   );
-}
-
-function turnSideForView(view: PlayerView): Side | null {
-  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase")
-    return "corp";
-  if (view.phase === "runner_action_phase" || view.phase === "run")
-    return "runner";
-  return null;
 }
 
 function currentTurnNumberForView(view: PlayerView): number {

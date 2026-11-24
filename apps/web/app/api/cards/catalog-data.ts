@@ -3,7 +3,6 @@ import { type CardDefinitionId } from "@netgrid/shared";
 import {
   CATALOG_STATUS_KEYS,
   assertCatalogPayloadSafe,
-  getCatalogCard,
   searchCatalog,
   type CatalogCardType,
   type CatalogQuery,
@@ -53,7 +52,7 @@ export function catalogListResponse(searchParams: URLSearchParams) {
   return safeCatalogPayload({
     snapshotId: snapshot.snapshotId,
     snapshotHash,
-    cards: searchCatalog(snapshot, query).map(catalogSummaryWithAiInspector),
+    cards: searchCatalog(catalogIndex, query).map(catalogSummaryWithAiInspector),
     filters: catalogIndex.filters,
     summary: catalogIndex.statusSummary,
   });
@@ -61,7 +60,7 @@ export function catalogListResponse(searchParams: URLSearchParams) {
 
 export function catalogDetailResponse(cardId: unknown) {
   const catalogCardId = typeof cardId === "string" ? Number(cardId) : cardId;
-  const { snapshot, snapshotHash, validation } = createCatalogRuntime();
+  const { snapshot, snapshotHash, validation, cardsById } = createCatalogRuntime();
   if (!validation.ok)
     return safeCatalogError(
       500,
@@ -70,7 +69,7 @@ export function catalogDetailResponse(cardId: unknown) {
     );
   const card = isCardDefinitionId(catalogCardId) &&
     (typeof cardId !== "string" || String(catalogCardId) === cardId)
-    ? getCatalogCard(snapshot, catalogCardId) : undefined;
+    ? cardsById[catalogCardId] : undefined;
   if (!card)
     return safeCatalogError(
       404,

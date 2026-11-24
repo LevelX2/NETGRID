@@ -13,6 +13,10 @@ Katalog und Editor. Karten-Lookups verwenden die kurze numerische
 Definitionsreferenzen. Statische Kartendaten werden zwischen Partien geteilt.
 Die Spiel- und Planungsruntime liest die Registry im Speicher.
 
+Beim Aufbau prüft die Registry jeden CardSpec-Vertrag und die globalen
+Identitäten vor dem Einfrieren. Die Planungsprojektion verwendet anschließend
+die bereits berechneten Kartenfingerprints.
+
 ## Architekturprinzipien
 
 1. **Rules Engine als einzige Regelautorität.** CardSpecs beschreiben Regeln;

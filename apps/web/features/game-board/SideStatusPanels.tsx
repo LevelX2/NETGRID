@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl/react";
 
 import { CreditBadge, ScoreAreaStat, Stat } from "./ResourceStrip";
 import { IdentityCounterStrip } from "./CounterStrips";
+import { opponentSide, turnSideForView } from "./board-view-helpers";
 
 export function OpponentPanel({
   view,
@@ -165,18 +166,6 @@ export function PlayerPanel({
       {children}
     </section>
   );
-}
-
-function opponentSide(side: Side): Side {
-  return side === "runner" ? "corp" : "runner";
-}
-
-function turnSideForView(view: PlayerView): Side | null {
-  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase")
-    return "corp";
-  if (view.phase === "runner_action_phase" || view.phase === "run")
-    return "runner";
-  return null;
 }
 
 function sideStatusForView(

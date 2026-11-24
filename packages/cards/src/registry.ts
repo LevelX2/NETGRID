@@ -9,8 +9,6 @@ import {
 import {
   assertCardSpecContract,
   assertSetSpecContract,
-  finalizeCardSpec,
-  finalizeSetSpec,
 } from "./card-spec-validation";
 import type { CardSpec, PrintingId, SetId, SetSpec } from "./contracts";
 import {
@@ -184,13 +182,14 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
     }
   }
 
+  // Per-spec and cross-registry checks above completed without mutating input.
   const cards = input.cardSpecs
-    .map(finalizeCardSpec)
+    .map((spec) => deepFreezeSerializable(spec))
     .sort((left, right) =>
       left.identity.cardDefinitionId - right.identity.cardDefinitionId,
     );
   const sets = input.setSpecs
-    .map(finalizeSetSpec)
+    .map((set) => deepFreezeSerializable(set))
     .sort((left, right) => compareText(left.setId, right.setId));
   const cardsById = new Map(
     cards.map((spec) => [spec.identity.cardDefinitionId, spec] as const),

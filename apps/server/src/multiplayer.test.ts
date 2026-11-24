@@ -1387,6 +1387,12 @@ describe("Backend 0.5 private storage maintenance", () => {
       const publicService = new MultiplayerService(reopened, {
         tokenSalt: "public-match-backfill-reopened",
       });
+      const summaries = await reopened.listPublicMatchSummaries();
+      expect(summaries).toHaveLength(2);
+      for (const summary of summaries) {
+        expect(summary.hasGameState).toBe(true);
+        expect(summary).not.toHaveProperty("gameState");
+      }
       expect(await publicService.listPublicMatches()).toHaveLength(2);
 
       const auditDb = new DatabaseSync(dbPath, { readOnly: true });

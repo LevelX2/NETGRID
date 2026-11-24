@@ -602,7 +602,7 @@ describe("card set support catalog source", () => {
       "system",
       "testset",
     ]);
-    expect(searchCatalog(snapshot, { status: "ai_supported" })).toHaveLength(
+    expect(searchCatalog(index, { status: "ai_supported" })).toHaveLength(
       activeAiApprovedCardIds.length,
     );
     expect(assertCatalogPayloadSafe(index)).toEqual({ ok: true, errors: [] });
@@ -617,9 +617,10 @@ describe("card set support catalog source", () => {
 
   it("searches title, visible rules text, card type and subtype case-insensitively", () => {
     const snapshot = createRuntimeCardSnapshot();
+    const index = createCatalogIndex(snapshot, computeSnapshotHash(snapshot));
     const afreetId = 213;
     const resultIds = (q: string) =>
-      searchCatalog(snapshot, { q }).map((card) => card.catalogCardId);
+      searchCatalog(index, { q }).map((card) => card.catalogCardId);
 
     expect(resultIds("AFREET")).toContain(afreetId);
     expect(resultIds("hosting capacity")).toContain(afreetId);

@@ -120,6 +120,7 @@ export function CatalogPanel({
   cards,
   detail,
   filters,
+  resultStatus,
   search,
   side,
   setAddons,
@@ -143,6 +144,7 @@ export function CatalogPanel({
   cards: CatalogCardSummary[];
   detail: CatalogCardDetail | null;
   filters: CatalogFilters | null;
+  resultStatus: "loading" | "ready" | "error";
   search: string;
   side: Side | "all";
   setAddons: CatalogProductSetSelection;
@@ -425,7 +427,11 @@ export function CatalogPanel({
               </span>
             </button>
           ))}
-          {cards.length === 0 ? (
+          {resultStatus === "loading" ? (
+            <p className="meta catalogEmpty" role="status">{t("loadingResults")}</p>
+          ) : resultStatus === "error" ? (
+            <p className="meta catalogEmpty" role="alert">{t("loadFailed")}</p>
+          ) : cards.length === 0 ? (
             <p className="meta catalogEmpty">{t("noResults")}</p>
           ) : null}
         </div>

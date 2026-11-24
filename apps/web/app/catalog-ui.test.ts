@@ -59,7 +59,8 @@ describe("catalog UI filtering", () => {
       { catalogCardId: 9156, type: "ice", subtypes: [] },
     ];
 
-    expect(nextCatalogSelection(null, cards, noTypes)).toBeNull();
+    expect(nextCatalogSelection(null, filterCatalogCardsByType(cards, noTypes)))
+      .toBeNull();
   });
 
   it("keeps or picks only cards visible through type filters", () => {
@@ -69,15 +70,11 @@ describe("catalog UI filtering", () => {
     ];
     const onlyIce = { ...noTypes, ice: true };
 
-    expect(nextCatalogSelection(9155, cards, onlyIce)).toBe(
-      9156,
-    );
-    expect(nextCatalogSelection(9156, cards, onlyIce)).toBe(
-      9156,
-    );
-    expect(nextCatalogSelection(null, cards, allTypes)).toBe(
-      9155,
-    );
+    const visibleIce = filterCatalogCardsByType(cards, onlyIce);
+    expect(nextCatalogSelection(9155, visibleIce)).toBe(9156);
+    expect(nextCatalogSelection(9156, visibleIce)).toBe(9156);
+    expect(nextCatalogSelection(null, filterCatalogCardsByType(cards, allTypes)))
+      .toBe(9155);
   });
 
   it("separates original cards from local test cards in the deck editor source filter", () => {

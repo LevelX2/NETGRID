@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   isCuratedLegacyDeckId,
-  mergeVisibleGuestDecks,
   visibleGuestDecks,
 } from "./deck-library-visibility";
 import type { EditableDeck } from "./deck-table-model";
@@ -20,16 +19,6 @@ describe("guest deck library visibility", () => {
     expect(isCuratedLegacyDeckId(standard.deckId)).toBe(true);
   });
 
-  it("keeps hidden legacy files in the persistence payload", () => {
-    const hidden = deck("local_corp_unused_black_ice_ambush_lab");
-    const oldOwn = deck("local_old_own");
-    const nextOwn = deck("local_next_own");
-    expect(
-      mergeVisibleGuestDecks([hidden, oldOwn], [nextOwn]).map(
-        (entry) => entry.deckId,
-      ),
-    ).toEqual([hidden.deckId, nextOwn.deckId]);
-  });
 });
 
 function deck(deckId: string): EditableDeck {

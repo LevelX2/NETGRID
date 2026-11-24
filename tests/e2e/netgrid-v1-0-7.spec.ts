@@ -49,6 +49,38 @@ const fixedCorpDeckName = deckSnapshots.snapshots.find(
 if (!fixedCorpDeckName) throw new Error("Missing fixed Corp browser test deck");
 
 test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
+  test("Katalog verwirft eine durch eine neue Suche überholte Anfrage", async ({ page }) => {
+    let signalOlderRequest!: () => void;
+    const olderRequest = new Promise<void>((resolve) => { signalOlderRequest = resolve; });
+    let releaseOlderRequest!: () => void;
+    const olderRequestHeld = new Promise<void>((resolve) => { releaseOlderRequest = resolve; });
+    const isOlderSearch = (url: URL) =>
+      url.pathname === "/api/cards/catalog" && url.searchParams.get("q") === "Afreet";
+    await page.route(isOlderSearch, async (route) => {
+      signalOlderRequest();
+      await olderRequestHeld;
+      await route.continue();
+    });
+    try {
+      await page.goto(BASE_URL);
+      await page.getByRole("button", { name: /^(Katalog|Catalog|Catalogue)$/ }).click();
+      const search = page.locator("#catalogSearch");
+      await search.fill("Afreet");
+      await olderRequest;
+      const cancelled = page.waitForEvent("requestfailed", {
+        predicate: (request) => isOlderSearch(new URL(request.url())),
+        timeout: 15_000,
+      });
+      await search.fill("Data Wall");
+      await expect(page.locator(".catalogItem").filter({ hasText: "Data Wall" }).first()).toBeVisible();
+      releaseOlderRequest();
+      await cancelled;
+      await expect(page.locator(".catalogItem").filter({ hasText: "Afreet" })).toHaveCount(0);
+    } finally {
+      releaseOlderRequest();
+    }
+  });
+
   test("Human-vs-KI Desktop prüft aktives Board, KI-Takt, Cue, Aktionen, Credits und Artefakte", async ({
     page,
   }, testInfo) => {

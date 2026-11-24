@@ -15,6 +15,10 @@
 
 - Action UI zeigt und sendet nur `LegalActions`, die aus der Engine kommen.
 - UI-Komponenten dürfen keine Legalität erzeugen oder Actions fachlich umdeuten.
+- Der Katalog teilt das ungesuchte Anfangsergebnis mit der Kartenanzeige.
+  `useCatalogWorkspace` bricht überholte Suchanfragen ab und bindet
+  Ergebnisse an die aktuelle Suche. Die API durchsucht den vorbereiteten
+  Katalogindex und lädt Kartendetails per Karten-ID.
 - Hidden-Info bleibt an PlayerView-, PublicEvent-, Reconnect-, Debug- und Tooltip-Grenzen side-safe.
 - Normale Player-UI darf keinen FullState bekommen.
 - `page.tsx` soll nicht wieder neue Sammelbereiche für Card-, Action-, Recent-, Storage- oder Overlay-Helfer aufnehmen.
@@ -281,6 +285,11 @@ und die Fortsetzung `Access beginnen`. Zugehörige Choices bleiben an die
 aktuelle LegalAction gebunden. Die Aktionsleiste zählt eine bezahlte Aktion
 über unterbrechende Zahlungsfenster anhand desselben Aktionsordinals nur
 einmal; echte zusätzliche Aktionen bleiben sichtbar.
+
+Der Spielstandsstreifen und der Kopf des Aktionspanels zeigen die
+verbleibenden Aktionen der Zugseite aus der Spielphase. Während eines Runs
+bleibt der Runner sichtbar, auch wenn die Korp über das Rezzen von ICE
+entscheidet. Die Kapazität der Aktionsleiste gehört zum jeweiligen Zug.
 
 Bewegung, Zugriff, Damage, Trace, Pumpen und Trash erhalten ihre Ambience aus
 dem fachlichen Präsentationszustand, nicht aus dem Kartentyp. Ein Zugriff auf

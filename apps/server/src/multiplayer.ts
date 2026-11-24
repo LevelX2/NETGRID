@@ -735,6 +735,7 @@ export type MultiplayerStorage = {
   ): Promise<MatchStartupReconciliationMetadata[]>;
   listOpenMatchCandidates?(): Promise<StoredMatch[]>;
   listPublicMatchCandidates?(): Promise<StoredMatch[]>;
+  listPublicMatchSummaries?(): Promise<PublicMatchListCandidate[]>;
   listResultSnapshotCandidates?(): Promise<StoredMatch[]>;
   listResultSnapshotCandidatesByMatchIds?(
     matchIds: readonly string[],
@@ -1442,12 +1443,24 @@ export class MultiplayerService {
         records.push(candidate);
         continue;
       }
-      const record = await this.storage.load(candidate.match.matchId);
+      const record = await this.loadPersistedResultSnapshot(
+        candidate.match.matchId,
+      );
       if (!record) continue;
-      if (ensureMatchResultSnapshot(record)) await this.storage.save(record);
       records.push(record);
     }
     return records;
+  }
+
+  private loadPersistedResultSnapshot(
+    matchId: string,
+  ): Promise<StoredMatch | undefined> {
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.storage.load(matchId);
+      if (record && ensureMatchResultSnapshot(record))
+        await this.storage.save(record);
+      return record;
+    });
   }
 
   async createMatch(
@@ -4542,14 +4555,27 @@ export class MultiplayerService {
   }
 
   async listPublicMatches(): Promise<PublicMatchListEntry[]> {
-    const candidates = this.storage.listPublicMatchCandidates
-      ? await this.storage.listPublicMatchCandidates()
+    const candidates = this.storage.listPublicMatchSummaries
+      ? await this.storage.listPublicMatchSummaries()
       : this.storage.list
-        ? await this.storage.list()
+        ? (await this.storage.list()).map(publicMatchListCandidateFor)
         : [];
-    const records = await this.ensurePersistedResultSnapshots(
-      candidates.filter((record) => record.match.isPublic),
-    );
+    const records: PublicMatchListCandidate[] = [];
+    for (const candidate of candidates) {
+      if (!candidate.match.isPublic) continue;
+      if (
+        isCompletedGameStatus(candidate.match.status) &&
+        !candidate.resultSnapshot
+      ) {
+        const current = await this.loadPersistedResultSnapshot(
+          candidate.match.matchId,
+        );
+        if (current?.match.isPublic)
+          records.push(publicMatchListCandidateFor(current));
+      } else {
+        records.push(candidate);
+      }
+    }
     return records
       .map((record): PublicMatchListEntry | undefined => {
         let status: PublicMatchListEntry["status"] | undefined;
@@ -4563,7 +4589,7 @@ export class MultiplayerService {
           status = "active";
         } else if (
           isCompletedGameStatus(record.match.status) &&
-          record.gameState
+          record.hasGameState
         ) {
           status = "finished";
         }
@@ -4606,8 +4632,8 @@ export class MultiplayerService {
             : {}),
           ...(record.resultSnapshot?.winner
             ? { winner: record.resultSnapshot.winner }
-            : record.gameState.winner
-              ? { winner: record.gameState.winner }
+            : record.winner
+              ? { winner: record.winner }
               : {}),
           ...(status === "finished" && record.resultSnapshot
             ? { result: record.resultSnapshot }
@@ -6805,7 +6831,9 @@ export class MultiplayerService {
     return this.openJoinToken(record);
   }
 
-  private openJoinToken(record: StoredMatch): TokenRecord | undefined {
+  private openJoinToken(
+    record: Pick<StoredMatch, "tokens" | "sessions">,
+  ): TokenRecord | undefined {
     return record.tokens.find(
       (candidate) =>
         candidate.kind === "join" &&
@@ -7289,8 +7317,29 @@ function legalActionForAiDecision(
   );
 }
 
-function participantNamesForReplay(
+export type PublicMatchListCandidate = Pick<
+  StoredMatch,
+  "match" | "sessions" | "tokens" | "resultSnapshot"
+> & {
+  hasGameState: boolean;
+  winner?: NonNullable<GameState["winner"]>;
+};
+
+function publicMatchListCandidateFor(
   record: StoredMatch,
+): PublicMatchListCandidate {
+  return {
+    match: record.match,
+    sessions: record.sessions,
+    tokens: record.tokens,
+    hasGameState: Boolean(record.gameState),
+    ...(record.gameState?.winner ? { winner: record.gameState.winner } : {}),
+    ...(record.resultSnapshot ? { resultSnapshot: record.resultSnapshot } : {}),
+  };
+}
+
+function participantNamesForReplay(
+  record: Pick<StoredMatch, "match" | "sessions">,
 ): ReplayIndexEntry["participantNames"] {
   const bySide: ReplayIndexEntry["participantNames"] = {};
   for (const session of record.sessions) {

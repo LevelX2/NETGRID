@@ -81,7 +81,7 @@ describe("account match-start preferences HTTP API", () => {
       );
       const standards = accountDecks.listStandards();
       const runner = standards.find((deck) => deck.side === "runner")!;
-      const corp = standards.find((deck) => deck.side === "corp")!;
+      const corp = accountDecks.getStandard("standard_corp_original_speed_v10");
       const copiedCorp = await accountDecks.copyStandard(
         alpha.accountId,
         corp.standardDeckId,
