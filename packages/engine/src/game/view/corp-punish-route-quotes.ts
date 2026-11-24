@@ -589,7 +589,7 @@ function certifyExactDirectTagResponse(
     side: "corp",
     actionId: currentHeadAction.actionId,
     clientKnownStateVersion: simulationState.stateVersion,
-  });
+  }, { publicEventsMode: "latest" });
   if (!played.ok) return undefined;
   const outcomes = exactTagApplicationOutcomes(played.state);
   if (!outcomes || outcomes.states.length === 0) return undefined;
@@ -689,7 +689,7 @@ function certifyExactTraceTagResponse(
     side: "corp",
     actionId: currentHeadAction.actionId,
     clientKnownStateVersion: simulationState.stateVersion,
-  });
+  }, { publicEventsMode: "latest" });
   if (
     !played.ok ||
     played.state.trace?.status !== "corp_bid" ||
@@ -708,9 +708,10 @@ function certifyExactTraceTagResponse(
     !maximumAvailableCorpBid ||
     maximumAvailableCorpBid.value < requiredCorpBid
   ) {
-    const { state: fundedSimulationState } = publicTraceSimulationState(state);
-    fundedSimulationState.corp.credits =
-      traceStep.quote.credits + requiredCorpBid;
+    const fundedSimulationState = {
+      ...simulationState,
+      corp: { ...simulationState.corp, credits: traceStep.quote.credits + requiredCorpBid },
+    };
     const fundedHeadAction = exactCurrentHeadAction(
       fundedSimulationState,
       traceStep.quote,
@@ -721,7 +722,7 @@ function certifyExactTraceTagResponse(
       side: "corp",
       actionId: fundedHeadAction.actionId,
       clientKnownStateVersion: fundedSimulationState.stateVersion,
-    });
+    }, { publicEventsMode: "latest" });
     if (
       !fundedHead.ok ||
       fundedHead.state.trace?.status !== "corp_bid" ||
@@ -757,7 +758,7 @@ function certifyExactTraceTagResponse(
     .filter((option) => !automaticSuccess || option.value === 0)
     .sort((left, right) => left.value - right.value)) {
     const corpChoice = applyExactChoice(
-      structuredClone(verifiedAfterHead),
+      verifiedAfterHead,
       "corp",
       bid.id,
     );
@@ -775,14 +776,14 @@ function certifyExactTraceTagResponse(
     const zeroBid = runnerOptions.find((option) => option.value === 0);
     if (!maximumBid || !zeroBid) return undefined;
     const zeroResponse = applyExactChoice(
-      structuredClone(afterBid),
+      afterBid,
       "runner",
       zeroBid.id,
     );
     const maximumResponse =
       maximumBid.id === zeroBid.id
         ? zeroResponse
-        : applyExactChoice(structuredClone(afterBid), "runner", maximumBid.id);
+        : applyExactChoice(afterBid, "runner", maximumBid.id);
     if (!zeroResponse || !maximumResponse) return undefined;
     const { traceId } = afterBid.trace;
     const blind =
@@ -926,11 +927,7 @@ function exactTagApplicationOutcomes(
   }
   const states: GameState[] = [];
   for (const option of choice.options) {
-    const resolved = applyExactChoice(
-      structuredClone(state),
-      "runner",
-      option.id,
-    );
+    const resolved = applyExactChoice(state, "runner", option.id);
     if (!resolved) return undefined;
     const branch = exactTagApplicationOutcomes(resolved.state, depth + 1);
     if (!branch) return undefined;
@@ -948,7 +945,7 @@ function publicTraceSimulationState(state: GameState): {
   state: GameState;
   concealedRunnerResponsesUnknown: boolean;
 } {
-  const projected = structuredClone(state);
+  const projected = { ...state, corp: { ...state.corp } };
   const concealed = new Set(
     [
       ...projected.runner.rig.hardware,
@@ -959,15 +956,17 @@ function publicTraceSimulationState(state: GameState): {
   if (concealed.size === 0) {
     return { state: projected, concealedRunnerResponsesUnknown: false };
   }
-  projected.runner.rig.hardware = projected.runner.rig.hardware.filter(
-    (cardId) => !concealed.has(cardId),
-  );
-  projected.runner.rig.programs = projected.runner.rig.programs.filter(
-    (cardId) => !concealed.has(cardId),
-  );
-  projected.runner.rig.resources = projected.runner.rig.resources.filter(
-    (cardId) => !concealed.has(cardId),
-  );
+  const { rig } = state.runner;
+  projected.runner = {
+    ...state.runner,
+    rig: {
+      ...rig,
+      hardware: rig.hardware.filter((cardId) => !concealed.has(cardId)),
+      programs: rig.programs.filter((cardId) => !concealed.has(cardId)),
+      resources: rig.resources.filter((cardId) => !concealed.has(cardId)),
+    },
+  };
+  projected.cardInstances = { ...state.cardInstances };
   for (const cardId of concealed) delete projected.cardInstances[cardId];
   return { state: projected, concealedRunnerResponsesUnknown: true };
 }
@@ -1734,8 +1733,7 @@ function exactFundingOnlyHeadAvailable(
   ) {
     return false;
   }
-  const fundedProbe = structuredClone(state);
-  fundedProbe.corp.credits = step.credits;
+  const fundedProbe = { ...state, corp: { ...state.corp, credits: step.credits } };
   return exactCurrentHeadAction(fundedProbe, step) !== undefined;
 }
 

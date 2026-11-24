@@ -1,3 +1,4 @@
+import { applyPostSetupDeckOrder, type PostSetupDeckOrder } from "../evaluation/decision-checkpoints/post-setup-deck-order.test-support";
 import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { readFileSync } from "node:fs";
 import { afterEach, expect, it } from "vitest";
@@ -7,11 +8,8 @@ import {
   createGameAfterSetup,
   getLegalActions,
   hashGameState,
-  validateGameState,
 } from "@netgrid/engine";
 import type {
-  CardInstanceId,
-  GameState,
   PlayerAction,
   Side,
 } from "@netgrid/shared";
@@ -32,12 +30,7 @@ type Fixture = {
   gameNumber: number;
   options: Parameters<typeof createGame>[0];
   initialHash: string;
-  setupArrangement: {
-    runnerGrip: CardInstanceId[];
-    runnerStack: CardInstanceId[];
-    corpHq: CardInstanceId[];
-    corpRd: CardInstanceId[];
-  };
+  setupArrangement: PostSetupDeckOrder;
   commands: {
     side: Side;
     applied: Pick<PlayerAction, "actionId" | "selectedChoices">;
@@ -67,30 +60,6 @@ const fixtures = JSON.parse(
 ) as Fixture[];
 afterEach(resetResidentPlanPortfolioMemory);
 
-function arrangeAfterSetup(state: GameState, fixture: Fixture) {
-  const arrangement = fixture.setupArrangement;
-  expect(
-    [...arrangement.runnerGrip, ...arrangement.runnerStack].sort(),
-  ).toEqual([...state.runner.grip, ...state.runner.stack].sort());
-  expect([...arrangement.corpHq, ...arrangement.corpRd].sort()).toEqual(
-    [...state.corp.hq, ...state.corp.rd].sort(),
-  );
-  state.runner.grip = [...arrangement.runnerGrip];
-  state.runner.stack = [...arrangement.runnerStack];
-  state.corp.hq = [...arrangement.corpHq];
-  state.corp.rd = [...arrangement.corpRd];
-  for (const [zone, ids] of [
-    [{ side: "runner", zone: "grip" }, state.runner.grip],
-    [{ side: "runner", zone: "stack" }, state.runner.stack],
-    [{ side: "corp", zone: "hq" }, state.corp.hq],
-    [{ side: "corp", zone: "rd" }, state.corp.rd],
-  ] as const) {
-    for (const id of ids) state.cardInstances[id]!.zone = { ...zone };
-  }
-  expect(validateGameState(state)).toEqual({ ok: true, errors: [] });
-  state.eventLog.at(-1)!.stateHashAfter = hashGameState(state);
-}
-
 function replay(gameNumber: number) {
   const fixture = fixtures.find((f) => f.gameNumber === gameNumber)!;
   let state = createGame(fixture.options);
@@ -104,7 +73,7 @@ function replay(gameNumber: number) {
     });
     if (!result.ok) throw Error(result.error.message);
     state = result.state;
-    if (index === 1) arrangeAfterSetup(state, fixture);
+    if (index === 1) applyPostSetupDeckOrder(state, fixture.setupArrangement);
     expect(hashGameState(state)).toBe(command.hash);
   }
   const cp = fixture.checkpoint;

@@ -1,43 +1,23 @@
+import { isSupportedTraceSuccessEffect } from "../trace/trace-success-effect-validation";
 import type {
-  CardDefinition,
   CardDefinitionId,
-  CardInstance,
-  CardInstanceId,
-  ChoiceRequest,
-  CorpServer,
   CounterType,
-  EffectCommand,
   GameState,
   LegalAction,
   ServerId,
-  Side,
-  SubroutineDefinition,
-  TraceSuccessEffect,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import { effectiveIceRunSubroutines } from "./effective-ice-run-subroutines";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { credits } from "../state/economy-mutation";
 import {
-  addRunnerTagsWithPrevention,
-  createDamageImminentEvent,
   createRunnerInstalledTrashImminentEvent,
-  doDamage,
-  openDamageResolutionWindow,
-  openEventModificationWindow,
-  openReplacementWindow,
-  resolveDamageImminentEvent,
   resolveRunnerInstalledTrashImminentEvent,
-  setDamagePayload,
 } from "../damage/damage-core";
 import { buildLegalAction as action } from "../turn/action-builders";
-import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
 import {
   startCorpRdArrangeChoice,
-  type HiddenZoneArrangeChoiceHandlerHost,
 } from "../hidden-zone/arrange-choice-handlers";
-import type { BreachStateHost } from "../access/breach-state";
-import type { AccessFlowHost } from "../access/access-flow";
 import {
   enterAccessFromSuccessfulRun,
   type RunAccessTransitionHost,
@@ -55,7 +35,6 @@ import {
 import {
   applySuccessfulRunExtraRunFollowup,
   applySuccessfulRunEndCreditTriggers,
-  buildSuccessfulRunFollowupActions,
   cleanupDelayedSuccessfulRunTemporaryIce,
   finalizeDelayedSuccessfulRunAfterPassedIce,
   successfulRunInterventionCost,
@@ -63,15 +42,12 @@ import {
   type SuccessfulRunInterventionHost,
 } from "./successful-run-interventions";
 import {
-  resetBreakerStrength,
   type RunEndCleanupHost,
 } from "./run-end-cleanup";
 import {
   availableRunnerRunCredits,
   bindRunnerBreakerPaymentSupportOpening,
   hostedPaymentCredits,
-  isRestrictedHostedCreditSource,
-  restrictedHostedCreditSourceIds,
   runDurationPaymentHost,
   runJackOutAdditionalCost,
   spendHostedPaymentCredits,
@@ -83,7 +59,6 @@ import {
 } from "./encounter-printed-nontrace-effects";
 import {
   encounterPrintedEffectHost,
-  isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "./encounter-printed-effects";
 import {
@@ -106,7 +81,6 @@ import {
   buildCanonicalPaidIceRezActions,
   corpRunRootRezActionsAvailable,
   isCorpRunRootRezWindowOpen,
-  passCorpRunRootRezWindow,
   type RunRezWindowHost,
 } from "./run-rez-window";
 import {
@@ -127,7 +101,6 @@ import {
   type RunMovementHost,
 } from "./run-movement";
 import type { RunnerEncounterActionHost } from "./encounter-actions";
-import type { RunnerAccessActionHost } from "../access/access-actions";
 import { applyHqAccessExposeInstalledCorpCards } from "../access/access-breach-lifecycle";
 import type { RunFlowAdapters, RunFlowHost } from "./run-flow-contracts";
 
@@ -185,9 +158,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         },
         corpDuringRunCardImplementationLegalActions:
           host.run.corpDuringRunCardImplementationLegalActions,
-      },
-      rules: {
-        isV099OrLater: () => host.rules.isV099OrLater(state),
       },
       callbacks: {
         beginRunnerRunStartOrdering: host.run.beginRunnerRunStartOrdering,
@@ -374,7 +344,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.servers.publicServerLabel(state, serverId),
       },
       rules: {
-        isV097OrLater: () => host.rules.isV097OrLater(state),
         corpRunRootRezActionsAvailable: () =>
           corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
         corpRunRootRezWindowOpen: () =>
@@ -922,7 +891,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         if (legalAction) host.damage.setDamagePayload(legalAction, summary);
       },
       supportsTraceSuccessEffect: (effect) =>
-        isSupportedEncounterTraceSuccessEffect(
+        isSupportedTraceSuccessEffect(
           effect,
           host.callbacks.traceCounterEffectDefinitionFor,
         ),
@@ -1296,7 +1265,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
       },
       run: {
-        isV097OrLater: () => host.rules.isV097OrLater(state),
         finishRun: (successful, legalAction) =>
           host.callbacks.finishRun(state, successful, legalAction),
         successfulRunInterventionKindForSource: (sourceCardId) => {
@@ -1345,7 +1313,6 @@ export function assertRequiredHostGroups(host: RunFlowHost): void {
   for (const group of [
     "cards",
     "servers",
-    "rules",
     "turn",
     "access",
     "run",

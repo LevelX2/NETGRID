@@ -19,7 +19,6 @@ import {
   restrictedActionGrantRemaining,
   clearRestrictedActionGrant,
 } from "../state/restricted-action-grants";
-import { openRunnerInstalledTrashPreventionWindow } from "../damage/damage-core";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 
 export type TriggerAbilityExecutionHost = {

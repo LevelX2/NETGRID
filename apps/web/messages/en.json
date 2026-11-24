@@ -1358,6 +1358,16 @@
       "turnActions": "Turn: {turn}  {actor} actions",
       "remainingActions": "{count} remaining"
     },
+    "tracePayment": {
+      "bid": "Trace bid: {amount}",
+      "available": "up to {amount}",
+      "remaining": "Other payment sources: {amount}",
+      "counterMinimum": "At least {amount} trace counters",
+      "specializedMinimum": "At least {amount} from the listed sources",
+      "invalidAmount": "Check the amounts and the trace bid.",
+      "unavailable": "The payment sources are currently unavailable.",
+      "confirm": "Confirm payment"
+    },
     "cardChoice": {
       "cardDisplay": "Card display",
       "all": "All",

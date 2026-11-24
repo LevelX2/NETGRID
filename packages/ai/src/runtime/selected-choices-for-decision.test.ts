@@ -2557,43 +2557,19 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("uses the Engine-quoted Corp Trace allocation with the most specialized credits", () => {
-    const input = inputWithChoice({
-      kind: "select_option",
-      source: "trace:1:corp_payment",
-      minSelections: 1,
-      maxSelections: 1,
-      options: [
-        {
-          id: "normal_only",
-          label: "3 normale Credits",
-          value: JSON.stringify([]),
-        },
-        {
-          id: "mixed",
-          label: "2 Trace-Credits, 1 normaler Credit",
-          value: JSON.stringify([
-            { sourceCardInstanceId: "trace_pool", amount: 2 },
-          ]),
-        },
-        {
-          id: "specialized",
-          label: "3 Trace-Credits",
-          value: JSON.stringify([
-            { sourceCardInstanceId: "trace_pool", amount: 3 },
-          ]),
-        },
-      ],
-    });
+    const input = corpTracePaymentInput(2);
+    const action = input.legalActions.find((candidate) => candidate.type === "resolve_choice")!;
 
     expect(
       selectedChoicesForDecision(
         input,
-        resolveChoiceActionForInput(input),
+        action,
         unusedDependencies(),
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["specialized"],
+      selectedOptionIds: ["trace_pool", "trace_counters"],
+      selectedOptionAmounts: [2, 1],
     });
   });
 
@@ -2626,24 +2602,13 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("fails closed on a malformed Corp Trace payment allocation", () => {
-    const input = inputWithChoice({
-      kind: "select_option",
-      source: "trace:1:corp_payment",
-      minSelections: 1,
-      maxSelections: 1,
-      options: [
-        {
-          id: "malformed",
-          label: "Ungültige Quellenquote",
-          value: "not-json",
-        },
-      ],
-    });
+    const input = corpTracePaymentInput(3);
+    const action = input.legalActions.find((candidate) => candidate.type === "resolve_choice")!;
 
     expect(() =>
       selectedChoicesForDecision(
         input,
-        resolveChoiceActionForInput(input),
+        action,
         unusedDependencies(),
       ),
     ).toThrowError("window_origin_missing");
@@ -2819,6 +2784,72 @@ function inputWithChoice(
     },
     legalActions: [resolveChoiceAction(side)],
   } as unknown as AiDecisionInput;
+}
+
+function corpTracePaymentInput(bitAmount: number): AiDecisionInput {
+  const state = createGameAfterSetup({ seed: "corp-trace-payment-choice", traceRulesProfile: "classic_blind" });
+  state.trace = {
+    traceId: 1,
+    sourceCardInstanceId: state.corp.identity,
+    sourceDefinitionId: state.cardInstances[state.corp.identity]!.definitionId,
+    traceRulesProfile: "classic_blind",
+    status: "corp_bid",
+    traceLimit: 2,
+    successEffect: { type: "add_tag", amount: 1 },
+    corpBidPaymentSelection: { bid: 3 },
+  };
+  state.pendingChoice = {
+    choiceId: "choice_multi",
+    side: "corp",
+    stateVersion: state.stateVersion,
+    visibility: "hidden_info_barrier",
+    prompt: "Zahlungsquellen wählen",
+    kind: "select_option",
+    source: "trace:1:corp_payment",
+    minSelections: 0,
+    maxSelections: 2,
+    traceCorpPayment: {
+      bid: 3,
+      minimumSpecializedAmount: 2,
+      requiredTraceCounters: 1,
+    },
+    options: [
+      {
+        id: "trace_pool",
+        label: "Krumz",
+        metadata: {
+          traceCorpPaymentSource: {
+            kind: "corp_trace_bit_pool",
+            maxAmount: 2,
+            recommendedAmount: bitAmount,
+          },
+        },
+      },
+      {
+        id: "trace_counters",
+        label: "Hacker Tracker Central",
+        metadata: {
+          traceCorpPaymentSource: {
+            kind: "corp_trace_counter_pool",
+            maxAmount: 2,
+            recommendedAmount: 1,
+          },
+        },
+      },
+    ],
+  };
+  const playerView = getPlayerView(state, "corp");
+  return buildAiDecisionInputDto({
+    side: "corp",
+    playerView,
+    legalActions: playerView.legalActions,
+    eventTail: playerView.publicEvents,
+    difficulty: "normal",
+    seed: state.seed,
+    decisionId: "corp-trace-payment-choice",
+    actionNumber: state.stateVersion,
+    profileId: "corp-trace-payment-choice",
+  });
 }
 
 function scoredAgendaCleanupInput(): AiDecisionInput {

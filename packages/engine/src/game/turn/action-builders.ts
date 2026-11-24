@@ -1,4 +1,5 @@
 import type {
+  AbilityPayloadDiscriminatorField,
   ActionType,
   EncounterActionTargets,
   GameState,
@@ -6,7 +7,6 @@ import type {
   Side,
 } from "@netgrid/shared";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
-import { ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS } from "../../compatibility/payload-compatibility";
 import { abilityPayloadDiscriminatorEntries } from "../../mechanics/public-payload-schema";
 
 export type LegalActionMetadata = EncounterActionTargets &
@@ -16,6 +16,27 @@ export type LegalActionMetadata = EncounterActionTargets &
       "abilityRef" | "effectRef" | "choiceRequirements" | "targetRequirements"
     >
   >;
+
+// Only current execution discriminators that contribute to Action IDs belong
+// here. The order is deterministic because replay and stale-action validation
+// compare generated IDs inside the current build.
+const ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS = [
+  "v1917AssetAbility",
+  "v1918UpgradeAbility",
+  "v1919OperationAbility",
+  "v1919RunnerProgramAbility",
+  "v1919RunnerEventAbility",
+  "v1920AssetAbility",
+  "v1921AssetAbility",
+  "v1921UpgradeAbility",
+  "v1921RunnerProgramAbility",
+  "v1921RunnerResourceAbility",
+  "resourceAbility",
+  "runnerAbility",
+  "delayedInstallAbility",
+  "obligationDebtAbility",
+  "agendaAbility",
+] as const satisfies readonly AbilityPayloadDiscriminatorField[];
 
 // Fixed codes, ordered by the existing action-family ordering. Append new
 // codes explicitly so future declarations cannot reassign an action family's identity.

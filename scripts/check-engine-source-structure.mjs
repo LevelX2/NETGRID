@@ -29,10 +29,6 @@ const forbiddenRuntimeDelegateFiles = [
   "runtime-delegates.ts",
   "state-runtime-delegates.ts",
 ];
-const allowedLayerDebt = new Set([
-  "ability-engine/active-modifiers.ts -> game/state/temporary-breaker-strength.ts",
-  "ability-engine/card-implementation-runtime-activated-costs.ts -> game/payment/runner-payment-support.ts",
-]);
 const runtimePortContractFiles = [
   "access-flow-runtime-port.ts",
   "action-runtime-port.ts",
@@ -73,7 +69,7 @@ const productionFiles = collectSourceFiles(engineRoot);
 const productionFileSet = new Set(productionFiles);
 const graph = new Map(productionFiles.map((file) => [file, new Set()]));
 const findings = [];
-const actualLayerDebt = new Set();
+const forbiddenLayerEdges = new Set();
 const actualVersionedAbilityPayloadFields = new Set();
 const registeredAbilityPayloadFields = new Set(
   stringLiteralArrayValues(
@@ -118,7 +114,7 @@ for (const file of productionFiles) {
       relativeEnginePath(file),
       target ? relativeEnginePath(target) : specifier.text,
     );
-    if (layerFinding) actualLayerDebt.add(layerFinding);
+    if (layerFinding) forbiddenLayerEdges.add(layerFinding);
   }
 }
 
@@ -136,14 +132,8 @@ const actualCycleSignatures = new Set(
 for (const cycle of actualCycleSignatures) {
   findings.push(`relative import cycle: ${cycle}`);
 }
-for (const layerEdge of actualLayerDebt) {
-  if (!allowedLayerDebt.has(layerEdge))
-    findings.push(`unexpected forbidden layer edge: ${layerEdge}`);
-}
-for (const allowed of allowedLayerDebt) {
-  if (!actualLayerDebt.has(allowed))
-    findings.push(`stale allowed-layer debt entry: ${allowed}`);
-}
+for (const layerEdge of forbiddenLayerEdges)
+  findings.push(`unexpected forbidden layer edge: ${layerEdge}`);
 
 const runtimeFileNames = new Set(readdirSync(runtimeRoot));
 for (const fileName of forbiddenRuntimeDelegateFiles) {

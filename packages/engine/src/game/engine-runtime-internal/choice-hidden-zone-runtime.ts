@@ -72,11 +72,7 @@ function createChoiceHiddenZoneRuntimeLinks(
     installRunnerProgramFromZoneWithoutClick: link(
       "installRunnerProgramFromZoneWithoutClick",
     ),
-    resolveV1911RunnerHiddenZoneAbility: link(
-      "resolveV1911RunnerHiddenZoneAbility",
-    ),
     revealCorpRdTop: link("revealCorpRdTop"),
-    revealRunnerStackTop: link("revealRunnerStackTop"),
     shuffleRunnerStack: link("shuffleRunnerStack"),
     startRunnerProgramFreeMemoryChoice: link(
       "startRunnerProgramFreeMemoryChoice",
@@ -196,9 +192,6 @@ function createChoiceHiddenZoneRuntimeLinks(
     resolveMultiExposeInstalledCorpCardsChoice: link(
       "resolveMultiExposeInstalledCorpCardsChoice",
     ),
-    resolveScoredAgendaCorpRdTopReveal: link(
-      "resolveScoredAgendaCorpRdTopReveal",
-    ),
     shuffleCorpCardIntoRd: link("shuffleCorpCardIntoRd"),
     startExposeInstalledCorpCardsChoice: link(
       "startExposeInstalledCorpCardsChoice",
@@ -225,7 +218,7 @@ export function createChoiceHiddenZoneRuntime(
   const links = createChoiceHiddenZoneRuntimeLinks(runtime);
   Object.assign(
     runtime,
-    createHiddenZoneSearchRuntime(deps, links),
+    createHiddenZoneSearchRuntime(deps),
     createHiddenZoneArrangeRuntime(deps, links),
     createHiddenZoneNonSearchRuntime(deps, links),
     createHiddenZoneNonSearchDiceLoopRuntime(deps),

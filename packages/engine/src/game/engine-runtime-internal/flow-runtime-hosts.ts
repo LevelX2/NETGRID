@@ -12,7 +12,7 @@ export function createFlowRuntimeHosts(
   Object.assign(
     runtime,
     createInstallRezRuntimeHosts(deps),
-    createDamageTraceRuntimeHosts(deps),
+    createDamageTraceRuntimeHosts(),
     createRunFlowRuntimeHosts(deps, runtime),
     createEncounterMovementRuntimeHosts(deps, runtime),
     createAccessFlowRuntimeHosts(deps),

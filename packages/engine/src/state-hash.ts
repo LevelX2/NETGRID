@@ -7,12 +7,28 @@ import {
 import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import { createCurrentCardRegistryRulesContext } from "./card-registry-rules-context";
 
+// The process-wide CardSpec registry is fixed. Bound reuse by the complete
+// context inputs so independent matches can share a fingerprint safely.
+const maxCachedRulesFingerprints = 128;
+const rulesFingerprints = new Map<string, string>();
+
 export function hashStateSnapshot(state: GameState): StateHash {
-  const rulesContext = createCurrentCardRegistryRulesContext({
-    cardPoolSnapshotId: cardPoolSnapshotIdentityForState(state),
-    matchCardPoolDefinitionIds: matchCardSpecDefinitionIdsForState(state),
-  });
-  return hashStateSnapshotWithRulesContext(state, rulesContext.fingerprint);
+  const cardPoolSnapshotId = cardPoolSnapshotIdentityForState(state);
+  const matchCardPoolDefinitionIds = matchCardSpecDefinitionIdsForState(state);
+  const key = JSON.stringify([cardPoolSnapshotId, matchCardPoolDefinitionIds]);
+  let fingerprint = rulesFingerprints.get(key);
+  if (fingerprint === undefined) {
+    fingerprint = createCurrentCardRegistryRulesContext({
+      cardPoolSnapshotId,
+      matchCardPoolDefinitionIds,
+    }).fingerprint;
+    if (rulesFingerprints.size === maxCachedRulesFingerprints) {
+      const oldest = rulesFingerprints.keys().next();
+      if (!oldest.done) rulesFingerprints.delete(oldest.value);
+    }
+    rulesFingerprints.set(key, fingerprint);
+  }
+  return hashStateSnapshotWithRulesContext(state, fingerprint);
 }
 
 const activeCardSpecDefinitionIds = new Set<CardDefinitionId>(

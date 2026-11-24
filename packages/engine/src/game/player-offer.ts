@@ -2,6 +2,7 @@ import {
   choiceOptionPresentationForEngineKey,
   choiceOptionServerForEngineKey,
   isMatchOfferId,
+  isPositiveSafeInteger,
   type GameState,
   type LegalAction,
   type MatchActionSubmission,
@@ -201,7 +202,20 @@ export function bindMatchActionOffer(
         return { errorCode: "ERR_INVALID_CHOICE" };
       selectedOptionIds.push(option.id);
     }
-    selectedChoices = { choiceId: choice.choiceId, selectedOptionIds };
+    const amounts = selection.selectedOptionAmounts;
+    if (
+      choice.traceCorpPayment
+        ? !Array.isArray(amounts) ||
+          amounts.length !== selectedOptionIds.length ||
+          !amounts.every(isPositiveSafeInteger)
+        : amounts !== undefined
+    )
+      return { errorCode: "ERR_INVALID_CHOICE" };
+    selectedChoices = {
+      choiceId: choice.choiceId,
+      selectedOptionIds,
+      ...(amounts !== undefined ? { selectedOptionAmounts: [...amounts] } : {}),
+    };
   }
 
   return {

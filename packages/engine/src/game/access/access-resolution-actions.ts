@@ -9,7 +9,6 @@ import type {
 } from "@netgrid/shared";
 import {
   availableRunnerAccessTrashCredits,
-  canFreeTrashCurrentAccessCard,
   effectiveAccessTrashCost,
   freeTrashAccessSourceForCurrentAccessCard,
 } from "./access-actions";

@@ -40,7 +40,6 @@ import {
   executeFreeProgramInstallPlan,
 } from "./free-program-install-execution";
 import {
-  applySourceOncePerRunPostInstallPlan,
   applyTemporaryProgramInstallReturnPlan,
   createTemporaryProgramInstallPostInstallSideEffectPlan,
 } from "./post-install-side-effects";

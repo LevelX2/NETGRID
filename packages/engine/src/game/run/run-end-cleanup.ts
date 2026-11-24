@@ -1,21 +1,10 @@
 import type {
-  CardDefinition,
-  CardDefinitionId,
-  CardInstance,
   CardInstanceId,
-  CounterType,
-  DamageType,
   GameState,
   LegalAction,
   PlayerAction,
-  PurgeableRunnerVirusCounterBucket,
-  PurgeableRunnerVirusCounterType,
-  ResolvedGameEffect,
-  ServerId,
 } from "@netgrid/shared";
-import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
 import { icebreakerHasRunEndCounterAward } from "../../ability-engine/icebreaker-abilities";
-import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 import {
   applyV181SuccessfulRunCounterTriggers,
   compactPurgeableRunnerVirusCounters,
@@ -28,7 +17,6 @@ import type {
   PostRunBridgeResult,
   RunDurationCleanupResult,
   RunEndDamageSummary,
-  RunEndAftermathResult,
   RunEndCleanupHost,
   RunEndCleanupResult,
   RunEndTagContinuation,

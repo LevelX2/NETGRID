@@ -12,9 +12,9 @@ import type {
   Side,
 } from "@netgrid/shared";
 import {
-  isP358ConcealAndReorderInstalledIceChoiceSource,
-  isP358SuccessfulRunFortIceReorderChoiceSource,
-} from "../../compatibility/payload-compatibility";
+  isConcealAndReorderInstalledIceChoiceSource,
+  isSuccessfulRunFortIceReorderChoiceSource,
+} from "./choice-sources";
 import { orderedHostedProgramIds } from "../state/microtech-backup";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
@@ -44,15 +44,11 @@ export type HiddenZoneArrangeChoiceHandlerHost = {
     hiddenReplacementLongtailKind: (
       definitionId: CardDefinitionId,
     ) => string | undefined;
-    isHiddenZoneReorderAssetDefinition: (
-      definitionId: CardDefinitionId,
-    ) => boolean;
     hasCorpUtilityKind: (cardId: CardInstanceId, kind: string) => boolean;
     mustInstance: (cardId: CardInstanceId) => CardInstance;
   };
   zones: {
     removeFromAllZones: (cardId: CardInstanceId) => void;
-    rezzedCorpRootCardIds: () => CardInstanceId[];
   };
   servers: {
     mustServer: (serverId: string) => CorpServer;
@@ -96,8 +92,6 @@ export function handleHiddenZoneArrangeChoice(
     return resolveRunnerStackArrangeChoice(host);
   if (source.startsWith("v1911.corp_rd_arrange_top2"))
     return resolveCorpRdArrangeChoice(host);
-  if (source.startsWith("v1917.corp_rd_arrange_top2"))
-    return resolveCorpAssetRdTopReorderChoice(host);
   if (source.startsWith("v1922.corp_rd_arrange_top5"))
     return resolveCorpRdTopReorderChoice(host);
   if (
@@ -105,9 +99,9 @@ export function handleHiddenZoneArrangeChoice(
     source.startsWith("p3_37.runner_stack_top5_choose_one_arrange_rest")
   )
     return resolveRunnerStackTop5Choice(host);
-  if (isP358SuccessfulRunFortIceReorderChoiceSource(source))
+  if (isSuccessfulRunFortIceReorderChoiceSource(source))
     return resolveSuccessfulRunFortIceReorderChoice(host);
-  if (isP358ConcealAndReorderInstalledIceChoiceSource(source))
+  if (isConcealAndReorderInstalledIceChoiceSource(source))
     return resolveConcealAndReorderInstalledIceChoice(host);
   return { handled: false };
 }
@@ -335,43 +329,6 @@ export function startCorpRdArrangeChoice(
       arrangedCount: topCards.length,
     };
   }
-}
-
-export function startCorpAssetRdTopReorderChoice(
-  host: HiddenZoneArrangeChoiceHandlerHost,
-  sourceCardId: CardInstanceId,
-): void {
-  if (host.state.pendingChoice)
-    throw new Error("Es ist bereits eine Choice offen.");
-  const sourceDefinition = host.cards.definitionFor(sourceCardId);
-  if (!host.cards.isHiddenZoneReorderAssetDefinition(sourceDefinition.id))
-    throw new Error(
-      "Diese Karte darf keine V1.9.17-R&D-Reorder-Choice oeffnen.",
-    );
-  const topCards = host.state.corp.rd.slice(0, 2);
-  if (topCards.length < 2)
-    throw new Error("Nicht genug Karten fuer R&D-Reorder.");
-  host.state.pendingChoice = {
-    choiceId: `v1917_corp_rd_arrange_top2_${host.state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1917.corp_rd_arrange_top2:${sourceCardId}:${host.state.stateVersion + 1}`,
-    prompt: "R&D-Spitze anordnen",
-    kind: "select_cards",
-    options: topCards.map((cardId) => {
-      const definition = host.cards.definitionFor(cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    }),
-    minSelections: topCards.length,
-    maxSelections: topCards.length,
-    stateVersion: host.state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_corp_reorder_rd_top2",
-    arrangedCount: topCards.length,
-  };
 }
 
 export function startCorpRdTopReorderChoice(
@@ -677,53 +634,6 @@ function resolveCorpRdArrangeChoice(
   return resolvedCorpRdResult(host, selectedIds);
 }
 
-function resolveCorpAssetRdTopReorderChoice(
-  host: HiddenZoneArrangeChoiceHandlerHost,
-): HiddenZoneArrangeChoiceHandlerResult {
-  const choice = requireChoice(
-    host,
-    "Es ist keine V1.9.17-R&D-Reorder-Choice offen.",
-  );
-  if (!choice.source.startsWith("v1917.corp_rd_arrange_top2"))
-    throw new Error("Es ist keine V1.9.17-R&D-Reorder-Choice offen.");
-  const [, sourceCardId] = choice.source.split(":");
-  if (
-    !sourceCardId ||
-    !host.zones.rezzedCorpRootCardIds().includes(sourceCardId)
-  )
-    throw new Error(
-      "Die V1.9.17-R&D-Reorder-Quelle ist nicht mehr rezzed installiert.",
-    );
-  if (
-    !host.cards.isHiddenZoneReorderAssetDefinition(
-      host.cards.definitionFor(sourceCardId).id,
-    )
-  )
-    throw new Error(
-      "Die V1.9.17-R&D-Reorder-Choice gehoert nicht zur passenden Karte.",
-    );
-  const selectedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
-  reorderCorpRdTop(host, selectedIds, choice.options.length, {
-    incompleteMessage: "Die V1.9.17-R&D-Reorder-Auswahl ist unvollstaendig.",
-    invalidMessage:
-      "Die V1.9.17-R&D-Reorder-Auswahl enthaelt ungueltige Karten.",
-  });
-  delete host.state.pendingChoice;
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1917_corp_reorder_rd_top2",
-    hiddenZoneMutationKind: "reorder",
-    hiddenZoneAffectedCardCount: selectedIds.length,
-    hiddenZoneContentsChanged: false,
-    hiddenZoneOrderChanged: selectedIds.length > 1,
-    hiddenZoneChangesHq: false,
-    hiddenZoneChangesRd: selectedIds.length > 1,
-    arrangedCount: selectedIds.length,
-  };
-  return resolvedCorpRdResult(host, selectedIds);
-}
-
 function resolveCorpRdTopReorderChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
 ): HiddenZoneArrangeChoiceHandlerResult {
@@ -767,7 +677,7 @@ function resolveSuccessfulRunFortIceReorderChoice(
     host,
     "Es ist keine Fort-ICE-Reorder-Choice offen.",
   );
-  if (!isP358SuccessfulRunFortIceReorderChoiceSource(choice.source))
+  if (!isSuccessfulRunFortIceReorderChoiceSource(choice.source))
     throw new Error("Es ist keine Fort-ICE-Reorder-Choice offen.");
   const [, sourceCardId = "", serverId = ""] = choice.source.split(":");
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
@@ -819,7 +729,7 @@ function resolveConcealAndReorderInstalledIceChoice(
     host,
     "Es ist keine ICE-Conceal-Reorder-Choice offen.",
   );
-  if (!isP358ConcealAndReorderInstalledIceChoiceSource(choice.source))
+  if (!isConcealAndReorderInstalledIceChoiceSource(choice.source))
     throw new Error("Es ist keine ICE-Conceal-Reorder-Choice offen.");
   const [, sourceCardId = ""] = choice.source.split(":");
   const sourceDefinition = host.cards.definitionFor(sourceCardId);

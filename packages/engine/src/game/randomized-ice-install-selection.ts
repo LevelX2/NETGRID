@@ -18,9 +18,8 @@ import {
   type PlayerAction,
 } from "@netgrid/shared";
 import { buildApplyAction, type ApplyActionCoreHost } from "./apply-action";
-import { cloneGameStateForAction } from "./apply-action-state";
 import { getLegalActions } from "./legal-actions";
-import { nextRandom } from "./state/draw-random";
+import { prepareEngineSelectionDraw } from "./state/draw-random";
 
 let defaultRandomizedIceInstallSelectionHost: ApplyActionCoreHost | undefined;
 
@@ -184,12 +183,10 @@ export function buildApplyRandomizedIceInstallSelection(
     );
   }
 
-  const next = cloneGameStateForAction(state);
-  const counterBefore = next.randomCounter;
   const purpose = randomizedSelectionPurpose(requoted.quote);
-  const randomValue = nextRandom(next, purpose);
+  const { state: prepared, record } = prepareEngineSelectionDraw(state, purpose);
   const selectedIndex = Math.floor(
-    randomValue * requoted.quote.candidates.length,
+    record.value * requoted.quote.candidates.length,
   );
   const selectedCandidate = requoted.quote.candidates[selectedIndex];
   const selectedLegalAction = requoted.quote.legalActions[selectedIndex];
@@ -210,16 +207,14 @@ export function buildApplyRandomizedIceInstallSelection(
       ? { idempotencyKey: command.idempotencyKey }
       : {}),
   };
-  const applied = buildApplyAction(host, next, selectedPlayerAction, options);
+  const applied = buildApplyAction(host, prepared, selectedPlayerAction, options);
   if (!applied.ok) {
     return { ok: false, error: applied.error, state };
   }
 
-  const randomDraw = applied.state.randomDrawRecords.find(
-    (record) => record.counter === counterBefore,
-  );
+  const randomDraw = applied.state.randomDrawRecords[record.counter];
   if (
-    !randomDraw ||
+    randomDraw?.counter !== record.counter ||
     serializeRandomPurpose(randomDraw.purpose) !==
       serializeRandomPurpose(purpose)
   ) {

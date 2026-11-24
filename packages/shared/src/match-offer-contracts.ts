@@ -13,6 +13,10 @@ export type MatchChoiceId = number;
 export type MatchChoiceOptionId = number;
 
 export function isMatchOfferId(value: unknown): value is number {
+  return isPositiveSafeInteger(value);
+}
+
+export function isPositiveSafeInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 }
 
@@ -138,6 +142,7 @@ export type OfferedPlayerView = Omit<
 export type MatchChoiceSelection = {
   choiceId: MatchChoiceId;
   selectedOptionIds: MatchChoiceOptionId[];
+  selectedOptionAmounts?: number[];
 };
 
 export type MatchActionSubmission = {

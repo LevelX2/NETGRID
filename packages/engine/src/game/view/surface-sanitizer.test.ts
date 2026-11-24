@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sanitizeCardImplementationSurfacePayload } from "./surface-sanitizer";
+import { sanitizeCardImplementationSurfacePayload } from "./surface-policy";
 
 describe("sanitizeCardImplementationSurfacePayload", () => {
   it("keeps public counts, public definition ids and explicit facts", () => {

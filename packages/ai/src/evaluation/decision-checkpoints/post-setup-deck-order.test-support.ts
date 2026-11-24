@@ -37,5 +37,8 @@ export function applyPostSetupDeckOrder(
   if (!valid.ok) throw new Error(valid.errors.join("\n"));
   const event = state.eventLog.at(-1);
   if (!event) throw new Error("Die Szenarioanordnung benötigt den abgeschlossenen Setup-Übergang.");
-  event.stateHashAfter = hashGameState(state);
+  state.eventLog = [
+    ...state.eventLog.slice(0, -1),
+    Object.freeze({ ...event, stateHashAfter: hashGameState(state) }),
+  ];
 }

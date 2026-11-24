@@ -13,33 +13,34 @@ export function eligibleInstalledRunnerHardwareIds(
   excludedSubtype: string,
 ): CardInstanceId[] {
   const normalizedExcludedSubtype = normalizeSubtype(excludedSubtype);
-  return state.runner.rig.hardware
-    .filter((cardId) => {
-      const instance = state.cardInstances[cardId];
-      const definition = instance
-        ? CARD_DEFINITIONS_BY_ID[instance.definitionId]
-        : undefined;
-      return (
-        instance?.owner === "runner" &&
-        instance.controller === "runner" &&
-        instance.zone.side === "runner" &&
-        instance.zone.zone === "rig" &&
-        definition?.type === "hardware" &&
-        !definition.subtypes.some(
-          (subtype) => normalizeSubtype(subtype) === normalizedExcludedSubtype,
-        )
-      );
-    })
+  const eligible: { cardId: CardInstanceId; title: string }[] = [];
+  for (const cardId of state.runner.rig.hardware) {
+    const instance = state.cardInstances[cardId];
+    if (
+      instance?.owner !== "runner" ||
+      instance.controller !== "runner" ||
+      instance.zone.side !== "runner" ||
+      instance.zone.zone !== "rig"
+    )
+      continue;
+    const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
+    if (
+      definition?.type !== "hardware" ||
+      definition.subtypes.some(
+        (subtype) => normalizeSubtype(subtype) === normalizedExcludedSubtype,
+      )
+    )
+      continue;
+    eligible.push({ cardId, title: definition.title.toLowerCase() });
+  }
+  // Numbered choices must keep the same instance order on every host.
+  return eligible
     .sort((left, right) => {
-      const leftDefinition =
-        CARD_DEFINITIONS_BY_ID[state.cardInstances[left]!.definitionId]!;
-      const rightDefinition =
-        CARD_DEFINITIONS_BY_ID[state.cardInstances[right]!.definitionId]!;
-      return (
-        leftDefinition.title.localeCompare(rightDefinition.title) ||
-        left.localeCompare(right)
-      );
-    });
+      if (left.title !== right.title) return left.title < right.title ? -1 : 1;
+      if (left.cardId === right.cardId) return 0;
+      return left.cardId < right.cardId ? -1 : 1;
+    })
+    .map(({ cardId }) => cardId);
 }
 
 function normalizeSubtype(value: string): string {

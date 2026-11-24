@@ -1,4 +1,3 @@
-import type { MultiServerSuccessSequenceState } from "@netgrid/shared";
 import type { CardEffectFamilyInput } from "./family-runtime";
 
 export function executeResourceCostLinkEffect(
@@ -19,9 +18,7 @@ export function executeResourceCostLinkEffect(
     effectReason,
     assertPositiveIntegerAmount,
     assertPublicVisibility,
-    assertHiddenInfoBarrierVisibility,
     mergePublicPayload,
-    dataFortServerIds,
   } = runtime;
 
   switch (effect.kind) {

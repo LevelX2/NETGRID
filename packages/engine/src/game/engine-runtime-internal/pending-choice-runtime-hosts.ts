@@ -1,17 +1,8 @@
 import { parseRunIdToken } from "@netgrid/shared";
 import type {
-  CardDefinition,
-  CardDefinitionId,
   CardInstanceId,
   ChoiceRequest,
-  CounterType,
-  CorpServer,
-  CorpZoneChoiceHandlerHost,
   GameState,
-  HiddenZoneArrangeChoiceHandlerHost,
-  HiddenZoneNonSearchChoiceHandlerHost,
-  HiddenZoneSearchActivationHandlerHost,
-  HiddenZoneSearchChoiceHandlerHost,
   LegalAction,
   PendingChoiceResolutionHost,
   PlayerAction,
@@ -46,7 +37,7 @@ import { startCorpHqCardToRdChoice } from "../hidden-zone/nonsearch-choice-handl
 import { resumeSuccessfulRunAccessReplacementAfterTagPrevention } from "../run/run-access-transition";
 import { enterRunStartApproach } from "../run/run-core-execution";
 import { resumePreventableTrashCostContinuation } from "../abilities/trigger-ability-execution";
-import { resumeRunEndCleanupAfterTagPrevention } from "../run/run-end-cleanup";
+import { resumeRunEndCleanupAfterTagPrevention, resumeRunEndTrashUsedBreakers } from "../run/run-end-cleanup";
 import {
   appendResolvedEffectsToPayload,
   applyCorpStartOfTurnEffects,
@@ -72,51 +63,16 @@ export function createPendingChoiceRuntimeHosts(
   links: ChoiceHiddenZoneRuntimeLinks,
 ): import("./pending-choice-runtime-port").PendingChoiceRuntimePort {
   const {
-    RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION,
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE:
       runnerInstalledConnectionTrashBadPublicityChoiceSource,
-    addCounterToAllInstalledRunnerIcebreakers,
-    canInstallRunnerProgramFromZone,
-    canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
-    chooseCorpAgendasForPointCost,
-    continueRandomDiceLoop,
-    corpAgendaPointTotal,
     corpZoneChoiceHandlerHost,
-    creditTextForPrompt,
-    diePromptText,
-    exposeCorpCardInServer,
-    exposeInstalledCorpCardForImplementation,
     exposeInstalledCorpCardLabel,
-    exposeInstalledCorpCardTargets,
-    exposeInstalledCorpCardsChoiceOptions,
-    exposeOutermostIceOfEachDataFort,
-    exposedCorpCardInServer,
     hiddenZoneArrangeChoiceHandlerHost,
     hiddenZoneNonSearchChoiceHandlerHost,
-    hiddenZoneSearchActivationHandlerHost,
-    hiddenZoneSearchActivationTargetHost,
     hiddenZoneSearchChoiceHandlerHost,
-    hiddenZoneSearchHandlerHostBase,
-    multiExposeInstalledCorpCardOptionLabel,
-    multiExposeInstalledCorpCardTargets,
-    iceChoiceLabelForSide,
-    installRunnerProgramForFree,
-    installRunnerProgramFromStackWithoutClick,
-    installRunnerProgramFromZoneWithoutClick,
-    installedCorpCardServerContext,
-    installedRunnerConnectionIds,
-    installedRunnerIcebreakerIds,
-    outermostIceExposures,
-    parseRandomDiceSplitChoiceSource,
-    parseRandomDiceSplit,
-    parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
-    randomDiceSplitOptions,
-    publicIcePositionLabelForCard,
-    publicIceSelectionLabelForCard,
     resolveDerezRezzedBlackIceChoice,
     resolveCardImplementationAccessPaymentChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
-    resolveRunnerIcebreakerCounterEvent,
     resolveExposeInstalledCorpCardsChoice,
     resolveExposePreventionChoice,
     resolveCorpChoiceRezOrTrashIceDecisionChoice,
@@ -127,31 +83,12 @@ export function createPendingChoiceRuntimeHosts(
     resolveIncubatorTransformChoice,
     resolvePaidSourceReturnToGripChoice,
     resolveP358HiddenReplacementChoice,
-    resolveRandomDiceLoopEvent,
     resolveRunnerProgramReturnChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveTrashUnrezzedIceChoice,
     resolveStackInstallRunCleanupChoice,
-    resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveScoredAgendaCorpRdTopReveal,
-    resolveV1911RunnerHiddenZoneAbility,
     resolveRandomDiceSplitChoice,
-    revealCorpRdTop,
-    revealRunnerStackTop,
     selectedChoiceCardIds,
-    selectedChoiceCardIdsForChoice,
-    shuffleCorpCardIntoRd,
-    shuffleRunnerStack,
-    startDerezRezzedBlackIceChoice,
-    startPayRezCostToTrashRezzedIceChoice,
-    startExposeInstalledCorpCardsChoice,
-    startCorpChoiceRezOrTrashIceChoice,
-    startMultiExposeInstalledCorpCardsChoice,
-    startPaidSourceReturnToGripChoice,
-    startTrashUnrezzedIceChoice,
-    startRunnerProgramFreeMemoryChoice,
-    startRandomDiceSplitChoice,
-    trashCorpInstalledCardsInScoredSourceServer,
   } = links;
 
   const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
@@ -722,11 +659,22 @@ export function createPendingChoiceRuntimeHosts(
     }
   }
 
+  let pendingChoiceServices:
+    | Omit<PendingChoiceResolutionHost, "state">
+    | undefined;
+
   function pendingChoiceResolutionHost(
     state: GameState,
   ): PendingChoiceResolutionHost {
+    pendingChoiceServices ??= createPendingChoiceServices();
+    return { state, ...pendingChoiceServices };
+  }
+
+  function createPendingChoiceServices(): Omit<
+    PendingChoiceResolutionHost,
+    "state"
+  > {
     return {
-      state,
       lifecycle: {
         trashCorpInstalledCardToArchives,
         resolveFortCapacityCleanupChoice,
@@ -745,7 +693,7 @@ export function createPendingChoiceRuntimeHosts(
           deps.resolvePdcaDamageReplacementChoice,
       },
       trace: {
-        resolveTraceChoice: (_state, actionToResolve, playerActionToResolve) =>
+        resolveTraceChoice: (state, actionToResolve, playerActionToResolve) =>
           deps.resolveTraceChoice(
             deps.traceOrchestrationHost(state),
             actionToResolve,
@@ -753,17 +701,32 @@ export function createPendingChoiceRuntimeHosts(
           ),
       },
       hiddenZone: {
-        handleHiddenZoneArrangeChoice: deps.handleHiddenZoneArrangeChoice,
-        hiddenZoneArrangeChoiceHandlerHost,
-        handleHiddenZoneNonSearchChoice: deps.handleHiddenZoneNonSearchChoice,
-        hiddenZoneNonSearchChoiceHandlerHost,
-        handleCorpZoneChoice: deps.handleCorpZoneChoice,
-        corpZoneChoiceHandlerHost,
-        isP358HiddenReplacementCompatibilityChoiceSource:
-          deps.isP358HiddenReplacementCompatibilityChoiceSource,
+        handleHiddenZoneArrangeChoice: (state, legalAction, playerAction) =>
+          deps.handleHiddenZoneArrangeChoice(
+            hiddenZoneArrangeChoiceHandlerHost(
+              state,
+              legalAction,
+              playerAction,
+            ),
+          ),
+        handleHiddenZoneNonSearchChoice: (state, legalAction, playerAction) =>
+          deps.handleHiddenZoneNonSearchChoice(
+            hiddenZoneNonSearchChoiceHandlerHost(
+              state,
+              legalAction,
+              playerAction,
+            ),
+          ),
+        handleCorpZoneChoice: (state, legalAction, playerAction) =>
+          deps.handleCorpZoneChoice(
+            corpZoneChoiceHandlerHost(state, legalAction, playerAction),
+          ),
+        isHiddenZoneChoiceSource: deps.isHiddenZoneChoiceSource,
         resolveP358HiddenReplacementChoice,
-        handleHiddenZoneSearchChoice: deps.handleHiddenZoneSearchChoice,
-        hiddenZoneSearchChoiceHandlerHost,
+        handleHiddenZoneSearchChoice: (state, legalAction, playerAction) =>
+          deps.handleHiddenZoneSearchChoice(
+            hiddenZoneSearchChoiceHandlerHost(state, legalAction, playerAction),
+          ),
         resolveMultiExposeInstalledCorpCardsChoice,
         resolveExposeInstalledCorpCardsChoice,
         resolveExposePreventionChoice,
@@ -798,18 +761,28 @@ export function createPendingChoiceRuntimeHosts(
         resolveFortHqReplacementChoice: deps.resolveFortHqReplacementChoice,
       },
       corp: {
-        handleCorpInstallRezSequenceChoice:
-          deps.handleCorpInstallRezSequenceChoice,
-        corpInstallRezSequenceHandlerHost:
-          deps.corpInstallRezSequenceHandlerHost,
-        handleScoredAgendaFlowChoice: deps.handleScoredAgendaFlowChoice,
-        scoredAgendaFlowHost: deps.scoredAgendaFlowHost,
+        handleCorpInstallRezSequenceChoice: (
+          state,
+          legalAction,
+          playerAction,
+        ) =>
+          deps.handleCorpInstallRezSequenceChoice(
+            deps.corpInstallRezSequenceHandlerHost(
+              state,
+              legalAction,
+              playerAction,
+            ),
+          ),
+        handleScoredAgendaFlowChoice: (state, legalAction, playerAction) =>
+          deps.handleScoredAgendaFlowChoice(
+            deps.scoredAgendaFlowHost(state, legalAction, playerAction),
+          ),
       },
       runner: {
         resolveRunnerProgramTrashBeforeInstallChoice:
           deps.resolveRunnerProgramTrashBeforeInstallChoice,
         resolveRunnerMemoryCheckpointChoice: (
-          _state,
+          state,
           legalAction,
           playerAction,
         ) =>
@@ -827,7 +800,7 @@ export function createPendingChoiceRuntimeHosts(
             playerAction,
           ),
         resolveDelayedInstallPlacementChoice: (
-          _state,
+          state,
           legalAction,
           playerAction,
         ) => {
@@ -849,7 +822,7 @@ export function createPendingChoiceRuntimeHosts(
           deps.appendResolvedEffectsToPayload(legalAction, effects);
         },
         resolveDelayedInstallStartTurnChoice: (
-          _state,
+          state,
           legalAction,
           playerAction,
         ) => {
@@ -870,35 +843,91 @@ export function createPendingChoiceRuntimeHosts(
         },
       },
       run: {
-        resolveHqIceSwapChoice: deps.resolveHqIceSwapChoice,
-        fortPassWindowHostForState: deps.fortPassWindowHostForState,
-        resolveSecretSpendCompareChoiceInRunModule:
-          deps.resolveSecretSpendCompareChoiceInRunModule,
-        encounterSpecialWindowHostForState:
-          deps.encounterSpecialWindowHostForState,
-        resolveHammerStealthLossChoice: deps.resolveHammerStealthLossChoice,
-        fortRunSideFamiliesHostForState: deps.fortRunSideFamiliesHostForState,
-        resolveActiveIceProgramTrashChoiceInRunModule:
-          deps.resolveActiveIceProgramTrashChoiceInRunModule,
-        encounterResolutionHostForState: deps.encounterResolutionHostForState,
-        resolvePassRezzedIceProgramTrashChoiceInRunModule:
-          deps.resolvePassRezzedIceProgramTrashChoiceInRunModule,
-        resolveRezInterruptJackOutChoice: deps.resolveRezInterruptJackOutChoice,
-        runRezWindowHostForState: deps.runRezWindowHostForState,
-        resolveBrokenIceVirusCounterChoice:
-          deps.resolveBrokenIceVirusCounterChoice,
-        runEndCleanupHost: deps.runEndCleanupHost,
-        resolveAardvarkInterceptionChoice:
-          deps.resolveAardvarkInterceptionChoice,
-        resolveSuccessfulRunInterventionChoiceInRunModule:
-          deps.resolveSuccessfulRunInterventionChoiceInRunModule,
-        successfulRunInterventionHost: deps.successfulRunInterventionHost,
+        resolveHqIceSwapChoice: (state, legalAction, playerAction) =>
+          deps.resolveHqIceSwapChoice(
+            deps.fortPassWindowHostForState(state),
+            legalAction,
+            playerAction,
+          ),
+        resolveSecretSpendCompareChoiceInRunModule: (
+          state,
+          legalAction,
+          playerAction,
+        ) =>
+          deps.resolveSecretSpendCompareChoiceInRunModule(
+            deps.encounterSpecialWindowHostForState(state),
+            legalAction,
+            playerAction,
+          ),
+        resolveHammerStealthLossChoice: (state, legalAction, playerAction) =>
+          deps.resolveHammerStealthLossChoice(
+            deps.fortRunSideFamiliesHostForState(state),
+            legalAction,
+            playerAction,
+          ),
+        resolveActiveIceProgramTrashChoiceInRunModule: (
+          state,
+          legalAction,
+          playerAction,
+        ) =>
+          deps.resolveActiveIceProgramTrashChoiceInRunModule(
+            deps.encounterResolutionHostForState(state),
+            legalAction,
+            playerAction,
+          ),
+        resolvePassRezzedIceProgramTrashChoiceInRunModule: (
+          state,
+          legalAction,
+          playerAction,
+        ) =>
+          deps.resolvePassRezzedIceProgramTrashChoiceInRunModule(
+            deps.encounterResolutionHostForState(state),
+            legalAction,
+            playerAction,
+          ),
+        resolveRezInterruptJackOutChoice: (state, legalAction, playerAction) =>
+          deps.resolveRezInterruptJackOutChoice(
+            deps.runRezWindowHostForState(state),
+            legalAction,
+            playerAction,
+          ),
+        resolveBrokenIceVirusCounterChoice: (
+          state,
+          legalAction,
+          playerAction,
+        ) =>
+          deps.resolveBrokenIceVirusCounterChoice(
+            deps.runEndCleanupHost(state),
+            legalAction,
+            playerAction,
+          ),
+        resolveAardvarkInterceptionChoice: (state, legalAction, playerAction) =>
+          deps.resolveAardvarkInterceptionChoice(
+            deps.fortRunSideFamiliesHostForState(state),
+            legalAction,
+            playerAction,
+          ),
+        resolveSuccessfulRunInterventionChoiceInRunModule: (
+          state,
+          legalAction,
+          playerAction,
+        ) =>
+          deps.resolveSuccessfulRunInterventionChoiceInRunModule(
+            deps.successfulRunInterventionHost(state),
+            legalAction,
+            playerAction,
+          ),
         resolvePostMeatDamageHiddenResourceChoice:
           deps.resolvePostMeatDamageHiddenResourceChoice,
         resolveStartOfRunFortUtilityChoice,
         resolveClassicDeflectorChoice,
         resolveTrashProgramChoice,
         resumeTraceProgramTrashContinuation,
+        resumeRunEndTrashUsedBreakers: (state, legalAction) =>
+          resumeRunEndTrashUsedBreakers(
+            deps.runEndCleanupHost(state),
+            legalAction,
+          ),
         resolveTraceHardwareWreckerTargetChoice:
           deps.resolveTraceHardwareWreckerTargetChoice,
         resumeTraceHardwareWreckerAfterTrash:
@@ -911,12 +940,12 @@ export function createPendingChoiceRuntimeHosts(
           deps.applyRunnerTraceCounterRunStartEffects,
       },
       access: {
-        resumeAccessEffectAfterDamagePrevention: (_state, legalAction) =>
+        resumeAccessEffectAfterDamagePrevention: (state, legalAction) =>
           resumeAccessEffectAfterDamagePrevention(
             deps.accessEffectHandlerHost(state, legalAction),
           ),
         resolveAccessProgramInstallMemoryChoice: (
-          _state,
+          state,
           legalAction,
           playerAction,
         ) => {
@@ -927,7 +956,7 @@ export function createPendingChoiceRuntimeHosts(
           );
         },
         resolveMercenaryCurrentAccessTrashChoice: (
-          _state,
+          state,
           legalAction,
           playerAction,
         ) => {
@@ -937,13 +966,36 @@ export function createPendingChoiceRuntimeHosts(
             playerAction,
           );
         },
-        resolveSuccessfulRunCreditLossSpendChoice:
-          deps.resolveSuccessfulRunCreditLossSpendChoice,
-        runAccessTransitionHost: deps.runAccessTransitionHost,
-        resolvePreAccessTopRdReorderChoice:
-          deps.resolvePreAccessTopRdReorderChoice,
-        resolveRevealRdUntilAgendaStoreInHqChoice:
-          deps.resolveRevealRdUntilAgendaStoreInHqChoice,
+        resolveSuccessfulRunCreditLossSpendChoice: (
+          state,
+          legalAction,
+          playerAction,
+        ) =>
+          deps.resolveSuccessfulRunCreditLossSpendChoice(
+            deps.runAccessTransitionHost(state),
+            legalAction,
+            playerAction,
+          ),
+        resolvePreAccessTopRdReorderChoice: (
+          state,
+          legalAction,
+          playerAction,
+        ) =>
+          deps.resolvePreAccessTopRdReorderChoice(
+            deps.runAccessTransitionHost(state),
+            legalAction,
+            playerAction,
+          ),
+        resolveRevealRdUntilAgendaStoreInHqChoice: (
+          state,
+          legalAction,
+          playerAction,
+        ) =>
+          deps.resolveRevealRdUntilAgendaStoreInHqChoice(
+            deps.runAccessTransitionHost(state),
+            legalAction,
+            playerAction,
+          ),
       },
       cardImplementation: {
         resumePreventableTrashCostContinuation,
@@ -957,10 +1009,11 @@ export function createPendingChoiceRuntimeHosts(
         resolveCorpStartOfTurnOrderChoice:
           deps.resolveCorpStartOfTurnOrderChoice,
         resolveCorpStartOfTurnRezChoice: deps.resolveCorpStartOfTurnRezChoice,
-        resumeCorpStartOfTurnOrdering: deps.resumeCorpStartOfTurnOrdering,
+        resumeCorpStartOfTurnOrdering: (state, legalAction) =>
+          deps.resumeCorpStartOfTurnOrdering(state, undefined, legalAction),
         resolveRunnerStartOfTurnOrderChoice:
           deps.resolveRunnerStartOfTurnOrderChoice,
-        resumeRunnerStartOfTurnOrdering: (_state, legalAction) => {
+        resumeRunnerStartOfTurnOrdering: (state, legalAction) => {
           const effects: ResolvedGameEffect[] = [];
           deps.resumeRunnerStartOfTurnOrdering(state, effects);
           deps.appendResolvedEffectsToPayload(legalAction, effects);

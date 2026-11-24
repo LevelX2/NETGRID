@@ -1,7 +1,6 @@
 import { isRemoteServerId } from "@netgrid/shared";
 import type {
   CardDefinition,
-  CardDefinitionId,
   CardInstanceId,
   ChoiceRequest,
   DamageType,

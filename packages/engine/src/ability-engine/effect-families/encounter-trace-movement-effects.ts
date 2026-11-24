@@ -1,27 +1,19 @@
-import type { MultiServerSuccessSequenceState } from "@netgrid/shared";
 import type { CardEffectFamilyInput } from "./family-runtime";
 
 export function executeEncounterTraceMovementEffect(
   input: CardEffectFamilyInput,
 ): boolean {
   const {
-    state,
     context,
     effect,
-    index,
     publicPayload,
-    resolvedEffects,
     runtime,
   } = input;
   const {
-    recipientSide,
-    publicEffectId,
-    effectReason,
     assertPositiveIntegerAmount,
     assertPublicVisibility,
     assertHiddenInfoBarrierVisibility,
     mergePublicPayload,
-    dataFortServerIds,
   } = runtime;
 
   switch (effect.kind) {

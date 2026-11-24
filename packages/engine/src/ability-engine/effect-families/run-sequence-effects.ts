@@ -11,18 +11,12 @@ export function executeRunSequenceEffect(
     state,
     context,
     effect,
-    index,
     publicPayload,
-    resolvedEffects,
     runtime,
   } = input;
   const {
-    recipientSide,
-    publicEffectId,
-    effectReason,
     assertPositiveIntegerAmount,
     assertPublicVisibility,
-    assertHiddenInfoBarrierVisibility,
     mergePublicPayload,
     dataFortServerIds,
   } = runtime;

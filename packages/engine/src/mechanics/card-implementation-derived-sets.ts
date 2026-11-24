@@ -68,24 +68,10 @@ function cardIdsMatching(
 
 function isCorpCardType(
   implementation: CardImplementationDefinition,
-  type: "asset" | "operation" | "upgrade",
+  type: "operation" | "upgrade",
 ): boolean {
   const definition = cardDefinitionFor(implementation);
   return definition?.side === "corp" && definition.type === type;
-}
-
-type FortRunWindowKind = NonNullable<
-  CardImplementationDefinition["fortRunWindows"]
->[number]["kind"];
-
-function hasFortRunWindowKind(
-  implementation: CardImplementationDefinition,
-  kinds: readonly FortRunWindowKind[],
-): boolean {
-  const wanted = new Set(kinds);
-  return (implementation.fortRunWindows ?? []).some((window) =>
-    wanted.has(window.kind),
-  );
 }
 
 export const CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES = cardIdsMatching(
@@ -101,19 +87,4 @@ export const CORP_FORT_RUN_WINDOW_UPGRADE_SOURCES = cardIdsMatching(
   (implementation) =>
     isCorpCardType(implementation, "upgrade") &&
     (implementation.fortRunWindows?.length ?? 0) > 0,
-);
-
-export const CORP_TRACE_ASSET_SOURCES = cardIdsMatching(
-  (implementation) =>
-    isCorpCardType(implementation, "asset") &&
-    hasEffectKind(implementation, ["trace"]),
-);
-
-export const CORP_RUN_TAX_UPGRADE_SOURCES = cardIdsMatching(
-  (implementation) =>
-    isCorpCardType(implementation, "upgrade") &&
-    hasFortRunWindowKind(implementation, [
-      "temporary_hq_ice_encounter_after_successful_run",
-      "block_stealth_bits_during_runs_on_this_fort",
-    ]),
 );

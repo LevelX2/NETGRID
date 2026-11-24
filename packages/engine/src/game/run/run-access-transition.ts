@@ -100,7 +100,6 @@ export type RunAccessTransitionHost = {
     ) => boolean;
   };
   run: {
-    isV097OrLater: () => boolean;
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
     successfulRunInterventionKindForSource: (
       sourceCardId: CardInstanceId,
@@ -298,68 +297,55 @@ export function enterAccessFromSuccessfulRun(
       ...resolvedPayloadFor(legalAction),
     };
   }
-  if (host.run.isV097OrLater()) {
-    revealArchivesAtBreachStart(host, run, legalAction);
-    const breach = buildBreachState(host.breach, run);
-    if (breach.queue.length === 0) {
-      host.run.finishRun(true, legalAction);
-      return {
-        handled: true,
-        accessSkipped: true,
-        runFinished: true,
-        stateChanged: true,
-        ...resolvedPayloadFor(legalAction),
-      };
-    }
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        serverId: breach.serverId,
-        breachId: breach.breachId,
-        ...accessCountPayloadForBreach(host.breach, breach),
-      };
-    }
-    const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
-    void _accessedCardId;
-    host.state.run = {
-      ...runWithoutAccessedCard,
-      phase: "access",
-      successful: true,
-      breach,
-    };
-    if (legalAction) {
-      host.access.applyHqAccessExposeInstalledCorpCards(
-        breach.serverId,
-        legalAction,
-      );
-    }
-    host.access.advanceArchivesBreachPastNonDecisionCards(legalAction);
-    if (!host.state.run)
-      return {
-        handled: true,
-        accessStarted: true,
-        runFinished: true,
-        stateChanged: true,
-        ...resolvedPayloadFor(legalAction),
-      };
-    host.state.timingPoint = "access.resolve_card";
-    host.state.activeSide = "runner";
+  revealArchivesAtBreachStart(host, run, legalAction);
+  const breach = buildBreachState(host.breach, run);
+  if (breach.queue.length === 0) {
+    host.run.finishRun(true, legalAction);
     return {
       handled: true,
-      accessStarted: true,
-      serverId: breach.serverId,
-      accessCount: breach.queue.length,
+      accessSkipped: true,
+      runFinished: true,
       stateChanged: true,
       ...resolvedPayloadFor(legalAction),
     };
   }
-  host.state.run = { ...run, phase: "access", successful: true };
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      serverId: breach.serverId,
+      breachId: breach.breachId,
+      ...accessCountPayloadForBreach(host.breach, breach),
+    };
+  }
+  const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
+  host.state.run = {
+    ...runWithoutAccessedCard,
+    phase: "access",
+    successful: true,
+    breach,
+  };
+  if (legalAction) {
+    host.access.applyHqAccessExposeInstalledCorpCards(
+      breach.serverId,
+      legalAction,
+    );
+  }
+  host.access.advanceArchivesBreachPastNonDecisionCards(legalAction);
+  if (!host.state.run)
+    return {
+      handled: true,
+      accessStarted: true,
+      runFinished: true,
+      stateChanged: true,
+      ...resolvedPayloadFor(legalAction),
+    };
   host.state.timingPoint = "access.resolve_card";
   host.state.activeSide = "runner";
   return {
     handled: true,
     accessStarted: true,
-    serverId: run.attackedServerId,
+    serverId: breach.serverId,
+    accessCount: breach.queue.length,
     stateChanged: true,
     ...resolvedPayloadFor(legalAction),
   };

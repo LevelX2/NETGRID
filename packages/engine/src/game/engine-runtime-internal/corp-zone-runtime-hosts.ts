@@ -3,21 +3,14 @@ import type {
   CardDefinition,
   CardDefinitionId,
   CardInstanceId,
-  ChoiceRequest,
   CounterType,
   CorpServer,
   CorpZoneChoiceHandlerHost,
   GameState,
-  HiddenZoneArrangeChoiceHandlerHost,
-  HiddenZoneNonSearchChoiceHandlerHost,
-  HiddenZoneSearchActivationHandlerHost,
-  HiddenZoneSearchChoiceHandlerHost,
   LegalAction,
-  PendingChoiceResolutionHost,
   PlayerAction,
   RuntimeDeps,
   ServerId,
-  Side,
 } from "./runtime-shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import {
@@ -34,63 +27,7 @@ export function createCorpZoneRuntimeHosts(
   links: ChoiceHiddenZoneRuntimeLinks,
 ): import("./corp-zone-runtime-port").CorpZoneRuntimePort {
   const {
-    RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION,
-    RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
-    canInstallRunnerProgramFromZone,
-    canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
-    continueRandomDiceLoop,
-    creditTextForPrompt,
-    diePromptText,
-    discardChoice,
-    hiddenZoneArrangeChoiceHandlerHost,
-    hiddenZoneNonSearchChoiceHandlerHost,
-    hiddenZoneSearchActivationHandlerHost,
-    hiddenZoneSearchActivationTargetHost,
-    hiddenZoneSearchChoiceHandlerHost,
-    hiddenZoneSearchHandlerHostBase,
-    iceChoiceLabelForSide,
-    installRunnerProgramForFree,
-    installRunnerProgramFromStackWithoutClick,
-    installRunnerProgramFromZoneWithoutClick,
-    installedRunnerConnectionIds,
-    parseRandomDiceSplitChoiceSource,
-    parseRandomDiceSplit,
-    parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
-    pendingChoiceResolutionHost,
-    randomDiceSplitOptions,
-    publicIcePositionLabelForCard,
-    publicIceSelectionLabelForCard,
-    resolveDerezRezzedBlackIceChoice,
-    resolveCardImplementationAccessPaymentChoice,
-    resolvePayRezCostToTrashRezzedIceChoice,
-    resolveDiscardChoice,
-    resolveCorpChoiceRezOrTrashIceDecisionChoice,
-    resolveCorpChoiceRezOrTrashIceTargetChoice,
-    resolveIncubatorTransformChoice,
-    resolvePaidSourceReturnToGripChoice,
-    resolveP358HiddenReplacementChoice,
-    resolveRandomDiceLoopEvent,
-    resolveRunnerProgramReturnChoice,
-    resolveRunnerInstalledConnectionTrashBadPublicityChoice,
-    resolveTrashUnrezzedIceChoice,
-    resolveSetupMulliganChoice,
-    resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveV1911RunnerHiddenZoneAbility,
-    resolveRandomDiceSplitChoice,
-    revealCorpRdTop,
-    revealRunnerStackTop,
     selectedChoiceCardIds,
-    selectedChoiceCardIdsForChoice,
-    setupMulliganChoice,
-    shuffleRunnerStack,
-    startDerezRezzedBlackIceChoice,
-    startPayRezCostToTrashRezzedIceChoice,
-    startCorpChoiceRezOrTrashIceChoice,
-    startPaidSourceReturnToGripChoice,
-    startTrashUnrezzedIceChoice,
-    startRunnerProgramFreeMemoryChoice,
-    startRandomDiceSplitChoice,
-    takeSetupMulligan,
   } = links;
 
   function corpZoneChoiceHandlerHost(
@@ -187,24 +124,6 @@ export function createCorpZoneRuntimeHosts(
       if (total >= requiredPoints) return selected;
     }
     return [];
-  }
-
-  function resolveScoredAgendaCorpRdTopReveal(
-    state: GameState,
-    legalAction: LegalAction,
-  ): void {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf diese Scored-Agenda-Aktion nutzen.");
-    const sourceCardId = String(legalAction.payload?.cardId ?? "");
-    if (!state.corp.scoreArea.includes(sourceCardId))
-      throw new Error("Die Scored Agenda ist nicht gescort.");
-    if (
-      deps.scoredAgendaKindForDefinition(
-        deps.definitionFor(state, sourceCardId),
-      ) !== "shuffle_selected_hq_agendas_into_rd_gain_credits"
-    )
-      throw new Error("Die Agenda-Aktion passt nicht zur Scored-Agenda-Art.");
-    revealCorpRdTop(state, legalAction);
   }
 
   function exposedCorpCardInServer(
@@ -1304,7 +1223,6 @@ export function createCorpZoneRuntimeHosts(
     resolveExposePreventionChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveMultiExposeInstalledCorpCardsChoice,
-    resolveScoredAgendaCorpRdTopReveal,
     shuffleCorpCardIntoRd,
     startExposeInstalledCorpCardsChoice,
     startMultiExposeInstalledCorpCardsChoice,

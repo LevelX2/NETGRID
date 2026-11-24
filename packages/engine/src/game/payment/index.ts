@@ -12,6 +12,8 @@ export type {
   CorpTracePaymentSelection,
   CorpTraceSpecializedPaymentSource,
   CorpTracePaymentSourceKind,
+} from "./corp-trace-payment";
+export type {
   RunnerTracePaymentBreakdown,
   RunnerTracePaymentDependencies,
   RunnerTraceLinkCreditSelection,
@@ -19,7 +21,7 @@ export type {
   RunnerTracePaymentQuote,
   RunnerTracePaymentReceipt,
   RunnerTracePaymentSourceKind,
-} from "./trace-payment";
+} from "./runner-trace-payment";
 export {
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
@@ -51,22 +53,24 @@ export {
   assertCommittedCorpTraceBidPaymentQuoteValid,
   assertCorpTraceBidPaymentQuoteValid,
   assertCorpTraceBidPaymentValid,
+  quoteCorpTracePaymentChoice,
+  corpTracePaymentPublicPayload,
+  payCommittedCorpTraceBidQuote,
+  payCorpTraceBidQuote,
+  quoteCorpTraceBidPayment,
+} from "./corp-trace-payment";
+export {
   assertPostBidLinkPaymentQuoteValid,
   assertPostBidLinkPaymentValid,
   assertRunnerTraceBidPaymentQuoteValid,
   assertRunnerTraceBidPaymentValid,
-  corpTracePaymentPublicPayload,
-  corpTraceSpecializedPaymentSources,
   payPostBidLinkPaymentQuote,
-  payCommittedCorpTraceBidQuote,
-  payCorpTraceBidQuote,
   payRunnerTraceBidQuote,
   postBidLinkPaymentPublicPayload,
   quotePostBidLinkPayment,
-  quoteCorpTraceBidPayment,
   quoteRunnerTraceBidPayment,
   runnerTracePaymentPublicPayload,
-} from "./trace-payment";
+} from "./runner-trace-payment";
 export {
   closeRunnerCostPenaltySupportWindowForPayment,
   openRunnerCostPenaltySupportWindow,

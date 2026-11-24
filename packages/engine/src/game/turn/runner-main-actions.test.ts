@@ -109,14 +109,12 @@ describe("runner main action generation", () => {
         }) as never;
       host.cards.isUniqueCard = () => false;
       host.cards.hasInstalledUniqueCardDefinition = () => false;
-      host.constants.RUNNER_EVENT_RESOLVERS = {
-        locked_run_event: {
-          name: "locked_run_event",
-          startsRun: true,
-          requiresServer: true,
-          resolve: () => undefined,
-        },
-      };
+      host.cardImplementation.runnerEventResolver = () => ({
+        name: "locked_run_event",
+        startsRun: true,
+        requiresServer: true,
+        resolve: () => undefined,
+      });
 
       const actions = buildRunnerMainActions(host);
 
@@ -224,7 +222,7 @@ describe("runner main action generation", () => {
       if (cardId !== sourceCardId)
         throw new Error(`Unexpected card: ${cardId}`);
       return {
-        id: "bodyweight_data_creche",
+        id: 2334816537,
         title: "Bodyweight Data Crèche",
         side: "runner",
         type: "hardware",
@@ -233,10 +231,11 @@ describe("runner main action generation", () => {
     host.cardImplementation.cardImplementationForDefinitionId = (
       definitionId,
     ) =>
-      definitionId === "bodyweight_data_creche"
+      definitionId === 2334816537
         ? {
+            cardDefinitionId: definitionId,
             successfulRunFollowups: [
-              { kind: "optional_make_run_after_successful_run" },
+              { kind: "optional_make_run_after_successful_run", limit: "once_per_turn_per_source", cost: "none", visibility: "public" },
             ],
           }
         : undefined;
@@ -252,7 +251,7 @@ describe("runner main action generation", () => {
         (candidate) =>
           (candidate.type === "start_run" &&
             candidate.payload?.bonusRunNoClick === true &&
-            candidate.payload?.bonusRunSource === "bodyweight_data_creche" &&
+            candidate.payload?.bonusRunSource === 2334816537 &&
             candidate.payload?.optionalBonusRun === true &&
             candidate.payload?.multiServerSuccessSequenceRun !== true) ||
           (candidate.type === "trigger_ability" &&
@@ -289,7 +288,7 @@ describe("runner main action generation", () => {
       if (cardId !== sourceCardId)
         throw new Error(`Unexpected card: ${cardId}`);
       return {
-        id: "all_nighter",
+        id: 1235935470,
         title: "All-Nighter",
         side: "runner",
         type: "event",
@@ -298,12 +297,14 @@ describe("runner main action generation", () => {
     host.cardImplementation.cardImplementationForDefinitionId = (
       definitionId,
     ) =>
-      definitionId === "all_nighter"
+      definitionId === 1235935470
         ? {
+            cardDefinitionId: definitionId,
             abilities: [
               {
                 kind: "on_play",
-                effects: [{ kind: "make_run", followupRunOnEnd: "optional" }],
+                costs: "printed",
+                effects: [{ kind: "make_run", target: { kind: "chosen_server" }, followupRunOnEnd: "optional", visibility: "public" }],
               },
             ],
           }
@@ -485,7 +486,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
       ),
     },
     runner: {
-      ensureRunnerTurnFlags: () => state.runnerTurnFlags ?? {},
       availableRunnerTagRemovalCredits: () => state.runner.credits,
       availableRunnerProgramInstallCredits: () => state.runner.credits,
       runnerCostPenaltySupportCreditCapacity: () => 0,
@@ -505,8 +505,8 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
     },
     run: {
       activeRunActionSpendingCapSourceIds: () => [],
-      runDurationPaymentHost: () => ({}),
-      runStartTaxForServerUpgrades: () => ({
+      runDurationPaymentHost: (state) => ({ state }),
+      runStartCreditLossForServer: () => ({
         amount: 0,
         sourceDefinitionIds: [],
       }),
@@ -539,16 +539,12 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
       delayedInstallPreparedTargetIds: () => [],
     },
     cardImplementation: {
-      runtimeDeps: {},
       cardImplementationForDefinitionId: () => undefined,
       pushEndOfRunnerTurnActions: () => undefined,
       canPlayPrintedCostOnPlayImplementation: () => false,
       runnerEventResolver: () => undefined,
       printedCostMakeRunEffect: () => undefined,
       pushActivatedActions: () => undefined,
-    },
-    constants: {
-      RUNNER_EVENT_RESOLVERS: {},
     },
   };
 }

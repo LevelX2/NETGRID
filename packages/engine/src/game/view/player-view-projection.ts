@@ -13,7 +13,6 @@ import {
   runnerMemoryLimit,
 } from "../../ability-engine/effective-values";
 import { projectInstalledCorpIceRezCost } from "../payment";
-import { isV099OrLater } from "../rules-version";
 import { runJackOutAdditionalCost } from "../run/run-duration-payment";
 import { runnerActiveSuccessfulRunFortIceTrashQuote } from "../turn/runner-fort-ice-trash-quote";
 import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
@@ -80,11 +79,21 @@ export function buildPlayerViewProjection(
   if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 0))
     throw new Error("PlayerView public event limit must be a nonnegative integer.");
   const runnerSide = side === "runner";
+  const rezIceActionsBySource = new Map<string, LegalAction[]>();
+  if (!runnerSide) {
+    for (const action of legalActions) {
+      if (action.type !== "rez_ice") continue;
+      const actions = rezIceActionsBySource.get(action.source);
+      if (actions) actions.push(action);
+      else rezIceActionsBySource.set(action.source, [action]);
+    }
+  }
   const corpCentralAccessQuotes =
     side === "corp" ? quoteCorpCentralAccesses(state) : undefined;
   const visibleServers = state.corp.servers.map((server) => {
     const statuses = visibleServerStatuses(state, server.id);
     const ice = server.ice.map((id) => {
+      const rezIceActions = rezIceActionsBySource.get(id) ?? [];
       const visibleIce = visibleCorpCard(state, id, side, "ice");
       const effectiveRunQuote = visibleEffectiveIceRunQuote(
         state,
@@ -113,12 +122,9 @@ export function buildPlayerViewProjection(
           : undefined;
       const effectivePostRezActionRunQuotes =
         side === "corp"
-          ? legalActions
+          ? rezIceActions
               .filter(
-                (action) =>
-                  action.type === "rez_ice" &&
-                  action.source === id &&
-                  action.payload?.variableRezKind === "x_strength",
+                (action) => action.payload?.variableRezKind === "x_strength",
               )
               .flatMap((action) => {
                 const quote = visibleCorpIcePostRezRunQuote(
@@ -132,7 +138,7 @@ export function buildPlayerViewProjection(
           : [];
       const effectiveRezActionResourceExchangeQuotes =
         side === "corp"
-          ? legalActions.flatMap((action) => {
+          ? rezIceActions.flatMap((action) => {
               const count = action.payload?.effectiveSubroutineCountAfterRez;
               const selectedSubtypes =
                 action.payload?.variableRezKind === "alternate_subtype" &&
@@ -142,8 +148,6 @@ export function buildPlayerViewProjection(
                       .filter((subtype) => subtype.length > 0)
                   : undefined;
               if (
-                action.type !== "rez_ice" ||
-                action.source !== id ||
                 ((!Number.isSafeInteger(count) || (count as number) < 0) &&
                   (!selectedSubtypes || selectedSubtypes.length === 0))
               ) {
@@ -171,7 +175,7 @@ export function buildPlayerViewProjection(
           : [];
       const currentTraceIceRezQuotes =
         side === "corp"
-          ? visibleCorpTraceIceRezQuotes(state, visibleIce, legalActions)
+          ? visibleCorpTraceIceRezQuotes(state, visibleIce, rezIceActions)
           : [];
       return {
         ...visibleIce,
@@ -563,7 +567,7 @@ export function buildPlayerViewProjection(
         ) -
         Number(state.runnerTurnFlags?.forgoNextActionPending === true),
     ),
-    ...(isV099OrLater(state) && state.corp.badPublicity > 0
+    ...(state.corp.badPublicity > 0
       ? { runnerNextRunBadPublicityCredits: state.corp.badPublicity }
       : {}),
     stateVersion: state.stateVersion,

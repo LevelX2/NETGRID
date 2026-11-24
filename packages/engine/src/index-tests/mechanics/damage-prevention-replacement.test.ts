@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { cardSpecSourceRefByDefinitionId } from "@netgrid/cards/engine";
 import {
   applyAction,
-  applyEffectCommands,
   checkWinConditions,
   createGame,
   createGameAfterSetup,
@@ -16,10 +15,8 @@ import {
   isHiddenInfoBarrierEvent,
   quoteCorpRezCost,
   replayEvents,
-  validateDeckDefinition,
   validateGameState,
 } from "../../index";
-import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";

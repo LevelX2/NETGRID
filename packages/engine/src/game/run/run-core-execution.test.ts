@@ -196,7 +196,6 @@ function hostFor(state: GameState): {
             publicServerLabel: (serverId) => mustServer(serverId).label,
           },
           rules: {
-            isV097OrLater: () => true,
             corpRunRootRezActionsAvailable: () => false,
             corpRunRootRezWindowOpen: () => false,
             approachIceExposeCanBeOfferedForCurrentIce: () => false,
@@ -224,9 +223,6 @@ function hostFor(state: GameState): {
             finishRun: () => calls.push("finishRun"),
           },
         }),
-      },
-      rules: {
-        isV099OrLater: () => true,
       },
       callbacks: {
         beginRunnerRunStartOrdering: () => {

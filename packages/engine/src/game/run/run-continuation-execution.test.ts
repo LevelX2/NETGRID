@@ -238,7 +238,6 @@ function hostFor(
       publicServerLabel: (serverId) => mustServer(serverId).label,
     },
     rules: {
-      isV097OrLater: () => true,
       corpRunRootRezActionsAvailable: () => false,
       corpRunRootRezWindowOpen: () => false,
       approachIceExposeCanBeOfferedForCurrentIce: () => false,

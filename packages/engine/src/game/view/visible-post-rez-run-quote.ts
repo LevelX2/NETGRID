@@ -462,32 +462,44 @@ export function visibleCorpIcePostInstallRunQuote(
   ) {
     return undefined;
   }
-  const projected = structuredClone(state);
-  const projectedSource = projected.cardInstances[iceId]!;
-  const existingServer = projected.corp.servers.find(
+  const existingServer = state.corp.servers.find(
     (server) => server.id === projectedServerId,
   );
-  const server =
-    targetServerId === "new_remote"
-      ? {
-          id: projectedServerId,
-          kind: "remote" as const,
-          label: `Remote ${projectedServerId.slice(1)}`,
-          ice: [] as CardInstanceId[],
-          root: [] as CardInstanceId[],
-        }
-      : existingServer;
-  if (!server || (targetServerId === "new_remote" && existingServer)) {
-    return undefined;
+  let servers: GameState["corp"]["servers"];
+  if (targetServerId === "new_remote") {
+    if (existingServer) return undefined;
+    servers = [
+      ...state.corp.servers,
+      {
+        id: projectedServerId,
+        kind: "remote",
+        label: `Remote ${projectedServerId.slice(1)}`,
+        ice: [iceId],
+        root: [],
+      },
+    ];
+  } else {
+    if (!existingServer) return undefined;
+    servers = state.corp.servers.map((server) =>
+      server === existingServer ? { ...server, ice: [...server.ice, iceId] } : server,
+    );
   }
-  if (targetServerId === "new_remote") projected.corp.servers.push(server);
-  projected.corp.hq = projected.corp.hq.filter((id) => id !== iceId);
-  server.ice.push(iceId);
-  projected.cardInstances[iceId] = {
-    ...projectedSource,
-    faceup: false,
-    rezzed: false,
-    zone: { side: "corp", zone: "serverIce", serverId: projectedServerId },
+  const projected: GameState = {
+    ...state,
+    corp: {
+      ...state.corp,
+      hq: state.corp.hq.filter((id) => id !== iceId),
+      servers,
+    },
+    cardInstances: {
+      ...state.cardInstances,
+      [iceId]: {
+        ...source,
+        faceup: false,
+        rezzed: false,
+        zone: { side: "corp", zone: "serverIce", serverId: projectedServerId },
+      },
+    },
   };
   const visibleIce = visibleCorpCard(projected, iceId, "corp", "ice");
   return visibleIce

@@ -247,21 +247,15 @@ function hostFor(
       cardImplementationForDefinitionId: () => undefined,
       rezzedCorpRootCardIds: () => [],
       corpInstalledCardIds: () => [],
-      visibleVirusCounterTargetIds: () => [],
     },
     scored: {
       effectiveAgendaDifficulty: unexpected("effectiveAgendaDifficulty"),
-      effectiveAgendaDifficultyDeps: {},
       scoredAgendaKindForDefinition: unexpected(
         "scoredAgendaKindForDefinition",
       ),
       serverChoiceDisplayLabel: (_state: GameState, serverId: string) =>
         serverId,
-      scoredAgendaAbilityHost: () => ({}),
-      buildScoredAgendaAbilityActionsForCard: () => ({
-        handled: false,
-        actions: [],
-      }),
+      bindScoredAgendaAbilityActions: () => () => ({ handled: false, actions: [] }),
     },
     counters: {
       totalCounters: () => 0,
@@ -278,17 +272,15 @@ function hostFor(
       cardImplementationOperationLegalActions: () => [],
       corpUtilityImplementationForDefinition: () => undefined,
       hardwareTrashByCounterLegalActions: () => [],
-      advancementPlacementLegalActions: () => [],
       corpAgendaPointTotal: () => 0,
       hasCorpUtilityKind: () => false,
-      uniqueDirectLongtailKindForDefinition: () => undefined,
     },
     runner: {
       isConcealedRunnerResource: () => false,
       hiddenRunnerResourceSlotId: unexpected("hiddenRunnerResourceSlotId"),
-      ensureRunnerTurnFlags: () => state.runnerTurnFlags ?? {},
       availableRunnerTagRemovalCredits: () => state.runner.credits,
       availableRunnerProgramInstallCredits: () => state.runner.credits,
+      runnerCostPenaltySupportCreditCapacity: () => 0,
       availableRunnerRunStartCredits: () => state.runner.credits,
       runnerDrawActionContext: () => ({
         drawTaxSourceCount: 0,
@@ -299,10 +291,8 @@ function hostFor(
     },
     run: {
       activeRunActionSpendingCapSourceIds: () => [],
-      runDurationPaymentHost: () => ({}),
-      isActivityGatedFortRunBlocked: () => false,
-      fortRunSideFamiliesHostForState: () => ({}),
-      runStartTaxForServerUpgrades: () => ({
+      runDurationPaymentHost: (state) => ({ state }),
+      runStartCreditLossForServer: () => ({
         amount: 0,
         sourceDefinitionIds: [],
       }),
@@ -317,6 +307,7 @@ function hostFor(
       canInstallCorpRootCardInServer: unexpected(
         "canInstallCorpRootCardInServer",
       ),
+      canInstallCorpRootCardInNewRemote: unexpected("canInstallCorpRootCardInNewRemote"),
       isRegionUpgrade: unexpected("isRegionUpgrade"),
       corpRegionUpgradeIdsInServer: unexpected("corpRegionUpgradeIdsInServer"),
       corpRootAgendaOrNodeCapacityInServer: unexpected(
@@ -336,20 +327,15 @@ function hostFor(
     rez: {
       rootInstallRezzesOnInstall: unexpected("rootInstallRezzesOnInstall"),
       rezCostForCard: unexpected("rezCostForCard"),
+      quoteCorpRootRezCost: unexpected("quoteCorpRootRezCost"),
       rezCostReductionSourceDefinitionIdsFor: unexpected(
         "rezCostReductionSourceDefinitionIdsFor",
       ),
       isObligationDebtDefinition: () => false,
     },
     cardImplementation: {
-      corpTraceDamageAbilityHost: () => ({}),
-      corpSpecialDamageAbilityHost: () => ({}),
-      pushCorpTraceDamageOrCardImplementationActions: () => undefined,
-      buildCorpSpecialDamageAbilityActionsForCard: () => ({
-        handled: false,
-        actions: [] as LegalAction[],
-      }),
-      runtimeDeps: {},
+      bindTraceDamageActions: () => () => undefined,
+      bindSpecialDamageActions: () => () => ({ handled: false, actions: [] }),
       cardImplementationForDefinitionId: () => undefined,
       pushEndOfRunnerTurnActions: () => undefined,
       canPlayPrintedCostOnPlayImplementation: () => false,
@@ -373,10 +359,6 @@ function hostFor(
         state.corp.servers.find((server) => server.id === serverId)?.label ??
         serverId,
       runnerMemoryLimit: () => state.runner.memoryLimit,
-      constants: {
-        CODE_VIRAL_CACHE_ID: "code_viral_cache",
-        RUNNER_EVENT_RESOLVERS: {},
-      },
     },
-  } as unknown as MainActionHostCompositionHost;
+  };
 }

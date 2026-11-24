@@ -61,6 +61,7 @@ export type CardImplementationRuntimeCoreDependencies = {
   ) => boolean;
   spendClick: (state: GameState, side: Side) => void;
   spendCredits: (state: GameState, side: Side, amount: number) => void;
+  syncPendingChoiceAfterRunnerCostPenaltySupport: (state: GameState) => void;
   gainCredits: (
     state: GameState,
     input: {

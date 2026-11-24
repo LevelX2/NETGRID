@@ -191,10 +191,6 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
       advancementNetDamageAsset: "virus",
     },
     callbacks: {
-      rules: {
-        isV097OrLater: () => true,
-        isV099OrLater: () => true,
-      },
       turn: {
         ensureRunnerTurnFlags: (targetState: GameState) => {
           calls.push("ensureRunnerTurnFlags");

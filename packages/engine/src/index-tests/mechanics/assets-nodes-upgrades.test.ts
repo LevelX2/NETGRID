@@ -2,7 +2,8 @@ import { serializedDefinitionReferences } from "../../test-fixtures/serialized-d
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
-  applyEffectCommands,
+  applyMatchActionOffer,
+  buildMatchPlayerOffer,
   checkWinConditions,
   createGame,
   createGameAfterSetup,
@@ -15,10 +16,9 @@ import {
   isHiddenInfoBarrierEvent,
   quoteCorpRezCost,
   replayEvents,
-  validateDeckDefinition,
   validateGameState,
 } from "../../index";
-import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
+import { collectActiveModifiers } from "../../test-fixtures/active-modifier-inspection";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -1091,73 +1091,136 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     }
   });
 
-  it("uses Krumz as a trace-only bit source and refreshes it at Corp turn start", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
-      "v1917-krumz-trace-bit-source",
-    );
-    state.corp.credits = 10;
-    state.runner.credits = 0;
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const krumzId = moveCorpCardToHq(state, 542);
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "install_card" &&
-        action.payload?.cardId === krumzId &&
-        action.payload?.serverId === "new_remote",
-    );
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "rez_card" &&
-        sourceDefinition(state, action) === 542,
-    );
-    expect(cardCounterAmount(state, krumzId, "bit")).toBe(1);
-    const bloodCatId = moveCorpCardToHq(state, 522);
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "install_card" &&
-        action.payload?.cardId === bloodCatId &&
-        action.payload?.serverId === "new_remote",
-    );
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "rez_card" &&
-        sourceDefinition(state, action) === 522,
-    );
-    state.corp.credits = 0;
+  it.each([0, 1])(
+    "uses and refreshes Krumz with %s regular credits available",
+    (credits) => {
+      let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+        "v1917-krumz-trace-bit-source",
+      );
+      state.corp.credits = 10;
+      state.runner.credits = 0;
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
+      const krumzId = moveCorpCardToHq(state, 542);
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === krumzId &&
+          action.payload?.serverId === "new_remote",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_card" && sourceDefinition(state, action) === 542,
+      );
+      expect(cardCounterAmount(state, krumzId, "bit")).toBe(1);
+      const bloodCatId = moveCorpCardToHq(state, 522);
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === bloodCatId &&
+          action.payload?.serverId === "new_remote",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_card" && sourceDefinition(state, action) === 522,
+      );
+      state.corp.credits = credits;
 
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardId === bloodCatId,
-    );
-    expect(
-      state.pendingChoice?.options.some((option) => option.id === "bid_1"),
-    ).toBe(true);
-    state = applyChoice(state, "corp", "bid_1");
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === bloodCatId,
+      );
+      expect(
+        state.pendingChoice?.options.some((option) => option.id === "bid_1"),
+      ).toBe(true);
+      const beforeBid = state;
+      state = applyChoice(state, "corp", "bid_1");
+      if (credits > 0) {
+        const offer = buildMatchPlayerOffer(getPlayerView(state, "corp"));
+        const choice = offer.pendingChoice!;
+        expect(choice.traceCorpPayment).toEqual({
+          bid: 1,
+          minimumSpecializedAmount: 0,
+          requiredTraceCounters: 0,
+        });
+        const [source] = choice.options;
+        expect(source).toMatchObject({
+          label: "Krumz",
+          metadata: {
+            traceCorpPaymentSource: { maxAmount: 1, recommendedAmount: 1 },
+          },
+        });
+        expect(source).not.toHaveProperty("value");
+        expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+        const resolve = offer.legalActions.find(
+          (action) => action.type === "resolve_choice",
+        )!;
+        const submitAmounts = (
+          selectedOptionIds: number[],
+          selectedOptionAmounts: number[],
+        ) =>
+          applyMatchActionOffer(state, {
+            matchId: state.matchId,
+            side: "corp",
+            actionId: resolve.actionId,
+            clientKnownStateVersion: state.stateVersion,
+            clientKnownMatchVersion: state.stateVersion,
+            idempotencyKey: "krumz-payment",
+            selectedChoices: {
+              choiceId: choice.choiceId,
+              selectedOptionIds,
+              selectedOptionAmounts,
+            },
+          });
+        expect(submitAmounts([source!.id], [2])).toMatchObject({
+          ok: false,
+          error: { code: "ERR_INVALID_CHOICE" },
+        });
+        const ordinary = submitAmounts([], []);
+        if (!ordinary.ok) throw new Error(ordinary.error.message);
+        expect(ordinary.state.corp.credits).toBe(0);
+        expect(cardCounterAmount(ordinary.state, krumzId, "bit")).toBe(1);
+        const usingKrumz = submitAmounts([source!.id], [1]);
+        if (!usingKrumz.ok) throw new Error(usingKrumz.error.message);
+        state = usingKrumz.state;
+        const replay = replayEvents(
+          beforeBid,
+          state.eventLog.slice(beforeBid.eventLog.length),
+        );
+        expect(replay).toMatchObject({
+          ok: true,
+          actualFinalStateHash: usingKrumz.stateHash,
+        });
+      }
 
-    expect(cardCounterAmount(state, krumzId, "bit")).toBe(0);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      traceStep: "corp_bid",
-      corpBid: 1,
-      corpCreditBid: 0,
-      recurringTraceCreditPoolSpent: 1,
-    });
+      expect(cardCounterAmount(state, krumzId, "bit")).toBe(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        traceStep: "corp_bid",
+        corpBid: 1,
+        corpCreditBid: 0,
+        recurringTraceCreditPoolSpent: 1,
+      });
 
-    state = applyChoice(state, "runner", "bid_0");
-    state = toRunnerTurnFromCorpMain(state);
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    expect(cardCounterAmount(state, krumzId, "bit")).toBe(1);
-  });
+      state = applyChoice(state, "runner", "bid_0");
+      state = toRunnerTurnFromCorpMain(state);
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      expect(cardCounterAmount(state, krumzId, "bit")).toBe(1);
+    },
+  );
 
   it("resolves Corporate Negotiating Center as start-of-turn HQ agenda reveal", () => {
     let state = toRunnerTurn(

@@ -1,6 +1,5 @@
 import type {
   CardInstanceId,
-  ChoiceRequest,
   LegalAction,
 } from "@netgrid/shared";
 import {

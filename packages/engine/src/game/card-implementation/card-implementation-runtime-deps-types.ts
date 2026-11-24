@@ -1,7 +1,6 @@
 import type {
   ActionType,
   CardDefinition,
-  CardInstance,
   CardInstanceId,
   GameState,
   LegalAction,
@@ -68,6 +67,7 @@ export type GameCardImplementationRuntimeDepsHost = {
   credits: {
     spendClick: CardImplementationRuntimeDependencies["spendClick"];
     spendCredits: CardImplementationRuntimeDependencies["spendCredits"];
+    syncPendingChoiceAfterRunnerCostPenaltySupport: CardImplementationRuntimeDependencies["syncPendingChoiceAfterRunnerCostPenaltySupport"];
     gainCredits: CardImplementationRuntimeDependencies["gainCredits"];
   };
   actions: {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
+  createGame,
   createGameAfterSetup,
   CARD_DEFINITIONS_BY_ID,
   getLegalActions,
@@ -100,16 +101,21 @@ describe("ChoiceView projection", () => {
   });
 
   it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
-    const state = toRunnerTurn(createGameAfterSetup({ seed: "v093-choice" }));
-    state.pendingChoice = choiceRequest(state, "runner");
+    const state = createGame({ seed: "v093-choice" });
+    const choice = state.pendingChoice;
+    if (!choice) throw new Error("Missing setup choice.");
+    choice.prompt = "Private setup prompt";
+    choice.options = choice.options.map((option) =>
+      option.id === "keep" ? { ...option, label: "Keep private option" } : option,
+    );
 
     const runnerView = getPlayerView(state, "runner");
     const corpView = getPlayerView(state, "corp");
     const runnerActions = getLegalActions(state, "runner");
 
-    expect(runnerView.pendingChoice?.choiceId).toBe("choice_v093_runner");
+    expect(runnerView.pendingChoice?.choiceId).toBe(choice.choiceId);
     expect(runnerView.pendingChoice?.presentationKey).toBe(
-      "generic_select_option",
+      "setup_mulligan",
     );
     expect(runnerView.pendingChoice?.options[0]?.label).toBe(
       "Keep private option",
@@ -130,7 +136,7 @@ describe("ChoiceView projection", () => {
       actionId: runnerActions[0]!.actionId,
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
-        choiceId: "choice_v093_runner",
+        choiceId: choice.choiceId,
         selectedOptionIds: ["illegal"],
       },
     });
@@ -143,19 +149,19 @@ describe("ChoiceView projection", () => {
       actionId: runnerActions[0]!.actionId,
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
-        choiceId: "choice_v093_runner",
+        choiceId: choice.choiceId,
         selectedOptionIds: ["keep"],
       },
     });
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error(result.error.message);
-    expect(result.state.pendingChoice).toBeUndefined();
-    expect(result.event.visibilityClass).toBe("private_to_side");
+    expect(result.state.pendingChoice?.side).toBe("corp");
+    expect(result.event.visibilityClass).toBe("hidden_info_barrier");
     expect(JSON.stringify(result.event.publicPayload)).not.toContain(
       "Keep private option",
     );
     expect(JSON.stringify(result.event.publicPayload)).not.toContain(
-      "private prompt",
+      "Private setup prompt",
     );
     expect(replayEvents(state, [result.event]).ok).toBe(true);
   });

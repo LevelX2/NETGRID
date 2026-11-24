@@ -3153,6 +3153,18 @@ function sanitizeVisibleChoiceRequest(
     playerViewStateVersion,
     playerViewSide,
   );
+  const candidatePayment = choice.traceCorpPayment;
+  const traceCorpPayment =
+    playerViewSide === "corp" &&
+    choice.side === "corp" &&
+    choice.stateVersion === playerViewStateVersion &&
+    /^trace:\d+:corp_payment$/.test(choice.source) &&
+    candidatePayment &&
+    Number.isSafeInteger(candidatePayment.bid) &&
+    Number.isSafeInteger(candidatePayment.minimumSpecializedAmount) &&
+    Number.isSafeInteger(candidatePayment.requiredTraceCounters)
+      ? candidatePayment
+      : undefined;
   const agendaPurgeArchivesProtectionQuote =
     sanitizeAgendaPurgeArchivesProtectionQuote(
       choice,
@@ -3183,6 +3195,15 @@ function sanitizeVisibleChoiceRequest(
       : {}),
     ...(continuation ? { continuation } : {}),
     ...(corpStartDrawQuote ? { corpStartDrawQuote } : {}),
+    ...(traceCorpPayment
+      ? {
+          traceCorpPayment: {
+            bid: traceCorpPayment.bid,
+            minimumSpecializedAmount: traceCorpPayment.minimumSpecializedAmount,
+            requiredTraceCounters: traceCorpPayment.requiredTraceCounters,
+          },
+        }
+      : {}),
     ...(agendaPurgeArchivesProtectionQuote
       ? { agendaPurgeArchivesProtectionQuote }
       : {}),
@@ -3195,6 +3216,24 @@ function sanitizeVisibleChoiceRequest(
         ownRig,
         servers,
       );
+      const source = option.metadata?.traceCorpPaymentSource;
+      if (
+        traceCorpPayment &&
+        source &&
+        (source.kind === "corp_trace_bit_pool" ||
+          source.kind === "corp_trace_counter_pool") &&
+        Number.isSafeInteger(source.maxAmount) &&
+        Number.isSafeInteger(source.recommendedAmount)
+      ) {
+        metadata = {
+          ...metadata,
+          traceCorpPaymentSource: {
+            kind: source.kind,
+            maxAmount: source.maxAmount,
+            recommendedAmount: source.recommendedAmount,
+          },
+        };
+      }
       const optionKind = option.metadata?.optionKind;
       if (
         playerViewSide === "runner" &&

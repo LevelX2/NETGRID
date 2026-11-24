@@ -1,10 +1,29 @@
-import type { ChoiceRequest, LegalAction, PlayerAction } from "@netgrid/shared";
+import {
+  isPositiveSafeInteger,
+  traceCorpPaymentBalance,
+  type ChoiceRequest,
+  type LegalAction,
+  type PlayerAction,
+} from "@netgrid/shared";
+
+export class MissingChoiceResolverError extends Error {
+  constructor(readonly choiceSource: string) {
+    super("Diese Auswahl kann nicht aufgelöst werden.");
+    this.name = "MissingChoiceResolverError";
+  }
+}
 
 export function validateChoiceAction(
   choice: ChoiceRequest | undefined,
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): string | undefined {
+  const amounts = playerAction.selectedChoices?.selectedOptionAmounts;
+  if (
+    amounts !== undefined &&
+    (legalAction.type !== "resolve_choice" || !choice?.traceCorpPayment)
+  )
+    return "Für diese Auswahl sind keine Beträge vorgesehen.";
   if (!choice)
     return legalAction.type === "resolve_choice"
       ? "Es ist keine Choice offen."
@@ -44,18 +63,33 @@ export function validateChoiceAction(
     selectedOptionIds.length > choice.maxSelections
   )
     return "Die Anzahl der gewaehlten Optionen ist ungueltig.";
-  const optionIds = new Set(choice.options.map((option) => option.id));
-  if (selectedOptionIds.some((id) => !optionIds.has(id)))
+  const optionsById = new Map(choice.options.map((option) => [option.id, option]));
+  const selectedOptions = selectedOptionIds.map((id) => optionsById.get(id));
+  if (selectedOptions.some((option) => option === undefined))
     return "Eine gewaehlte Option ist nicht legal.";
-  if (
-    selectedOptionIds.some(
-      (id) =>
-        choice.options.find((option) => option.id === id)?.selectable === false,
-    )
-  )
+  if (selectedOptions.some((option) => option?.selectable === false))
     return "Eine gewaehlte Option ist fuer diesen Effekt nicht auswaehlbar.";
   if (new Set(selectedOptionIds).size !== selectedOptionIds.length)
     return "Eine Option wurde doppelt gewaehlt.";
+  const payment = choice.traceCorpPayment;
+  if (payment) {
+    if (!Array.isArray(amounts) || amounts.length !== selectedOptions.length)
+      return "Die Beträge für die Trace-Zahlung fehlen oder passen nicht zur Auswahl.";
+    const selectedSources = [];
+    for (const [index, option] of selectedOptions.entries()) {
+      const source = option?.metadata?.traceCorpPaymentSource;
+      const amount: unknown = amounts[index];
+      if (!source || !isPositiveSafeInteger(amount))
+        return "Ein Betrag für eine Trace-Zahlungsquelle ist ungültig.";
+      selectedSources.push({
+        kind: source.kind,
+        maxAmount: source.maxAmount,
+        amount,
+      });
+    }
+    if (!traceCorpPaymentBalance(payment, selectedSources)?.canPay)
+      return "Die gewählten Quellen decken das Trace-Gebot nicht regelkonform.";
+  }
   return undefined;
 }
 

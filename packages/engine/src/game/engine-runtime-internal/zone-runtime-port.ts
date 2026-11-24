@@ -44,5 +44,5 @@ export type ZoneRuntimePort = {
     cardId: CardInstanceId,
     definition: CardDefinition,
     legalAction: LegalAction,
-  ) => import("..").CostQuote | undefined;
+  ) => import("../payment/cost-quote").CostQuote | undefined;
 };

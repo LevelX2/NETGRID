@@ -2,7 +2,6 @@ import type {
   CardDefinition,
   CardInstanceId,
   GameState,
-  LegalAction,
 } from "@netgrid/shared";
 import type { CardEffectHiddenInfoResult } from "../../ability-engine/effect-execution-types";
 import type { CardImplementationRuntimeDependencies } from "../../ability-engine/card-implementation-runtime";

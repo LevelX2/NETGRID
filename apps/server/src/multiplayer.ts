@@ -106,9 +106,6 @@ import {
   type CorpPunishRouteQuoteSet,
   type DeckPublicMetadata,
   type EngineError,
-  type EngineRandomizedIceInstallSelectionCommand,
-  type EngineRandomizedTurnPlanSelectionCommand,
-  type EngineRandomizedTraceBidSelectionCommand,
   type EngineResult,
   type GameEvent,
   type GameState,
@@ -119,7 +116,6 @@ import {
   type PlayerView,
   type PublicGameEvent,
   type RulesBaseline,
-  type ReplayableEngineAction,
   type Side,
   type StandardDeckGuideRef,
   type TraceRulesProfile,
@@ -7356,70 +7352,26 @@ function replayStateHashChecks(record: StoredMatch): {
     return { byEventId, errors };
   }
 
-  let replayState = clone(initial);
-  for (const event of record.gameState.eventLog) {
-    const replayAction = replayActionFromEvent(event);
-    if (!replayAction) {
-      if (event.type === "game_created") {
-        const actual = hashState(replayState);
-        const ok = actual === event.stateHashAfter;
-        byEventId[event.eventId] = {
-          ok,
-          expected: event.stateHashAfter,
-          actual,
-          ...(ok ? {} : { reason: "state_hash_mismatch" }),
-          randomDrawCounters: [],
-        };
-        if (!ok) errors.push(`state_hash_mismatch:${event.eventId}`);
-        continue;
+  const replay = replayEvents(initial, record.gameState.eventLog, {
+    onEventChecked({ eventId, ...check }) {
+      if (!check.ok) {
+        byEventId[eventId] = { ...check, randomDrawCounters: [] };
+        errors.push(`${check.reason}:${eventId}`);
+        return;
       }
-      byEventId[event.eventId] = {
-        ok: false,
-        expected: event.stateHashAfter,
-        reason: "missing_replay_action",
-        randomDrawCounters: [],
-      };
-      errors.push(`missing_replay_action:${event.eventId}`);
-      continue;
-    }
-
-    const beforeRandomCounter = replayState.randomCounter;
-    const result = isRandomizedIceInstallSelectionCommand(replayAction)
-      ? applyRandomizedIceInstallSelection(replayState, replayAction)
-      : isRandomizedTurnPlanSelectionCommand(replayAction)
-        ? applyRandomizedTurnPlanSelection(replayState, replayAction)
-        : isRandomizedTraceBidSelectionCommand(replayAction)
-          ? applyRandomizedTraceBidSelection(replayState, replayAction)
-          : applyAction(replayState, replayAction);
-    if (!result.ok) {
-      byEventId[event.eventId] = {
-        ok: false,
-        expected: event.stateHashAfter,
-        reason: result.error.code,
-        randomDrawCounters: [],
-      };
-      errors.push(`replay_failed:${event.eventId}:${result.error.code}`);
-      continue;
-    }
-
-    const counters: number[] = [];
-    for (
-      let counter = beforeRandomCounter;
-      counter < result.state.randomCounter;
-      counter += 1
-    )
-      counters.push(counter);
-    const ok = result.stateHash === event.stateHashAfter;
-    byEventId[event.eventId] = {
-      ok,
-      expected: event.stateHashAfter,
-      actual: result.stateHash,
-      ...(ok ? {} : { reason: "state_hash_mismatch" }),
-      randomDrawCounters: counters,
-    };
-    if (!ok) errors.push(`state_hash_mismatch:${event.eventId}`);
-    replayState = result.state;
-  }
+      const { randomCounterBefore, randomCounterAfter, ...hashCheck } = check;
+      const randomDrawCounters: number[] = [];
+      for (
+        let counter = randomCounterBefore;
+        counter < randomCounterAfter;
+        counter += 1
+      ) {
+        randomDrawCounters.push(counter);
+      }
+      byEventId[eventId] = { ...hashCheck, randomDrawCounters };
+    },
+  });
+  if (!replay.ok && errors.length === 0) errors.push("replay_journal_invalid");
 
   return { byEventId, errors };
 }
@@ -7485,82 +7437,6 @@ function replayPlayerViewFor(state: GameState, side: Side): PlayerView {
     publicEvents: [],
     legalActions: [],
   };
-}
-
-function replayActionFromEvent(
-  event: GameEvent,
-): ReplayableEngineAction | undefined {
-  const payload = event.privatePayload;
-  if (!payload || typeof payload !== "object") return undefined;
-  for (const side of ["runner", "corp"] as const) {
-    const local = payload[side];
-    if (!local || typeof local !== "object" || !("action" in local)) continue;
-    const action = (local as { action?: unknown }).action;
-    if (!action || typeof action !== "object") continue;
-    if (
-      "kind" in action &&
-      action.kind === "engine_randomized_ice_install_selection"
-    ) {
-      const command =
-        action as Partial<EngineRandomizedIceInstallSelectionCommand>;
-      if (!command.quote || typeof command.quote !== "object") return undefined;
-      return command as EngineRandomizedIceInstallSelectionCommand;
-    }
-    if (
-      "kind" in action &&
-      action.kind === "engine_randomized_turn_plan_selection"
-    ) {
-      const command =
-        action as Partial<EngineRandomizedTurnPlanSelectionCommand>;
-      if (!command.quote || typeof command.quote !== "object") return undefined;
-      return command as EngineRandomizedTurnPlanSelectionCommand;
-    }
-    if (
-      "kind" in action &&
-      action.kind === "engine_randomized_trace_bid_selection"
-    ) {
-      const command =
-        action as Partial<EngineRandomizedTraceBidSelectionCommand>;
-      if (!command.quote || typeof command.quote !== "object") return undefined;
-      return command as EngineRandomizedTraceBidSelectionCommand;
-    }
-    const candidate = action as Partial<PlayerAction>;
-    if (candidate.side !== "runner" && candidate.side !== "corp") continue;
-    if (
-      typeof candidate.matchId !== "string" ||
-      typeof candidate.actionId !== "string" ||
-      typeof candidate.clientKnownStateVersion !== "number"
-    )
-      continue;
-    if (typeof candidate.idempotencyKey !== "string") continue;
-    return candidate as PlayerAction;
-  }
-  return undefined;
-}
-
-function isRandomizedIceInstallSelectionCommand(
-  action: ReplayableEngineAction,
-): action is EngineRandomizedIceInstallSelectionCommand {
-  return (
-    "kind" in action &&
-    action.kind === "engine_randomized_ice_install_selection"
-  );
-}
-
-function isRandomizedTurnPlanSelectionCommand(
-  action: ReplayableEngineAction,
-): action is EngineRandomizedTurnPlanSelectionCommand {
-  return (
-    "kind" in action && action.kind === "engine_randomized_turn_plan_selection"
-  );
-}
-
-function isRandomizedTraceBidSelectionCommand(
-  action: ReplayableEngineAction,
-): action is EngineRandomizedTraceBidSelectionCommand {
-  return (
-    "kind" in action && action.kind === "engine_randomized_trace_bid_selection"
-  );
 }
 
 function replayTimelineStepFor(input: {

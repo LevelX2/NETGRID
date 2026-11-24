@@ -57,6 +57,8 @@ export function createGameCardImplementationRuntimeDeps(
     runnerInstalledCardIds: host.cards.runnerInstalledCardIds,
     spendClick: host.credits.spendClick,
     spendCredits: host.credits.spendCredits,
+    syncPendingChoiceAfterRunnerCostPenaltySupport:
+      host.credits.syncPendingChoiceAfterRunnerCostPenaltySupport,
     gainCredits: host.credits.gainCredits,
     createAction: host.actions.createAction,
     appendResolvedEffectsToPayload: host.actions.appendResolvedEffectsToPayload,

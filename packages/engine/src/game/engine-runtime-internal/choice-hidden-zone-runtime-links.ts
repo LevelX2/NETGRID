@@ -18,9 +18,7 @@ export interface ChoiceHiddenZoneRuntimeLinks {
   installRunnerProgramForFree: ChoiceHiddenZoneRuntimePort["installRunnerProgramForFree"];
   installRunnerProgramFromStackWithoutClick: ChoiceHiddenZoneRuntimePort["installRunnerProgramFromStackWithoutClick"];
   installRunnerProgramFromZoneWithoutClick: ChoiceHiddenZoneRuntimePort["installRunnerProgramFromZoneWithoutClick"];
-  resolveV1911RunnerHiddenZoneAbility: ChoiceHiddenZoneRuntimePort["resolveV1911RunnerHiddenZoneAbility"];
   revealCorpRdTop: ChoiceHiddenZoneRuntimePort["revealCorpRdTop"];
-  revealRunnerStackTop: ChoiceHiddenZoneRuntimePort["revealRunnerStackTop"];
   shuffleRunnerStack: ChoiceHiddenZoneRuntimePort["shuffleRunnerStack"];
   startRunnerProgramFreeMemoryChoice: ChoiceHiddenZoneRuntimePort["startRunnerProgramFreeMemoryChoice"];
   hiddenZoneArrangeChoiceHandlerHost: ChoiceHiddenZoneRuntimePort["hiddenZoneArrangeChoiceHandlerHost"];
@@ -82,7 +80,6 @@ export interface ChoiceHiddenZoneRuntimeLinks {
   resolveExposePreventionChoice: ChoiceResolver;
   resolveExposeInstalledCorpCardsChoice: ChoiceHiddenZoneRuntimePort["resolveExposeInstalledCorpCardsChoice"];
   resolveMultiExposeInstalledCorpCardsChoice: ChoiceHiddenZoneRuntimePort["resolveMultiExposeInstalledCorpCardsChoice"];
-  resolveScoredAgendaCorpRdTopReveal: ChoiceHiddenZoneRuntimePort["resolveScoredAgendaCorpRdTopReveal"];
   shuffleCorpCardIntoRd: ChoiceHiddenZoneRuntimePort["shuffleCorpCardIntoRd"];
   startExposeInstalledCorpCardsChoice: ChoiceHiddenZoneRuntimePort["startExposeInstalledCorpCardsChoice"];
   startMultiExposeInstalledCorpCardsChoice: ChoiceHiddenZoneRuntimePort["startMultiExposeInstalledCorpCardsChoice"];

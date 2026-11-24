@@ -31,7 +31,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps): TurnRuntimePort {
   const runtime = {} as TurnRuntimePort;
   Object.assign(
     runtime,
-    createTurnEffectRuntimeResolvers(deps, runtime),
+    createTurnEffectRuntimeResolvers(),
     createTurnCorpStartRuntimeResolvers(deps, runtime),
     createTurnRunnerStartRuntimeResolvers(deps, runtime),
     createTurnEndRuntimeResolvers(deps, runtime),

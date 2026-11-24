@@ -142,7 +142,6 @@ function action(
 function hostFor(
   state: GameState,
   options: {
-    v097?: boolean;
     corpRootRezActionsAvailable?: boolean;
     corpRootRezWindowOpen?: boolean;
     approachExposeAvailable?: boolean;
@@ -187,7 +186,6 @@ function hostFor(
       publicServerLabel: () => "R&D",
     },
     rules: {
-      isV097OrLater: () => options.v097 ?? true,
       corpRunRootRezActionsAvailable: () =>
         options.corpRootRezActionsAvailable ?? false,
       corpRunRootRezWindowOpen: () => options.corpRootRezWindowOpen ?? false,

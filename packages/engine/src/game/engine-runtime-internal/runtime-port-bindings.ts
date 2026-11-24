@@ -119,7 +119,6 @@ export let requiresDataFortInstallTarget: RuntimePortGroups["cardRuntimeResolver
 export let runnerEventLongtailForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["runnerEventLongtailForDefinition"];
 export let variableRezForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["variableRezForDefinition"];
 export let runnerEventLongtailKindForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["runnerEventLongtailKindForDefinition"];
-export let runnerEventInstallChoiceActionPayload: RuntimePortGroups["cardRuntimeResolvers"]["runnerEventInstallChoiceActionPayload"];
 export let hiddenReplacementLongtailForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["hiddenReplacementLongtailForDefinition"];
 export let cardImplementationRunnerEventResolver: RuntimePortGroups["cardRuntimeResolvers"]["cardImplementationRunnerEventResolver"];
 export let printedCostCardImplementationMakeRunEffect: RuntimePortGroups["cardRuntimeResolvers"]["printedCostCardImplementationMakeRunEffect"];
@@ -144,7 +143,7 @@ export let variableTraceSubroutineForCurrentEncounter: RuntimePortGroups["cardRu
 export let relativeDamageSubroutineForCurrentEncounter: RuntimePortGroups["cardRuntimeHosts"]["relativeDamageSubroutineForCurrentEncounter"];
 export let relativeTraceSubroutinesForCurrentEncounter: RuntimePortGroups["cardRuntimeHosts"]["relativeTraceSubroutinesForCurrentEncounter"];
 export let runCardImplementationActionHost: RuntimePortGroups["cardRuntimeHosts"]["runCardImplementationActionHost"];
-export let runStartTaxForServerUpgrades: RuntimePortGroups["cardRuntimeHosts"]["runStartTaxForServerUpgrades"];
+export let runStartCreditLossForServer: RuntimePortGroups["cardRuntimeHosts"]["runStartCreditLossForServer"];
 export let runStartTaxForCorpRootAssets: RuntimePortGroups["cardRuntimeHosts"]["runStartTaxForCorpRootAssets"];
 export let spendRunnerAccessTrashCredits: RuntimePortGroups["cardRuntimeHosts"]["spendRunnerAccessTrashCredits"];
 export let runnerSpecialTriggerExecutionHost: RuntimePortGroups["cardRuntimeHosts"]["runnerSpecialTriggerExecutionHost"];
@@ -223,10 +222,7 @@ export let parseRandomDiceSplit: RuntimePortGroups["choiceHiddenZoneRuntime"]["p
 export let continueRandomDiceLoop: RuntimePortGroups["choiceHiddenZoneRuntime"]["continueRandomDiceLoop"];
 export let resolveRandomDiceSplitChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveRandomDiceSplitChoice"];
 export let shuffleRunnerStack: RuntimePortGroups["choiceHiddenZoneRuntime"]["shuffleRunnerStack"];
-export let revealRunnerStackTop: RuntimePortGroups["choiceHiddenZoneRuntime"]["revealRunnerStackTop"];
 export let revealCorpRdTop: RuntimePortGroups["choiceHiddenZoneRuntime"]["revealCorpRdTop"];
-export let resolveV1911RunnerHiddenZoneAbility: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveV1911RunnerHiddenZoneAbility"];
-export let resolveScoredAgendaCorpRdTopReveal: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveScoredAgendaCorpRdTopReveal"];
 export let exposedCorpCardInServer: RuntimePortGroups["choiceHiddenZoneRuntime"]["exposedCorpCardInServer"];
 export let exposeCorpCardInServer: RuntimePortGroups["choiceHiddenZoneRuntime"]["exposeCorpCardInServer"];
 export let installedCorpCardServerContext: RuntimePortGroups["choiceHiddenZoneRuntime"]["installedCorpCardServerContext"];
@@ -643,8 +639,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.cardRuntimeResolvers.variableRezForDefinition;
   runnerEventLongtailKindForDefinition =
     ports.cardRuntimeResolvers.runnerEventLongtailKindForDefinition;
-  runnerEventInstallChoiceActionPayload =
-    ports.cardRuntimeResolvers.runnerEventInstallChoiceActionPayload;
   hiddenReplacementLongtailForDefinition =
     ports.cardRuntimeResolvers.hiddenReplacementLongtailForDefinition;
   cardImplementationRunnerEventResolver =
@@ -689,8 +683,7 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.cardRuntimeHosts.relativeTraceSubroutinesForCurrentEncounter;
   runCardImplementationActionHost =
     ports.cardRuntimeHosts.runCardImplementationActionHost;
-  runStartTaxForServerUpgrades =
-    ports.cardRuntimeHosts.runStartTaxForServerUpgrades;
+  runStartCreditLossForServer = ports.cardRuntimeHosts.runStartCreditLossForServer;
   runStartTaxForCorpRootAssets =
     ports.cardRuntimeHosts.runStartTaxForCorpRootAssets;
   spendRunnerAccessTrashCredits =
@@ -836,12 +829,7 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   resolveRandomDiceSplitChoice =
     ports.choiceHiddenZoneRuntime.resolveRandomDiceSplitChoice;
   shuffleRunnerStack = ports.choiceHiddenZoneRuntime.shuffleRunnerStack;
-  revealRunnerStackTop = ports.choiceHiddenZoneRuntime.revealRunnerStackTop;
   revealCorpRdTop = ports.choiceHiddenZoneRuntime.revealCorpRdTop;
-  resolveV1911RunnerHiddenZoneAbility =
-    ports.choiceHiddenZoneRuntime.resolveV1911RunnerHiddenZoneAbility;
-  resolveScoredAgendaCorpRdTopReveal =
-    ports.choiceHiddenZoneRuntime.resolveScoredAgendaCorpRdTopReveal;
   exposedCorpCardInServer =
     ports.choiceHiddenZoneRuntime.exposedCorpCardInServer;
   exposeCorpCardInServer = ports.choiceHiddenZoneRuntime.exposeCorpCardInServer;

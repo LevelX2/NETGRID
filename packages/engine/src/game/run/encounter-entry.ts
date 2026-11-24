@@ -183,7 +183,6 @@ export function beginEncounter(
     }
   }
   const temporaryTraceCredits = grantEncounterTemporaryTraceCredits(
-    host,
     run,
     encounteredIceId,
     encounteredDefinition,
@@ -657,7 +656,6 @@ export function resolveApproachIceExposeViewingDecision(
 }
 
 function grantEncounterTemporaryTraceCredits(
-  host: EncounterEntryHost,
   run: ActiveRun,
   encounteredIceId: CardInstanceId,
   encounteredDefinition: CardDefinition,

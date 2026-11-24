@@ -68,6 +68,50 @@ zentralen Producer in `game/state/draw-random.ts`. Schaden zieht erst nach den
 Replacement- und Prevention-Fenstern und enthält seine typisierte Quelle im
 Zufallszweck.
 
+## Aufwand je Aktion
+
+Die Engine berechnet den StateHash weiterhin über den vollständigen
+regelrelevanten Zustand. Die Prozess-Registry ist fest, daher teilt der Hashpfad
+den Kartenregel-Fingerprint zwischen Zuständen mit exakt derselben
+Snapshot-Identität und derselben sortierten Menge an CardSpec-Definitionen.
+Der Prozess hält dafür höchstens 128 Einträge. Replays projizieren bei der
+erneuten Anwendung jedes Ereignisses nur das neue öffentliche Ereignis. Der
+Replayzustand enthält weiterhin das Journal der nachgespielten Aktionen.
+
+Die Corp-Trace-Zahlwahl bietet je verfügbarer Spezialquelle einen Höchstbetrag
+und eine empfohlene Menge an. Das private Angebot enthält das feste Gebot, den
+Mindestbetrag aus Spezialquellen und die erforderlichen Trace-Counter. Die Corp
+bestätigt die ausgewählten Quellen und ihre Beträge in einer Aktion. Den Rest
+bucht die Engine nach der bestehenden Reihenfolge für temporäre Credits,
+Fort-Bits und reguläre Credits. Eine Trace-Reaktion aktualisiert ein offenes
+Zahlangebot. Beim Bestätigen prüft die Engine die gebundenen Options-IDs und
+Beträge sowie die Zahlungsquote am aktuellen Zustand erneut. In Blind-Profilen
+bucht sie die Zahlung erst bei der Aufdeckung beider Gebote.
+
+Aktionen und gebundene Verteidigungsvorschauen, die Effekte ausführen, kopieren
+die Journal-Liste flach und den veränderlichen Kernzustand tief. Beide behandeln
+Journal-Einträge als unveränderlich. Zufallsauswahlen bereiten lediglich den
+betroffenen Zufallsverlauf vor. Die nachfolgende Aktionsausführung erstellt die
+einzige vollständige Kopie des veränderlichen Zustands. Vorschauen für Corp-
+Zahlungen und Punish-Routen verwenden dieselbe Aktionsausführung und projizieren
+jeweils nur das neue Ereignis. Vorbereitende Projektionen ändern ausschließlich
+die für die Quote relevanten Felder. So kopiert die ICE-Installationsvorschau
+die betroffene Hand, Fortposition und Karte. Das Journal und der Zufallsverlauf
+werden dabei nur gelesen.
+
+Die Hauptphasen binden den jeweiligen Spielzustand an typisierte Dienste aus
+der Runtime-Komposition. Die LegalAction-Generatoren verwenden dieselbe
+Dienstkonfiguration für aufeinanderfolgende Abfragen. Innerhalb einer
+Runner-Abfrage werden die verfügbaren Credits für Installieren, Runstart,
+Events und Kostensupport jeweils höchstens einmal berechnet. Diese Werte
+gelten nur für die einzelne Abfrage.
+
+Zustandsinvarianten für Board, Run, Trace, Zug und Fenster gehören in ihre
+jeweiligen Prüfmodule unter `game/state-validation`. Die zentrale Prüfung
+führt sie in fester Reihenfolge aus und bündelt ihre Diagnosen. Deckprüfung
+und direkte Effektkommandos sind über
+`@netgrid/engine/test-fixtures/rules-scenarios` für Engine-Tests erreichbar.
+
 ## Pflegeprinzip
 
 Neue Dokumente gehören nur dauerhaft in diesen Ordner, wenn sie einen aktuellen Engine-Architektur- oder Strukturvertrag beschreiben, der nicht sinnvoll in eines der bestehenden Dokumente integriert werden kann.

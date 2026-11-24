@@ -6,7 +6,6 @@ import type {
 } from "@netgrid/shared";
 import { assertAbilityRefIdentity } from "@netgrid/cards/engine";
 import type {
-  CardLifecycleTriggeredAbilityImplementation,
   PayCreditsOrLoseGameEffectImplementation,
 } from "./definition-types";
 import { executeCardImplementationEffects } from "./effect-interpreter";

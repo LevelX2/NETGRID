@@ -1,7 +1,0 @@
-import {
-  CORP_RUN_TAX_UPGRADE_SOURCES,
-  CORP_TRACE_ASSET_SOURCES,
-} from "./card-implementation-derived-sets";
-
-export const TRACE_ASSET_SOURCES = CORP_TRACE_ASSET_SOURCES;
-export const RUN_TAX_UPGRADE_SOURCES = CORP_RUN_TAX_UPGRADE_SOURCES;

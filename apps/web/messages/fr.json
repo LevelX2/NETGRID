@@ -1400,6 +1400,16 @@
       "turnActions": "Tour : actions {turn} {actor}",
       "remainingActions": "{count} restant"
     },
+    "tracePayment": {
+      "bid": "Mise de traque : {amount}",
+      "available": "jusqu’à {amount}",
+      "remaining": "Autres sources de paiement : {amount}",
+      "counterMinimum": "Au moins {amount} compteurs de traque",
+      "specializedMinimum": "Au moins {amount} des sources indiquées",
+      "invalidAmount": "Vérifiez les montants et la mise de traque.",
+      "unavailable": "Les sources de paiement sont momentanément indisponibles.",
+      "confirm": "Confirmer le paiement"
+    },
     "cardChoice": {
       "cardDisplay": "Affichage de la carte",
       "all": "Tout",

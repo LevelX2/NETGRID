@@ -43,6 +43,7 @@ import {
   enrichVisibleChoiceCardsFromView,
 } from "./CardChoicePanel";
 import { DiscardChoicePanel, FieldCardChoicePanel } from "./ChoicePanels";
+import { TracePaymentChoice } from "./TracePaymentChoice";
 import {
   SecurityPurgeChoicePanel,
   isSecurityPurgeInstallTargetChoice,
@@ -100,6 +101,7 @@ export function LegalActionsPanel({
     action: LegalAction,
     choiceId: SelectionId,
     selectedOptionIds: SelectionId[],
+    options?: { selectedOptionAmounts?: number[] },
   ): void;
   onDiscardChoiceToggle(optionId: SelectionId): void;
   onFieldCardChoiceClear(): void;
@@ -281,37 +283,56 @@ export function LegalActionsPanel({
             cardPresentationsById,
           )}
         </p>
-        <div className="actions setupActions">
-          {genericChoice.options.map((option) => {
-            const targetServerId = serverTargetIdForChoiceOption(
-              option,
-              view.servers.map((server) => server.id),
-            );
-            const label = choiceOptionPresentationLabel(
-              genericChoice,
-              option,
-              locale,
-            );
-            return (
-              <OverflowAwareActionButton
-                action={genericChoiceAction}
-                className="button actionButton primary"
-                key={option.id}
-                label={label}
-                serverTargetId={targetServerId}
-                onClick={() =>
-                  onChoiceOption(
-                    genericChoiceAction,
-                    genericChoice.choiceId,
-                    option.id,
-                  )
-                }
-                disabled={disabled}
-                data-testid="generic-choice-button"
-              />
-            );
-          })}
-        </div>
+        {genericChoice.traceCorpPayment ? (
+          <TracePaymentChoice
+            key={`${genericChoice.choiceId}:${genericChoice.stateVersion}`}
+            choice={genericChoice}
+            payment={genericChoice.traceCorpPayment}
+            disabled={disabled || connection !== "online"}
+            onSubmit={(ids, amounts) =>
+              onChoiceOptions(
+                genericChoiceAction,
+                genericChoice.choiceId,
+                ids,
+                {
+                  selectedOptionAmounts: amounts,
+                },
+              )
+            }
+          />
+        ) : (
+          <div className="actions setupActions">
+            {genericChoice.options.map((option) => {
+              const targetServerId = serverTargetIdForChoiceOption(
+                option,
+                view.servers.map((server) => server.id),
+              );
+              const label = choiceOptionPresentationLabel(
+                genericChoice,
+                option,
+                locale,
+              );
+              return (
+                <OverflowAwareActionButton
+                  action={genericChoiceAction}
+                  className="button actionButton primary"
+                  key={option.id}
+                  label={label}
+                  serverTargetId={targetServerId}
+                  onClick={() =>
+                    onChoiceOption(
+                      genericChoiceAction,
+                      genericChoice.choiceId,
+                      option.id,
+                    )
+                  }
+                  disabled={disabled}
+                  data-testid="generic-choice-button"
+                />
+              );
+            })}
+          </div>
+        )}
       </section>
     );
   }

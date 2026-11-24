@@ -214,6 +214,19 @@ describe("authenticated WebSocket match contract", () => {
       }));
       expect(await stringAction).toMatchObject({ type: "error" });
       expect((await f.service.loadForTest(f.created.matchId))?.actionReceipts).toEqual([]);
+      const unexpectedAmounts = f.next("action_receipt");
+      f.socket.send(JSON.stringify({
+        type: "submit_action",
+        payload: {
+          ...payload,
+          idempotencyKey: "unexpected-ws-choice-amounts",
+          selectedChoices: { ...payload.selectedChoices, selectedOptionAmounts: [1] },
+        },
+      }));
+      expect(await unexpectedAmounts).toMatchObject({
+        type: "action_receipt",
+        payload: { accepted: false, errorCode: "ERR_INVALID_CHOICE" },
+      });
       const accepted = f.next("action_receipt");
       f.socket.send(JSON.stringify({ type: "submit_action", payload }));
       expect(await accepted).toMatchObject({

@@ -1,17 +1,12 @@
 import type {
-  CardDefinition,
   CardDefinitionId,
-  CardInstance,
   CardInstanceId,
-  GameState,
   LegalAction,
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
 import type {
   CardSuccessfulRunFollowupImplementation,
-  CardRunnerUtilityLongtailImplementation,
-  CardUniqueDirectLongtailImplementation,
 } from "../../ability-engine/definition-types";
 import {
   cardImplementationPrimitivePayload,

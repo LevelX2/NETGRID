@@ -1,7 +1,6 @@
 import type {
   CardCreditGainContinuation,
   CardDefinition,
-  CardInstance,
   CardInstanceId,
   CorpServer,
   GameState,
@@ -209,7 +208,7 @@ export function buildCorpRunRootRezActions(
         continue;
       const rezQuote = quoteCorpRootRezCost(host.state, cardId);
       if (!rezQuote.canPay) continue;
-      if (!rootRezLifecycleIsSolvable(host, cardId, definition, server))
+      if (!rootRezLifecycleIsSolvable(host, definition, server))
         continue;
       const action = buildLegalAction(
         host.state,
@@ -273,7 +272,6 @@ export function buildCorpRunRootRezActions(
 
 function rootRezLifecycleIsSolvable(
   host: RunRezWindowHost,
-  cardId: CardInstanceId,
   definition: CardDefinition,
   server: CorpServer,
 ): boolean {
@@ -929,18 +927,13 @@ function installedRezInterruptJackOutSourceIds(
 ): CardInstanceId[] {
   return host.cards
     .runnerInstalledProgramIds()
-    .filter((cardId) => {
-      const definitionId = host.cards.definitionFor(cardId).id;
-      if (
-        hasRunEncounterInterventionKind(
-          host,
-          cardId,
-          "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
-        )
-      )
-        return true;
-      return false;
-    })
+    .filter((cardId) =>
+      hasRunEncounterInterventionKind(
+        host,
+        cardId,
+        "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
+      ),
+    )
     .sort();
 }
 

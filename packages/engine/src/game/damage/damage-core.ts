@@ -15,17 +15,14 @@ import {
   openPdcaDamageReplacementChoice,
   resolveAddTagImminentEvent,
   resolveDamageImminentEvent,
-  resolveRunnerInstalledTrashImminentEvent,
   setDamagePayload,
 } from "./damage-event-resolution";
 import {
   openEventModificationWindow,
-  resolveEventModificationChoice,
 } from "./prevention-window";
 import { simultaneousInstalledProgramTrashIds } from "../state/microtech-backup";
 import {
   openReplacementWindow,
-  resolveReplacementChoice,
 } from "./damage-replacement";
 import { runnerInstalledCardIds } from "./damage-runtime-context";
 

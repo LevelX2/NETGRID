@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { quoteTraceBaseLinkChoices } from "./base-link";
 import { describe, expect, it } from "vitest";
 import {
-  handleTraceOrchestrationAction,
   resolveTraceChoice,
   startTraceFromOperation,
   type TraceOrchestrationHost,
@@ -341,14 +340,15 @@ describe("trace orchestration", () => {
       actionFor("corp", "resolve_choice"),
       playerChoice("bid_3"),
     );
-    const allocationOption = state.pendingChoice?.options.find((option) =>
-      String(option.value).includes('"amount":1'),
-    );
+    const allocationOption = state.pendingChoice?.options.find((option) => option.value === poolId);
     if (!allocationOption) throw new Error("Krumz allocation option missing.");
     resolveTraceChoice(
       host,
       actionFor("corp", "resolve_choice"),
-      playerChoice(allocationOption.id),
+      {
+        ...playerChoice(allocationOption.id),
+        selectedChoices: { selectedOptionIds: [allocationOption.id], selectedOptionAmounts: [1] },
+      },
     );
 
     expect(state.corp.credits).toBe(3);
@@ -931,38 +931,6 @@ describe("trace orchestration", () => {
     });
   });
 
-  it("does not handle legacy Paris City Grid trace trigger payloads", () => {
-    const sourceId = "paris_1" as CardInstanceId;
-    const sourceDefinition = definition(3963457139, "upgrade");
-    const state = minimalState({
-      cardInstances: {
-        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
-      },
-    });
-    const action = actionFor("corp", "trigger_ability", {
-      cardId: sourceId,
-      v1918UpgradeAbility: "trace_2_tag",
-      traceValue: 2,
-    });
-
-    const result = handleTraceOrchestrationAction(
-      testHost(
-        state,
-        { [sourceDefinition.id]: sourceDefinition },
-        testCalls(),
-        {
-          parisTraceDefinitionId: sourceDefinition.id,
-          rezzedCorpRootCardIds: [sourceId],
-        },
-      ),
-      action,
-    );
-
-    expect(result).toEqual({ handled: false });
-    expect(state.trace).toBeUndefined();
-    expect(state.pendingChoice).toBeUndefined();
-  });
-
   it("does not import from index.ts", () => {
     const source = readFileSync(
       new URL("./trace-orchestration.ts", import.meta.url),
@@ -1160,8 +1128,6 @@ function testHost(
     postBidLinkTap?: boolean;
     postBidLinkRepeatable?: boolean;
     successCancelSourceId?: CardInstanceId;
-    parisTraceDefinitionId?: CardDefinitionId;
-    rezzedCorpRootCardIds?: CardInstanceId[];
     runnerTraceLinkCreditSourceIds?: CardInstanceId[];
     hostedCredits?: Map<CardInstanceId, number>;
     corpSpecializedSources?: CorpTraceSpecializedPaymentSource[];
@@ -1351,7 +1317,7 @@ function testHost(
       ) => 0,
     },
     corp: {
-      rezzedCorpRootCardIds: () => options.rezzedCorpRootCardIds ?? [],
+      rezzedCorpRootCardIds: () => [],
     },
     counters: {
       cardCounter: () => 0,

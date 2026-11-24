@@ -108,7 +108,6 @@ export function rezCard(
     waiveBaseCreditCost?: true;
   },
 ): void {
-  const { state } = host;
   const definition = host.cards.definitionFor(cardId);
   const standardRezCost = host.payment.rezCostForCard(cardId);
   const waivedBaseRezCost = Math.max(0, definition.rezCost ?? 0);

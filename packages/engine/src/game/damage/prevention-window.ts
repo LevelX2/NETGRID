@@ -339,7 +339,6 @@ export function resolveEventModificationChoice(
     : undefined;
   if (selected === "pass") {
     const remainingCandidates = remainingEventModificationCandidatesAfterStage(
-      state,
       window,
       event,
     );
@@ -550,7 +549,6 @@ export function resolveEventModificationChoice(
         state,
         finalEvent,
         remainingEventModificationCandidatesAfterStage(
-          state,
           window,
           finalEvent,
         ),
@@ -1012,8 +1010,7 @@ export function corpDamagePreventionBypassCandidatesForStage(
   );
 }
 
-export function remainingEventModificationCandidatesAfterStage(
-  state: GameState,
+function remainingEventModificationCandidatesAfterStage(
   window: EventModificationWindow,
   event: ImminentEvent,
 ): EventModificationCandidate[] {

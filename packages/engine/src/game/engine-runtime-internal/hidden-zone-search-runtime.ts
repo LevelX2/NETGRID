@@ -1,25 +1,14 @@
 import type { RandomPurpose } from "@netgrid/shared";
 import type {
   CardDefinition,
-  CardDefinitionId,
   CardInstanceId,
-  ChoiceRequest,
-  CounterType,
-  CorpServer,
-  CorpZoneChoiceHandlerHost,
   GameState,
-  HiddenZoneArrangeChoiceHandlerHost,
-  HiddenZoneNonSearchChoiceHandlerHost,
   HiddenZoneSearchActivationHandlerHost,
   HiddenZoneSearchChoiceHandlerHost,
   LegalAction,
-  PendingChoiceResolutionHost,
   PlayerAction,
   RuntimeDeps,
-  ServerId,
-  Side,
 } from "./runtime-shared";
-import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import { completeRunnerProgramRigInstall } from "../install/runner-rig-install-finalization";
 import {
   runnerInstalledProgramMemoryCost,
@@ -28,79 +17,7 @@ import {
 
 export function createHiddenZoneSearchRuntime(
   deps: RuntimeDeps,
-  links: ChoiceHiddenZoneRuntimeLinks,
 ): import("./hidden-zone-search-runtime-port").HiddenZoneSearchRuntimePort {
-  const {
-    RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION,
-    RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
-    addCounterToAllInstalledRunnerIcebreakers,
-    canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
-    chooseCorpAgendasForPointCost,
-    continueRandomDiceLoop,
-    corpAgendaPointTotal,
-    corpZoneChoiceHandlerHost,
-    creditTextForPrompt,
-    diePromptText,
-    discardChoice,
-    exposeCorpCardInServer,
-    exposeInstalledCorpCardForImplementation,
-    exposeInstalledCorpCardLabel,
-    exposeInstalledCorpCardTargets,
-    exposeInstalledCorpCardsChoiceOptions,
-    exposeOutermostIceOfEachDataFort,
-    exposedCorpCardInServer,
-    hiddenZoneArrangeChoiceHandlerHost,
-    hiddenZoneNonSearchChoiceHandlerHost,
-    multiExposeInstalledCorpCardOptionLabel,
-    multiExposeInstalledCorpCardTargets,
-    iceChoiceLabelForSide,
-    installedCorpCardServerContext,
-    installedRunnerConnectionIds,
-    installedRunnerIcebreakerIds,
-    outermostIceExposures,
-    parseRandomDiceSplitChoiceSource,
-    parseRandomDiceSplit,
-    parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
-    pendingChoiceResolutionHost,
-    randomDiceSplitOptions,
-    publicIcePositionLabelForCard,
-    publicIceSelectionLabelForCard,
-    resolveDerezRezzedBlackIceChoice,
-    resolveCardImplementationAccessPaymentChoice,
-    resolvePayRezCostToTrashRezzedIceChoice,
-    resolveRunnerIcebreakerCounterEvent,
-    resolveDiscardChoice,
-    resolveExposeInstalledCorpCardsChoice,
-    resolveCorpChoiceRezOrTrashIceDecisionChoice,
-    resolveCorpChoiceRezOrTrashIceTargetChoice,
-    resolveMultiExposeInstalledCorpCardsChoice,
-    resolveIncubatorTransformChoice,
-    resolvePaidSourceReturnToGripChoice,
-    resolveP358HiddenReplacementChoice,
-    resolveRandomDiceLoopEvent,
-    resolveRunnerProgramReturnChoice,
-    resolveRunnerInstalledConnectionTrashBadPublicityChoice,
-    resolveTrashUnrezzedIceChoice,
-    resolveSetupMulliganChoice,
-    resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveScoredAgendaCorpRdTopReveal,
-    resolveRandomDiceSplitChoice,
-    selectedChoiceCardIds,
-    selectedChoiceCardIdsForChoice,
-    setupMulliganChoice,
-    shuffleCorpCardIntoRd,
-    startDerezRezzedBlackIceChoice,
-    startPayRezCostToTrashRezzedIceChoice,
-    startExposeInstalledCorpCardsChoice,
-    startCorpChoiceRezOrTrashIceChoice,
-    startMultiExposeInstalledCorpCardsChoice,
-    startPaidSourceReturnToGripChoice,
-    startTrashUnrezzedIceChoice,
-    startRandomDiceSplitChoice,
-    takeSetupMulligan,
-    trashCorpInstalledCardsInScoredSourceServer,
-  } = links;
-
   function hiddenZoneSearchHandlerHostBase(
     state: GameState,
     legalAction: LegalAction,
@@ -453,20 +370,6 @@ export function createHiddenZoneSearchRuntime(
     state.runner.stack = result.shuffledStack;
   }
 
-  function revealRunnerStackTop(
-    state: GameState,
-    legalAction: LegalAction,
-  ): void {
-    const cardId = state.runner.stack[0];
-    if (!cardId) throw new Error("Der Stack ist leer.");
-    const definition = deps.definitionFor(state, cardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      publicRevealKind: "reveal",
-      publicRevealDefinitionId: definition.id,
-    };
-  }
-
   function revealCorpRdTop(state: GameState, legalAction: LegalAction): void {
     const cardId = state.corp.rd[0];
     if (!cardId) throw new Error("R&D ist leer.");
@@ -480,17 +383,6 @@ export function createHiddenZoneSearchRuntime(
     };
   }
 
-  function resolveV1911RunnerHiddenZoneAbility(
-    state: GameState,
-    legalAction: LegalAction,
-  ): void {
-    void state;
-    void legalAction;
-    throw new Error(
-      "Die ausgemusterte V1.9.11-Hidden-Zone-Route hat keine CardSpec-Continuation.",
-    );
-  }
-
   return {
     canInstallRunnerProgramFromZone,
     hiddenZoneSearchActivationHandlerHost,
@@ -500,9 +392,7 @@ export function createHiddenZoneSearchRuntime(
     installRunnerProgramForFree,
     installRunnerProgramFromStackWithoutClick,
     installRunnerProgramFromZoneWithoutClick,
-    resolveV1911RunnerHiddenZoneAbility,
     revealCorpRdTop,
-    revealRunnerStackTop,
     shuffleRunnerStack,
     startRunnerProgramFreeMemoryChoice,
   };

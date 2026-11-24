@@ -297,7 +297,8 @@ describe("deriveOpponentActionCues", () => {
     expect(cues[0]?.title).toBe("Die Korp-KI hat ihre Pflichtkarte gezogen.");
     expect(cues[0]?.description).toBeUndefined();
     expect(cues[0]?.aiExplanation).toBe("Die Korp braucht ihre Pflichtkarte.");
-    expect(JSON.stringify(cues[0])).not.toContain("ce");
+    expect(cues[0]).not.toHaveProperty("aiReasonCode");
+    expect(JSON.stringify(cues[0])).not.toMatch(/\b(?:corp\.mandatory_draw|ce)\b/u);
   });
 
   it("leaves the outermost ICE reveal to its confirmation dialog", () => {

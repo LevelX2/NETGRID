@@ -9,18 +9,6 @@ import type {
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
-import type {
-  CardSuccessfulRunFollowupImplementation,
-  CardRunnerUtilityLongtailImplementation,
-  CardUniqueDirectLongtailImplementation,
-} from "../../ability-engine/definition-types";
-import {
-  cardImplementationPrimitivePayload,
-  type SuccessfulRunBeforeAccessEffect,
-} from "../../ability-engine/card-implementation-primitives";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
-import type { SuccessfulRunInterventionKind } from "./run-access-transition";
 
 export type ActiveRun = NonNullable<GameState["run"]>;
 

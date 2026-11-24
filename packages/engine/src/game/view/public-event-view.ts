@@ -7,7 +7,10 @@ import {
   type PublicGameEvent,
   type Side,
 } from "@netgrid/shared";
-import { sanitizeEventPayloadForSurface } from "./surface-policy";
+import {
+  assertSafeEventPayloadForSurface,
+  sanitizeEventPayloadForSurface,
+} from "./surface-policy";
 import { parseCardDefinitionIdToken } from "../choices/card-definition-id-token";
 
 export function toPublicEvent(event: GameEvent): PublicGameEvent {
@@ -36,21 +39,11 @@ export function toPublicEventForSide(
 ): PublicGameEvent {
   const publicEvent = toPublicEvent(event);
   const privateProjection = sidePrivatePublicPayload(event, viewerSide);
-  return redactPublicEventForSide(
-    privateProjection
-      ? {
-          ...publicEvent,
-          publicPayload: sanitizeEventPayloadForSurface(
-            {
-              ...publicEvent.publicPayload,
-              ...privateProjection,
-            },
-            "public_event",
-          ),
-        }
-      : publicEvent,
-    viewerSide,
-  );
+  if (privateProjection) {
+    assertSafeEventPayloadForSurface(privateProjection, "public_event");
+    Object.assign(publicEvent.publicPayload, privateProjection);
+  }
+  return redactPublicEventForSide(publicEvent, viewerSide);
 }
 
 export function redactPublicEventForSide(
@@ -99,6 +92,7 @@ function sidePrivatePublicPayload(
   event: GameEvent,
   viewerSide: Side,
 ): Record<string, unknown> | undefined {
+  if (event.publicPayload.actor !== viewerSide) return undefined;
   const privatePayload = event.privatePayload?.[viewerSide];
   const legalAction =
     privatePayload &&
@@ -128,7 +122,6 @@ function sidePrivatePublicPayload(
   };
   if (
     viewerSide !== "runner" ||
-    event.publicPayload.actor !== "runner" ||
     payload?.hiddenZoneAction !== "p3_33_private_look"
   ) {
     return Object.keys(result).length > 0 ? result : undefined;

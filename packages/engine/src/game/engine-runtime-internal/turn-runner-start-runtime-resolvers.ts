@@ -31,7 +31,7 @@ import {
 } from "../damage/damage-core";
 import { startInstalledCardTrashForCreditsChoice } from "../hidden-zone/nonsearch-choice-handlers";
 import { selectedChoiceIds } from "../choices/choice-validation";
-import { publicServerLabel } from "../../public-context";
+import { publicServerLabel } from "../view/server-view";
 import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
@@ -819,10 +819,7 @@ export function createTurnRunnerStartRuntimeResolvers(
       throw new Error(
         "Die Zufallsaktionstabelle enthält eine unbekannte Aktion.",
       );
-    const target = randomRunnerGripCardId(
-      state,
-      [54],
-    );
+    const target = randomRunnerGripCardId(state);
     if (!target) return undefined;
     return {
       restriction: "play_or_install_card",
@@ -831,10 +828,7 @@ export function createTurnRunnerStartRuntimeResolvers(
     };
   }
 
-  function randomRunnerGripCardId(
-    state: GameState,
-    purpose: readonly [54],
-  ): CardInstanceId | undefined {
+  function randomRunnerGripCardId(state: GameState): CardInstanceId | undefined {
     if (state.runner.grip.length === 0) return undefined;
     const value = nextRandom(state, [54, state.stateVersion]);
     return state.runner.grip[Math.floor(value * state.runner.grip.length)];

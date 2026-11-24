@@ -1,9 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
-import {
-  type GameState,
-  type LegalAction,
-  type ResolvedGameEffect,
-} from "@netgrid/shared";
+import { type GameState, type LegalAction } from "@netgrid/shared";
 import type { AutomaticEffectCollector, RuntimeDeps } from "./runtime-shared";
 
 type ContinuationCallbacks = {

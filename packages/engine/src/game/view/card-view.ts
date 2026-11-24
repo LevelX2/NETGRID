@@ -14,7 +14,6 @@ import {
   type CardInstance,
   type CardInstanceId,
   type CounterType,
-  type CorpServer,
   type GameState,
   type PlayerView,
   type PurgeableRunnerVirusCounterBucket,
@@ -1491,12 +1490,6 @@ export function serverDifficultyIncreaseFromRunCounters(
   );
 }
 
-function requiresDataFortInstallTarget(definition: CardDefinition): boolean {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.installTargetBinding
-      ?.kind === "choose_data_fort_on_install"
-  );
-}
 
 function hostedProgramStrengthModifier(
   state: GameState,
@@ -1764,10 +1757,4 @@ function mustInstance(
   const instance = source[id];
   if (!instance) throw new Error(`CardInstance fehlt: ${id}`);
   return instance;
-}
-
-function mustServer(state: GameState, id: string): CorpServer {
-  const server = state.corp.servers.find((candidate) => candidate.id === id);
-  if (!server) throw new Error(`Server fehlt: ${id}`);
-  return server;
 }

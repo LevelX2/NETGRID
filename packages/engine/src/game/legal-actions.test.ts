@@ -19,7 +19,7 @@ describe("game legal-actions facade", () => {
     );
   });
 
-  it("matches the public Engine API for a Runner main-action window", () => {
+  it("matches the public Engine API for a Runner main-action window without initializing turn flags", () => {
     const state = createGame({
       seed: "arch-56-runner-main",
       setupMode: "completed",
@@ -27,10 +27,12 @@ describe("game legal-actions facade", () => {
     state.activeSide = "runner";
     state.timingPoint = "runner_action.main";
     state.runner.clicks = 4;
+    const before = structuredClone(state);
 
     expect(legalActionsFor(state, "runner")).toEqual(
       engineGetLegalActions(state, "runner"),
     );
+    expect(state).toEqual(before);
   });
 
   it("matches pending-choice resolve actions without mutating state", () => {

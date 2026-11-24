@@ -7,7 +7,6 @@ import type {
   CardInstanceId,
   CorpServer,
   GameState,
-  LegalAction,
   ServerId,
 } from "@netgrid/shared";
 import { quoteAccessCountModifiers } from "../../ability-engine/access-count-modifiers";

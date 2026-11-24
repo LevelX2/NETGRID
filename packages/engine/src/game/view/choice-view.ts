@@ -47,6 +47,9 @@ export function visibleChoice(
       ...(choice.corpStartDrawQuote
         ? { corpStartDrawQuote: { ...choice.corpStartDrawQuote } }
         : {}),
+      ...(choice.traceCorpPayment
+        ? { traceCorpPayment: { ...choice.traceCorpPayment } }
+        : {}),
       prompt: choice.prompt,
       ...(classicRunnerBidWithoutBaseLink
         ? { presentationKey: "classic_runner_bid_without_base_link" as const }
@@ -78,7 +81,20 @@ export function visibleChoice(
           ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
           ...(option.selectable === false ? { selectable: false } : {}),
           ...(value !== undefined ? { value } : {}),
-          ...(option.metadata ? { metadata: { ...option.metadata } } : {}),
+          ...(option.metadata
+            ? {
+                metadata: {
+                  ...option.metadata,
+                  ...(option.metadata.traceCorpPaymentSource
+                    ? {
+                        traceCorpPaymentSource: {
+                          ...option.metadata.traceCorpPaymentSource,
+                        },
+                      }
+                    : {}),
+                },
+              }
+            : {}),
           ...(card ? { card } : {}),
           ...(hqInstallRezOptionQuote ? { hqInstallRezOptionQuote } : {}),
           ...(choice.side === "corp" && option.forcedIceRezQuote
@@ -105,7 +121,7 @@ function visibleChoiceOptionValue(
   choice: ChoiceRequest,
   option: ChoiceRequest["options"][number],
 ): ChoiceRequest["options"][number]["value"] | undefined {
-  if (option.value === undefined) return undefined;
+  if (option.value === undefined || choice.traceCorpPayment) return undefined;
   if (
     choice.source.startsWith(
       "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target:",
@@ -186,7 +202,6 @@ function isCorpRdArrangeChoice(choice: ChoiceRequest): boolean {
   return (
     choice.kind === "select_cards" &&
     (choice.source.startsWith("v1911.corp_rd_arrange_top2") ||
-      choice.source.startsWith("v1917.corp_rd_arrange_top2") ||
       choice.source.startsWith("v1922.corp_rd_arrange_top5"))
   );
 }

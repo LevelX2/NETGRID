@@ -66,7 +66,6 @@ export type RunAccessLegalActionHostCompositionHost = {
   };
   constants: AccessFlowCompositionHost["constants"];
   callbacks: {
-    rules: RunFlowHost["rules"];
     turn: RunFlowHost["turn"] & AccessFlowCompositionHost["turn"];
     trace: RunFlowHost["trace"] & AccessFlowCompositionHost["trace"];
     damage: RunFlowHost["damage"] & AccessFlowCompositionHost["damage"];
@@ -111,7 +110,6 @@ export function createRunAccessLegalActionHostComposition(
         cardImplementation.accessHookKindsForDefinition,
     },
     servers,
-    rules: callbacks.rules,
     turn: callbacks.turn,
     access: {
       breachStateHost: (state) => accessFlow.breachStateHost(state),

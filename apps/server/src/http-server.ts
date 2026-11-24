@@ -22,6 +22,7 @@ import type {
 import {
   isApiUserErrorCode,
   isMatchOfferId,
+  isPositiveSafeInteger,
   runtimeProfileFromEnvironment,
   testCardsEnabledFromEnvironment,
 } from "@netgrid/shared";
@@ -4615,13 +4616,25 @@ function isMatchActionSubmission(value: Record<string, unknown>): boolean {
     value.idempotencyKey.length > 0 &&
     (value.selectedTargets === undefined ||
       (isMessageRecord(value.selectedTargets) &&
-        Object.values(value.selectedTargets).every((target) => typeof target === "string"))) &&
+        Object.values(value.selectedTargets).every(
+          (target) => typeof target === "string",
+        ))) &&
     (choice === undefined ||
       (isMessageRecord(choice) &&
-        Object.keys(choice).length === 2 &&
+        Object.keys(choice).every(
+          (key) =>
+            key === "choiceId" ||
+            key === "selectedOptionIds" ||
+            key === "selectedOptionAmounts",
+        ) &&
         isMatchOfferId(choice.choiceId) &&
         Array.isArray(choice.selectedOptionIds) &&
-        choice.selectedOptionIds.every(isMatchOfferId)))
+        choice.selectedOptionIds.every(isMatchOfferId) &&
+        (choice.selectedOptionAmounts === undefined ||
+          (Array.isArray(choice.selectedOptionAmounts) &&
+            choice.selectedOptionAmounts.length ===
+              choice.selectedOptionIds.length &&
+            choice.selectedOptionAmounts.every(isPositiveSafeInteger)))))
   );
 }
 

@@ -218,7 +218,6 @@ function makeHost(
       },
     },
     run: {
-      isV097OrLater: () => true,
       finishRun: (successful) => {
         finishedRuns.push(successful);
         delete state.run;

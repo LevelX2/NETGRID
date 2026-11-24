@@ -32,10 +32,13 @@ The old delegate store, delegate barrel and five forwarding modules have been re
 - `flow-runtime-bootstrap.ts`
 - `action-runtime-bootstrap.ts`
 - `state-runtime-bootstrap.ts`
-- `public-event-runtime-bootstrap.ts`
 - `runtime-bootstrap-support.ts`
 
 The orchestrator owns the global bootstrap order: create the stable dependency object, install the complete port graph, configure Card/Flow/Action, then let State populate the same dependency object. Phase modules expose configure/initialize functions and must not configure each other at import time. Preserve the import-time side effect from `public-api.ts`: importing the public runtime must still execute the bootstrap exactly once through `runtime-bootstrap.ts`. New gameplay logic does not belong in bootstrap modules; put it in the owning game/domain module and wire it through a focused runtime bridge only when necessary.
+
+`@netgrid/engine/test-fixtures/rules-scenarios` bootstraps the same runtime for
+engine tests that need direct effect execution or deck validation. Product
+consumers use the public action and game creation entry points.
 
 `action-runtime-hosts.ts`, `flow-runtime-hosts.ts` and `state-runtime-services.ts` are now aggregators for smaller host/service families. ARCH-112 split them into:
 

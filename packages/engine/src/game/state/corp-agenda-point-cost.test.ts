@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createGameAfterSetup } from "../index";
+import { createGameAfterSetup } from "../../index";
 import { ORIGINALSET_DEFAULT_DECKS } from "@netgrid/shared";
 import { removeEverywhere } from "../../test-fixtures/mechanic-smoke-fixtures";
 import {

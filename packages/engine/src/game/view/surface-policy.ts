@@ -20,21 +20,16 @@ export type PayloadFamily =
 export type PublicSurfacePayloadValue = string | number | boolean;
 export type PublicSurfacePayload = Record<string, PublicSurfacePayloadValue>;
 
-const HIDDEN_CARD_LIST_FIELD_PATTERNS = [
-  /(?:hidden|private|unselected).*cardIds$/i,
-  /(?:replacement|selected).*cardIds$/i,
-  /(?:hq|rd|hand|stack|grip).*cardIds$/i,
-];
+const HIDDEN_CARD_LIST_FIELD =
+  /(?:hidden|private|selected|replacement|hq|rd|hand|stack|grip).*cardIds$/i;
+const ACTOR_PRIVATE_LABEL_FIELD = /private.*label/i;
 
-const ACTOR_PRIVATE_LABEL_FIELD_PATTERNS = [
-  /actorPrivate.*label/i,
-  /private.*label/i,
-  /^label$/i,
-];
-const EVENT_ACTOR_PRIVATE_LABEL_FIELD_PATTERNS = [
-  /actorPrivate.*label/i,
-  /private.*label/i,
-];
+export class UnsafeEventPayloadError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnsafeEventPayloadError";
+  }
+}
 
 /**
  * @contract Surface policy distinguishes actor-private engine surfaces from
@@ -86,10 +81,51 @@ export function sanitizeEventPayloadForSurface(
   payload: Record<string, unknown>,
   surfaceKind: SurfaceKind,
 ): Record<string, unknown> {
-  return sanitizePayloadForSurface(payload, {
-    surface: surfaceKind,
-    family: "access_event",
-  });
+  assertSafeEventPayloadForSurface(payload, surfaceKind);
+  return { ...payload };
+}
+
+export function assertSafeEventPayloadForSurface(
+  payload: Record<string, unknown>,
+  surfaceKind: SurfaceKind,
+): void {
+  if (surfaceKind !== "actor_private" && surfaceKind !== "developer_trace")
+    assertSafeEventRecord(payload, surfaceKind);
+}
+
+function assertSafeEventRecord(
+  payload: object,
+  surfaceKind: SurfaceKind,
+  ancestors?: Set<object>,
+): void {
+  function visit(value: unknown): void {
+    if (typeof value !== "object" || value === null) return;
+    ancestors ??= new Set([payload]);
+    if (ancestors.has(value))
+      throw new UnsafeEventPayloadError(
+        `Surface ${surfaceKind} event payload contains a cycle.`,
+      );
+    ancestors.add(value);
+    assertSafeEventRecord(value, surfaceKind, ancestors);
+    ancestors.delete(value);
+  }
+
+  if (Array.isArray(payload)) {
+    for (const item of payload) visit(item);
+    return;
+  }
+  const record = payload as Record<string, unknown>;
+  for (const key of Object.keys(record)) {
+    if (HIDDEN_CARD_LIST_FIELD.test(key))
+      throw new UnsafeEventPayloadError(
+        `Surface ${surfaceKind} payload field ${key} may leak hidden card data.`,
+      );
+    if (ACTOR_PRIVATE_LABEL_FIELD.test(key))
+      throw new UnsafeEventPayloadError(
+        `Surface ${surfaceKind} payload field ${key} may leak actor-private labels.`,
+      );
+    visit(record[key]);
+  }
 }
 
 export function sanitizeChoiceViewForSurface<
@@ -118,7 +154,7 @@ export function assertNoHiddenCardLists(
   surfaceKind: SurfaceKind,
 ): void {
   for (const key of Object.keys(payload)) {
-    if (HIDDEN_CARD_LIST_FIELD_PATTERNS.some((pattern) => pattern.test(key)))
+    if (HIDDEN_CARD_LIST_FIELD.test(key))
       throw new Error(
         `Surface ${surfaceKind} payload field ${key} may leak hidden card data.`,
       );
@@ -130,12 +166,11 @@ export function assertNoActorPrivateLabels(
   surfaceKind: SurfaceKind,
   options: { rejectGenericLabel?: boolean } = {},
 ): void {
-  const patterns =
-    options.rejectGenericLabel === false
-      ? EVENT_ACTOR_PRIVATE_LABEL_FIELD_PATTERNS
-      : ACTOR_PRIVATE_LABEL_FIELD_PATTERNS;
   for (const key of Object.keys(payload)) {
-    if (patterns.some((pattern) => pattern.test(key)))
+    if (
+      ACTOR_PRIVATE_LABEL_FIELD.test(key) ||
+      (options.rejectGenericLabel !== false && /^label$/i.test(key))
+    )
       throw new Error(
         `Surface ${surfaceKind} payload field ${key} may leak actor-private labels.`,
       );

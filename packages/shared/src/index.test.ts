@@ -22,7 +22,6 @@ describe("current ability payload discriminator registry", () => {
   it("covers current runtime discriminator families without dead v1919 aliases", () => {
     expect(ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS).toEqual(
       expect.arrayContaining([
-        "v1911HiddenZoneAbility",
         "v1917AssetAbility",
         "v1919OperationAbility",
         "v1922RunnerEventAbility",

@@ -77,7 +77,6 @@ function makeHost(
     run?: HiddenZoneArrangeChoiceHandlerHost["state"]["run"];
     hiddenKinds?: Record<string, string>;
     utilitySources?: CardInstanceId[];
-    reorderAssets?: CardDefinitionId[];
   } = {},
 ): HiddenZoneArrangeChoiceHandlerHost {
   const definitions = input.definitions ?? {};
@@ -121,8 +120,6 @@ function makeHost(
         definitions[cardId] ?? definition(syntheticCardDefinitionId(cardId)),
       hiddenReplacementLongtailKind: (definitionId) =>
         input.hiddenKinds?.[definitionId],
-      isHiddenZoneReorderAssetDefinition: (definitionId) =>
-        (input.reorderAssets ?? []).includes(definitionId),
       hasCorpUtilityKind: (cardId, kind) =>
         kind === "corp_rd_top_reorder" &&
         (input.utilitySources ?? []).includes(cardId),
@@ -138,7 +135,6 @@ function makeHost(
         state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
         state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
       },
-      rezzedCorpRootCardIds: () => [],
     },
     servers: {
       mustServer: (serverId) => {

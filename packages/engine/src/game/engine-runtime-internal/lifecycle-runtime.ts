@@ -1,28 +1,16 @@
 import type { RandomHqDiscardContext } from "@netgrid/shared";
 import type {
-  CardDefinition,
   CardDefinitionId,
   CardInstanceId,
-  CardRunnerEventLongtailImplementation,
   ChoiceRequest,
   CorpServer,
-  CorpZoneChoiceHandlerHost,
-  CounterType,
-  DamageSummary,
   DrawTaxDecision,
   GameState,
-  HiddenZoneArrangeChoiceHandlerHost,
-  HiddenZoneNonSearchChoiceHandlerHost,
-  HiddenZoneSearchActivationHandlerHost,
-  HiddenZoneSearchChoiceHandlerHost,
   LegalAction,
-  PendingChoiceResolutionHost,
   PlayerAction,
-  ResolvedGameEffect,
   RunnerDrawSummary,
   RuntimeDeps,
   ServerId,
-  Side,
 } from "./runtime-shared";
 import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/definition-types";
 import { clearDepartedBreakerStrength } from "../state/temporary-breaker-strength";
@@ -76,7 +64,7 @@ export function createLifecycleRuntime(
     for (const hostedId of hostedIds) {
       trashRunnerInstalledProgram(state, hostedId);
     }
-    const definition = deps.definitionFor(state, cardId);
+    deps.definitionFor(state, cardId);
     const instance = deps.mustInstance(state.cardInstances, cardId);
     const usesMemory = runnerProgramUsesMemory(state, cardId);
     const memoryCost = runnerInstalledProgramMemoryCost(state, cardId);
