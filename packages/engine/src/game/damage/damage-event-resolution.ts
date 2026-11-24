@@ -54,26 +54,10 @@ export function doDamage(
   // vollständig abgearbeitet sein, damit Replay und RandomCounter stabil bleiben.
   assertPositiveIntegerAmount(request.amount);
   const runnerGripBefore = state.runner.grip.length;
-  if (request.amount > runnerGripBefore) {
-    state.winner = "corp";
-    state.gameEndReason = "flatline";
-    state.phase = "game_over";
-    state.timingPoint = "game.checkpoint";
-    state.activeSide = "corp";
-    delete state.run;
-    return {
-      damageType: request.damageType,
-      amount: request.amount,
-      cardsTrashed: 0,
-      flatline: true,
-      runnerGripBefore,
-      runnerGripAfter: state.runner.grip.length,
-    };
-  }
-
+  const cardsToTrash = Math.min(request.amount, runnerGripBefore);
   const available = state.runner.grip.slice();
   const selected: CardInstanceId[] = [];
-  for (let index = 0; index < request.amount; index += 1) {
+  for (let index = 0; index < cardsToTrash; index += 1) {
     const value = nextRandom(
       state,
       [
@@ -105,23 +89,30 @@ export function doDamage(
     };
   }
 
-  if (request.damageType === "core") state.runner.coreDamage += request.amount;
-  recordRunnerDamageDuringCurrentAction(state, request.runnerActionOrdinal);
-
-  const summary = {
+  const summary: DamageSummary = {
     damageType: request.damageType,
     amount: request.amount,
     cardsTrashed: selected.length,
-    flatline: false,
+    flatline: request.amount > runnerGripBefore,
     runnerGripBefore,
     runnerGripAfter: state.runner.grip.length,
-    ...(request.damageType === "core"
-      ? {
-          coreDamageAfter: state.runner.coreDamage,
-          runnerMaxHandSizeAfter: maxHandSize(state, "runner"),
-        }
-      : {}),
   };
+  if (summary.flatline) {
+    state.winner = "corp";
+    state.gameEndReason = "flatline";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    state.activeSide = "corp";
+    delete state.run;
+    return summary;
+  }
+
+  if (request.damageType === "core") {
+    state.runner.coreDamage += request.amount;
+    summary.coreDamageAfter = state.runner.coreDamage;
+    summary.runnerMaxHandSizeAfter = maxHandSize(state, "runner");
+  }
+  recordRunnerDamageDuringCurrentAction(state, request.runnerActionOrdinal);
   if (request.damageType === "meat" && selected.length > 0 && !state.winner)
     requireDamageCoreHost().reactions?.openPostMeatDamageReactionWindow(
       state,

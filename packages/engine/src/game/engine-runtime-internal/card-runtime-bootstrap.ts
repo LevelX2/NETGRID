@@ -14,7 +14,6 @@ import {
 import { rezCostForCard } from "../payment";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
-  corpInstalledCardIds,
   definitionFor,
   mustInstance,
   runnerInstalledCardIds,
@@ -177,12 +176,6 @@ export function configureCardRuntimeBootstrap() {
         affordableRezzedInstalledIceIdsForRunner:
           runtimePorts.affordableRezzedInstalledIceIdsForRunner,
         unrezzedInstalledIceIds: runtimePorts.unrezzedInstalledIceIds,
-        installedIceIds: (state) =>
-          corpInstalledCardIds(state).filter(
-            (cardId) =>
-              mustInstance(state.cardInstances, cardId).zone.zone ===
-              "serverIce",
-          ),
         rezzedBlackIceIds: runtimePorts.rezzedBlackIceIds,
         startPayRezCostToTrashRezzedIceChoice:
           runtimePorts.startPayRezCostToTrashRezzedIceChoice,

@@ -196,10 +196,10 @@ import {
   loadRecentSession,
   loadStoredSession,
   persistSession,
-  rememberRecentSession,
   removeRecentSession,
   storedSessionMatches,
   subscribeToRecoverableSessionChanges,
+  updateSessionRecovery,
   type RecentSessionInfo,
   type SessionInfo,
 } from "./session-recovery";
@@ -423,6 +423,7 @@ import {
   accessRevealFromLatestEvent,
   archivesRevealFromLatestEvent,
   exposeReviewFromLatestEvent,
+  exposedBoardIceForReview,
   gypsyScheduleAnalyzerRevealFromPendingChoice,
   hqAgendaRevealFromLatestEvent,
   retainedArchivesRevealEvent,
@@ -477,7 +478,6 @@ import {
   playerSlotForSide,
   resultReasonLabel,
   seriesStatusText,
-  shouldForgetRecoveryStatus,
 } from "../features/match-start/lobby-format";
 import {
   formatCardCount,
@@ -3108,11 +3108,6 @@ export default function Page() {
     accessReveal?.kind === "access" &&
     accessReveal.outcomeStatus,
   );
-  const interactionPresentationBlocked = interactionPresentationBlocksAi({
-    damageOpen: Boolean(currentDamageImpact),
-    accessOutcomeOpen: accessOutcomeAwaitingConfirmation,
-    successfulRunOutcomeOpen: showSuccessfulRunOutcome,
-  });
   const exposeReviewEvent = payload
     ? retainedExposeReviewEvent(
         payload.playerView.publicEvents,
@@ -3141,6 +3136,20 @@ export default function Page() {
     !viewedApproachIceId &&
     !viewedInstalledExposeCardId,
   );
+  const outermostIceReviewOpen = Boolean(
+    activeMatchIsGame && showExposeReview && exposeReview?.outermostIce,
+  );
+  const exposedBoardIce =
+    outermostIceReviewOpen && exposeReview && activeView
+      ? exposedBoardIceForReview(exposeReview, activeView)
+      : null;
+  const interactionPresentationBlocked =
+    outermostIceReviewOpen ||
+    interactionPresentationBlocksAi({
+      damageOpen: Boolean(currentDamageImpact),
+      accessOutcomeOpen: accessOutcomeAwaitingConfirmation,
+      successfulRunOutcomeOpen: showSuccessfulRunOutcome,
+    });
   const showResultModal = overlayPresentation.showResultModal;
   const canReturnToStart = Boolean(
     payload &&
@@ -3753,6 +3762,7 @@ export default function Page() {
     lastSeenAccessPresentationEventIdRef.current =
       payload?.playerView.publicEvents.at(-1)?.eventId ?? null;
     setDismissedAccessEventIds([]);
+    setDismissedExposeReviewEventId(null);
     setPendingAccessPresentationEvents([]);
     pendingAccessContinuationRef.current = null;
     setDismissedSuccessfulRunOutcomeEventId(null);
@@ -4446,6 +4456,8 @@ export default function Page() {
         ...(next.joinUrl ? { joinUrl: next.joinUrl } : {}),
       };
       persistSession(nextSession);
+      removeRecentSession(session);
+      sessionRef.current = nextSession;
       setSession(nextSession);
       presentMatchStartLogo(next.matchId);
       setPayload(fromInitialResponse(next, next.hostSide));
@@ -4866,7 +4878,7 @@ export default function Page() {
         reconnectToken: reconnected.reconnectToken,
         webSocketUrl: reconnected.webSocketUrl,
       };
-      persistSession(nextSession);
+      persistSession(nextSession, reconnected);
       setSession(nextSession);
       if (reconnected.lobby || !reconnected.playerView) {
         setPayload(null);
@@ -4900,24 +4912,13 @@ export default function Page() {
       setLobby(remotePayload);
     }
     if (session) {
-      rememberRecentSession(session, remotePayload);
+      updateSessionRecovery(session, remotePayload);
       setRecentSession(loadRecentSession());
     }
     if (isInvalidatingTerminalStatus(remotePayload.matchStatus)) {
-      if (session) {
-        clearStoredSession(session);
-        removeRecentSession(session);
-        setRecentSession(loadRecentSession());
-      } else {
-        clearStoredSession();
-      }
+      if (!session) clearStoredSession();
       closeSocket();
       setConnection("offline");
-    }
-    if (session && shouldForgetRecoveryStatus(remotePayload.matchStatus)) {
-      clearStoredSession(session);
-      removeRecentSession(session);
-      setRecentSession(loadRecentSession());
     }
   }
 
@@ -4949,11 +4950,11 @@ export default function Page() {
     if (bootstrapped && "playerView" in bootstrapped) {
       setPayload(bootstrapped);
       setLobby(null);
-      rememberRecentSession(nextSession, bootstrapped);
+      persistSession(nextSession, bootstrapped);
     } else if (bootstrapped) {
       setPayload(null);
       setLobby(bootstrapped);
-      rememberRecentSession(nextSession, bootstrapped);
+      persistSession(nextSession, bootstrapped);
     } else {
       setNotice(noticeT("recentLoadFailed"));
     }
@@ -5003,6 +5004,7 @@ export default function Page() {
     options: { immediateAudio?: boolean; confirmed?: boolean } = {},
   ): boolean => {
     if (
+      outermostIceReviewOpen ||
       !session ||
       !payload ||
       !isMatchOfferId(action.actionId) ||
@@ -5703,18 +5705,35 @@ export default function Page() {
     });
   };
 
-  const leaveMatch = () => {
-    const leavingSession = session;
+  const clearMatchView = () => {
     closeSocket();
-    clearStoredSession(leavingSession ?? undefined);
-    if (leavingSession) removeRecentSession(leavingSession);
-    setRecentSession(loadRecentSession());
+    sessionRef.current = null;
     setSession(null);
     setPayload(null);
     setLobby(null);
     setConnection("offline");
     setSeriesTransitioning(false);
+    setDismissedResultKey(null);
     setNotice("");
+  };
+
+  const leaveMatch = () => {
+    clearStoredSession(session ?? undefined);
+    if (session) removeRecentSession(session);
+    setRecentSession(loadRecentSession());
+    clearMatchView();
+  };
+
+  const returnToStartFromGame = () => {
+    if (!session || !payload || !canStartNextSeriesGame) {
+      leaveMatch();
+      return;
+    }
+    updateSessionRecovery(session, payload);
+    setRecentSession(loadRecentSession());
+    clearMatchView();
+    setEntryTab("play");
+    selectStartTab("resume");
   };
 
   const copyJoinLink = async () => {
@@ -6272,10 +6291,17 @@ export default function Page() {
 
   function applyServerMessage(message: ServerMessage) {
     if (message.type === "lobby_update") {
-      setLobby(message.payload);
+      const next = message.payload;
+      const activeSession = sessionRef.current;
+      if (
+        !activeSession ||
+        activeSession.matchId !== next.matchId ||
+        activeSession.side !== next.side
+      )
+        return;
+      setLobby(next);
       setPayload(null);
-      if (sessionRef.current)
-        rememberRecentSession(sessionRef.current, message.payload);
+      updateSessionRecovery(activeSession, next);
       return;
     }
     if (message.type === "state_update") {
@@ -6305,9 +6331,8 @@ export default function Page() {
       }
       setPayload((current) => latestSideUpdate(current, next));
       setLobby(null);
-      if (shouldForgetRecoveryStatus(next.matchStatus)) {
-        clearStoredSession(activeSession);
-        removeRecentSession(activeSession);
+      if (next.matchStatus !== "active") {
+        updateSessionRecovery(activeSession, next);
         setRecentSession(loadRecentSession());
       }
       return;
@@ -7106,7 +7131,7 @@ export default function Page() {
                     setMatchDetailsOpen((open) => !open)
                   }
                   onStartNextSeriesGame={startNextSeriesGame}
-                  onLeaveMatch={leaveMatch}
+                  onLeaveMatch={returnToStartFromGame}
                   onRequestForfeitMatch={requestForfeitMatch}
                   onRequestCancelSimulation={requestCancelSimulation}
                   onToggleRightRail={() =>
@@ -7210,6 +7235,7 @@ export default function Page() {
               !matchEnded &&
               !currentDamageImpact &&
               !showAccessReveal &&
+              !outermostIceReviewOpen &&
               !showSuccessfulRunOutcome ? (
                 <OpponentActionOverlay
                   cue={currentActionCue}
@@ -7643,6 +7669,7 @@ export default function Page() {
                       activeRunIceId={activeRunIceId}
                       viewedApproachIceId={viewedApproachIceId}
                       viewedInstalledExposeCardId={viewedInstalledExposeCardId}
+                      {...(exposedBoardIce ? { exposedBoardIce } : {})}
                       exposedCardHighlightIds={new Set(exposedCardHighlightIds)}
                       selectedActionContext={selectedActionContext}
                       selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}

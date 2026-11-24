@@ -30373,6 +30373,8 @@ describe("plan-bound Corp delayed-success continuation", () => {
       input.playerView.pendingChoice = {
         choiceId,
         side: "corp",
+        sourceCardInstanceId: "dr-dreff",
+        sourceCardDefinitionId: 570,
         source: `p3_54.delayed_success:dr-dreff:temporary_hq_ice_encounter_after_successful_run:${attackedServerId}:202`,
         prompt: "Dr. Dreff: Successful Run verzögern?",
         kind: "select_option",

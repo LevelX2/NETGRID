@@ -2249,7 +2249,7 @@
     },
     {
       "standardDeckId": "standard_corp_siren_fortress",
-      "version": "1.1.0",
+      "version": "1.4.0",
       "status": "active",
       "name": "Siren Fortress",
       "side": "corp",
@@ -2316,8 +2316,12 @@
           "quantity": 2
         },
         {
-          "cardId": 508,
-          "quantity": 2
+          "cardId": 502,
+          "quantity": 3
+        },
+        {
+          "cardId": 507,
+          "quantity": 3
         },
         {
           "cardId": 521,
@@ -2338,20 +2342,12 @@
         {
           "cardId": 579,
           "quantity": 2
-        },
-        {
-          "cardId": 580,
-          "quantity": 2
-        },
-        {
-          "cardId": 586,
-          "quantity": 2
         }
       ],
       "source": {
         "kind": "curated_local_deck",
-        "sourceDeckId": "local_corp_siren_fortress",
-        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
+        "sourceDeckId": "local_corp_siren_fortress_wirtschaft",
+        "sourceDeckVersion": "1.4.0-wirtschaft-2026-11-22"
       }
     },
     {

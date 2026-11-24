@@ -5382,6 +5382,10 @@ export class MultiplayerService {
     this.storage.close?.();
   }
 
+  async warmUpAiWorker(): Promise<void> {
+    await this.aiDecisionWorkers?.warmUp();
+  }
+
   private async resolveUndo(
     input: {
       matchId: string;

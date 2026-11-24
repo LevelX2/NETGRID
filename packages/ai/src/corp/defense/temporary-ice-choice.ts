@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { corpCurrentRunAccessServerId } from "./corp-central-defense-facts-adapter";
 import { selectableChoiceOptions } from "../../runtime/choice-option";
 import { exactCurrentChoiceAction } from "../../runtime/plan-bound-choice-contract";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -20,13 +21,25 @@ export function currentDelayedSuccessChoice(
   const sourceCardId = source?.[1];
   const serverId = source?.[2];
   const { stateVersion } = input.playerView;
+  const sourceCard = input.playerView.servers
+    .find((server) => server.id === serverId)
+    ?.root.find(
+      (card) =>
+        card.instanceId === sourceCardId &&
+        card.known &&
+        card.rezzed === true &&
+        card.definitionId === 570 &&
+        card.definitionId === choice.sourceCardDefinitionId,
+    );
   const options = selectableChoiceOptions(choice.options);
   if (
     input.side !== "corp" ||
     !sourceCardId ||
     !serverId ||
     source?.[3] !== String(stateVersion) ||
-    input.playerView.run?.attackedServerId !== serverId ||
+    choice.sourceCardInstanceId !== sourceCardId ||
+    !sourceCard ||
+    input.playerView.run?.position?.kind !== "server" ||
     choice.kind !== "select_option" ||
     choice.visibility !== "hidden_info_barrier" ||
     choice.minSelections !== 1 ||
@@ -34,7 +47,7 @@ export function currentDelayedSuccessChoice(
     exactCurrentChoiceAction(input, choice) !== action
   )
     return undefined;
-  return { sourceCardId, serverId, options };
+  return { sourceCard, sourceCardId, serverId, options };
 }
 
 /** The caller sorted legal effect-bearing choices by their Engine cost.
@@ -44,12 +57,12 @@ export function preferUnbreakableEquivalentTemporaryIce(
   input: AiDecisionInput,
   options: readonly Option[],
 ): Option | null | undefined {
-  const attackedServerId = input.playerView.run?.attackedServerId;
+  const accessServerId = corpCurrentRunAccessServerId(input);
   const agendaExposed =
     input.playerView.servers
-      .find((server) => server.id === attackedServerId)
+      .find((server) => server.id === accessServerId)
       ?.root.some((card) => card.known && card.type === "agenda") ||
-    (attackedServerId === "hq" &&
+    (accessServerId === "hq" &&
       input.playerView.own.gripOrHq.some(
         (card) => card.known && card.type === "agenda",
       ));

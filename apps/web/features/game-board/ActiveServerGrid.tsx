@@ -61,6 +61,7 @@ export function ActiveServerGrid({
   activeRunIceId,
   viewedApproachIceId,
   viewedInstalledExposeCardId,
+  exposedBoardIce,
   exposedCardHighlightIds,
   selectedActionContext,
   selectedDiscardOptionIdSet,
@@ -89,6 +90,7 @@ export function ActiveServerGrid({
   activeRunIceId: string | null;
   viewedApproachIceId: string | null;
   viewedInstalledExposeCardId: string | null;
+  exposedBoardIce?: ReadonlyMap<string, DisplayVisibleCard>;
   exposedCardHighlightIds: ReadonlySet<string>;
   selectedActionContext: ActionContext | null;
   selectedDiscardOptionIdSet: ReadonlySet<SelectionId>;
@@ -239,7 +241,8 @@ export function ActiveServerGrid({
                 return lane.cards.map((card, index) => {
                   const isCurrentIce =
                     lane.kind === "ice" && activeRunIceId === card.instanceId;
-                  const displayCard = enrichCard(card);
+                  const exposedIce = exposedBoardIce?.get(card.instanceId);
+                  const displayCard = exposedIce ?? enrichCard(card);
                   const cardView = (
                     <CardView
                       key={card.instanceId}
@@ -296,12 +299,12 @@ export function ActiveServerGrid({
                       viewMarkerActive={
                         (lane.kind === "ice" &&
                           viewedApproachIceId === card.instanceId) ||
-                        viewedInstalledExposeCardId === card.instanceId
+                        viewedInstalledExposeCardId === card.instanceId ||
+                        Boolean(exposedIce)
                       }
                       {...fieldChoiceCardProps(card)}
                       onAction={onAction}
-                      onFocus={onFocus}
-                      onActionContextSelect={onActionContextSelect}
+                      {...(!exposedIce ? { onFocus, onActionContextSelect } : {})}
                     />
                   );
                   if (lane.kind !== "ice") return cardView;

@@ -2374,8 +2374,16 @@ mit genau einem Aktionspreis und einem festen öffentlichen `make_run`-Effekt.
 Abweichender HQ-/R&D-Zugriff benötigt aktuelle Accessquotes und vollständig
 gebundenes eigenes Inventar; fehlende Fakten bleiben unknown. Der Fact
 beschreibt eine Möglichkeit, keine Zielwahrscheinlichkeit. Der bestehende
-globale Defenseowner lässt sie zur exakten Install-/Fundingprüfung zu;
-er garantiert weder ihre Auswahl noch eine vollständig bessere Allokation.
+globale Defenseowner lässt sie zur exakten Install-/Fundingprüfung zu.
+
+Paarung 739, G4 D174 zeigt die Grenze der qualitativen Bewertung nach der
+Zulassung. Die Data-Wall-Installationen auf HQ, Archives und Remote 1
+erhalten im Verteidigungsvergleich jeweils den Wert 18. Die KI wählt HQ. Der
+folgende Runner-Zug erreicht HQ mit öffentlich installiertem Shredder Uplink
+Protocol über das freie Archives. Bei der Bewertung einer besseren
+Allokation sind der zusätzliche Schutz am gemeinsamen Zugriffsziel, die
+Rezreserve, die Breakkosten des Runners und seine bezahlbaren Ausweichrouten
+gemeinsam zu prüfen.
 
 Für einen offenen, legalen Eintritt zu einer unmittelbar siegbringenden
 Zentralagenda kann eine einzelne feste Trace-ICE-Schicht den direkten
@@ -2477,6 +2485,16 @@ bricht, erzeugt keine harte Finanzierungsreserve. Zusatzsteuer, weitere Effekte,
 unzureichende Stärke oder unbekannte Quotes erfüllen diesen Ausschlussnachweis
 nicht. Ein unabhängiger dringlicher Bedarf nach besserem Schutz bleibt bestehen.
 
+Am letzten Rez-Fenster eines regulären Zentralzugriffs prüft
+`corp.defend_servers` den bedingungslosen Zugriffseffekt einer installierten
+Root-Karte. Ein Rez zur Verringerung der gespeicherten Zugriffskarten benötigt
+einen aktuell bedrohten Agenda-Bestand und mindestens einen ungeschützten
+Platz in der HQ- oder R&D-Zugriffsquote. Bereits aktive Reduktionen zählen
+zur Deckung. Die bestehende Score-Reserve gilt auch für diesen Rez.
+Der öffentliche Runursprung muss einen regulären Zugriff belegen.
+Zugriffsersatz und unbekannte Kartenwirkungen begründen keine Ausgabe.
+Die Gegenproben stehen in `central-access-reduction-rez.test.ts`.
+
 Gemeinsame Hint-Begriffe rechtfertigen keine gemeinsame Rez-Heuristik.
 Dr. Dreff wird nur im letzten relevanten Begegnungsfenster desselben Forts
 produktiv, wenn sichtbares HQ-ICE unter seinem eigenen Halb-Rez-Kostenvertrag
@@ -2488,10 +2506,15 @@ benötigen ebenfalls ein eigenes Modell.
 
 Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
 Defense und Payload-Erzeugung prüfen denselben Choice-Vertrag. Aktueller
-Timingpunkt, StateVersion, angegriffener Server und auswählbare Options-IDs
-müssen mit dem LegalAction-Angebot übereinstimmen. Defense prüft diese Bindung,
-bevor es eine ICE-Option oder das auswählbare Decline in den Plan übernimmt.
-Bei einer exponierten eigenen Agenda im angegriffenen Fort oder HQ und
+Timingpunkt, StateVersion, Quellinstanz und auswählbare Options-IDs müssen
+mit dem LegalAction-Angebot übereinstimmen. Die private Engine-Choice benennt
+den Server, auf dem der Run als erfolgreich zählt. Dort muss ihre gerezzte
+Quelle liegen. Die Herkunft des Runs und die Breakquote der temporären
+Begegnung sind an den physischen Run gebunden. Bei Private LDL Access kann
+die Begegnung auf HQ stattfinden, während Dr. Dreff in R&D auslöst.
+Der native Nachweis steht in `corp-dreff-visible-budget.test.ts`.
+Der Plan übernimmt die ICE-Option oder das auswählbare Decline erst nach dieser Prüfung.
+Bei einer exponierten eigenen Agenda am tatsächlichen Zugriffsziel und
 mehreren vollständig quotierten produktiven Optionen vergleicht derselbe
 Owner die aktuelle sichtbare Runner-Breakantwort. Die
 Engine liefert dafür eine Corp-private Quote mit Karteninstanz, Fort, Run

@@ -95,14 +95,6 @@ export function isInvalidatingTerminalStatus(status: MatchStatus): boolean {
   );
 }
 
-export function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
-  return (
-    isInvalidatingTerminalStatus(status) ||
-    status === "finished" ||
-    status === "forfeited"
-  );
-}
-
 export function seriesStatusText(
   series: SeriesResultSummary,
   viewerLabel = "Du",

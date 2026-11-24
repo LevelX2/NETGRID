@@ -99,8 +99,13 @@ AI konfiguriert ist. Dabei gilt:
   wiederhergestellten residenten Portfolio neu.
 - Standardpayloads bleiben side-gefiltert.
 
-Der HTTP-Server lässt produktive KI-Entscheidungen in einem Pool mit zwei
-Worker-Threads berechnen. Der Auftrag enthält das seitensichere KI-DTO und
+Der HTTP-Server lässt produktive KI-Entscheidungen in einem Pool mit bis zu
+zwei Worker-Threads berechnen. Beim Serverstart lädt der erste Worker die
+KI-Runtime und bestätigt vor dem Öffnen des HTTP-Ports seine Bereitschaft.
+Der zweite Worker startet bei parallelem Bedarf. Im Quellbetrieb lädt der
+Worker direkt den Entscheidungseinstieg.
+
+Der Auftrag enthält das seitensichere KI-DTO und
 den laufenden KI-Speicher. Regelabfragen laufen über typisierte Nachrichten
 gegen den vom Server gehaltenen, für diese Partie gesperrten Zustand.
 Der Server übernimmt den fortgeschriebenen KI-Speicher und wendet das

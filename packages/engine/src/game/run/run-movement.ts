@@ -302,15 +302,15 @@ export function jackOutRunner(
   host: RunMovementHost,
   legalAction: LegalAction,
 ): RunMovementActionResult {
-  const run = host.state.run;
-  const serverLabel = run
-    ? host.servers.publicServerLabel(run.attackedServerId)
-    : undefined;
-  const reachedServerBeforeAccess = run?.position.kind === "server";
+  const run = mustRun(host.state);
+  const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
   const jackOutPayload = {
     ...(legalAction.payload ?? {}),
+    serverId: run.attackedServerId,
     ...(serverLabel ? { serverLabel } : {}),
-    ...(reachedServerBeforeAccess ? { jackOutBeforeAccess: true } : {}),
+    ...(run.position.kind === "ice"
+      ? { jackOutIcePosition: run.position.iceIndex + 1 }
+      : { jackOutBeforeAccess: true }),
   };
   const payment = payJackOutAdditionalCost(
     runDurationPaymentHost(host.state),

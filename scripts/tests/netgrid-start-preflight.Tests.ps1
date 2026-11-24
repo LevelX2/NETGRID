@@ -16,6 +16,17 @@ Describe "Startfehlerdiagnose" {
     Get-NetgridStartupDiagnostic -LogPath $log -StartOffset 0 | Should Match 'passenden aktuellen Version'
   }
 
+  It "benennt die betroffene Kontodatenbank und erklärt die Folgen eines Resets" {
+    $log = Join-Path $TestDrive "account-schema.log"
+    [IO.File]::WriteAllText($log, 'StorageError: Die Kontodatenbank nutzt kein unterstütztes Kontoschema.')
+    $message = Get-NetgridStartupDiagnostic -LogPath $log -StartOffset 0
+    $message | Should Match 'NETGRID_ACCOUNT_SQLITE_PATH'
+    $message | Should Match 'NETGRID_SQLITE_STORAGE_PATH'
+    $message | Should Match 'sichern und zurücksetzen'
+    $message | Should Match 'Konten und Kontodecks'
+    $message | Should Match 'bisherige Partien'
+  }
+
   It "meldet ein nicht erkanntes Schema" {
     $log = Join-Path $TestDrive "unknown.log"
     [IO.File]::WriteAllText($log, 'Storage-Schema konnte nicht sicher erkannt werden.')

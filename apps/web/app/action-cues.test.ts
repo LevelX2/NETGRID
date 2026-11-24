@@ -297,7 +297,26 @@ describe("deriveOpponentActionCues", () => {
     expect(cues[0]?.title).toBe("Die Korp-KI hat ihre Pflichtkarte gezogen.");
     expect(cues[0]?.description).toBeUndefined();
     expect(cues[0]?.aiExplanation).toBe("Die Korp braucht ihre Pflichtkarte.");
-    expect(JSON.stringify(cues[0])).not.toContain("ce");
+    expect(cues[0]).not.toHaveProperty("aiReasonCode");
+    expect(JSON.stringify(cues[0])).not.toMatch(/\b(?:corp\.mandatory_draw|ce)\b/u);
+  });
+
+  it("leaves the outermost ICE reveal to its confirmation dialog", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [
+        event(110, "play_event", {
+          actor: "runner",
+          sourceDefinitionId: 304,
+          hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
+          publicRevealKind: "expose",
+          publicRevealDefinitionIds: "589,589",
+        }),
+      ],
+    });
+
+    expect(cues).toEqual([]);
   });
 
   it("shows each resolved City Surveillance choice exactly once", () => {

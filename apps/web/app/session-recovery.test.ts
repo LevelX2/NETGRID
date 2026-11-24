@@ -3,7 +3,10 @@ import {
   loadRecentSessions,
   loadStoredSession,
   parseRecoverableSessionFromStorage,
+  persistSession,
+  SESSION_STORAGE_KEY,
   serializeRecoverableSessionForStorage,
+  updateSessionRecovery,
   type SessionInfo,
 } from "./session-recovery";
 
@@ -116,6 +119,56 @@ describe("session recovery storage", () => {
     stubWindow(localStorage, sessionStorage);
 
     expect(loadStoredSession()).toEqual(otherTabSession);
+  });
+
+  it.each(["finished", "forfeited"] as const)(
+    "recovers a %s game with a pending series continuation after reopening",
+    (matchStatus) => {
+      const localStorage = memoryStorage();
+      stubWindow(localStorage, memoryStorage());
+      persistSession(session);
+
+      const result = {
+        matchStatus,
+        resultSummary: { series: { nextAvailable: true } },
+      };
+      updateSessionRecovery(session, result);
+      stubWindow(localStorage, memoryStorage());
+
+      expect(loadStoredSession()).toEqual(session);
+      expect(loadRecentSessions()).toMatchObject([
+        { matchId: session.matchId, matchStatus },
+      ]);
+      persistSession(session, result);
+      expect(loadStoredSession()).toEqual(session);
+    },
+  );
+
+  it.each([
+    { matchStatus: "finished" },
+    { matchStatus: "forfeited" },
+    { matchStatus: "finished", resultSummary: { series: { nextAvailable: false } } },
+    { matchStatus: "cancelled" },
+    { matchStatus: "abandoned" },
+  ] as const)("clears recovery on terminal results without a continuation (%j)", (result) => {
+    stubWindow(memoryStorage(), memoryStorage());
+    persistSession(session);
+    updateSessionRecovery(session, result);
+    expect(loadStoredSession()).toBeNull();
+    expect(loadRecentSessions()).toEqual([]);
+    persistSession(session, result);
+    expect(loadStoredSession()).toBeNull();
+    expect(loadRecentSessions()).toEqual([]);
+  });
+
+  it("does not discard a different match's credentials for a terminal snapshot", () => {
+    const otherSession: SessionInfo = { ...session, matchId: "match_other" };
+    const tabStorage = memoryStorage({
+      [SESSION_STORAGE_KEY]: JSON.stringify(otherSession),
+    });
+    stubWindow(memoryStorage(), tabStorage);
+    updateSessionRecovery(session, { matchStatus: "finished" });
+    expect(loadStoredSession()).toEqual(otherSession);
   });
 });
 

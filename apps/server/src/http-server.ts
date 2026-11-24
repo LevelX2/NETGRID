@@ -993,8 +993,17 @@ export async function startNetgridServer(
     accountStatistics?: AccountMatchStatisticsService;
   } = {},
 ): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
+  const deploymentConfig = loadDeploymentConfig();
+  const service = options.service ?? defaultService(deploymentConfig);
+  try {
+    await service.warmUpAiWorker();
+  } catch (error) {
+    service.closeStorage();
+    throw error;
+  }
   const accountDecks = options.accountDecks ?? createConfiguredAccountDecks();
-  const handle = createNetgridHttpServer(options.service, {
+  const handle = createNetgridHttpServer(service, {
+    deploymentConfig,
     accountAuth: options.accountAuth ?? createConfiguredAccountAuth(),
     accountDecks,
     accountMatchStartPreferences:

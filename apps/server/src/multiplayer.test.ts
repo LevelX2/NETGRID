@@ -12294,7 +12294,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
-  it("does not stall Runner AI when Forged Activation Orders can target rezzed ICE", async () => {
+  it("continues the Runner AI turn when Forged Activation Orders has no unrezzed target", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
       tokenSalt: "ai-runner-forged-no-unrezzed",
@@ -12350,7 +12350,6 @@ describe("MVP 0.2 multiplayer service", () => {
       gameState,
       298,
     );
-    // This case certifies the legal continuation after a known liquidity event.
     moveRunnerCardToGripForTest(gameState, 595);
     expect(
       getLegalActions(gameState, "runner").some(
@@ -12359,7 +12358,7 @@ describe("MVP 0.2 multiplayer service", () => {
           sourceDefinitionForServerTest(gameState, action) ===
             298,
       ),
-    ).toBe(true);
+    ).toBe(false);
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;

@@ -9,12 +9,80 @@ import { describe, expect, it } from "vitest";
 
 import {
   accessRevealFromLatestEvent,
+  exposedBoardIceForReview,
+  exposeReviewFromLatestEvent,
   gypsyScheduleAnalyzerRevealFromPendingChoice,
   hqAgendaRevealFromLatestEvent,
   retainedHqAgendaRevealEvent,
   retainedSecurityPurgeRevealEvent,
   securityPurgeRevealFromLatestEvent,
 } from "../features/actions/access-review-derivation";
+import { retainedExposeReviewEvent } from "./action-board-ui";
+
+describe("Ice and Data’s Guide to the Net presentation", () => {
+  const exposure = event(100, {
+    actionType: "play_event",
+    actor: "runner",
+    sourceTitle: "Ice and Data’s Guide to the Net",
+    hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
+    publicRevealKind: "expose",
+    publicRevealDefinitionIds: "589,589,601",
+    exposedServerIds: "hq,rd,r1",
+    exposedPositionKeys: "ice:0,ice:0,ice:1",
+    exposedServerLabels: "HQ,R&D,Remote 1",
+  });
+  const details = {
+    589: catalogCard(589, "Wall of Static", "ice"),
+    601: catalogCard(601, "Quandary", "ice"),
+  };
+
+  it("holds every exposed copy in server order until the event is confirmed", () => {
+    const events = [exposure, event(101, { actionType: "gain_credit" })];
+    const pending = retainedExposeReviewEvent(events, null);
+    const review = exposeReviewFromLatestEvent(pending ?? undefined, details, "runner");
+
+    expect(review?.cards.map((card) => [card.definitionId, card.known])).toEqual([
+      [589, true],
+      [589, true],
+      [601, true],
+    ]);
+    expect(review?.serverLabels).toEqual(["HQ", "R&D", "Remote 1"]);
+    expect(retainedExposeReviewEvent(events, exposure.eventId)).toBeNull();
+  });
+
+  it("turns over only the public outer ICE in the matching board state", () => {
+    const review = exposeReviewFromLatestEvent(exposure, details, "runner")!;
+    const hiddenIce = (instanceId: string) => ({
+      instanceId,
+      known: false,
+      rezzed: false,
+    });
+    const view = {
+      stateVersion: exposure.stateVersionAfter,
+      servers: [
+        { id: "hq", label: "HQ", ice: [hiddenIce("hq_outer")], root: [] },
+        { id: "rd", label: "R&D", ice: [hiddenIce("rd_outer")], root: [] },
+        {
+          id: "r1",
+          label: "Remote 1",
+          ice: [hiddenIce("remote_inner"), hiddenIce("remote_outer")],
+          root: [hiddenIce("remote_root")],
+        },
+      ],
+    } satisfies Pick<PlayerView, "stateVersion" | "servers">;
+
+    const exposed = exposedBoardIceForReview(review, view);
+    expect([...exposed.keys()]).toEqual(["hq_outer", "rd_outer", "remote_outer"]);
+    expect(exposed.get("remote_outer")).toMatchObject({
+      instanceId: "remote_outer",
+      definitionId: 601,
+      known: true,
+      rezzed: false,
+    });
+    expect(view.servers[2]?.ice.every((card) => !card.known)).toBe(true);
+    expect(exposedBoardIceForReview(review, { ...view, stateVersion: 3 }).size).toBe(0);
+  });
+});
 
 describe("Access outcome presentation", () => {
   it("explains a lethal Fetal AI access before any steal choice", () => {

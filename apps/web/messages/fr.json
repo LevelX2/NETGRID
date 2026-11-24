@@ -1021,8 +1021,8 @@
       },
       "sideArea": "Zone {side}",
       "randomStandard": "{side} · Deck standard aléatoire",
-      "standard": "{side} · Deck standard · {name}",
-      "personal": "{side} · Mon deck · {name}",
+      "standard": "{name} · {side} · Deck standard",
+      "personal": "{name} · {side} · Mon deck",
       "openOnTable": "Voir sur la table de deck",
       "editOnTable": "Modifier sur la table de deck",
       "guide": {
@@ -1557,6 +1557,7 @@
       "gypsyRevealed": "Carte {position} : révélée par R&D",
       "view": "Voir",
       "closeView": "Fermer la vue",
+      "outermostIceExposed": "{count, plural, one {Glace la plus extérieure exposée} other {# glaces extérieures exposées}}",
       "seen": "Vu"
     },
     "opponentCue": {
@@ -1935,7 +1936,7 @@
     "set": "Ensemble {set}",
     "instance": "Instance {instance}",
     "strength": "Force {value}",
-    "strengthModifier": "Modificateur de force {value}",
+    "strengthModifier": "{value} en force",
     "agendaDifficultyModifier": "Seuil d’avancement {value}. Valeur imprimée {printed} · Seuil actuel {current}",
     "concealedRunnerResource": "Ressource Runner cachée, non révélée au Corp",
     "advancement": "{count, plural, one {# avancement} other {# avancements}}",
@@ -1966,7 +1967,6 @@
       "active": "Actif",
       "actionsPerTurn": "+{count} {count, plural, one {action} other {actions}}/tour",
       "creditsPerTurn": "+{count} {count, plural, one {crédit} other {crédits}}/tour",
-      "iceStrength": "+ Force {count}",
       "currentStrength": "Intensité actuelle {value}"
     }
   },
@@ -2267,7 +2267,9 @@
       "runContinued": "{subject} : poursuite de l'exécution sur {server}.",
       "runContinuedToIce": "{subject} : poursuite de l'exécution sur {server} vers ICE {number}.",
       "runContinuedToRoot": "{subject} : poursuite de l'exécution sur {server} vers la racine.",
-      "runJackedOut": "{subject} : débranché.",
+      "runJackedOut": "{subject} : déconnexion du piratage sur {server}.",
+      "runJackedOutBeforeIce": "{subject} : déconnexion du piratage sur {server} avant la GLACE {number}.",
+      "runJackedOutBeforeAccess": "{subject} : déconnexion du piratage sur {server} avant l’accès.",
       "optionalBonusRunDeclined": "{subject} : a renoncé au piratage bonus.",
       "runEnded": "La course s'est terminée.",
       "cardAccessed": "{subject} : accès à {card}.",
@@ -2481,7 +2483,9 @@
       "viralProgramTrashed": "{subject} : {count} {count, select, 1 {programme} other {programmes}} effacés à cause de Viral 15 : {card}.",
       "jackOutNoAccess": "Aucune carte n'a été accédée sur {server}.",
       "viralJackOut": "Viral 15 : {amount} {amount, select, 1 {crédit} other {crédits}} payés pour se déconnecter ; aucun accès à {server} et aucun programme effacé.",
-      "rio": "{subject} : {ice} passé ; Rio de Janeiro City Grid obtient {roll} – {outcome}.",
+      "rio": "{subject} : passage de {ice} sur {server}. Rio de Janeiro City Grid obtient {roll} – {outcome}.",
+      "numberedIce": "GLACE {number}",
+      "numberedNamedIce": "GLACE {number} ({ice})",
       "vacuumRewind": "{subject} : {source} obtient {roll} ; retour de {back} glaces activées vers la glace {position}.",
       "vacuumNoRewind": "{subject} : {source} obtient {roll} ; le piratage ne recule pas.",
       "startupImmolator": "{subject} : Startup Immolator épuisé, {ice} effacé vers les Archives et {amount} {amount, select, 1 {crédit} other {crédits}} payés.",

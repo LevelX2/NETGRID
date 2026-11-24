@@ -320,6 +320,25 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(prevented.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardsTrashed: 0,
     });
+
+    let lethal = structuredClone(before);
+    clearRunnerGrip(lethal);
+    addRunnerGripCard(lethal, 222, "pro013_last_grip_card");
+    scoreCorpAgenda(lethal, 402, "pro013_bioweapons_engineering");
+    lethal = apply(
+      lethal,
+      "corp",
+      (candidate) =>
+        candidate.payload?.cardImplementationPrimitiveKind ===
+        "tagged_runner_meat_damage_reduce_hand_size_on_success",
+    );
+    expect(lethal.gameEndReason).toBe("flatline");
+    expect(lethal.runner.maxHandSize).toBe(before.runner.maxHandSize);
+    expect(lethal.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageAmount: 2,
+      cardsTrashed: 1,
+      flatline: true,
+    });
   });
 
   it("keeps Fetal AI damage out of Archives while charging its steal cost, applies Marked Accounts there, and keeps R&D reveal scoped", () => {

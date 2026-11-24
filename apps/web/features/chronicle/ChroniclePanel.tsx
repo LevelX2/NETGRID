@@ -719,8 +719,9 @@ function chronicleActionCompletesRun(
   event: PublicGameEvent,
   actionType: string,
 ): boolean {
+  if (actionType === "jack_out")
+    return event.publicPayload.runnerCostPenaltySupportWindowOpened !== true;
   if (
-    actionType === "jack_out" ||
     actionType === "trash_accessed_card" ||
     actionType === "steal_agenda" ||
     actionType === "decline_trash"

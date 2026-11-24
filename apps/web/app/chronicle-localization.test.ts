@@ -39,6 +39,60 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
+  it.each([
+    ["de", "ICE 2", "würfelt 1", "Run beendet"],
+    ["en", "ICE 2", "rolls 1", "run ended"],
+    ["fr", "GLACE 2", "obtient 1", "piratage terminé"],
+  ] as const)(
+    "keeps the Rio run ending visible beside the resolved subroutine in %s",
+    (locale, position, roll, result) => {
+      const rio = event("continue_run", {
+        abilityId: "rio_de_janeiro_passed_ice",
+        sourceDefinitionId: 579,
+        aiReasonCode: "plan_first.runner.convert_run_window",
+        encounterContinue: true,
+        serverLabel: "R&D",
+        passedIcePosition: 2,
+        passedIceDefinitionId: 434,
+        amounts: { randomRoll: 1 },
+        result: "ended",
+        rioRunEnded: true,
+        resolvedEffects: [
+          {
+            effectId: 0,
+            kind: "resolve_subroutine",
+            visibility: "public",
+            sourceDefinitionId: 434,
+            subroutineIndex: 0,
+            subroutineType: "set_run_encounter_tax",
+            amount: 2,
+          },
+        ],
+      });
+      const t = translate(locale);
+      const cards = {
+        434: { title: "Ball and Chain" },
+        579: { title: "Rio de Janeiro City Grid" },
+      };
+      expect(shouldSuppressChronicleEventItem(rio)).toBe(false);
+      const item = formatChronicleEvent(rio, "corp", {
+        translate: t,
+        cardPresentationsById: cards,
+      });
+      expect(item).toMatchObject({ category: "run", importance: "critical" });
+      for (const fragment of [
+        position,
+        "Ball and Chain",
+        "R&D",
+        "Rio de Janeiro City Grid",
+        roll,
+        result,
+      ])
+        expect(item.title).toContain(fragment);
+      expect(formatChronicleEffectItems(rio, "corp", cards, t)).toHaveLength(1);
+    },
+  );
+
   it.each(["de", "en", "fr"] as const)(
     "shows a run start once when its choice already shows the same start in %s",
     (locale) => {

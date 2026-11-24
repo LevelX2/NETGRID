@@ -60,7 +60,7 @@ export function DeckSlotSelect({
   const t = useTranslations("Decks.selection");
   const SideIcon = side === "runner" ? Cable : Building2;
   const sideLabel = t(`side.${side}`);
-  const optionMark = side === "runner" ? "⌁" : "▦";
+  const optionSide = `${side === "runner" ? "⌁" : "▦"} ${sideLabel}`;
   const selectId = useId();
   const guideButtonRef = useRef<HTMLButtonElement>(null);
   const [guideOpen, setGuideOpen] = useState(false);
@@ -173,14 +173,12 @@ export function DeckSlotSelect({
                 value={snapshot.deckSnapshotId}
                 key={snapshot.deckSnapshotId}
               >
-                {optionMark}{" "}
-                {t("standard", { side: sideLabel, name: snapshot.name })}
+                {t("standard", { name: snapshot.name, side: optionSide })}
               </option>
             ))}
             {localDecks.map((deck) => (
               <option value={`local:${deck.deckId}`} key={deck.deckId}>
-                {optionMark}{" "}
-                {t("personal", { side: sideLabel, name: deck.name })}
+                {t("personal", { name: deck.name, side: optionSide })}
               </option>
             ))}
           </select>

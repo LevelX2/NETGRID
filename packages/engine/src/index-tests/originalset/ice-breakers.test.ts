@@ -507,6 +507,49 @@ describe("Originalset Spotcheck 2026-05-15 Tagged/Wall/Breaker hardening", () =>
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(wallState));
   });
+
+  it("trashes the last of three grip cards on the second Wall of Ice hit before flatline", () => {
+    let state = toRunnerTurn(onrV1Game("wall-of-ice-three-grip"));
+    emptyRunnerGripForTest(state);
+    drawRunnerCardsForTest(state, 3);
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", 490);
+    const encounter = encounterIce(state, "rd", 490);
+
+    state = apply(
+      encounter,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+
+    expect(state.gameEndReason).toBe("flatline");
+    expect(state.winner).toBe("corp");
+    expect(state.runner.grip).toHaveLength(0);
+    expect(state.runner.heap.slice(encounter.runner.heap.length).sort()).toEqual(
+      [...encounter.runner.grip].sort(),
+    );
+    expect(state.randomCounter - encounter.randomCounter).toBe(3);
+    const events = state.eventLog.slice(encounter.eventLog.length);
+    const payload = events.at(-1)?.publicPayload;
+    expect(payload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 4,
+      cardsTrashed: 3,
+      runnerGripBefore: 3,
+      runnerGripAfter: 0,
+      flatline: true,
+      resolvedEffects: [
+        { subroutineIndex: 0, amount: 2, cardsTrashed: 2 },
+        { subroutineIndex: 1, amount: 2, cardsTrashed: 1 },
+      ],
+    });
+    for (const id of encounter.runner.grip)
+      expect(JSON.stringify(payload)).not.toContain(id);
+    const replay = replayEvents(encounter, events);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
 });
 
 describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", () => {

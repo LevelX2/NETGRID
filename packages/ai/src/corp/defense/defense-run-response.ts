@@ -20,6 +20,7 @@ import {
   corpIceRezSupportTargetHasNoCurrentEffect,
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
+import { assessCentralAccessReductionRez } from "./central-access-reduction-rez";
 import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
 import { assessMobileIceRunDefense } from "./mobile-ice-run-defense";
 import { assessCorpTemporaryIceStrengthPulse } from "./corp-temporary-ice-strength-pulse";
@@ -618,6 +619,12 @@ export function corpExactCardRezSupportAssessment(
     serverId,
   );
   if (passTaxAssessment) return passTaxAssessment;
+  const accessReduction = assessCentralAccessReductionRez(
+    input,
+    sourceCard,
+    serverId,
+  );
+  if (accessReduction) return accessReduction;
   const hint = candidate.sourceDefinitionId
     ? AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)
     : sourceCard.definitionId

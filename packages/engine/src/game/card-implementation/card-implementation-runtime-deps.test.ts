@@ -217,7 +217,6 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
         rez: {
           affordableRezzedInstalledIceIdsForRunner: () => [],
           unrezzedInstalledIceIds: () => [],
-          installedIceIds: () => [],
           rezzedBlackIceIds: () => [],
           startPayRezCostToTrashRezzedIceChoice: () => undefined,
           startTrashUnrezzedIceChoice: () => undefined,
@@ -422,7 +421,6 @@ describe("game card implementation runtime deps root", () => {
         "shuffleGripTrashAndStackThenDraw",
         "rezzedIceTargetCount",
         "unrezzedIceTargetCount",
-        "installedIceTargetCount",
         "rezzedBlackIceTargetCount",
         "corpHqCardCount",
         "runnerValuPakInstallableProgramCount",

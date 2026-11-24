@@ -1,4 +1,6 @@
-import type { ApiMatchMode, Side } from "@netgrid/shared";
+import type { ApiMatchMode, ApiSeriesResultSummary, Side } from "@netgrid/shared";
+
+import { isInvalidatingTerminalStatus } from "../features/match-start/lobby-format";
 
 export type MatchStatus =
   | "pending"
@@ -39,6 +41,9 @@ type RemoteSessionSummary = {
     displayName?: string;
   };
   matchStatus?: MatchStatus;
+  resultSummary?: {
+    series?: Pick<ApiSeriesResultSummary, "nextAvailable">;
+  };
 };
 
 type RecoverableSessionRecord = {
@@ -61,15 +66,46 @@ export function persistSession(
   session: SessionInfo,
   remotePayload?: RemoteSessionSummary,
 ) {
-  window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
-  persistRecoverableSession(session);
+  if (!shouldForgetSession(remotePayload)) {
+    window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    persistRecoverableSession(session);
+  }
+  updateSessionRecovery(session, remotePayload);
+}
+
+export function updateSessionRecovery(
+  session: SessionInfo,
+  remotePayload?: RemoteSessionSummary,
+): void {
+  if (shouldForgetSession(remotePayload)) {
+    clearStoredSession(session);
+    removeRecentSession(session);
+    return;
+  }
   rememberRecentSession(session, remotePayload);
+}
+
+function shouldForgetSession(remotePayload?: RemoteSessionSummary): boolean {
+  const status = remotePayload?.matchStatus;
+  if (!status) return false;
+  return (
+    isInvalidatingTerminalStatus(status) ||
+    ((status === "finished" || status === "forfeited") &&
+      !remotePayload?.resultSummary?.series?.nextAvailable)
+  );
 }
 
 export function clearStoredSession(
   session?: Pick<SessionInfo, "matchId" | "side">,
 ): void {
-  removeStorageKey(window.sessionStorage, SESSION_STORAGE_KEY);
+  const currentTab = loadCurrentTabSession();
+  if (
+    !session ||
+    !currentTab ||
+    (currentTab.matchId === session.matchId && currentTab.side === session.side)
+  ) {
+    removeStorageKey(window.sessionStorage, SESSION_STORAGE_KEY);
+  }
   const recoverable = loadRecoverableSession();
   if (
     !session ||
@@ -81,7 +117,7 @@ export function clearStoredSession(
   }
 }
 
-export function rememberRecentSession(
+function rememberRecentSession(
   session: SessionInfo,
   remotePayload?: RemoteSessionSummary,
 ) {

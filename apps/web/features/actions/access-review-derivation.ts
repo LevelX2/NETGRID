@@ -9,10 +9,12 @@ import {
   serverDisplayLabel,
 } from "../../app/action-board-ui";
 import { accessPresentationOutcomeAfter } from "../../app/access-presentation";
+import { isExposeOutermostIceEachDataFortPayload } from "../../app/action-payload";
 import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
   visibleCardFromPublicEvent,
+  type DisplayVisibleCard,
 } from "../cards/card-view-model";
 import type { AccessReveal, ExposeReview } from "./AccessReviewModals";
 
@@ -482,12 +484,23 @@ export function exposeReviewFromLatestEvent(
     event.publicPayload,
     "exposedServerLabels",
   ).map(serverDisplayLabel);
+  const outermostIce = isExposeOutermostIceEachDataFortPayload(
+    event.publicPayload,
+  )
+    ? {
+        stateVersion: event.stateVersionAfter,
+        sourceTitle: payloadString(event.publicPayload, "sourceTitle"),
+        serverIds: payloadStringList(event.publicPayload, "exposedServerIds"),
+        positionKeys: payloadStringList(event.publicPayload, "exposedPositionKeys"),
+      }
+    : undefined;
   return {
     eventId: event.eventId,
     actorSide,
     viewerSide,
     cards,
     serverLabels,
+    ...(outermostIce ? { outermostIce } : {}),
     title:
       cards.length === 1
         ? "Karte angesehen"
@@ -499,6 +512,41 @@ export function exposeReviewFromLatestEvent(
       serverLabels,
     ),
   };
+}
+
+export function exposedBoardIceForReview(
+  review: ExposeReview,
+  view: Pick<PlayerView, "stateVersion" | "servers">,
+): ReadonlyMap<string, DisplayVisibleCard> {
+  const exposed = new Map<string, DisplayVisibleCard>();
+  const locations = review.outermostIce;
+  if (
+    !locations ||
+    locations.stateVersion !== view.stateVersion ||
+    locations.serverIds.length !== review.cards.length ||
+    locations.positionKeys.length !== review.cards.length
+  )
+    return exposed;
+
+  for (const [index, revealedCard] of review.cards.entries()) {
+    const server = view.servers.find(
+      ({ id }) => id === locations.serverIds[index],
+    );
+    const installedCard = server?.ice.at(-1);
+    if (
+      !server ||
+      !installedCard ||
+      locations.positionKeys[index] !== `ice:${server.ice.length - 1}` ||
+      installedCard.known
+    )
+      continue;
+    exposed.set(installedCard.instanceId, {
+      ...revealedCard,
+      ...installedCard,
+      known: true,
+    });
+  }
+  return exposed;
 }
 
 export function retainedArchivesRevealEvent(
@@ -567,14 +615,14 @@ function revealedEventCardId(event: PublicGameEvent): CardDefinitionId | null {
 }
 
 function exposeReviewDefinitionIds(event: PublicGameEvent): CardDefinitionId[] {
-  return Array.from(
-    new Set(
-      [
-        cardDefinitionIdValue(event.publicPayload["publicRevealDefinitionId"]),
-        ...cardDefinitionIdsFromCsv(event.publicPayload["publicRevealDefinitionIds"]),
-      ].filter((value): value is CardDefinitionId => value !== undefined),
-    ),
+  const definitionIds = cardDefinitionIdsFromCsv(
+    event.publicPayload["publicRevealDefinitionIds"],
   );
+  if (definitionIds.length > 0) return definitionIds;
+  const definitionId = cardDefinitionIdValue(
+    event.publicPayload["publicRevealDefinitionId"],
+  );
+  return definitionId === undefined ? [] : [definitionId];
 }
 
 function exposeReviewDescription(
