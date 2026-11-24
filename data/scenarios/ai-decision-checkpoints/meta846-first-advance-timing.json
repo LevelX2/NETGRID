@@ -1,0 +1,119 @@
+{
+  "matchId": "match_aaca63c75123b6fd",
+  "seed": "meta-846-r1-69e9c6aeff2e2c6e-008",
+  "stateHash": "fnv1a:80a4a872",
+  "commandsAfterCampaign": [
+    ["corp", "cc.c37x.r1.c37x"],
+    ["corp", "cp.c37x.r1.c37x"],
+    ["corp", "c1.c37x.c37x.activated.635"],
+    ["corp", "c1.c37x.c37x.activated.635"],
+    ["corp", "c9"],
+    ["runner", "rh.c1z7.c1z7.404"],
+    ["runner", "r8"],
+    ["runner", "rs.r1"],
+    ["corp", "c6"],
+    ["runner", "r5"],
+    ["corp", "cq.c2u5.c2u5"],
+    ["runner", "rx.cx5.cx5.c1jt.boost_icebreaker_for_run.c1jt"],
+    ["runner", "rj.c1jt.c1jt.c1jt.c2u5.329"],
+    ["runner", "rj.c1jt.c1jt.c1jt.c2u5.329"],
+    ["runner", "rj.c1jt.c1jt.c1jt.c2u5.329"],
+    ["runner", "rj.c1jt.c1jt.c1jt.c2u5.329"],
+    ["runner", "r3.c1jt.c1jt.c1jt.c2u5.0.0.328"],
+    ["runner", "r5.1"],
+    ["runner", "r1.c1a9.c1a9.activated.271"],
+    ["runner", "r9"],
+    ["corp", "ce"],
+    ["corp", "c1.c37x.c37x.activated.635"],
+    ["corp", "c1.c37x.c37x.activated.635"],
+    ["corp", "cc.c3kt.hq.c3kt"],
+    ["corp", "c9"],
+    ["runner", "rh.cab.cab.60"],
+    ["runner", "rb"],
+    ["runner", "rb"],
+    ["runner", "r9"],
+    ["corp", "ce"],
+    ["corp", "c8"],
+    ["corp", "c1.c37x.c37x.activated.635"],
+    ["corp", "c1.c37x.c37x.activated.635"],
+    ["corp", "c9"],
+    [
+      "corp",
+      "cn",
+      {
+        "choiceId": "discard_corp_122",
+        "selectedOptionIds": ["card_c37y", "card_c3md"]
+      }
+    ],
+    ["runner", "rb"],
+    ["runner", "rb"],
+    ["runner", "rb"],
+    ["runner", "rb"],
+    ["runner", "r9"],
+    ["corp", "ce"],
+    ["corp", "cc.c319.rd.c319.2"],
+    ["corp", "c8"],
+    ["corp", "c1.c37x.c37x.activated.635"],
+    ["corp", "c9"],
+    [
+      "corp",
+      "cn",
+      {
+        "choiceId": "discard_corp_133",
+        "selectedOptionIds": ["card_c3ku"]
+      }
+    ],
+    ["runner", "rc.c1du.c1du"],
+    ["runner", "r1.c1a9.c1a9.activated.271"],
+    ["runner", "rb"],
+    ["runner", "rb"],
+    ["runner", "r9"],
+    ["corp", "ce"],
+    ["corp", "cc.c2wm.rd.c2wm.3"],
+    ["corp", "c1.c37x.c37x.activated.635"],
+    ["corp", "cc.c2ol.r1.c2ol.2"],
+    ["corp", "c9"],
+    ["runner", "r8"],
+    ["runner", "rc.c27l.c27l"],
+    ["runner", "r8"],
+    ["runner", "r8"],
+    ["runner", "r9"],
+    [
+      "runner",
+      "rn",
+      {
+        "choiceId": "discard_runner_149",
+        "selectedOptionIds": ["card_c10h"]
+      }
+    ],
+    ["corp", "ce"],
+    ["corp", "c8"],
+    ["corp", "cb"],
+    ["corp", "cb"],
+    ["corp", "c9"],
+    [
+      "corp",
+      "cn",
+      {
+        "choiceId": "discard_corp_155",
+        "selectedOptionIds": ["card_c3me"]
+      }
+    ],
+    ["runner", "rc.c2ei.c2ei"],
+    ["runner", "r8"],
+    ["runner", "r8"],
+    ["runner", "rh.c14i.c14i.245"],
+    ["runner", "r9"],
+    [
+      "runner",
+      "rn",
+      {
+        "choiceId": "discard_runner_161",
+        "selectedOptionIds": ["card_c1ld"]
+      }
+    ],
+    ["corp", "ce"],
+    ["corp", "c8"],
+    ["corp", "cc.c2h2.r1.c2h2"]
+  ]
+}
