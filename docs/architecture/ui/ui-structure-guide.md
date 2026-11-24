@@ -87,6 +87,10 @@ Tooltip und Aktionstext erklären das Beenden des Runs in Deutsch, Englisch
 und Französisch; der Aktionstext ist an die Capability
 `onr_classic_001_data-fort-remapping:spend_remap_counter_end_run` gebunden.
 
+Über jedem Server zeigt das Spielbrett die Summe seiner sichtbaren Kostenmodifikatoren
+je Kostenart und Richtung. Zwei aktive Chester Mix ergeben ein Badge „ICE-Install −4“.
+Im Tooltip stehen die beteiligten Karten, gleichnamige Quellen mit ihrer Anzahl.
+
 Unter dem eigenen Corp-Statusblock erscheinen verfügbare Fähigkeiten aus
 der eigenen Agenda-Auslage als Standard-Aktionsbuttons mit Agenda-Symbol.
 Quelle und Vorrat stammen aus dem PlayerView, Effektmenge und Kosten aus

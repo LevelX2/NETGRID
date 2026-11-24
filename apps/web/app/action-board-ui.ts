@@ -12,6 +12,7 @@ import {
   type PublicGameEvent,
   type Side,
   type VisibleCard,
+  type VisibleServerCostModifierStatus,
   type VisibleServerStatus,
 } from "@netgrid/shared";
 import type { LegalAction, PlayerView, VisibleChoiceOption } from "../lib/presented-player-view";
@@ -953,14 +954,60 @@ export function serverCounterChipsForDisplays(
     });
 }
 
+type CostModifierGroup = [
+  VisibleServerCostModifierStatus,
+  ...VisibleServerCostModifierStatus[],
+];
+type ServerStatusPresentation =
+  | VisibleServerStatus
+  | Pick<VisibleServerCostModifierStatus, "kind" | "operation" | "amount" | "sourceTitle">;
+
+function combinedServerCostModifier(
+  modifiers: CostModifierGroup,
+): ServerStatusPresentation {
+  let amount = 0;
+  const sourceCounts = new Map<string, number>();
+  for (const modifier of modifiers) {
+    amount += modifier.amount;
+    const title = modifier.sourceTitle;
+    sourceCounts.set(title, (sourceCounts.get(title) ?? 0) + 1);
+  }
+  const sources = Array.from(sourceCounts, ([title, count]) =>
+    count === 1 ? title : `${count}× ${title}`,
+  );
+  return {
+    kind: "cost_modifier",
+    operation: modifiers[0].operation,
+    amount,
+    sourceTitle: sources.join(" + "),
+  };
+}
+
 export function serverStatusChips(
   statuses: VisibleServerStatus[] | undefined,
   locale: AppLocale | string = "de",
 ): ServerStatusChipView[] {
-  return (statuses ?? []).map((status) => {
+  const groups = new Map<
+    string,
+    Exclude<VisibleServerStatus, VisibleServerCostModifierStatus> | CostModifierGroup
+  >();
+  for (const status of statuses ?? []) {
+    if (status.kind !== "cost_modifier") {
+      groups.set(status.id, status);
+      continue;
+    }
+    const key = `server_status:${status.targetServerId}:${status.costKind}:${status.operation}`;
+    const group = groups.get(key);
+    if (Array.isArray(group)) group.push(status);
+    else groups.set(key, [status]);
+  }
+  return Array.from(groups, ([key, group]) => {
+    const status = Array.isArray(group)
+      ? combinedServerCostModifier(group)
+      : group;
     const tooltip = serverStatusTooltip(status, locale);
     return {
-      key: status.id,
+      key,
       label: serverStatusLabel(status, locale),
       ariaLabel: tooltip,
       tooltip,
@@ -970,7 +1017,7 @@ export function serverStatusChips(
 }
 
 export function serverStatusTooltip(
-  status: VisibleServerStatus,
+  status: ServerStatusPresentation,
   locale: AppLocale | string = "de",
 ): string {
   switch (status.kind) {
@@ -1006,7 +1053,7 @@ export function serverStatusTooltip(
 }
 
 function serverStatusLabel(
-  status: VisibleServerStatus,
+  status: ServerStatusPresentation,
   locale: AppLocale | string = "de",
 ): string {
   switch (status.kind) {
@@ -1023,7 +1070,7 @@ function serverStatusLabel(
 }
 
 function serverStatusTone(
-  status: VisibleServerStatus,
+  status: ServerStatusPresentation,
 ): ServerStatusChipView["tone"] {
   switch (status.kind) {
     case "run_prohibited":

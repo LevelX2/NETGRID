@@ -10,6 +10,7 @@ import type {
   PublicGameEvent,
   Side,
   VisibleCard,
+  VisibleServerCostModifierStatus,
   VisibleServerStatus,
 } from "@netgrid/shared";
 import {
@@ -4249,7 +4250,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         tone: "blocking",
       },
       {
-        key: statuses[1]!.id,
+        key: "server_status:rd:corp_ice_install:increase",
         label: "ICE-Install +2",
         ariaLabel:
           "Öffentliche Runner-Kostenquelle: Die Korp muss 2 zusätzliche Credits zahlen, um ICE vor diesem Server zu installieren.",
@@ -4258,7 +4259,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         tone: "cost_increase",
       },
       {
-        key: statuses[2]!.id,
+        key: "server_status:r1:corp_ice_install:reduce",
         label: "ICE-Install −1",
         ariaLabel:
           "Öffentliche Korp-Kostenquelle: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um 1 Credit reduziert.",
@@ -4309,6 +4310,66 @@ describe("V1.0.6 resource and card-display helpers", () => {
         tooltip: expect.stringContaining("2 crédits supplémentaires"),
       },
     ]);
+  });
+
+  it("sums server status cost badges by server, cost kind and direction", () => {
+    const chester: VisibleServerCostModifierStatus = {
+      id: "chester_1_discount",
+      kind: "cost_modifier",
+      scope: "target_server",
+      costKind: "corp_ice_install",
+      operation: "reduce",
+      amount: 2,
+      targetServerId: "r1",
+      sourceCardInstanceId: "chester_1",
+      sourceTitle: "Chester Mix",
+      sourceSide: "corp",
+    };
+    const secondChester = {
+      ...chester,
+      id: "chester_2_discount",
+      sourceCardInstanceId: "chester_2",
+    };
+    const zoning: VisibleServerCostModifierStatus = {
+      ...chester,
+      id: "zoning_surcharge",
+      sourceCardInstanceId: "zoning",
+      sourceTitle: "Restrictive Net Zoning",
+      sourceSide: "runner",
+      operation: "increase",
+    };
+    const chips = serverStatusChips([
+      chester,
+      zoning,
+      {
+        ...chester,
+        targetServerId: "r2",
+        id: "chester_3_discount",
+        sourceCardInstanceId: "chester_3",
+      },
+      secondChester,
+      {
+        ...zoning,
+        id: "other_surcharge",
+        sourceCardInstanceId: "other",
+        sourceTitle: "Zusatzquelle",
+        amount: 1,
+      },
+    ]);
+    const tooltip =
+      "2× Chester Mix: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um 4 Credits reduziert.";
+    expect(chips).toMatchObject([
+      { label: "ICE-Install −4", tone: "cost_reduction", ariaLabel: tooltip, tooltip },
+      {
+        label: "ICE-Install +3",
+        tooltip: expect.stringContaining("Restrictive Net Zoning + Zusatzquelle"),
+      },
+      { label: "ICE-Install −2", tooltip: expect.stringContaining("Chester Mix:") },
+    ]);
+    expect(serverStatusChips([secondChester])).toMatchObject([
+      { key: chips[0]!.key, label: "ICE-Install −2", tooltip: serverStatusTooltip(secondChester) },
+    ]);
+    expect(serverStatusChips([])).toEqual([]);
   });
 
   it("keeps advancement counters as separate gems until ten counters", () => {
