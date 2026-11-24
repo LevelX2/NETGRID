@@ -3,10 +3,12 @@ import { join, resolve, sep } from "node:path";
 import { homedir, tmpdir } from "node:os";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { EditableDeck } from "@netgrid/decks";
+import { PUT } from "./library/route";
 import {
   defaultDeckLibraryPath,
+  deleteLibraryDeck,
   readDeckLibrary,
-  writeDeckLibrary,
+  saveLibraryDeck,
 } from "./library-store";
 
 const runnerDeck: EditableDeck = {
@@ -115,7 +117,7 @@ describe("deck file library", () => {
       const appData = join(dir, "account-data");
       const accountLibrary = join(appData, "NetGrid", "Decks");
       const accountDeck = { ...runnerDeck, deckId: "account_only_deck" };
-      await writeDeckLibrary([accountDeck], accountLibrary);
+      await saveLibraryDeck(accountDeck, accountLibrary);
       const accountFile = join(accountLibrary, "account_only_deck.json");
       const before = await readFile(accountFile, "utf8");
       vi.stubEnv("NETGRID_RUNTIME_PROFILE", "release");
@@ -127,7 +129,7 @@ describe("deck file library", () => {
         decks: [],
         storagePath: join(root, "runtime", "decks"),
       });
-      const saved = await writeDeckLibrary([runnerDeck]);
+      const saved = await saveLibraryDeck(runnerDeck);
       expect(saved.storagePath).toBe(join(root, "runtime", "decks"));
       expect((await readDeckLibrary()).decks).toEqual([
         runnerDeckNeedsRevalidation,
@@ -190,7 +192,7 @@ describe("deck file library", () => {
   it("writes editable decks as local JSON files and reads them back", async () => {
     const dir = await mkdtemp(join(tmpdir(), "netgrid-decks-"));
     try {
-      await writeDeckLibrary([runnerDeck], dir);
+      await saveLibraryDeck(runnerDeck, dir);
       const file = await readFile(join(dir, "local_runner_test.json"), "utf8");
       expect(file).toContain("netgrid-editable-deck-v1");
       const result = await readDeckLibrary(dir);
@@ -203,13 +205,69 @@ describe("deck file library", () => {
   it("removes deleted decks without failing on unrelated invalid JSON", async () => {
     const dir = await mkdtemp(join(tmpdir(), "netgrid-decks-"));
     try {
-      await writeDeckLibrary([runnerDeck], dir);
+      await saveLibraryDeck(runnerDeck, dir);
       await writeFile(join(dir, "broken.json"), "{", "utf8");
       expect((await readDeckLibrary(dir)).decks).toEqual([
         runnerDeckNeedsRevalidation,
       ]);
-      await writeDeckLibrary([], dir);
+      await deleteLibraryDeck(runnerDeck.deckId, dir);
       expect((await readDeckLibrary(dir)).decks).toEqual([]);
+      expect(await readFile(join(dir, "broken.json"), "utf8")).toBe("{");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("preserves other drafts and rejects malformed edits before changing files", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "netgrid-decks-"));
+    try {
+      const second = { ...runnerDeck, deckId: "second_draft", name: "Second" };
+      await Promise.all([
+        saveLibraryDeck(runnerDeck, dir),
+        saveLibraryDeck(second, dir),
+      ]);
+      const target = join(dir, "local_runner_test.json");
+      const previous = await readFile(target, "utf8");
+      await expect(
+        saveLibraryDeck({ ...runnerDeck, name: 17 }, dir),
+      ).rejects.toMatchObject({ code: "deck_library_payload_invalid" });
+      await expect(
+        saveLibraryDeck({ ...runnerDeck, cards: [{ cardId: 9128 }] }, dir),
+      ).rejects.toMatchObject({ code: "deck_library_payload_invalid" });
+      vi.stubEnv("NETGRID_DECK_LIBRARY_PATH", dir);
+      const bulk = await PUT(
+        new Request("http://local/api/decks/library", {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ decks: [second] }),
+        }),
+      );
+      expect(bulk.status).toBe(400);
+      expect(await readFile(target, "utf8")).toBe(previous);
+      await saveLibraryDeck({ ...runnerDeck, name: "Updated" }, dir);
+      expect(
+        (await readDeckLibrary(dir)).decks.map((deck) => deck.name),
+      ).toEqual(["Second", "Updated"]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("checks the deck identity before replacing or deleting a colliding filename", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "netgrid-decks-"));
+    try {
+      const deck = { ...runnerDeck, deckId: "my_deck" };
+      const collidingDeck = { ...runnerDeck, deckId: "my deck" };
+      await saveLibraryDeck(deck, dir);
+      await expect(saveLibraryDeck(collidingDeck, dir)).rejects.toMatchObject({
+        code: "deck_library_file_conflict",
+      });
+      await expect(
+        deleteLibraryDeck(collidingDeck.deckId, dir),
+      ).rejects.toMatchObject({ code: "deck_library_file_conflict" });
+      expect(
+        (await readDeckLibrary(dir)).decks.map((entry) => entry.deckId),
+      ).toEqual([deck.deckId]);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

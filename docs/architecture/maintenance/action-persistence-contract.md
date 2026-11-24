@@ -97,6 +97,11 @@ enthalten; eine neue Entscheidung baut die Chronologie erneut auf.
 
 ## Transaktion und Sicherheit
 
+Die öffentliche Partienliste liest Match-Metadaten und die Zustandsversion
+sowie die Gewinnerseite als schmale SQLite-Projektion. Sie dekodiert keinen
+Spielzustand für die Listenanzeige. Fehlt bei einer abgeschlossenen Partie
+der Ergebnissnapshot, lädt und ergänzt der Service ihn unter der Match-Sperre.
+
 - `withMatchLock` serialisiert die Verarbeitung pro Match. Die Rules Engine
   validiert weiterhin Seite, StateVersion, Timing, Kosten, Ziele und Choices.
 - Der Delta-Save prüft erwartete Match-/StateVersion und die gespeicherten

@@ -9,6 +9,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import path from "node:path";
+import { FileWriteLockBusyError, withFileWriteLock } from "./file-write-lock";
 import { resolveNetgridManagedCardImageRoot } from "./paths";
 
 export const CARD_IMAGE_STORE_SCHEMA_VERSION = "card-image-store-v1";
@@ -87,6 +88,7 @@ export type CardImageStoreErrorCode =
   | "asset_blob_corrupt"
   | "binding_exists"
   | "duplicate_binding_change"
+  | "storage_write_busy"
   | "collection_manifest_invalid";
 
 export class CardImageStoreError extends Error {
@@ -149,19 +151,19 @@ export class CardImageStore {
         "asset_manifest_invalid",
         "Kartenbild-Asset benötigt eine Master-Variante.",
       );
-    const existing = await this.readAssetIfPresent(master.blobHash);
-    const asset: StoredCardImageAsset = {
-      schemaVersion: CARD_IMAGE_STORE_SCHEMA_VERSION,
-      assetHash: master.blobHash,
-      createdAt: existing?.createdAt ?? this.now().toISOString(),
-      variants: { ...existing?.variants, ...variants },
-    };
-    await this.writeJsonAtomically(
-      this.assetManifestPath(asset.assetHash),
-      asset,
-    );
-    this.assetCache.delete(asset.assetHash);
-    return asset;
+    const target = this.assetManifestPath(master.blobHash);
+    return this.withStoreWriteLock(target, async () => {
+      const existing = await this.readAssetIfPresent(master.blobHash);
+      const asset: StoredCardImageAsset = {
+        schemaVersion: CARD_IMAGE_STORE_SCHEMA_VERSION,
+        assetHash: master.blobHash,
+        createdAt: existing?.createdAt ?? this.now().toISOString(),
+        variants: { ...existing?.variants, ...variants },
+      };
+      await this.writeJsonAtomically(target, asset);
+      this.assetCache.delete(asset.assetHash);
+      return asset;
+    });
   }
 
   async putBlob(input: PutCardImageBlobInput): Promise<StoredCardImageVariant> {
@@ -176,9 +178,13 @@ export class CardImageStore {
     const blobHash = sha256(content);
     const relativePath = blobRelativePath(blobHash, input.mediaType);
     const target = path.join(this.root, relativePath);
-    await mkdir(path.dirname(target), { recursive: true });
     if (await fileExists(target)) await verifyExistingBlob(target, blobHash);
-    else await this.writeFileAtomically(target, content);
+    else {
+      await this.withStoreWriteLock(target, async () => {
+        if (await fileExists(target)) await verifyExistingBlob(target, blobHash);
+        else await this.writeFileAtomically(target, content);
+      });
+    }
     return {
       kind,
       blobHash,
@@ -196,11 +202,11 @@ export class CardImageStore {
       if (!variant) continue;
       await this.verifyVariantBlob(variant);
     }
-    await this.writeJsonAtomically(
-      this.assetManifestPath(asset.assetHash),
-      asset,
-    );
-    this.assetCache.delete(asset.assetHash);
+    const target = this.assetManifestPath(asset.assetHash);
+    await this.withStoreWriteLock(target, async () => {
+      await this.writeJsonAtomically(target, asset);
+      this.assetCache.delete(asset.assetHash);
+    });
   }
 
   async readAsset(assetHash: string): Promise<StoredCardImageAsset> {
@@ -267,51 +273,54 @@ export class CardImageStore {
       validatePrintingId(change.printingId);
       await this.verifyAsset(change.assetHash);
     }
-    const collection = await this.readCollection(collectionId);
-    const nextBindings = { ...collection.bindings };
-    const results: CardImageBindingResult[] = [];
-    let changed = false;
-    const updatedAt = this.now().toISOString();
+    const target = this.collectionManifestPath(collectionId);
+    return this.withStoreWriteLock(target, async () => {
+      const collection = await this.readCollection(collectionId);
+      const nextBindings = { ...collection.bindings };
+      const results: CardImageBindingResult[] = [];
+      let changed = false;
+      const updatedAt = this.now().toISOString();
 
-    for (const change of changes) {
-      const existing = nextBindings[change.printingId];
-      if (existing?.assetHash === change.assetHash) {
-        results.push({ ...change, status: "unchanged" });
-        continue;
-      }
-      if (existing && onExisting === "fail")
-        throw new CardImageStoreError(
-          "binding_exists",
-          `Für ${change.printingId} existiert bereits eine persönliche Bildbindung.`,
-        );
-      if (existing && onExisting === "skip") {
+      for (const change of changes) {
+        const existing = nextBindings[change.printingId];
+        if (existing?.assetHash === change.assetHash) {
+          results.push({ ...change, status: "unchanged" });
+          continue;
+        }
+        if (existing && onExisting === "fail")
+          throw new CardImageStoreError(
+            "binding_exists",
+            `Für ${change.printingId} existiert bereits eine persönliche Bildbindung.`,
+          );
+        if (existing && onExisting === "skip") {
+          results.push({
+            ...change,
+            status: "skipped",
+            previousAssetHash: existing.assetHash,
+          });
+          continue;
+        }
+        nextBindings[change.printingId] = {
+          ...change,
+          updatedAt,
+        };
         results.push({
           ...change,
-          status: "skipped",
-          previousAssetHash: existing.assetHash,
+          status: existing ? "replaced" : "bound",
+          ...(existing ? { previousAssetHash: existing.assetHash } : {}),
         });
-        continue;
+        changed = true;
       }
-      nextBindings[change.printingId] = {
-        ...change,
-        updatedAt,
-      };
-      results.push({
-        ...change,
-        status: existing ? "replaced" : "bound",
-        ...(existing ? { previousAssetHash: existing.assetHash } : {}),
-      });
-      changed = true;
-    }
 
-    if (changed) {
-      await this.writeCollection({
-        ...collection,
-        revision: collection.revision + 1,
-        bindings: sortBindings(nextBindings),
-      });
-    }
-    return results;
+      if (changed) {
+        await this.writeCollection({
+          ...collection,
+          revision: collection.revision + 1,
+          bindings: sortBindings(nextBindings),
+        });
+      }
+      return results;
+    });
   }
 
   async removeBinding(
@@ -320,16 +329,19 @@ export class CardImageStore {
   ): Promise<boolean> {
     validateCollectionId(collectionId);
     validatePrintingId(printingId);
-    const collection = await this.readCollection(collectionId);
-    if (!collection.bindings[printingId]) return false;
-    const bindings = { ...collection.bindings };
-    delete bindings[printingId];
-    await this.writeCollection({
-      ...collection,
-      revision: collection.revision + 1,
-      bindings: sortBindings(bindings),
+    const target = this.collectionManifestPath(collectionId);
+    return this.withStoreWriteLock(target, async () => {
+      const collection = await this.readCollection(collectionId);
+      if (!collection.bindings[printingId]) return false;
+      const bindings = { ...collection.bindings };
+      delete bindings[printingId];
+      await this.writeCollection({
+        ...collection,
+        revision: collection.revision + 1,
+        bindings: sortBindings(bindings),
+      });
+      return true;
     });
-    return true;
   }
 
   absoluteVariantPath(variant: StoredCardImageVariant): string {
@@ -431,6 +443,21 @@ export class CardImageStore {
       collection,
     );
     this.collectionCache.delete(collection.collectionId);
+  }
+
+  private async withStoreWriteLock<T>(
+    target: string,
+    write: () => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await withFileWriteLock(target, write);
+    } catch (error) {
+      if (!(error instanceof FileWriteLockBusyError)) throw error;
+      throw new CardImageStoreError(
+        "storage_write_busy",
+        "Der Kartenbildspeicher wird bereits aktualisiert.",
+      );
+    }
   }
 
   private assetManifestPath(assetHash: string): string {

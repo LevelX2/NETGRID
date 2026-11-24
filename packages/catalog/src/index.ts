@@ -255,25 +255,15 @@ export function toCatalogSummary(card: CatalogCard): CatalogCardSummary {
   };
 }
 
-export function getCatalogCard(
-  snapshot: CardSnapshot,
-  catalogCardId: CardDefinitionId,
-): CatalogCard | undefined {
-  return normalizeSnapshot(snapshot).cards.find(
-    (card) => card.catalogCardId === catalogCardId,
-  );
-}
-
 export function searchCatalog(
-  snapshot: CardSnapshot,
+  index: CatalogIndex,
   query: CatalogQuery = {},
 ): CatalogCardSummary[] {
-  const index = createCatalogIndex(snapshot, computeSnapshotHash(snapshot));
   const searchTerms = normalizeSearch(query.q ?? "")
     .split(/\s+/)
     .filter(Boolean);
-  return normalizeSnapshot(snapshot)
-    .cards.filter((card) => {
+  return index.cards
+    .filter((card) => {
       if (query.side && query.side !== "all" && card.side !== query.side)
         return false;
       if (query.type && query.type !== "all" && card.type !== query.type)
@@ -294,8 +284,7 @@ export function searchCatalog(
         return false;
       return true;
     })
-    .sort(compareCatalogCards)
-    .map(toCatalogSummary);
+    .sort(compareCatalogCards);
 }
 
 export function summarizeStatuses(
@@ -375,7 +364,7 @@ export function createRuntimeCardsById(): Record<string, CatalogCard> {
   );
 }
 
-function compareCatalogCards(left: CatalogCard, right: CatalogCard): number {
+function compareCatalogCards(left: CatalogCardSummary, right: CatalogCardSummary): number {
   return (
     left.side.localeCompare(right.side) ||
     left.type.localeCompare(right.type) ||

@@ -9,7 +9,7 @@ import {
 import { assertCardSpecContract } from "./card-spec-validation";
 import type { CardSpec } from "./contracts";
 import type { CardMechanicalSpec } from "./engine/card-mechanical-contracts";
-import { cardSectionFingerprints, type Fingerprint } from "./fingerprints";
+import { cardSectionFingerprints, type CardSectionFingerprints, type Fingerprint } from "./fingerprints";
 import type { PlanningInterpretation } from "./planning-annotations";
 import {
   canonicalSerialize,
@@ -207,7 +207,19 @@ export function compileProspectiveCapabilities(
   resolveCapabilityId: ResolveCapabilityId = canonicalCapabilityId,
 ): DeepReadonly<ProspectiveCapabilityView> {
   assertCardSpecContract(spec);
-  const fingerprints = cardSectionFingerprints(spec);
+  return compileValidatedProspectiveCapabilities(
+    spec,
+    cardSectionFingerprints(spec),
+    resolveCapabilityId,
+  );
+}
+
+/** Internal projection for a spec and fingerprints already checked by the registry. */
+export function compileValidatedProspectiveCapabilities(
+  spec: CardSpec,
+  fingerprints: Pick<CardSectionFingerprints, "cardRulesFingerprint" | "planningAnnotationsFingerprint">,
+  resolveCapabilityId: ResolveCapabilityId,
+): DeepReadonly<ProspectiveCapabilityView> {
   const cacheKey = canonicalSerialize([
     PROSPECTIVE_COMPILER_VERSION,
     spec.identity.cardDefinitionId,

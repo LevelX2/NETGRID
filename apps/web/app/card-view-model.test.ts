@@ -1,6 +1,11 @@
 import { readFileSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { IntlProvider } from "use-intl/react";
 import { describe, expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
+import { CardView } from "../features/cards/CardView";
+import messages from "../messages/en.json";
 
 import {
   aiBoonRunStrengthBadgeValue,
@@ -153,24 +158,42 @@ describe("card view model ICE strength badge", () => {
     ).toBeNull();
   });
 
-  it("binds the signed modifier label to the visible card badge", () => {
-    const badgeSource = readFileSync(
-      new URL("../features/cards/CardBadges.tsx", import.meta.url),
-      "utf8",
+  it("renders the signed strength change and Ice Transmutation marker on visible ICE", () => {
+    const ice: VisibleCard = {
+      instanceId: "ice-4",
+      known: true,
+      title: "Wall",
+      type: "ice",
+      strength: 3,
+      strengthModifier: -2,
+      counterDisplays: [{
+        id: "ice_mark_modifier",
+        amount: 1,
+        displayKind: "generic_counter",
+        label: "Ice Transmutation",
+        ariaLabel: "1 Ice Transmutation",
+        counterType: "mark",
+        usageHint: "status_marker",
+      }],
+    };
+    const render = (faceDown: boolean) => renderToStaticMarkup(
+      createElement(IntlProvider, {
+        locale: "en",
+        messages,
+        timeZone: "UTC",
+        children: createElement(CardView, {
+          card: ice,
+          displayMode: "text-card",
+          ...(faceDown ? { forceCardBack: "corp" as const } : {}),
+        }),
+      }),
     );
-    const cardSource = readFileSync(
-      new URL("../features/cards/CardView.tsx", import.meta.url),
-      "utf8",
-    );
-
-    expect(badgeSource).toContain('data-testid="strength-modifier-badge"');
-    expect(badgeSource).toContain("signedStrengthModifier(amount)");
-    expect(cardSource).toMatch(
-      /counterDisplaysForRendering\(card\)\.filter\(\s*\(display\) => display\.id !== "ice_mark_modifier"/u,
-    );
-    expect(cardSource).toMatch(
-      /strengthModifier !== null\s*\?\s*\(?\s*<StrengthModifierBadge amount=\{strengthModifier\} \/>\s*\)?\s*:\s*null/u,
-    );
+    const shown = render(false);
+    expect(shown).toContain('data-testid="strength-modifier-badge"');
+    expect(shown).toContain("−2");
+    expect(shown).toContain("Ice Transmutation");
+    expect(render(true)).not.toContain('data-testid="strength-modifier-badge"');
+    expect(render(true)).not.toContain("Ice Transmutation");
   });
 
   it("keeps duplicate-instance and temporary-return markers visible and keyboard-readable", () => {

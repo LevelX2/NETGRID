@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./file-write-lock": "./src/file-write-lock.ts",
     "./paths": "./src/paths.ts",
     "./runtime": "./src/runtime-entry.ts"
   },

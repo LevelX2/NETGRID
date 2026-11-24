@@ -25,13 +25,15 @@ Jedes Deck wird als eigene JSON-Datei gespeichert. Der Dateiname basiert auf der
 - Die Datei-Deckbibliothek enthält bearbeitbare persönliche Decks, nicht den autoritativen Matchzustand.
 - Beim Matchstart validiert NETGRID das gespeicherte Deck erneut und friert daraus einen unveränderlichen Snapshot für das Match ein.
 
-## Migration
-
-Beim Laden der Deckansicht liest NETGRID zuerst die Datei-Deckbibliothek. Wenn sie leer ist und alte Browser-Decks unter `netgrid-v0-6-local-decks` existieren, werden diese einmalig über den neuen `netgrid-v0-6-local-decks`-Kompatibilitätspfad in die Datei-Deckbibliothek übernommen.
-
 ## Produktverhalten
 
-- `Speichern` schreibt in die lokale Datei-Deckbibliothek.
+- `Speichern` validiert und ersetzt genau das gewählte Deck. `Löschen` ist
+  eine eigene Operation für genau eine Deck-ID. Die Route prüft die Identität
+  einer vorhandenen Datei vor dem Ersetzen oder Löschen.
+- Schreibvorgänge für dieselbe Datei werden prozessübergreifend serialisiert.
+  Eine gültige Datei wird durch atomare Umbenennung ihrer vollständig
+  geschriebenen Nachfolgerin ersetzt. Andere Decks und fremde Dateien im
+  Ordner bleiben beim Speichern unberührt.
 - Ungespeicherte Änderungen bleiben sichtbar.
 - Ein lokales Deck mit ungespeicherten Änderungen wird vor dem Matchstart blockiert, bis es gespeichert wurde.
 - Importierte und kopierte Decks werden ebenfalls in der Datei-Deckbibliothek abgelegt.

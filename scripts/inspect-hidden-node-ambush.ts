@@ -3,12 +3,15 @@ import { resolve } from "node:path";
 import { AI_HINTS_BY_CARD } from "../packages/ai/src/ai-hints";
 import { buildActionSemanticCandidates } from "../packages/ai/src/action-semantic-candidate";
 import { buildCorpStrategicIntentProfile } from "../packages/ai/src/corp-strategic-intent";
-import { buildCorpAmbushPlanSignals } from "../packages/ai/src/runtime/corp-ambush-plan-signals";
+import { buildCorpAmbushPlanSignals } from "../packages/ai/src/corp/ambush/corp-ambush-plan-signals";
 
-const source = resolve(
-  process.argv[2] ?? "tmp/hidden-node/audit-baseline-034.json",
-);
+const inputFile = process.argv[2];
+if (!inputFile)
+  throw new Error("Eine Audit-JSON-Datei als erstes Argument angeben.");
+const source = resolve(inputFile);
 const audit = JSON.parse(readFileSync(source, "utf8"));
+if (!Array.isArray(audit?.decisions))
+  throw new Error("Die Audit-Datei enthält keine Entscheidungsliste.");
 const rows = audit.decisions
   .filter(
     (decision) =>

@@ -1,5 +1,6 @@
 "use client";
 
+import { importDeck } from "@netgrid/decks";
 import { type SelectionId } from "../lib/presented-player-view";
 import {
   nextChronicleWidth,
@@ -306,6 +307,7 @@ import type {
 import {
   deckFingerprint,
   deckMetadataFromEditable,
+  normalizeDeckTablePileSortMode,
   type DeckCardEntry,
   type DeckEditorMode,
   type EditableDeck,
@@ -322,7 +324,6 @@ import {
   snapshotAllowedForMatchCardPool,
 } from "../features/decks/deck-match-filters";
 import {
-  mergeVisibleGuestDecks,
   visibleGuestDecks,
 } from "../features/decks/deck-library-visibility";
 import {
@@ -650,6 +651,8 @@ export default function Page() {
     defaultDisplayNameRef.current = nextDefault;
   }, [noticeT]);
   const accountSession = useAccountSession();
+  const deckLibraryAccountIdRef = useRef(accountSession.account?.accountId);
+  deckLibraryAccountIdRef.current = accountSession.account?.accountId;
   const accountIdRef = useRef<string | null>(null);
   const accountMatchStartPreferencesBaselineRef = useRef<string | null>(null);
   const accountMatchStartPreferencesRef =
@@ -765,7 +768,7 @@ export default function Page() {
     useState<DeckSnapshot | null>(null);
   const [localDecks, setLocalDecks] = useState<EditableDeck[]>([]);
   const [localDecksLoaded, setLocalDecksLoaded] = useState(false);
-  const [guestDeckBacking, setGuestDeckBacking] = useState<EditableDeck[]>([]);
+  const deckLibraryWrites = useRef<Promise<void>>(Promise.resolve());
   const [accountDeckRecords, setAccountDeckRecords] = useState<AccountDeck[]>(
     [],
   );
@@ -1532,12 +1535,10 @@ export default function Page() {
         if (cancelled) return;
         setAccountDeckRecords([]);
         setAccountDeckQuota(null);
-        setGuestDeckBacking(decks);
         setDeckLibraryStoragePath(data.storagePath ?? "");
         applyLoadedDecks(visibleGuestDecks(decks));
       } catch (error) {
         if (!cancelled) {
-          setGuestDeckBacking([]);
           applyLoadedDecks([]);
           setNotice(noticeT("fileDeckLibraryUnavailable"));
         }
@@ -5885,9 +5886,8 @@ export default function Page() {
       clearDeckValidation();
       return;
     }
-    const nextDecks = [...localDecks, deck];
-    setLocalDecks(nextDecks);
-    void commitDeckLibrary(nextDecks, noticeT("newDeckSaved"));
+    setLocalDecks((current) => [...current, deck]);
+    commitDeckLibrary({ deck }, noticeT("newDeckSaved"));
     setSelectedLocalDeckId(deck.deckId);
     selectDeckForSide(deck);
     clearDeckValidation();
@@ -5910,7 +5910,7 @@ export default function Page() {
       void saveAccountDeck(selectedDeck, noticeT("personalDeckSaved"));
       return;
     }
-    void commitDeckLibrary(localDecks, noticeT("deckSaved"));
+    commitDeckLibrary({ deck: selectedDeck }, noticeT("deckSaved"));
   };
 
   const updateDeckCardQuantity = (cardId: import("@netgrid/shared").CardDefinitionId, quantity: number) => {
@@ -5937,7 +5937,7 @@ export default function Page() {
     const now = new Date().toISOString();
     const copy = {
       ...selectedLocalDeck,
-      deckId: `${selectedLocalDeck.deckId}_copy_${runtimeRandomId().slice(0, 6)}`,
+      deckId: `local_${selectedLocalDeck.side}_copy_${runtimeRandomId().slice(0, 8)}`,
       name: `${selectedLocalDeck.name} Kopie`,
       createdAt: now,
       updatedAt: now,
@@ -5959,9 +5959,8 @@ export default function Page() {
       clearDeckValidation();
       return;
     }
-    const nextDecks = [...localDecks, copy];
-    setLocalDecks(nextDecks);
-    void commitDeckLibrary(nextDecks, noticeT("deckCopySaved"));
+    setLocalDecks((current) => [...current, copy]);
+    commitDeckLibrary({ deck: copy }, noticeT("deckCopySaved"));
     setSelectedLocalDeckId(copy.deckId);
     selectDeckForSide(copy);
     clearDeckValidation();
@@ -5986,12 +5985,7 @@ export default function Page() {
       clearDeckValidation();
       return;
     }
-    const nextDecks = localDecks.filter(
-      (deck) => deck.deckId !== selectedLocalDeck.deckId,
-    );
-    setLocalDecks(nextDecks);
-    setSelectedLocalDeckId(nextDecks[0]?.deckId ?? null);
-    void commitDeckLibrary(nextDecks, noticeT("deckDeleted"));
+    commitDeckLibrary({ deckId: selectedLocalDeck.deckId }, noticeT("deckDeleted"));
     clearDeckValidation();
   };
 
@@ -6062,27 +6056,23 @@ export default function Page() {
   };
 
   const importLocalDeck = () => {
-    let parsed: { deck?: EditableDeck };
-    try {
-      parsed = JSON.parse(deckImportText) as { deck?: EditableDeck };
-    } catch {
+    const result = importDeck(deckImportText);
+    if (!result.ok) {
       setNotice(noticeT("deckImportUnreadable"));
       return;
     }
-    if (
-      !parsed.deck ||
-      (parsed.deck.side !== "runner" && parsed.deck.side !== "corp")
-    ) {
-      setNotice(noticeT("deckImportUnreadable"));
-      return;
-    }
-    const now = new Date().toISOString();
-    const imported = {
-      ...parsed.deck,
-      deckId:
-        parsed.deck.deckId || `local_import_${runtimeRandomId().slice(0, 8)}`,
-      createdAt: parsed.deck.createdAt || now,
-      updatedAt: now,
+    const { tableLayout, ...draft } = result.deck;
+    const imported: EditableDeck = {
+      ...draft,
+      ...(tableLayout ? {
+        tableLayout: {
+          ...tableLayout,
+          piles: tableLayout.piles.map((pile) => ({
+            ...pile,
+            sortMode: normalizeDeckTablePileSortMode(pile.sortMode),
+          })),
+        },
+      } : {}),
     };
     if (accountSession.account) {
       setAccountDeckBusy(true);
@@ -6101,12 +6091,11 @@ export default function Page() {
       clearDeckValidation();
       return;
     }
-    const nextDecks = [
-      ...localDecks.filter((deck) => deck.deckId !== imported.deckId),
+    setLocalDecks((current) => [
+      ...current.filter((deck) => deck.deckId !== imported.deckId),
       imported,
-    ];
-    setLocalDecks(nextDecks);
-    void commitDeckLibrary(nextDecks, noticeT("deckImported"));
+    ]);
+    commitDeckLibrary({ deck: imported }, noticeT("deckImported"));
     setSelectedLocalDeckId(imported.deckId);
     selectDeckForSide(imported);
     clearDeckValidation();
@@ -6148,46 +6137,60 @@ export default function Page() {
     }
   }
 
-  async function commitDeckLibrary(
-    nextDecks: EditableDeck[],
+  function commitDeckLibrary(
+    change: { deck: EditableDeck } | { deckId: string },
     successNotice: string,
-  ) {
-    try {
-      const result = await persistDeckLibrary(nextDecks);
-      setLocalDecks(result.decks);
-      setSavedDeckFingerprints(
-        Object.fromEntries(
-          result.decks.map((deck) => [deck.deckId, deckFingerprint(deck)]),
-        ),
-      );
-      if (result.storagePath) setDeckLibraryStoragePath(result.storagePath);
-      setNotice(successNotice);
-    } catch {
-      setNotice(noticeT("localDeckSaveFailed"));
-    }
-  }
-
-  async function persistDeckLibrary(
-    nextDecks: EditableDeck[],
-  ): Promise<{ decks: EditableDeck[]; storagePath?: string }> {
-    const persistenceDecks = mergeVisibleGuestDecks(
-      guestDeckBacking.length > 0 ? guestDeckBacking : nextDecks,
-      nextDecks,
-    );
-    const response = await fetch("/api/decks/library", {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ decks: persistenceDecks }),
+  ): void {
+    deckLibraryWrites.current = deckLibraryWrites.current.then(async () => {
+      try {
+        const response = await fetch("/api/decks/library", {
+          method: "deck" in change ? "PUT" : "DELETE",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(change),
+        });
+        if (!response.ok) throw new Error("deck_library_mutation_failed");
+        const result = (await response.json()) as {
+          storagePath: string;
+          deck?: EditableDeck;
+          deckId?: string;
+        };
+        if (deckLibraryAccountIdRef.current) return;
+        if ("deck" in change) {
+          const saved = result.deck;
+          if (saved?.deckId !== change.deck.deckId)
+            throw new Error("deck_library_save_response_invalid");
+          const submittedFingerprint = deckFingerprint(change.deck);
+          setLocalDecks((current) => current.map((deck) =>
+            deck.deckId === saved.deckId && deckFingerprint(deck) === submittedFingerprint
+              ? saved
+              : deck,
+          ));
+          setSavedDeckFingerprints((current) => ({
+            ...current,
+            [saved.deckId]: deckFingerprint(saved),
+          }));
+        } else {
+          const { deckId } = change;
+          if (result.deckId !== deckId)
+            throw new Error("deck_library_delete_response_invalid");
+          setLocalDecks((current) => current.filter((deck) => deck.deckId !== deckId));
+          setSavedDeckFingerprints((current) => {
+            const next = { ...current };
+            delete next[deckId];
+            return next;
+          });
+          setSelectedLocalDeckId((current) => current === deckId
+            ? (localDecks.find((deck) => deck.deckId !== deckId)?.deckId ?? null)
+            : current,
+          );
+        }
+        setDeckLibraryStoragePath(result.storagePath);
+        setNotice(successNotice);
+      } catch {
+        if (!deckLibraryAccountIdRef.current)
+          setNotice(noticeT("deck" in change ? "localDeckSaveFailed" : "deckDeleteFailed"));
+      }
     });
-    const data = (await response.json()) as DeckLibraryResponse;
-    if (!response.ok || data.error)
-      throw new Error(data.error?.message ?? "deck_library_save_failed");
-    const persistedDecks = data.decks ?? persistenceDecks;
-    setGuestDeckBacking(persistedDecks);
-    return {
-      decks: visibleGuestDecks(persistedDecks),
-      ...(data.storagePath ? { storagePath: data.storagePath } : {}),
-    };
   }
 
   function applyLoadedDecks(decks: EditableDeck[]) {

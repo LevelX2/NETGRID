@@ -372,6 +372,14 @@ describe("deck validation and snapshots", () => {
       templates[0]!,
       "2026-05-03T12:00:00.000Z",
     );
+    for (const invalid of [
+      null,
+      { deck: { ...deck, name: 17 } },
+      { deck: { ...deck, cards: [{ cardId: 1 }] } },
+      { deck: { ...deck, cards: [{ cardId: 1, quantity: 1.5 }] } },
+    ]) {
+      expect(importDeck(JSON.stringify(invalid))).toMatchObject({ ok: false });
+    }
     const imported = importDeck(exportDeck(deck), "2026-05-03T12:01:00.000Z");
     expect(imported.ok).toBe(true);
     if (!imported.ok) throw new Error("import failed");

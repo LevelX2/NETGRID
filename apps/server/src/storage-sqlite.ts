@@ -39,6 +39,7 @@ import {
   type MatchStatus,
   type MatchStartupReconciliationMetadata,
   type MultiplayerStorage,
+  type PublicMatchListCandidate,
   type StoredMatch,
 } from "./multiplayer";
 import {
@@ -999,6 +1000,63 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       )
       .all() as MatchStateRow[];
     return rows.map(matchCandidateFromRow);
+  }
+
+  async listPublicMatchSummaries(): Promise<PublicMatchListCandidate[]> {
+    const rows = this.db
+      .prepare(
+        `SELECT json_extract(m.record_json, '$.match') AS matchJson,
+                json_extract(m.record_json, '$.sessions') AS sessionsJson,
+                json_extract(m.record_json, '$.tokens') AS tokensJson,
+                json_extract(m.record_json, '$.resultSnapshot') AS resultJson,
+                m.state_version AS stateVersion,
+                gs.match_id IS NOT NULL AS hasGameState,
+                json_extract(gs.game_state_json, '$.stateVersion') AS storedStateVersion,
+                json_extract(gs.game_state_json, '$.winner') AS winner
+           FROM matches m
+           LEFT JOIN game_states gs ON gs.match_id = m.match_id
+          WHERE json_extract(m.record_json, '$.match.isPublic') = 1
+            AND m.status IN ('pending', 'active', 'finished', 'forfeited')
+          ORDER BY m.updated_at DESC`,
+      )
+      .all() as Array<{
+        matchJson: string;
+        sessionsJson: string;
+        tokensJson: string;
+        resultJson: string | null;
+        stateVersion: number | null;
+        hasGameState: number;
+        storedStateVersion: number | null;
+        winner: string | null;
+      }>;
+    return rows.map((row) => {
+      if (
+        row.stateVersion !== row.storedStateVersion ||
+        Boolean(row.hasGameState) !== (row.storedStateVersion !== null)
+      )
+        throw invalidStoredGameState(
+          "Die Zustandsversionen von Match und Spielzustand widersprechen sich in SQLite.",
+        );
+      if (
+        row.winner !== null &&
+        row.winner !== "runner" &&
+        row.winner !== "corp" &&
+        row.winner !== "draw"
+      )
+        throw invalidStoredGameState(
+          "Die gespeicherte Gewinnerseite ist ungültig.",
+        );
+      return {
+        match: JSON.parse(row.matchJson) as StoredMatch["match"],
+        sessions: JSON.parse(row.sessionsJson) as StoredMatch["sessions"],
+        tokens: JSON.parse(row.tokensJson) as StoredMatch["tokens"],
+        hasGameState: Boolean(row.hasGameState),
+        ...(row.winner ? { winner: row.winner } : {}),
+        ...(row.resultJson === null
+          ? {}
+          : { resultSnapshot: JSON.parse(row.resultJson) as NonNullable<StoredMatch["resultSnapshot"]> }),
+      };
+    });
   }
 
   async listResultSnapshotCandidates(): Promise<StoredMatch[]> {

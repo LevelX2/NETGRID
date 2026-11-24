@@ -209,7 +209,7 @@ describe("card image CSV workflow", () => {
     const store = new CardImageStore({ root: path.join(root, "store") });
     const first = fixtureCard();
     const second = fixtureCard({
-      catalogCardId: "second",
+      catalogCardId: 2,
       printingId: "onr_v1_002_second",
       collectorNumber: "2",
       title: "Second",
@@ -379,7 +379,7 @@ function fixtureCard(overrides: Partial<CatalogCard> = {}): CatalogCard {
   const base = Object.values(createRuntimeCardsById())[0]!;
   return {
     ...base,
-    catalogCardId: "fixture",
+    catalogCardId: 1,
     printingId: "onr_v1_001_fixture",
     setId: "originalset-v1",
     collectorNumber: "1",

@@ -249,12 +249,10 @@ export function filterCatalogCardsByType<T extends CatalogCardForTypeFilter>(
   return cards.filter((card) => catalogCardMatchesTypeFilters(card, filters));
 }
 
-export function nextCatalogSelection<T extends CatalogCardForTypeFilter>(
+export function nextCatalogSelection(
   current: CardDefinitionId | null,
-  cards: T[],
-  filters: CatalogTypeFilterState,
+  filteredCards: readonly Pick<CatalogCardForTypeFilter, "catalogCardId">[],
 ): CardDefinitionId | null {
-  const filteredCards = filterCatalogCardsByType(cards, filters);
   if (current && filteredCards.some((card) => card.catalogCardId === current))
     return current;
   return filteredCards[0]?.catalogCardId ?? null;

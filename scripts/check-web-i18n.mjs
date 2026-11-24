@@ -1,10 +1,11 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import { icuParameters } from "./lib/icu-parameters.mjs";
 
-const root = process.cwd();
+const root = fileURLToPath(new URL("../", import.meta.url));
 const webRoot = resolve(root, "apps/web");
 const de = JSON.parse(
   readFileSync(resolve(webRoot, "messages/de.json"), "utf8"),

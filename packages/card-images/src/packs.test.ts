@@ -372,13 +372,13 @@ async function packFixture() {
   temporaryDirectories.push(root);
   const cards = [
     fixtureCard({
-      catalogCardId: "pack-one",
+      catalogCardId: 1,
       printingId: "onr_pack_001_one",
       collectorNumber: "1",
       title: "Pack One",
     }),
     fixtureCard({
-      catalogCardId: "pack-two",
+      catalogCardId: 2,
       printingId: "onr_pack_002_two",
       collectorNumber: "2",
       title: "Pack Two",

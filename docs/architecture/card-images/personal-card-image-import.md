@@ -41,6 +41,16 @@ ein gemeinsamer Datenroot für beide Umgebungen ist dafür nicht erforderlich.
 
 ### Zuordnungstabelle
 
+Der Speicher serialisiert Änderungen an derselben Collection und demselben
+Asset-Manifest mit einem leeren, exklusiv angelegten Verzeichnis neben der
+Zieldatei. Der Schreibpfad liest die aktuelle Revision innerhalb dieser Sperre
+und ersetzt das vollständig geschriebene Manifest atomar. Die Runtime liest
+weiterhin die zuletzt veröffentlichte Fassung. Eine belegte Sperre führt nach
+fünf Sekunden Wartezeit zur strukturierten Meldung `storage_write_busy`.
+Wenn ein abgebrochener Schreibprozess ein `.write-lock`-Verzeichnis
+hinterlassen hat, kann es nach Prüfung der schreibenden Prozesse als leeres
+Verzeichnis entfernt werden.
+
 Eine aktuelle Zuordnungstabelle wird aus dem Katalog erzeugt:
 
 ```powershell

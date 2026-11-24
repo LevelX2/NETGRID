@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
-import type { EditableDeck } from "@netgrid/decks";
-import { readDeckLibrary, writeDeckLibrary } from "../library-store";
+import {
+  DeckLibraryMutationError,
+  deleteLibraryDeck,
+  readDeckLibrary,
+  saveLibraryDeck,
+} from "../library-store";
 
 export const runtime = "nodejs";
 
@@ -25,9 +29,21 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  let body: { decks?: EditableDeck[] };
+  return mutate(request, "deck", saveLibraryDeck);
+}
+
+export async function DELETE(request: Request) {
+  return mutate(request, "deckId", deleteLibraryDeck);
+}
+
+async function mutate(
+  request: Request,
+  key: "deck" | "deckId",
+  apply: (value: unknown) => Promise<unknown>,
+) {
+  let body: unknown;
   try {
-    body = (await request.json()) as { decks?: EditableDeck[] };
+    body = await request.json();
   } catch {
     return NextResponse.json(
       {
@@ -39,19 +55,18 @@ export async function PUT(request: Request) {
       { status: 400 },
     );
   }
-  if (!Array.isArray(body.decks))
-    return NextResponse.json(
-      { error: { code: "deck_library_missing", message: "Deckliste fehlt." } },
-      { status: 400 },
-    );
-
   try {
-    const result = await writeDeckLibrary(body.decks);
-    return NextResponse.json({
-      decks: result.decks,
-      storagePath: result.storagePath,
-    });
-  } catch {
+    const value =
+      body && typeof body === "object"
+        ? (body as Record<string, unknown>)[key]
+        : undefined;
+    return NextResponse.json(await apply(value));
+  } catch (error) {
+    if (error instanceof DeckLibraryMutationError)
+      return NextResponse.json(
+        { error: { code: error.code, message: error.message } },
+        { status: error.code === "deck_library_payload_invalid" ? 400 : 409 },
+      );
     return NextResponse.json(
       {
         error: {

@@ -12,7 +12,7 @@ import type {
 } from "./fingerprints";
 import type { CardPlanningAnnotations } from "./planning-annotations";
 import {
-  compileProspectiveCapabilities,
+  compileValidatedProspectiveCapabilities,
   type ProspectiveCapabilityView,
 } from "./prospective-capabilities";
 import { deepFreezeSerializable, type DeepReadonly } from "./serializable";
@@ -225,7 +225,11 @@ export function projectPlanningCard(
     side: spec.identity.side,
     cardType: spec.identity.cardType,
     engine: spec.engine,
-    prospectiveCapabilities: compileProspectiveCapabilities(spec, resolveCapabilityId),
+    prospectiveCapabilities: compileValidatedProspectiveCapabilities(
+      spec,
+      fingerprints,
+      resolveCapabilityId,
+    ),
     ...(spec.planningAnnotations !== undefined
       ? { planningAnnotations: spec.planningAnnotations }
       : {}),

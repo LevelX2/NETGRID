@@ -20,7 +20,7 @@ describe("IMG08 importer progress and inbox confinement", () => {
     const imageFile = path.join(inboxRoot, "images", "afreet.png");
     await mkdir(path.dirname(imageFile), { recursive: true });
     await writeCardPng(imageFile);
-    const card = createRuntimeCardsById()["onr_v1_001_afreet"]!;
+    const card = afreet();
     await writeFile(
       mappingFile,
       serializeCardImageMappingCsv(
@@ -67,7 +67,7 @@ describe("IMG08 importer progress and inbox confinement", () => {
     const outsideImage = path.join(root, "outside.png");
     await mkdir(inboxRoot, { recursive: true });
     await writeCardPng(outsideImage);
-    const card = createRuntimeCardsById()["onr_v1_001_afreet"]!;
+    const card = afreet();
     await writeFile(
       mappingFile,
       serializeCardImageMappingCsv(
@@ -90,6 +90,12 @@ describe("IMG08 importer progress and inbox confinement", () => {
     ).resolves.toBeUndefined();
   });
 });
+
+function afreet() {
+  return Object.values(createRuntimeCardsById()).find(
+    (card) => card.printingId === "onr_v1_001_afreet",
+  )!;
+}
 
 async function temporaryRoot(): Promise<string> {
   return mkdtemp(path.join(tmpdir(), "netgrid-img08-import-job-"));

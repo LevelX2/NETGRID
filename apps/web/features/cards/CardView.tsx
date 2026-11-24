@@ -230,10 +230,18 @@ export function CardView({
     : "";
   const isCompact = compact || displayMode === "compact";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
+  const detailCard = (!card.known || forceCardBack) && previewCard.counterDisplays
+    ? {
+        ...previewCard,
+        counterDisplays: previewCard.counterDisplays.filter(
+          (display) => display.id !== "ice_mark_modifier",
+        ),
+      }
+    : previewCard;
   const lifecycleMarkers =
     preview || forceCardBack ? [] : (card.lifecycleMarkers ?? []);
   const detailLines = card.known
-    ? cardDetailLines(previewCard, t as unknown as CardDetailTranslate)
+    ? cardDetailLines(detailCard, t as unknown as CardDetailTranslate)
     : [];
   const rulesText = card.known ? (card.rulesText ?? "") : "";
   const tooltipRulesText = card.known
@@ -488,10 +496,7 @@ export function CardView({
         : [];
   const renderedCounterDisplays = preview
     ? []
-    : counterDisplaysForRendering(card).filter(
-        (display) =>
-          display.id !== "ice_mark_modifier" || (card.known && !forceCardBack),
-      );
+    : counterDisplaysForRendering(detailCard);
   const selectedTarget =
     preview || forceCardBack ? null : selectedTargetDisplayLabel(card);
   const effectiveSubroutineCount = card.effectiveRunQuote?.subroutines.length;

@@ -1317,6 +1317,8 @@
       "operation": "Operation"
     },
     "noResults": "No results.",
+    "loadingResults": "Loading cards…",
+    "loadFailed": "Could not load cards.",
     "yes": "yes",
     "no": "no",
     "noCardSelected": "No card selected."

@@ -1,4 +1,8 @@
-import { isCardDefinitionId } from "@netgrid/shared";
+import { randomUUID } from "node:crypto";
+import {
+  isCardDefinitionId,
+  runtimeProfileFromEnvironment,
+} from "@netgrid/shared";
 import {
   mkdir,
   readdir,
@@ -9,9 +13,17 @@ import {
 } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { homedir } from "node:os";
-import type { EditableDeck } from "@netgrid/decks";
-import { runtimeProfileFromEnvironment } from "@netgrid/shared";
+import {
+  isDeckCardEntry,
+  isDeckTableLayout,
+  type EditableDeck,
+} from "@netgrid/decks";
+import {
+  FileWriteLockBusyError,
+  withFileWriteLock,
+} from "@netgrid/card-images/file-write-lock";
 import { resolveNetgridDataRoot } from "@netgrid/card-images/paths";
+import { isCuratedLegacyDeckId } from "../../../features/decks/deck-library-visibility";
 
 const LIBRARY_SCHEMA_VERSION = "netgrid-editable-deck-v1";
 const PRIVATE_LOCAL_PROFILE_ID = "netgrid_private_local_v1";
@@ -27,6 +39,20 @@ export type DeckLibraryReadResult = {
   decks: EditableDeck[];
   storagePath: string;
 };
+
+export class DeckLibraryMutationError extends Error {
+  readonly name = "DeckLibraryMutationError";
+
+  constructor(
+    readonly code:
+      | "deck_library_payload_invalid"
+      | "deck_library_file_conflict"
+      | "deck_library_busy",
+    message: string,
+  ) {
+    super(message);
+  }
+}
 
 export function defaultDeckLibraryPath(
   env: NodeJS.ProcessEnv = process.env,
@@ -63,18 +89,9 @@ export async function readDeckLibrary(
   const decks: EditableDeck[] = [];
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
-    try {
-      const raw = await readFile(join(storagePath, entry.name), "utf8");
-      const parsed = JSON.parse(raw) as Partial<DeckLibraryFile>;
-      if (
-        parsed.schemaVersion !== LIBRARY_SCHEMA_VERSION ||
-        !isEditableDeck(parsed.deck)
-      )
-        continue;
-      decks.push(markRevalidationIfNeeded(parsed.deck));
-    } catch {
-      continue;
-    }
+    const raw = await readDeckFile(join(storagePath, entry.name));
+    const deck = raw === undefined ? undefined : storedDeck(raw);
+    if (deck) decks.push(markRevalidationIfNeeded(deck));
   }
   decks.sort(
     (left, right) =>
@@ -84,67 +101,98 @@ export async function readDeckLibrary(
   return { decks, storagePath };
 }
 
-export async function writeDeckLibrary(
-  decks: EditableDeck[],
+export async function saveLibraryDeck(
+  value: unknown,
   storagePath = defaultDeckLibraryPath(),
-): Promise<DeckLibraryReadResult> {
-  await mkdir(storagePath, { recursive: true });
-  const normalized = normalizeDecks(decks);
-  const nextFiles = new Set<string>();
-
-  for (const deck of normalized) {
-    const fileName = `${safeFileStem(deck.deckId)}.json`;
-    nextFiles.add(fileName);
-    const target = join(storagePath, fileName);
-    const temp = join(storagePath, `${fileName}.tmp`);
+): Promise<{ deck: EditableDeck; storagePath: string }> {
+  if (!isEditableDeck(value)) throw invalidDeckPayload();
+  const deck = {
+    ...markRevalidationIfNeeded(value),
+    name: value.name.slice(0, 120),
+    cards: [...value.cards].sort((left, right) => left.cardId - right.cardId),
+  };
+  const fileName = deckFileName(deck.deckId);
+  const target = join(storagePath, fileName);
+  await withDeckWriteLock(target, async () => {
+    await checkDeckFileOwner(target, deck.deckId);
+    const temporary = join(storagePath, `.${fileName}.${randomUUID()}.tmp`);
     const payload: DeckLibraryFile = {
       schemaVersion: LIBRARY_SCHEMA_VERSION,
       deck,
     };
-    await writeFile(temp, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
-    await rename(temp, target);
-  }
-
-  const existing = await readdir(storagePath, { withFileTypes: true });
-  for (const entry of existing) {
-    if (
-      !entry.isFile() ||
-      !entry.name.endsWith(".json") ||
-      nextFiles.has(entry.name)
-    )
-      continue;
-    await rm(join(storagePath, entry.name), { force: true });
-  }
-
-  return { decks: normalized, storagePath };
+    try {
+      await writeFile(temporary, `${JSON.stringify(payload, null, 2)}\n`, {
+        encoding: "utf8",
+        flag: "wx",
+      });
+      await rename(temporary, target);
+    } finally {
+      await rm(temporary, { force: true });
+    }
+  });
+  return { deck, storagePath };
 }
 
-function normalizeDecks(decks: EditableDeck[]): EditableDeck[] {
-  const byId = new Map<string, EditableDeck>();
-  for (const deck of decks) {
-    if (!isEditableDeck(deck)) continue;
-    byId.set(deck.deckId, {
-      ...deck,
-      ...revalidationFields(deck),
-      name: deck.name.slice(0, 120),
-      cards: deck.cards
-        .filter(
-          (entry) =>
-            isCardDefinitionId(entry.cardId) && Number.isFinite(entry.quantity),
-        )
-        .map((entry) => ({
-          cardId: entry.cardId,
-          quantity: Math.max(0, Math.floor(entry.quantity)),
-        }))
-        .filter((entry) => entry.quantity > 0)
-        .sort((left, right) => left.cardId - right.cardId),
-    });
+export async function deleteLibraryDeck(
+  deckId: unknown,
+  storagePath = defaultDeckLibraryPath(),
+): Promise<{ deckId: string; storagePath: string }> {
+  if (typeof deckId !== "string") throw invalidDeckPayload();
+  const target = join(storagePath, deckFileName(deckId));
+  await withDeckWriteLock(target, async () => {
+    if (await checkDeckFileOwner(target, deckId))
+      await rm(target, { force: true });
+  });
+  return { deckId, storagePath };
+}
+
+async function withDeckWriteLock(target: string, write: () => Promise<void>) {
+  try {
+    await withFileWriteLock(target, write);
+  } catch (error) {
+    if (!(error instanceof FileWriteLockBusyError)) throw error;
+    throw new DeckLibraryMutationError(
+      "deck_library_busy",
+      "Die Deckdatei wird bereits aktualisiert.",
+    );
   }
-  return [...byId.values()].sort(
-    (left, right) =>
-      left.updatedAt.localeCompare(right.updatedAt) ||
-      left.name.localeCompare(right.name),
-  );
+}
+
+async function checkDeckFileOwner(
+  target: string,
+  deckId: string,
+): Promise<boolean> {
+  const raw = await readDeckFile(target);
+  if (raw === undefined) return false;
+  if (storedDeck(raw)?.deckId !== deckId)
+    throw new DeckLibraryMutationError(
+      "deck_library_file_conflict",
+      "Der Dateiname ist durch einen anderen oder ungültigen Eintrag belegt.",
+    );
+  return true;
+}
+
+async function readDeckFile(target: string): Promise<string | undefined> {
+  try {
+    return await readFile(target, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
+function storedDeck(raw: string): EditableDeck | undefined {
+  try {
+    const file = JSON.parse(raw) as Partial<DeckLibraryFile> | null;
+    if (
+      file?.schemaVersion === LIBRARY_SCHEMA_VERSION &&
+      isEditableDeck(file.deck)
+    )
+      return file.deck;
+  } catch (error) {
+    if (!(error instanceof SyntaxError)) throw error;
+  }
+  return undefined;
 }
 
 function markRevalidationIfNeeded(deck: EditableDeck): EditableDeck {
@@ -177,17 +225,40 @@ function isEditableDeck(value: unknown): value is EditableDeck {
     typeof deck.deckId === "string" &&
     typeof deck.deckVersion === "string" &&
     typeof deck.name === "string" &&
+    deck.name.trim().length > 0 &&
     (deck.side === "runner" || deck.side === "corp") &&
     isCardDefinitionId(deck.identityCardId) &&
     typeof deck.cardPoolSnapshotId === "string" &&
+    (deck.cardPoolVersion === undefined ||
+      typeof deck.cardPoolVersion === "string") &&
     typeof deck.formatProfileId === "string" &&
+    (deck.formatProfileVersion === undefined ||
+      typeof deck.formatProfileVersion === "string") &&
+    (deck.validationStatus === undefined ||
+      ["valid", "invalid", "needs_revalidation"].includes(
+        deck.validationStatus,
+      )) &&
+    (deck.notes === undefined || typeof deck.notes === "string") &&
     Array.isArray(deck.cards) &&
+    deck.cards.every(isDeckCardEntry) &&
+    (deck.tableLayout === undefined || isDeckTableLayout(deck.tableLayout)) &&
     typeof deck.createdAt === "string" &&
     typeof deck.updatedAt === "string",
   );
 }
 
-function safeFileStem(value: string): string {
-  const sanitized = value.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 80);
-  return sanitized || "deck";
+function deckFileName(deckId: string): string {
+  if (!deckId.trim() || isCuratedLegacyDeckId(deckId))
+    throw invalidDeckPayload();
+  const stem = deckId.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 80);
+  if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(stem))
+    throw invalidDeckPayload();
+  return `${stem}.json`;
+}
+
+function invalidDeckPayload(): DeckLibraryMutationError {
+  return new DeckLibraryMutationError(
+    "deck_library_payload_invalid",
+    "Das Deck enthält ungültige Daten.",
+  );
 }

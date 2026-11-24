@@ -1353,6 +1353,8 @@
       "operation": "Fonctionnement"
     },
     "noResults": "Aucun résultat.",
+    "loadingResults": "Chargement des cartes…",
+    "loadFailed": "Impossible de charger les cartes.",
     "yes": "oui",
     "no": "non",
     "noCardSelected": "Aucune carte sélectionnée."

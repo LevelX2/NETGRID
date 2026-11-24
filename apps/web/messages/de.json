@@ -1321,6 +1321,8 @@
       "operation": "Operation"
     },
     "noResults": "Keine Treffer.",
+    "loadingResults": "Karten werden geladen …",
+    "loadFailed": "Karten konnten nicht geladen werden.",
     "yes": "ja",
     "no": "nein",
     "noCardSelected": "Keine Karte ausgewählt."

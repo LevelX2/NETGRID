@@ -40,6 +40,15 @@ export type DeckCardEntry = {
   quantity: number;
 };
 
+export function isDeckCardEntry(value: unknown): value is DeckCardEntry {
+  if (!value || typeof value !== "object") return false;
+  const entry = value as Partial<DeckCardEntry>;
+  return isCardDefinitionId(entry.cardId) &&
+    typeof entry.quantity === "number" &&
+    Number.isSafeInteger(entry.quantity) &&
+    entry.quantity > 0;
+}
+
 export class DeckCardIdentifierError extends Error {
   readonly code = "deck_invalid";
   readonly name = "DeckCardIdentifierError";
@@ -79,6 +88,27 @@ export type DeckTableLayout = {
   showPileNames: boolean;
   piles: DeckTablePile[];
 };
+
+export function isDeckTableLayout(value: unknown): value is DeckTableLayout {
+  if (!value || typeof value !== "object") return false;
+  const layout = value as Partial<DeckTableLayout>;
+  return layout.schemaVersion === "deck-table-layout-v0.1" &&
+    typeof layout.showPileNames === "boolean" &&
+    Array.isArray(layout.piles) &&
+    layout.piles.every((pile) =>
+      pile &&
+      typeof pile.id === "string" &&
+      (pile.name === undefined || typeof pile.name === "string") &&
+      Number.isFinite(pile.order) &&
+      (pile.sortMode === undefined || [
+        "free", "name", "type", "install", "rez", "trash", "cost", "strength", "agenda",
+      ].includes(pile.sortMode)) &&
+      Array.isArray(pile.entries) &&
+      pile.entries.every((entry: DeckTableLayoutEntry) =>
+        isDeckCardEntry(entry) && Number.isFinite(entry.order),
+      )
+    );
+}
 
 export type EditableDeck = {
   deckId: string;
@@ -411,6 +441,8 @@ export function importDeck(
   } catch {
     return { ok: false, errors: ["Deck JSON konnte nicht gelesen werden."] };
   }
+  if (!parsed || typeof parsed !== "object")
+    return { ok: false, errors: ["Deck JSON enthält kein Deck."] };
   const record = parsed as { deck?: Partial<EditableDeck> };
   const deck = record.deck;
   if (!deck || typeof deck !== "object")
@@ -418,17 +450,19 @@ export function importDeck(
   if (deck.side !== "runner" && deck.side !== "corp")
     return { ok: false, errors: ["Deck Side ist ungültig."] };
   if (
-    !deck.name ||
+    typeof deck.name !== "string" ||
+    !deck.name.trim() ||
     !isCardDefinitionId(deck.identityCardId) ||
     !Array.isArray(deck.cards)
   )
     return { ok: false, errors: ["Deck Pflichtfelder fehlen."] };
-  if (
-    deck.cards.some(
-      (entry) => !entry || !isCardDefinitionId(entry.cardId),
-    )
-  )
-    return { ok: false, errors: ["Deck enthält eine ungültige Karten-ID."] };
+  if (!deck.cards.every(isDeckCardEntry))
+    return { ok: false, errors: ["Deck enthält eine ungültige Karten-ID oder Kartenanzahl."] };
+  if (deck.tableLayout !== undefined && !isDeckTableLayout(deck.tableLayout))
+    return { ok: false, errors: ["Deck enthält eine ungültige Tischanordnung."] };
+  const cards = normalizeCards(deck.cards);
+  if (!cards.every(isDeckCardEntry))
+    return { ok: false, errors: ["Deck enthält eine ungültige Kartenanzahl."] };
   return {
     ok: true,
     deck: {
@@ -438,7 +472,7 @@ export function importDeck(
           : `local_import_${hashText(text).slice(-8)}`,
       deckVersion:
         typeof deck.deckVersion === "string" ? deck.deckVersion : "0.6.0-local",
-      name: deck.name.slice(0, 80),
+      name: deck.name.slice(0, 120),
       side: deck.side,
       identityCardId: deck.identityCardId,
       cardPoolSnapshotId:
@@ -455,16 +489,14 @@ export function importDeck(
       ...(typeof deck.formatProfileVersion === "string"
         ? { formatProfileVersion: deck.formatProfileVersion }
         : {}),
-      validationStatus:
-        typeof deck.formatProfileId === "string"
-          ? "needs_revalidation"
-          : "needs_revalidation",
-      cards: normalizeCards(deck.cards as DeckCardEntry[]),
+      validationStatus: "needs_revalidation",
+      cards,
       createdAt: typeof deck.createdAt === "string" ? deck.createdAt : now,
       updatedAt: now,
       ...(typeof deck.notes === "string"
         ? { notes: deck.notes.slice(0, 500) }
         : {}),
+      ...(deck.tableLayout === undefined ? {} : { tableLayout: deck.tableLayout }),
     },
     warnings: [],
   };

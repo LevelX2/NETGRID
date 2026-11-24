@@ -48,6 +48,56 @@ describe("CardImageStore", () => {
     expect(Object.isFrozen(secondAsset.variants)).toBe(true);
   });
 
+  it("serializes independent stores updating and removing bindings", async () => {
+    const first = await temporaryStore();
+    const second = new CardImageStore({
+      root: first.root,
+      now: () => fixedNow,
+    });
+    const asset = await putAsset(first, "concurrent");
+    const binding = (printingId: string) => ({
+      printingId,
+      assetHash: asset.assetHash,
+    });
+    await Promise.all([
+      first.applyBindings("personal", [binding("first")]),
+      second.applyBindings("personal", [binding("second")]),
+    ]);
+    expect(await first.readCollection("personal")).toMatchObject({
+      revision: 2,
+      bindings: { first: binding("first"), second: binding("second") },
+    });
+    await Promise.all([
+      first.removeBinding("personal", "first"),
+      second.applyBindings("personal", [binding("third")]),
+    ]);
+    const result = await second.readCollection("personal");
+    expect(result.revision).toBe(4);
+    expect(Object.keys(result.bindings)).toEqual(["second", "third"]);
+  });
+
+  it("preserves variants supplied concurrently for the same master", async () => {
+    const first = await temporaryStore();
+    const second = new CardImageStore({
+      root: first.root,
+      now: () => fixedNow,
+    });
+    const blob = (kind: "master" | "thumb" | "preview") => ({
+      kind,
+      content: Buffer.from(kind),
+      mediaType: "image/png" as const,
+      width: 64,
+      height: 84,
+    });
+    const [asset] = await Promise.all([
+      first.putAssetVariants({ variants: [blob("master"), blob("thumb")] }),
+      second.putAssetVariants({ variants: [blob("master"), blob("preview")] }),
+    ]);
+    expect(
+      Object.keys((await first.readAsset(asset.assetHash)).variants).sort(),
+    ).toEqual(["master", "preview", "thumb"]);
+  });
+
   it("applies fail, skip and replace without overwriting blobs", async () => {
     const store = await temporaryStore();
     const first = await putAsset(store, "first");
