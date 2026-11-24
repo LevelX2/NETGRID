@@ -24,6 +24,7 @@ import {
   advancementCounterDisplay,
   contextualCardActionLabel,
   corpInstalledCardState,
+  counterDisplayTooltipText,
   counterDisplaysForRendering,
   inactiveCardZoneClassName,
   isConcealedRunnerResourceCard,
@@ -488,12 +489,18 @@ export function CardView({
   const renderedCounterDisplays = preview
     ? []
     : counterDisplaysForRendering(card).filter(
-        (display) => display.id !== "ice_mark_modifier",
+        (display) =>
+          display.id !== "ice_mark_modifier" || (card.known && !forceCardBack),
       );
   const selectedTarget =
     preview || forceCardBack ? null : selectedTargetDisplayLabel(card);
+  const effectiveSubroutineCount = card.effectiveRunQuote?.subroutines.length;
   const counterAriaSuffix = renderedCounterDisplays
-    .map((display) => display.ariaLabel)
+    .map((display) =>
+      display.id === "ice_mark_modifier"
+        ? counterDisplayTooltipText(display, locale, effectiveSubroutineCount)
+        : display.ariaLabel,
+    )
     .filter(Boolean)
     .join(", ");
   const scoreStateAriaSuffix = scoreStateBadges
@@ -1073,6 +1080,7 @@ export function CardView({
           <CounterDisplayBadge
             key={`${card.instanceId}-counter-display-${display.id}`}
             display={display}
+            effectiveSubroutineCount={effectiveSubroutineCount}
             scoreState={showScoreStateBadges}
             onHelpTooltipVisibilityChange={setCounterHelpTooltipActive}
           />

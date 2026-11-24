@@ -6,6 +6,21 @@ import {
 } from "./score-area-ui";
 
 describe("score area UI helpers", () => {
+  it("explains Ice Transmutation on scoring and omits the effect on a stolen agenda", () => {
+    expect(scoredAgendaEffectLineForScoreArea(416, "corp")).toMatchObject({
+      value: "Wertung",
+      label:
+        "Das gewählte gerezzte ICE erhält +1 Stärke und eine Kopie jeder eigenen Subroutine.",
+    });
+    expect(
+      scoredAgendaEffectLineForScoreArea(416, "corp", "en")?.label,
+    ).toContain("one copy of each of its own subroutines");
+    expect(
+      scoredAgendaEffectLineForScoreArea(416, "corp", "fr")?.label,
+    ).toContain("une copie de chacune de ses propres routines");
+    expect(scoredAgendaEffectLineForScoreArea(416, "runner")).toBeNull();
+  });
+
   it("shows Superior Net Barriers as active only in the Corp scored area", () => {
     const corpLine = scoredAgendaEffectLineForScoreArea(
       431,

@@ -129,6 +129,12 @@ const EN_ACTION_PRESENTATION_MESSAGES = {
   tooltipTesseractAria:
     "Tesseract Fort Construction: additional subroutine on this ICE",
   tooltipTesseract: "Tesseract Fort Construction: additional subroutine",
+  tooltipIceTransmutation:
+    "Ice Transmutation gives this ICE +{amount} strength. Each of its own subroutines appears {multiplier} times in succession.",
+  tooltipSubroutineTotal: "The total number of subroutines is {total}.",
+  scoreIceTransmutationTrigger: "On score",
+  scoreIceTransmutationEffect:
+    "The chosen rezzed ICE gains +1 strength and one copy of each of its own subroutines.",
   tooltipVariableSubtypeAria: "{card} is currently rezzed as {current}",
   tooltipVariableSubtype:
     "{card} is currently rezzed as {current}. Printed subtypes: {printed}.",
@@ -451,6 +457,12 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   tooltipTesseractAria:
     "Tesseract Fort Construction: zusätzliche Subroutine auf diesem ICE",
   tooltipTesseract: "Tesseract Fort Construction: zusätzliche Subroutine",
+  tooltipIceTransmutation:
+    "Ice Transmutation gibt diesem ICE +{amount} Stärke. Jede eigene Subroutine steht {multiplier}-mal direkt hintereinander.",
+  tooltipSubroutineTotal: "Die Gesamtzahl der Subroutinen beträgt {total}.",
+  scoreIceTransmutationTrigger: "Wertung",
+  scoreIceTransmutationEffect:
+    "Das gewählte gerezzte ICE erhält +1 Stärke und eine Kopie jeder eigenen Subroutine.",
   tooltipVariableSubtypeAria: "{card} ist aktuell als {current} gerezzt",
   tooltipVariableSubtype:
     "{card} ist aktuell als {current} gerezzt. Gedruckte Subtypen: {printed}.",
@@ -772,6 +784,12 @@ const FR_ACTION_PRESENTATION_MESSAGES: Record<
   tooltipTesseractAria:
     "Tesseract Fort Construction : routine supplémentaire sur cette glace",
   tooltipTesseract: "Tesseract Fort Construction : routine supplémentaire",
+  tooltipIceTransmutation:
+    "Ice Transmutation donne +{amount} en force à cette glace. Chacune de ses propres routines apparaît {multiplier} fois de suite.",
+  tooltipSubroutineTotal: "Le nombre total de routines est de {total}.",
+  scoreIceTransmutationTrigger: "Score",
+  scoreIceTransmutationEffect:
+    "La glace activée choisie gagne +1 en force et une copie de chacune de ses propres routines.",
   tooltipVariableSubtypeAria:
     "{card} est actuellement activée en tant que {current}",
   tooltipVariableSubtype:

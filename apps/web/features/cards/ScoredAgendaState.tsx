@@ -1,4 +1,5 @@
 import type { Side, VisibleCard } from "@netgrid/shared";
+import { useLocale } from "use-intl/react";
 
 import {
   researchAgendaDifficultyModifierLineForCard,
@@ -27,7 +28,8 @@ export function ScoredAgendaStateLines({
   card: DisplayVisibleCard;
   side: Side;
 }) {
-  const lines = scoredAgendaStateLines(card, side);
+  const locale = useLocale();
+  const lines = scoredAgendaStateLines(card, side, locale);
   if (lines.length === 0) return null;
   return (
     <div
@@ -81,9 +83,10 @@ export function ScoreCardStateBadges({
 function scoredAgendaStateLines(
   card: DisplayVisibleCard,
   side: Side,
+  locale: string,
 ): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
-  const effectLine = scoredAgendaEffectLineForScoreArea(card, side);
+  const effectLine = scoredAgendaEffectLineForScoreArea(card, side, locale);
   if (effectLine) lines.push(effectLine);
   return lines;
 }

@@ -4185,7 +4185,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         usageHint: "status_marker",
       }),
     ).toBe(
-      "Ice Transmutation: Dieses ICE hat +1 Stärke. Pro Counter wird jede gedruckte Subroutine einmal direkt nach ihrem ursprünglichen Platz wiederholt.",
+      "Ice Transmutation gibt diesem ICE +1 Stärke. Jede eigene Subroutine steht 2-mal direkt hintereinander.",
     );
     expect(
       counterDisplayTooltipText({

@@ -210,17 +210,23 @@ export function RunStrengthBadge({ strength }: { strength: number }) {
 
 export function CounterDisplayBadge({
   display,
+  effectiveSubroutineCount,
   scoreState,
   onHelpTooltipVisibilityChange,
 }: {
   display: NonNullable<VisibleCard["counterDisplays"]>[number];
+  effectiveSubroutineCount?: number | undefined;
   scoreState: boolean;
   onHelpTooltipVisibilityChange?(visible: boolean): void;
 }) {
   const t = useTranslations("Cards.badge");
   const locale = useLocale();
   const amount = safeCounterDisplayAmount(display.amount);
-  const tooltip = counterDisplayTooltipText(display, locale);
+  const tooltip = counterDisplayTooltipText(
+    display,
+    locale,
+    effectiveSubroutineCount,
+  );
   const ariaLabel = locale === "de" ? display.ariaLabel : tooltip;
   if (amount <= 0) return null;
   if (display.displayKind === "stored_credits") {
@@ -264,19 +270,28 @@ export function CounterDisplayBadge({
       />
     );
   }
-  if (display.id === "variable_paid_etr_subroutines") {
+  const repeatsSubroutines = display.id === "ice_mark_modifier";
+  if (repeatsSubroutines || display.id === "variable_paid_etr_subroutines") {
     return (
       <CounterHelpTooltipTrigger
-        className="variableSubroutineBadge"
-        ariaLabel={ariaLabel}
-        data-testid="variable-subroutine-badge"
+        className={
+          repeatsSubroutines
+            ? "variableSubroutineBadge iceTransmutationBadge"
+            : "variableSubroutineBadge"
+        }
+        ariaLabel={repeatsSubroutines ? tooltip : ariaLabel}
+        data-testid={
+          repeatsSubroutines
+            ? "ice-transmutation-badge"
+            : "variable-subroutine-badge"
+        }
         tooltip={tooltip}
         {...(onHelpTooltipVisibilityChange
           ? { onVisibilityChange: onHelpTooltipVisibilityChange }
           : {})}
       >
         <SubroutineIcon />
-        <span>{amount}</span>
+        <span>{repeatsSubroutines ? `×${amount + 1}` : amount}</span>
       </CounterHelpTooltipTrigger>
     );
   }

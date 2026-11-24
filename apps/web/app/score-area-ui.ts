@@ -1,4 +1,5 @@
 import type { CardDefinitionId, Side, VisibleCard } from "@netgrid/shared";
+import { actionPresentationText } from "../i18n/action-presentation";
 
 export const GENETICS_VISIONARY_ACQUISITION_ID =
   414;
@@ -21,6 +22,7 @@ export function scoredAgendaEffectLineForScoreArea(
     | CardDefinitionId
     | undefined,
   scoreAreaSide: Side,
+  locale: string = "de",
 ): ScoredAgendaEffectLine | null {
   if (scoreAreaSide !== "corp") return null;
   const definitionId =
@@ -54,6 +56,13 @@ export function scoredAgendaEffectLineForScoreArea(
         key: "effect-encryption-breakthrough",
         value: "Aktiv",
         label: "Code-Gates haben +1 Stärke",
+        tone: "effect",
+      };
+    case 416:
+      return {
+        key: "effect-ice-transmutation",
+        value: actionPresentationText(locale, "scoreIceTransmutationTrigger"),
+        label: actionPresentationText(locale, "scoreIceTransmutationEffect"),
         tone: "effect",
       };
     case 419:

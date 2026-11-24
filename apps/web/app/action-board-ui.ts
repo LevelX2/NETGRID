@@ -749,9 +749,21 @@ export function counterDisplayBadgeView(
 export function counterDisplayTooltipText(
   display: NonNullable<VisibleCard["counterDisplays"]>[number],
   locale: AppLocale | string = "de",
+  effectiveSubroutineCount?: number,
 ): string {
   const amount = safeCounterDisplayAmount(display.amount);
   const countLabel = `${amount} ${counterDisplayShortLabel(display.label)}`;
+  if (display.id === "ice_mark_modifier") {
+    const effect = actionPresentationText(locale, "tooltipIceTransmutation", {
+      amount,
+      multiplier: amount + 1,
+    });
+    if (effectiveSubroutineCount === undefined) return effect;
+    const total = actionPresentationText(locale, "tooltipSubroutineTotal", {
+      total: effectiveSubroutineCount,
+    });
+    return `${effect} ${total}`;
+  }
   if (display.counterType === "remap")
     return actionPresentationText(locale, "tooltipRemap", { amount });
   if (display.id === "pattel")
@@ -812,8 +824,6 @@ export function counterDisplayTooltipText(
     case "breaker_strength_penalty":
       return `Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.`;
     case "mark":
-      if (display.id === "ice_mark_modifier")
-        return `Ice Transmutation: Dieses ICE hat +${amount} Stärke. Pro Counter wird jede gedruckte Subroutine einmal direkt nach ihrem ursprünglichen Platz wiederholt.`;
       if (display.id === "corporate_retreat_active")
         return "Corporate Retreat: Die Agenda-Fähigkeit ist noch aktiv. Die Korp kann für 1 Aktion 2 Credits nehmen. Sobald die Korp eine Karte installiert oder rezzt, erlischt die Fähigkeit und der Marker verschwindet.";
       if (display.id === "project_venice_actions_per_turn")

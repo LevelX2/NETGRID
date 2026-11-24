@@ -89,6 +89,12 @@ Tooltip und Aktionstext erklären das Beenden des Runs in Deutsch, Englisch
 und Französisch; der Aktionstext ist an die Capability
 `onr_classic_001_data-fort-remapping:spend_remap_counter_end_run` gebunden.
 
+Bei _Ice Transmutation_ zeigt das gewählte ICE links ein Subroutinensymbol
+mit dem Multiplikator aus seinem sichtbaren `ice_mark_modifier`. Ein Marker
+ergibt ×2, zwei Marker ergeben ×3. Der Tooltip erklärt die Wiederholung der
+eigenen Subroutinen und nennt die Gesamtzahl aus `effectiveRunQuote`, wenn
+sie vorliegt. Unter der gewerteten Korp-Agenda steht der Effekt der Wertung.
+
 Über jedem Server zeigt das Spielbrett die Summe seiner sichtbaren Kostenmodifikatoren
 je Kostenart und Richtung. Zwei aktive Chester Mix ergeben ein Badge „ICE-Install −4“.
 Im Tooltip stehen die beteiligten Karten, gleichnamige Quellen mit ihrer Anzahl.

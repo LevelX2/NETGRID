@@ -10233,6 +10233,23 @@ section[data-testid="legal-actions"].cueHighlight {
   color: var(--text);
 }
 
+.variableSubroutineBadge.iceTransmutationBadge {
+  left: calc(2px * var(--lane-card-scale, 1));
+  right: auto;
+  top: calc(46px * var(--lane-card-scale, 1));
+  gap: calc(1px * var(--lane-card-scale, 1));
+  padding-inline: calc(2px * var(--lane-card-scale, 1));
+  font-size: calc(10px * var(--lane-card-scale, 1));
+}
+
+.iceTransmutationBadge .subroutineIcon {
+  margin-right: 0;
+}
+
+.iceCardSlot:has(+ .unrezzedIceStackSlot) .iceTransmutationBadge {
+  flex-direction: column;
+}
+
 .iceModifierTooltip {
   border-color: color-mix(in srgb, var(--ice), var(--line));
 }
