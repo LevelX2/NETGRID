@@ -1446,7 +1446,7 @@ export function runnerExactRunWindowPhaseActionIds(
   input: AiDecisionInput,
   windowCandidates: readonly ActionSemanticCandidate[],
   actionsById: ReadonlyMap<string, LegalAction>,
-  assessments: Readonly<Record<string, { admissible: boolean }>>,
+  assessments: Readonly<Record<string, RunnerRunWindowActionAssessment>>,
   safetyRequiresJackOut: boolean,
   encounterRequiresTargetPreservingBreak: boolean,
 ): string[] {
