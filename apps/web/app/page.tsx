@@ -5682,9 +5682,15 @@ export default function Page() {
     clearMatchView();
   };
 
+  const returnToMatchCreation = () => {
+    leaveMatch();
+    setEntryTab("play");
+    selectStartTab("host");
+  };
+
   const returnToStartFromGame = () => {
     if (!session || !payload || !canStartNextSeriesGame) {
-      leaveMatch();
+      returnToMatchCreation();
       return;
     }
     updateSessionRecovery(session, payload);
@@ -7860,7 +7866,7 @@ export default function Page() {
                   onDismiss={() => {
                     if (resultKey) setDismissedResultKey(resultKey);
                   }}
-                  onNewMatch={leaveMatch}
+                  onNewMatch={returnToMatchCreation}
                   {...(payload?.isPublic
                     ? {
                         onReplay: () =>

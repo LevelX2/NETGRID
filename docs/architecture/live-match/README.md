@@ -33,8 +33,10 @@ Serienspiel anbietet. Ein Reload öffnet denselben Ergebnisstand. Über
 „Startbildschirm“ und „Fortsetzen“ lässt sich die Sitzung auch innerhalb
 des Browsers wieder öffnen. „Serie verlassen“ entfernt nach Bestätigung
 die Browser-Sitzung. Sobald der Client das Folgespiel übernimmt, ersetzt
-dessen Sitzung die vorherige. Nach dem letzten Spiel entfernt der Client
-die gespeicherten Zugangsdaten.
+dessen Sitzung die vorherige. Nach einem abgeschlossenen Einzelmatch oder
+dem letzten Serienspiel entfernt der Client die gespeicherten Zugangsdaten
+für dieses Match. Die Rückkehr zum Startbildschirm öffnet „Spiel“ mit dem
+ausgewählten Reiter „Match erstellen“.
 
 Dieser Weg verwendet die vorhandenen Match-Zugangsdaten im Browser.
 Die kontogebundene Wiederaufnahme erfasst aktive öffentliche Spiele mit
