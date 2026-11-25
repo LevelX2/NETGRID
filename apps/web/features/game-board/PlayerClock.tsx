@@ -1,5 +1,12 @@
-import type { ApiPlayerClockSnapshot, Side } from "@netgrid/shared";
+import type { ApiPlayerClockSnapshot } from "@netgrid/shared";
 import { useTranslations } from "use-intl/react";
+import {
+  formatPlayerClockDuration,
+  playerClockIsPaused,
+  playerClockLiveConsumed,
+  playerClockLiveElapsed,
+  playerClockLiveRemaining,
+} from "../../app/match-timer-ui";
 
 export function PlayerClockStrip({
   snapshot,
@@ -18,9 +25,11 @@ export function PlayerClockStrip({
     : playerClockLiveRemaining(snapshot, "corp", nowMs);
   const ownerLabel = snapshot.expiredSide
     ? t("expired", { side: t(`side.${snapshot.expiredSide}`) })
-    : snapshot.decisionOwnerSide
-      ? t("deciding", { side: t(`side.${snapshot.decisionOwnerSide}`) })
-      : t("waiting");
+    : playerClockIsPaused(snapshot, nowMs)
+      ? t("paused")
+      : snapshot.decisionOwnerSide
+        ? t("deciding", { side: t(`side.${snapshot.decisionOwnerSide}`) })
+        : t("waiting");
   const valueLabel = isNoLimit ? t("consumed") : t("remaining");
   return (
     <div
@@ -78,56 +87,10 @@ function playerClockLiveGraceRemaining(
     snapshot.activityStartedAtMs !== undefined &&
     snapshot.gracePeriodMs !== undefined
   ) {
-    const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+    const elapsedMs = playerClockLiveElapsed(snapshot, nowMs) ?? 0;
     return Math.max(0, snapshot.gracePeriodMs - elapsedMs);
   }
   if (snapshot.graceRemainingMs !== undefined)
     return Math.max(0, snapshot.graceRemainingMs);
   return null;
-}
-
-function playerClockLiveConsumed(
-  snapshot: ApiPlayerClockSnapshot,
-  side: Side,
-  nowMs: number,
-): number {
-  const consumedMs = snapshot.consumedMs?.[side] ?? 0;
-  if (
-    snapshot.mode !== "none" ||
-    snapshot.decisionOwnerSide !== side ||
-    snapshot.activityStartedAtMs === undefined
-  )
-    return consumedMs;
-  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
-  const serverElapsedMs = snapshot.elapsedActivityMs ?? 0;
-  return Math.max(0, consumedMs + Math.max(0, elapsedMs - serverElapsedMs));
-}
-
-function playerClockLiveRemaining(
-  snapshot: ApiPlayerClockSnapshot,
-  side: Side,
-  nowMs: number,
-): number {
-  let remainingMs = snapshot.remainingMs?.[side] ?? 0;
-  if (snapshot.expiredSide === side) return 0;
-  if (
-    snapshot.decisionOwnerSide !== side ||
-    snapshot.activityStartedAtMs === undefined ||
-    snapshot.gracePeriodMs === undefined
-  )
-    return remainingMs;
-  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
-  const liveChargeableMs = Math.max(0, elapsedMs - snapshot.gracePeriodMs);
-  const serverChargeableMs = snapshot.chargeableElapsedMs ?? 0;
-  return Math.max(
-    0,
-    remainingMs - Math.max(0, liveChargeableMs - serverChargeableMs),
-  );
-}
-
-function formatPlayerClockDuration(valueMs: number): string {
-  const totalSeconds = Math.max(0, Math.ceil(valueMs / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }

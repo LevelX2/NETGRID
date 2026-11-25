@@ -121,6 +121,36 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     }
   });
 
+  test("Spieleruhr gegen die KI pausiert im Hintergrund und läuft sichtbar weiter", async ({ page }) => {
+    await createHumanVsAiGame(page, "player-clock-visibility");
+    const clock = page.getByTestId("player-clock");
+    const runnerTime = clock.locator(".playerClockSide.runner .playerClockValue");
+    const decisionTime = page.getByTestId("match-clock").locator("span").last();
+    await expect(clock).toHaveAttribute("aria-label", /Runner entscheidet/);
+    await expect(runnerTime).not.toHaveText("0:00");
+
+    const setVisibility = (visibility: "visible" | "hidden") =>
+      page.evaluate((state) => {
+        Object.defineProperty(document, "visibilityState", {
+          configurable: true,
+          value: state,
+        });
+        document.dispatchEvent(new Event("visibilitychange"));
+      }, visibility);
+
+    await setVisibility("hidden");
+    await expect(clock).toHaveAttribute("aria-label", /Spieleruhr pausiert/);
+    const pausedRunnerTime = await runnerTime.innerText();
+    const pausedDecisionTime = await decisionTime.innerText();
+    await page.waitForTimeout(2_000);
+    await expect(runnerTime).toHaveText(pausedRunnerTime);
+    await expect(decisionTime).toHaveText(pausedDecisionTime);
+
+    await setVisibility("visible");
+    await expect(clock).toHaveAttribute("aria-label", /Runner entscheidet/);
+    await expect(runnerTime).not.toHaveText(pausedRunnerTime);
+  });
+
   test("Human-vs-KI Desktop prüft aktives Board, KI-Takt, Cue, Aktionen, Credits und Artefakte", async ({
     page,
   }, testInfo) => {

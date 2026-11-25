@@ -23,6 +23,10 @@ export { traceCorpPaymentBalance } from "./trace-payment-choice";
 import type { AbilityPayloadDiscriminators } from "./ability-payload";
 import type { ServerId } from "./server-ids";
 export { isRemoteServerId, type RemoteServerId, type ServerId } from "./server-ids";
+export {
+  PLAYER_CLOCK_VISIBILITY_LEASE_MS,
+  PLAYER_CLOCK_VISIBILITY_RENEW_MS,
+} from "./api-contracts";
 export type {
   ApiAccountActivePublicMatchIds,
   ApiAccountMatchHistory,
@@ -58,6 +62,7 @@ export type {
   ApiPlayerClockConfig,
   ApiPlayerClockMode,
   ApiPlayerClockSnapshot,
+  ApiPlayerClockUpdate,
   ApiPersonalRecentResults,
   ApiPublicMatchListEntry,
   ApiPublicMatchStatus,

@@ -182,6 +182,7 @@ type ClientWsMessage =
   | { type: "set_ready"; payload: { ready: boolean } }
   | { type: "cancel_countdown"; payload: Record<string, never> }
   | { type: "send_lobby_chat"; payload: { text: string } }
+  | { type: "player_clock_presence"; payload: { visible: boolean } }
   | {
       type: "advance_ai";
       payload: {
@@ -355,6 +356,18 @@ export class NetgridRealtimeServer {
     const context = this.findContext(socket);
     if (!context) {
       sendUserError(socket, { code: "not_joined" });
+      return;
+    }
+
+    if (message.type === "player_clock_presence") {
+      const result = await this.service.setPlayerClockPresence(
+        { ...context, visible: message.payload.visible },
+        () => this.connection(context.matchId, context.side)?.socket === socket,
+      );
+      if (!result) return;
+      if ("error" in result) sendUserError(socket, result.error);
+      else if ("finished" in result) sendBootstrap(socket, result.finished);
+      else send(socket, { type: "player_clock_update", payload: result.update });
       return;
     }
 
@@ -4589,6 +4602,12 @@ function parseWsMessage(raw: string): ClientWsMessage | null {
       !isMessageRecord(parsed.payload)
     ) return null;
     if (parsed.type === "submit_action" && !isMatchActionSubmission(parsed.payload))
+      return null;
+    if (
+      parsed.type === "player_clock_presence" &&
+      (typeof parsed.payload.visible !== "boolean" ||
+        Object.keys(parsed.payload).length !== 1)
+    )
       return null;
     return parsed;
   } catch {

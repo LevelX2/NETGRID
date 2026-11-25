@@ -133,6 +133,29 @@ verbrauchteZeit[decisionOwnerSide] += elapsedSinceActivityStart - alreadyCounted
 
 Die hochgezählte Verbrauchszeit ist serverseitige Match-Metadatenprojektion für REST/WebSocket/Reconnect. Sie wird nicht in den deterministischen Engine-State geschrieben und erzeugt keinen `time_expired`-Lifecycle-Grund.
 
+## Sichtbarkeit bei Mensch gegen KI
+
+Die Entscheidungszeit der menschlichen Seite läuft, solange der Spieltab
+sichtbar ist und die Seite entscheiden muss. Das gilt für das Zeitkonto und
+für die erfasste Denkzeit im Modus `none`. Beim Fortsetzen bleiben Restzeit
+und verbleibende Grundfrist der laufenden Entscheidung erhalten.
+
+Der Client meldet die Sichtbarkeit über die bestätigte Matchverbindung beim
+Sichtbarkeitswechsel und beim Verlassen der Seite. Solange die Seite sichtbar
+ist, bestätigt sie dies alle fünf Sekunden. Der Server akzeptiert Meldungen
+der aktuell gebundenen menschlichen Seite in Mensch-gegen-KI-Spielen. Jede
+Bestätigung gilt für 15 Sekunden ab Serverempfang. Beim Verbergen oder
+Schließen der Verbindung rechnet der Server bis zum beobachteten Übergang
+ab. Bei ausbleibender Meldung endet die Abrechnung mit Ablauf der letzten
+Bestätigung. Eine neue Verbindung benötigt eine eigene Bestätigung.
+
+Das Match speichert Zeitkonto, Pause und Sichtbarkeitsfrist als serverseitige
+Metadaten. WebSocket-Nachrichten vom Typ `player_clock_update` übertragen die
+Uhr für die aktuelle Matchversion. Zeitablauf wird als normales
+abgeschlossenes Matchupdate übertragen. Die Sichtbarkeitsregel betrifft die
+menschliche Seite. KI-Entscheidungen und Partien zwischen Menschen verwenden
+die Abrechnung nach Entscheidungseigner.
+
 ## Zeitablauf
 
 Zeitablauf darf nur greifen, wenn alle Bedingungen erfüllt sind:
@@ -181,6 +204,10 @@ export type ApiPlayerClockSnapshot = {
   elapsedActivityMs?: number;
   graceRemainingMs?: number;
   chargeableElapsedMs?: number;
+  pausesWhenHidden?: true;
+  paused?: true;
+  visibilityExpiresAtMs?: number;
+  serverNowMs?: number;
   warningLevel: "none" | "grace" | "charging" | "critical" | "expired";
   expiredSide?: Side;
 };

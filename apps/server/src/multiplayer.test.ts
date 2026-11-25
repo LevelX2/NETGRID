@@ -1,5 +1,6 @@
 import {
   isCardDefinitionId,
+  PLAYER_CLOCK_VISIBILITY_LEASE_MS,
   type ApiJoinMatchResponse,
   type ApiSidePayload,
   type CardDefinitionId,
@@ -6660,6 +6661,12 @@ describe("MVP 0.2 multiplayer service", () => {
     );
 
     nowMs = startMs + 7_000;
+    expect(await service.setPlayerClockPresence({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: corp.sessionToken,
+      visible: false,
+    })).toBeUndefined();
     const reconnected = await service.reconnectMatch(created.matchId, {
       side: "corp",
       sessionToken: corp.sessionToken,
@@ -6760,6 +6767,148 @@ describe("MVP 0.2 multiplayer service", () => {
     } finally { storage.close(); }
   });
 
+  it("preserves a human player's remaining grace and SQLite clock across a long pause and lease expiry", async () => {
+    const start = Date.parse("2026-11-25T08:00:00.000Z");
+    let elapsed = 0;
+    const directory = await tempStorageDir();
+    const storage = new SqliteMatchStorage({ dbPath: join(directory, "netgrid.sqlite") });
+    const service = new MultiplayerService(storage, {
+      now: () => new Date(start + elapsed).toISOString(),
+    });
+    try {
+      const created = await service.createMatch({
+        mode: "human_runner_vs_corp_ai",
+        hostSide: "runner",
+        seed: "player-clock-visibility",
+        aiPacingMode: "paced",
+        settings: { playerClock: {
+          mode: "player_clock", startingTimeMs: 120_000, gracePeriodMs: 5_000,
+        } },
+      });
+      const session = {
+        side: "runner" as const,
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      };
+      const matchId = created.matchId;
+      const initial = (await storage.load(matchId))!;
+      const report = async (visible: boolean) => {
+        const result = await service.setPlayerClockPresence({ matchId, ...session, visible });
+        if (!result || !("update" in result)) throw new Error("Missing player clock update");
+        expect(result.update.matchVersion).toBe(created.matchVersion);
+        return result.update.clock;
+      };
+
+      expect(created.playerClock).toMatchObject({
+        decisionOwnerSide: "runner",
+        pausesWhenHidden: true,
+        paused: true,
+        elapsedActivityMs: 0,
+      });
+      elapsed += 3_600_000;
+      expect(await report(true)).toMatchObject({
+        graceRemainingMs: 5_000,
+        remainingMs: { runner: 120_000 },
+      });
+      elapsed += 2_000;
+      const paused = await report(false);
+      expect(paused).toMatchObject({
+        paused: true,
+        elapsedActivityMs: 2_000,
+        graceRemainingMs: 3_000,
+        remainingMs: { runner: 120_000 },
+      });
+      elapsed += 6 * 3_600_000;
+      expect((await bootstrap(service, matchId, session)).playerClock).toEqual(paused);
+      const resumed = await report(true);
+      expect(resumed.paused).toBeUndefined();
+      expect(resumed).toMatchObject({
+        elapsedActivityMs: paused.elapsedActivityMs,
+        graceRemainingMs: paused.graceRemainingMs,
+        remainingMs: paused.remainingMs,
+      });
+      elapsed += 4_000;
+      expect(await report(true)).toMatchObject({
+        graceRemainingMs: 0,
+        remainingMs: { runner: 119_000 },
+        visibilityExpiresAtMs: start + elapsed + PLAYER_CLOCK_VISIBILITY_LEASE_MS,
+      });
+      elapsed += 2_000;
+      expect(await service.setPlayerClockPresence(
+        { matchId, ...session, visible: false },
+        () => false,
+      )).toBeUndefined();
+
+      elapsed += 3_600_000;
+      const expiredPresence = (await bootstrap(service, matchId, session)).playerClock;
+      expect(expiredPresence).toMatchObject({
+        paused: true,
+        remainingMs: { runner: 119_000 - PLAYER_CLOCK_VISIBILITY_LEASE_MS },
+      });
+      expect((await report(true)).remainingMs).toEqual(expiredPresence?.remainingMs);
+      const persisted = (await storage.load(matchId))!;
+      expect(persisted.match.matchVersion).toBe(initial.match.matchVersion);
+      expect(persisted.eventLog).toEqual(initial.eventLog);
+      expect(persisted.stateSnapshots).toEqual(initial.stateSnapshots);
+      expect(hashState(persisted.gameState)).toBe(hashState(initial.gameState));
+
+      let timeExpiry: SidePayload | undefined;
+      for (let visibleMs = 0; visibleMs < 120_000; visibleMs += 10_000) {
+        elapsed += 10_000;
+        const result = await service.setPlayerClockPresence({ matchId, ...session, visible: true });
+        if (result && "finished" in result) {
+          timeExpiry = result.finished;
+          break;
+        }
+      }
+      expect(timeExpiry?.resultSummary).toMatchObject({
+        reason: "time_expired",
+        playerTimeMs: { runner: 120_000 },
+        finalEngineStateHash: hashState(initial.gameState),
+      });
+      expect(await service.replayMatch(matchId)).toMatchObject({
+        ok: true,
+        finalStateHash: hashState(initial.gameState),
+      });
+    } finally {
+      storage.close();
+    }
+  });
+
+  it("stops the human Corp's no-limit clock at disconnect and preserves the time in the result", async () => {
+    const start = Date.parse("2026-11-25T08:00:00.000Z");
+    let elapsed = 0;
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      now: () => new Date(start + elapsed).toISOString(),
+    });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "player-clock-disconnect",
+      aiPacingMode: "paced",
+    });
+    const input = {
+      matchId: created.matchId,
+      side: "corp" as const,
+      sessionToken: created.hostSessionToken,
+    };
+    await forceSetupComplete(service, created.matchId);
+    await service.setPlayerClockPresence({ ...input, visible: true });
+    elapsed += 3_000;
+    const disconnected = await service.setConnected(
+      input.matchId, input.side, input.sessionToken, false,
+    );
+    expect(disconnected).toMatchObject({
+      playerClock: { paused: true, consumedMs: { corp: 3_000 } },
+    });
+    elapsed += 3_600_000;
+    const finished = await service.forfeitMatch(input);
+    expect(finished).toMatchObject({
+      ok: true,
+      actorPayload: { resultSummary: { playerTimeMs: { corp: 3_000 } } },
+    });
+  });
+
   it("moves the displayed player time to the Runner as soon as paced Corp AI finishes", async () => {
     const startMs = Date.parse("2026-07-13T08:00:00.000Z");
     let nowMs = startMs;
@@ -6786,6 +6935,12 @@ describe("MVP 0.2 multiplayer service", () => {
       sessionToken: created.hostSessionToken,
       reconnectToken: created.hostReconnectToken,
     };
+    await service.setPlayerClockPresence({
+      matchId: created.matchId,
+      side: runner.side,
+      sessionToken: runner.sessionToken,
+      visible: true,
+    });
     const afterSetup = await submitChoice(
       service,
       created.matchId,

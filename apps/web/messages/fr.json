@@ -1655,6 +1655,7 @@
       },
       "expired": "{side} expiré",
       "deciding": "{side} décide",
+      "paused": "Chronomètre en pause",
       "waiting": "En attente",
       "consumed": "utilisé",
       "remaining": "restant",
