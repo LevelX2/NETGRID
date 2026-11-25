@@ -287,6 +287,27 @@ export function currentRunRemainderSupportsExactEtrPricing(
   );
 }
 
+/** The current decision can resolve only a free, harmless hard stop. */
+export function canResolveFreeHardEndRun(input: AiDecisionInput): boolean {
+  const subroutines =
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
+  const indexes = currentEncounterCompleteSubroutineIndexes(input);
+  if (!subroutines || !indexes?.size) return false;
+  if ([...indexes].some((index) => subroutines[index]?.type !== "end_the_run"))
+    return false;
+  return input.legalActions.some(
+    (action) =>
+      actionMatchesCurrentDecision(input, action) &&
+      action.type === "continue_run" &&
+      action.payload?.encounterContinue === true &&
+      action.payload.encounterWillEndRun === true &&
+      action.payload.encounterFullBreakDamage === 0 &&
+      nonNegativeActionCreditCost(action) === 0 &&
+      actionClickCost(action) === 0 &&
+      !action.choiceRequirements?.length,
+  );
+}
+
 /** Price a certified complete current payment and its known pure-ETR suffix.
  * The current payment can fully break mixed effects; no such effect remains.
  * The Run Window owner consumes this value; this quote never selects an action.

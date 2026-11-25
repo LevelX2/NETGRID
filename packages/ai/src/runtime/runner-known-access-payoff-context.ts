@@ -45,6 +45,12 @@ export function runnerCurrentRunHasSafeCompletionReward(
     })
   )
     return false;
+  return runnerRigHasSuccessfulRunCreditReward(input);
+}
+
+export function runnerRigHasSuccessfulRunCreditReward(
+  input: AiDecisionInput,
+): boolean {
   return (input.playerView.own.rig ?? []).some((card) => {
     if (!card.known || !card.definitionId || !card.rezzed) return false;
     const effect = planningCardByDefinitionId(card.definitionId)

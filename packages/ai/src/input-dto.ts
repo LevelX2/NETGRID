@@ -1231,6 +1231,10 @@ function sanitizePlayerView(
               ? { followupRunOpportunity: view.run.followupRunOpportunity }
               : {}),
             attackedServerId: view.run.attackedServerId,
+            ...(view.side === "runner" &&
+            view.run.successfulRunSpendCreditsToDeny === true
+              ? { successfulRunSpendCreditsToDeny: true as const }
+              : {}),
             ...(fortTrash
               ? {
                   successfulRunFortIceTrashQuote: {

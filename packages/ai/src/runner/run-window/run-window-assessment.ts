@@ -9,6 +9,7 @@ import {
   programProtectionEncounterPayment,
 } from "./run-window-encounter-payment";
 import {
+  canResolveFreeHardEndRun,
   currentRunRemainderSupportsExactEtrPricing,
   preparedProgramEncounterPayment,
   pureEndRunEncounterPayment,
@@ -78,6 +79,7 @@ import {
 import {
   runnerCurrentRunHasSafeCompletionReward,
   runnerRemoteHasKnownNoCurrentPayoff,
+  runnerRigHasSuccessfulRunCreditReward,
 } from "../../runtime/runner-known-access-payoff-context";
 import {
   assessRunnerAdditionalAccessRunWindowAction,
@@ -1206,6 +1208,33 @@ function runnerRunWindowActionAssessment(
   const pureEncounterEconomics = encounterPayment
     ? pureEndRunEncounterEconomics(input, encounterPayment)
     : undefined;
+  const run = input.playerView.run;
+  if (
+    run.successfulRunSpendCreditsToDeny === true &&
+    input.playerView.own.clicks === 0 &&
+    run.followupRunOpportunity === undefined &&
+    !run.pendingSequenceRunCount &&
+    !run.unpreventableCoreDamageAtRunEnd &&
+    !runOrigin?.postBreakTrashCommitment &&
+    !runnerRigHasSuccessfulRunCreditReward(input) &&
+    pureEncounterEconomics &&
+    pureEncounterEconomics.cashCost > 0 &&
+    canResolveFreeHardEndRun(input)
+  ) {
+    const maximumDenial = Math.min(
+      input.playerView.opponent.credits,
+      pureEncounterEconomics.liquidCreditsAfterPath,
+    );
+    if (pureEncounterEconomics.cashCost >= maximumDenial)
+      return {
+        admissible: false,
+        evidenceCodes: [
+          "runner_credit_denial_does_not_cover_remaining_break_cost",
+          `runner_credit_denial_complete_cash_cost:${pureEncounterEconomics.cashCost}`,
+          `runner_credit_denial_payoff_upper_bound:${maximumDenial}`,
+        ],
+      };
+  }
   const encounterEconomics =
     pureEncounterEconomics ?? currentEncounterEconomics;
   if (

@@ -14,6 +14,7 @@ import {
 } from "../../ability-engine/effective-values";
 import { projectInstalledCorpIceRezCost } from "../payment";
 import { runJackOutAdditionalCost } from "../run/run-duration-payment";
+import { successfulRunEffectTargetMatches } from "../run/run-server-identities";
 import { runnerActiveSuccessfulRunFortIceTrashQuote } from "../turn/runner-fort-ice-trash-quote";
 import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import {
@@ -297,6 +298,11 @@ export function buildPlayerViewProjection(
     runnerSide && approachedIce?.known
       ? projectInstalledCorpIceRezCost(state, approachedIce.instanceId)
       : undefined;
+  const successfulRunSpendCreditsToDeny =
+    runnerSide &&
+    state.run?.successfulRunAccessReplacement ===
+      "runner_spend_corp_lose_credits" &&
+    successfulRunEffectTargetMatches(state.run);
   const successfulRunFortIceTrashQuote = runnerSide
     ? runnerActiveSuccessfulRunFortIceTrashQuote(state)
     : undefined;
@@ -307,6 +313,9 @@ export function buildPlayerViewProjection(
           ? { successfulRunFortIceTrashQuote }
           : {}),
         attackedServerId: state.run.attackedServerId,
+        ...(successfulRunSpendCreditsToDeny
+          ? { successfulRunSpendCreditsToDeny: true as const }
+          : {}),
         ...(state.run.accessServerOverride
           ? { accessServerOverride: state.run.accessServerOverride }
           : {}),

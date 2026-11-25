@@ -489,6 +489,19 @@ Rest-Denial, verlustreiches Successful-Run-Einkommen und kostenlosen nützlichen
 Denial unter unverändertem Central-Owner ab. Selbsttag-Prävention und der
 optimale langfristige Denial-/Zugriffsmix bleiben eigene Bewertungsaufgaben.
 
+Nach einem tatsächlichen Rez bewertet `runner.convert_run_window` den
+verbleibenden Creditentzug aus dem aktuellen Zustand. Die Engine projiziert
+die aktive verpflichtende Credit-Ausgabe zum Entzug nur für den Runner und
+nur am gebundenen Fort. Bei vollständig bekannter ETR-Route vergleicht der
+Owner die verbleibende allgemeine Break-Zahlung mit dem maximal möglichen
+Entzug nach dieser Zahlung. Sind beide Beträge gleich oder ist der Entzug
+kleiner, entfällt die bezahlte Fortsetzung am letzten Runner-Klick, sofern
+die Engine einen kostenlosen reinen Stop ohne weitere Folgen anbietet und
+kein anderer gebundener Erfolgszweck vorliegt. Ein positiver verbleibender
+Entzug bleibt ausführbar. P901/R1/G8 D138 prüft zwölf Break-Credits gegen
+höchstens einen Credit Entzug und das Fortsetzen des Regelablaufs nach dem
+reinen Stop (SP-902).
+
 Der zusätzliche Wert einer HQ-Erfolgsfenster-Vorbereitung gehört zur konkret
 zugelassenen Runroute des Central-Signals. Ein auf Finanzierung verschobener
 Basisrun darf weder seinen Vorbereitungswert noch seine Begründung an einen

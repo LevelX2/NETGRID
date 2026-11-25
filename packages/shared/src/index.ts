@@ -4508,6 +4508,8 @@ export type PlayerView = {
     /** Remaining runs of public event sequences, independent of run success. */
     pendingSequenceRunCount?: number;
     successfulRunFortIceTrashQuote?: RunnerSuccessfulRunFortIceTrashQuote;
+    /** Runner-private Engine fact for the active fort's mandatory spend-to-deny replacement. */
+    successfulRunSpendCreditsToDeny?: true;
     attackedServerId: Exclude<ServerId, "new_remote">;
     /** Public resolved access destination; absent means the attacked server. */
     accessServerOverride?: Exclude<ServerId, "new_remote">;
