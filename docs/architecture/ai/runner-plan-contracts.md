@@ -4225,6 +4225,14 @@ Zahlungen und alle bekannten Folge-Encounters; bloß vorhandene Subroutinen
 sind kein Coverage-Nachweis. Die Quote markiert tatsächlich verwendete
 Zufallsbreaks ausdrücklich als bedingt. Der Risk-Owner prüft anschließend
 Handpuffer und Fehlschaden; ein Score-Threat hebt keine physische Sperre auf.
+Hat der bedingte Pfad genau ein bekanntes ICE mit einer einzelnen
+Break-/Jack-out-Sperre, prüft dieselbe Projektion auch den Fehlschlag. Kann
+die Corp die unmittelbar folgende unbekannte Schicht rezzen, muss nach dem
+möglichen Fehlschaden deren bestehender Handpuffer ohne Breaker-Abdeckung
+reichen. Sichtbare Rez-Unterstützung zählt zum Rez-Potenzial. Paarung
+915/G29 belegt den legalen Ausstieg vor der Sperre und die anschließende
+erzwungene Begegnung im gespielten Zweig. Die Erfolgsfolge mit bezahlten
+Breaks verbleibt in der normalen Pfadquote.
 
 Ein ausreichend gepufferter probabilistischer Pfad darf deshalb nach dem
 letzten unbekannten ICE zu Zugriff konvertieren; fehlende sichere Coverage

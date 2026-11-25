@@ -1,6 +1,19 @@
 import type { RunnerPrerunReserveQuote } from "./runner-run-target-types";
 import type { VisibleCard } from "@netgrid/shared";
 
+export function requiredHandBufferForExposedUnknownIce(
+  coverage: RunnerPrerunReserveQuote["visibleCoverage"],
+  tolerance: RunnerPrerunReserveQuote["riskTolerance"],
+): number {
+  if (
+    tolerance === "matchpoint_with_stable_universal_coverage" ||
+    coverage === "stable_universal"
+  ) {
+    return 2;
+  }
+  return coverage === "risky_universal" ? 4 : 3;
+}
+
 export function quoteRunnerRunRiskReserve(params: {
   purpose: RunnerPrerunReserveQuote["purpose"];
   riskTolerance: RunnerPrerunReserveQuote["riskTolerance"];
@@ -58,12 +71,10 @@ export function quoteRunnerRunRiskReserve(params: {
   const requiredIceHandBuffer =
     params.unknownIceCount === 0 || !params.corpRezExposureActive
       ? 0
-      : params.riskTolerance === "matchpoint_with_stable_universal_coverage" ||
-          params.visibleCoverage === "stable_universal"
-        ? 2
-        : params.visibleCoverage === "risky_universal"
-          ? 4
-          : 3;
+      : requiredHandBufferForExposedUnknownIce(
+          params.visibleCoverage,
+          params.riskTolerance,
+        );
   const requiredHandBuffer = Math.max(
     requiredIceHandBuffer,
     params.requiredAccessHandBuffer,
