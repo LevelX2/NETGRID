@@ -5,6 +5,7 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { reconstructBeliefState, type BeliefState } from "./belief-state";
 import { runnerHintProvidesMultiaccess } from "./runner-canonical-hint-semantics";
+import { archivesIsKnownWithoutAgenda } from "./runtime/visible-server-agenda-facts";
 import {
   eventVersion,
   findLastHistoryIndex,
@@ -83,7 +84,31 @@ export function evaluateKnownCentralAccessPayoff(
       ?.root.filter(
         (card) => card.known && card.type === "agenda" && card.definitionId,
       );
-    if (!agendas?.length) return unknownCentralPayoff("archives");
+    if (!agendas?.length) {
+      if (!archivesIsKnownWithoutAgenda(input)) {
+        return unknownCentralPayoff("archives");
+      }
+      return {
+        payoff: "known_low_value",
+        accessFacts: {
+          knownTargetDefinitionIds: [],
+          trashBudget: "not_applicable",
+        },
+        knownNoCurrentPayoff: true,
+        accessNoveltyRatio: 0,
+        score: 0,
+        penalty: 0,
+        reasons: [
+          "archives_visible_state_has_no_agenda_payoff",
+          "central_known_no_current_payoff",
+        ],
+        evidence: [
+          "central_target:archives",
+          "central_memory_payoff:known_low_value",
+          "archives_visible_state_has_no_agenda_payoff:true",
+        ],
+      };
+    }
     return {
       payoff: "agenda",
       accessFacts: {

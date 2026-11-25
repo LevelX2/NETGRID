@@ -144,6 +144,140 @@ describe("Defense hand-buffer phase ownership", () => {
     },
   );
 
+  it("defers a legal shield during the current next-turn grip buildup", () => {
+    const f = fixture(0);
+    const shield = legalAction(
+      "rc.armored-fridge",
+      "runner",
+      "install_card",
+      "Install Armored Fridge",
+      { credits: 3, clicks: 1 },
+      { source: "armored-fridge", payload: { cardId: "armored-fridge" } },
+    );
+    f.input.legalActions.push(shield);
+    f.input.playerView.own.gripOrHq[0] = visibleCard(
+      "armored-fridge",
+      "runner",
+      "hardware",
+      { definitionId: 333, installCost: 3 },
+    );
+    f.defense.nextCorpTurnBufferTarget = 4;
+    f.defense.defenseSupportInstallActionIds = [shield.actionId];
+    const actionCandidates = buildActionSemanticCandidates({
+      legalActions: f.input.legalActions,
+      observerSide: "runner",
+      stateVersion: f.input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: { "armored-fridge": 333 },
+    });
+    const dispositions = () => runnerActionDispositions(
+      f.input,
+      actionCandidates,
+      f.domain,
+      [],
+      [],
+      () => undefined,
+    );
+    const heads = () => runnerDefenseCurrentHeadActionIds({
+      input: f.input,
+      actionCandidates,
+      signals: f.defense,
+      actionDispositions: dispositions(),
+    });
+    expect(heads()).toEqual([f.draw.actionId]);
+    expect(dispositions()).toContainEqual({
+      actionId: shield.actionId,
+      ownerModuleId: "runner.defense_and_recovery",
+      disposition: "explicitly_nonproductive",
+      evidenceCode: "runner_defense_support_install_deferred_until_survival_buffer",
+    });
+
+    f.defense.handSize = f.defense.minimumHandBuffer;
+    expect(heads()).toEqual([shield.actionId]);
+    expect(dispositions().some((entry) => entry.actionId === shield.actionId)).toBe(false);
+  });
+
+  it("keeps an exact top-trash recovery available for Defense when only the Coverage line is rejected", () => {
+    const f = fixture(0);
+    const recover = legalAction(
+      "r1.junkyard.rent-i-con",
+      "runner",
+      "activated_card_ability",
+      "Recover the top trash card",
+      { credits: 1, clicks: 1 },
+      {
+        source: "junkyard",
+        payload: {
+          cardId: "junkyard",
+          targetCardId: "rent-i-con",
+          targetDefinitionId: 219,
+          cardImplementationEffectKind: "move_top_trash_to_grip",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId: 450,
+          cardImplementationAbilityKey: "abilities_activated_runner_main_move_top_trash_to_grip",
+        },
+      },
+    );
+    recover.abilityRef = { sourceCardInstanceId: "junkyard", sourceAbilityId: 450 };
+    Object.assign(f.input.playerView.own, {
+      stackOrRdCount: 0,
+      rig: [visibleCard("junkyard", "runner", "resource", { definitionId: 377 })],
+      heapOrArchives: [visibleCard("rent-i-con", "runner", "program", { definitionId: 219 })],
+    });
+    f.input.legalActions = [recover];
+    const actionCandidates = buildActionSemanticCandidates({
+      legalActions: f.input.legalActions,
+      observerSide: "runner",
+      stateVersion: f.input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: { junkyard: 377 },
+      cardSemanticProfilesByDefinitionId: buildActionCardSemanticProfilesByDefinitionId(),
+    });
+    f.defense.handBufferActionIds = [recover.actionId];
+    f.domain.coverageGaps.push({
+      gapId: "coverage:breaker_wall",
+      requiredRole: "breaker_wall",
+      requesterModuleId: "runner.contest_remote",
+      targetServerId: "r2",
+      priorityClass: "P2",
+      evidenceCode: "terminal_remote_coverage:r2",
+      answerInHand: false,
+      deckHasAnswer: true,
+      installActionIds: [],
+      fundingActionIds: [],
+      directSearchActionIds: [],
+      rejectedSearchActionIds: [recover.actionId],
+      searchEngineSetupActionIds: [],
+      drawForAnswerActionIds: [],
+      recoveryEvidenceCodes: [
+        "temporary_search_incomplete_horizon:" + recover.actionId + ":source_install_not_payable",
+      ],
+    });
+    const dispositions = () => runnerActionDispositions(
+      f.input,
+      actionCandidates,
+      f.domain,
+      [],
+      [],
+      () => undefined,
+    );
+    expect(runnerDefenseCurrentHeadActionIds({
+      input: f.input,
+      actionCandidates,
+      signals: f.defense,
+      actionDispositions: dispositions(),
+    })).toEqual([recover.actionId]);
+    expect(dispositions().some((entry) => entry.actionId === recover.actionId)).toBe(false);
+    expect(f.domain.coverageGaps[0]?.directSearchActionIds).toEqual([]);
+
+    f.defense.handBufferActionIds = [];
+    expect(dispositions()).toContainEqual({
+      actionId: recover.actionId,
+      ownerModuleId: "runner.rig_and_coverage",
+      disposition: "explicitly_nonproductive",
+      evidenceCode: "runner_temporary_coverage_search_requires_complete_same_turn_route:breaker_wall@r2",
+    });
+  });
+
+
   it("does not defer a tag-removing current hand-buffer action for its same effect", () => {
     const f = fixture();
     f.defense.preserveHandBeforeIncompleteTagClear = true;

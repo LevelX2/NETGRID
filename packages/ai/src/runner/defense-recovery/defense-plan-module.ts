@@ -526,32 +526,37 @@ export function runnerDefenseDeferredHandBufferDispositions(params: {
   );
   if (!phase) return [];
   if (phase === "build_hand_buffer") {
-    return params.signals.preserveHandBeforeIncompleteTagClear
-      ? params.actionCandidates.flatMap((candidate) => {
-          const deferredDefenseSupport =
-            params.signals.defenseSupportInstallActionIds?.includes(candidate.actionId) === true &&
-            !params.independentlyOwnedActionIds.has(candidate.actionId) &&
-            !params.actionDispositions?.some(
-              (entry) => entry.actionId === candidate.actionId,
-            );
-          const evidenceCode = deferredDefenseSupport
-            ? "runner_defense_support_install_deferred_until_survival_buffer"
-            : candidate.semanticActionType === "tag.remove"
-              ? "runner_tag_clear_deferred_until_survival_buffer"
-              : candidate.semanticActionType === "counter.remove_trace_tag" ||
-                  candidate.semanticActionType === "counter.remove_runner_hazard"
-                ? "runner_persistent_hazard_counter_deferred_until_survival_buffer"
-                : undefined;
-          return evidenceCode && !params.signals.handBufferActionIds?.includes(candidate.actionId)
-            ? [{
-                actionId: candidate.actionId,
-                disposition: "explicitly_nonproductive" as const,
-                ownerModuleId: "runner.defense_and_recovery" as const,
-                evidenceCode,
-              }]
-            : [];
-        })
-      : [];
+    return params.actionCandidates.flatMap((candidate) => {
+      const { actionId, semanticActionType } = candidate;
+      if (params.signals.handBufferActionIds?.includes(actionId)) return [];
+
+      const supportInstallDeferred =
+        (params.signals.defenseSupportInstallActionIds?.includes(actionId) ||
+          params.signals.nextCorpTurnCapacityInstallActionIds?.includes(actionId)) &&
+        !params.independentlyOwnedActionIds.has(actionId) &&
+        !params.actionDispositions?.some((entry) => entry.actionId === actionId);
+      let evidenceCode: string | undefined;
+      if (supportInstallDeferred) {
+        evidenceCode = "runner_defense_support_install_deferred_until_survival_buffer";
+      } else if (params.signals.preserveHandBeforeIncompleteTagClear) {
+        if (semanticActionType === "tag.remove") {
+          evidenceCode = "runner_tag_clear_deferred_until_survival_buffer";
+        } else if (
+          semanticActionType === "counter.remove_trace_tag" ||
+          semanticActionType === "counter.remove_runner_hazard"
+        ) {
+          evidenceCode = "runner_persistent_hazard_counter_deferred_until_survival_buffer";
+        }
+      }
+      return evidenceCode
+        ? [{
+            actionId,
+            disposition: "explicitly_nonproductive" as const,
+            ownerModuleId: "runner.defense_and_recovery" as const,
+            evidenceCode,
+          }]
+        : [];
+    });
   }
   const currentPhaseActionIds = new Set(
     defenseCandidates(

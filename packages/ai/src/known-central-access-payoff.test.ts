@@ -1108,3 +1108,56 @@ function visibleIdentity(side: "runner" | "corp"): VisibleCard {
     known: true,
   };
 }
+
+describe("known Archives access payoff", () => {
+  const operation: VisibleCard = {
+    instanceId: "visible-operation",
+    known: true,
+    definitionId: 514,
+    title: "Scorched Earth",
+    type: "operation",
+    owner: "corp",
+    controller: "corp",
+  };
+  const agenda: VisibleCard = {
+    instanceId: "visible-agenda",
+    known: true,
+    definitionId: 424,
+    title: "Priority Requisition",
+    type: "agenda",
+    owner: "corp",
+    controller: "corp",
+  };
+
+  it.each([
+    { total: 0, revealed: [], payoff: "known_low_value", knownEmpty: true },
+    { total: 1, revealed: [operation], payoff: "known_low_value", knownEmpty: true },
+    { total: 2, revealed: [operation], payoff: "unknown", knownEmpty: false },
+    { total: 2, revealed: [agenda], payoff: "agenda", knownEmpty: false },
+  ])(
+    "keeps the visible result separate from the unseen discard count ($total, $payoff)",
+    ({ total, revealed, payoff, knownEmpty }) => {
+      const input = aiInput({
+        handCount: 4,
+        servers: [
+          { id: "archives", label: "Archives", ice: [], root: revealed },
+        ],
+      });
+      input.playerView.opponent.discardCount = total;
+
+      const output = evaluateKnownCentralAccessPayoff(input, "archives");
+
+      expect(output).toMatchObject({
+        payoff,
+        knownNoCurrentPayoff: knownEmpty,
+      });
+      if (knownEmpty) {
+        expect(output.accessFacts).toEqual({
+          knownTargetDefinitionIds: [],
+          trashBudget: "not_applicable",
+        });
+        expect(output.accessNoveltyRatio).toBe(0);
+      }
+    },
+  );
+});

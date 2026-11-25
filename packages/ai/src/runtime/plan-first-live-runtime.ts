@@ -1917,7 +1917,15 @@ export function runnerActionDispositions(
   addRunnerCoverageRejectedSearchDispositions(
     domain,
     coverageOwnedActionIds,
-    developmentOwnedActionIds,
+    new Set([
+      ...developmentOwnedActionIds,
+      ...runnerDefenseCurrentHeadActionIds({
+        input,
+        actionCandidates: candidates,
+        signals: domain.defense,
+        actionDispositions: dispositions,
+      }),
+    ]),
     new Set(defenseSafetyDispositions.map((entry) => entry.actionId)),
     add,
   );

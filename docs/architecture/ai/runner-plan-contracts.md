@@ -352,6 +352,15 @@ aber weder Stealpreis noch Pfad-, Hand- oder Creditreserve. Ein zweiter
 pauschaler Archives-Zulassungspfad darf die bewertete Route nicht ersetzen;
 bezahlbare sichere Steals behalten ihren normalen Central-Parent.
 
+Die gemeinsame Zentralzugriffsquote meldet für Archives
+`known_no_current_payoff`, sobald die sichtbare Kartenliste alle Karten des
+öffentlichen Ablagestapels abdeckt und keine Agenda enthält. Eine verdeckte
+Archivkarte lässt das Zugriffsergebnis offen. Der Run-Window-Owner übernimmt
+die Fakten für den tatsächlichen `accessServerId`. So führt ein freiwilliger
+Zusatzrun ohne aktuellen Zugriffswert direkt zur nächsten produktiven Aktion.
+Paarung 917/R1/G2 D82 zeigt den Informationsgewinn bei einer verdeckten
+Karte. D106 belegt die direkte Credit-Aktion bei vollständig bekanntem Inhalt.
+
 Die Nullnutzen-Disposition für normale Archives-Runs gilt für unklassifizierte
 LegalActions. Ein bereits vom Abwehrplan wegen konkreter Flatline-Gefahr
 abgelehnter Run behält den Abwehrplan als Owner und dessen Ablehnungsgrund.
@@ -1456,6 +1465,10 @@ Engine-Zustand und keine verborgene Karte; jede Ausführung rematerialisiert
 weiterhin am tatsächlichen Folgezustand. Native letzte-Klick-, Handpuffer- und
 unbezahlbare Pfade sowie tatsächlich genutzte temporäre Remote-Antworten
 sichern die Grenze (Paarung 592, SP-757).
+Eine abgelehnte Coverage-Folge lässt die aktuelle LegalAction für einen
+eigenständig gebundenen Defense-Schritt verfügbar. Paarung 917/R1/G28 D456
+belegt das Wiederauffüllen des Grips durch Junkyard BBS bei leerem Stack.
+Die Quote hält den unbezahlbaren Installations- und Run-Pfad geschlossen.
 
 Diese Horizontquote übernimmt die Zulassung des bestehenden Run-Owners. Sie
 darf weder eine vorläufige fehlende Zahlbarkeit noch einen allgemeinen
@@ -2810,8 +2823,12 @@ Ziehpfad und bevorzugt bei gleichem Klickbedarf den günstigeren. Liegt das
 Ziel über dem Limit, muss nach der Installation genug Grip übrig bleiben
 oder ein gebundener Draw bis zum Ziel reichen. Die Prüfung berücksichtigt
 Installationskosten, Grip-Verbrauch, verbleibende Klicks und sichtbare Draw
-Taxes. Nach der Installation bindet Defense den benötigten Draw am neuen
-Zustand. Kann der Runner mit dem letzten Klick durch die Basisaktion alle
+Taxes. Ist zuerst ein Zugendpuffer im Grip aufzubauen, stellt Defense die
+genaue ansonsten erwogene Schutzinstallation für diesen Zustand zurück.
+Paarung 917/R1/G4 D223 belegt die Reihenfolge bei der Wahl zwischen einem
+Basisdraw und Armored Fridge. Nach der Installation bindet Defense den
+benötigten Draw am neuen Zustand. Kann der Runner mit dem letzten Klick
+durch die Basisaktion alle
 Tags entfernen und liegt seine Hand bereits innerhalb des Limits, stellt
 Defense eine Installation mit ausschließlich passivem Handlimitgewinn
 zurück. Das höhere Limit füllt die Hand vor dem Corp-Zug erst mit einem
