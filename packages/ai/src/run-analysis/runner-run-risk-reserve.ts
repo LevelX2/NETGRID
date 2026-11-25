@@ -1,5 +1,9 @@
 import type { RunnerPrerunReserveQuote } from "./runner-run-target-types";
-import type { VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  VisibleCard,
+  VisibleEffectiveSubroutine,
+} from "@netgrid/shared";
 
 export function requiredHandBufferForExposedUnknownIce(
   coverage: RunnerPrerunReserveQuote["visibleCoverage"],
@@ -12,6 +16,31 @@ export function requiredHandBufferForExposedUnknownIce(
     return 2;
   }
   return coverage === "risky_universal" ? 4 : 3;
+}
+
+/** An unbroken lock can force the next encounter without usable breakers. */
+export function requiredHandBufferAfterUnbrokenNextEncounterLock(
+  input: AiDecisionInput,
+  targetServerId: string,
+  nextIce: VisibleCard | undefined,
+  unbrokenEffect: VisibleEffectiveSubroutine["unbrokenRunEffect"],
+): number | undefined {
+  if (
+    unbrokenEffect?.preventsFutureBreaking !== true ||
+    unbrokenEffect.preventsJackOut !== true ||
+    nextIce?.known !== false ||
+    nextIce.rezzed === true
+  ) {
+    return undefined;
+  }
+  const rezExposure =
+    input.playerView.opponent.credits > 0 ||
+    input.playerView.servers
+      .find((server) => server.id === targetServerId)
+      ?.statuses?.some((status) => status.kind === "during_run_ice_rez_support");
+  return rezExposure
+    ? requiredHandBufferForExposedUnknownIce("none", "standard")
+    : undefined;
 }
 
 export function quoteRunnerRunRiskReserve(params: {

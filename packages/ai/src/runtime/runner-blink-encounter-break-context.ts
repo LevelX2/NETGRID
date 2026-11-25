@@ -1,9 +1,12 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { requiredHandBufferAfterUnbrokenNextEncounterLock } from "../run-analysis/runner-run-risk-reserve";
 import { isVisibleDirectDamageSubroutine } from "../run-analysis/visible-subroutine-semantics";
 import { projectRunnerVisibleIceDamage } from "../runner-damage-threat-assessment";
 import {
   currentEncounteredIceCard,
   currentEncounterRequiresFullBreak,
+  currentEncounterUnbrokenSubroutineIndexes,
+  currentRunRemainingIce,
 } from "./current-encounter";
 
 import type {
@@ -35,6 +38,7 @@ export type RunnerRandomBreakOrDamageEncounterContextDependencies = {
     context: "encounter_break";
     riskProfile: RandomBreakOrDamageRiskProfile;
     unbrokenEncounterDamageLikely?: number;
+    forcedNextIceHandBuffer?: number | undefined;
     certainLossRescue?: true;
     evidence?: readonly string[];
   }) => RandomBreakOrDamageRiskAssessment;
@@ -106,6 +110,14 @@ export function createRunnerRandomBreakOrDamageEncounterContext(
       context: "encounter_break",
       riskProfile,
       unbrokenEncounterDamageLikely,
+      forcedNextIceHandBuffer:
+        encounteredSubroutines.length === 1 && breakIndexes.size === 1
+          ? forcedNextIceHandBufferForEncounterBreak(
+              input,
+              action,
+              targetSubroutines[0],
+            )
+          : undefined,
       ...(randomBreakHasSurvivingBranchAgainstCertainLoss(
         input,
         action,
@@ -187,6 +199,34 @@ export function createRunnerRandomBreakOrDamageEncounterContext(
   }
 
   return { randomBreakOrDamageRiskAssessmentForEncounterBreak };
+}
+
+function forcedNextIceHandBufferForEncounterBreak(
+  input: AiDecisionInput,
+  action: LegalAction,
+  target: VisibleEncounterSubroutine | undefined,
+): number | undefined {
+  const run = input.playerView.run;
+  const ice = currentEncounteredIceCard(input);
+  if (
+    run?.phase !== "encounter_ice" ||
+    run.position?.kind !== "ice" ||
+    !ice ||
+    action.payload?.iceId !== ice.instanceId ||
+    !target?.unbrokenRunEffect
+  ) {
+    return undefined;
+  }
+  const handBuffer = requiredHandBufferAfterUnbrokenNextEncounterLock(
+    input,
+    run.position.serverId,
+    currentRunRemainingIce(input).at(-1),
+    target.unbrokenRunEffect,
+  );
+  return handBuffer !== undefined &&
+    currentEncounterUnbrokenSubroutineIndexes(input).has(0)
+    ? handBuffer
+    : undefined;
 }
 
 function unbrokenEncounterSubroutines(

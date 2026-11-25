@@ -187,3 +187,97 @@ describe("random break before a forced unrezzed encounter", () => {
     },
   );
 });
+
+function newlyRevealedLock(
+  hand: number,
+  corpCreditsAfterRez: number,
+) {
+  const runnerDeck = deckWith(ORIGINALSET_DEFAULT_DECKS.runner, [BLINK]);
+  const corpDeck = deckWith(ORIGINALSET_DEFAULT_DECKS.corp, [
+    SHOCK,
+    WALL_OF_ICE,
+    416,
+  ]);
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed: "random-break-after-new-lock-rez",
+      traceRulesProfile: "modern_open",
+      runnerDeck,
+      corpDeck,
+    }),
+  );
+  RealEngineFixtureBuilder.forState(state)
+    .withRunnerCredits(15)
+    .withCorpCredits(corpCreditsAfterRez + 1)
+    .withRunnerProgramInstalled(BLINK)
+    .withCorpRemoteRoot("r1", 416, 1)
+    .withCorpIceOnServer("r1", WALL_OF_ICE)
+    .withCorpIceOnServer("r1", SHOCK);
+  while (state.runner.grip.length < hand) {
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+  }
+  RealEngineFixtureBuilder.forState(state).withRunnerGripSize(hand);
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "r1",
+  );
+  state = apply(state, "corp", (action) => action.type === "rez_ice");
+  if (state.run?.phase !== "encounter_ice") {
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+  }
+  const input = buildAiDecisionInput(state, "runner", {
+    difficulty: "hard",
+    ownDeckSnapshot: {
+      deckSnapshotId: runnerDeck.id,
+      side: "runner",
+      cards: runnerDeck.cards.map(({ id, quantity }) => ({
+        cardId: id,
+        quantity,
+      })),
+    },
+  });
+  expect(input.playerView.timingPoint).toBe("run.encounter_ice");
+  expect(input.playerView.opponent.credits).toBe(corpCreditsAfterRez);
+  expect(input.playerView.own.gripOrHq).toHaveLength(hand);
+  expect(currentRunRemainingIce(input)).toMatchObject([
+    { known: false, rezzed: false },
+  ]);
+  return input;
+}
+
+describe("random break after the outer lock is rezzed", () => {
+  it.each([
+    { hand: 5, corpCredits: 16, selected: "continue_run" },
+    { hand: 6, corpCredits: 16, selected: "break_subroutine" },
+    { hand: 5, corpCredits: 0, selected: "break_subroutine" },
+  ])(
+    "keeps the failure reserve with grip $hand and Corp credits $corpCredits",
+    ({ hand, corpCredits, selected }) => {
+      const input = newlyRevealedLock(hand, corpCredits);
+      try {
+        expect(input.legalActions.map((action) => action.type)).toEqual(
+          expect.arrayContaining(["continue_run", "break_subroutine"]),
+        );
+        expect(input.legalActions.some((a) => a.type === "jack_out")).toBe(
+          false,
+        );
+        const decision = chooseAiAction(input);
+        const action = input.legalActions.find(
+          (candidate) => candidate.actionId === decision.actionId,
+        );
+        expect(action?.type).toBe(selected);
+        expect(action?.expiresAtStateVersion).toBe(
+          input.playerView.stateVersion,
+        );
+        expect(decision.reasonCode).toBe(
+          "plan_first.runner.convert_run_window",
+        );
+        expect(decision.fallbackUsed).toBe(false);
+      } finally {
+        releaseAiMatchRuntime(input.matchId!);
+      }
+    },
+  );
+});

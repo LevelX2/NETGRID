@@ -4229,8 +4229,14 @@ Hat der bedingte Pfad genau ein bekanntes ICE mit einer einzelnen
 Break-/Jack-out-Sperre, prüft dieselbe Projektion auch den Fehlschlag. Kann
 die Corp die unmittelbar folgende unbekannte Schicht rezzen, muss nach dem
 möglichen Fehlschaden deren bestehender Handpuffer ohne Breaker-Abdeckung
-reichen. Sichtbare Rez-Unterstützung zählt zum Rez-Potenzial. Paarung
-915/G29 belegt den legalen Ausstieg vor der Sperre und die anschließende
+reichen. Sichtbare Rez-Unterstützung zählt zum Rez-Potenzial. Der Encounter-Owner
+verwendet denselben Puffer, sobald ein Rez die einzelne Sperre aufdeckt.
+Dazu bindet er die konkrete Breakaktion und den noch offenen Lock an die
+aktuelle Engine-Quote und entnimmt das nächste ICE dem verbleibenden Pfad.
+Paarung 915/R2/G32 zeigt die legale Fortsetzung ohne Wurf. Mit fünf Handkarten
+überlebt der Runner das zweite ICE. Ein Fehlschlag senkt die Hand auf zwei
+Karten und führt zur Flatline. Paarung 915/R1/G29 belegt den legalen Ausstieg
+vor der Sperre und die anschließende
 erzwungene Begegnung im gespielten Zweig. Die Erfolgsfolge mit bezahlten
 Breaks verbleibt in der normalen Pfadquote.
 

@@ -180,6 +180,8 @@ export type RandomBreakOrDamageRiskAssessment = {
   stableCoverageAvailable: boolean;
   /** Exact successful encounter branch survives an otherwise certain loss. */
   certainLossRescue?: true;
+  /** Missing grip in the failure branch of a forced next encounter. */
+  forcedNextIceHandBufferGap?: number;
   pathDependsOnRandomBreakOrDamage: boolean;
   breakWouldBeExcludedInEncounter: boolean;
   blockedByHandBuffer: boolean;

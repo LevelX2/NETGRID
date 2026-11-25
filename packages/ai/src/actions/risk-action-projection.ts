@@ -1,6 +1,6 @@
 import { decisionEventHistory } from "../decision-event-history";
 import { currentRunPathContext } from "../run-analysis/current-run-path-context";
-import { requiredHandBufferForExposedUnknownIce } from "../run-analysis/runner-run-risk-reserve";
+import { requiredHandBufferAfterUnbrokenNextEncounterLock } from "../run-analysis/runner-run-risk-reserve";
 import { planningCardFactsByDefinitionId } from "@netgrid/cards/planning";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
@@ -117,10 +117,6 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     params.context === "encounter_break" &&
     params.payoffOverride === "survival" &&
     params.certainLossRescue === true;
-  const breakWouldBeExcludedInEncounter =
-    !certainLossRescue &&
-    pathDependsOnRandomBreakOrDamage &&
-    randomBreakOrDamageRiskShouldAvoidRunSeverity(riskSeverity);
   const forcedNextIceHandBuffer = params.forcedNextIceHandBuffer ?? 0;
   const gripAfterFailure =
     handAfterActionCost - maxSingleFailureDamage - unbrokenEncounterDamageLikely;
@@ -128,6 +124,15 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     forcedNextIceHandBuffer > 0
       ? Math.max(0, forcedNextIceHandBuffer - gripAfterFailure)
       : 0;
+  const encounterReserveExcludesBreak =
+    !certainLossRescue &&
+    params.context === "encounter_break" &&
+    forcedNextIceHandBufferGap > 0;
+  const breakWouldBeExcludedInEncounter =
+    encounterReserveExcludesBreak ||
+    (!certainLossRescue &&
+      pathDependsOnRandomBreakOrDamage &&
+      randomBreakOrDamageRiskShouldAvoidRunSeverity(riskSeverity));
   const blockedByHandBuffer =
     pathDependsOnRandomBreakOrDamage &&
     params.context === "run_path" &&
@@ -147,11 +152,13 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     ? forcedNextIceHandBufferGap > 0
       ? "why_random_break_damage_run_deferred_for_hand_buffer:forced_next_ice_hand_buffer_too_low"
       : "why_random_break_damage_run_deferred_for_hand_buffer:self_damage_buffer_too_low"
-    : params.payoffOverride !== "none"
-      ? `why_random_break_damage_run_allowed_despite_risk:${params.payoffOverride}`
-      : randomBreakOrDamageRiskShouldAvoidRunSeverity(riskSeverity)
-        ? `why_random_break_damage_run_blocked:${riskSeverity}`
-        : "why_random_break_damage_run_allowed_despite_risk:hand_buffer";
+    : encounterReserveExcludesBreak
+      ? "why_random_break_damage_encounter_blocked:forced_next_ice_hand_buffer_too_low"
+      : params.payoffOverride !== "none"
+        ? `why_random_break_damage_run_allowed_despite_risk:${params.payoffOverride}`
+        : randomBreakOrDamageRiskShouldAvoidRunSeverity(riskSeverity)
+          ? `why_random_break_damage_run_blocked:${riskSeverity}`
+          : "why_random_break_damage_run_allowed_despite_risk:hand_buffer";
   const evidence = [
     "randomBreakDamageRiskApplied:true",
     `randomBreakDamageRiskContext:${params.context}`,
@@ -222,6 +229,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     blockedByHandBuffer,
     noProgressRunExpected,
     expectedEtrUnbroken,
+    ...(encounterReserveExcludesBreak ? { forcedNextIceHandBufferGap } : {}),
     ...(certainLossRescue ? { certainLossRescue: true as const } : {}),
     recentFailure: recent.recentFailure,
     recentDamageAmount: recent.recentDamageAmount,
@@ -324,18 +332,14 @@ function forcedNextIceHandBuffer(
   // The Engine orders ICE from inner to outer. With one known, single-lock
   // encounter, the blocked stable quote identifies which break is conditional.
   const lockIce = params.visibleIce.at(-1);
-  const nextIce = params.visibleIce.at(-2);
   const subroutines = lockIce?.effectiveRunQuote?.subroutines;
   const lock = subroutines?.[0];
   if (
     params.fullPath.assessedKnownIceCount !== 1 ||
     lockIce?.known !== true ||
     lockIce.rezzed !== true ||
-    nextIce?.known !== false ||
-    nextIce.rezzed === true ||
     subroutines?.length !== 1 ||
-    lock?.unbrokenRunEffect?.preventsFutureBreaking !== true ||
-    lock.unbrokenRunEffect.preventsJackOut !== true ||
+    !lock ||
     !params.fullPath.paidSubroutineBreaks?.some(
       (payment) =>
         payment.iceInstanceId === lockIce.instanceId &&
@@ -344,15 +348,12 @@ function forcedNextIceHandBuffer(
   ) {
     return undefined;
   }
-  const rezExposure =
-    input.playerView.opponent.credits > 0 ||
-    input.playerView.servers
-      .find((server) => server.id === params.targetServerId)
-      ?.statuses?.some((status) => status.kind === "during_run_ice_rez_support");
-  // In the failure branch this lock makes every installed breaker unavailable.
-  return rezExposure
-    ? requiredHandBufferForExposedUnknownIce("none", "standard")
-    : undefined;
+  return requiredHandBufferAfterUnbrokenNextEncounterLock(
+    input,
+    params.targetServerId,
+    params.visibleIce.at(-2),
+    lock.unbrokenRunEffect,
+  );
 }
 
 /** Risk facts for the exact route already quoted by the existing run owner. */
@@ -438,6 +439,7 @@ export function randomBreakOrDamageRiskShouldAvoidRun(
 ): boolean {
   if (!assessment) return false;
   if (assessment.certainLossRescue === true) return false;
+  if ((assessment.forcedNextIceHandBufferGap ?? 0) > 0) return true;
   if (
     randomBreakOrDamageRiskShouldAvoidRunSeverity(assessment.riskSeverity) &&
     !randomBreakOrDamageRiskHandBufferOverrideAllowed(assessment.payoffOverride)
