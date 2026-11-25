@@ -37,14 +37,13 @@ bei kleinen, lazy geladenen Thumb-Derivaten. Die Namensleisten verwenden unabhä
 Schrift auf nahezu deckendem dunklem Hintergrund, damit das Kartenmotiv
 den Textkontrast nicht bestimmt.
 
-Der gemeinsame Katalogdetail-Loader begrenzt Abrufe über alle gleichzeitig
-angeforderten Batches auf zwei aktive Requests. Damit belegt das Vorladen
-des Deckeditor-Katalogs nicht sämtliche Browser-Verbindungen vor Bild- und
-Spielanfragen. Die Katalog-API verwendet ihren validierten Runtime-Pool pro
-Testkartenprofil wieder, statt für jede Detailanfrage alle Karten neu zu
-projizieren, zu validieren und zu hashen. Änderungen an den eingebundenen
-Katalogquellen erfordern ein neu geladenes Runtime-Modul; persönliche
-Bildimporte bleiben davon unabhängig live aktualisierbar.
+Der Deckeditor lädt seine Kartenliste beim Öffnen gesammelt. Der gemeinsame
+Katalogdetail-Loader begrenzt Abrufe für Spiel, Katalogansicht und Replay
+auf zwei gleichzeitig benötigte Karten. Bei einem Wechsel entfallen Abrufe
+für Karten, die keine der aktuellen Ansichten benötigt. Die Katalog-API
+verwendet ihren validierten Runtime-Pool pro Testkartenprofil wieder.
+Änderungen an den eingebundenen Katalogquellen erfordern ein neu geladenes
+Runtime-Modul. Persönliche Bildimporte werden live aktualisiert.
 
 ## Zweck
 

@@ -15,10 +15,9 @@
 
 - Action UI zeigt und sendet nur `LegalActions`, die aus der Engine kommen.
 - UI-Komponenten dürfen keine Legalität erzeugen oder Actions fachlich umdeuten.
-- Der Katalog teilt das ungesuchte Anfangsergebnis mit der Kartenanzeige.
-  `useCatalogWorkspace` bricht überholte Suchanfragen ab und bindet
-  Ergebnisse an die aktuelle Suche. Die API durchsucht den vorbereiteten
-  Katalogindex und lädt Kartendetails per Karten-ID.
+- Die Kartenanzeige am Spieltisch und im Replay verwendet den kompakten
+  Präsentationsindex. Die Katalogansicht und der Deckeditor laden ihre
+  jeweiligen Listen beim Öffnen.
 - Hidden-Info bleibt an PlayerView-, PublicEvent-, Reconnect-, Debug- und Tooltip-Grenzen side-safe.
 - Normale Player-UI darf keinen FullState bekommen.
 - `page.tsx` soll nicht wieder neue Sammelbereiche für Card-, Action-, Recent-, Storage- oder Overlay-Helfer aufnehmen.
@@ -313,6 +312,29 @@ und hält bis dahin die automatische KI-Fortsetzung an.
 - Letzte Spiele: `features/recent/`.
 - Storage-Key oder LocalStorage-Legacy-Pfad: `lib/storage-keys.ts` oder `lib/local-storage.ts`.
 - Globale Farben, Z-Index und Theme-Tokens: `app/styles/tokens.css`.
+
+## Kartenabrufe und Spieluhr
+
+- Startseite und Replay laden den Präsentationsindex über
+  `/api/cards/catalog/presentation`. Er enthält Karten-ID, Titel, Typ und Set.
+  Die Startseite verwendet das Set auch zur Auswahl verfügbarer Decks.
+- Der Deckeditor lädt `/api/cards/catalog/decks` gesammelt. Die Antwort enthält
+  die Daten für Formatfilter, Listen und Tooltips, Regeltextsuche und
+  numerische Sortierung. Die Ansicht verwendet denselben Datensatz für diese
+  Funktionen. Beim Verlassen bricht der Client einen laufenden Listenabruf ab.
+- Die erweiterte Trefferliste und ihre KI-Inspektionsdaten werden beim Öffnen
+  des Katalogs geladen. Abgeschlossene Listen bleiben im Client verfügbar.
+  Überholte Suchabrufe werden abgebrochen. Die API sucht im vorbereiteten
+  Katalogindex.
+- Der Detail-Loader lädt bis zu zwei aktuell benötigte Karten gleichzeitig.
+  Bekannte Karten und veröffentlichte Ereignisse bestimmen den Bedarf am
+  Spieltisch und im Replay. Im Katalog kommt die ausgewählte Karte hinzu.
+  Entfällt ein Bedarf, werden vorgemerkte Abrufe entfernt und laufende
+  abgebrochen. Weiterhin benötigte Karten behalten ihren Abruf.
+- Die Zeitanker für Partie und Entscheidung gehören zur Matchansicht. Der
+  Sekundentakt läuft in `MatchClockCluster`, solange die Uhren angezeigt werden.
+  Die Chronik speichert aufbereitete Einträge für unveränderte Ereignis- und
+  Kontextdaten. Ihre Anzeigereihenfolge und Gruppen berechnet sie beim Öffnen.
 
 ## Bewusst Noch Groß
 

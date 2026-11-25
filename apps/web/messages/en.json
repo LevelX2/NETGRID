@@ -388,19 +388,6 @@
       "inviteFailed": "The invitation could not be created.",
       "resetLinkFailed": "The reset link could not be created."
     },
-    "deckLibrary": {
-      "eyebrow": "Deck library",
-      "accountTitle": "Standard decks and My decks",
-      "guestTitle": "Standard decks and local guest decks",
-      "help": "Standard decks cannot be modified. You can play them directly.",
-      "side": "Side",
-      "runner": "Runner",
-      "corp": "Corp",
-      "standardDeck": "Standard deck",
-      "playDirectly": "Play directly",
-      "quota": "My decks: {used}/{limit} · {remaining} remaining",
-      "guestStorage": "Guest mode: your own decks remain in local file storage."
-    },
     "statistics": {
       "loadError": "The match statistics could not be loaded.",
       "loadMoreError": "More results could not be loaded.",

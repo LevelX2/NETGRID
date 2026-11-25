@@ -14,7 +14,7 @@ import {
   Play,
   RotateCcw,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "use-intl/react";
 
 import {
@@ -38,13 +38,9 @@ import {
   publicEventsThroughReplayFrame,
 } from "../../features/replay/replay-player-model";
 import { readLocalStorage } from "../../lib/local-storage";
-import type {
-  CatalogCardDetail,
-  CatalogListResponse,
-} from "../../features/catalog/catalog-types";
-import { CatalogDetailRequestCoordinator } from "../../features/catalog/catalog-detail-loader";
+import { useCatalogDetails } from "../../features/catalog/useCatalogDetails";
+import { useCatalogPresentationIndex } from "../../features/catalog/useCatalogListResource";
 import { publicChronicleCardDefinitionIds } from "../../features/chronicle/chronicle-public-card-ids";
-import type { PublicCardPresentationsById } from "../public-card-presentation";
 import {
   CatalogCardPresentationsProvider,
   catalogCardPresentationsFor,
@@ -93,6 +89,7 @@ type ReplayView = {
 
 export default function ReplayPage() {
   const t = useTranslations("Replay");
+  const catalogT = useTranslations("Catalog");
   const [selectedMatchId, setSelectedMatchId] = useState("");
   const { elementRef: topbarRef, heightPx: topbarHeightPx } =
     useObservedElementHeight<HTMLElement>(selectedMatchId);
@@ -103,15 +100,19 @@ export default function ReplayPage() {
   const [speed, setSpeed] = useState(1);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [cardPresentationsById, setCardPresentationsById] =
-    useState<PublicCardPresentationsById>({});
-  const [cardDetailsById, setCardDetailsById] = useState<
-    Record<string, CatalogCardDetail>
-  >({});
-  const cardDetailsByIdRef = useRef(cardDetailsById);
-  const cardDetailRequestCoordinatorRef = useRef(
-    new CatalogDetailRequestCoordinator(),
+  const presentationIndex = useCatalogPresentationIndex();
+  const cardPresentationsById = useMemo(
+    () => presentationIndex?.status === "ready"
+      ? catalogCardPresentationsFor(presentationIndex.data.cards)
+      : {},
+    [presentationIndex],
   );
+  const publicEvents = replay?.publicEvents;
+  const detailCardIds = useMemo(
+    () => (publicEvents ?? []).flatMap(publicChronicleCardDefinitionIds),
+    [publicEvents],
+  );
+  const { cardDetailsById } = useCatalogDetails(detailCardIds);
   const [boardSettings, setBoardSettings] = useState(
     DEFAULT_REPLAY_BOARD_SETTINGS,
   );
@@ -119,22 +120,6 @@ export default function ReplayPage() {
 
   useEffect(() => {
     setBoardSettings(loadReplayBoardSettings(readLocalStorage));
-  }, []);
-
-  useEffect(() => {
-    let closed = false;
-    void fetch("/api/cards/catalog", { cache: "no-store" })
-      .then((response) => response.json() as Promise<CatalogListResponse>)
-      .then((data) => {
-        if (closed) return;
-        setCardPresentationsById(catalogCardPresentationsFor(data.cards ?? []));
-      })
-      .catch(() => {
-        if (!closed) setCardPresentationsById({});
-      });
-    return () => {
-      closed = true;
-    };
   }, []);
 
   useEffect(() => {
@@ -220,36 +205,6 @@ export default function ReplayPage() {
       ),
     };
   }, [replayView, currentPublicEvents]);
-
-  useEffect(() => {
-    const cardIds = Array.from(
-      new Set(
-        (replay?.publicEvents ?? []).flatMap(publicChronicleCardDefinitionIds),
-      ),
-    );
-    if (cardIds.length === 0) return;
-    void cardDetailRequestCoordinatorRef.current.ensure(
-      cardIds,
-      (cardId) => Boolean(cardDetailsByIdRef.current[cardId]),
-      async (cardId) => {
-        const response = await fetch(
-          `/api/cards/catalog/${encodeURIComponent(cardId)}`,
-          { cache: "no-store" },
-        );
-        if (!response.ok) return null;
-        const data = (await response.json()) as { card?: CatalogCardDetail };
-        return data.card ?? null;
-      },
-      (detail) => {
-        setCardDetailsById((current) => {
-          if (current[detail.catalogCardId]) return current;
-          const next = { ...current, [detail.catalogCardId]: detail };
-          cardDetailsByIdRef.current = next;
-          return next;
-        });
-      },
-    );
-  }, [replay?.publicEvents]);
 
   useEffect(() => {
     if (!playing || frames.length === 0) return;
@@ -427,6 +382,11 @@ export default function ReplayPage() {
       {error ? (
         <div className="matchNotice replayError" role="alert">
           {error}
+        </div>
+      ) : null}
+      {presentationIndex?.status === "error" ? (
+        <div className="matchNotice replayError" role="alert">
+          {catalogT("loadFailed")}
         </div>
       ) : null}
       {loading && !currentFrame ? (

@@ -18,7 +18,6 @@ const localizedSurfaces = [
   "../features/settings/OptionsPanel.tsx",
   "../features/account/AccountPanel.tsx",
   "../features/account/AccountStatisticsPanel.tsx",
-  "../features/account/AccountDeckLibraryHeader.tsx",
   "../features/games/PublicGamesPanel.tsx",
   "../features/recent/RecentGamesPanel.tsx",
   "../features/match-start/MatchResumePanel.tsx",

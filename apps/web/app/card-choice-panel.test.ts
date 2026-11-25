@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView } from "@netgrid/shared";
+import { createTranslator } from "use-intl/core";
 
 import {
   cardChoiceHeapPositionBadge,
@@ -8,7 +9,8 @@ import {
   cardChoiceReadonlyPositionBadge,
   cardChoiceReadonlyPositionHint,
 } from "../features/actions/card-choice-order-badge";
-import { choiceSelectionRangeLabel } from "../features/actions/card-choice-selection-label";
+import { cardChoiceCounterLabel } from "../features/actions/CardChoicePanel";
+import de from "../messages/de.json";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 
@@ -142,11 +144,20 @@ describe("Heap positions", () => {
   });
 });
 
-describe("choiceSelectionRangeLabel", () => {
-  it("states how many cards the player may select", () => {
-    expect(choiceSelectionRangeLabel(2, 2)).toBe("2 Karten auswählen");
-    expect(choiceSelectionRangeLabel(1, 1)).toBe("1 Karte auswählen");
-    expect(choiceSelectionRangeLabel(0, 3)).toBe("Bis zu 3 Karten auswählen");
-    expect(choiceSelectionRangeLabel(1, 3)).toBe("1 bis 3 Karten auswählen");
+describe("cardChoiceCounterLabel", () => {
+  const translate = createTranslator({
+    locale: "de",
+    messages: de,
+    namespace: "Actions.cardChoice",
+  });
+
+  it.each([
+    [2, 2, "2 Karten auswählen"],
+    [1, 1, "1 Karte auswählen"],
+    [0, 3, "Bis zu 3 Karten auswählen"],
+    [1, 3, "1 bis 3 Karten auswählen"],
+  ] as const)("shows the selection range %i–%i in the dialog", (min, max, label) => {
+    expect(cardChoiceCounterLabel(orderedChoice("search_stack"), min, max, translate))
+      .toBe(label);
   });
 });

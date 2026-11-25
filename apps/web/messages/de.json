@@ -388,19 +388,6 @@
       "inviteFailed": "Die Einladung konnte nicht erstellt werden.",
       "resetLinkFailed": "Der Resetlink konnte nicht erstellt werden."
     },
-    "deckLibrary": {
-      "eyebrow": "Deckbibliothek",
-      "accountTitle": "Standard-Decks und Meine Decks",
-      "guestTitle": "Standard-Decks und lokale Gast-Decks",
-      "help": "Standards sind unveränderlich. Du kannst sie direkt spielen.",
-      "side": "Seite",
-      "runner": "Runner",
-      "corp": "Korp",
-      "standardDeck": "Standard-Deck",
-      "playDirectly": "Direkt spielen",
-      "quota": "Meine Decks: {used}/{limit} · noch {remaining} frei",
-      "guestStorage": "Gastmodus: eigene Decks bleiben in deiner lokalen Dateiablage."
-    },
     "statistics": {
       "loadError": "Die Matchstatistik konnte nicht geladen werden.",
       "loadMoreError": "Weitere Ergebnisse konnten nicht geladen werden.",

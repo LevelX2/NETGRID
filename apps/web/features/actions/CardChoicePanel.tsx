@@ -629,7 +629,7 @@ function cardChoiceEffectHint(
   return null;
 }
 
-function cardChoiceCounterLabel(
+export function cardChoiceCounterLabel(
   choice: VisibleChoice,
   minSelections: number,
   maxSelections: number,
