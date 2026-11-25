@@ -1606,6 +1606,7 @@
       "side": { "runner": "Runner", "corp": "Korp" },
       "expired": "{side} abgelaufen",
       "deciding": "{side} entscheidet",
+      "paused": "Spieleruhr pausiert",
       "waiting": "Wartet",
       "consumed": "verbraucht",
       "remaining": "verbleibend",

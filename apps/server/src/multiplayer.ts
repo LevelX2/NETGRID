@@ -94,6 +94,8 @@ import {
   type ApiSidePayload,
   type ApiPlayerClockConfig,
   type ApiPlayerClockSnapshot,
+  type ApiPlayerClockUpdate,
+  PLAYER_CLOCK_VISIBILITY_LEASE_MS,
   type ApiPendingUndoRequest,
   type ApiPlayerIdentityKind,
   type ApiPublicMatchListEntry,
@@ -323,11 +325,13 @@ export type PlayerClockActivityState = {
   decisionOwnerSide: Side;
   startedAtMs: number;
   chargedMs: number;
+  pausedAtMs?: number;
 };
 
 export type PlayerClockBaseState = {
   consumedMs: { runner: number; corp: number };
   activity?: PlayerClockActivityState;
+  visibilityExpiresAtMs?: number;
 };
 
 export type PlayerClockState = PlayerClockBaseState &
@@ -2828,6 +2832,18 @@ export class MultiplayerService {
       session.connected = connected;
       session.lastSeenAt = this.now();
       const timeExpired = this.syncPlayerClock(record, session.lastSeenAt);
+      const clock = record.match.playerClock;
+      const clockVisibilityCleared =
+        !timeExpired &&
+        clock?.visibilityExpiresAtMs !== undefined &&
+        humanPlayerClockSide(record.match.mode) === side;
+      if (clockVisibilityCleared)
+        setPlayerClockVisibility(
+          clock,
+          side,
+          false,
+          Date.parse(session.lastSeenAt),
+        );
       const countdownCancelled =
         !connected &&
         record.match.status === "countdown" &&
@@ -2837,13 +2853,19 @@ export class MultiplayerService {
       }
       const persistTransientConnectionState =
         this.storage instanceof InMemoryMatchStorage;
-      if (timeExpired || countdownCancelled || persistTransientConnectionState) {
+      if (
+        timeExpired ||
+        countdownCancelled ||
+        persistTransientConnectionState ||
+        clockVisibilityCleared
+      ) {
         const kind = timeExpired
           ? "time_expired"
           : countdownCancelled
             ? "countdown_cancelled"
             : "heartbeat";
-        if (!timeExpired) record.match.matchVersion += 1;
+        if (!timeExpired && (countdownCancelled || persistTransientConnectionState))
+          record.match.matchVersion += 1;
         record.match.updatedAt = this.now();
         await this.persistConnection(record, {
           sessionId: session.sessionId,
@@ -2853,6 +2875,64 @@ export class MultiplayerService {
       if (this.shouldUseLobbyPayload(record))
         return this.lobbyPayloadFor(record, side);
       return this.payloadFor(record, side);
+    });
+  }
+
+  async setPlayerClockPresence(
+    input: { matchId: string; side: Side; sessionToken: string; visible: boolean },
+    isCurrentConnection?: () => boolean,
+  ): Promise<
+    | { update: ApiPlayerClockUpdate }
+    | { finished: SidePayload }
+    | { error: SafeErrorPayload }
+    | undefined
+  > {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.loadConnection(input.matchId);
+      if (isCurrentConnection && !isCurrentConnection()) return;
+      if (!record)
+        return {
+          error: safeError("not_found", "Dieses private Match ist nicht verfügbar."),
+        };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session)
+        return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      const clock = record.match.playerClock;
+      if (
+        !clock ||
+        record.match.status !== "active" ||
+        humanPlayerClockSide(record.match.mode) !== input.side
+      )
+        return;
+
+      const now = this.now();
+      const timeExpired = this.syncPlayerClock(record, now);
+      session.lastSeenAt = now;
+      if (timeExpired) {
+        await this.persistConnection(record, {
+          sessionId: session.sessionId,
+          kind: "time_expired",
+        });
+        return { finished: this.payloadFor(record, input.side) };
+      }
+
+      const nowMs = Date.parse(now);
+      if (!Number.isFinite(nowMs)) throw new Error("invalid_player_clock_time");
+      setPlayerClockVisibility(clock, input.side, input.visible, nowMs);
+      await this.persistConnection(record, {
+        sessionId: session.sessionId,
+        kind: "heartbeat",
+      });
+      const snapshot = this.playerClockSnapshotFor(record, now);
+      if (!snapshot) throw new Error("player_clock_snapshot_missing");
+      return {
+        update: {
+          matchId: record.match.matchId,
+          matchVersion: record.match.matchVersion,
+          side: input.side,
+          clock: snapshot,
+        },
+      };
     });
   }
 
@@ -5795,6 +5875,11 @@ export class MultiplayerService {
       return false;
     }
     const key = this.playerClockActivityKey(record, owner, decision?.legalActions);
+    const usesVisibility = humanPlayerClockSide(record.match.mode) === owner;
+    const visibilityExpired =
+      usesVisibility &&
+      (clock.visibilityExpiresAtMs === undefined ||
+        nowMs >= clock.visibilityExpiresAtMs);
     if (
       !clock.activity ||
       clock.activity.key !== key ||
@@ -5805,10 +5890,18 @@ export class MultiplayerService {
         decisionOwnerSide: owner,
         startedAtMs: nowMs,
         chargedMs: 0,
+        ...(visibilityExpired ? { pausedAtMs: nowMs } : {}),
       };
       return false;
     }
-    if (settlePlayerClockActivity(clock, clock.activity, nowMs)) {
+    const throughMs = playerClockActivityEndMs(
+      record.match.mode,
+      clock,
+      clock.activity,
+      nowMs,
+    );
+    if (visibilityExpired) clock.activity.pausedAtMs = throughMs;
+    if (settlePlayerClockActivity(clock, clock.activity, throughMs)) {
       this.terminalizeTimeExpired(record, owner, nowIso);
       return true;
     }
@@ -5904,9 +5997,30 @@ export class MultiplayerService {
     const activity = clock.activity;
     const elapsedActivityMs =
       activity && Number.isFinite(nowMs)
-        ? Math.max(0, nowMs - activity.startedAtMs)
+        ? Math.max(
+            0,
+            playerClockActivityEndMs(record.match.mode, clock, activity, nowMs) -
+              activity.startedAtMs,
+          )
         : undefined;
     const decisionOwnerSide = activity?.decisionOwnerSide;
+    const humanSide = humanPlayerClockSide(record.match.mode);
+    const visibilityLimited = humanSide !== undefined && decisionOwnerSide === humanSide;
+    const paused =
+      visibilityLimited &&
+      (activity?.pausedAtMs !== undefined ||
+        clock.visibilityExpiresAtMs === undefined ||
+        nowMs >= clock.visibilityExpiresAtMs);
+    const activityProjection = {
+      ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
+      ...(activity && !paused ? { activityStartedAtMs: activity.startedAtMs } : {}),
+      ...(elapsedActivityMs !== undefined ? { elapsedActivityMs } : {}),
+      ...(humanSide !== undefined ? { pausesWhenHidden: true as const } : {}),
+      ...(paused ? { paused: true as const } : {}),
+      ...(visibilityLimited && !paused && clock.visibilityExpiresAtMs !== undefined
+        ? { visibilityExpiresAtMs: clock.visibilityExpiresAtMs, serverNowMs: nowMs }
+        : {}),
+    };
     if (clock.mode === "none") {
       const effectiveConsumed = { ...clock.consumedMs };
       if (decisionOwnerSide && elapsedActivityMs !== undefined && activity) {
@@ -5919,9 +6033,7 @@ export class MultiplayerService {
         schemaVersion: "player-clock-v1",
         mode: "none",
         consumedMs: effectiveConsumed,
-        ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
-        ...(activity ? { activityStartedAtMs: activity.startedAtMs } : {}),
-        ...(elapsedActivityMs !== undefined ? { elapsedActivityMs } : {}),
+        ...activityProjection,
         warningLevel: "none",
       };
     }
@@ -5962,9 +6074,7 @@ export class MultiplayerService {
       consumedMs: timeSpentFromBudget(clock.startingTimeMs, effectiveRemaining),
       startingTimeMs: clock.startingTimeMs,
       gracePeriodMs: clock.gracePeriodMs,
-      ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
-      ...(activity ? { activityStartedAtMs: activity.startedAtMs } : {}),
-      ...(elapsedActivityMs !== undefined ? { elapsedActivityMs } : {}),
+      ...activityProjection,
       ...(graceRemainingMs !== undefined ? { graceRemainingMs } : {}),
       ...(chargeableElapsedMs !== undefined ? { chargeableElapsedMs } : {}),
       warningLevel,
@@ -6242,10 +6352,16 @@ export class MultiplayerService {
       settlePlayerClockActivity(
         clock,
         clock.activity,
-        Date.parse(record.match.updatedAt),
+        playerClockActivityEndMs(
+          record.match.mode,
+          clock,
+          clock.activity,
+          Date.parse(record.match.updatedAt),
+        ),
       );
       delete clock.activity;
     }
+    if (clock) delete clock.visibilityExpiresAtMs;
     const series = record.match.series;
     const state = record.gameState;
     const winner = record.lifecycleResult?.winnerSide ?? state?.winner;
@@ -7138,6 +7254,45 @@ function timeSpentFromBudget(
     runner: startingTimeMs - remainingMs.runner,
     corp: startingTimeMs - remainingMs.corp,
   };
+}
+
+function humanPlayerClockSide(mode: MatchMode): Side | undefined {
+  if (mode === "human_runner_vs_corp_ai") return "runner";
+  if (mode === "human_corp_vs_runner_ai") return "corp";
+  return undefined;
+}
+
+function playerClockActivityEndMs(
+  mode: MatchMode,
+  clock: PlayerClockState,
+  activity: PlayerClockActivityState,
+  nowMs: number,
+): number {
+  if (humanPlayerClockSide(mode) !== activity.decisionOwnerSide) return nowMs;
+  const endMs =
+    activity.pausedAtMs ?? clock.visibilityExpiresAtMs ?? activity.startedAtMs;
+  return Math.max(activity.startedAtMs, Math.min(nowMs, endMs));
+}
+
+// The previous interval has already been settled by syncPlayerClock.
+function setPlayerClockVisibility(
+  clock: PlayerClockState,
+  side: Side,
+  visible: boolean,
+  nowMs: number,
+): void {
+  const activity =
+    clock.activity?.decisionOwnerSide === side ? clock.activity : undefined;
+  if (visible) {
+    clock.visibilityExpiresAtMs = nowMs + PLAYER_CLOCK_VISIBILITY_LEASE_MS;
+    if (activity?.pausedAtMs !== undefined) {
+      activity.startedAtMs += nowMs - activity.pausedAtMs;
+      delete activity.pausedAtMs;
+    }
+  } else {
+    delete clock.visibilityExpiresAtMs;
+    if (activity) activity.pausedAtMs ??= nowMs;
+  }
 }
 
 function settlePlayerClockActivity(

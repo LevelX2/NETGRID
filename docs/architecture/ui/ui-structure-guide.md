@@ -333,7 +333,11 @@ und hält bis dahin die automatische KI-Fortsetzung an.
   abgebrochen. Weiterhin benötigte Karten behalten ihren Abruf.
 - Die Zeitanker für Partie und Entscheidung gehören zur Matchansicht. Der
   Sekundentakt läuft in `MatchClockCluster`, solange die Uhren angezeigt werden.
-  Die Chronik speichert aufbereitete Einträge für unveränderte Ereignis- und
+- Im Spiel gegen die KI meldet der Matchtransport die Sichtbarkeit des Tabs.
+  Die Uhrenanzeige empfängt Zeitupdates für die aktuelle Matchversion direkt.
+  Die menschliche Entscheidungszeit folgt der serverseitigen Pause. Die
+  Matchlaufzeit zeigt die Dauer seit Öffnen der laufenden Partie.
+- Die Chronik speichert aufbereitete Einträge für unveränderte Ereignis- und
   Kontextdaten. Ihre Anzeigereihenfolge und Gruppen berechnet sie beim Öffnen.
 
 ## Bewusst Noch Groß

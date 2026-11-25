@@ -1110,8 +1110,12 @@ export default function Page() {
     ensureSocketConnected,
     reconnectSocket,
     sendSocketMessage,
+    playerClockUpdates,
   } = useMatchTransport({
     session,
+    connectionState: connection,
+    playerClockPresenceEnabled:
+      payload?.matchStatus === "active" && payload.playerClock?.pausesWhenHidden === true,
     onMessage: applyServerMessage,
     setConnection,
     setNotice,
@@ -7518,6 +7522,10 @@ export default function Page() {
                     {activeMatchClockAnchor || payload.playerClock ? (
                       <MatchClockCluster
                         anchor={activeMatchClockAnchor}
+                        matchId={payload.matchId}
+                        matchVersion={payload.matchVersion}
+                        side={payload.side}
+                        updates={playerClockUpdates}
                         scopeLabel={
                           payload.winner
                             ? gameT("gameEnded")

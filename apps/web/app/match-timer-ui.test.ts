@@ -11,7 +11,9 @@ import {
   formatPlayerClockDuration,
   matchTimerDecisionKey,
   matchTimerScopeLabel,
+  playerClockIsPaused,
   playerClockLiveConsumed,
+  playerClockLiveElapsed,
   playerClockLiveRemaining,
 } from "./match-timer-ui";
 
@@ -43,6 +45,27 @@ describe("UI-only match timer helpers", () => {
     expect(playerClockLiveConsumed(snapshot, "runner", 8_500)).toBe(33_500);
     expect(playerClockLiveConsumed(snapshot, "corp", 8_500)).toBe(10_000);
     expect(playerClockLiveRemaining(snapshot, "runner", 8_500)).toBe(0);
+  });
+
+  it("stops both elapsed and remaining time at the last visibility deadline", () => {
+    const snapshot = {
+      schemaVersion: "player-clock-v1",
+      mode: "player_clock",
+      decisionOwnerSide: "runner",
+      activityStartedAtMs: 1_000,
+      elapsedActivityMs: 2_000,
+      gracePeriodMs: 5_000,
+      chargeableElapsedMs: 0,
+      remainingMs: { runner: 60_000, corp: 60_000 },
+      warningLevel: "grace",
+      visibilityExpiresAtMs: 8_000,
+    } as const;
+    expect(playerClockIsPaused(snapshot, 7_000)).toBe(false);
+    expect(playerClockIsPaused(snapshot, 3_600_000)).toBe(true);
+    expect(playerClockLiveElapsed(snapshot, 3_600_000)).toBe(7_000);
+    expect(playerClockLiveRemaining(snapshot, "runner", 3_600_000)).toBe(
+      58_000,
+    );
   });
 
   it("uses only side-safe snapshot fields for the visible scope label", () => {

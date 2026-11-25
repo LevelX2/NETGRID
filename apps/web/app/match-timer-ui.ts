@@ -64,7 +64,7 @@ export function playerClockLiveRemaining(
   side: Side,
   nowMs: number,
 ): number {
-  let remainingMs = snapshot.remainingMs?.[side] ?? 0;
+  const remainingMs = snapshot.remainingMs?.[side] ?? 0;
   if (snapshot.expiredSide === side) return 0;
   if (
     snapshot.decisionOwnerSide !== side ||
@@ -72,7 +72,7 @@ export function playerClockLiveRemaining(
     snapshot.gracePeriodMs === undefined
   )
     return remainingMs;
-  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+  const elapsedMs = playerClockLiveElapsed(snapshot, nowMs) ?? 0;
   const liveChargeableMs = Math.max(0, elapsedMs - snapshot.gracePeriodMs);
   const serverChargeableMs = snapshot.chargeableElapsedMs ?? 0;
   return Math.max(
@@ -93,9 +93,33 @@ export function playerClockLiveConsumed(
     snapshot.activityStartedAtMs === undefined
   )
     return consumedMs;
-  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+  const elapsedMs = playerClockLiveElapsed(snapshot, nowMs) ?? 0;
   const serverElapsedMs = snapshot.elapsedActivityMs ?? 0;
   return Math.max(0, consumedMs + Math.max(0, elapsedMs - serverElapsedMs));
+}
+
+export function playerClockLiveElapsed(
+  snapshot: ApiPlayerClockSnapshot,
+  nowMs: number,
+): number | undefined {
+  if (snapshot.paused || snapshot.activityStartedAtMs === undefined)
+    return snapshot.elapsedActivityMs;
+  const throughMs = Math.min(nowMs, snapshot.visibilityExpiresAtMs ?? nowMs);
+  return Math.max(
+    snapshot.elapsedActivityMs ?? 0,
+    throughMs - snapshot.activityStartedAtMs,
+  );
+}
+
+export function playerClockIsPaused(
+  snapshot: ApiPlayerClockSnapshot | undefined,
+  nowMs: number,
+): boolean {
+  return (
+    snapshot?.paused === true ||
+    (snapshot?.visibilityExpiresAtMs !== undefined &&
+      nowMs >= snapshot.visibilityExpiresAtMs)
+  );
 }
 
 export function formatPlayerClockDuration(valueMs: number): string {

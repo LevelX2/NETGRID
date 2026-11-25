@@ -1602,6 +1602,7 @@
       "side": { "runner": "Runner", "corp": "Corp" },
       "expired": "{side} expired",
       "deciding": "{side} is deciding",
+      "paused": "Player clock paused",
       "waiting": "Waiting",
       "consumed": "used",
       "remaining": "remaining",

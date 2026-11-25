@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-import type { ApiServerMessage } from "@netgrid/shared";
+import {
+  PLAYER_CLOCK_VISIBILITY_RENEW_MS,
+  type ApiServerMessage,
+} from "@netgrid/shared";
 
 import type { SessionInfo } from "../../app/session-recovery";
 import {
@@ -10,9 +13,12 @@ import {
 } from "./match-transport-connection";
 export type { MatchTransportNoticeKey } from "./match-transport-connection";
 import type { ConnectionState } from "../app-shell/AppShell";
+import { createPlayerClockUpdates } from "./player-clock-updates";
 
 type MatchTransportOptions = {
   session: SessionInfo | null;
+  connectionState: ConnectionState;
+  playerClockPresenceEnabled: boolean;
   onMessage(message: ApiServerMessage): void;
   setConnection(connection: ConnectionState): void;
   setNotice(notice: string): void;
@@ -21,6 +27,8 @@ type MatchTransportOptions = {
 
 export function useMatchTransport({
   session,
+  connectionState,
+  playerClockPresenceEnabled,
   onMessage,
   setConnection,
   setNotice,
@@ -31,6 +39,7 @@ export function useMatchTransport({
   const translateNoticeRef = useRef(translateNotice);
   const manualReconnectRef = useRef(false);
   const [reconnectGeneration, setReconnectGeneration] = useState(0);
+  const [playerClockUpdates] = useState(createPlayerClockUpdates);
 
   useEffect(() => {
     onMessageRef.current = onMessage;
@@ -41,11 +50,30 @@ export function useMatchTransport({
   }, [translateNotice]);
 
   useEffect(() => {
+    playerClockUpdates.publish(null);
     if (!session) return;
     const connection = openMatchConnection({
       session,
       reconnecting: manualReconnectRef.current,
-      onMessage: (message) => onMessageRef.current(message),
+      onMessage: (message) => {
+        if (message.type === "player_clock_update") {
+          playerClockUpdates.publish(message.payload);
+          return;
+        }
+        if (
+          message.type === "state_update" &&
+          message.payload.playerClock?.pausesWhenHidden
+        ) {
+          const { matchId, matchVersion, side, playerClock } = message.payload;
+          playerClockUpdates.publish({
+            matchId,
+            matchVersion,
+            side,
+            clock: playerClock,
+          });
+        }
+        onMessageRef.current(message);
+      },
       setConnection,
       notice: (key) => setNotice(translateNoticeRef.current(key)),
       onAttemptSettled: () => {
@@ -65,6 +93,54 @@ export function useMatchTransport({
     reconnectGeneration,
     setConnection,
     setNotice,
+    playerClockUpdates,
+  ]);
+
+  useEffect(() => {
+    if (!session || !playerClockPresenceEnabled) return;
+    let renewal: number | undefined;
+    let lastVisible: boolean | undefined;
+    const isVisible = () => document.visibilityState === "visible";
+    const report = (visible: boolean, returning = false) => {
+      if (!returning && visible === lastVisible) return;
+      lastVisible = visible;
+      window.clearInterval(renewal);
+      renewal = undefined;
+      const transport = socketRef.current;
+      if (!transport?.isJoined()) {
+        if (returning && visible && connectionState === "offline")
+          setReconnectGeneration((generation) => generation + 1);
+        return;
+      }
+      transport.send("player_clock_presence", { visible });
+      if (visible) {
+        renewal = window.setInterval(() => {
+          if (isVisible() && transport.isJoined())
+            transport.send("player_clock_presence", { visible: true });
+        }, PLAYER_CLOCK_VISIBILITY_RENEW_MS);
+      }
+    };
+    const onVisibilityChange = () => report(isVisible(), isVisible());
+    const onPageShow = () => report(isVisible(), true);
+    const onPageHide = () => report(false);
+    report(isVisible());
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("online", onPageShow);
+    return () => {
+      window.clearInterval(renewal);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("online", onPageShow);
+    };
+  }, [
+    session?.matchId,
+    session?.side,
+    session?.sessionToken,
+    playerClockPresenceEnabled,
+    connectionState,
   ]);
 
   const reconnectSocket = () => {
@@ -93,5 +169,6 @@ export function useMatchTransport({
     ensureSocketConnected,
     reconnectSocket,
     sendSocketMessage,
+    playerClockUpdates,
   };
 }

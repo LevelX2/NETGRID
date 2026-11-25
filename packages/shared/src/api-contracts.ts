@@ -96,6 +96,9 @@ export type ApiGameResultReason =
 
 export type ApiPlayerClockMode = "none" | "player_clock";
 
+export const PLAYER_CLOCK_VISIBILITY_RENEW_MS = 5_000;
+export const PLAYER_CLOCK_VISIBILITY_LEASE_MS = 15_000;
+
 export type ApiPlayerClockConfig = {
   mode: ApiPlayerClockMode;
   startingTimeMs?: number;
@@ -114,6 +117,10 @@ export type ApiPlayerClockSnapshot = {
   elapsedActivityMs?: number;
   graceRemainingMs?: number;
   chargeableElapsedMs?: number;
+  pausesWhenHidden?: true;
+  paused?: true;
+  visibilityExpiresAtMs?: number;
+  serverNowMs?: number;
   warningLevel: "none" | "grace" | "charging" | "critical" | "expired";
   expiredSide?: Side;
 };
@@ -469,6 +476,7 @@ export type ApiServerMessage =
   | { type: "state_update"; payload: ApiSidePayload }
   | { type: "lobby_update"; payload: ApiLobbyPayload }
   | { type: "opponent_status"; payload: ApiOpponentStatus }
+  | { type: "player_clock_update"; payload: ApiPlayerClockUpdate }
   | {
       type: "error";
       payload: ApiUserErrorPayload;
@@ -487,6 +495,13 @@ export type ApiServerMessage =
       };
     }
   | { type: "pong"; payload: { clientTime?: number; serverTime: number } };
+
+export type ApiPlayerClockUpdate = {
+  matchId: string;
+  matchVersion: number;
+  side: Side;
+  clock: ApiPlayerClockSnapshot;
+};
 
 export type ApiCreateMatchResponse = {
   matchId: string;
