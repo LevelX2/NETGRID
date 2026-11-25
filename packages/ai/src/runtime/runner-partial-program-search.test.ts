@@ -1,3 +1,7 @@
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
+import { coverageSupportActionIds } from "../runner/rig-coverage/coverage-support";
+import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { referencesDefaultDeckCard } from "../evaluation/decision-checkpoints/compact-card-reference.test-support";
 import { afterEach, expect, it } from "vitest";
 import checkpoint from "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-485-sp332-g1-d70.json";
@@ -36,6 +40,63 @@ function fixture(source: unknown = checkpoint) {
   return { cp, input };
 }
 afterEach(resetResidentPlanPortfolioMemory);
+
+it.each([
+  { credits: 1, terminalRemoteCoverageThreat: false, admitted: false },
+  { credits: 10, terminalRemoteCoverageThreat: false, admitted: false },
+  { credits: 11, terminalRemoteCoverageThreat: false, admitted: true },
+  { credits: 4, terminalRemoteCoverageThreat: true, admitted: true },
+])(
+  "binds funding for a paid partial search before acquiring the coverage target (%j)",
+  ({ credits, terminalRemoteCoverageThreat, admitted }) => {
+    const snapshot = fixture().input.ownDeckSnapshot!;
+    const state = createGameAfterSetup({
+      seed: "partial-search-coverage-funding",
+      runnerDeck: decks.runner as DeckDefinition,
+      corpDeck: decks.corp as DeckDefinition,
+    });
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerGripSize(0)
+      .withRunnerResourceInstalled(363)
+      .withRunnerClicks(4);
+    state.runner.credits = credits;
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "hard",
+      ownDeckSnapshot: snapshot,
+    });
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
+        input.playerView,
+      ),
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+    });
+    const search = input.legalActions.find(isOwnStackSearch)!;
+    expect(search).toBeDefined();
+    const support = coverageSupportActionIds(
+      input,
+      candidates,
+      input.ownDeckCapabilities!,
+      "breaker_sentry",
+      { terminalRemoteCoverageThreat },
+    );
+    expect(support.directSearchActionIds.includes(search.actionId)).toBe(admitted);
+    if (admitted) {
+      expect(support.directSearchChoiceBindings).toContainEqual(
+        expect.objectContaining({
+          actionId: search.actionId,
+          targetDefinitionId: 278,
+        }),
+      );
+    }
+  },
+);
 
 it("projects the canonical own-stack program search without injected roles", () => {
   const { input } = fixture();

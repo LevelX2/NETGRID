@@ -4,7 +4,10 @@ import {
   actionClickCost,
   nonNegativeActionCreditCost,
 } from "../../runtime/action-cost";
-import { runnerPartialProgramSearchIsPayable } from "../../runtime/runner-partial-program-search-facts";
+import {
+  runnerPartialProgramSearchIsPayable,
+  runnerPartialProgramSearchProfile,
+} from "../../runtime/runner-partial-program-search-facts";
 import { runnerCandidateExecutesProgramSearch } from "../../runtime/runner-program-search-facts";
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
 import { uniqueBy } from "../../runtime/collection";
@@ -436,7 +439,12 @@ export function coverageSupportActionIds(
           (effect) => effect.kind === "search" && effect.scope === "stack",
         ) === true) &&
       runnerPartialProgramSearchIsPayable(input, candidate) &&
-      runnerCoverageSearchTargetIsPayable(input, candidate, targetBreaker)
+      runnerCoverageSearchTargetIsPayable(
+        input,
+        candidate,
+        targetBreaker,
+        options.terminalRemoteCoverageThreat,
+      )
     );
   });
   const stackSearchCandidates = deckHasStackAnswer
@@ -655,6 +663,7 @@ export function runnerCoverageSearchTargetIsPayable(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   targetBreaker: BreakerCapability | undefined,
+  terminalRemoteCoverageThreat = false,
 ): boolean {
   const installEffects = (candidate.functionalEffects ?? []).filter(
     (effect) =>
@@ -662,29 +671,39 @@ export function runnerCoverageSearchTargetIsPayable(
       effect.scope === "installed_card" &&
       effect.target === "program",
   );
-  if (installEffects.length === 0) return true;
-  const installCostModes = new Set(
-    installEffects.flatMap((effect) =>
-      effect.installCost ? [effect.installCost] : [],
-    ),
-  );
-  if (installCostModes.size !== 1) return false;
-  if (installCostModes.has("free")) return true;
-  if (
-    !installCostModes.has("normal") ||
-    targetBreaker?.installCost === undefined ||
-    !Number.isSafeInteger(targetBreaker.installCost) ||
-    targetBreaker.installCost < 0
-  ) {
-    return false;
+  const partialSearch = terminalRemoteCoverageThreat
+    ? undefined
+    : runnerPartialProgramSearchProfile(
+        input,
+        runnerCandidateSourceDefinitionId(input, candidate),
+      );
+  const acquisitionCost = partialSearch?.costPerTaken ?? 0;
+  if (installEffects.length === 0 && acquisitionCost === 0) return true;
+  if (installEffects.length > 0) {
+    const installCostModes = new Set(
+      installEffects.flatMap((effect) =>
+        effect.installCost ? [effect.installCost] : [],
+      ),
+    );
+    if (installCostModes.size !== 1) return false;
+    if (installCostModes.has("free")) return true;
+    if (!installCostModes.has("normal")) return false;
   }
+  const installCost = targetBreaker?.installCost;
+  if (
+    installCost === undefined ||
+    !Number.isSafeInteger(installCost) ||
+    installCost < 0
+  )
+    return false;
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
   if (!action) return false;
   const sourceCreditCost = nonNegativeActionCreditCost(action);
   return (
-    input.playerView.own.credits >= sourceCreditCost + targetBreaker.installCost
+    input.playerView.own.credits >=
+    sourceCreditCost + acquisitionCost + installCost
   );
 }
 

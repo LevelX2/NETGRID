@@ -1320,6 +1320,13 @@ Resolver übernimmt ausschließlich das gebundene Ziel, falls es unter den
 tatsächlichen Optionen liegt, ansonsten die erlaubte leere Auswahl. Er
 entwickelt dort keine neue Suchstrategie und übernimmt keine weiteren Programme.
 
+Die Coverage-Zielwertung reserviert bei einer bezahlten begrenzten
+Spitzensuche zusätzlich die normalen Installationskosten des gebundenen
+Programms. Bei erst einem Credit führt eine Übernahme des zehn Credits
+teuren Snowball noch zu keiner finanzierten Coverage. Der terminale
+Remote-Owner prüft Erwerb, Installation, Finanzierung und Run in seiner
+bestehenden vollständigen Folgeroute.
+
 Die maximale Optionszahl allein macht eine begrenzte Spitzensuche nicht zur
 Mehrkartensuche. Die Coverage-Fortsetzung trennt beide Verträge anhand der
 vorher gebundenen kanonischen Quellfunktion. Auch bei einer abweichenden
