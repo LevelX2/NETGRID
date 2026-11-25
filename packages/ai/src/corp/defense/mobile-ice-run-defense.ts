@@ -1,4 +1,7 @@
-import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
+import {
+  currentRunEncounterPath,
+  currentRunPathContext,
+} from "../../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -160,8 +163,20 @@ export function assessMobileIceRunDefense(
       rig,
       { liquidCredits: input.playerView.opponent.credits },
     );
-  const beforeAssessment = assessKnownRezzedIcePath(
+  const beforeIce = currentRunEncounterPath(
+    input,
+    target.id,
     q.beforeIce,
+    q.beforeIce.length - 1,
+  );
+  const afterIce = currentRunEncounterPath(
+    input,
+    target.id,
+    q.afterIce,
+    q.afterIce.length - 1,
+  );
+  const beforeAssessment = assessKnownRezzedIcePath(
+    beforeIce,
     rig,
     budget(),
     target.root,
@@ -170,11 +185,11 @@ export function assessMobileIceRunDefense(
   );
   const before = quoteCorpRemotePath({
     assessment: beforeAssessment,
-    expectedKnownIceCount: q.beforeIce.length,
+    expectedKnownIceCount: beforeIce.length,
     runnerCreditBudgetBefore: budget(),
   });
   const after = assessKnownRezzedIcePath(
-    q.afterIce,
+    afterIce,
     rig,
     budget(),
     target.root,

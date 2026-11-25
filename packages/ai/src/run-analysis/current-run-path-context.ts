@@ -88,3 +88,33 @@ function missingBreakRestrictionBinding(
     removalCondition: `Public break restriction requires the ${encounter} actual encounter ICE binding.`,
   });
 }
+
+/** Remaining encounters respect the first auto-pass on each quoted branch.
+ * An unrezzed outer layer leaves that bypass for the next rezzed ICE. */
+export function currentRunEncounterPath<
+  T extends { instanceId: string; rezzed?: boolean },
+>(
+  input: AiDecisionInput,
+  serverId: string,
+  ice: readonly T[],
+  projectedOuterIndex?: number,
+): T[] {
+  const run = input.playerView.run;
+  if (run?.attackedServerId !== serverId) return [...ice];
+  const currentIceIndex =
+    projectedOuterIndex ??
+    (run.position?.kind === "ice" ? run.position.iceIndex : undefined);
+  if (currentIceIndex === undefined) return [...ice];
+  let bypassedIndex = -1;
+  if (run.bypassFirstIceRemaining === true) {
+    for (let index = currentIceIndex; index >= 0; index--) {
+      if (ice[index]?.rezzed === true) {
+        bypassedIndex = index;
+        break;
+      }
+    }
+  }
+  return ice.filter(
+    (_card, index) => index <= currentIceIndex && index !== bypassedIndex,
+  );
+}

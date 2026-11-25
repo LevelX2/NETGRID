@@ -1421,8 +1421,13 @@ StateVersion, Zahlung und vollständige öffentliche ICE-Pfade bleiben gebunden.
 Der bisherige Pfad muss erreichbar sein; der neue Pfad muss anhand des
 sichtbaren Runner-Rigs und seiner tatsächlich verfügbaren Run-Zahlungsmittel
 an einer unbezahlbaren ETR scheitern. Der Pfadprüfer darf dabei am belegten
-Stop enden, ohne inneres ICE nochmals zu durchlaufen. Root, Executor, Step und
-Route gehören weiterhin `corp.defend_servers`, ebenso der später separat
+Stop enden, ohne inneres ICE nochmals zu durchlaufen. Ein noch offener
+automatischer Erstbegegnungs-Bypass wird in beiden Bewegungszweigen auf das
+jeweils äußere gerezzte ICE gebunden. Die Bewegung schützt nur, wenn der
+danach tatsächlich zu begegnende Pfad den Zugriff sperrt. P902 R4 G19 D552
+prüft den bereits mit zwei Credits bezahlbaren inneren Pfad.
+Root, Executor, Step und Route gehören weiterhin `corp.defend_servers`,
+ebenso der später separat
 revalidierte Rez-Schritt. Unbekannte oder weitere ungerezzte Zielschichten,
 unvollständige Quotes, nichtterminale Allokation und ein belegter
 weiterhin bezahlbarer Zugriff eröffnen diese enge Route nicht. Eine Rootkarte

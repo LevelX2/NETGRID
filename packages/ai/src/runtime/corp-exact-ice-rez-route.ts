@@ -13,6 +13,7 @@ import {
 } from "../card-definition-id-input";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { actionMatchesCurrentDecision } from "../actions/current-legal-action";
+import { currentRunEncounterPath } from "../run-analysis/current-run-path-context";
 import {
   assessCorpScoreProtection,
   compareExactProbabilities,
@@ -530,30 +531,6 @@ function currentInnerBypassContinuation(params: {
     ice: { ...innerIce, rezzed: true, effectiveRunQuote: continuation.effectiveRunQuote },
     rezCredits: cost.finalCredits,
   };
-}
-
-/** Compare the remaining actual encounters on each branch. Declining an
- * unrezzed outer layer preserves the first-encounter bypass for inner ICE. */
-function currentRunEncounterPath<
-  T extends { instanceId: string; rezzed?: boolean },
->(input: AiDecisionInput, serverId: string, ice: readonly T[]): T[] {
-  const run = input.playerView.run;
-  if (run?.attackedServerId !== serverId || run.position?.kind !== "ice")
-    return [...ice];
-  const currentIceIndex = run.position.iceIndex;
-  let bypassedIndex = -1;
-  if (run.bypassFirstIceRemaining === true) {
-    for (let index = currentIceIndex; index >= 0; index--) {
-      if (ice[index]?.rezzed === true) {
-        bypassedIndex = index;
-        break;
-      }
-    }
-  }
-  return ice.filter((card, index) => {
-    if (index > currentIceIndex) return false;
-    return index !== bypassedIndex;
-  });
 }
 
 /** Credit conversion is a fact of the offered rez; Defense remains its owner. */

@@ -19,7 +19,7 @@ import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-port
 import { assessMobileIceRunDefense } from "./mobile-ice-run-defense";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
-function fixture(credits = 3, runnerCredits = 22) {
+function fixture(credits = 3, runnerCredits = 22, useInsideJob = false) {
   const state = createGameAfterSetup({
     seed: "sp431-current-terminal-move",
     runnerDeck: {
@@ -27,6 +27,7 @@ function fixture(credits = 3, runnerCredits = 22) {
       cards: [
         { id: 251, quantity: 3 },
         { id: 320, quantity: 8 },
+        ...(useInsideJob ? [{ id: 306, quantity: 1 }] : []),
       ],
     },
     corpDeck: {
@@ -106,8 +107,22 @@ function fixture(credits = 3, runnerCredits = 22) {
       ice: [dead.instanceId, glacs[1]!.instanceId],
     },
   );
+  let insideJobId: string | undefined;
+  if (useInsideJob) {
+    const insideJob = Object.values(state.cardInstances).find(
+      (card) => card.definitionId === 306,
+    )!;
+    insideJobId = insideJob.instanceId;
+    removeEverywhere(state, insideJobId);
+    insideJob.zone = { side: "runner", zone: "grip" };
+    state.runner.grip.push(insideJobId);
+  }
   const start = getLegalActions(state, "runner").find(
-    (a) => a.type === "start_run" && a.payload?.serverId === "r2",
+    (a) =>
+      a.payload?.serverId === "r2" &&
+      (insideJobId
+        ? a.type === "play_event" && a.source === insideJobId
+        : a.type === "start_run"),
   )!;
   const result = applyAction(state, {
     matchId: state.matchId,
@@ -343,6 +358,26 @@ describe("SP-431 Defense-owned current terminal mobile-ICE route", () => {
     });
     expect(chooseAiAction(input).actionId).not.toBe(action.actionId);
   });
+  it.each([
+    { runnerCredits: 24, productive: false },
+    { runnerCredits: 16, productive: true },
+  ])(
+    "compares both actual Inside Job paths with $runnerCredits starting credits",
+    ({ runnerCredits, productive }) => {
+      const { state } = fixture(3, runnerCredits, true);
+      const input = inputFor(state);
+      const action = move(input);
+      expect(action.payload?.corpMobileIceMoveQuoteJson).toBeTypeOf("string");
+      expect(input.playerView.run?.bypassFirstIceRemaining).toBe(true);
+      expect(assessMobileIceRunDefense(input, action)).toMatchObject({
+        productive,
+        serverId: "r2",
+      });
+      const decision = chooseAiAction(input);
+      expect(decision.actionId === action.actionId).toBe(productive);
+      expect(decision.fallbackUsed).toBe(false);
+    },
+  );
   it("does not abandon an agenda on the origin fort", () => {
     const { state } = fixture(),
       spare = Object.values(state.cardInstances).find(
