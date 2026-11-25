@@ -250,8 +250,8 @@ it("rejects a voluntary trace break that spends the credits needed to reach a bo
     paymentLosesKnownTerminalPath: true,
     evidenceCodes: expect.arrayContaining(["runner_paid_break_loses_known_terminal_path"]),
   });
-  expect(runnerRunRiskContractReassessment(input, {
-    ...origin,
-    accessCommitment: undefined,
-  }, paid)?.decision).toBe("preserve_continuation");
+  const uncommitted: RunnerRunOrigin = { runRiskContract: origin.runRiskContract! };
+  expect(runnerRunRiskContractReassessment(input, uncommitted, paid)?.decision).toBe(
+    "preserve_continuation",
+  );
 });
