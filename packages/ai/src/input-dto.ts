@@ -1218,6 +1218,16 @@ function sanitizePlayerView(
           ),
         }
       : {}),
+    ...(view.side === "corp" && view.corpCurrentCentralAccessQuote
+      ? {
+          corpCurrentCentralAccessQuote: {
+            stateVersion: view.corpCurrentCentralAccessQuote.stateVersion,
+            runId: view.corpCurrentCentralAccessQuote.runId,
+            serverId: view.corpCurrentCentralAccessQuote.serverId,
+            accessCount: view.corpCurrentCentralAccessQuote.accessCount,
+          },
+        }
+      : {}),
     ...(corpPunishRouteQuoteSet ? { corpPunishRouteQuoteSet } : {}),
     ...(view.run
       ? {

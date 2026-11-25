@@ -8,6 +8,7 @@ import type { CorpExactIceRezRouteProjection } from "../../runtime/corp-exact-ic
 import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
 import {
   readCorpCentralAgendaExposure,
+  readCorpCurrentCentralAgendaExposure,
   corpCurrentRunAccessServerId,
 } from "./corp-central-defense-facts-adapter";
 import {
@@ -180,6 +181,8 @@ export function corpCurrentRunAgendaExposure(
   if (input.playerView.run?.attackedServerId !== defendedServerId)
     return undefined;
   const accessServerId = corpCurrentRunAccessServerId(input);
+  if (accessServerId === "hq" || accessServerId === "rd")
+    return readCorpCurrentCentralAgendaExposure(input, accessServerId);
   return accessServerId === undefined
     ? undefined
     : corpServerAgendaExposure(input, accessServerId);

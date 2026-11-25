@@ -51,7 +51,10 @@ import {
   visibleEffectiveEncounteredIceRunQuote,
   visibleEffectiveIceRunQuote,
 } from "./visible-run-quote";
-import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
+import {
+  quoteCorpCentralAccesses,
+  quoteCorpCurrentCentralAccess,
+} from "./corp-central-access-quotes";
 import {
   visibleCorpFutureFlexibleClicks,
   visibleCorpScoreContinuationQuote,
@@ -91,6 +94,10 @@ export function buildPlayerViewProjection(
   }
   const corpCentralAccessQuotes =
     side === "corp" ? quoteCorpCentralAccesses(state) : undefined;
+  const corpCurrentCentralAccessQuote =
+    side === "corp"
+      ? quoteCorpCurrentCentralAccess(state, corpCentralAccessQuotes)
+      : undefined;
   const visibleServers = state.corp.servers.map((server) => {
     const statuses = visibleServerStatuses(state, server.id);
     const ice = server.ice.map((id) => {
@@ -316,7 +323,7 @@ export function buildPlayerViewProjection(
         ...(successfulRunSpendCreditsToDeny
           ? { successfulRunSpendCreditsToDeny: true as const }
           : {}),
-        ...(state.run.accessServerOverride
+        ...(state.run.accessServerOverride && successfulRunEffectTargetMatches(state.run)
           ? { accessServerOverride: state.run.accessServerOverride }
           : {}),
         ...(state.run.runEndTrashUsedBreakerIdsThisRun?.length
@@ -709,6 +716,7 @@ export function buildPlayerViewProjection(
     ...(corpCentralAccessQuotes
       ? { corpCentralAccessQuotes: [...corpCentralAccessQuotes] }
       : {}),
+    ...(corpCurrentCentralAccessQuote ? { corpCurrentCentralAccessQuote } : {}),
     specialZones: visibleSpecialZones(state, side),
     ...(run ? { run } : {}),
     ...(state.pendingChoice?.side === side

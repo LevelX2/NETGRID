@@ -4499,6 +4499,8 @@ export type PlayerView = {
   };
   /** Present only in the Corp's own PlayerView; never a Runner-information surface. */
   corpCentralAccessQuotes?: CorpCentralAccessQuote[];
+  /** Corp-only card access bound to the active run and its actual storage zone. */
+  corpCurrentCentralAccessQuote?: CorpCurrentCentralAccessQuote;
   /** Required base draws under the current Corp-visible position. Optional draws are excluded. */
   corpMandatoryBaseDrawQuote?: {
     baseCount: number;
@@ -4584,6 +4586,14 @@ export type PlayerView = {
   winner: Winner | null;
   agendaPointsToWin: number;
   gameEndReason?: GameEndReason;
+};
+
+export type CorpCurrentCentralAccessQuote = {
+  stateVersion: number;
+  runId: RunId;
+  serverId: "hq" | "rd";
+  /** Stored-card depth if the committed run reaches card access. */
+  accessCount: number;
 };
 
 export type CorpCentralAccessQuote = {

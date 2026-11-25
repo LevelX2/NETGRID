@@ -46,9 +46,40 @@ export function readCorpCentralAgendaExposure(
   serverId: CorpCentralDefenseServerId,
   leavingHqCardId?: string,
 ): { expectedPoints: number; maximumPoints: number } | undefined {
+  const quote = quotesForCurrentView(input)?.[serverId];
+  return quote
+    ? centralAgendaExposure(input, serverId, quote.effectiveAccessCount, leavingHqCardId)
+    : undefined;
+}
+
+export function readCorpCurrentCentralAgendaExposure(
+  input: AiDecisionInput,
+  serverId: CorpCentralDefenseServerId,
+) {
+  const view = input.playerView;
+  const quote = view.corpCurrentCentralAccessQuote;
+  if (
+    !quote ||
+    view.run?.runId === undefined ||
+    quote.runId !== view.run.runId ||
+    quote.stateVersion !== view.stateVersion ||
+    quote.serverId !== serverId ||
+    corpCurrentRunAccessServerId(input) !== serverId ||
+    !Number.isSafeInteger(quote.accessCount) ||
+    quote.accessCount < 0
+  )
+    return undefined;
+  return centralAgendaExposure(input, serverId, quote.accessCount);
+}
+
+function centralAgendaExposure(
+  input: AiDecisionInput,
+  serverId: CorpCentralDefenseServerId,
+  accessCount: number,
+  leavingHqCardId?: string,
+) {
   if (input.side !== "corp" || input.playerView.side !== "corp")
     return undefined;
-  const quote = quotesForCurrentView(input)?.[serverId];
   const cards =
     serverId === "hq"
       ? inventoryForCards(
@@ -57,18 +88,14 @@ export function readCorpCentralAgendaExposure(
           ),
         )
       : centralInventory(input)?.rd;
-  if (!quote || !cards) return undefined;
-  if (cards.populationCardCount === 0)
+  if (!cards) return undefined;
+  if (cards.populationCardCount === 0 || accessCount === 0)
     return { expectedPoints: 0, maximumPoints: 0 };
-  const maximumPoints = maximumAgendaPointValueForAccesses(
-    cards,
-    quote.effectiveAccessCount,
-  );
+  const maximumPoints = maximumAgendaPointValueForAccesses(cards, accessCount);
   if (maximumPoints === undefined) return undefined;
   return {
     expectedPoints:
-      (Math.min(quote.effectiveAccessCount, cards.populationCardCount) *
-        cards.agendaPointValue) /
+      (Math.min(accessCount, cards.populationCardCount) * cards.agendaPointValue) /
       cards.populationCardCount,
     maximumPoints,
   };

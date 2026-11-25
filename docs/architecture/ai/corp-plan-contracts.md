@@ -1677,6 +1677,16 @@ G15 D87 bleibt als Minotaur ohne äußeres aktives Gate ein Decline-Gegenfall.
 Die Route wird erst nach `assessCorpExactIceRezAgainstScoreReserves`
 zugelassen: veröffentlichte Score-Fortsetzungen, andere bedrohte Agenden und
 notwendige weitere ICE im laufenden Run behalten ihre konkreten Reserven.
+Für die aktuelle zentrale Agendaexposition bindet die Engine die bereits
+verpflichtete Zahl der HQ- oder R&D-Karten an Run-ID, Zugriffsziel und
+StateVersion. Der Defense-Owner verwendet diese Quote für den laufenden
+Zugriff und die normalen Server-Quotes für spätere Runs. Ein bereits
+ausgelöstes Mehrfachzugriffsereignis kann damit den laufenden Zugriff in den
+terminalen Bereich heben. Bedingte, noch ausstehende Zusatzeffekte erhöhen
+die gebundene Kartenzahl erst nach Anwendung durch die Engine. Bei einer
+Umleitung gilt das tatsächliche Zugriffsziel. Paarung 920, G9 D9, prüft drei
+R&D-Karten und maximal sieben erreichbare Agendapunkte gegen einen
+bezahlbaren Deadeye-Rez und den konkurrierenden HQ-Schutz.
 Auch vor einem terminalen Zugriff darf eine solche exakt kostenlose
 Einkommensroute diese Reserven erhalten, obwohl ihre Quelle nicht zum zuvor
 berechneten bezahlten Verteidigungspaket gehört. Die belegte Endbank muss
