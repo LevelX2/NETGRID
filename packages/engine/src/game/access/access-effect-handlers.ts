@@ -271,11 +271,18 @@ export function resumeAccessEffectAfterDamagePrevention(
   const continuation = host.state.pendingAccessEffectDamageContinuation;
   if (!continuation)
     throw new Error("Es ist keine Access-Damage-Fortsetzung offen.");
+  // Lethal damage has already ended the run when the prevention choice closes.
+  const flatlineEndedRun =
+    host.state.gameEndReason === "flatline" &&
+    host.state.run === undefined &&
+    legalAction.payload?.damageResolved === true &&
+    legalAction.payload.flatline === true;
   if (
     host.state.pendingChoice ||
     host.state.replacementWindow ||
     host.state.eventModificationWindow ||
-    host.state.run?.accessedCardId !== continuation.sourceCardId
+    (!flatlineEndedRun &&
+      host.state.run?.accessedCardId !== continuation.sourceCardId)
   )
     throw new Error("Der Access-Damage-Kontext ist nicht mehr gültig.");
   const definition = host.cards.definitionFor(continuation.sourceCardId);

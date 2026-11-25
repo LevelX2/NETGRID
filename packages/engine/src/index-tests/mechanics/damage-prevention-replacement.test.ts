@@ -666,6 +666,84 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it.each([
+    { title: "partially prevented flatline", grip: 0, prevent: true, damage: 1 },
+    { title: "unprevented flatline", grip: 1, prevent: false, damage: 2 },
+    { title: "survived prevention", grip: 1, prevent: true, damage: 1 },
+  ])("completes Fetal AI damage after a prevention choice in $title", (testCase) => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention(`fetal-prevention-${testCase.title}`),
+    );
+    const flatline = testCase.damage > testCase.grip;
+    state.runner.credits = 10;
+    const boxId = moveRunnerCardToGrip(state, 250);
+    state.cardInstances[boxId]!.definitionId = 51;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" && sourceDefinition(state, action) === 51,
+    );
+    emptyRunnerGripForTest(state);
+    drawRunnerCardsForTest(state, testCase.grip);
+    addCorpCardToHqForTest(state, 62, "fetal-prevention");
+    putCorpCardOnTopOfRd(state, 62);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const preventionOption = state.pendingChoice?.options.find(
+      (option) => option.label === "Little Black Box: 1 Schaden verhindern",
+    );
+    expect(preventionOption).toBeDefined();
+    const eventId = state.imminentEvent?.eventId;
+    state = applyChoice(
+      state,
+      "runner",
+      testCase.prevent ? preventionOption!.id : "pass",
+    );
+
+    expect(state.pendingAccessEffectDamageContinuation).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.grip).toHaveLength(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      imminentEventId: eventId,
+      damageType: "net",
+      damageAmount: testCase.damage,
+      cardsTrashed: testCase.grip,
+      flatline,
+      resolvedEffects: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "damage",
+          amount: testCase.damage,
+          sourceDefinitionId: 62,
+        }),
+      ]),
+    });
+    if (flatline) {
+      expect(state.winner).toBe("corp");
+      expect(state.gameEndReason).toBe("flatline");
+      expect(state.run).toBeUndefined();
+    } else {
+      expect(state.winner).toBeNull();
+      expect(
+        getLegalActions(state, "runner").some(
+          (action) => action.type === "steal_agenda",
+        ),
+      ).toBe(true);
+    }
+    expect(validateGameState(state)).toEqual({ ok: true, errors: [] });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it.each(["avoid", "pass"] as const)(
     "keeps completed damage bound when TRAP opens a later tag window (%s)",
     (tagDecision) => {

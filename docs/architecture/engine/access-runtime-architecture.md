@@ -75,6 +75,13 @@ azyklischer interner Implementierungsschnitt.
   dem Trashing der Quelle für denselben Run bestehen; ein neuer Run übernimmt
   ihn nicht. Die verzögerte Wertung am nächsten Runner-Zugbeginn bleibt an die
   im selben Remote verbliebene Agenda gebunden.
+- Bei Zugriffsschaden mit offenem Präventions- oder Replacement-Fenster
+  bleibt die Effektfortsetzung bis zur endgültigen Schadensauflösung gebunden.
+  Eine bestätigte Flatline beendet den Run schon im Damage-Resolver. Der
+  Access-Handler schließt danach die gebundene Schadensfortsetzung ab und
+  protokolliert den Zugriffsschaden. Weitere Effektschritte enden mit dem Spiel.
+  Bei laufendem Spiel braucht die Fortsetzung weiterhin dieselbe aktuelle
+  Zugriffskarte.
 - Archives-Autozugriffe verwenden dieselbe Queue und denselben Abschluss wie
   interaktive Zugriffe; nur Karten ohne Entscheidung oder Effekt werden
   automatisch übersprungen.
