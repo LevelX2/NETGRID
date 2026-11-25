@@ -10,6 +10,7 @@ import {
 } from "./run-window-encounter-payment";
 import {
   currentRunRemainderSupportsExactEtrPricing,
+  preparedProgramEncounterPayment,
   pureEndRunEncounterPayment,
   pureEndRunEncounterEconomics,
 } from "./run-window-pure-etr-economics";
@@ -877,7 +878,11 @@ function runnerRunWindowActionAssessment(
       ],
     };
   }
+  const preparedProgramPayment = runOrigin?.runRiskContract
+    ? preparedProgramEncounterPayment(input, action)
+    : undefined;
   const supportedRunAction =
+    preparedProgramPayment !== undefined ||
     accessAction ||
     restrictedRunSequenceAction !== undefined ||
     candidate.semanticActionType === "run.continue" ||
@@ -920,9 +925,11 @@ function runnerRunWindowActionAssessment(
     action,
     dependencies,
     runOrigin,
+    preparedProgramPayment,
   );
   const encounterPayment = !planStepExclusion
-    ? (pureEndRunEncounterPayment(input, action) ??
+    ? (preparedProgramPayment ??
+      pureEndRunEncounterPayment(input, action) ??
       nextEncounterDamageMarkerPayment(input, action))
     : undefined;
   const optionalPayments =
@@ -1122,6 +1129,15 @@ function runnerRunWindowActionAssessment(
     : undefined;
   const encounterEconomics =
     pureEncounterEconomics ?? currentEncounterEconomics;
+  if (
+    preparedProgramPayment &&
+    !exclusion &&
+    (!pureEncounterEconomics || paidRunRisk?.decision !== "preserve_continuation")
+  )
+    return {
+      admissible: false,
+      evidenceCodes: ["runner_prepared_program_requires_bound_payable_access"],
+    };
   return exclusion
     ? {
         admissible: false,
@@ -1158,6 +1174,9 @@ function runnerRunWindowActionAssessment(
               ? "runner_encounter_action_plan_admissible"
               : "runner_run_window_action_plan_admissible",
           `runner_run_window_action:${action.type}`,
+          ...(preparedProgramPayment
+            ? ["runner_prepared_program_complete_etr"]
+            : []),
           ...(pureEncounterEconomics
             ? [
                 `runner_pure_etr_complete_path_cost:${pureEncounterEconomics.totalCost}`,
@@ -1482,14 +1501,15 @@ export function runnerExactRunWindowPhaseActionIds(
     return exactPayOrEndRunRouteActionIds;
   }
   if (encounterRequiresTargetPreservingBreak) {
-    // A run-long strength ability is preparation for the same mandatory
-    // break. Preserve its prior owner assessment instead of dropping it
-    // merely because the Engine exposes it as trigger_ability, not pump.
+    // Keep paid preparation already assessed for this mandatory break.
     const directEncounterActionIds = admissibleRunWindowCandidates
       .filter(
         (candidate) =>
           candidate.actionType === "pump_breaker" ||
           candidate.actionType === "break_subroutine" ||
+          assessments[candidate.actionId]?.evidenceCodes.includes(
+            "runner_prepared_program_complete_etr",
+          ) ||
           runnerRunRemainderStrengthBoostAction(
             input,
             candidate,
@@ -1675,6 +1695,7 @@ function runnerRunWindowPlanStepExclusion(
   action: AiDecisionInput["legalActions"][number],
   dependencies: RunWindowAssessmentServices,
   runOrigin: RunnerRunOrigin | undefined,
+  preparedProgramPayment?: RunnerRunContinuationPayment,
 ): SemanticRuntimeExclusion | undefined {
   const run = input.playerView.run;
   if (!run) return undefined;
@@ -1702,8 +1723,12 @@ function runnerRunWindowPlanStepExclusion(
     runnerRunWindowEncounterRequiredHandFloor(runOrigin),
   );
   const informationReassessment = runOrigin?.informationBoundaryReassessment;
+  const spendsOnEncounter =
+    action.type === "pump_breaker" ||
+    action.type === "break_subroutine" ||
+    preparedProgramPayment !== undefined;
   if (
-    (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+    spendsOnEncounter &&
     informationReassessment?.decision === "retain_information" &&
     !runnerInformationProbeRequiresEncounterBreak(input, runOrigin) &&
     !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
@@ -1728,7 +1753,7 @@ function runnerRunWindowPlanStepExclusion(
   }
 
   if (
-    (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+    spendsOnEncounter &&
     runOrigin?.purpose === "information" &&
     runOrigin.encounterCreditSpendLimit !== undefined &&
     !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
@@ -1737,10 +1762,11 @@ function runnerRunWindowPlanStepExclusion(
   ) {
     const actionCost = nonNegativeActionCreditCost(action);
     const completePayment =
-      action.type === "pump_breaker" &&
+      preparedProgramPayment?.cost ??
+      (action.type === "pump_breaker" &&
       informationReassessment?.decision === "retain_information"
         ? completeInformationLockPumpCost(input, action)
-        : undefined;
+        : undefined);
     if ((completePayment ?? actionCost) > runOrigin.encounterCreditSpendLimit) {
       return {
         key: "run_plan_information_budget_exceeded",
@@ -1759,7 +1785,7 @@ function runnerRunWindowPlanStepExclusion(
   }
 
   if (
-    (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+    spendsOnEncounter &&
     currentActiveRunHasKnownNoPayoff(input) &&
     !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
     !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&

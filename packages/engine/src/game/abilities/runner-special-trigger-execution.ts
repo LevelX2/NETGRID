@@ -11,6 +11,7 @@ import type {
   Side,
   SpecialZoneState,
 } from "@netgrid/shared";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import { completeRunnerProgramRigInstall } from "../install/runner-rig-install-finalization";
 
@@ -1220,6 +1221,42 @@ function delayedInstallCanInstallPreparedCardForFree(
       ? delayedInstallHostIds(host, definition).includes(hostOnCardId)
       : state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
         host.runner.runnerMemoryLimit(state))
+  );
+}
+
+/** Certify a public final counter whose fixed-strength breaker installs
+ * immediately with no destination choice, extra payment or lifecycle effects. */
+export function delayedInstallCompletesPlainBreaker(
+  host: RunnerSpecialTriggerExecutionHost,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  counters: number,
+): boolean {
+  const zone = host.state.cardInstances[cardId]?.zone;
+  if (
+    counters !== 1 ||
+    zone?.side !== "special" ||
+    zone.zone !== "set_aside" ||
+    zone.visibility !== "public" ||
+    definition.type !== "program" ||
+    !definition.subtypes.includes("icebreaker") ||
+    definition.strength === undefined ||
+    definition.variableStrength !== undefined ||
+    definition.modifiers?.length ||
+    host.cards.shouldLoadLegacyRecurringCredits(definition) ||
+    host.cards.additionalAgendaPointInstallCost(definition) !== 0
+  )
+    return false;
+  const implementation = cardImplementationForDefinitionId(definition.id);
+  return (
+    implementation?.icebreakerAbilities?.some(
+      (ability) => ability.kind === "break_subroutine",
+    ) === true &&
+    Object.keys(implementation).every(
+      (key) => key === "cardDefinitionId" || key === "icebreakerAbilities",
+    ) &&
+    delayedInstallCanInstallPreparedCardForFree(host, cardId, definition) &&
+    delayedInstallHostIds(host, definition, true).length === 0
   );
 }
 

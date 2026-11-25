@@ -3143,6 +3143,17 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+Beim letzten bekannten ICE mit ausschließlich harten End-the-Run-Subroutinen
+kann der Run-Owner den letzten Shell-Counter als Teil der vollständigen
+Breakzahlung bewerten. Die Engine kennzeichnet dafür die aktuelle bezahlte
+Action, wenn der öffentlich vorbereitete Breaker mit fester Stärke direkt ins
+Rig kommt. Zusätzliche Kosten, eine Installationswahl und Installationsfolgen
+sind in dieser Quote ausgeschlossen. Die KI vergleicht die vollständigen
+Kosten und verbleibenden liquiden Credits mit den bereits bezahlbaren
+Breakrouten. Der bestehende Runreservevertrag und das Budget eines
+Informationsruns gelten auch für diese Zahlung. Paarung 898, G14 D268,
+belegt denselben R&D-Zugriff für vier statt acht Credits.
+
 Der Run-Owner berücksichtigt ausgelösten Folgeschaden bis zur nächsten
 tatsächlichen ICE-Begegnung. Für deren Abschluss konsumiert er die
 öffentlichen Felder `encounterContinue` und `passedIcePosition` aus der

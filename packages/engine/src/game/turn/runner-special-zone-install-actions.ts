@@ -30,6 +30,7 @@ export type RunnerDelayedInstallRemoveCounterActionInput = {
   targetCardId: CardInstanceId;
   targetDefinitionId: CardDefinitionId;
   remainingCountersBefore: number;
+  completesPlainBreaker?: true;
 };
 
 export function buildRunnerValuPakInstallAction(
@@ -157,6 +158,9 @@ export function buildRunnerDelayedInstallRemoveCounterAction(
       counterType: "shell",
       removeCounterAmount: 1,
       remainingCountersBefore: input.remainingCountersBefore,
+      ...(input.completesPlainBreaker
+        ? { delayedInstallCompletesPlainBreaker: true }
+        : {}),
       sourceDefinitionId: input.sourceDefinitionId,
       abilityFamily: "hosting-counters",
       effectKind: "counter_change",

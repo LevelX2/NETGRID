@@ -13,7 +13,10 @@ import {
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import { cardCounter } from "../state/turn-flags-counters";
 import { buildLegalAction as action } from "../turn/action-builders";
-import { delayedInstallPreparedTargetIds } from "../abilities/runner-special-trigger-execution";
+import {
+  delayedInstallCompletesPlainBreaker,
+  delayedInstallPreparedTargetIds,
+} from "../abilities/runner-special-trigger-execution";
 import { buildRunnerDelayedInstallRemoveCounterAction } from "../turn/runner-special-zone-install-actions";
 import {
   buildCorpTraceDamageAbilityActionsForCard,
@@ -109,9 +112,8 @@ export function createLegalActionRuntimeHosts(
     )
       return [];
     const actions: LegalAction[] = [];
-    const targets = delayedInstallPreparedTargetIds(
-      deps.runnerSpecialTriggerExecutionHost(state),
-    );
+    const delayedInstall = deps.runnerSpecialTriggerExecutionHost(state);
+    const targets = delayedInstallPreparedTargetIds(delayedInstall);
     for (const sourceCardId of state.runner.rig.resources.slice().sort()) {
       const sourceDefinition = definitionFor(state, sourceCardId);
       if (
@@ -121,14 +123,25 @@ export function createLegalActionRuntimeHosts(
       )
         continue;
       for (const targetCardId of targets) {
+        const target = definitionFor(state, targetCardId);
+        const remainingCounters = cardCounter(state, targetCardId, "shell");
+        const completesPlainBreaker =
+          state.timingPoint === "run.encounter_ice" &&
+          delayedInstallCompletesPlainBreaker(
+            delayedInstall,
+            targetCardId,
+            target,
+            remainingCounters,
+          );
         actions.push(
           buildRunnerDelayedInstallRemoveCounterAction(state, {
             sourceCardId,
             sourceTitle: sourceDefinition.title,
             sourceDefinitionId: sourceDefinition.id,
             targetCardId,
-            targetDefinitionId: definitionFor(state, targetCardId).id,
-            remainingCountersBefore: cardCounter(state, targetCardId, "shell"),
+            targetDefinitionId: target.id,
+            remainingCountersBefore: remainingCounters,
+            ...(completesPlainBreaker ? { completesPlainBreaker: true } : {}),
           }),
         );
       }

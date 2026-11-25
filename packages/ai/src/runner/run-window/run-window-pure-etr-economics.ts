@@ -4,7 +4,12 @@ import {
 } from "../../run-analysis/visible-run-credit-budget";
 
 import { completeEncounterBreakerPayment } from "./run-window-encounter-payment";
-import { nonNegativeActionCreditCost } from "../../runtime/action-cost";
+import {
+  actionClickCost,
+  nonNegativeActionCreditCost,
+} from "../../runtime/action-cost";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
+import { delayedInstallAbilityForAction } from "../../actions/delayed-install-action";
 import { parseSubroutineIndexes } from "../../runtime/subroutine-indexes";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
@@ -123,13 +128,79 @@ export function pureEndRunEncounterPayment(
   return completeEncounterBreakerPayment(input, action);
 }
 
-/** Bind the real fixed-payment head before quoting only its exact remaining
- * pure-ETR scope through the existing path-cost service. This is neither a
- * speculative future Action nor a second action chooser. */
+/** Compare the certified installation with an already payable direct path
+ * through the final hard ETR. The run owner still binds the reserve. */
+export function preparedProgramEncounterPayment(
+  input: AiDecisionInput,
+  action: LegalAction,
+) {
+  if (
+    action.type !== "trigger_ability" ||
+    delayedInstallAbilityForAction(action) !== "remove_shell_counter" ||
+    action.payload?.delayedInstallCompletesPlainBreaker !== true ||
+    !actionMatchesCurrentDecision(input, action) ||
+    input.playerView.run?.phase !== "encounter_ice" ||
+    input.playerView.run.position?.kind !== "ice" ||
+    input.playerView.run.position.iceIndex !== 0 ||
+    input.playerView.pendingChoice ||
+    currentEncounterRequiresFullBreak(input) ||
+    actionClickCost(action) !== 0 ||
+    nonNegativeActionCreditCost(action) <= 0 ||
+    action.choiceRequirements?.length
+  )
+    return undefined;
+  const ice = currentEncounteredIceCard(input);
+  const complete = currentEncounterCompleteSubroutineIndexes(input);
+  if (!ice?.known || ice.rezzed !== true || !ice.effectiveRunQuote || !complete?.size)
+    return undefined;
+  const remaining = ice.effectiveRunQuote.subroutines.filter((_, index) =>
+    complete.has(index),
+  );
+  if (!remaining.every(isVisibleHardEndRunSubroutine)) return undefined;
+
+  const targetId = action.payload.targetCardId;
+  const target = input.playerView.specialZones?.setAside.find(
+    (card) => card.instanceId === targetId && card.known,
+  );
+  if (
+    target?.type !== "program" ||
+    target.owner !== "runner" ||
+    target.definitionId !== action.payload.targetCardDefinitionId ||
+    target.strength === undefined ||
+    target.counters?.shell !== 1 ||
+    action.payload.remainingCountersBefore !== 1 ||
+    action.payload.removeCounterAmount !== 1
+  )
+    return undefined;
+
+  const direct = input.legalActions.flatMap((alternative) => {
+    const payment = pureEndRunEncounterPayment(input, alternative);
+    return payment ? [payment] : [];
+  });
+  if (direct.length === 0) return undefined;
+  const payment = completeEncounterAfterFixedPayment(input, action, new Set(), [
+    ...(input.playerView.own.rig ?? []),
+    target,
+  ]);
+  if (
+    !payment ||
+    direct.some(
+      (alternative) =>
+        payment.liquidCreditsAfterPayment < alternative.liquidCreditsAfterPayment ||
+        (payment.liquidCreditsAfterPayment === alternative.liquidCreditsAfterPayment &&
+          payment.cost >= alternative.cost),
+    )
+  )
+    return undefined;
+  return payment;
+}
+
+/** Quote the exact remaining pure-ETR scope after binding the fixed payment. */
 function completeEncounterAfterFixedPayment(
   input: AiDecisionInput,
   action: LegalAction,
   next: ReadonlySet<number>,
+  rig = input.playerView.own.rig ?? [],
 ) {
   const ice = currentEncounteredIceCard(input)!;
   const complete = currentEncounterCompleteSubroutineIndexes(input)!;
@@ -144,6 +215,7 @@ function completeEncounterAfterFixedPayment(
   });
   if (
     !first.affordable ||
+    (action.type === "trigger_ability" && first.restrictedSpent > 0) ||
     ice.effectiveRunQuote!.conditionalEncounterEffects?.length
   )
     return undefined;
@@ -157,7 +229,7 @@ function completeEncounterAfterFixedPayment(
         },
       },
     ],
-    input.playerView.own.rig ?? [],
+    rig,
     runnerRunPathCreditBudgetAfterEncounter(first.budget),
     [],
     input.playerView.opponent.credits,
@@ -192,10 +264,7 @@ function completeEncounterAfterFixedPayment(
     liquidCreditsAfterPayment: after,
     carriesStrengthAcrossIce:
       Object.keys(path.carriedBreakerStrengthAfterPath).length > 0,
-    rig: runnerRigAfterEncounter(
-      input.playerView.own.rig ?? [],
-      path.carriedBreakerStrengthAfterPath,
-    ),
+    rig: runnerRigAfterEncounter(rig, path.carriedBreakerStrengthAfterPath),
     runEndTrashSourceIds: path.runEndTrashSourceIds ?? [],
     budget: path.creditBudgetAfterPath,
   };

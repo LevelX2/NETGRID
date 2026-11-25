@@ -416,6 +416,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "removePowerCounterAmount",
   "remainingCounters",
   "remainingCountersBefore",
+  "delayedInstallCompletesPlainBreaker",
   "shellCounterAmount",
   "counterType",
   "counterSide",
