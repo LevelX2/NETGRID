@@ -179,11 +179,42 @@ test.describe("Zwei-Browser-Multiplayer", () => {
         testInfo,
         "two-browser-series-finished",
       );
-      await pair.host.reload();
-      await expect(pair.host.getByTestId("setup-screen")).toBeVisible();
+
+      const finishedMatchStillStored = await pair.host.evaluate(() => {
+        const recentSessionsKey = "netgrid.recentSessions";
+        const hasStoredSession =
+          window.sessionStorage.getItem("netgrid-mvp-0-3-session") !== null ||
+          window.localStorage.getItem("netgrid.recovery.v1") !== null ||
+          window.localStorage.getItem(recentSessionsKey) !== null;
+        window.localStorage.setItem(
+          recentSessionsKey,
+          JSON.stringify([
+            {
+              matchId: "other-recent-match",
+              side: "runner",
+              displayName: "Host",
+              matchStatus: "active",
+              savedAt: new Date().toISOString(),
+            },
+          ]),
+        );
+        return hasStoredSession;
+      });
+      expect(finishedMatchStillStored).toBe(false);
+      await finalResult
+        .getByRole("button", { name: "Zurück zum Startbildschirm", exact: true })
+        .click();
+      await expect(pair.host.getByTestId("create-match")).toBeVisible();
       await expect(
         pair.host.getByRole("button", { name: "Fortsetzen", exact: true }),
-      ).toHaveCount(0);
+      ).toBeVisible();
+
+      await pair.joiner.getByRole("button", { name: "Board ansehen" }).click();
+      await pair.joiner.getByRole("button", { name: "Startbildschirm" }).click();
+      await expect(pair.joiner.getByTestId("create-match")).toBeVisible();
+
+      await pair.host.reload();
+      await expect(pair.host.getByTestId("create-match")).toBeVisible();
     } finally {
       await pair.close();
     }
