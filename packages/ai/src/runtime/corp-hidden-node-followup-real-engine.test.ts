@@ -3,6 +3,7 @@ import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
+  getPlayerView,
   hashState,
   quoteCorpPunishRoute,
 } from "@netgrid/engine";
@@ -13,7 +14,7 @@ import {
   type DeckDefinition,
 } from "@netgrid/shared";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
-import { chooseCorpAction } from "../index";
+import { chooseAiAction, chooseCorpAction } from "../index";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -218,4 +219,103 @@ it("prices Manhunt, binds its zero-credit bid and then trashes a visible resourc
   expect(payoffAction.type).toBe("trash_resource");
   state = act(state, "corp", payoff.actionId!, payoff.selectedChoices);
   expect(state.runner.rig.resources).toHaveLength(0);
+});
+
+// Pairing 899 R1 G15: a partial avoid spends the source of full meat prevention.
+it.each([
+  { sourceId: 399, runnerCredits: 0, avoid: false },
+  { sourceId: 399, runnerCredits: 5, avoid: true },
+  { sourceId: 373, runnerCredits: 0, avoid: true },
+])("binds tag avoidance to the actual protection left by source $sourceId with $runnerCredits credits", ({ sourceId, runnerCredits, avoid }) => {
+  let state = createGameAfterSetup({
+    seed: `tag-avoidance-meat-prevention-${sourceId}-${runnerCredits}`,
+    traceRulesProfile: "modern_open",
+    corpDeck: {
+      ...corpDeck,
+      cards: [...corpDeck.cards, { id: 514, quantity: 1 }],
+    },
+    runnerDeck: {
+      ...runnerDeck,
+      cards: [...runnerDeck.cards, { id: sourceId, quantity: 1 }],
+    },
+  });
+  state = act(state, "corp", "ce");
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpCardInHq(MANHUNT)
+    .withCorpCardInHq(514)
+    .withRunnerResourceInstalled(sourceId)
+    .withRunnerGripSize(3)
+    .withRunnerCredits(runnerCredits)
+    .withCorpCredits(8);
+  state.runnerTurnFlags!.runAttemptsLastTurn = 1;
+  state.corp.clicks = 2;
+  const play = (cardId: number) => {
+    const action = getLegalActions(state, "corp").find(
+      (candidate) =>
+        candidate.type === "play_operation" &&
+        state.cardInstances[candidate.source ?? ""]?.definitionId === cardId,
+    );
+    if (!action) throw new Error(`Missing legal operation ${cardId}`);
+    state = act(state, "corp", action.actionId);
+  };
+  const resolve = (side: Side, optionId: string) => {
+    const action = getLegalActions(state, side).find((a) => a.type === "resolve_choice")!;
+    state = act(state, side, action.actionId, {
+      choiceId: state.pendingChoice!.choiceId,
+      selectedOptionIds: [optionId],
+    });
+  };
+  play(MANHUNT);
+  resolve("corp", "bid_0");
+  resolve("runner", `bid_${runnerCredits}`);
+  const runner = buildAiDecisionInput(state, "runner", {
+    difficulty: "hard",
+    ownDeckSnapshot: {
+      deckSnapshotId: runnerDeck.id,
+      side: "runner",
+      cards: [...runnerDeck.cards, { id: sourceId, quantity: 1 }].map((card) => ({
+        cardId: card.id,
+        quantity: card.quantity,
+      })),
+    },
+  });
+  const choice = runner.playerView.pendingChoice!;
+  const avoidance = choice.options.find((option) => option.id !== "pass")!;
+  expect(avoidance.metadata?.tagAvoidanceSpendsMeatProtectionWhileTagged).toBe(
+    avoid ? undefined : true,
+  );
+  expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+  expect(JSON.stringify(getPlayerView(state, "corp").publicEvents)).not.toContain(
+    "tagAvoidanceSpendsMeatProtectionWhileTagged",
+  );
+  const before = hashState(state);
+  const decision = chooseAiAction(runner);
+  expect(decision.selectedChoices).toEqual({
+    choiceId: choice.choiceId,
+    selectedOptionIds: [avoid ? avoidance.id : "pass"],
+  });
+  expect(
+    getLegalActions(state, "runner").find((a) => a.actionId === decision.actionId),
+  ).toMatchObject({
+    type: "resolve_choice",
+    expiresAtStateVersion: state.stateVersion,
+    choiceRequirements: [expect.objectContaining({ choiceId: choice.choiceId })],
+  });
+  expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+    rootPlanInstanceId: "rules",
+    leafExecutorInstanceId: "rules.window_resolution",
+  });
+  expect(decision.fallbackUsed).toBeFalsy();
+  expect(hashState(state)).toBe(before);
+  state = act(state, "runner", decision.actionId!, decision.selectedChoices);
+  if (!avoid) {
+    expect(state.runner.tags).toBe(6);
+    play(514);
+    const protection = state.pendingChoice!.options.find((option) => option.id !== "pass")!;
+    resolve("runner", protection.id);
+    expect(state.runner.grip).toHaveLength(3);
+    expect(state.winner).toBeNull();
+  } else {
+    expect(state.runner.tags).toBe(runnerCredits === 5 ? 0 : 5);
+  }
 });

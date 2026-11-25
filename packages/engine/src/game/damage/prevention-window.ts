@@ -39,6 +39,7 @@ import {
   revalidateDamagePreventionCandidateSource,
   revalidateTagPreventionCandidateSource,
   revalidateTrashPreventionCandidateSource,
+  tagAvoidanceSpendsMeatProtectionWhileTagged,
 } from "./prevention-sources";
 import {
   isMicrotechBackupDrive,
@@ -193,7 +194,7 @@ export function eventModificationChoice(
                 : "do_not_prevent",
       },
     },
-    ...stageCandidates.flatMap((stageCandidate) => {
+    ...stageCandidates.flatMap<ChoiceRequest["options"][number]>((stageCandidate) => {
       if (
         event.eventType === "runner_installed_trash" &&
         stageCandidate.kind === "interrupt" &&
@@ -272,6 +273,15 @@ export function eventModificationChoice(
                     : "prevent_damage",
             ...(stageCandidate.sourceRef.kind === "card"
               ? { cardTitle: stageCandidate.sourceRef.label }
+              : {}),
+            ...(event.eventType === "add_tag" &&
+            tagAvoidanceSpendsMeatProtectionWhileTagged(
+              state,
+              window,
+              stageCandidate,
+              amount,
+            )
+              ? { tagAvoidanceSpendsMeatProtectionWhileTagged: true as const }
               : {}),
             amount:
               event.eventType === "add_tag"

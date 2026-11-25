@@ -3240,6 +3240,19 @@ function sanitizeVisibleChoiceRequest(
       if (
         playerViewSide === "runner" &&
         choice.side === "runner" &&
+        choice.stateVersion === playerViewStateVersion &&
+        choice.source === "v120.event_modification.avoid" &&
+        optionKind === "prevent_tag" &&
+        option.metadata?.tagAvoidanceSpendsMeatProtectionWhileTagged === true
+      ) {
+        metadata = {
+          ...metadata,
+          tagAvoidanceSpendsMeatProtectionWhileTagged: true,
+        };
+      }
+      if (
+        playerViewSide === "runner" &&
+        choice.side === "runner" &&
         choice.source === "v120.event_modification.prevent" &&
         optionKind === "prevent_damage"
       ) {

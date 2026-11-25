@@ -3,6 +3,7 @@ import type {
   CardInstanceId,
   CardType,
   EventModificationCandidate,
+  EventModificationWindow,
   GameState,
   ImminentEvent,
 } from "@netgrid/shared";
@@ -591,6 +592,52 @@ export function applyRuntimeDamagePreventionCost(
     };
   }
   return {};
+}
+
+export function tagAvoidanceSpendsMeatProtectionWhileTagged(
+  state: GameState,
+  window: EventModificationWindow,
+  candidate: EventModificationCandidate,
+  incomingTags: number,
+): boolean {
+  const cardId = candidate.sourceRef.instanceId;
+  if (
+    !cardId ||
+    candidate.sourceRef.kind !== "card" ||
+    state.cancelledDamagePreventionSourceIdsUntilEndOfTurn?.includes(cardId)
+  ) {
+    return false;
+  }
+  const definition = definitionFor(state, cardId);
+  const tagSource = cardImplementationTagPreventionSourceForCandidate(
+    definition,
+    candidate,
+  );
+  if (
+    tagSource?.cost.kind !== "trash_source" &&
+    tagSource?.cost.kind !== "credit_and_trash_source"
+  ) {
+    return false;
+  }
+  // If another source survives the payment, its subsequent window may remove
+  // the rest. Certify only when the remaining tag is already unavoidable.
+  if (
+    state.runner.tags === 0 &&
+    (incomingTags <= (candidate.preventedTags ?? 0) ||
+      window.candidates.some((other) => other.sourceRef.instanceId !== cardId))
+  ) {
+    return false;
+  }
+  return damagePreventionSourcesForDefinition(definition).some(
+    (source) =>
+      source.kind === "damage_prevention" &&
+      source.visibility === "public" &&
+      source.damageTypes.includes("meat") &&
+      (source.amount === "all" || source.amount > 0) &&
+      (source.limit?.kind !== "per_turn" ||
+        damagePreventionUsedThisTurn(state, cardId) < source.limit.amount) &&
+      cardImplementationDamagePreventionSourceCanPay(state, cardId, source),
+  );
 }
 
 export function applyRuntimeTagPreventionCost(

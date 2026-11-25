@@ -1122,6 +1122,8 @@ export type ChoiceOption = {
     creditCost?: number;
     /** Corp-private certificate: this exact paid access effect has no target or other effect. False makes no optimality claim. */
     accessPaymentNoOpCertified?: boolean;
+    /** Runner-private fact on an offered tag reaction. This choice trashes a usable meat-prevention source and cannot leave the Runner untagged. */
+    tagAvoidanceSpendsMeatProtectionWhileTagged?: true;
     amount?: number;
     secondaryAmount?: number;
     cardTitle?: string;

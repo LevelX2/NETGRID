@@ -1712,7 +1712,7 @@ export function selectedChoicesForDecision(
       const selectedTagAvoidanceOptionId = selectedRunnerOptionalChoiceOptionId(
         input,
         action,
-        runnerTagAvoidanceChoiceResolution(choice, selectableOptions),
+        runnerTagAvoidanceChoiceResolution(input, choice, selectableOptions),
         selectableOptions,
       );
       return resolved([selectedTagAvoidanceOptionId], "runner_tag_avoidance");

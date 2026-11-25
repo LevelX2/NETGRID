@@ -4401,6 +4401,18 @@ nicht rekonstruiert, wenn nur eine Bankaktivierung legal ist. Paarung 561
 prüft die vollständige native Folge Gebot sieben → Swiss-Auszahlung →
 derselbe bezahlte Gebotskopf sowie fremde Trace-/Optionsbindungen.
 
+Eine angebotene Tag-Vermeidung kann eine installierte Quelle für
+Meat-Schadensprävention opfern. Die Engine kennzeichnet die konkrete Option,
+wenn die Prävention gerade nutzbar ist und die Tag-Reaktion den Runner
+sicher getaggt lässt. Weitere Quellen, die die restlichen Tags noch
+vermeiden könnten, verhindern dieses Zertifikat. Das gebundene Regelfenster
+`rules.window_resolution` lässt auf einem Corp-Zug mit verbleibender Aktion
+diese Option aus und wählt eine geeignete angebotene Tag-Reaktion oder
+`pass`. Action, Choice und StateVersion bleiben an die bestehende
+Auflösung gebunden. Die Einschätzung verwendet keine verdeckte Corp-Hand.
+Paarung 899/Runde 1/G15 prüft sechs Tags und den danach verhinderten
+Meat-Schaden (SP-899).
+
 Die Effizienzprüfung einer gebundenen offenen Trace-Choice vergleicht den
 vollständigen sichtbaren Effekt. Bei dem von der Engine quotierten Effekt
 `add_tags_by_trace_margin_over_runner_link` sind zwei verlorene Gebote nur
