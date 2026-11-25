@@ -8,7 +8,7 @@ import {
   type Side,
 } from "@netgrid/shared";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl/react";
 
 import {
@@ -26,6 +26,7 @@ import {
   isISpySuccessfulRunFollowupPayload,
   shouldSuppressChronicleEventItem,
   type ChronicleContext,
+  type ChronicleEventProjectionPlan,
   type ChronicleItem,
   type ChronicleTranslate,
 } from "../../app/chronicle";
@@ -218,14 +219,14 @@ export function chronicleContextByEventId(
     preferGermanCardImages?: boolean;
     cardPresentationsById?: PublicCardPresentationsById;
     translate?: ChronicleTranslate;
+    projectionPlan?: ChronicleEventProjectionPlan;
   } = {},
 ): Record<MatchEventId, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
-  const projectionPlan = chronicleEventProjectionPlan(
-    events,
-    options.translate,
-  );
+  const projectionPlan =
+    options.projectionPlan ??
+    chronicleEventProjectionPlan(events, options.translate);
   const hasServerTurnContext = events.some((event) =>
     payloadPositiveInteger(event.publicPayload, "chronicleTurnNumber"),
   );
@@ -307,30 +308,49 @@ export function ChroniclePanel({
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
   );
-  const presentationEvents = coalesceAiPumpPresentationEvents(events);
-  const projectionPlan = chronicleEventProjectionPlan(turnContextEvents);
-  const accessOutcomePlan = chronicleAccessOutcomePlan(presentationEvents);
-  const contextByEventId = chronicleContextByEventId(
-    turnContextEvents,
-    cardDetailsById,
-    {
-      preferGermanCardImages,
+  const entries = useMemo(() => {
+    const presentationEvents = coalesceAiPumpPresentationEvents(events);
+    const projectionPlan = chronicleEventProjectionPlan(
+      turnContextEvents,
       translate,
-      ...(cardPresentationsById ? { cardPresentationsById } : {}),
-    },
-  );
-  const entries = orderChronicleEntriesForDisplay(
-    chronicleEntriesWithRunGroups(
+    );
+    const contextByEventId = chronicleContextByEventId(
+      turnContextEvents,
+      cardDetailsById,
+      {
+        preferGermanCardImages,
+        translate,
+        projectionPlan,
+        ...(cardPresentationsById ? { cardPresentationsById } : {}),
+      },
+    );
+    return chronicleEntriesWithRunGroups(
       presentationEvents,
       side,
       contextByEventId,
       cardDetailsById,
       projectionPlan.suppressedEventIds,
-      accessOutcomePlan,
+      chronicleAccessOutcomePlan(presentationEvents),
       translate,
-    ).reverse(),
+    );
+  }, [
+    events,
+    turnContextEvents,
+    side,
+    cardDetailsById,
+    cardPresentationsById,
+    translate,
+    preferGermanCardImages,
+  ]);
+  const groupedEntries = useMemo(
+    () =>
+      collapsed
+        ? []
+        : groupChronicleEntriesForRender(
+            orderChronicleEntriesForDisplay([...entries].reverse()),
+          ),
+    [collapsed, entries],
   );
-  const groupedEntries = groupChronicleEntriesForRender(entries);
   const shownChronicleGroupLabels = new Set<string>();
   function toggleChronicleGroup(key: string) {
     setCollapsedGroups((current) => {

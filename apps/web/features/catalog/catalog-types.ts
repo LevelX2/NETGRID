@@ -48,6 +48,32 @@ export type CatalogCardDetail = CatalogCardSummary & {
   aiInspector?: CatalogAiInspector | null;
 };
 
+export type CatalogPresentationCard = Pick<
+  CatalogCardSummary,
+  "catalogCardId" | "title" | "type" | "setId"
+>;
+
+export type CatalogDeckCard = Pick<
+  CatalogCardDetail,
+  | "catalogCardId"
+  | "title"
+  | "side"
+  | "type"
+  | "subtypes"
+  | "faction"
+  | "setId"
+  | "setName"
+  | "collectorNumber"
+  | "rarity"
+  | "text"
+  | "numeric"
+> & {
+  statuses: Pick<CatalogStatuses, "catalog_ready" | "playable" | "deck_legal">;
+};
+
+export type CatalogCardList<Card> = { cards: Card[] };
+export type CatalogLoadStatus = "loading" | "ready" | "error";
+
 export type CatalogListResponse = {
   snapshotId: string;
   snapshotHash: string;

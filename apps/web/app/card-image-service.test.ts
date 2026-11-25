@@ -4,7 +4,7 @@ import {
   localCardImageUrl,
   withCardImageCollectionRevision,
   withCardImageVariant,
-} from "./card-image-service";
+} from "../features/cards/card-image-service";
 import { readFileSync } from "node:fs";
 
 describe("card image client service", () => {

@@ -49,6 +49,46 @@ const fixedCorpDeckName = deckSnapshots.snapshots.find(
 if (!fixedCorpDeckName) throw new Error("Missing fixed Corp browser test deck");
 
 test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
+  test("Startseite und Deckeditor laden nur ihre Katalogdaten", async ({ page }) => {
+    const requests: string[] = [];
+    page.on("request", (request) => {
+      const { pathname } = new URL(request.url());
+      if (pathname.startsWith("/api/cards/catalog")) requests.push(pathname);
+    });
+    const presentation = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/cards/catalog/presentation" &&
+        response.ok(),
+    );
+    await page.goto(BASE_URL);
+    await presentation;
+    await expect(page.getByTestId("setup-screen")).toBeVisible();
+    expect(requests).toEqual(["/api/cards/catalog/presentation"]);
+
+    await page.getByRole("button", { name: "Deck-Editor", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Neues Runner-Deck", exact: true })
+      .click();
+    await page
+      .getByPlaceholder("Titel, Regeltext, Typ, Subtyp")
+      .fill("hosting capacity");
+    const card = page.locator(".deckLibraryCard").filter({ hasText: "Afreet" });
+    await expect(card).toContainText("hosting capacity");
+    await card.click();
+    await expect(page.locator(".deckBuilderPreview")).toContainText(
+      "hosting capacity",
+    );
+    await page.getByRole("button", { name: "Spiel", exact: true }).click();
+    expect(requests).toEqual([
+      "/api/cards/catalog/presentation",
+      "/api/cards/catalog/decks",
+    ]);
+
+    await page.getByRole("button", { name: "Katalog", exact: true }).click();
+    await expect(page.locator(".catalogItem").first()).toBeVisible();
+    expect(requests).toContain("/api/cards/catalog");
+  });
+
   test("Katalog verwirft eine durch eine neue Suche überholte Anfrage", async ({ page }) => {
     let signalOlderRequest!: () => void;
     const olderRequest = new Promise<void>((resolve) => { signalOlderRequest = resolve; });

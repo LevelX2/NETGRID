@@ -119,6 +119,7 @@ const CATALOG_TYPE_FILTER_GROUPS: Array<{
 export function CatalogPanel({
   cards,
   detail,
+  detailError,
   filters,
   resultStatus,
   search,
@@ -143,6 +144,7 @@ export function CatalogPanel({
 }: {
   cards: CatalogCardSummary[];
   detail: CatalogCardDetail | null;
+  detailError: boolean;
   filters: CatalogFilters | null;
   resultStatus: "loading" | "ready" | "error";
   search: string;
@@ -552,6 +554,8 @@ export function CatalogPanel({
                 </p>
               ) : null}
             </>
+          ) : detailError ? (
+            <p className="meta" role="alert">{t("loadFailed")}</p>
           ) : (
             <p className="meta">{t("noCardSelected")}</p>
           )}

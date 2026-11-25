@@ -10,7 +10,6 @@ import { localizedDeckValidationIssues } from "../i18n/deck-validation";
 
 import {
   Check,
-  Clock,
   CopyPlus,
   Download,
   Eye,
@@ -58,7 +57,7 @@ import type {
   MouseEvent as ReactMouseEvent,
   ReactNode,
 } from "react";
-import type { ApiClientGameMode, ApiCreateMatchResponse, ApiGameResultSummary, ApiJoinMatchResponse, ApiLifecycleResultSummary, ApiLobbyParticipantPayload, ApiLobbyPayload, ApiMatchCardPool, ApiMatchStartLobbyPayload, ApiMatchStatus, ApiPlayerClockSnapshot, ApiRecentResultEntry, ApiSeriesResultSummary, ApiServerMessage, ApiSidePayload, ApiUserErrorPayload, MatchEventId, PublicGameEvent, Side, TraceRulesProfile, VisibleCard, VisibleRunnerPaymentSupportAbility, Winner } from "@netgrid/shared";
+import type { ApiClientGameMode, ApiCreateMatchResponse, ApiGameResultSummary, ApiJoinMatchResponse, ApiLifecycleResultSummary, ApiLobbyParticipantPayload, ApiLobbyPayload, ApiMatchCardPool, ApiMatchStartLobbyPayload, ApiMatchStatus, ApiRecentResultEntry, ApiSeriesResultSummary, ApiServerMessage, ApiSidePayload, ApiUserErrorPayload, MatchEventId, PublicGameEvent, Side, TraceRulesProfile, VisibleCard, VisibleRunnerPaymentSupportAbility, Winner } from "@netgrid/shared";
 import type { LegalAction, PlayerView } from "../lib/presented-player-view";
 import { isApiUserErrorCode, isMatchOfferId } from "@netgrid/shared";
 import { formatChronicleEvent, type ChronicleTranslate } from "./chronicle";
@@ -158,7 +157,6 @@ import {
 } from "./match-start";
 import { isHumanVsAiMatchMode } from "./match-deck-details";
 import {
-  formatMatchTimerDuration,
   matchTimerDecisionKey,
   matchTimerScopeLabel,
 } from "./match-timer-ui";
@@ -174,6 +172,7 @@ import {
   catalogCardMatchesTypeFilters,
   catalogRarityLabel,
   filterCatalogCardsBySet,
+  isCatalogVisibleCard,
   summarizeCatalogSetFilters,
 } from "./catalog-ui";
 import { type DeckStrategyProfileViewerResponse } from "./deck-strategy-profile-ui";
@@ -382,10 +381,7 @@ import {
   type CueDisplayMode,
   type ResourceStripMode,
 } from "../features/settings/settings-model";
-import {
-  PlayerClockStrip,
-  playerClockGraceDisplay,
-} from "../features/game-board/PlayerClock";
+import { MatchClockCluster } from "../features/game-board/MatchClockCluster";
 import {
   RunnerOpponentZonesStrip,
   RunnerRigStrip,
@@ -430,7 +426,6 @@ import {
   retainedArchivesRevealEvent,
   retainedHqAgendaRevealEvent,
   retainedSecurityPurgeRevealEvent,
-  revealedEventCardIds,
   securityPurgeRevealFromLatestEvent,
 } from "../features/actions/access-review-derivation";
 import {
@@ -510,7 +505,6 @@ import {
   snapshotAccountDeck,
   updateAccountDeck,
   type AccountDeck,
-  type AccountDeckQuota,
   type StandardDeck,
 } from "../features/account/account-deck-client";
 import {
@@ -603,6 +597,7 @@ export default function Page() {
   const deckValidationT = useTranslations("Decks.validation");
   const navigationT = useTranslations("AppShell.navigation");
   const chronicleT = useTranslations("Chronicle");
+  const catalogT = useTranslations("Catalog");
   const chronicleTranslate = chronicleT as unknown as ChronicleTranslate;
   const localizedUserError = (error: { code: string }) =>
     errorT(
@@ -718,7 +713,6 @@ export default function Page() {
   const [matchStartLogoMatchId, setMatchStartLogoMatchId] = useState<
     string | null
   >(null);
-  const [matchClockNowMs, setMatchClockNowMs] = useState(() => Date.now());
   const [matchClockAnchor, setMatchClockAnchor] =
     useState<LocalMatchClockAnchor | null>(null);
   const [lobbyChatText, setLobbyChatText] = useState("");
@@ -772,8 +766,6 @@ export default function Page() {
   const [accountDeckRecords, setAccountDeckRecords] = useState<AccountDeck[]>(
     [],
   );
-  const [accountDeckQuota, setAccountDeckQuota] =
-    useState<AccountDeckQuota | null>(null);
   const [standardDecks, setStandardDecks] = useState<StandardDeck[]>([]);
   const [standardDeckTablePreviewId, setStandardDeckTablePreviewId] = useState<
     string | null
@@ -1125,13 +1117,36 @@ export default function Page() {
     setNotice,
     translateNotice: (key) => noticeT(key),
   });
+  const visibleWorkspace = session && payload ? activeMatchWorkspace : entryTab;
+  const matchPublicEvents = payload?.playerView.publicEvents;
+  const successfulRunOutcome = useMemo(
+    () =>
+      matchPublicEvents
+        ? latestSuccessfulRunOutcomePresentation(
+            matchPublicEvents,
+            dismissedSuccessfulRunOutcomeEventId,
+          )
+        : null,
+    [matchPublicEvents, dismissedSuccessfulRunOutcomeEventId],
+  );
   const {
-    allCatalogCards,
+    presentationCards,
+    presentationIndexStatus,
     catalogCardPresentationsById,
     catalogDetailsById,
     catalogPanelProps,
-    ensureCatalogDetails,
-  } = useCatalogWorkspace(payload?.playerView);
+    deckCatalogCards,
+    deckCatalogStatus,
+  } = useCatalogWorkspace({
+    playerView: payload?.playerView,
+    catalogOpen: visibleWorkspace === "catalog",
+    decksOpen: visibleWorkspace === "decks",
+    runOutcomeCardId: successfulRunOutcome?.sourceDefinitionId,
+  });
+
+  useEffect(() => {
+    if (presentationIndexStatus === "error") setNotice(catalogT("loadFailed"));
+  }, [catalogT, presentationIndexStatus, setNotice]);
 
   useEffect(() => {
     lobbyRef.current = lobby;
@@ -1510,14 +1525,12 @@ export default function Page() {
           const data = await loadAccountDecks();
           if (cancelled) return;
           setAccountDeckRecords(data.decks);
-          setAccountDeckQuota(data.quota);
           setDeckLibraryStoragePath(noticeT("personalStorage"));
           applyLoadedDecks(data.decks.map((record) => record.deck));
         } catch (error) {
           if (!cancelled) {
             setLocalDecks([]);
             setAccountDeckRecords([]);
-            setAccountDeckQuota(null);
             setNotice(noticeT("personalDecksLoadFailed"));
           }
         } finally {
@@ -1535,7 +1548,6 @@ export default function Page() {
         const decks = data.decks ?? [];
         if (cancelled) return;
         setAccountDeckRecords([]);
-        setAccountDeckQuota(null);
         setDeckLibraryStoragePath(data.storagePath ?? "");
         applyLoadedDecks(visibleGuestDecks(decks));
       } catch (error) {
@@ -2011,7 +2023,6 @@ export default function Page() {
       winner: payload.winner,
     });
     const now = Date.now();
-    setMatchClockNowMs(now);
     setMatchClockAnchor((current) => {
       if (!current || current.matchId !== payload.matchId) {
         return {
@@ -2036,16 +2047,6 @@ export default function Page() {
     payload?.matchId,
     payload?.winner,
   ]);
-
-  useEffect(() => {
-    if (!payload || !activeView) return;
-    setMatchClockNowMs(Date.now());
-    const handle = window.setInterval(
-      () => setMatchClockNowMs(Date.now()),
-      1000,
-    );
-    return () => window.clearInterval(handle);
-  }, [activeView, payload?.matchId]);
 
   const activeDiscardChoice =
     activeView?.pendingChoice?.source === "discard_phase"
@@ -2104,8 +2105,13 @@ export default function Page() {
   const latestEventId = payload?.playerView.publicEvents.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
   const cardSetsById = useMemo(
-    () => Object.fromEntries(allCatalogCards.map((card) => [card.catalogCardId, card])),
-    [allCatalogCards],
+    () =>
+      Object.fromEntries(
+        presentationCards
+          .filter(isCatalogVisibleCard)
+          .map((card) => [card.catalogCardId, card]),
+      ),
+    [presentationCards],
   );
   const selectionCardPool = mode === "join" ? joinCardPool : matchCardPool;
   const runnerSnapshots = deckSnapshots.filter(
@@ -2349,7 +2355,7 @@ export default function Page() {
       !matchStartSettingsLoaded ||
       !localDecksLoaded ||
       !standardDecksLoaded ||
-      allCatalogCards.length === 0 ||
+      presentationCards.length === 0 ||
       accountMatchStartPreferencesLoadedFor === accountId
     )
       return;
@@ -2382,7 +2388,7 @@ export default function Page() {
     accountMatchStartPreferencesLoadedFor,
     accountSession.account?.accountId,
     accountSession.status,
-    allCatalogCards.length,
+    presentationCards.length,
     localDecksLoaded,
     matchStartSettingsLoaded,
     standardDecksLoaded,
@@ -2726,14 +2732,21 @@ export default function Page() {
     : false;
   const playableCatalogCards = useMemo(
     () =>
-      allCatalogCards.filter((card) =>
+      deckCatalogCards.filter((card) =>
         catalogCardAllowedForDeckEditor(card, deckEditorContextDeck),
       ),
     [
-      allCatalogCards,
+      deckCatalogCards,
       deckEditorContextDeck?.formatProfileId,
       deckEditorContextDeck?.side,
     ],
+  );
+  const deckCatalogDetailsById = useMemo(
+    () =>
+      Object.fromEntries(
+        deckCatalogCards.map((card) => [card.catalogCardId, card]),
+      ),
+    [deckCatalogCards],
   );
   const gripPreviewCard =
     activeView?.own.gripOrHq.find((card) => card.known) ?? null;
@@ -2928,12 +2941,6 @@ export default function Page() {
       onSelect: () => toggleFieldCardChoiceCardOptions(optionIds),
     };
   };
-  const successfulRunOutcome = payload
-    ? latestSuccessfulRunOutcomePresentation(
-        payload.playerView.publicEvents,
-        dismissedSuccessfulRunOutcomeEventId,
-      )
-    : null;
   const showSuccessfulRunOutcome = Boolean(successfulRunOutcome && !matchEnded);
   const successfulRunOutcomeCard = successfulRunOutcome
     ? (catalogDetailsById[successfulRunOutcome.sourceDefinitionId] ?? null)
@@ -3175,28 +3182,8 @@ export default function Page() {
   const canCancelSimulation = Boolean(
     isAiVsAiMatch && payload?.matchStatus === "active" && !payload.winner,
   );
-  const matchClockDisplay =
-    payload && activeView && matchClockAnchor?.matchId === payload.matchId
-      ? {
-          matchElapsed: formatMatchTimerDuration(
-            matchClockNowMs - matchClockAnchor.matchStartedAtMs,
-          ),
-          decisionElapsed: formatMatchTimerDuration(
-            matchClockNowMs - matchClockAnchor.decisionStartedAtMs,
-          ),
-          scopeLabel: payload.winner
-            ? gameT("gameEnded")
-            : matchTimerScopeLabel(activeView, payload.playerView.legalActions),
-          graceLabel: playerClockGraceDisplay(
-            payload.playerClock,
-            matchClockNowMs,
-            {
-              grace: (duration) => gameT("grace", { duration }),
-              over: gameT("graceOver"),
-            },
-          ),
-        }
-      : null;
+  const activeMatchClockAnchor =
+    matchClockAnchor?.matchId === payload?.matchId ? matchClockAnchor : null;
   useEffect(() => {
     if (!activeMatchIsGame || resourceStripMode !== "auto") {
       setStatusPanelsVisible(true);
@@ -3711,36 +3698,10 @@ export default function Page() {
   }, [activeView, payload?.matchId]);
 
   useEffect(() => {
-    if (entryTab !== "decks" || !deckEditorContextDeck) return;
-    const missingIds = deckEditorContextDeck.cards
-      .map((entry) => entry.cardId)
-      .filter((cardId) => !catalogDetailsById[cardId]);
-    void ensureCatalogDetails(missingIds);
-  }, [
-    entryTab,
-    deckEditorContextDeck,
-    catalogDetailsById,
-    ensureCatalogDetails,
-  ]);
-
-  useEffect(() => {
     if (entryTab === "decks") return;
     if (standardDeckTablePreviewId) setStandardDeckTablePreviewId(null);
     if (localDeckTableEditId) setLocalDeckTableEditId(null);
   }, [entryTab, localDeckTableEditId, standardDeckTablePreviewId]);
-
-  useEffect(() => {
-    if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
-    const missingIds = playableCatalogCards
-      .map((card) => card.catalogCardId)
-      .filter((cardId) => !catalogDetailsById[cardId]);
-    void ensureCatalogDetails(missingIds);
-  }, [
-    entryTab,
-    playableCatalogCards,
-    catalogDetailsById,
-    ensureCatalogDetails,
-  ]);
 
   useEffect(() => {
     if (!resultKey || !resultSummary) {
@@ -4055,11 +4016,6 @@ export default function Page() {
     chronicleTranslate,
     preferGermanCardImages,
   ]);
-
-  useEffect(() => {
-    if (!successfulRunOutcome?.sourceDefinitionId) return;
-    void ensureCatalogDetails([successfulRunOutcome.sourceDefinitionId]);
-  }, [ensureCatalogDetails, successfulRunOutcome?.sourceDefinitionId]);
 
   useEffect(() => {
     const outcomeEventId = successfulRunOutcome?.eventId;
@@ -5797,7 +5753,6 @@ export default function Page() {
       const result = await createAccountDeck(copy, accountSession.csrfToken);
       const nextRecords = [...accountDeckRecords, result.deck];
       setAccountDeckRecords(nextRecords);
-      setAccountDeckQuota(result.quota);
       applyLoadedDecks(nextRecords.map((record) => record.deck));
       setSelectedLocalDeckId(result.deck.cloudDeckId);
       selectDeckForSide(result.deck.deck);
@@ -5872,7 +5827,6 @@ export default function Page() {
         .then((result) => {
           const nextRecords = [...accountDeckRecords, result.deck];
           setAccountDeckRecords(nextRecords);
-          setAccountDeckQuota(result.quota);
           applyLoadedDecks(nextRecords.map((record) => record.deck));
           setSelectedLocalDeckId(result.deck.cloudDeckId);
           selectDeckForSide(result.deck.deck);
@@ -5945,7 +5899,6 @@ export default function Page() {
         .then((result) => {
           const nextRecords = [...accountDeckRecords, result.deck];
           setAccountDeckRecords(nextRecords);
-          setAccountDeckQuota(result.quota);
           applyLoadedDecks(nextRecords.map((record) => record.deck));
           setSelectedLocalDeckId(result.deck.cloudDeckId);
           selectDeckForSide(result.deck.deck);
@@ -5968,12 +5921,11 @@ export default function Page() {
     if (accountSession.account) {
       setAccountDeckBusy(true);
       void deleteAccountDeck(selectedLocalDeck.deckId, accountSession.csrfToken)
-        .then((result) => {
+        .then(() => {
           const nextRecords = accountDeckRecords.filter(
             (record) => record.cloudDeckId !== selectedLocalDeck.deckId,
           );
           setAccountDeckRecords(nextRecords);
-          setAccountDeckQuota(result.quota);
           applyLoadedDecks(nextRecords.map((record) => record.deck));
           setNotice(noticeT("personalDeckDeleted"));
         })
@@ -6077,7 +6029,6 @@ export default function Page() {
         .then((result) => {
           const nextRecords = [...accountDeckRecords, result.deck];
           setAccountDeckRecords(nextRecords);
-          setAccountDeckQuota(result.quota);
           applyLoadedDecks(nextRecords.map((record) => record.deck));
           setSelectedLocalDeckId(result.deck.cloudDeckId);
           selectDeckForSide(result.deck.deck);
@@ -6886,7 +6837,8 @@ export default function Page() {
                         validation={deckValidation}
                         validatedSnapshot={validatedSnapshot}
                         playableCards={playableCatalogCards}
-                        cardDetailsById={catalogDetailsById}
+                        cardDetailsById={deckCatalogDetailsById}
+                        catalogStatus={deckCatalogStatus}
                         importText={deckImportText}
                         exportText={deckExportText}
                         onCreateEmpty={createEmptyDeck}
@@ -7563,40 +7515,19 @@ export default function Page() {
                     className="board boardPanel"
                     data-testid="active-board"
                   >
-                    {matchClockDisplay || payload.playerClock ? (
-                      <div
-                        className="clockCluster"
-                        aria-label={gameT("clockArea")}
-                      >
-                        {matchClockDisplay ? (
-                          <div
-                            className="matchClockStrip"
-                            aria-label={gameT("matchClock")}
-                            data-testid="match-clock"
-                          >
-                            <span className="matchClockIcon" aria-hidden="true">
-                              <Clock size={15} />
-                            </span>
-                            <span>
-                              <strong>{gameT("match")}</strong>{" "}
-                              {matchClockDisplay.matchElapsed}
-                            </span>
-                            <span>
-                              <strong>{matchClockDisplay.scopeLabel}</strong>{" "}
-                              {matchClockDisplay.decisionElapsed}
-                            </span>
-                            {matchClockDisplay.graceLabel ? (
-                              <small>{matchClockDisplay.graceLabel}</small>
-                            ) : null}
-                          </div>
-                        ) : null}
-                        {payload.playerClock ? (
-                          <PlayerClockStrip
-                            snapshot={payload.playerClock}
-                            nowMs={matchClockNowMs}
-                          />
-                        ) : null}
-                      </div>
+                    {activeMatchClockAnchor || payload.playerClock ? (
+                      <MatchClockCluster
+                        anchor={activeMatchClockAnchor}
+                        scopeLabel={
+                          payload.winner
+                            ? gameT("gameEnded")
+                            : matchTimerScopeLabel(
+                                activeView,
+                                payload.playerView.legalActions,
+                              )
+                        }
+                        snapshot={payload.playerClock}
+                      />
                     ) : null}
                     {activeView.side === "corp" ? (
                       <section
@@ -7780,7 +7711,8 @@ export default function Page() {
                     validation: deckValidation,
                     validatedSnapshot,
                     playableCards: playableCatalogCards,
-                    cardDetailsById: catalogDetailsById,
+                    cardDetailsById: deckCatalogDetailsById,
+                    catalogStatus: deckCatalogStatus,
                     importText: deckImportText,
                     exportText: deckExportText,
                     onCreateEmpty: createEmptyDeck,

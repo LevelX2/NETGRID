@@ -9,6 +9,16 @@ import {
 } from "@netgrid/catalog";
 import generatedCardSpecAiHints from "../../../../../data/ai/card-spec-ai-hints-generated.json";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
+import {
+  catalogDeckCardsResponse,
+  catalogPresentationResponse,
+  createCatalogRuntime,
+} from "./catalog-runtime";
+import type {
+  CatalogCardList,
+  CatalogDeckCard,
+  CatalogPresentationCard,
+} from "../../../features/catalog/catalog-types";
 
 const previousTestCardSetting = process.env.NETGRID_ENABLE_TEST_CARDS;
 
@@ -188,6 +198,43 @@ const EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
 ] as const;
 
 describe("catalog API filters", () => {
+  it.each([false, true])("serves a compact presentation index with test cards enabled=%s", (testCards) => {
+    process.env.NETGRID_ENABLE_TEST_CARDS = String(testCards);
+    const response = catalogPresentationResponse();
+    expect(response.status).toBe(200);
+    const { cards } = response.body as CatalogCardList<CatalogPresentationCard>;
+    const { snapshot } = createCatalogRuntime();
+    expect(cards).toEqual(snapshot.cards.map(({ catalogCardId, title, type, setId }) => ({
+      catalogCardId, title, type, setId,
+    })));
+    expect(cards.some((card) => card.setId === "testset")).toBe(testCards);
+  });
+
+  it("provides deck card text and values in one response with editor eligibility", () => {
+    const response = catalogDeckCardsResponse();
+    expect(response.status).toBe(200);
+    const { cards } = response.body as CatalogCardList<CatalogDeckCard>;
+    const { snapshot } = createCatalogRuntime();
+    expect(cards.map((card) => card.catalogCardId)).toEqual(
+      snapshot.cards.map((card) => card.catalogCardId),
+    );
+    cards.forEach((card, index) => {
+      const source = snapshot.cards[index]!;
+      expect(card).toMatchObject({
+        text: source.text,
+        numeric: source.numeric,
+        statuses: {
+          catalog_ready: source.statuses.catalog_ready,
+          playable: source.statuses.playable,
+          deck_legal: source.statuses.deck_legal,
+        },
+      });
+      expect(card).not.toHaveProperty("aiHints");
+      expect(card).not.toHaveProperty("aiInspectorSummary");
+      expect(card).not.toHaveProperty("implementationManifest");
+    });
+  });
+
   it("hides test cards when the backend setting is absent", () => {
     delete process.env.NETGRID_ENABLE_TEST_CARDS;
 

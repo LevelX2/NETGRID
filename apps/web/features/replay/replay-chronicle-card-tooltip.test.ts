@@ -10,6 +10,10 @@ const replayPageSource = readFileSync(
   new URL("../../app/replays/page.tsx", import.meta.url),
   "utf8",
 );
+const catalogDetailsSource = readFileSync(
+  new URL("../catalog/useCatalogDetails.ts", import.meta.url),
+  "utf8",
+);
 const replayBoardSource = readFileSync(
   new URL("./ReplayBoard.tsx", import.meta.url),
   "utf8",
@@ -40,9 +44,13 @@ describe("replay chronicle card tooltips", () => {
 
   it("binds public replay references through catalog details into the chronicle", () => {
     expect(replayPageSource).toContain(
-      "(replay?.publicEvents ?? []).flatMap(publicChronicleCardDefinitionIds)",
+      "const publicEvents = replay?.publicEvents;",
     );
     expect(replayPageSource).toContain(
+      "(publicEvents ?? []).flatMap(publicChronicleCardDefinitionIds)",
+    );
+    expect(replayPageSource).toContain("useCatalogDetails(detailCardIds)");
+    expect(catalogDetailsSource).toContain(
       "`/api/cards/catalog/${encodeURIComponent(cardId)}`",
     );
     expect(replayPageSource).toContain("cardDetailsById={cardDetailsById}");

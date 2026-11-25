@@ -2,7 +2,6 @@ import { isCardDefinitionId } from "@netgrid/shared";
 import { type CardDefinitionId } from "@netgrid/shared";
 import {
   CATALOG_STATUS_KEYS,
-  assertCatalogPayloadSafe,
   searchCatalog,
   type CatalogCardType,
   type CatalogQuery,
@@ -16,10 +15,11 @@ import {
   type CatalogAiHintReadModel,
 } from "@netgrid/ai/catalog";
 import {
-  TEST_CARD_SET_ID,
-  testCardsEnabledFromEnvironment,
-} from "@netgrid/shared";
-import { createRuntimeCardPool } from "../card-pool-runtime";
+  createCatalogRuntime,
+  invalidCatalog,
+  safeCatalogError,
+  safeCatalogPayload,
+} from "./catalog-runtime";
 
 type CatalogAiInspectorListSummary = {
   available: boolean;
@@ -33,12 +33,7 @@ type CatalogAiInspectorListSummary = {
 export function catalogListResponse(searchParams: URLSearchParams) {
   const { snapshot, snapshotHash, catalogIndex, validation } =
     createCatalogRuntime();
-  if (!validation.ok)
-    return safeCatalogError(
-      500,
-      "catalog_invalid",
-      "Katalogdaten sind ungültig.",
-    );
+  if (!validation.ok) return invalidCatalog();
   const query: CatalogQuery = {};
   const q = searchParams.get("q");
   const side = searchParams.get("side");
@@ -61,12 +56,7 @@ export function catalogListResponse(searchParams: URLSearchParams) {
 export function catalogDetailResponse(cardId: unknown) {
   const catalogCardId = typeof cardId === "string" ? Number(cardId) : cardId;
   const { snapshot, snapshotHash, validation, cardsById } = createCatalogRuntime();
-  if (!validation.ok)
-    return safeCatalogError(
-      500,
-      "catalog_invalid",
-      "Katalogdaten sind ungültig.",
-    );
+  if (!validation.ok) return invalidCatalog();
   const card = isCardDefinitionId(catalogCardId) &&
     (typeof cardId !== "string" || String(catalogCardId) === cardId)
     ? cardsById[catalogCardId] : undefined;
@@ -91,33 +81,13 @@ export function catalogDetailResponse(cardId: unknown) {
 export function catalogStatusSummaryResponse() {
   const { snapshot, snapshotHash, catalogIndex, validation } =
     createCatalogRuntime();
-  if (!validation.ok)
-    return safeCatalogError(
-      500,
-      "catalog_invalid",
-      "Katalogdaten sind ungültig.",
-    );
+  if (!validation.ok) return invalidCatalog();
   return safeCatalogPayload({
     snapshotId: snapshot.snapshotId,
     snapshotHash,
     summary: catalogIndex.statusSummary,
     filters: catalogIndex.filters,
   });
-}
-
-function safeCatalogPayload(payload: unknown) {
-  const safety = assertCatalogPayloadSafe(payload);
-  if (!safety.ok)
-    return safeCatalogError(
-      500,
-      "catalog_payload_unsafe",
-      "Katalogantwort wurde aus Sicherheitsgründen blockiert.",
-    );
-  return { status: 200, body: payload };
-}
-
-function safeCatalogError(status: number, code: string, message: string) {
-  return { status, body: { error: { code, message } } };
 }
 
 function isSide(value: string | null): value is CatalogSide {
@@ -143,23 +113,6 @@ function isStatus(value: string | null): value is CatalogStatusKey {
   return Boolean(
     value && (CATALOG_STATUS_KEYS as readonly string[]).includes(value),
   );
-}
-
-const catalogRuntimes = new Map<
-  boolean,
-  ReturnType<typeof createRuntimeCardPool>
->();
-
-function createCatalogRuntime() {
-  const testCardsEnabled = testCardsEnabledFromEnvironment(process.env);
-  let runtime = catalogRuntimes.get(testCardsEnabled);
-  if (!runtime) {
-    runtime = createRuntimeCardPool({
-      excludedSetIds: testCardsEnabled ? [] : [TEST_CARD_SET_ID],
-    });
-    catalogRuntimes.set(testCardsEnabled, runtime);
-  }
-  return runtime;
 }
 
 function catalogSummaryWithAiInspector<T extends { catalogCardId: CardDefinitionId }>(

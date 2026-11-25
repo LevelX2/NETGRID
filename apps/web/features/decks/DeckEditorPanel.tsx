@@ -45,6 +45,7 @@ import {
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState,
 } from "../catalog/catalog-model";
+import type { CatalogDeckCard, CatalogLoadStatus } from "../catalog/catalog-types";
 import { DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
 import { formatCardTerm } from "../cards/card-text-lines";
@@ -121,48 +122,6 @@ import {
 
 type DeckSideFilter = Side | "all";
 
-type CatalogStatusKey =
-  | "imported"
-  | "validated"
-  | "catalog_ready"
-  | "implemented"
-  | "engine_supported"
-  | "playable"
-  | "human_playable"
-  | "ai_supported"
-  | "deck_legal"
-  | "format_legal"
-  | "blocked";
-
-type CatalogStatuses = Record<CatalogStatusKey, boolean>;
-
-type CatalogCardSummary = {
-  catalogCardId: CardDefinitionId;
-  title: string;
-  side: Side;
-  type: string;
-  subtypes: string[];
-  faction: string;
-  setId: string;
-  rarity?: {
-    code: string;
-    labelDe: string;
-    labelEn?: string;
-    sourceValue?: string;
-    sourceId?: string;
-  };
-  statuses: CatalogStatuses;
-  blockReasons: string[];
-};
-
-type CatalogCardDetail = CatalogCardSummary & {
-  setName: string;
-  collectorNumber: string;
-  text: string;
-  numeric: Record<string, number | null>;
-  engineCardId: CardDefinitionId | null;
-};
-
 import type { DeckValidationResult } from "@netgrid/decks";
 
 type DeckSnapshot = {
@@ -228,7 +187,7 @@ const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   operation: true,
 };
 
-function deckBuilderCardGroup(card: CatalogCardSummary | null): string {
+function deckBuilderCardGroup(card: CatalogDeckCard | null): string {
   if (!card) return "Unbekannt";
   return [
     formatCardTerm(card.type),
@@ -236,14 +195,6 @@ function deckBuilderCardGroup(card: CatalogCardSummary | null): string {
   ]
     .filter(Boolean)
     .join(" - ");
-}
-
-function catalogCardAllowedForDeckEditor(
-  card: CatalogCardSummary,
-  deck: EditableDeck | null,
-): boolean {
-  if (!deck) return true;
-  return card.side === deck.side;
 }
 
 function snapshotAllowedForMatchCardPool(
@@ -264,6 +215,7 @@ export function DeckEditorPanel({
   validatedSnapshot,
   playableCards,
   cardDetailsById,
+  catalogStatus,
   importText,
   exportText,
   onCreateEmpty,
@@ -299,8 +251,9 @@ export function DeckEditorPanel({
   storagePath: string;
   validation: DeckValidationResult | null;
   validatedSnapshot: DeckSnapshot | null;
-  playableCards: CatalogCardSummary[];
-  cardDetailsById: Record<string, CatalogCardDetail>;
+  playableCards: CatalogDeckCard[];
+  cardDetailsById: Record<string, CatalogDeckCard>;
+  catalogStatus: CatalogLoadStatus;
   importText: string;
   exportText: string;
   onCreateEmpty(side: Side): void;
@@ -334,6 +287,7 @@ export function DeckEditorPanel({
 }) {
   const t = useTranslations("Decks.editor");
   const tableT = useTranslations("Decks.table");
+  const catalogT = useTranslations("Catalog");
   const [builderSearch, setBuilderSearch] = useState("");
   const [builderTypeFilters, setBuilderTypeFilters] =
     useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
@@ -528,13 +482,12 @@ export function DeckEditorPanel({
         if (!catalogCardMatchesTypeFilters(card, builderTypeFilters))
           return false;
         if (!search) return true;
-        const detail = cardDetailsById[card.catalogCardId];
         return [
           card.title,
           card.type,
           card.faction,
           ...card.subtypes,
-          detail?.text ?? "",
+          card.text,
         ].some((value) => value.toLowerCase().includes(search));
       })
       .sort(
@@ -547,7 +500,6 @@ export function DeckEditorPanel({
     builderOnlyInDeck,
     builderSearch,
     builderTypeFilters,
-    cardDetailsById,
     deckQuantities,
     rarityFilteredPlayableCards,
   ]);
@@ -1813,7 +1765,7 @@ export function DeckEditorPanel({
                     {previewCard ? (
                       <DeckBuilderPreview
                         card={previewCard}
-                        detail={cardDetailsById[previewCard.catalogCardId]}
+                        detail={previewCard}
                         quantity={previewQuantity}
                         onAdd={() =>
                           onUpdateQuantity(
@@ -2033,12 +1985,15 @@ export function DeckEditorPanel({
                       </label>
                     </div>
                   ) : null}
-                  <div className="deckLibraryList">
+                  <div
+                    className="deckLibraryList"
+                    aria-busy={catalogStatus === "loading"}
+                  >
                     {libraryCards.map((card, index) =>
                       deckEditorMode === "table" ? (
                         <DeckTableLibraryCard
                           card={card}
-                          detail={cardDetailsById[card.catalogCardId]}
+                          detail={card}
                           key={card.catalogCardId}
                           overlapped={index >= tableLibraryColumnCount}
                           quantity={deckQuantities.get(card.catalogCardId) ?? 0}
@@ -2059,7 +2014,7 @@ export function DeckEditorPanel({
                       ) : (
                         <DeckLibraryCard
                           card={card}
-                          detail={cardDetailsById[card.catalogCardId]}
+                          detail={card}
                           key={card.catalogCardId}
                           quantity={deckQuantities.get(card.catalogCardId) ?? 0}
                           selected={
@@ -2081,7 +2036,15 @@ export function DeckEditorPanel({
                         />
                       ),
                     )}
-                    {libraryCards.length === 0 ? (
+                    {catalogStatus === "loading" ? (
+                      <p className="meta deckEmpty" role="status">
+                        {catalogT("loadingResults")}
+                      </p>
+                    ) : catalogStatus === "error" ? (
+                      <p className="meta deckEmpty" role="alert">
+                        {catalogT("loadFailed")}
+                      </p>
+                    ) : libraryCards.length === 0 ? (
                       <p className="meta deckEmpty">{t("noMatchingCard")}</p>
                     ) : null}
                   </div>

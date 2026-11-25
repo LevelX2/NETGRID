@@ -388,19 +388,6 @@
       "inviteFailed": "L'invitation n'a pas pu être créée.",
       "resetLinkFailed": "Le lien de réinitialisation n'a pas pu être créé."
     },
-    "deckLibrary": {
-      "eyebrow": "Bibliothèque de decks",
-      "accountTitle": "Decks standards et Mes decks",
-      "guestTitle": "Decks standards et decks invités locaux",
-      "help": "Les decks standards ne peuvent pas être modifiés. Vous pouvez les jouer directement.",
-      "side": "Côté",
-      "runner": "Runner",
-      "corp": "Corp",
-      "standardDeck": "Deck standard",
-      "playDirectly": "Jouez directement",
-      "quota": "Mes decks : {used}/{limit} · {remaining} restant",
-      "guestStorage": "Mode Invité : vos propres decks restent dans le stockage de fichiers local."
-    },
     "statistics": {
       "loadError": "Les statistiques du match n'ont pas pu être chargées.",
       "loadMoreError": "Impossible de charger d'autres résultats.",
