@@ -34,6 +34,7 @@ import { RUNNER_BREAKER_COVERAGE } from "../../plans/runner-coverage-contracts";
 import type { RunnerCoverageServices } from "./coverage-services";
 import { runnerDrawProjectionFor } from "../../actions/action-economy-projection";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { currentRunnerCoverageBankPayout } from "../credit-bank/credit-bank-coverage-funding";
 export function runnerCoverageSearchLifecycleBinding(
   gap: RunnerCoverageGapSignal,
   candidates: readonly Pick<
@@ -242,11 +243,28 @@ export function runnerUrgentRemoteCoverageConversionQuote(
         `coverage_conversion_clicks_reserved:${requiredClicksAfterFunding}`,
       ],
     }).routeActionIds.length > 0;
-  const postRunCreditFloor = fundingCanReach(requiredCreditsWithoutFloor + 1)
+  const ordinaryCreditFloor = fundingCanReach(requiredCreditsWithoutFloor + 1)
     ? 1
     : fundingCanReach(requiredCreditsWithoutFloor)
       ? 0
       : undefined;
+  const bankPayout =
+    ordinaryCreditFloor === undefined &&
+    remainingFundingClicks > 0 &&
+    runnerCoverageGapIsTerminalRemoteThreat(input, evaluation)
+      ? currentRunnerCoverageBankPayout(
+          input,
+          candidates,
+          requiredCreditsWithoutFloor - input.playerView.own.credits,
+        )
+      : undefined;
+  const bankCreditFloor = bankPayout
+    ? Number(
+        input.playerView.own.credits + bankPayout.payout >
+          requiredCreditsWithoutFloor,
+      )
+    : undefined;
+  const postRunCreditFloor = ordinaryCreditFloor ?? bankCreditFloor;
   if (postRunCreditFloor === undefined) return undefined;
   const requiredCredits = requiredCreditsWithoutFloor + postRunCreditFloor;
   if (!Number.isSafeInteger(requiredCredits) || requiredCredits < 0) {
@@ -258,6 +276,7 @@ export function runnerUrgentRemoteCoverageConversionQuote(
     requiredClicksAfterFunding,
     projectedKnownPathCost,
     postRunCreditFloor,
+    ...(bankPayout ? { bankCashOutActionId: bankPayout.actionId } : {}),
     installProjection: installRoute.projection,
   };
 }

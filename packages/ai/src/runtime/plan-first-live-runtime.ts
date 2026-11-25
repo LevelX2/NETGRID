@@ -3040,34 +3040,39 @@ function prepareRunnerDomain(
                 : [];
             })
         : [];
-    const baseCentralPressure = buildRunnerCentralPressureSignals({
-      input,
-      candidates,
-      targetedPreparationCandidates,
-      strategicIntent,
-      economy,
-      runTargets,
-      handDevelopment,
-      previous,
-      runLockReleaseRoutes,
-      coverageGaps,
-      damageThreat,
-      recentSafetyAbort,
-      handSize,
-      minimumHandBuffer,
-      forgoUnsafeRunCapacity,
-      constrainedRunCandidates,
-      effectiveAccessPayoffCampaignSignals,
-      activeRunRoot,
-      recurringEconomyRunDeferralEvidenceCode,
-    });
-    const { centralPressure, defense } = bindRunnerCentralSelfTagProtection({
-      input,
-      candidates,
-      runTargets,
-      centralPressure: baseCentralPressure,
-      defense: baseDefense,
-    });
+    function centralAndDefense(
+      currentGaps: RunnerPlanDomain["coverageGaps"],
+    ) {
+      const baseCentralPressure = buildRunnerCentralPressureSignals({
+        input,
+        candidates,
+        targetedPreparationCandidates,
+        strategicIntent,
+        economy,
+        runTargets,
+        handDevelopment,
+        previous,
+        runLockReleaseRoutes,
+        coverageGaps: currentGaps,
+        damageThreat,
+        recentSafetyAbort,
+        handSize,
+        minimumHandBuffer,
+        forgoUnsafeRunCapacity,
+        constrainedRunCandidates,
+        effectiveAccessPayoffCampaignSignals,
+        activeRunRoot,
+        recurringEconomyRunDeferralEvidenceCode,
+      });
+      return bindRunnerCentralSelfTagProtection({
+        input,
+        candidates,
+        runTargets,
+        centralPressure: baseCentralPressure,
+        defense: baseDefense,
+      });
+    }
+    const { centralPressure, defense } = centralAndDefense(coverageGaps);
     const remoteContests = buildRunnerRemoteContestSignals({
       input,
       previous,
@@ -3090,6 +3095,7 @@ function prepareRunnerDomain(
       centralPressure,
       remoteContests,
       defense,
+      centralAndDefense,
       minimumHandBuffer,
       defenseSupportAllInstallActionIds,
       effectiveAccessPayoffCampaignSignals,
@@ -3127,9 +3133,10 @@ function prepareRunnerDomain(
       >,
     ): RunnerPlanDomain {
       const {
-        centralPressure,
+        centralPressure: initialCentralPressure,
         remoteContests,
-        defense,
+        defense: initialDefense,
+        centralAndDefense,
         minimumHandBuffer,
         defenseSupportAllInstallActionIds,
         effectiveAccessPayoffCampaignSignals,
@@ -3185,7 +3192,7 @@ function prepareRunnerDomain(
         economy,
         runTargets,
         handDevelopment,
-        defense.minimumHandBuffer,
+        initialDefense.minimumHandBuffer,
         {
           hasExactRunUrgency: (target) =>
             runnerRunHasExactUrgency(input, target),
@@ -3357,15 +3364,14 @@ function prepareRunnerDomain(
         currentCredits,
         input.playerView.stateVersion,
       );
-      const runFundingParents = { centralPressure, remoteContests };
       const protectedCreditBanks = bindRunnerCreditBankDefenseFunding(
         input,
         candidates,
-        defense,
+        initialDefense,
         reconcileRunnerCreditBankRunFunding(
           prospectiveCreditBanks,
           input.playerView.stateVersion,
-          runFundingParents,
+          { centralPressure: initialCentralPressure, remoteContests },
         ),
       );
       const coverageBankSupport = bindRunnerCreditBankCoverageFunding(
@@ -3375,8 +3381,25 @@ function prepareRunnerDomain(
         protectedCreditBanks,
         handDevelopment,
       );
-      const { coverageGaps: fundedCoverageGaps, creditBanks } =
-        coverageBankSupport;
+      const { coverageGaps: fundedCoverageGaps } = coverageBankSupport;
+      // Only a bound bank executor can displace the last-chance Central route.
+      const urgentBankSupport = fundedCoverageGaps.some(
+        (gap) =>
+          gap.bankFunding !== undefined &&
+          gap.bankFunding.actionId ===
+            gap.sameTurnRunConversion?.bankCashOutActionId,
+      );
+      const { centralPressure, defense } = urgentBankSupport
+        ? centralAndDefense(fundedCoverageGaps)
+        : { centralPressure: initialCentralPressure, defense: initialDefense };
+      const runFundingParents = { centralPressure, remoteContests };
+      const creditBanks = urgentBankSupport
+        ? reconcileRunnerCreditBankRunFunding(
+            coverageBankSupport.creditBanks,
+            input.playerView.stateVersion,
+            runFundingParents,
+          )
+        : coverageBankSupport.creditBanks;
       const preDevelopmentFundingNeeds = uniqueBy(
         [
           ...runFundingNeeds.filter((need) =>

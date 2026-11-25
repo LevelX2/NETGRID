@@ -9,9 +9,72 @@ import type { RunnerHandDevelopmentEvaluation } from "../hand-development/runner
 import type { CoverageState } from "../rig-coverage/coverage-types";
 import type { RunnerCreditBankSignal } from "./credit-bank-types";
 
+// A coverage quote may use one current payout. The bank still owns its execution.
+export function currentRunnerCoverageBankPayout(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  minimumPayout: number,
+  actionId?: string,
+): { actionId: string; bankId: string; payout: number } | undefined {
+  if (!Number.isSafeInteger(minimumPayout) || minimumPayout <= 0)
+    return undefined;
+  return candidates.flatMap((candidate) => {
+    const p = candidate.economyProjection;
+    const payout = p?.netLiquidCreditGain;
+    const bankId = candidate.sourceCardInstanceId;
+    const action = input.legalActions.find(
+      (legal) => legal.actionId === candidate.actionId,
+    );
+    if (
+      (actionId !== undefined && candidate.actionId !== actionId) ||
+      candidate.actorSide !== "runner" ||
+      candidate.stateVersion !== input.playerView.stateVersion ||
+      !actionMatchesCurrentDecision(input, action) ||
+      action.type !== "activated_card_ability" ||
+      action.source !== bankId ||
+      action.targetRequirements?.length ||
+      action.choiceRequirements?.length ||
+      !bankId ||
+      !input.playerView.own.rig?.some(
+        (card) =>
+          card.instanceId === bankId &&
+          card.definitionId === candidate.sourceDefinitionId,
+      ) ||
+      candidate.planOwnerBinding?.owner !== "runner.credit_bank" ||
+      candidate.planOwnerBinding.route !== "cash_out" ||
+      candidate.costProfile.clickCost !== 1 ||
+      (candidate.costProfile.creditCost ?? 0) !== 0 ||
+      candidate.costProfile.additionalCosts.length !== 0 ||
+      candidate.costProfile.selfDamage?.length ||
+      p?.source !== "legal_action_payload" ||
+      p.confidence !== "high" ||
+      p.kind !== "immediate_liquid" ||
+      p.reliability !== "guaranteed" ||
+      p.timing !== "immediate" ||
+      p.creditRestriction !== "general" ||
+      p.sourcePool !== "finite" ||
+      p.payoutMode !== "all_available" ||
+      p.cardsConsumed !== 0 ||
+      p.cardsDrawn !== 0 ||
+      p.netHandDelta !== 0 ||
+      payout === undefined ||
+      !Number.isSafeInteger(payout) ||
+      payout < minimumPayout ||
+      p.storedCreditsTaken !== payout
+    )
+      return [];
+    return [{ actionId: candidate.actionId, bankId, payout }];
+  }).sort(
+    (a, b) =>
+      a.payout - b.payout ||
+      a.bankId.localeCompare(b.bankId) ||
+      a.actionId.localeCompare(b.actionId),
+  )[0];
+}
+
 /** Coverage owns the missing answer; the bank owns its current payout.
- * Replace only a strictly longer, currently offered basic-credit sequence.
- * This quotes funding, never a future legal installation or run. */
+ * Use the currently quoted terminal conversion or replace a longer ordinary
+ * credit sequence. The subsequent install and run need fresh LegalActions. */
 export function bindRunnerCreditBankCoverageFunding(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -53,26 +116,48 @@ export function bindRunnerCreditBankCoverageFunding(
       c.economyProjection?.netLiquidCreditGain === 1 &&
       c.economyProjection.creditRestriction === "general",
   );
-  if (!basic) return unchanged();
   for (const gap of gaps) {
     const installGap = gap.fundingGap;
     if (
       !gap.answerInHand ||
       !gap.handAnswerDefinitionId ||
-      (gap.priorityClass !== "P4" && gap.priorityClass !== "P5") ||
       typeof installGap !== "number" ||
       !Number.isSafeInteger(installGap) ||
-      installGap < 2 ||
-      installGap > clicks - 1 ||
-      gap.answerInstallCost !== input.playerView.own.credits + installGap ||
-      gap.sameTurnRunConversion ||
+      installGap <= 0 ||
+      gap.answerInstallCost === undefined ||
       (gap.preparationActionIds?.length ?? 0) > 0 ||
-      (gap.installActionIds?.length ?? 0) > 0 ||
-      gap.directSearchActionIds.length > 0 ||
-      !gap.fundingActionIds.includes(basic.actionId) ||
       !input.playerView.own.gripOrHq.some(
         (c) => c.definitionId === gap.handAnswerDefinitionId,
       )
+    )
+      continue;
+    const conversion = gap.sameTurnRunConversion;
+    const urgent =
+      conversion?.bankCashOutActionId !== undefined &&
+      gap.priorityClass === "P2" &&
+      gap.requesterModuleId === "runner.contest_remote" &&
+      gap.requesterPlanInstanceId !== undefined &&
+      gap.requesterNeedId === gap.gapId &&
+      gap.targetRunActionId === conversion.targetRunActionId &&
+      conversion.requiredClicksAfterFunding < clicks
+        ? currentRunnerCoverageBankPayout(
+            input,
+            currentCandidates,
+            installGap,
+            conversion.bankCashOutActionId,
+          )
+        : undefined;
+    if (
+      !urgent &&
+      ((gap.priorityClass !== "P4" && gap.priorityClass !== "P5") ||
+        installGap < 2 ||
+        installGap > clicks - 1 ||
+        gap.answerInstallCost !== input.playerView.own.credits + installGap ||
+        conversion !== undefined ||
+        (gap.installActionIds?.length ?? 0) > 0 ||
+        gap.directSearchActionIds.length > 0 ||
+        !basic ||
+        !gap.fundingActionIds.includes(basic.actionId))
     )
       continue;
     const development = handDevelopment.find(
@@ -80,15 +165,17 @@ export function bindRunnerCreditBankCoverageFunding(
         e.definitionId === gap.handAnswerDefinitionId &&
         e.fundingNeed?.installOrPlayCost === gap.answerInstallCost,
     );
-    const targetCredits = development?.fundingNeed?.targetCredits;
+    const targetCredits = urgent
+      ? conversion?.requiredCredits
+      : development?.fundingNeed?.targetCredits;
     if (
       targetCredits === undefined ||
       !Number.isSafeInteger(targetCredits) ||
-      targetCredits < gap.answerInstallCost!
+      targetCredits < gap.answerInstallCost
     )
       continue;
     const missing = targetCredits - input.playerView.own.credits;
-    if (missing < installGap) continue;
+    if (urgent ? missing !== installGap : missing < installGap) continue;
     const ordinaryFasterIncome = currentCandidates.some((c) => {
       const p = c.economyProjection;
       return (
@@ -117,6 +204,7 @@ export function bindRunnerCreditBankCoverageFunding(
           .filter((c) => {
             const p = c.economyProjection;
             return (
+              (!urgent || c.actionId === urgent.actionId) &&
               c.sourceCardInstanceId === signal.bankId &&
               c.planOwnerBinding?.owner === "runner.credit_bank" &&
               c.planOwnerBinding.route === "cash_out" &&
@@ -177,9 +265,13 @@ export function bindRunnerCreditBankCoverageFunding(
               coverageFunding: funding,
               value: 60 + missing,
               evidenceCodes: [
-                "runner_credit_bank_replaces_basic_coverage_funding",
+                urgent
+                  ? "runner_credit_bank_funds_urgent_remote_coverage"
+                  : "runner_credit_bank_replaces_basic_coverage_funding",
                 "runner_credit_bank_bound_coverage_gap:" + gap.gapId,
-                "runner_credit_bank_replaced_basic_clicks:" + missing,
+                ...(urgent
+                  ? []
+                  : ["runner_credit_bank_replaced_basic_clicks:" + missing]),
                 ...s.evidenceCodes,
               ],
             },

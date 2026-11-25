@@ -90,6 +90,7 @@ export type RunnerCoverageGapSignal = {
     requiredClicksAfterFunding: number;
     projectedKnownPathCost: number;
     postRunCreditFloor: number;
+    bankCashOutActionId?: string;
     /** Exact central parent value after the quoted current install and run. */
     projectedCentralPressureValue?: number;
     installProjection:

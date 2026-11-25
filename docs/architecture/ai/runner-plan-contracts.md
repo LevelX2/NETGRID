@@ -4846,6 +4846,18 @@ Basiscreditaktionen aussperren. P719/R1 G35 D371 und G37 D305 sichern die
 Bank-Auszahlung mit unverändertem Remote-Root, Need, Step und aktueller
 Actionbindung; G35 D372 hält die Bank bei bereits erfülltem Bedarf.
 
+Bei einem terminalen Remote mit bekannter ICE-Strecke kann Coverage die
+Kosten für den normalen Einbau des sichtbaren Breakers und den folgenden Run
+in einem Zug quotieren. Wenn normale Einnahmen diese Summe rechtzeitig nicht
+decken, darf eine aktuell legale, garantierte Auszahlung aus genau einer
+installierten Bank die Finanzierung liefern. Der Bank-Executor bindet diese
+Auszahlung an die bestehende Coverage-Instanz und deren Remote-Parent. Der
+Central-Owner nimmt die letzte Ausweichlinie erst nach der Bindung des
+Bank-Executors aus der terminalen Priorität. Nach der Auszahlung wählen die
+jeweiligen Owner den Einbau und den Run aus den neu angebotenen LegalActions.
+Der native Zustand P922/R1/G17/D311 belegt die Route bei genau drei offenen
+Klicks und ohne verbleibende liquide Credits nach dem Run (SP-681).
+
 Für den heutigen Bankpfad existiert kein eigener strategischer Choice-Resolver.
 Die gebundene generische Ausführung bleibt zuständig. CardSpec-Installchoices
 mit `requires_engine_quote` behalten ihre bisherige Projektionsgrenze; daraus

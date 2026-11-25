@@ -979,6 +979,19 @@ export function buildRunnerCentralPressureSignals({
   }
   const noPayableRemotePreparation = !coverageGaps.some((gap) => {
     const conversion = gap.sameTurnRunConversion;
+    const bank = gap.bankFunding;
+    const hasBoundBankPayout =
+      conversion !== undefined &&
+      bank !== undefined &&
+      conversion.requiredClicksAfterFunding < input.playerView.own.clicks &&
+      bank.stateVersion === input.playerView.stateVersion &&
+      bank.actionId === conversion.bankCashOutActionId &&
+      bank.targetCredits === conversion.requiredCredits &&
+      input.legalActions.some(
+        (action) =>
+          action.actionId === bank.actionId &&
+          action.expiresAtStateVersion === input.playerView.stateVersion,
+      );
     // A current, fully fundable install-and-run preparation is an
     // alternative to the last-chance central gamble, even while the
     // present rig cannot yet pass the scoring fort.
@@ -987,15 +1000,16 @@ export function buildRunnerCentralPressureSignals({
       conversion !== undefined &&
       gap.targetRunActionId === conversion.targetRunActionId &&
       conversion.requiredClicksAfterFunding <= input.playerView.own.clicks &&
-      (gap.fundingGap === 0 || gap.fundingActionIds.length > 0) &&
-      (gap.installActionIds ?? []).some((id) =>
-        input.legalActions.some(
-          (a) =>
-            a.actionId === id &&
-            a.type === "install_card" &&
-            a.expiresAtStateVersion === input.playerView.stateVersion,
-        ),
-      ) &&
+      (hasBoundBankPayout ||
+        ((gap.fundingGap === 0 || gap.fundingActionIds.length > 0) &&
+          (gap.installActionIds ?? []).some((id) =>
+            input.legalActions.some(
+              (a) =>
+                a.actionId === id &&
+                a.type === "install_card" &&
+                a.expiresAtStateVersion === input.playerView.stateVersion,
+            ),
+          ))) &&
       runTargets.some(
         (target) =>
           target.actionId === conversion.targetRunActionId &&
