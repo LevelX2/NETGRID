@@ -114,6 +114,11 @@ der zuletzt abgeschlossenen Runde in
 Registry führt sie als Ergebnisserien mit je 40 Finalspielen. Paarungsbericht
 und Replayprüfung sind im Eintrag jeder Paarung verknüpft.
 
+Für diesen Aufbau bei der Spielerstellung `aiPacingMode: "paced"` angeben.
+Der HTTP-Endpunkt akzeptiert `fast`, `paced` und `manual`. Bei einem
+KI-gegen-KI-Match steuert `mode: "batch"` im Aufruf von `ai-advance` die
+Abarbeitung von bis zu 40 Entscheidungen je Anfrage.
+
 Soll diese Matchdatenbank für eine neue Runde geleert werden, benennt
 `database-owner.json` den letzten Abschluss und seine Match-IDs. Bei
 beendetem Testserver den Abschlussnachweis und seine Prüfsumme abgleichen.
