@@ -55,10 +55,11 @@ Importindex liegt unter `docs/Berichte/Gmail-Import-2026-10-08/Index.md`.
 Die zentrale Evidenzregistrierung ist der alleinige operative
 Selbstspiel-Datenspeicher. Fortlaufende Paarungsreviews,
 Markdown-Matrixänderungen und Reporting-State-Commits sind abgeschlossen und
-werden nicht wieder aufgenommen. Große Match-, Trace- und Debugdaten bleiben je
-Worktree in einer isolierten Blockdatenbank und werden nach dem erfolgreichen
-Berichtscheckpoint gelöscht. Die kompakte Evidenzdatenbank bleibt lokal
-erhalten und wird nicht versioniert.
+werden nicht wieder aufgenommen. Große Match-, Trace- und Debugdaten liegen
+je Worktree in einer isolierten Blockdatenbank. Temporäre Blockdatenbanken
+werden nach dem erfolgreichen Berichtscheckpoint gelöscht. Für die
+wiederverwendbare Matchdatenbank gilt der unten beschriebene Rundenwechsel.
+Die kompakte Evidenzdatenbank bleibt lokal erhalten und wird nicht versioniert.
 
 Standardpfad im primären Checkout:
 
@@ -106,6 +107,21 @@ Wird zugleich der Maintenance-Export weggelassen, misst der Zeitvergleich
 den gemeinsamen Einfluss der Änderungen. Die Einzelkosten
 des Tracings erfordern einen getrennten Versuch. Wiederholungen derselben
 Seeds zählen als Messwiederholungen für den Lastvergleich.
+
+Für weitere tracefreie Zehnerrunden mit neuen Seeds liegen die 400 Spiele
+der zuletzt abgeschlossenen Runde in
+`data/local/selfplay-runtime/lean-series/matches.sqlite`. Die zentrale
+Registry führt sie als Ergebnisserien mit je 40 Finalspielen. Paarungsbericht
+und Replayprüfung sind im Eintrag jeder Paarung verknüpft.
+
+Soll diese Matchdatenbank für eine neue Runde geleert werden, benennt
+`database-owner.json` den letzten Abschluss und seine Match-IDs. Bei
+beendetem Testserver den Abschlussnachweis und seine Prüfsumme abgleichen.
+Die Cleanup-Vorschau des `SqliteMatchStorage` muss genau diese fertigen
+Match-IDs enthalten. Anschließend die Vorschau über `maintenanceCleanupApply`
+anwenden und die leeren Match-, Ereignis-, Snapshot- und Tracetabellen
+prüfen. Dieselbe SQLite-Datei dient dann dem nächsten Lauf. Registry,
+Registry-Backup und die Datenbank der Hauptinstanz haben eigene Pfade.
 
 ## Kommandos
 
