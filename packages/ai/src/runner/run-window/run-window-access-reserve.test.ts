@@ -10,6 +10,9 @@ import { RealEngineFixtureBuilder } from "../../evaluation/real-engine-fixture-b
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import { buildRunnerEconomyPosture } from "../../runner-economy-posture";
 import { currentAccessWindowCommitment } from "./run-window-access";
+import type { RunnerRunOrigin } from "../../plans/runner-run-origin-contract";
+import { runnerRunRiskContractReassessment } from "./run-window-assessment";
+import { completeEncounterBreakerPayment } from "./run-window-encounter-payment";
 
 function deck(id: string): DeckDefinition {
   const d = standardDeckCatalog.decks.find((d) => d.standardDeckId === id);
@@ -26,11 +29,12 @@ function step(
   state: GameState,
   type: string,
   sourceDefinition?: number,
+  runServer = "hq",
 ): GameState {
   const actions = getLegalActions(state, state.activeSide).filter(
     (a) =>
       a.type === type &&
-      (type !== "start_run" || a.payload?.serverId === "hq") &&
+      (type !== "start_run" || a.payload?.serverId === runServer) &&
       (sourceDefinition === undefined ||
         state.cardInstances[a.source]?.definitionId === sourceDefinition),
   );
@@ -147,4 +151,107 @@ it("reserves only general credits after the native dedicated trash payment", () 
     intendedAction: "trash",
     trashBudget: 0,
   });
+});
+
+it("rejects a voluntary trace break that spends the credits needed to reach a bound terminal remote", () => {
+  const runnerDeck = deck("standard_runner_deep_market_engine");
+  const corpDeck = deck("standard_corp_code_rot_bitte_eintreten_2026_07_16");
+  let state = createGameAfterSetup({
+    matchId: "paid-terminal-run-reserve",
+    seed: "paid-terminal-run-reserve",
+    traceRulesProfile: "modern_open",
+    runnerDeck,
+    corpDeck,
+  });
+  state = step(state, "mandatory_draw");
+  const scoreCards = [405, 409, 419].map((definitionId) => {
+    const card = Object.values(state.cardInstances).find(
+      (entry) => entry.owner === "corp" && entry.definitionId === definitionId,
+    );
+    if (!card) throw new Error(`Missing scoring fixture card ${definitionId}`);
+    return card;
+  });
+  for (const card of scoreCards) {
+    state.corp.hq = state.corp.hq.filter((id) => id !== card.instanceId);
+    state.corp.rd = state.corp.rd.filter((id) => id !== card.instanceId);
+    state.corp.scoreArea.push(card.instanceId);
+    card.zone = { side: "corp", zone: "scoreArea" };
+    card.faceup = true;
+  }
+  RealEngineFixtureBuilder.forState(state).withCorpHqSize(4);
+  state = step(state, "end_turn");
+  RealEngineFixtureBuilder.forState(state)
+    .withRunnerCredits(11)
+    .withRunnerProgramInstalled(251)
+    .withCorpRemoteRoot("r1", 63, 2)
+    .withRezzedCorpIceOnServer("r1", 435)
+    .withRezzedCorpIceOnServer("r1", 455);
+  state.runner.memoryUsed = 1;
+  state = step(state, "start_run", undefined, "r1");
+  if (state.activeSide === "corp") state = step(state, "decline_rez");
+  if (state.timingPoint === "run.jack_out_window")
+    state = step(state, "continue_run");
+  const input = buildAiDecisionInput(state, "runner", {
+    difficulty: "hard",
+    ownDeckSnapshot: {
+      deckSnapshotId: runnerDeck.id,
+      side: "runner",
+      cards: runnerDeck.cards.map((c) => ({ cardId: c.id, quantity: c.quantity })),
+    },
+  });
+  expect(input.playerView.run?.encounteredIce?.title).toBe("Fetch 4.0.1");
+  expect(input.playerView.opponent.agendaPoints).toBe(6);
+  const origin: RunnerRunOrigin = {
+    purpose: "contest",
+    accessCommitment: {
+      payoff: "score_threat",
+      intendedAction: "access",
+      knownTargetDefinitionIds: [],
+      trashBudget: 0,
+      evidenceCode: "terminal_fixture",
+    },
+    runRiskContract: {
+      schemaVersion: "runner-run-risk-contract-v1",
+      serverId: "r1",
+      observedAtStateVersion: input.playerView.stateVersion,
+      runCommitment: "full_path",
+      unrezzedIceRisk: 0,
+      runnerCreditsAtEntry: 11,
+      runnerHandCountAtEntry: input.playerView.own.gripOrHq.length,
+      visibleDuringRunRezSupport: false,
+      reserveQuote: {
+        purpose: "contest",
+        status: "not_required",
+        riskTolerance: "standard",
+        visibleCoverage: "stable_universal",
+        knownPathCost: 10,
+        creditsAfterKnownPath: 1,
+        unknownIceCount: 0,
+        unknownIcePositions: [],
+        corpRezCredits: input.playerView.opponent.credits,
+        requiredCredits: 0,
+        creditGap: 0,
+        requiredHandBuffer: 0,
+        handBufferGap: 0,
+        evidence: [],
+      },
+      evidenceCodes: [],
+    },
+  };
+  const pump = input.legalActions.find((a) => a.type === "pump_breaker");
+  if (!pump) throw new Error("Missing native pump offer");
+  const paid = completeEncounterBreakerPayment(input, pump);
+  expect(paid?.cost).toBe(8);
+  expect(runnerRunRiskContractReassessment(input, origin)?.decision).toBe(
+    "preserve_continuation",
+  );
+  expect(runnerRunRiskContractReassessment(input, origin, paid)).toMatchObject({
+    decision: "prefer_jack_out",
+    paymentLosesKnownTerminalPath: true,
+    evidenceCodes: expect.arrayContaining(["runner_paid_break_loses_known_terminal_path"]),
+  });
+  expect(runnerRunRiskContractReassessment(input, {
+    ...origin,
+    accessCommitment: undefined,
+  }, paid)?.decision).toBe("preserve_continuation");
 });

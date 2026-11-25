@@ -14,7 +14,8 @@ import {
   pureEndRunEncounterPayment,
   pureEndRunEncounterEconomics,
 } from "./run-window-pure-etr-economics";
-import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import { type AiDecisionInput, type LegalAction, type VisibleCard } from "@netgrid/shared";
+import { actionMatchesCurrentDecision } from "../../actions/current-legal-action";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   assessRandomBreakOrDamageRiskForVisibleRunPath,
@@ -308,7 +309,17 @@ export function runnerRunRiskContractReassessment(
       contract.reserveQuote.status === "information_probe_only",
     runnerRig: input.playerView.own.rig,
   });
+  const paymentLosesKnownTerminalPath =
+    afterEncounterPayment !== undefined &&
+    !knownPath.canReachAccess &&
+    knownPath.creditsAfterPath < 0 &&
+    contract.runCommitment === "full_path" &&
+    runOrigin?.accessCommitment?.payoff === "score_threat" &&
+    currentReserveQuote.handBufferGap === 0 &&
+    runnerTargetHasTerminalContestThreat(input, run.attackedServerId) &&
+    unpaidTagEncounterKeepsKnownAccess(input, remainingIce, server.root);
   const materialReserveDegradation =
+    paymentLosesKnownTerminalPath ||
     (currentReserveQuote.status === "blocked" &&
       contract.reserveQuote.status !== "blocked") ||
     currentReserveQuote.creditGap > contract.reserveQuote.creditGap ||
@@ -370,6 +381,7 @@ export function runnerRunRiskContractReassessment(
     currentUnrezzedIceRisk: currentRiskModel.risk,
     baselineReserveQuote: structuredClone(contract.reserveQuote),
     currentReserveQuote,
+    ...(paymentLosesKnownTerminalPath ? { paymentLosesKnownTerminalPath: true } : {}),
     evidenceCodes: [
       "runner_run_risk_contract_reassessed",
       `runner_run_risk_contract_decision:${decision}`,
@@ -379,11 +391,73 @@ export function runnerRunRiskContractReassessment(
       `runner_run_risk_contract_current_hand_gap:${currentReserveQuote.handBufferGap}`,
       `runner_run_risk_contract_current_unknown_ice:${unknownIcePositions.length}`,
       `runner_run_risk_contract_current_corp_rez_exposure:${corpRezExposureActive}`,
+      ...(paymentLosesKnownTerminalPath
+        ? ["runner_paid_break_loses_known_terminal_path"]
+        : []),
       ...(terminalLastActionContinuation
         ? ["runner_terminal_last_action_spends_unknown_ice_cash_reserve"]
         : []),
     ],
   };
+}
+
+/** The current encounter can be passed for tags or a jack-out lock alone.
+ * A fully known and funded remainder is required before omitting that break. */
+function unpaidTagEncounterKeepsKnownAccess(
+  input: AiDecisionInput,
+  remainder: VisibleCard[],
+  root: VisibleCard[],
+): boolean {
+  if (
+    input.playerView.run?.phase !== "encounter_ice" ||
+    remainder.length === 0 ||
+    remainder.some((ice) => !ice.known || !ice.rezzed || !ice.effectiveRunQuote)
+  )
+    return false;
+  const offer = input.legalActions.find(
+    (entry) =>
+      entry.type === "continue_run" &&
+      entry.payload?.encounterContinue === true,
+  );
+  const current = currentEncounteredIceCard(input)?.effectiveRunQuote;
+  const open = currentEncounterCompleteSubroutineIndexes(input);
+  if (
+    !actionMatchesCurrentDecision(input, offer) ||
+    offer.payload?.encounterWillEndRun !== false ||
+    offer.payload?.encounterFullBreakDamage !== 0 ||
+    offer.payload?.encounterSourceWillTrashAtEndOfTurn !== false ||
+    offer.choiceRequirements?.length ||
+    nonNegativeActionCreditCost(offer) !== 0 ||
+    !current ||
+    current.conditionalEncounterEffects?.length ||
+    !open?.size
+  )
+    return false;
+  const subroutines = current.subroutines.filter((_, index) => open.has(index));
+  if (subroutines.some((subroutine) =>
+    subroutine.type !== "set_run_jack_out_lock" &&
+    !(subroutine.type === "initiate_trace" &&
+      subroutine.traceSuccessEffect?.type === "add_tag"),
+  ))
+    return false;
+
+  const path = assessKnownRezzedIcePath(
+    remainder,
+    runnerRigAfterEncounter(input.playerView.own.rig ?? []),
+    runnerRunWindowCreditBudget(input),
+    root,
+    input.playerView.opponent.credits,
+    currentRunPathContext(input),
+  );
+  return (
+    path.canReachAccess &&
+    !path.blocked &&
+    !path.conditionalAccessReasons?.length &&
+    !path.conditionalRiskReasons?.length &&
+    !path.futureClicksLost &&
+    !path.preRunPreparation &&
+    (path.creditBudgetAfterPath?.paymentSupportCreditsGained ?? 0) === 0
+  );
 }
 
 export function currentRunAbortAssessment(
@@ -1116,6 +1190,11 @@ function runnerRunWindowActionAssessment(
           currentEncounterPayment,
         )
       : undefined;
+  if (
+    (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+    currentPaidRisk?.paymentLosesKnownTerminalPath
+  )
+    return { admissible: false, evidenceCodes: currentPaidRisk.evidenceCodes };
   const currentEncounterEconomics =
     currentEncounterPayment &&
     currentPaidRisk?.decision === "preserve_continuation"
@@ -1507,9 +1586,8 @@ export function runnerExactRunWindowPhaseActionIds(
         (candidate) =>
           candidate.actionType === "pump_breaker" ||
           candidate.actionType === "break_subroutine" ||
-          assessments[candidate.actionId]?.evidenceCodes.includes(
-            "runner_prepared_program_complete_etr",
-          ) ||
+          actionsById.get(candidate.actionId)?.payload
+            ?.delayedInstallCompletesPlainBreaker === true ||
           runnerRunRemainderStrengthBoostAction(
             input,
             candidate,

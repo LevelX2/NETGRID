@@ -45,6 +45,7 @@ export type RunnerRunRiskReassessmentSignal = {
   currentUnrezzedIceRisk?: number;
   baselineReserveQuote: RunnerPrerunReserveQuote;
   currentReserveQuote?: RunnerPrerunReserveQuote;
+  paymentLosesKnownTerminalPath?: true;
   evidenceCodes: string[];
   failureCode?: "current_server_risk_model_missing";
 };

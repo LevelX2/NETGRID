@@ -3154,6 +3154,16 @@ Breakrouten. Der bestehende Runreservevertrag und das Budget eines
 Informationsruns gelten auch für diese Zahlung. Paarung 898, G14 D268,
 belegt denselben R&D-Zugriff für vier statt acht Credits.
 
+Bei einem gebundenen terminalen Remote-Contest wird eine freiwillige
+Breakzahlung gegen reine Tagfolgen oder eine Jack-out-Sperre aus dem
+Encounter-Angebot genommen, wenn sie einen bezahlbaren, vollständig bekannten
+Restpfad unfinanzierbar macht. Die aktuelle Continue-Action und die öffentliche
+Encounterquote müssen die Wirkung bestätigen. Eine Bedingung zur
+Zugriffssicherheit oder eine offen gebliebene Zahlung in der Restquote kann
+die Einsparung nicht belegen. Paarung 898, Diagnoserunde 2 G24 D454,
+belegt den Wechsel zwischen elf verfügbaren Credits und nur drei Credits
+nach dem freiwilligen Break. Der bekannte Restpfad braucht dann mindestens vier.
+
 Der Run-Owner berücksichtigt ausgelösten Folgeschaden bis zur nächsten
 tatsächlichen ICE-Begegnung. Für deren Abschluss konsumiert er die
 öffentlichen Felder `encounterContinue` und `passedIcePosition` aus der
