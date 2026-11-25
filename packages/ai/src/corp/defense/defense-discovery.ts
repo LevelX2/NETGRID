@@ -20,6 +20,7 @@ import {
   corpMissingConcreteDefenseDrawNeed,
   corpMissingConcreteScoreDefenseDrawNeed,
   corpOptionalDrawAttemptedInEventTailThisTurn,
+  corpOptionalStartDrawTakenInEventTailThisTurn,
 } from "../../runtime/corp-economy/corp-defensive-draw";
 import { corpRestrictedRezPreparationCandidates } from "../../runtime/corp-restricted-credit-reserve";
 import { technicalIdCompare, turnKey } from "../../runtime/runtime-identifiers";
@@ -979,9 +980,11 @@ export function buildCorpDefenseProtectionSignals({
         })
       : [],
   );
+  const optionalStartDrawTaken =
+    corpOptionalStartDrawTakenInEventTailThisTurn(input);
   const defenseDrawSignals: CorpDefenseSignal[] = candidates.flatMap(
     (candidate) => {
-      if (defenseDrawAttemptConsumed) return [];
+      if (defenseDrawAttemptConsumed || optionalStartDrawTaken) return [];
       if (!corpCandidateProjectsCardDraw(candidate)) return [];
       const action = input.legalActions.find(
         (legalAction) => legalAction.actionId === candidate.actionId,

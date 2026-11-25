@@ -2000,7 +2000,8 @@ Die Engine liefert mit `corpStartDrawQuote` die zusätzliche Kartenanzahl,
 bereits feststehenden Draws einschließlich früher gewählter Zusatzkarten und
 die aktuelle Pflichtdrawrate. Der Hand-Owner entscheidet aus Kapazität,
 R&D-Horizont und konkretem Bedarf; der Score-Owner liefert gegebenenfalls
-einen verfügbaren, finanzierten Remote als Agenda-Suchzweck. Der automatische
+einen verfügbaren, finanzierten Remote als Agenda-Suchzweck. Defense kann
+einen terminal bedrohten Zentralserver als ICE-Suchzweck liefern. Der automatische
 Ein-Aktions-Pfad nimmt diese strategische Choice nicht an. Der Resolver prüft
 exakte Agendaquelle, StateVersion, Action, Handplan und gebundene Option und
 überträgt ausschließlich dessen `draw` oder `skip`. Fehlende oder veraltete

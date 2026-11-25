@@ -272,21 +272,30 @@ function exactLegalActionClickCost(action: LegalAction): number | undefined {
   return Number.isSafeInteger(clickCost) ? clickCost : undefined;
 }
 
+function latestCorpMandatoryDrawIndex(input: AiDecisionInput): number {
+  const eventTail = input.eventTail ?? [];
+  for (let index = eventTail.length - 1; index >= 0; index -= 1) {
+    const event = eventTail[index]!;
+    if (event.type === "mandatory_draw" && event.publicPayload?.actor === "corp")
+      return index;
+  }
+  return -1;
+}
+
+export function corpOptionalStartDrawTakenInEventTailThisTurn(
+  input: AiDecisionInput,
+): boolean {
+  const mandatoryDraw = input.eventTail?.[latestCorpMandatoryDrawIndex(input)];
+  return positiveSafeInteger(
+    mandatoryDraw?.publicPayload?.corpMandatoryOptionalAgendaCardCount,
+  );
+}
+
 export function corpOptionalDrawAttemptedInEventTailThisTurn(
   input: AiDecisionInput,
 ): boolean {
   const eventTail = input.eventTail ?? [];
-  let latestMandatoryDrawIndex = -1;
-  for (let index = eventTail.length - 1; index >= 0; index -= 1) {
-    const event = eventTail[index]!;
-    if (
-      event.type === "mandatory_draw" &&
-      event.publicPayload?.actor === "corp"
-    ) {
-      latestMandatoryDrawIndex = index;
-      break;
-    }
-  }
+  const latestMandatoryDrawIndex = latestCorpMandatoryDrawIndex(input);
   if (latestMandatoryDrawIndex < 0) return false;
   return eventTail
     .slice(latestMandatoryDrawIndex + 1)

@@ -5,6 +5,7 @@ import {
   unresolvedChoiceFailure,
 } from "../../runtime/plan-bound-choice-contract";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { corpStartDrawDefenseSearchServerId } from "../defense/defense-start-draw-need";
 import { corpStartDrawAgendaSearchServerId } from "../score/score-start-draw-need";
 import type { CorpHandManagementSignal } from "./hand-management-types";
 
@@ -74,8 +75,16 @@ export function corpOptionalStartDrawSignal(
     2 * quote.mandatoryDrawCount;
   const searchServerId = corpStartDrawAgendaSearchServerId(input);
   const lowHand = projectedHand <= 2;
+  const defenseSearchServerId =
+    hasCapacity && preservesHorizon && !lowHand && !searchServerId
+      ? corpStartDrawDefenseSearchServerId(input)
+      : undefined;
   const selectedOptionId =
-    hasCapacity && preservesHorizon && (lowHand || searchServerId !== undefined)
+    hasCapacity &&
+    preservesHorizon &&
+    (lowHand ||
+      searchServerId !== undefined ||
+      defenseSearchServerId !== undefined)
       ? "draw"
       : "skip";
   const reason = !hasCapacity
@@ -86,7 +95,9 @@ export function corpOptionalStartDrawSignal(
         ? "refill_low_hand"
         : searchServerId
           ? `agenda_search:${searchServerId}`
-          : "no_concrete_draw_need";
+          : defenseSearchServerId
+            ? `central_defense_search:${defenseSearchServerId}`
+            : "no_concrete_draw_need";
   return {
     handPlanId: `optional-start-draw:${choice.choiceId}`,
     phase: "optional_start_draw_window",

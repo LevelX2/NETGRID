@@ -3829,6 +3829,17 @@ Run-Reibung und fehlender Agenda in HQ/aktiven Remotes. Agenda-Karten in
 Archives verhindern diese Suche nicht. Die konkrete Installation und
 Risikoprüfung erfolgt erst nach Beobachtung der gezogenen Karte.
 
+Defense kann vor dem Pflichtzug zusätzlich die Suche nach Zentralschutz
+anmelden. Dafür muss die aktuelle Zentralallokation eine terminale
+Zugriffsgefahr ausweisen. HQ enthält kein ICE, im Deck verbleibt nachweislich
+ICE, und die vollständige sichtbare Breakquote bleibt selbst mit allen
+installierten ICE als gerezzt durchlässig. Der Handplan behält Kapazität,
+Pflichtziehhorizont und die Choice. Nach einem tatsächlich gezogenen
+Agenda-Zusatzdraw zählt die gewöhnliche einmalige Zentralsuche für diesen
+Zug als erfolgt. Konkrete Score-Schutzbedarfe bleiben im Score-/Defense-Vertrag.
+P902 G8 D143 nutzt dadurch dieselben Karten wie Pflichtzug plus bezahlter
+Defense-Draw und erhält einen zusätzlichen Klick.
+
 Regionsvergleiche verwenden die Funktionssignale sowohl der neuen als auch
 der installierten Karte. So kann Handüberlauf keinen vermeintlichen
 Mehrwert aus einer unvollständigen Beschreibung der alten Region ableiten.
